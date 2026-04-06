@@ -24,15 +24,6 @@
           {
             "type": "question",
             "label": "Power at the time of survey"
-          },
-          {
-            "type": "list",
-            "label": "Water at the time of survey",
-            "options": [
-              "No water either in tanks or direct hookup",
-              "Water was in the freshwater tanks",
-              "Water supplied from a direct shore hookup"
-            ]
           }
         ]
       },

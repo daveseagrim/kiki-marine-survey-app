@@ -698,6 +698,7 @@ function createNewSurvey(formData) {
     vesselDescription: formData.vesselDescription,
 
     // Vessel documentation
+    tcLicenseType: formData.tcLicenseType,
     tcLicense: formData.tcLicense,
     hinNumber: formData.hinNumber,
     taxStatus: formData.taxStatus,
@@ -796,14 +797,17 @@ function renderHome() {
       content.innerHTML = html;
     }
 
-    // Add floating action button for new survey
-    if (!document.querySelector('.fab')) {
-      const fab = document.createElement('button');
-      fab.className = 'fab';
-      fab.innerHTML = '+';
-      fab.onclick = () => renderNewSurveyForm();
-      document.body.appendChild(fab);
-    }
+    // Add floating action button for new survey (remove any existing fab first, e.g. report button)
+    const existingFab = document.querySelector('.fab');
+    if (existingFab) existingFab.remove();
+    const reportBtnEl = document.getElementById('reportBtn');
+    if (reportBtnEl) reportBtnEl.remove();
+
+    const fab = document.createElement('button');
+    fab.className = 'fab';
+    fab.innerHTML = '+';
+    fab.onclick = () => renderNewSurveyForm();
+    document.body.appendChild(fab);
   });
 }
 
@@ -1067,8 +1071,42 @@ function renderNewSurveyForm() {
       <h2 class="form-heading">Vessel Documentation</h2>
 
       <div class="form-group">
-        <label class="form-label">Transport Canada Licence Type and Number</label>
-        <input type="text" id="tcLicense" placeholder="">
+        <label class="form-label">Cover Photo of Vessel</label>
+        <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">This photo will appear as the hero image on the report cover page. Take a clear, well-lit photo of the vessel.</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:6px 12px;">
+            📷 Take Cover Photo
+            <input type="file" accept="image/*" capture="environment" style="display:none;"
+                   onchange="captureDocPhoto('coverPhoto', 'Cover Photo', event)" />
+          </label>
+          <span id="coverPhotoStatus" style="font-size:12px;color:#6b7280;"></span>
+        </div>
+        <div id="coverPhotoPreview" style="margin-top:8px;"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Transport Canada Licence Type</label>
+        <select id="tcLicenseType">
+          <option value="">Select</option>
+          <option value="Pleasure Craft Licence (PCL)">Pleasure Craft Licence (PCL)</option>
+          <option value="Small Vessel Register (SVR)">Small Vessel Register (SVR)</option>
+          <option value="Large Vessel Register (LVR)">Large Vessel Register (LVR)</option>
+          <option value="Not licenced / Not registered">Not licenced / Not registered</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Licence / Registration Number</label>
+        <input type="text" id="tcLicense" placeholder="e.g., 12A34567">
+        <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
+          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:6px 12px;">
+            📷 Photo of Licence
+            <input type="file" accept="image/*" capture="environment" style="display:none;"
+                   onchange="captureDocPhoto('licencePhoto', 'TC Licence', event)" />
+          </label>
+          <span id="licencePhotoStatus" style="font-size:12px;color:#6b7280;"></span>
+        </div>
+        <div id="licencePhotoPreview" style="margin-top:8px;"></div>
       </div>
 
       <div class="form-group">
@@ -1835,6 +1873,7 @@ function startNewSurvey() {
 
     vesselDescription: document.getElementById('vesselDescription').value,
 
+    tcLicenseType: document.getElementById('tcLicenseType').value,
     tcLicense: document.getElementById('tcLicense').value,
     hinNumber: document.getElementById('hinNumber').value,
     taxStatus: document.getElementById('taxStatus').value,
@@ -2720,9 +2759,10 @@ async function generateReport() {
   const esc = (s) => (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const reportDate = survey.reportDate || new Date().toISOString().split('T')[0];
 
-  // ── Fetch documentation photos (HIN plate, compliance plate) ──────────
+  // ── Fetch documentation photos (HIN plate, compliance plate, licence) ──
   let hinPhotoDataUrl = '';
   let compliancePhotoDataUrl = '';
+  let licencePhotoDataUrl = '';
   if (survey.hinPhoto) {
     const p = await getPhotoById(survey.hinPhoto);
     if (p && p.dataUrl) hinPhotoDataUrl = p.dataUrl;
@@ -2730,6 +2770,15 @@ async function generateReport() {
   if (survey.compliancePhoto) {
     const p = await getPhotoById(survey.compliancePhoto);
     if (p && p.dataUrl) compliancePhotoDataUrl = p.dataUrl;
+  }
+  if (survey.licencePhoto) {
+    const p = await getPhotoById(survey.licencePhoto);
+    if (p && p.dataUrl) licencePhotoDataUrl = p.dataUrl;
+  }
+  let coverPhotoDataUrl = '';
+  if (survey.coverPhoto) {
+    const p = await getPhotoById(survey.coverPhoto);
+    if (p && p.dataUrl) coverPhotoDataUrl = p.dataUrl;
   }
 
   // ── Pass 1: collect all findings ──────────────────────────────────────
@@ -2848,20 +2897,34 @@ async function generateReport() {
     </div>
   </div>
 
-  <div class="header-bar">Report of Condition &amp; Value Marine Survey — "${esc(survey.vesselName)}" — Kiki Marine</div>
-
-  <div style="text-align:center; margin: 20px 0 10px;">
+  <!-- ═══ COVER PAGE ═══ -->
+  <div style="text-align:center; padding-top: 20px;">
     <img src="https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png"
-         alt="Kiki Marine Logo" style="max-width: 400px; width: 100%; height: auto;"
+         alt="Kiki Marine Logo" style="max-width: 300px; width: 80%; height: auto;"
          onerror="this.style.display='none'">
+    <h1 style="margin-top: 12px; font-size: 22pt;">KIKI MARINE</h1>
+    <p style="font-size: 10pt; color: #555; margin-top: -8px;">SAMS &bull; ABYC Master Advisor</p>
+    <h1 style="font-size: 16pt; border: none; margin-top: 20px; border-bottom: 2px solid #1e3a5f; display: inline-block; padding-bottom: 6px;">Report of Condition &amp; Value<br/>Marine Survey</h1>
   </div>
-  <h1 style="margin-top: 6px;">KIKI MARINE</h1>
-  <h1 style="font-size: 16pt; border: none; margin-top: 0;">Report of Condition &amp; Value<br/>Marine Survey Report</h1>
-  <p style="text-align:center; font-size: 11pt;">
-    <strong>Marine Survey Report for the vessel:</strong> "${esc(survey.vesselName)}", a ${esc(survey.yearMakeModel)}<br/>
-    <strong>Prepared by:</strong> Dave Seagrim, SAMS Surveyor Associate, ABYC Master Advisor — Kiki Marine<br/>
-    <strong>Inspection date:</strong> ${survey.surveyDate || 'N/A'} &nbsp; | &nbsp; <strong>Report date:</strong> ${reportDate}
-  </p>
+
+  ${coverPhotoDataUrl ? `
+  <div style="text-align:center; margin: 24px auto; max-width: 700px;">
+    <img src="${coverPhotoDataUrl}" alt="Vessel Photo"
+         style="width:100%; max-height:400px; object-fit:cover; border:2px solid #1e3a5f; border-radius:4px;" />
+  </div>` : ''}
+
+  <table style="margin-top: 20px; border: 2px solid #1e3a5f;">
+    <tr><td style="width:40%; background:#e8edf2;"><strong>Vessel</strong></td><td>"${esc(survey.vesselName)}" — ${esc(survey.yearMakeModel)}</td></tr>
+    <tr><td style="background:#e8edf2;"><strong>HIN</strong></td><td>${esc(survey.hinNumber) || 'N/A'}</td></tr>
+    <tr><td style="background:#e8edf2;"><strong>Survey Conducted For</strong></td><td>${esc(survey.clientName) || 'N/A'}</td></tr>
+    <tr><td style="background:#e8edf2;"><strong>Date of Inspection</strong></td><td>${survey.surveyDate || 'N/A'}</td></tr>
+    <tr><td style="background:#e8edf2;"><strong>Date of Report</strong></td><td>${reportDate}</td></tr>
+    <tr><td style="background:#e8edf2;"><strong>Surveyor</strong></td><td>Dave Seagrim, SAMS SA, ABYC Master Advisor</td></tr>
+  </table>
+
+  <div style="text-align:center; margin-top: 24px; font-size: 9pt; color: #666;">
+    <p>Kiki Marine — kikimarinesurveyor.ca<br/>647-289-7876 — dave@kikimarine.ca</p>
+  </div>
 
   <!-- ═══ PURPOSE AND SCOPE ═══ -->
   <h2>PURPOSE AND SCOPE</h2>
@@ -2900,6 +2963,28 @@ async function generateReport() {
   <div class="scope-text">
     <p>The mandatory standards promulgated under the <em>Canada Shipping Act, 2001</em> and Transport Canada regulations (including TP 1332 — Construction Standards for Small Vessels), and the voluntary standards and recommended practices developed by the American Boat and Yacht Council (ABYC) and the National Fire Protection Association (NFPA 302) have been used as guidelines in the conduct of this report.</p>
     <p>Testing the vessel in the water under load, if performed, shall be referred to with the term "Limited Trial Run". This term has no bearing on the wind or weather conditions, or body of water upon which the vessel was tested and provides no guarantee of how the vessel will perform under different conditions, upon different waterways and in different weather conditions.</p>
+  </div>
+
+  <!-- ═══ DEFINITIONS OF TERMS ═══ -->
+  <h2>DEFINITIONS OF TERMS</h2>
+  <div class="scope-text">
+    <table style="font-size:10pt;">
+      <tr><td style="width:30%;vertical-align:top;"><strong>ABYC</strong></td><td>American Boat and Yacht Council — develops voluntary safety standards for the design, construction, maintenance, and repair of recreational boats.</td></tr>
+      <tr><td style="vertical-align:top;"><strong>Bonding System</strong></td><td>A system of electrically connecting metallic non-current-carrying parts of a vessel to reduce corrosion and minimize the risk of electric shock.</td></tr>
+      <tr><td style="vertical-align:top;"><strong>BUC</strong></td><td>BUC International Corp. — publisher of the BUC Used Boat Price Guide, an industry-accepted reference for marine vessel valuation.</td></tr>
+      <tr><td style="vertical-align:top;"><strong>Canada Shipping Act, 2001</strong></td><td>The primary federal legislation governing safety in Canadian marine transportation, including construction and equipment requirements for small vessels.</td></tr>
+      <tr><td style="vertical-align:top;"><strong>Conductivity Meter</strong></td><td>A non-destructive testing instrument that measures the electrical conductivity of hull and deck laminates to detect elevated moisture levels. Readings are relative indicators only.</td></tr>
+      <tr><td style="vertical-align:top;"><strong>Fair Market Value (FMV)</strong></td><td>The most probable price a vessel should bring in a competitive and open market under all conditions requisite to a fair sale, with buyer and seller each acting prudently and knowledgeably.</td></tr>
+      <tr><td style="vertical-align:top;"><strong>Estimated Replacement Cost</strong></td><td>The estimated cost to replace the surveyed vessel with one of like kind and quality at current market prices, excluding applicable taxes.</td></tr>
+      <tr><td style="vertical-align:top;"><strong>HIN</strong></td><td>Hull Identification Number — a unique serial number assigned to a vessel by the manufacturer, required by Transport Canada and the USCG for identification and registration.</td></tr>
+      <tr><td style="vertical-align:top;"><strong>Limited Trial Run</strong></td><td>A brief operational test of the vessel conducted under controlled conditions. This term does not imply a comprehensive sea trial and results are limited by prevailing conditions.</td></tr>
+      <tr><td style="vertical-align:top;"><strong>NFPA 302</strong></td><td>National Fire Protection Association Standard 302 — Fire Protection Standard for Pleasure and Commercial Motor Craft.</td></tr>
+      <tr><td style="vertical-align:top;"><strong>Percussion Testing</strong></td><td>A non-destructive technique using a sounding hammer or similar instrument to tap the hull and deck surfaces, identifying delamination, voids, or water-saturated areas by changes in tone.</td></tr>
+      <tr><td style="vertical-align:top;"><strong>TC TP 511</strong></td><td>Transport Canada publication TP 511E — Safe Boating Guide, outlining mandatory safety equipment requirements for pleasure craft in Canadian waters.</td></tr>
+      <tr><td style="vertical-align:top;"><strong>TC TP 1332</strong></td><td>Transport Canada publication TP 1332E — Construction Standards for Small Vessels, establishing mandatory construction and performance standards.</td></tr>
+      <tr><td style="vertical-align:top;"><strong>Through-Hull Fitting</strong></td><td>Any device that penetrates the hull below the waterline to allow water intake or discharge. Typically fitted with a seacock or valve for shutoff capability.</td></tr>
+      <tr><td style="vertical-align:top;"><strong>USCG 33 CFR 183</strong></td><td>United States Coast Guard regulations under Title 33, Code of Federal Regulations, Part 183 — Boats and Associated Equipment, applicable to vessels manufactured for the North American market.</td></tr>
+    </table>
   </div>
 
   <!-- ═══ USE OF RATINGS ═══ -->
@@ -2947,6 +3032,7 @@ async function generateReport() {
       <li>Purpose and Scope of Survey</li>
       <li>Methodology and Limitations</li>
       <li>Conduct of Survey</li>
+      <li>Definitions of Terms</li>
       <li>Use of Ratings</li>
       <li>Notes Regarding Report Format</li>
       <li>General Vessel Information</li>
@@ -2960,6 +3046,7 @@ async function generateReport() {
       <li>Findings &amp; Recommendations</li>
       <li>Summary of Vessel Condition</li>
       <li>Statement of Valuation</li>
+      <li>Valuation Worksheet</li>
       <li>Surveyor's Certificate</li>
     </ol>
   </div>
@@ -2975,7 +3062,7 @@ async function generateReport() {
     <tr><td><strong>Vessel Name</strong></td><td>${esc(survey.vesselName)}</td></tr>
     <tr><td><strong>Year/Make/Model</strong></td><td>${esc(survey.yearMakeModel)}</td></tr>
     <tr><td><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" style="max-width:280px;max-height:180px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
-    <tr><td><strong>TC Licence Type and Number</strong></td><td>${esc(survey.tcLicense) || 'N/A'}</td></tr>
+    <tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}</td></tr>
     <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" style="max-width:280px;max-height:180px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
     <tr><td><strong>Vessel Material</strong></td><td>${esc(survey.construction) || 'N/A'}</td></tr>
     <tr><td><strong>LOA (Length Overall)</strong></td><td>${esc(survey.loa) || 'N/A'}</td></tr>
@@ -3029,7 +3116,7 @@ ${survey.locationLat && survey.locationLon ? `
   <h2>VESSEL DOCUMENTATION DATA</h2>
   <table>
     <tr><td style="width:40%;"><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" style="max-width:300px;max-height:200px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
-    <tr><td><strong>TC Licence Type and Number</strong></td><td>${esc(survey.tcLicense) || 'N/A'}</td></tr>
+    <tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${licencePhotoDataUrl ? '<br><img src="' + licencePhotoDataUrl + '" alt="TC Licence Photo" style="max-width:300px;max-height:200px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
     <tr><td><strong>Tax Status (Duties Paid)</strong></td><td>${esc(survey.taxStatus) || 'N/A'}</td></tr>
     <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" style="max-width:300px;max-height:200px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
   </table>
@@ -3319,6 +3406,54 @@ ${survey.vesselDescription ? `
   <p class="scope-text">${esc(survey.valuationRationale) || 'Based on the condition of the vessel as surveyed, comparable sales data from BUCValu, soldboats.com, yachtworld.com, and current market conditions.'}</p>
 
   <p class="scope-text"><strong>Summary:</strong> In accordance with the request for a Marine Survey of the "${esc(survey.vesselName)}", for the purpose of evaluating its present condition and estimating its Fair Market Value and Replacement Cost, I herewith submit my conclusion based on the preceding report. The subject vessel was personally inspected by the undersigned on <strong>${survey.surveyDate || 'N/A'}</strong>. Subject to correction of deficiencies listed in sections A and B, the vessel is considered to be reasonably suitable for its intended use. Other deficiencies listed should be attended to in keeping with good maintenance practices or as upgrades.</p>
+  `;
+
+  // ── VALUATION WORKSHEET ────────────────────────────────────────────
+  html += `<div class="page-break"></div>`;
+  html += `
+  <h2>VALUATION WORKSHEET</h2>
+  <div class="scope-text">
+    <p>The following data sources and comparables were used in determining the Fair Market Value and Estimated Replacement Cost of the subject vessel.</p>
+  </div>
+  <table>
+    <tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Subject Vessel</td></tr>
+    <tr><td style="width:40%;"><strong>Vessel</strong></td><td>${esc(survey.yearMakeModel) || 'N/A'}</td></tr>
+    <tr><td><strong>Vessel Name</strong></td><td>${esc(survey.vesselName) || 'N/A'}</td></tr>
+    <tr><td><strong>HIN</strong></td><td>${esc(survey.hinNumber) || 'N/A'}</td></tr>
+    <tr><td><strong>Overall Condition Rating</strong></td><td>${esc(survey.overallCondition) || 'Not yet assessed'}</td></tr>
+    <tr><td><strong>Date of Survey</strong></td><td>${survey.surveyDate || 'N/A'}</td></tr>
+  </table>
+
+  <table style="margin-top:12px;">
+    <tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Primary Valuation Source</td></tr>
+    <tr><td style="width:40%;"><strong>Source</strong></td><td>${esc(survey.valuationSource) || 'N/A'}</td></tr>
+    <tr><td><strong>BUC Value Range (USD)</strong></td><td>$${parseInt(survey.valuationLow || 0).toLocaleString()} – $${parseInt(survey.valuationHigh || 0).toLocaleString()}</td></tr>
+    ${survey.exchangeRate ? `<tr><td><strong>Exchange Rate (USD→CAD)</strong></td><td>${parseFloat(survey.exchangeRate).toFixed(4)}</td></tr>` : ''}
+    ${survey.replacementCost ? `<tr><td><strong>Estimated Replacement Cost (USD)</strong></td><td>$${parseInt(survey.replacementCost).toLocaleString()}</td></tr>` : ''}
+  </table>
+
+  <table style="margin-top:12px;">
+    <tr><td colspan="4" style="background:#e8edf2;font-weight:bold;">Comparable Vessels / Market Research</td></tr>
+    <tr>
+      <th>Source</th>
+      <th>Vessel</th>
+      <th>Asking/Sold Price</th>
+      <th>Notes</th>
+    </tr>
+    ${(survey.comparables && survey.comparables.length > 0) ? survey.comparables.map(c => `
+    <tr>
+      <td>${esc(c.source)}</td>
+      <td>${esc(c.vessel)}</td>
+      <td>${esc(c.price)}</td>
+      <td>${esc(c.notes)}</td>
+    </tr>`).join('') : `
+    <tr><td colspan="4" style="text-align:center;color:#666;font-style:italic;">No comparables recorded. Check BUCValu, soldboats.com, and yachtworld.com for comparable sales and current listings.</td></tr>`}
+  </table>
+
+  <div class="scope-text" style="margin-top:12px;">
+    <p><strong>Appraisal Methodology:</strong> ${esc(survey.valuationRationale) || 'Based on the condition of the vessel as surveyed, comparable sales data from BUCValu, soldboats.com, yachtworld.com, and current market conditions.'}</p>
+    <p><strong>Condition Adjustment:</strong> The vessel's overall condition rating of "${esc(survey.overallCondition) || 'Not yet assessed'}" has been factored into the final valuation range using the BUC Marine Grading System.</p>
+  </div>
   `;
 
   // ── SURVEYOR'S CERTIFICATE ────────────────────────────────────────
