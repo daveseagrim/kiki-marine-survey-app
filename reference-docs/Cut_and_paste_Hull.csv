@@ -1,0 +1,121 @@
+Section,Rating,Standardized text
+Hull and rudder(s) condition (below the waterline),B,"The barrier coat appeared intact. Multiple areas of the hull and rudder showed oxidation, cracking, and flaking of the anti-fouling. Sand to a sound surface and reapply anti-fouling to restore protection."
+,B,"Below the waterline, the hull and rudders were serviceable overall. Minor hull damage noted in the photos should be repaired to prevent water ingress."
+,C - rudders,"Below the waterline, the hull and rudders were serviceable with no visible damage."
+,C - rudder,"Below the waterline, the hull and rudder were serviceable with no visible damage."
+,C - outdrives,"Below the waterline, the hull and outdrives were serviceable with no visible damage."
+,C - outdrive,"Below the waterline, the hull and outdrive were serviceable with no visible damage."
+Hull and rudder(s) impact and resonance testing,B,"Percussion testing of the hull and rudder produced and showed signs of saturation in ###### localized areas (see photos).  To mitigate spread, these areas should be repaired before the next launch. "
+,B - problematic rudder,"Percussion testing of the hull produced a clear and consistent tone with no signs of delamination or voids. However, the rudder showed signs of saturation in localized areas (see photos).  To mitigate spread, off-season venting or drainage may be attempted. However, foam cores often retain conductivity. Rudder removal and rebuild may be required in future if conditions persist."
+,B - One or more problematic areas,"The majority of percussion tests on the hull produced a clear, consistent tone without signs of delamination or voids. However, there was a ###### area which produced a ""thud"" indicating saturation and/or rot. This area should be repaired prior to launch. "
+,C - one rudder,Percussion testing of the hull and rudder produced a clear and even tone with no indications of delamination or voids.
+,C - two rudders,Percussion testing of the hull and rudders produced a clear and even tone with no indications of delamination or voids.
+Hull and rudder(s) conductivity testing,B - hull ok. Rudder needs help.,"Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of ### to ###, which are not considered abnormal for the vessel’s age. Suggest monitoring the photographed areas between seasons. However, the rudder displayed numerous saturated spots, many at 999, suggesting internal conductivity accumulation. To mitigate any spread, off-season venting or drainage may be attempted. However, foam cores often retain conductivity. Rudder removal and rebuild may be required in future if conditions persist"
+,B - Both elevated. No action required.,Conductivity readings were taken on a relative 0 to 999 scale. The hull returned elevated yet expected readings of [###–###]. The rudder returned readings of [###–###]. No softness or delamination was observed. Monitor the higher-reading areas seasonally for signs of osmosis or delamination.
+,C - Rudder issue not high,Conductivity readings were taken on a relative 0 to 999 scale. The hull presented no areas of concern. The rudder showed elevated readings of [###–###] that are not unusual for the vessel’s age. Recheck seasonally to confirm stability.
+,C - Hull and rudder not high,Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [###–###]. The rudder returned readings of [###–###]. These values are not considered abnormal or concerning for a vessel of this age. Monitor the photographed areas between seasons for signs of osmosis or delamination.
+,C,Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of  #### to #### that are not considered abnormal for the vessel’s age. Monitor the photographed areas between seasons. The rudders were bronze and not prone to conductivity uptake.
+,C,"Conductivity readings were taken on a relative scale of 0 to 999. Conductivity testing of the hull and rudder returned readings consistent with a serviceable condition, with no elevated conductivity detected."
+,Not tested,"Because the boat had just been lifted from the water, it retained water in the anti-fouling and barrier coat, which produced misleading readings. However, there was no indication of osmosis or delamination. Additionally, as indicated in other sections, the hull was inspected for barrier coat integrity and was percussion-sounded."
+"Primer, barrier coat, anti-fouling",B - many coats. Sanding.,"Local repairs to the primer, barrier coat, and anti-fouling are advisable. Multiple legacy coats of anti-fouling are flaking. Suggest sanding the epoxy barrier coat and applying new anti-fouling within the next one to two seasons."
+,B - localized repairs,"Localized repairs to the primer, barrier coat, and anti-fouling are advisable. Overall, the coating system was serviceable."
+,B - some sanding and reapplication of anti-fouling,"Although the barrier coat appeared intact, several areas of the anti-fouling should be lightly sanded and reapplied before the next launch. "
+,C - small touch ups,"The primer, barrier coat, and anti-fouling were intact and serviceable, with only some areas requiring touch-ups for next season."
+,C,"The primer, barrier coat, and anti-fouling were intact and serviceable."
+Keel and keel joint,B,"A longitudinal crack was observed along the keel-to-hull joint. This is a common occurrence typically addressed during routine maintenance. The joint had been previously repaired, but further work was required to prevent water ingress into the keel and keel bolts. Retorquing the keel bolts while the vessel is in the cradle is recommended."
+,B,A longitudinal crack was observed at the keel and hull joint. This is common and is typically repaired periodically as part of maintenance.  Retorquing the keel bolts while the vessel is in the cradle is recommended.
+,B,Impact wear or damage was noted along the forward edge of the keel. Sand and fair the area and apply multiple coats of epoxy barrier followed by anti-fouling.
+,C,The keel and keel joint were serviceable.
+,C,The keel was encapsulated and was in good condition.
+,,
+"Through-hulls, strainers",C,"All through-hulls and strainers were securely mounted, adequately clean, and serviceable."
+,,
+"Transducers (speed, depth, etc.)",B,"Transducers were mounted low on the transom with wiring run down the transom. Wiring supports were inadequate. Per ABYC E-11, wiring should be supported at intervals not exceeding 18 inches, approximately 455 mm. Add supports and secure the run."
+,B,Transducers were securely mounted. The speed wheel spun freely. The depth transducer appeared to be coated with anti-fouling. Remove coating to ensure proper operation.
+,B,Transducers were securely mounted. One transducer appears to be coated with anti-fouling. Remove coatings to ensure proper performance.
+,C,"All transducers were securely mounted and were not coated with anti-fouling. The speed wheel turned freely, and the installation was serviceable."
+,C,The transducer was securely mounted and not coated with anti-fouling. The installation was serviceable.
+,,
+Hull anodes,B,The transom-mounted hull anode was degraded and should be replaced.
+,C,No hull anodes were fitted. A permanent bonding plate was present and serviceable.
+,C,Hull anodes were securely mounted and did not exhibit undue corrosion.
+,,
+Stern tube(s) (external),C,The external stern tube was serviceable.
+,,
+Propeller shaft(s),C,The propeller shaft appeared true with no significant corrosion.
+,,
+Propeller/drive anode(s),B - none there,"No shaft anodes were installed on the propeller shafts. Without proper anode protection, the shafts, couplings, and propellers would have been vulnerable to galvanic corrosion. Suitable shaft anodes should have been installed and periodically maintained in accordance with ABYC A-28 guidance."
+,B - multiple,Propeller and drive anodes showed significant corrosion and merited replacement.
+,B - single,The propeller shaft anode showed significant corrosion and merited replacement.
+,B - wrong metal,"The propeller shaft or drive anode appeared to be aluminium. For freshwater service, magnesium anodes are preferred due to their higher driving voltage and improved protection in low-conductivity environments. Replacement with magnesium is recommended."
+,C - multiple,Propeller and drive anodes were securely mounted and did not exhibit undue corrosion.
+,C - single,The propeller anode was securely mounted and did not exhibit significant corrosion.
+,,
+Skeg(s),C - multiple,The bronze skegs were solidly mounted to the hull and serviceable.
+,C - single,The inlaid bronze skeg was solidly mounted and serviceable.
+,,
+Cutlass bearing(s),B,"Excessive play was noted at the cutlass bearing. A small amount of play is normal. Wear at this level warrants replacement to prevent vibration, shaft damage, and alignment issues. Plan replacement in the near term."
+,B,Radial cracking was noted on the outer circumference of the cutlass bearing. No undue play was observed. Monitor for vibration.
+,C - large diameter,"The cutlass bearings appeared serviceable. Due to the large shaft diameter, manual play testing was inconclusive. Confirm integrity during sea trial."
+,C - regular diameter,The cutlass bearing showed no visible wear. Applying pressure to the propeller shaft in multiple directions did not produce excessive movement.
+,,
+Propeller(s),C,The folding two-blade propeller opened and closed smoothly. It was properly secured with the required pins and nuts. The assembly was serviceable.
+,C - multiple props,"Despite minor corrosion, the propellers were serviceable and properly attached with the correct nuts and pins."
+,"C - single prop, minor corrosion","Despite minor corrosion, the propeller was serviceable and properly attached with the correct nuts and pin."
+,,
+"Outdrive(s) corrosion, anodes, propeller(s), boots and bellows",A,Corrosion was present on the outdrives. The anodes were degraded well beyond fifty percent and should be replaced before launch.
+,B,"Despite minor corrosion, the outdrives, boots, and bellows were serviceable. Both anode sets were at least fifty percent consumed and should be replaced."
+,C,"Despite some corrosion, the outdrives, anodes, propellers, boots, and bellows were serviceable."
+,,
+"Sail drive(s) (external), corrosion, propeller(s), anode(s)",C,"Despite minor corrosion, the sail drive, propeller, and anode were serviceable."
+,,
+Exhaust discharge position and condition,C,The exhaust ports were located below the waterline at the transom. The installation was serviceable.
+,C,The exhaust port was located above the waterline at the transom and was serviceable.
+,C,The exhaust ports were located at the aft corners of the transom. The installation was serviceable.
+,,
+"Trim tabs (exterior tabs, actuators, mounts and anodes)",B - none installed,"No anodes were installed on the trim tabs. In the absence of proper anode protection, the stainless-steel tab planes and hydraulic/electric actuators would have been vulnerable to galvanic corrosion. Suitable anodes should have been installed in accordance with ABYC A-28 and replaced as part of routine maintenance."
+,B,"Despite minor corrosion, the trim tabs, actuators, and mounts were serviceable. The anodes were at least fifty percent consumed and require replacement."
+,C,"Despite minor corrosion, the trim tabs, actuators, mounts, and anodes were serviceable."
+,C,"The trim tabs, actuators, and mounts were in good condition and functioned properly during sea trial."
+,,
+Underwater lighting,A,The underwater lighting functioned properly.
+,,
+Bow thruster,A,The bow thruster gear leg was solid and the propeller rotated freely. Significant corrosion was present on the gear leg and the anode was severely degraded.
+,B,The bow thruster gear leg was solid and the propeller rotated freely. The anode was degraded and should be replaced.
+,C,The bow thruster gear leg was solid and the propeller rotated freely. Corrosion was not concerning and the anode was intact.
+,,
+Swim platform and ladder,C,The swim platform was integrated with the transom and was generally dry and serviceable. The swim ladder was solidly mounted and serviceable.
+,"C - inegrated swim platform, minor conductivity","The swim platform was integrated with the transom and, aside from minor localized conductivity readings ######, was generally dry and serviceable. The swim ladder was securely mounted and in serviceable condition. Continued monitoring of the areas with elevated conductivity is recommended to identify any developing softness or delamination."
+,C - integrated swim platform. NO conductivity.,The swim platform was integrated with the transom. The platform was generally dry and serviceable. The swim ladder was securely mounted and in serviceable condition. 
+,C,The swim platform and ladder were solidly mounted with minor localized damage and some indication of elevated conductivity. Both remained serviceable.
+,C,The swim platform and ladder were solidly mounted and serviceable with minor localized damage. No notable areas of elevated conductivity were observed.
+,C,The swim platform and ladder were solidly mounted. No notable areas of elevated conductivity were observed.
+,C - ladder with feet,The swim ladder was securely mounted with protected feet and was serviceable.
+,"C - no swim platform, retractable",The swim ladder was securely mounted and extended and retracted properly.
+,,
+Transom,C - with door,The transom was serviceable. The door was firmly mounted on its hinges and functioned properly.
+,C - integrated lazarette,The transom was serviceable with a properly functioning lazarette that housed the AC power inputs.
+,C - minor repairs,"Despite some minor repairs in ######, the transom was in serviceable condition."
+,C,The transom was in serviceable condition.
+,C,The transom was in good condition.
+,,
+Hull exterior above the waterline,B,The hull exterior above the waterline was generally serviceable with minor scratches and oxidation typical for age. Localized areas noted in the photos warrant cosmetic repair.
+,C,The hull exterior above the waterline was in good condition.
+,C - buffed with minor scratches,The hull exterior above the waterline was well buffed and waxed and was in good overall condition with minor scratches consistent with normal use.
+,C - minor scratch,The hull exterior above the waterline was in serviceable condition with minor scratches and oxidation typical for a boat this age.
+,C,The hull exterior above the waterline was serviceable.
+,C,The hull exterior above the waterline was well buffed and waxed and was in good condition.
+,,
+Ventilation grills/covers,B,The plastic ventilation grills were cracked and degraded. Function was not affected. Replacement may be considered for appearance and longevity.
+,C,"Despite age-typical cracking of the plastic, the ventilation grills and covers were serviceable."
+,C,The ventilation grills and covers were serviceable.
+,C,The ventilation grills and covers were in good condition.
+,,
+Hull side windows and portholes (exterior observations),C,The hull-side windows and portholes were serviceable.
+,C,The hull-side windows were in good condition.
+,C,The hull-side windows and portholes were serviceable. Bug screens were intact where fitted.
+,,
+Rub rail,B,A localized section of the rub rail on the [side] was separating from the hull and deck joint. The remaining rub rail was solidly affixed and serviceable.
+,C,The rub rail was solidly affixed to the hull and deck joint and was serviceable.
+,,
+Hull–deck joint (exterior),C,The hull and deck joint was serviceable and in good condition.
