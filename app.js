@@ -2771,7 +2771,33 @@ async function generateReport() {
   <meta charset="UTF-8">
   <title>Kiki Marine — Report of Condition &amp; Value</title>
   <style>
-    @page { size: letter; margin: 20mm 15mm 25mm 15mm; }
+    @page {
+      size: letter;
+      margin: 25mm 15mm 25mm 15mm;
+      @top-center {
+        content: "Report of Condition & Value Marine Survey";
+        font-size: 8pt;
+        color: #666;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      @bottom-left {
+        content: "${esc(survey.vesselName)}";
+        font-size: 8pt;
+        color: #666;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      @bottom-right {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 8pt;
+        color: #666;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+    }
+    @page :first {
+      @top-center { content: none; }
+      @bottom-left { content: none; }
+      @bottom-right { content: none; }
+    }
     @media print {
       .page-break { page-break-after: always; }
       body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -2911,6 +2937,30 @@ async function generateReport() {
       <li><strong>Summary of Vessel Condition</strong> — Overall condition rating using the BUC Marine Grading System.</li>
       <li><strong>Statement of Valuation</strong> — Fair Market Value and Estimated Replacement Cost.</li>
       <li><strong>Surveyor's Certificate</strong></li>
+    </ol>
+  </div>
+
+  <!-- ═══ TABLE OF CONTENTS ═══ -->
+  <h2>TABLE OF CONTENTS</h2>
+  <div class="scope-text" style="columns:2;column-gap:30px;">
+    <ol style="font-size:10pt;line-height:2.0;padding-left:20px;">
+      <li>Purpose and Scope of Survey</li>
+      <li>Methodology and Limitations</li>
+      <li>Conduct of Survey</li>
+      <li>Use of Ratings</li>
+      <li>Notes Regarding Report Format</li>
+      <li>General Vessel Information</li>
+      <li>Vessel Specifications</li>
+      <li>Survey Conditions</li>
+      <li>Vessel Documentation Data</li>
+      <li>Vessel Description</li>
+      <li>Survey Checklist Summary</li>
+      <li>Safety Equipment — TC TP 511</li>
+      <li>Detailed Survey Findings</li>
+      <li>Findings &amp; Recommendations</li>
+      <li>Summary of Vessel Condition</li>
+      <li>Statement of Valuation</li>
+      <li>Surveyor's Certificate</li>
     </ol>
   </div>
 
@@ -3156,32 +3206,47 @@ ${survey.vesselDescription ? `
   </div>`;
 
   // Type A findings
-  html += `<h3 style="color:#dc2626;">Findings &amp; Recommendations (Type A)</h3>`;
+  html += `<h3 style="color:#dc2626;">Findings &amp; Recommendations (Type A — Critical / Safety)</h3>`;
   if (findings.A.length === 0) {
     html += `<p>No Type A findings.</p>`;
   } else {
     findings.A.forEach(f => {
-      html += `<div class="finding-section"><strong style="color:#dc2626;">Finding ${f.code}</strong><br/>${esc(f.label)}<br/>${f.text ? `<p>${esc(f.text)}</p>` : ''}${f.standards && f.standards.length ? `<p class="standards"><em>Standards: ${f.standards.join(', ')}</em></p>` : ''}</div>`;
+      html += `<div class="finding-section">
+        <strong style="color:#dc2626;">Finding ${f.code}</strong> — ${esc(f.label)}
+        ${f.text ? `<p>${esc(f.text)}</p>` : ''}
+        ${f.standards && f.standards.length ? `<p class="standards"><em>Standards: ${f.standards.join(', ')}</em></p>` : ''}
+        <p style="font-style:italic;color:#555;margin-top:4px;"><strong>Recommendation:</strong> Immediate correction required before the vessel is next underway. This finding represents a direct safety risk or code violation.</p>
+      </div>`;
     });
   }
 
   // Type B findings
-  html += `<h3 style="color:#d97706;">Findings &amp; Recommendations (Type B)</h3>`;
+  html += `<h3 style="color:#d97706;">Findings &amp; Recommendations (Type B — Needs Attention)</h3>`;
   if (findings.B.length === 0) {
     html += `<p>No Type B findings.</p>`;
   } else {
     findings.B.forEach(f => {
-      html += `<div class="finding-section"><strong style="color:#d97706;">Finding ${f.code}</strong><br/>${esc(f.label)}<br/>${f.text ? `<p>${esc(f.text)}</p>` : ''}${f.standards && f.standards.length ? `<p class="standards"><em>Standards: ${f.standards.join(', ')}</em></p>` : ''}</div>`;
+      html += `<div class="finding-section">
+        <strong style="color:#d97706;">Finding ${f.code}</strong> — ${esc(f.label)}
+        ${f.text ? `<p>${esc(f.text)}</p>` : ''}
+        ${f.standards && f.standards.length ? `<p class="standards"><em>Standards: ${f.standards.join(', ')}</em></p>` : ''}
+        <p style="font-style:italic;color:#555;margin-top:4px;"><strong>Recommendation:</strong> Schedule repairs in the near future to maintain compliance with applicable codes, regulations, standards, or recommended practices.</p>
+      </div>`;
     });
   }
 
   // Type C findings
-  html += `<h3 style="color:#16a34a;">Findings &amp; Recommendations (Type C)</h3>`;
+  html += `<h3 style="color:#16a34a;">Findings &amp; Recommendations (Type C — Serviceable / General Notes)</h3>`;
   if (findings.C.length === 0) {
     html += `<p>No Type C findings.</p>`;
   } else {
     findings.C.forEach(f => {
-      html += `<div class="finding-section"><strong style="color:#16a34a;">Finding ${f.code}</strong><br/>${esc(f.label)}<br/>${f.text ? `<p>${esc(f.text)}</p>` : ''}${f.standards && f.standards.length ? `<p class="standards"><em>Standards: ${f.standards.join(', ')}</em></p>` : ''}</div>`;
+      html += `<div class="finding-section">
+        <strong style="color:#16a34a;">Finding ${f.code}</strong> — ${esc(f.label)}
+        ${f.text ? `<p>${esc(f.text)}</p>` : ''}
+        ${f.standards && f.standards.length ? `<p class="standards"><em>Standards: ${f.standards.join(', ')}</em></p>` : ''}
+        <p style="font-style:italic;color:#555;margin-top:4px;"><strong>Recommendation:</strong> Address in keeping with good marine maintenance practices or as an upgrade when convenient.</p>
+      </div>`;
     });
   }
 
@@ -3189,7 +3254,11 @@ ${survey.vesselDescription ? `
   if (findings.NT.length > 0) {
     html += `<h3 style="color:#6b7280;">Not Tested / Not Verified</h3>`;
     findings.NT.forEach(f => {
-      html += `<div class="finding-section"><strong style="color:#6b7280;">Finding ${f.code}</strong><br/>${esc(f.label)}<br/>${f.text ? `<p>${esc(f.text)}</p>` : ''}</div>`;
+      html += `<div class="finding-section">
+        <strong style="color:#6b7280;">Finding ${f.code}</strong> — ${esc(f.label)}
+        ${f.text ? `<p>${esc(f.text)}</p>` : ''}
+        <p style="font-style:italic;color:#555;margin-top:4px;"><strong>Note:</strong> A comprehensive inspection was attempted but was not possible due to constraints imposed upon the surveyor. Further inspection is recommended when conditions permit.</p>
+      </div>`;
     });
   }
 
