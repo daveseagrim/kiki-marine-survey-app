@@ -262,10 +262,10 @@ async function initDB() {
 async function fetchDataFiles() {
   try {
     const [templateRes, libraryRes, specsRes, valuesRes] = await Promise.all([
-      fetch('/survey_template.json'),
-      fetch('/text_library.json'),
-      fetch('/boat_specs_db.json'),
-      fetch('/boat_values_db.json')
+      fetch('survey_template.json'),
+      fetch('text_library.json'),
+      fetch('boat_specs_db.json'),
+      fetch('boat_values_db.json')
     ]);
 
     surveyTemplate = await templateRes.json();
@@ -3466,7 +3466,7 @@ async function exportToWord() {
 
 // Service Worker registration
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(err => {
+  navigator.serviceWorker.register('sw.js').catch(err => {
     console.log('ServiceWorker registration failed: ', err);
   });
 }

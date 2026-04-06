@@ -1,16 +1,16 @@
-const CACHE_NAME = 'kiki-marine-v26';
+const CACHE_NAME = 'kiki-marine-v27';
 const URLS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/app.js',
-  '/manifest.json',
-  '/survey_template.json',
-  '/text_library.json',
-  '/boat_specs_db.json',
-  '/boat_values_db.json',
-  '/apple-touch-icon.png',
-  '/icon-192.png',
-  '/icon-512.png',
+  './',
+  'index.html',
+  'app.js',
+  'manifest.json',
+  'survey_template.json',
+  'text_library.json',
+  'boat_specs_db.json',
+  'boat_values_db.json',
+  'apple-touch-icon.png',
+  'icon-192.png',
+  'icon-512.png',
   'https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png',
 ];
 
@@ -87,7 +87,7 @@ self.addEventListener('fetch', (event) => {
         return response;
       }).catch(() => {
         // Return a fallback response if both cache and network fail
-        return caches.match('/');
+        return caches.match('./');
       });
     })
   );
