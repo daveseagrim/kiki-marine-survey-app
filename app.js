@@ -1012,6 +1012,15 @@ function renderNewSurveyForm() {
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Tip: Enter year, make and model — specs may auto-fill from built-in database</div>
       </div>
 
+      <div style="display: flex; gap: 8px; margin: 0 0 16px;">
+        <button class="btn-secondary" style="flex: 1; font-size: 14px;" onclick="lookupSpecs()">
+          🔍 Auto-Fill Specs
+        </button>
+        <button class="btn-secondary" style="flex: 1; font-size: 14px;" onclick="lookupComparables()">
+          💰 Suggest Valuation
+        </button>
+      </div>
+
       <div class="form-group">
         <label class="form-label">Client Name</label>
         <input type="text" id="clientName" placeholder="Client name">
@@ -1226,15 +1235,6 @@ function renderNewSurveyForm() {
           <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('enginePlatePhoto', 'Engine Data Plate', event)" />
         </label>
         <div id="enginePlatePhotoPreview" style="margin-top:4px;"></div>
-      </div>
-
-      <div style="display: flex; gap: 8px; margin: 16px 0;">
-        <button class="btn-secondary" style="flex: 1; font-size: 14px;" onclick="lookupSpecs()">
-          🔍 Auto-Fill Specs
-        </button>
-        <button class="btn-secondary" style="flex: 1; font-size: 14px;" onclick="lookupComparables()">
-          💰 Suggest Valuation
-        </button>
       </div>
 
       <h2 class="form-heading">Survey Conditions</h2>
