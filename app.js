@@ -3778,35 +3778,84 @@ async function captureDocPhoto(fieldKey, label, event) {
     // Add date stamp to the photo
     const stampedDataUrl = await addDateStampToPhoto(e.target.result);
 
-    const photoId = `${currentSurveyId}_doc_${fieldKey}_${Date.now()}`;
-    const photo = {
-      id: photoId,
-      surveyId: currentSurveyId,
-      itemLabel: label,
-      dataUrl: stampedDataUrl,
-      annotated: false,
-      isDocPhoto: true,
-      docField: fieldKey,
-      createdAt: new Date().toISOString()
-    };
-
-    await savePhoto(photo);
-
-    // Store the photo ID on the survey object
-    const survey = await getSurvey(currentSurveyId);
-    // Delete old photo if replacing
-    if (survey[fieldKey]) {
-      try { await deletePhoto(survey[fieldKey]); } catch(e) {}
-    }
-    survey[fieldKey] = photoId;
-    await saveSurvey(survey);
-
-    // Update UI with stamped preview
-    updateDocPhotoPreview(fieldKey, stampedDataUrl);
+    // Show preview modal
+    showPhotoPreviewModal(fieldKey, label, stampedDataUrl, file.type);
   };
 
   reader.readAsDataURL(file);
   event.target.value = '';
+}
+
+function showPhotoPreviewModal(fieldKey, label, stampedDataUrl, fileType) {
+  // Create modal if it doesn't exist
+  let modal = document.getElementById('photoPreviewModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'photoPreviewModal';
+    modal.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:9999;padding:20px;box-sizing:border-box;overflow-y:auto;';
+    document.body.appendChild(modal);
+  }
+
+  modal.innerHTML = `
+    <div style="background:white;border-radius:12px;max-width:90vw;max-height:90vh;margin:20px auto;padding:16px;display:flex;flex-direction:column;align-items:center;">
+      <div style="font-weight:600;margin-bottom:12px;color:#1e3a5f;">Photo Preview — ${label}</div>
+      <img id="previewImage" src="${stampedDataUrl}" style="max-width:100%;max-height:60vh;border-radius:8px;margin-bottom:16px;border:1px solid #ccc;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+        <button class="btn-secondary" style="padding:8px 16px;font-size:13px;" onclick="closePhotoPreviewModal()">❌ Retake</button>
+        <button class="btn-primary" style="padding:8px 16px;font-size:13px;" onclick="confirmPhotoPreview('${fieldKey}', '${label}')">✓ Confirm</button>
+      </div>
+    </div>
+  `;
+
+  // Store data for confirm action
+  window._pendingPhotoData = {
+    fieldKey: fieldKey,
+    label: label,
+    stampedDataUrl: stampedDataUrl,
+    fileType: fileType
+  };
+
+  modal.style.display = 'block';
+}
+
+function closePhotoPreviewModal() {
+  const modal = document.getElementById('photoPreviewModal');
+  if (modal) modal.style.display = 'none';
+  window._pendingPhotoData = null;
+}
+
+async function confirmPhotoPreview(fieldKey, label) {
+  const data = window._pendingPhotoData;
+  if (!data) return;
+
+  closePhotoPreviewModal();
+
+  const photoId = `${currentSurveyId}_doc_${fieldKey}_${Date.now()}`;
+  const photo = {
+    id: photoId,
+    surveyId: currentSurveyId,
+    itemLabel: label,
+    dataUrl: data.stampedDataUrl,
+    annotated: false,
+    isDocPhoto: true,
+    docField: fieldKey,
+    createdAt: new Date().toISOString()
+  };
+
+  await savePhoto(photo);
+
+  // Store the photo ID on the survey object
+  const survey = await getSurvey(currentSurveyId);
+  // Delete old photo if replacing
+  if (survey[fieldKey]) {
+    try { await deletePhoto(survey[fieldKey]); } catch(e) {}
+  }
+  survey[fieldKey] = photoId;
+  await saveSurvey(survey);
+
+  // Update UI with stamped preview
+  updateDocPhotoPreview(fieldKey, data.stampedDataUrl);
+  window._pendingPhotoData = null;
 }
 
 // Remove a documentation photo
