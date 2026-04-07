@@ -3414,20 +3414,6 @@ function renderInspection(survey) {
           `;
         });
 
-  // ── Bilge Pump Section (moved from new survey form) ──────────────────────
-  html += `
-    <div class="category-accordion">
-      <button class="accordion-header" onclick="toggleAccordion(this)">
-        <span class="category-title">⚙️ Bilge Pumps</span>
-        <span style="margin-left: 12px;">▼</span>
-      </button>
-      <div class="accordion-content" style="display: none;">
-        <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">Document each bilge pump installed: location, type, capacity, float switch, and test results.</div>
-        <div id="bilgePumpEntries"></div>
-        <button class="btn-secondary" style="font-size:12px;padding:6px 12px;margin-top:8px;" onclick="addBilgePumpEntry()">+ Add Bilge Pump</button>
-      </div>
-    </div>
-  `;
 
       }
 
