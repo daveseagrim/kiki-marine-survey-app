@@ -8,6 +8,7 @@
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
+let insuranceSurveyTemplate = null;
 let boatSpecsDB = null;
 let boatValuesDB = null;
 let engineDb = null;
@@ -267,8 +268,9 @@ async function initDB() {
 // Fetch data files
 async function fetchDataFiles() {
   try {
-    const [templateRes, libraryRes, specsRes, valuesRes, engineRes] = await Promise.all([
+    const [templateRes, insuranceTemplateRes, libraryRes, specsRes, valuesRes, engineRes] = await Promise.all([
       fetch('survey_template.json'),
+      fetch('insurance_survey_template.json'),
       fetch('text_library.json'),
       fetch('boat_specs_db.json'),
       fetch('boat_values_db.json'),
@@ -276,6 +278,7 @@ async function fetchDataFiles() {
     ]);
 
     surveyTemplate = await templateRes.json();
+    insuranceSurveyTemplate = await insuranceTemplateRes.json();
     textLibrary = await libraryRes.json();
     boatSpecsDB = await specsRes.json();
     boatValuesDB = await valuesRes.json();
@@ -283,6 +286,14 @@ async function fetchDataFiles() {
   } catch (e) {
     console.error('Error fetching data files:', e);
   }
+}
+
+// Returns the correct survey template based on survey type
+function getTemplateForSurvey(survey) {
+  if (survey && survey.surveyType === 'Insurance survey' && insuranceSurveyTemplate) {
+    return insuranceSurveyTemplate;
+  }
+  return surveyTemplate;
 }
 
 // Database operations
@@ -933,9 +944,12 @@ function renderHome() {
         const client = survey.clientName ? `Client: ${esc(survey.clientName)}` : '';
         const surveyDateStr = survey.surveyDate ? `Survey: ${esc(survey.surveyDate)}` : '';
         const detailParts = [subtitle, client, surveyDateStr].filter(Boolean);
+        const typeBadge = survey.surveyType === 'Insurance survey'
+          ? '<span style="display:inline-block;background:#f59e0b;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle;">INSURANCE</span>'
+          : (survey.surveyType ? `<span style="display:inline-block;background:#1e3a5f;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle;">${esc(survey.surveyType).toUpperCase()}</span>` : '');
         html += `
           <div class="survey-card" onclick="openSurvey('${survey.id}')">
-            <p class="survey-name">${esc(survey.vesselName) || 'Unnamed Survey'}</p>
+            <p class="survey-name">${esc(survey.vesselName) || 'Unnamed Survey'}${typeBadge}</p>
             ${subtitle ? `<p style="font-size:13px;color:#1e3a5f;margin:2px 0 0;font-weight:600;">${subtitle}</p>` : ''}
             <p class="survey-date">${[date, client, surveyDateStr].filter(Boolean).join(' · ')}</p>
             <div class="progress-bar">
@@ -2770,7 +2784,7 @@ function renderInspection(survey) {
       <button class="header-back" onclick="backToHome()">←</button>
       <div>
         <div class="header-title">${survey.vesselName}</div>
-        <div class="header-subtitle">Inspection</div>
+        <div class="header-subtitle">${survey.surveyType === 'Insurance survey' ? '<span style="background:#f59e0b;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;margin-right:4px;">INS</span>' : ''}Inspection</div>
       </div>
     </div>
     <div class="content" id="inspection-content">
@@ -2779,10 +2793,11 @@ function renderInspection(survey) {
   `;
 
   // Count and identify rated items
+  const activeTemplate = getTemplateForSurvey(survey);
   let totalRatedItems = 0;
   const ratedItemsByCategory = {};
 
-  surveyTemplate.forEach(section => {
+  activeTemplate.forEach(section => {
     if (section.name === 'Kiki Marine Survey' && section.categories) {
       section.categories.forEach(category => {
         if (category.items) {
@@ -3822,6 +3837,7 @@ async function generateReport() {
   const survey = await getSurvey(currentSurveyId);
   if (!survey) return;
 
+  const activeTemplate = getTemplateForSurvey(survey);
   const esc = (s) => (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const reportDate = survey.reportDate || new Date().toISOString().split('T')[0];
 
@@ -3861,7 +3877,7 @@ async function generateReport() {
   let findingCount = { A: 0, B: 0, C: 0, NT: 0 };
   let findings = { A: [], B: [], C: [], NT: [] };
 
-  surveyTemplate.forEach(section => {
+  activeTemplate.forEach(section => {
     if (section.name === 'Kiki Marine Survey' && section.categories) {
       section.categories.forEach(category => {
         if (!category.items || category.name === 'Survey Specifications' || category.name === 'Vessel Specifications') return;
@@ -3981,7 +3997,7 @@ async function generateReport() {
          onerror="this.style.display='none'">
     <h1 style="margin-top: 12px; font-size: 22pt;">KIKI MARINE</h1>
     <p style="font-size: 10pt; color: #555; margin-top: -8px;">SAMS &bull; ABYC Master Advisor</p>
-    <h1 style="font-size: 16pt; border: none; margin-top: 20px; border-bottom: 2px solid #1e3a5f; display: inline-block; padding-bottom: 6px;">Report of Condition &amp; Value<br/>Marine Survey</h1>
+    <h1 style="font-size: 16pt; border: none; margin-top: 20px; border-bottom: 2px solid #1e3a5f; display: inline-block; padding-bottom: 6px;">${survey.surveyType === 'Insurance survey' ? 'Insurance<br/>Marine Survey' : 'Report of Condition &amp; Value<br/>Marine Survey'}</h1>
   </div>
 
   ${coverPhotoDataUrl ? `
@@ -4232,7 +4248,7 @@ ${survey.vesselDescription ? `
 `;
 
   let tableRow = 0;
-  surveyTemplate.forEach(section => {
+  activeTemplate.forEach(section => {
     if (section.name === 'Kiki Marine Survey' && section.categories) {
       section.categories.forEach(category => {
         if (!category.items || category.name === 'Survey Specifications' || category.name === 'Vessel Specifications') return;
@@ -4346,7 +4362,7 @@ ${survey.vesselDescription ? `
     html += `</tbody></table>`;
   }
 
-  surveyTemplate.forEach(section => {
+  activeTemplate.forEach(section => {
     if (section.name === 'Kiki Marine Survey' && section.categories) {
       section.categories.forEach(category => {
         if (!category.items || category.name === 'Survey Specifications' || category.name === 'Vessel Specifications') return;
