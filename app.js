@@ -1047,7 +1047,7 @@ function renderNewSurveyForm() {
 
   app.innerHTML = `
     <div class="header">
-      <button class="header-back" onclick="renderHome()">←</button>
+      <button class="header-back" onclick="confirmAbandonNewSurvey()">←</button>
       <div class="header-title">New Survey</div>
     </div>
     <div class="content">
@@ -1055,13 +1055,13 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Vessel Name *</label>
-        <input type="text" id="vesselName" placeholder="e.g., Sea Dream II">
+        <input type="text" id="vesselName" placeholder="e.g., Sea Dream II" autocapitalize="words">
       </div>
 
       <div class="form-group">
         <label class="form-label">Year / Make / Model *</label>
         <input type="text" id="yearMakeModel" placeholder="e.g., 2015 Beneteau Oceanis 46"
-               onblur="checkSpecsOnBlur()" oninput="checkSpecsDebounced()">
+               onblur="checkSpecsOnBlur()" oninput="checkSpecsDebounced()" autocapitalize="words">
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Tip: Enter year, make and model — specs may auto-fill from built-in database</div>
       </div>
 
@@ -1076,7 +1076,7 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Client Name</label>
-        <input type="text" id="clientName" placeholder="Client name">
+        <input type="text" id="clientName" placeholder="Client name" autocapitalize="words">
       </div>
 
       <div class="form-group">
@@ -1087,7 +1087,7 @@ function renderNewSurveyForm() {
       <div class="form-group" style="position:relative;">
         <label class="form-label">Location</label>
         <input type="text" id="location" placeholder="Start typing an address or marina name..."
-               oninput="searchLocation(this.value)" autocomplete="off">
+               oninput="searchLocation(this.value)" autocomplete="off" autocapitalize="words">
         <div id="locationDropdown" style="display:none;position:absolute;left:0;right:0;background:white;border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;max-height:200px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.15);"></div>
         <div id="mapPreview"></div>
       </div>
@@ -1232,76 +1232,213 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Changes to Original Plan</label>
-        <textarea id="changesToPlan" placeholder="Any modifications or changes"></textarea>
+        <textarea id="changesToPlan" placeholder="Any modifications or changes" autocapitalize="sentences"></textarea>
       </div>
 
       <h3 style="margin-top:16px;color:#1e3a5f;">Engine & Transmission</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div class="form-group">
-          <label class="form-label" style="font-size:12px;">Engine Make</label>
-          <select id="engineMake" onchange="onEngineMakeChange()">
-            <option value="">Select make</option>
-          </select>
+
+      <!-- Engine 1 -->
+      <div style="border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin-bottom:10px;background:#f8fafc;">
+        <div style="font-weight:700;font-size:13px;color:#1e3a5f;margin-bottom:8px;">Engine 1 (Port / Single)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Engine Make</label>
+            <select id="engineMake" onchange="onEngineMakeChange()">
+              <option value="">Select make</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Engine Model</label>
+            <select id="engineModel" onchange="onEngineModelChange()">
+              <option value="">Select make first</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Engine Serial No.</label>
+            <input type="text" id="engineSerial" placeholder="">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Engine Hours</label>
+            <input type="text" id="engineHours" placeholder="">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">HP / kW Rating</label>
+            <input type="text" id="engineHP" placeholder="e.g., 54HP / 39.7kW">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Fuel Type</label>
+            <select id="fuelType">
+              <option value="">Select</option>
+              <option value="Diesel">Diesel</option>
+              <option value="Gasoline">Gasoline</option>
+              <option value="Electric">Electric</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label" style="font-size:12px;">Engine Model</label>
-          <select id="engineModel" onchange="onEngineModelChange()">
-            <option value="">Select make first</option>
-          </select>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:11px;">Engine Photo</label>
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+              📷 Engine
+              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('enginePhoto', 'Engine 1', event)" />
+            </label>
+            <div id="enginePhotoPreview" style="margin-top:4px;"></div>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:11px;">Data Plate Photo</label>
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+              📷 Data Plate
+              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('enginePlatePhoto', 'Engine 1 Data Plate', event)" />
+            </label>
+            <div id="enginePlatePhotoPreview" style="margin-top:4px;"></div>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label" style="font-size:12px;">Engine Serial No.</label>
-          <input type="text" id="engineSerial" placeholder="">
+        <div style="font-weight:700;font-size:13px;color:#1e3a5f;margin:12px 0 8px;">Transmission 1</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Transmission Make</label>
+            <select id="transmissionMake" onchange="onTransmissionMakeChange()">
+              <option value="">Select make</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Transmission Model</label>
+            <select id="transmissionModel" onchange="onTransmissionModelChange()">
+              <option value="">Select make first</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Transmission Serial No.</label>
+            <input type="text" id="transmissionSerial" placeholder="">
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label" style="font-size:12px;">Engine Hours</label>
-          <input type="text" id="engineHours" placeholder="">
-        </div>
-        <div class="form-group">
-          <label class="form-label" style="font-size:12px;">HP / kW Rating</label>
-          <input type="text" id="engineHP" placeholder="e.g., 54HP / 39.7kW">
-        </div>
-        <div class="form-group">
-          <label class="form-label" style="font-size:12px;">Fuel Type</label>
-          <select id="fuelType">
-            <option value="">Select</option>
-            <option value="Diesel">Diesel</option>
-            <option value="Gasoline">Gasoline</option>
-            <option value="Electric">Electric</option>
-            <option value="Hybrid">Hybrid</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label" style="font-size:12px;">Transmission Make</label>
-          <select id="transmissionMake" onchange="onTransmissionMakeChange()">
-            <option value="">Select make</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label" style="font-size:12px;">Transmission Model</label>
-          <select id="transmissionModel" onchange="onTransmissionModelChange()">
-            <option value="">Select make first</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label" style="font-size:12px;">Transmission Serial No.</label>
-          <input type="text" id="transmissionSerial" placeholder="">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:11px;">Transmission Photo</label>
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+              📷 Transmission
+              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmissionPhoto', 'Transmission 1', event)" />
+            </label>
+            <div id="transmissionPhotoPreview" style="margin-top:4px;"></div>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:11px;">Serial Plate Photo</label>
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+              📷 Serial Plate
+              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmissionPlatePhoto', 'Transmission 1 Serial Plate', event)" />
+            </label>
+            <div id="transmissionPlatePhotoPreview" style="margin-top:4px;"></div>
+          </div>
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label" style="font-size:12px;">Engine Data Plate Photo</label>
-        <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:5px 10px;">
-          📷 Capture Engine Plate
-          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('enginePlatePhoto', 'Engine Data Plate', event)" />
-        </label>
-        <div id="enginePlatePhotoPreview" style="margin-top:4px;"></div>
+
+      <!-- Engine 2 (hidden by default) -->
+      <div id="engine2Section" style="display:none;border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin-bottom:10px;background:#f8fafc;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="font-weight:700;font-size:13px;color:#1e3a5f;">Engine 2 (Starboard)</div>
+          <button class="btn-secondary" style="font-size:11px;padding:2px 8px;color:#dc2626;" onclick="removeEngine2()">Remove</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Engine Make</label>
+            <select id="engine2Make" onchange="onEngine2MakeChange()">
+              <option value="">Select make</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Engine Model</label>
+            <select id="engine2Model" onchange="onEngine2ModelChange()">
+              <option value="">Select make first</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Engine Serial No.</label>
+            <input type="text" id="engine2Serial" placeholder="">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Engine Hours</label>
+            <input type="text" id="engine2Hours" placeholder="">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">HP / kW Rating</label>
+            <input type="text" id="engine2HP" placeholder="e.g., 54HP / 39.7kW">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Fuel Type</label>
+            <select id="fuelType2">
+              <option value="">Select</option>
+              <option value="Diesel">Diesel</option>
+              <option value="Gasoline">Gasoline</option>
+              <option value="Electric">Electric</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:11px;">Engine Photo</label>
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+              📷 Engine
+              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('engine2Photo', 'Engine 2', event)" />
+            </label>
+            <div id="engine2PhotoPreview" style="margin-top:4px;"></div>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:11px;">Data Plate Photo</label>
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+              📷 Data Plate
+              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('engine2PlatePhoto', 'Engine 2 Data Plate', event)" />
+            </label>
+            <div id="engine2PlatePhotoPreview" style="margin-top:4px;"></div>
+          </div>
+        </div>
+        <div style="font-weight:700;font-size:13px;color:#1e3a5f;margin:12px 0 8px;">Transmission 2</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Transmission Make</label>
+            <select id="transmission2Make" onchange="onTransmission2MakeChange()">
+              <option value="">Select make</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Transmission Model</label>
+            <select id="transmission2Model" onchange="onTransmission2ModelChange()">
+              <option value="">Select make first</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Transmission Serial No.</label>
+            <input type="text" id="transmission2Serial" placeholder="">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:11px;">Transmission Photo</label>
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+              📷 Transmission
+              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmission2Photo', 'Transmission 2', event)" />
+            </label>
+            <div id="transmission2PhotoPreview" style="margin-top:4px;"></div>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:11px;">Serial Plate Photo</label>
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+              📷 Serial Plate
+              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmission2PlatePhoto', 'Transmission 2 Serial Plate', event)" />
+            </label>
+            <div id="transmission2PlatePhotoPreview" style="margin-top:4px;"></div>
+          </div>
+        </div>
       </div>
+
+      <button id="addEngine2Btn" class="btn-secondary" style="font-size:12px;padding:8px 14px;margin-bottom:12px;" onclick="showEngine2()">+ Add Second Engine</button>
 
       <h2 class="form-heading">Survey Conditions</h2>
 
       <div class="form-group">
         <label class="form-label">Persons in Attendance</label>
-        <input type="text" id="personsInAttendance" placeholder="e.g., Dave Seagrim (surveyor), John Smith (broker)">
+        <input type="text" id="personsInAttendance" placeholder="e.g., Dave Seagrim (surveyor), John Smith (broker)" autocapitalize="words">
       </div>
 
       <div class="form-group">
@@ -1332,7 +1469,7 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Storage / Observation Details</label>
-        <textarea id="storageDetails" rows="2" placeholder="e.g., Mast unstepped and stored on rack. Vessel winterized with antifreeze in all systems. Steel cradle, 6-pad."></textarea>
+        <textarea id="storageDetails" rows="2" placeholder="e.g., Mast unstepped and stored on rack. Vessel winterized with antifreeze in all systems. Steel cradle, 6-pad." autocapitalize="sentences"></textarea>
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Describe cradle type, winterization status, mast status (stepped/unstepped), and any relevant storage conditions.</div>
       </div>
 
@@ -1371,7 +1508,7 @@ function renderNewSurveyForm() {
       <div class="form-group">
         <label class="form-label">Overall Description of Vessel</label>
         <button class="btn-secondary" style="margin-bottom:8px;font-size:13px;" onclick="generateVesselDescription()">✨ Auto-Generate Description</button>
-        <textarea id="vesselDescription" rows="8" placeholder="Describe the vessel: hull type/material, rig, keel, propulsion, layout, cabins, history (e.g., freshwater only), any known damage or repairs..."></textarea>
+        <textarea id="vesselDescription" rows="8" placeholder="Describe the vessel: hull type/material, rig, keel, propulsion, layout, cabins, history (e.g., freshwater only), any known damage or repairs..." autocapitalize="sentences"></textarea>
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Provide a narrative description of the vessel's type, layout, construction, and notable features. This is required by SAMS. Use the auto-generate button to create a template, then fill in the [bracketed] placeholders.</div>
       </div>
 
@@ -1551,7 +1688,7 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Valuation Rationale</label>
-        <textarea id="valuationRationale" rows="5" placeholder="Will auto-generate from sources checked above — or type your own..."></textarea>
+        <textarea id="valuationRationale" rows="5" placeholder="Will auto-generate from sources checked above — or type your own..." autocapitalize="sentences"></textarea>
         <button class="btn-secondary" style="font-size:12px;margin-top:4px;padding:4px 10px;" onclick="regenerateValuationRationale()">🔄 Regenerate from sources</button>
       </div>
 
@@ -1579,7 +1716,7 @@ function renderNewSurveyForm() {
       <button class="btn-secondary" style="font-size:12px;padding:6px 12px;margin-top:8px;" onclick="addComparableEntry()">+ Add Comparable</button>
 
       <div class="form-actions">
-        <button class="btn-secondary" onclick="renderHome()">Cancel</button>
+        <button class="btn-secondary" onclick="confirmAbandonNewSurvey()">Cancel</button>
         <button class="btn-primary" onclick="startNewSurvey()">Start Survey</button>
       </div>
     </div>
@@ -1765,6 +1902,161 @@ function onTransmissionModelChange() {
     input.placeholder = 'Type transmission model...';
     modelSelect.replaceWith(input);
     input.focus();
+  }
+}
+
+// ─── Engine 2 (Dual Engine) ────────────────────────────────────────────────
+
+function showEngine2() {
+  const section = document.getElementById('engine2Section');
+  const btn = document.getElementById('addEngine2Btn');
+  if (section) section.style.display = 'block';
+  if (btn) btn.style.display = 'none';
+  populateEngine2Makes();
+}
+
+function removeEngine2() {
+  const section = document.getElementById('engine2Section');
+  const btn = document.getElementById('addEngine2Btn');
+  if (section) section.style.display = 'none';
+  if (btn) btn.style.display = '';
+  // Clear Engine 2 fields
+  ['engine2Make', 'engine2Model', 'engine2Serial', 'engine2Hours', 'engine2HP', 'fuelType2',
+   'transmission2Make', 'transmission2Model', 'transmission2Serial'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
+function populateEngine2Makes() {
+  if (!engineDb) return;
+  const engineSelect = document.getElementById('engine2Make');
+  if (engineSelect) {
+    engineSelect.innerHTML = '<option value="">Select make</option>';
+    [...engineDb.engines].sort((a, b) => a.make.localeCompare(b.make)).forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e.make;
+      opt.textContent = e.make;
+      engineSelect.appendChild(opt);
+    });
+    const otherOpt = document.createElement('option');
+    otherOpt.value = '__other__';
+    otherOpt.textContent = '— Other (type manually) —';
+    engineSelect.appendChild(otherOpt);
+  }
+  const transSelect = document.getElementById('transmission2Make');
+  if (transSelect) {
+    transSelect.innerHTML = '<option value="">Select make</option>';
+    [...engineDb.transmissions].sort((a, b) => a.make.localeCompare(b.make)).forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.make;
+      opt.textContent = t.make;
+      transSelect.appendChild(opt);
+    });
+    const otherOpt = document.createElement('option');
+    otherOpt.value = '__other__';
+    otherOpt.textContent = '— Other (type manually) —';
+    transSelect.appendChild(otherOpt);
+  }
+}
+
+function onEngine2MakeChange() {
+  if (!engineDb) return;
+  const select = document.getElementById('engine2Make');
+  const makeVal = select.value;
+  if (makeVal === '__other__') {
+    const input = document.createElement('input');
+    input.type = 'text'; input.id = 'engine2Make'; input.placeholder = 'Type engine make...';
+    select.replaceWith(input); input.focus();
+    const modelSelect = document.getElementById('engine2Model');
+    if (modelSelect) {
+      const mi = document.createElement('input');
+      mi.type = 'text'; mi.id = 'engine2Model'; mi.placeholder = 'Type engine model...';
+      modelSelect.replaceWith(mi);
+    }
+    return;
+  }
+  const modelSelect = document.getElementById('engine2Model');
+  if (!modelSelect || modelSelect.tagName !== 'SELECT') return;
+  modelSelect.innerHTML = '<option value="">Select model</option>';
+  const maker = engineDb.engines.find(e => e.make.toLowerCase() === makeVal.toLowerCase());
+  if (maker) {
+    [...maker.models].sort((a, b) => a.model.localeCompare(b.model)).forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.model; opt.textContent = m.model;
+      modelSelect.appendChild(opt);
+    });
+    const otherOpt = document.createElement('option');
+    otherOpt.value = '__other__'; otherOpt.textContent = '— Other (type manually) —';
+    modelSelect.appendChild(otherOpt);
+  }
+  document.getElementById('engine2HP').value = '';
+  document.getElementById('fuelType2').value = '';
+}
+
+function onEngine2ModelChange() {
+  if (!engineDb) return;
+  const makeEl = document.getElementById('engine2Make');
+  const modelSelect = document.getElementById('engine2Model');
+  if (!makeEl || !modelSelect) return;
+  if (modelSelect.value === '__other__') {
+    const input = document.createElement('input');
+    input.type = 'text'; input.id = 'engine2Model'; input.placeholder = 'Type engine model...';
+    modelSelect.replaceWith(input); input.focus();
+    return;
+  }
+  const maker = engineDb.engines.find(e => e.make.toLowerCase() === makeEl.value.toLowerCase());
+  if (maker) {
+    const model = maker.models.find(m => m.model.toLowerCase() === modelSelect.value.toLowerCase());
+    if (model) {
+      const hpField = document.getElementById('engine2HP');
+      const fuelField = document.getElementById('fuelType2');
+      if (hpField) hpField.value = model.hp + 'HP / ' + model.kw + 'kW';
+      if (fuelField) fuelField.value = model.fuel;
+    }
+  }
+}
+
+function onTransmission2MakeChange() {
+  if (!engineDb) return;
+  const select = document.getElementById('transmission2Make');
+  if (!select) return;
+  if (select.value === '__other__') {
+    const input = document.createElement('input');
+    input.type = 'text'; input.id = 'transmission2Make'; input.placeholder = 'Type transmission make...';
+    select.replaceWith(input); input.focus();
+    const modelSelect = document.getElementById('transmission2Model');
+    if (modelSelect) {
+      const mi = document.createElement('input');
+      mi.type = 'text'; mi.id = 'transmission2Model'; mi.placeholder = 'Type transmission model...';
+      modelSelect.replaceWith(mi);
+    }
+    return;
+  }
+  const modelSelect = document.getElementById('transmission2Model');
+  if (!modelSelect || modelSelect.tagName !== 'SELECT') return;
+  modelSelect.innerHTML = '<option value="">Select model</option>';
+  const maker = engineDb.transmissions.find(t => t.make.toLowerCase() === select.value.toLowerCase());
+  if (maker) {
+    [...maker.models].sort((a, b) => a.model.localeCompare(b.model)).forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.model; opt.textContent = m.model;
+      modelSelect.appendChild(opt);
+    });
+    const otherOpt = document.createElement('option');
+    otherOpt.value = '__other__'; otherOpt.textContent = '— Other (type manually) —';
+    modelSelect.appendChild(otherOpt);
+  }
+}
+
+function onTransmission2ModelChange() {
+  if (!engineDb) return;
+  const modelSelect = document.getElementById('transmission2Model');
+  if (!modelSelect) return;
+  if (modelSelect.value === '__other__') {
+    const input = document.createElement('input');
+    input.type = 'text'; input.id = 'transmission2Model'; input.placeholder = 'Type transmission model...';
+    modelSelect.replaceWith(input); input.focus();
   }
 }
 
@@ -2612,6 +2904,21 @@ function lookupComparables() {
   suggestValuation();
 }
 
+function confirmAbandonNewSurvey() {
+  // Check if user has entered any data in the new survey form
+  const fields = ['vesselName', 'yearMakeModel', 'clientName', 'location',
+    'engineMake', 'engineSerial', 'engineHours', 'transmissionSerial',
+    'hinNumber', 'tcLicense', 'personsInAttendance', 'vesselDescription'];
+  const hasData = fields.some(id => {
+    const el = document.getElementById(id);
+    return el && el.value && el.value.trim() !== '' && el.value !== 'Select' && el.value !== 'Select make';
+  });
+  if (hasData) {
+    if (!confirm('You have unsaved survey data. Discard and return to home?')) return;
+  }
+  renderHome();
+}
+
 function startNewSurvey() {
   const formData = {
     vesselName: document.getElementById('vesselName')?.value || '',
@@ -2658,6 +2965,18 @@ function startNewSurvey() {
     transmissionModel: document.getElementById('transmissionModel')?.value || '',
     transmissionMakeModel: (document.getElementById('transmissionMake')?.value || '') + (document.getElementById('transmissionModel')?.value ? ' ' + document.getElementById('transmissionModel')?.value : ''),
     transmissionSerial: document.getElementById('transmissionSerial')?.value || '',
+
+    // Engine 2 (dual engine)
+    engine2Make: document.getElementById('engine2Make')?.value || '',
+    engine2Model: document.getElementById('engine2Model')?.value || '',
+    engine2Serial: document.getElementById('engine2Serial')?.value || '',
+    engine2Hours: document.getElementById('engine2Hours')?.value || '',
+    engine2HP: document.getElementById('engine2HP')?.value || '',
+    fuelType2: document.getElementById('fuelType2')?.value || '',
+    transmission2Make: document.getElementById('transmission2Make')?.value || '',
+    transmission2Model: document.getElementById('transmission2Model')?.value || '',
+    transmission2MakeModel: (document.getElementById('transmission2Make')?.value || '') + (document.getElementById('transmission2Model')?.value ? ' ' + document.getElementById('transmission2Model')?.value : ''),
+    transmission2Serial: document.getElementById('transmission2Serial')?.value || '',
 
     bilgePumps: collectBilgePumps(),
     comparables: collectComparables(),
@@ -2958,7 +3277,7 @@ function renderInspection(survey) {
       html += `
           <div class="form-group">
             <label class="form-label">Notes / Description</label>
-            <textarea id="text-${item.label.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Add inspection notes..." style="min-height: 80px;">${itemData.text || ''}</textarea>
+            <textarea id="text-${item.label.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Add inspection notes..." style="min-height: 80px;" autocapitalize="sentences">${itemData.text || ''}</textarea>
           </div>
       `;
 
@@ -3910,10 +4229,47 @@ async function generateReport() {
     const p = await getPhotoById(survey.coverPhoto);
     if (p && p.dataUrl) coverPhotoDataUrl = p.dataUrl;
   }
+  let enginePhotoDataUrl = '';
+  if (survey.enginePhoto) {
+    const p = await getPhotoById(survey.enginePhoto);
+    if (p && p.dataUrl) enginePhotoDataUrl = p.dataUrl;
+  }
   let enginePlatePhotoDataUrl = '';
   if (survey.enginePlatePhoto) {
     const p = await getPhotoById(survey.enginePlatePhoto);
     if (p && p.dataUrl) enginePlatePhotoDataUrl = p.dataUrl;
+  }
+  let transmissionPhotoDataUrl = '';
+  if (survey.transmissionPhoto) {
+    const p = await getPhotoById(survey.transmissionPhoto);
+    if (p && p.dataUrl) transmissionPhotoDataUrl = p.dataUrl;
+  }
+  let transmissionPlatePhotoDataUrl = '';
+  if (survey.transmissionPlatePhoto) {
+    const p = await getPhotoById(survey.transmissionPlatePhoto);
+    if (p && p.dataUrl) transmissionPlatePhotoDataUrl = p.dataUrl;
+  }
+
+  // Engine 2 photos
+  let engine2PhotoDataUrl = '';
+  if (survey.engine2Photo) {
+    const p = await getPhotoById(survey.engine2Photo);
+    if (p && p.dataUrl) engine2PhotoDataUrl = p.dataUrl;
+  }
+  let engine2PlatePhotoDataUrl = '';
+  if (survey.engine2PlatePhoto) {
+    const p = await getPhotoById(survey.engine2PlatePhoto);
+    if (p && p.dataUrl) engine2PlatePhotoDataUrl = p.dataUrl;
+  }
+  let transmission2PhotoDataUrl = '';
+  if (survey.transmission2Photo) {
+    const p = await getPhotoById(survey.transmission2Photo);
+    if (p && p.dataUrl) transmission2PhotoDataUrl = p.dataUrl;
+  }
+  let transmission2PlatePhotoDataUrl = '';
+  if (survey.transmission2PlatePhoto) {
+    const p = await getPhotoById(survey.transmission2PlatePhoto);
+    if (p && p.dataUrl) transmission2PlatePhotoDataUrl = p.dataUrl;
   }
 
   // ── Pass 1: collect all findings ──────────────────────────────────────
@@ -4237,12 +4593,22 @@ ${survey.locationLat && survey.locationLon ? `
     <tr><td><strong>Number of Cabins</strong></td><td>${esc(survey.numberCabins) || 'N/A'}</td></tr>
     <tr><td><strong>Electrical System</strong></td><td>${esc(survey.electricalSystem) || 'N/A'}</td></tr>
     <tr><td><strong>Changes to Original Plan</strong></td><td>${esc(survey.changesToPlan) || 'None noted'}</td></tr>
-    ${survey.engineMake ? `<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Engine &amp; Transmission</td></tr>` : ''}
-    ${survey.engineMake ? `<tr><td><strong>Engine</strong></td><td>${esc(survey.engineMake)} ${esc(survey.engineModel || '')} — SN: ${esc(survey.engineSerial) || 'N/A'}${enginePlatePhotoDataUrl ? '<br><img src="' + enginePlatePhotoDataUrl + '" alt="Engine Data Plate" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>` : ''}
+    ${survey.engineMake ? `<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Engine &amp; Transmission${survey.engine2Make ? ' — Engine 1 (Port)' : ''}</td></tr>` : ''}
+    ${survey.engineMake ? `<tr><td><strong>Engine</strong></td><td>${esc(survey.engineMake)} ${esc(survey.engineModel || '')} — SN: ${esc(survey.engineSerial) || 'N/A'}</td></tr>` : ''}
     ${survey.engineHP ? `<tr><td><strong>Power Rating</strong></td><td>${esc(survey.engineHP)}</td></tr>` : ''}
     ${survey.engineHours ? `<tr><td><strong>Engine Hours</strong></td><td>${esc(survey.engineHours)}</td></tr>` : ''}
     ${survey.fuelType ? `<tr><td><strong>Fuel Type</strong></td><td>${esc(survey.fuelType)}</td></tr>` : ''}
+    ${enginePhotoDataUrl || enginePlatePhotoDataUrl ? `<tr><td><strong>Engine Photos</strong></td><td style="display:flex;gap:12px;flex-wrap:wrap;">${enginePhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Engine</div><img src="' + enginePhotoDataUrl + '" alt="Engine" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}${enginePlatePhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Data Plate</div><img src="' + enginePlatePhotoDataUrl + '" alt="Engine Data Plate" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}</td></tr>` : ''}
     ${survey.transmissionMakeModel ? `<tr><td><strong>Transmission</strong></td><td>${esc(survey.transmissionMakeModel)} — SN: ${esc(survey.transmissionSerial) || 'N/A'}</td></tr>` : ''}
+    ${transmissionPhotoDataUrl || transmissionPlatePhotoDataUrl ? `<tr><td><strong>Transmission Photos</strong></td><td style="display:flex;gap:12px;flex-wrap:wrap;">${transmissionPhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Transmission</div><img src="' + transmissionPhotoDataUrl + '" alt="Transmission" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}${transmissionPlatePhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Serial Plate</div><img src="' + transmissionPlatePhotoDataUrl + '" alt="Transmission Serial Plate" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}</td></tr>` : ''}
+    ${survey.engine2Make ? `<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Engine 2 (Starboard)</td></tr>` : ''}
+    ${survey.engine2Make ? `<tr><td><strong>Engine</strong></td><td>${esc(survey.engine2Make)} ${esc(survey.engine2Model || '')} — SN: ${esc(survey.engine2Serial) || 'N/A'}</td></tr>` : ''}
+    ${survey.engine2HP ? `<tr><td><strong>Power Rating</strong></td><td>${esc(survey.engine2HP)}</td></tr>` : ''}
+    ${survey.engine2Hours ? `<tr><td><strong>Engine Hours</strong></td><td>${esc(survey.engine2Hours)}</td></tr>` : ''}
+    ${survey.fuelType2 ? `<tr><td><strong>Fuel Type</strong></td><td>${esc(survey.fuelType2)}</td></tr>` : ''}
+    ${engine2PhotoDataUrl || engine2PlatePhotoDataUrl ? `<tr><td><strong>Engine Photos</strong></td><td style="display:flex;gap:12px;flex-wrap:wrap;">${engine2PhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Engine</div><img src="' + engine2PhotoDataUrl + '" alt="Engine 2" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}${engine2PlatePhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Data Plate</div><img src="' + engine2PlatePhotoDataUrl + '" alt="Engine 2 Data Plate" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}</td></tr>` : ''}
+    ${survey.transmission2MakeModel ? `<tr><td><strong>Transmission</strong></td><td>${esc(survey.transmission2MakeModel)} — SN: ${esc(survey.transmission2Serial) || 'N/A'}</td></tr>` : ''}
+    ${transmission2PhotoDataUrl || transmission2PlatePhotoDataUrl ? `<tr><td><strong>Transmission Photos</strong></td><td style="display:flex;gap:12px;flex-wrap:wrap;">${transmission2PhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Transmission</div><img src="' + transmission2PhotoDataUrl + '" alt="Transmission 2" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}${transmission2PlatePhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Serial Plate</div><img src="' + transmission2PlatePhotoDataUrl + '" alt="Transmission 2 Serial Plate" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}</td></tr>` : ''}
   </table>
 
   <!-- ═══ SURVEY CONDITIONS ═══ -->
