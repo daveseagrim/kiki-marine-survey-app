@@ -2369,6 +2369,232 @@
       "construction": "Fibreglass"
     },
     {
+      "id": "formula-27-pc",
+      "make": "Formula",
+      "model": "27 PC",
+      "aliases": [
+        "formula27pc",
+        "formula 27 performance cruiser"
+      ],
+      "yearStart": 2004,
+      "yearEnd": 2012,
+      "type": "powerboat",
+      "loa": "33'1\"",
+      "beam": "11'0\"",
+      "displacement": "14,100 lbs",
+      "maxDraft": "2'10\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-31-pc",
+      "make": "Formula",
+      "model": "31 PC",
+      "aliases": [
+        "formula31pc",
+        "formula 31 performance cruiser"
+      ],
+      "yearStart": 1993,
+      "yearEnd": 2021,
+      "type": "powerboat",
+      "loa": "31'8\"",
+      "beam": "11'0\"",
+      "displacement": "14,100 lbs",
+      "maxDraft": "2'10\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-34-pc",
+      "make": "Formula",
+      "model": "34 PC",
+      "aliases": [
+        "formula34pc",
+        "formula 34 performance cruiser"
+      ],
+      "yearStart": 2000,
+      "yearEnd": 2018,
+      "type": "powerboat",
+      "loa": "34'3\"",
+      "beam": "11'6\"",
+      "displacement": "15,710 lbs",
+      "maxDraft": "3'0\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-37-pc",
+      "make": "Formula",
+      "model": "37 PC",
+      "aliases": [
+        "formula37pc",
+        "formula 37 performance cruiser"
+      ],
+      "yearStart": 1998,
+      "yearEnd": 2020,
+      "type": "powerboat",
+      "loa": "38'5\"",
+      "beam": "12'0\"",
+      "displacement": "17,500 lbs",
+      "maxDraft": "2'10\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-40-pc",
+      "make": "Formula",
+      "model": "40 PC",
+      "aliases": [
+        "formula40pc",
+        "formula 40 performance cruiser"
+      ],
+      "yearStart": 2010,
+      "yearEnd": 2022,
+      "type": "powerboat",
+      "loa": "42'7\"",
+      "beam": "12'8\"",
+      "displacement": "22,150 lbs",
+      "maxDraft": "3'8\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-310-ss",
+      "make": "Formula",
+      "model": "310 Sun Sport",
+      "aliases": [
+        "formula310ss",
+        "formula 310 sunsport",
+        "formula 310ss"
+      ],
+      "yearStart": 1999,
+      "yearEnd": 2015,
+      "type": "powerboat",
+      "loa": "31'0\"",
+      "beam": "9'6\"",
+      "displacement": "10,251 lbs",
+      "maxDraft": "3'2\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-330-ss",
+      "make": "Formula",
+      "model": "330 Sun Sport",
+      "aliases": [
+        "formula330ss",
+        "formula 330 sunsport",
+        "formula 330ss"
+      ],
+      "yearStart": 2000,
+      "yearEnd": 2012,
+      "type": "powerboat",
+      "loa": "33'6\"",
+      "beam": "10'6\"",
+      "displacement": "12,500 lbs",
+      "maxDraft": "3'4\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-350-ss",
+      "make": "Formula",
+      "model": "350 Sun Sport",
+      "aliases": [
+        "formula350ss",
+        "formula 350 sunsport",
+        "formula 350ss"
+      ],
+      "yearStart": 2002,
+      "yearEnd": 2010,
+      "type": "powerboat",
+      "loa": "35'6\"",
+      "beam": "11'0\"",
+      "displacement": "14,200 lbs",
+      "maxDraft": "3'4\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-370-ss",
+      "make": "Formula",
+      "model": "370 Super Sport",
+      "aliases": [
+        "formula370ss",
+        "formula 370 supersport",
+        "formula 370ss"
+      ],
+      "yearStart": 2005,
+      "yearEnd": 2015,
+      "type": "powerboat",
+      "loa": "37'6\"",
+      "beam": "11'6\"",
+      "displacement": "16,000 lbs",
+      "maxDraft": "3'6\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-400-ss",
+      "make": "Formula",
+      "model": "400 Super Sport",
+      "aliases": [
+        "formula400ss",
+        "formula 400 supersport",
+        "formula 400ss"
+      ],
+      "yearStart": 2006,
+      "yearEnd": 2016,
+      "type": "powerboat",
+      "loa": "40'0\"",
+      "beam": "12'0\"",
+      "displacement": "19,500 lbs",
+      "maxDraft": "3'8\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-270-br",
+      "make": "Formula",
+      "model": "270 Bowrider",
+      "aliases": [
+        "formula270",
+        "formula 270br"
+      ],
+      "yearStart": 2003,
+      "yearEnd": 2015,
+      "type": "powerboat",
+      "loa": "27'0\"",
+      "beam": "8'6\"",
+      "displacement": "6,525 lbs",
+      "maxDraft": "3'0\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-280-br",
+      "make": "Formula",
+      "model": "280 Bowrider",
+      "aliases": [
+        "formula280",
+        "formula 280br"
+      ],
+      "yearStart": 2002,
+      "yearEnd": 2010,
+      "type": "powerboat",
+      "loa": "28'6\"",
+      "beam": "8'6\"",
+      "displacement": "7,200 lbs",
+      "maxDraft": "3'0\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-330-cbr",
+      "make": "Formula",
+      "model": "330 Crossover Bowrider",
+      "aliases": [
+        "formula330cbr",
+        "formula 330 crossover"
+      ],
+      "yearStart": 2018,
+      "yearEnd": 2025,
+      "type": "powerboat",
+      "loa": "34'4\"",
+      "beam": "10'3\"",
+      "displacement": "12,250 lbs",
+      "maxDraft": "3'2\"",
+      "construction": "Fibreglass"
+    },
+    {
       "id": "four-winns-245-sundowner",
       "make": "Four Winns",
       "model": "245 Sundowner",
