@@ -15,6 +15,53 @@ let engineDb = null;
 let currentSurveyId = null;
 let currentView = 'surveys';
 
+// Capitalize each word in a string (for name fields)
+function capitalizeWords(str) {
+  if (!str) return str;
+  return str.replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// Extract short location name (marina/yard + city) from full address
+function shortLocation(fullLocation) {
+  if (!fullLocation) return '';
+  // Split by commas
+  const parts = fullLocation.split(',').map(p => p.trim());
+  if (parts.length <= 2) return fullLocation;
+
+  // Look for marina/yacht club/yard/harbour keywords in first parts
+  const venueKeywords = /marina|yacht|club|harbour|harbor|boat|yard|wharf|dock|pier|bay|port|landing|shipyard/i;
+  let venue = '';
+  let city = '';
+
+  for (let i = 0; i < parts.length; i++) {
+    if (!venue && venueKeywords.test(parts[i])) {
+      venue = parts[i];
+    }
+    // City is typically the 2nd or 3rd part (after venue/street)
+    if (!city && i > 0 && i < parts.length - 1 && !/^\d/.test(parts[i]) && !parts[i].match(/^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/i) && parts[i].length > 2) {
+      // Skip postal codes and province abbreviations
+      if (!parts[i].match(/^(ON|BC|AB|SK|MB|QC|NB|NS|PE|NL|NT|NU|YT|Canada)$/i)) {
+        city = parts[i];
+      }
+    }
+  }
+
+  if (venue && city && venue !== city) return `${venue}, ${city}`;
+  if (venue) return venue;
+  // No venue found — use street address + city
+  if (parts.length >= 2) {
+    const street = parts[0];
+    // Find the city (skip postal codes, provinces, country)
+    for (let i = 1; i < parts.length; i++) {
+      if (!parts[i].match(/^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/i) && !parts[i].match(/^(ON|BC|AB|SK|MB|QC|NB|NS|PE|NL|NT|NU|YT|Canada)$/i) && parts[i].length > 2) {
+        return `${street}, ${parts[i]}`;
+      }
+    }
+    return `${street}, ${parts[1]}`;
+  }
+  return fullLocation;
+}
+
 // Color mapping for ratings
 const RATING_COLORS = {
   'A - Critical': '#dc2626',
@@ -705,6 +752,24 @@ function getLengthBracket(loaStr) {
   return 'over24';
 }
 
+// Infer hull type from boat style string
+function inferHullType(boatStyle) {
+  if (!boatStyle) return '';
+  const s = boatStyle.toLowerCase();
+  if (s.includes('catamaran')) return 'Catamaran';
+  if (s.includes('trimaran')) return 'Trimaran';
+  if (s.includes('trawler')) return 'Semi-displacement';
+  if (s.includes('express') || s.includes('sport')) return 'Planing';
+  if (s.includes('fishing')) return 'V-bottom';
+  if (s.includes('flybridge')) return 'Semi-displacement';
+  if (s.includes('cuddy')) return 'V-bottom';
+  if (s.includes('cabin cruiser')) return 'Semi-displacement';
+  if (s.includes('sloop') || s.includes('cutter') || s.includes('ketch')) return 'Round bottom';
+  if (s.includes('pontoon')) return 'Pontoon';
+  if (s.includes('flat')) return 'Flat bottom';
+  return '';
+}
+
 // Get vessel type from boatStyle string
 function getVesselType(boatStyle) {
   if (!boatStyle) return 'power';
@@ -971,7 +1036,7 @@ function renderHome() {
           typeShort,
           survey.clientName ? esc(survey.clientName) : '',
           boatLabel,
-          survey.location ? esc(survey.location) : ''
+          survey.location ? esc(shortLocation(survey.location)) : ''
         ].filter(Boolean);
 
         // Type badge colour
@@ -1055,13 +1120,13 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Vessel Name *</label>
-        <input type="text" id="vesselName" placeholder="e.g., Sea Dream II" autocapitalize="words">
+        <input type="text" id="vesselName" placeholder="e.g., Sea Dream II" autocapitalize="words" style="text-transform:capitalize;" onblur="this.value=capitalizeWords(this.value)">
       </div>
 
       <div class="form-group">
         <label class="form-label">Year / Make / Model *</label>
         <input type="text" id="yearMakeModel" placeholder="e.g., 2015 Beneteau Oceanis 46"
-               onblur="checkSpecsOnBlur()" oninput="checkSpecsDebounced()" autocapitalize="words">
+               onblur="checkSpecsOnBlur()" oninput="checkSpecsDebounced()" autocapitalize="words" style="text-transform:capitalize;">
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Tip: Enter year, make and model — specs may auto-fill from built-in database</div>
       </div>
 
@@ -1076,7 +1141,7 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Client Name</label>
-        <input type="text" id="clientName" placeholder="Client name" autocapitalize="words">
+        <input type="text" id="clientName" placeholder="Client name" autocapitalize="words" style="text-transform:capitalize;" onblur="this.value=capitalizeWords(this.value)">
       </div>
 
       <div class="form-group">
@@ -1142,7 +1207,7 @@ function renderNewSurveyForm() {
         <input type="text" id="displacement" placeholder="">
       </div>
 
-      <div class="form-group">
+      <div class="form-group sail-only-field">
         <label class="form-label">Ballast</label>
         <input type="text" id="ballast" placeholder="">
       </div>
@@ -1152,7 +1217,7 @@ function renderNewSurveyForm() {
         <input type="text" id="maxDraft" placeholder="">
       </div>
 
-      <div class="form-group">
+      <div class="form-group sail-only-field">
         <label class="form-label">Total Sail Area</label>
         <input type="text" id="totalSailArea" placeholder="">
       </div>
@@ -1630,9 +1695,9 @@ function renderNewSurveyForm() {
         <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
           <div data-photo-field="hinPhoto">
             <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:6px 12px;">
-              📷 HIN Plate
+              📷 HIN
               <input type="file" accept="image/*" capture="environment" style="display:none;"
-                     onchange="captureDocPhoto('hinPhoto', 'HIN Plate', event)" />
+                     onchange="captureDocPhoto('hinPhoto', 'HIN', event)" />
             </label>
           </div>
           <span id="hinPhotoStatus" style="font-size:12px;color:#6b7280;"></span>
@@ -2738,6 +2803,11 @@ function updateBoatStyleOptions() {
   const boatStyleInput = document.getElementById('boatStyle');
   if (!container || !boatStyleInput) return;
 
+  // Show/hide sail-only fields (ballast, total sail area)
+  document.querySelectorAll('.sail-only-field').forEach(el => {
+    el.style.display = (vesselType === 'sail' || vesselType === '') ? '' : 'none';
+  });
+
   const sailOptions = ['Sloop', 'Cutter', 'Ketch', 'Yawl', 'Schooner', 'Catamaran', 'Trimaran', 'Cat-rigged', 'Motorsailer'];
   const powerOptions = ['Motor Yacht', 'Trawler', 'Express Cruiser', 'Sportfisherman', 'Centre Console', 'Cuddy Cabin', 'Bowrider', 'Pontoon', 'Cabin Cruiser', 'Lobster Boat', 'Tug', 'Workboat'];
   const humanOptions = ['Canoe', 'Kayak', 'Rowboat', 'Dinghy', 'Paddleboard'];
@@ -3352,7 +3422,7 @@ function renderInspection(survey) {
       // Rating buttons
       item.options.forEach(option => {
         const isActive = itemData.rating === option;
-        const color = RATING_COLORS[option];
+        const color = RATING_COLORS[option] || '#1e3a5f';
         html += `
           <button class="rating-btn ${isActive ? 'active' : ''}"
                   style="${isActive ? `background-color: ${color}; border-color: ${color};` : ''}"
@@ -4270,7 +4340,7 @@ const PHOTO_FIELD_LABELS = {
   'fourCornerStbdBow': 'Starboard Bow',
   'fourCornerPortStern': 'Port Stern',
   'fourCornerStbdStern': 'Starboard Stern',
-  'hinPhoto': 'HIN Plate',
+  'hinPhoto': 'HIN',
   'compliancePhoto': 'Compliance Plate',
   'licencePhoto': 'Licence on Hull',
   'tcPaperLicencePhoto': 'TC Paper Licence'
@@ -4312,7 +4382,7 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
   // Rating buttons
   options.forEach(option => {
     const isActive = itemData.rating === option;
-    const color = RATING_COLORS[option];
+    const color = RATING_COLORS[option] || '#1e3a5f';
     html += `
       <button class="rating-btn ${isActive ? 'active' : ''}"
               style="${isActive ? `background-color: ${color}; border-color: ${color};` : ''}"
@@ -4534,6 +4604,25 @@ function selectRating(itemLabel, categoryName, rating) {
     survey.items[itemLabel].standards = [];
     survey.items[itemLabel].variantText = '';
 
+    // Sync special spec items to top-level survey properties
+    if (itemLabel === 'Boat style') {
+      survey.boatStyle = rating;
+      // Auto-detect vessel type from boat style
+      survey.vesselType = getVesselType(rating);
+      // Auto-suggest hull type based on boat style
+      const autoHull = inferHullType(rating);
+      if (autoHull) {
+        survey.hullType = autoHull;
+        // Also update the Hull type item rating if it exists
+        if (!survey.items['Hull type']) {
+          survey.items['Hull type'] = { rating: '', text: '', standards: [], photos: [] };
+        }
+        survey.items['Hull type'].rating = autoHull;
+      }
+    } else if (itemLabel === 'Hull type') {
+      survey.hullType = rating;
+    }
+
     saveSurvey(survey).then(() => {
       // Find the specific item's DOM element and update in place
       const itemDiv = document.querySelector(`.rated-item[data-item-label="${itemLabel.replace(/"/g, '\\"')}"]`);
@@ -4567,6 +4656,11 @@ function selectRating(itemLabel, categoryName, rating) {
 
       // Update the category header's completion percentage
       updateCategoryHeader(survey, categoryName);
+
+      // If boat style was changed, also refresh the Hull type item's DOM
+      if (itemLabel === 'Boat style' && survey.items['Hull type']?.rating) {
+        updateItemInPlace(survey, 'Hull type');
+      }
     });
   });
 }
@@ -5172,7 +5266,7 @@ async function generateReport() {
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Kiki Marine — Report of Condition &amp; Value</title>
+  <title>Kiki Marine — ${esc(survey.vesselName || 'Vessel')} — ${esc(shortLocation(survey.location) || 'Survey')}</title>
   <style>
     @page {
       size: letter;
@@ -5426,7 +5520,7 @@ async function generateReport() {
     <tr><td><strong>Beam</strong></td><td>${esc(survey.beam) || 'N/A'}</td></tr>
     <tr><td><strong>Displacement</strong></td><td>${esc(survey.displacement) || 'N/A'}</td></tr>
     <tr><td><strong>Draft</strong></td><td>${esc(survey.maxDraft) || 'N/A'}</td></tr>
-    <tr><td><strong>Location of Survey Inspection</strong></td><td>${esc(survey.location) || 'N/A'}${survey.onLandOrWater ? ' — ' + esc(survey.onLandOrWater) : ''}</td></tr>
+    <tr><td><strong>Location of Survey Inspection</strong></td><td>${esc(survey.location) || 'N/A'}</td></tr>
     <tr><td><strong>Client / Purchaser</strong></td><td>${esc(survey.clientName) || 'N/A'}</td></tr>
     <tr><td><strong>Persons in Attendance</strong></td><td>${esc(survey.personsInAttendance) || 'N/A'}</td></tr>
     <tr><td><strong>Weather Conditions</strong></td><td>${esc(survey.weather) || 'N/A'}</td></tr>
@@ -5999,10 +6093,15 @@ async function exportToWord() {
     var blob = new Blob(['\\ufeff' + wordDoc], { type: 'application/msword' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
-    var vesselName = document.title.split('—')[1] ? document.title.split('—')[1].trim().split('—')[0].trim() : 'Vessel';
+    var titleParts = document.title.split('—').map(function(p) { return p.trim(); });
+    var vesselName = titleParts[1] || 'Vessel';
+    var locationName = titleParts[2] || '';
     var dateStr = new Date().toISOString().split('T')[0];
+    var nameParts = ['Kiki_Marine_Survey', vesselName.replace(/[^a-zA-Z0-9]/g, '_')];
+    if (locationName && locationName !== 'Survey') nameParts.push(locationName.replace(/[^a-zA-Z0-9]/g, '_'));
+    nameParts.push(dateStr);
     a.href = url;
-    a.download = 'Kiki_Marine_Survey_' + vesselName.replace(/[^a-zA-Z0-9]/g, '_') + '_' + dateStr + '.doc';
+    a.download = nameParts.join('_') + '.doc';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
