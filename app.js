@@ -1382,15 +1382,20 @@ function renderNewSurveyForm() {
       <div class="form-group">
         <label class="form-label">Licence / Registration Number</label>
         <input type="text" id="tcLicense" placeholder="e.g., 12A34567">
-        <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:6px 12px;">
-            📷 Photo of Licence
+        <div style="margin-top:8px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:6px 10px;">
+            📷 Licence Number on Hull
             <input type="file" accept="image/*" capture="environment" style="display:none;"
-                   onchange="captureDocPhoto('licencePhoto', 'TC Licence', event)" />
+                   onchange="captureDocPhoto('licencePhoto', 'Licence Number on Hull', event)" />
           </label>
-          <span id="licencePhotoStatus" style="font-size:12px;color:#6b7280;"></span>
+          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:6px 10px;">
+            📷 TC Paper Licence
+            <input type="file" accept="image/*" capture="environment" style="display:none;"
+                   onchange="captureDocPhoto('tcPaperLicencePhoto', 'TC Paper Licence', event)" />
+          </label>
         </div>
         <div id="licencePhotoPreview" style="margin-top:8px;"></div>
+        <div id="tcPaperLicencePhotoPreview" style="margin-top:8px;"></div>
       </div>
 
       <div class="form-group">
@@ -3637,6 +3642,11 @@ async function generateReport() {
     const p = await getPhotoById(survey.licencePhoto);
     if (p && p.dataUrl) licencePhotoDataUrl = p.dataUrl;
   }
+  let tcPaperLicencePhotoDataUrl = '';
+  if (survey.tcPaperLicencePhoto) {
+    const p = await getPhotoById(survey.tcPaperLicencePhoto);
+    if (p && p.dataUrl) tcPaperLicencePhotoDataUrl = p.dataUrl;
+  }
   let coverPhotoDataUrl = '';
   if (survey.coverPhoto) {
     const p = await getPhotoById(survey.coverPhoto);
@@ -3991,7 +4001,7 @@ ${survey.locationLat && survey.locationLon ? `
   <h2>VESSEL DOCUMENTATION DATA</h2>
   <table>
     <tr><td style="width:40%;"><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
-    ${(survey.tcLicense || survey.tcLicenseType || licencePhotoDataUrl) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${licencePhotoDataUrl ? '<br><img src="' + licencePhotoDataUrl + '" alt="TC Licence Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>` : ''}
+    ${(survey.tcLicense || survey.tcLicenseType || licencePhotoDataUrl || tcPaperLicencePhotoDataUrl) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${licencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Licence number on hull:</em><br><img src="' + licencePhotoDataUrl + '" alt="Licence Number on Hull" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}${tcPaperLicencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Transport Canada paper licence:</em><br><img src="' + tcPaperLicencePhotoDataUrl + '" alt="TC Paper Licence" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>` : ''}
     <tr><td><strong>Tax Status (Duties Paid)</strong></td><td>${esc(survey.taxStatus) || 'N/A'}</td></tr>
     <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
   </table>
