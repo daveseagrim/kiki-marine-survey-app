@@ -1116,9 +1116,10 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Boat Style / Rig Type</label>
-        <select id="boatStyle">
-          <option value="">Select vessel type first</option>
-        </select>
+        <div id="boatStyleContainer" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));gap:8px;padding:8px 0;">
+          <div style="color:#9ca3af;font-size:13px;grid-column:1/-1;">Select vessel type first</div>
+        </div>
+        <input type="hidden" id="boatStyle" value="">
       </div>
 
       <div class="form-group">
@@ -2715,8 +2716,9 @@ function suggestValuation() {
 // Update boat style dropdown options based on vessel type
 function updateBoatStyleOptions() {
   const vesselType = document.getElementById('vesselType')?.value || '';
-  const boatStyleEl = document.getElementById('boatStyle');
-  if (!boatStyleEl) return;
+  const container = document.getElementById('boatStyleContainer');
+  const boatStyleInput = document.getElementById('boatStyle');
+  if (!container || !boatStyleInput) return;
 
   const sailOptions = ['Sloop', 'Cutter', 'Ketch', 'Yawl', 'Schooner', 'Catamaran', 'Trimaran', 'Cat-rigged', 'Motorsailer'];
   const powerOptions = ['Motor Yacht', 'Trawler', 'Express Cruiser', 'Sportfisherman', 'Centre Console', 'Cuddy Cabin', 'Bowrider', 'Pontoon', 'Cabin Cruiser', 'Lobster Boat', 'Tug', 'Workboat'];
@@ -2727,8 +2729,24 @@ function updateBoatStyleOptions() {
   else if (vesselType === 'power') options = powerOptions;
   else if (vesselType === 'human-powered') options = humanOptions;
 
-  boatStyleEl.innerHTML = '<option value="">Select</option>' +
-    options.map(o => `<option value="${o}">${o}</option>`).join('');
+  if (options.length === 0) {
+    container.innerHTML = '<div style="color:#9ca3af;font-size:13px;grid-column:1/-1;">Select vessel type first</div>';
+    boatStyleInput.value = '';
+    return;
+  }
+
+  const currentValue = boatStyleInput.value;
+  const buttonsHtml = options.map(o => `
+    <button type="button" onclick="selectBoatStyle('${o}')" style="padding:8px 10px;border:2px solid ${currentValue === o ? '#3b82f6' : '#e5e7eb'};background:${currentValue === o ? '#dbeafe' : '#ffffff'};color:${currentValue === o ? '#1e40af' : '#374151'};border-radius:6px;font-size:12px;font-weight:${currentValue === o ? '600' : '400'};cursor:pointer;transition:all 0.2s;">${o}</button>
+  `).join('');
+
+  container.innerHTML = buttonsHtml;
+}
+
+function selectBoatStyle(value) {
+  const boatStyleInput = document.getElementById('boatStyle');
+  if (boatStyleInput) boatStyleInput.value = value;
+  updateBoatStyleOptions(); // Refresh to show highlight
 }
 
 // Look up engine type (Inboard/Outboard/Sterndrive) from engine_db for a given make and model
