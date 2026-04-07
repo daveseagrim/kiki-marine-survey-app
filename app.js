@@ -3103,8 +3103,30 @@ function startNewSurvey() {
   };
 
   const survey = createNewSurvey(formData);
-  saveSurvey(survey).then(id => {
+  saveSurvey(survey).then(async (id) => {
     currentSurveyId = id;
+
+    // Transfer any doc photos captured on the new survey form
+    if (window._pendingDocPhotos) {
+      for (const [fieldKey, photoData] of Object.entries(window._pendingDocPhotos)) {
+        const photoId = `${id}_doc_${fieldKey}_${Date.now()}`;
+        const photo = {
+          id: photoId,
+          surveyId: id,
+          itemLabel: photoData.label,
+          dataUrl: photoData.dataUrl,
+          annotated: false,
+          isDocPhoto: true,
+          docField: fieldKey,
+          createdAt: new Date().toISOString()
+        };
+        await savePhoto(photo);
+        survey[fieldKey] = photoId;
+      }
+      await saveSurvey(survey);
+      window._pendingDocPhotos = null;
+    }
+
     renderInspection(survey);
   });
 }
@@ -3801,17 +3823,40 @@ function showPhotoPreviewModal(fieldKey, label, stampedDataUrl, fileType) {
   if (!modal) {
     modal = document.createElement('div');
     modal.id = 'photoPreviewModal';
-    modal.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:9999;padding:20px;box-sizing:border-box;overflow-y:auto;';
+    modal.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;box-sizing:border-box;overflow-y:auto;-webkit-overflow-scrolling:touch;';
     document.body.appendChild(modal);
   }
 
   modal.innerHTML = `
-    <div style="background:white;border-radius:12px;max-width:90vw;max-height:90vh;margin:20px auto;padding:16px;display:flex;flex-direction:column;align-items:center;">
-      <div style="font-weight:600;margin-bottom:12px;color:#1e3a5f;">Photo Preview — ${label}</div>
-      <img id="previewImage" src="${stampedDataUrl}" style="max-width:100%;max-height:60vh;border-radius:8px;margin-bottom:16px;border:1px solid #ccc;">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
-        <button class="btn-secondary" style="padding:8px 16px;font-size:13px;" onclick="closePhotoPreviewModal()">❌ Retake</button>
-        <button class="btn-primary" style="padding:8px 16px;font-size:13px;" onclick="confirmPhotoPreview('${fieldKey}', '${label}')">✓ Confirm</button>
+    <div style="background:white;border-radius:12px;max-width:95vw;width:100%;margin:10px auto;padding:14px;display:flex;flex-direction:column;align-items:center;">
+      <div style="font-weight:600;margin-bottom:8px;color:#1e3a5f;font-size:14px;">Photo Preview — ${label}</div>
+      <div style="position:relative;width:100%;text-align:center;margin-bottom:8px;">
+        <img id="previewImage" src="${stampedDataUrl}" style="max-width:100%;max-height:45vh;border-radius:8px;border:1px solid #ccc;">
+      </div>
+
+      <div style="width:100%;padding:0 4px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="font-size:12px;color:#555;width:70px;flex-shrink:0;">Brightness</span>
+          <input type="range" id="photoBrightness" min="50" max="200" value="100" style="flex:1;height:28px;"
+                 oninput="applyPhotoFilters()">
+          <span id="brightnessVal" style="font-size:11px;color:#888;width:35px;text-align:right;">100%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <span style="font-size:12px;color:#555;width:70px;flex-shrink:0;">Contrast</span>
+          <input type="range" id="photoContrast" min="50" max="200" value="100" style="flex:1;height:28px;"
+                 oninput="applyPhotoFilters()">
+          <span id="contrastVal" style="font-size:11px;color:#888;width:35px;text-align:right;">100%</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+          <button class="btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="resetPhotoFilters()">Reset</button>
+          <button class="btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="rotatePreviewPhoto()">↻ Rotate</button>
+          <button class="btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="startPhotoCrop()">✂ Crop</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;width:100%;justify-content:center;">
+        <button class="btn-secondary" style="padding:10px 20px;font-size:14px;flex:1;" onclick="closePhotoPreviewModal()">❌ Retake</button>
+        <button class="btn-primary" style="padding:10px 20px;font-size:14px;flex:1;" onclick="confirmPhotoPreview('${fieldKey}', '${label}')">✓ Confirm</button>
       </div>
     </div>
   `;
@@ -3821,10 +3866,187 @@ function showPhotoPreviewModal(fieldKey, label, stampedDataUrl, fileType) {
     fieldKey: fieldKey,
     label: label,
     stampedDataUrl: stampedDataUrl,
-    fileType: fileType
+    originalDataUrl: stampedDataUrl,
+    fileType: fileType,
+    brightness: 100,
+    contrast: 100,
+    rotation: 0
   };
 
   modal.style.display = 'block';
+}
+
+// Apply brightness/contrast filters to preview image
+function applyPhotoFilters() {
+  const brightness = document.getElementById('photoBrightness')?.value || 100;
+  const contrast = document.getElementById('photoContrast')?.value || 100;
+  const img = document.getElementById('previewImage');
+  if (img) {
+    img.style.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+  }
+  const bVal = document.getElementById('brightnessVal');
+  if (bVal) bVal.textContent = brightness + '%';
+  const cVal = document.getElementById('contrastVal');
+  if (cVal) cVal.textContent = contrast + '%';
+
+  if (window._pendingPhotoData) {
+    window._pendingPhotoData.brightness = parseInt(brightness);
+    window._pendingPhotoData.contrast = parseInt(contrast);
+  }
+}
+
+// Reset filters to default
+function resetPhotoFilters() {
+  const bSlider = document.getElementById('photoBrightness');
+  const cSlider = document.getElementById('photoContrast');
+  if (bSlider) bSlider.value = 100;
+  if (cSlider) cSlider.value = 100;
+  applyPhotoFilters();
+}
+
+// Rotate the photo 90 degrees clockwise
+function rotatePreviewPhoto() {
+  if (!window._pendingPhotoData) return;
+  window._pendingPhotoData.rotation = (window._pendingPhotoData.rotation + 90) % 360;
+  const img = document.getElementById('previewImage');
+  if (img) {
+    img.style.transform = `rotate(${window._pendingPhotoData.rotation}deg)`;
+    // Scale down if rotated sideways so it still fits
+    if (window._pendingPhotoData.rotation % 180 !== 0) {
+      img.style.maxHeight = '35vh';
+    } else {
+      img.style.maxHeight = '45vh';
+    }
+  }
+}
+
+// Start crop mode — draw a selection rectangle on the photo
+function startPhotoCrop() {
+  const img = document.getElementById('previewImage');
+  if (!img) return;
+
+  // Create a canvas-based crop overlay
+  const rect = img.getBoundingClientRect();
+  const overlay = document.createElement('div');
+  overlay.id = 'cropOverlay';
+  overlay.style.cssText = `position:fixed;top:${rect.top}px;left:${rect.left}px;width:${rect.width}px;height:${rect.height}px;z-index:10001;cursor:crosshair;touch-action:none;`;
+
+  // Dark border overlay
+  overlay.innerHTML = `
+    <div style="position:absolute;top:0;left:0;right:0;bottom:0;border:2px dashed #3b82f6;box-sizing:border-box;"></div>
+    <div id="cropBox" style="position:absolute;top:10%;left:10%;width:80%;height:80%;border:3px solid #3b82f6;background:rgba(59,130,246,0.1);box-sizing:border-box;touch-action:none;">
+      <div style="position:absolute;top:-6px;left:-6px;width:12px;height:12px;background:#3b82f6;border-radius:50%;"></div>
+      <div style="position:absolute;top:-6px;right:-6px;width:12px;height:12px;background:#3b82f6;border-radius:50%;"></div>
+      <div style="position:absolute;bottom:-6px;left:-6px;width:12px;height:12px;background:#3b82f6;border-radius:50%;"></div>
+      <div style="position:absolute;bottom:-6px;right:-6px;width:12px;height:12px;background:#3b82f6;border-radius:50%;"></div>
+    </div>
+    <div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:10002;">
+      <button class="btn-secondary" style="padding:10px 20px;font-size:14px;background:white;" onclick="cancelCrop()">Cancel</button>
+      <button class="btn-primary" style="padding:10px 20px;font-size:14px;" onclick="applyCrop()">Apply Crop</button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // Make crop box draggable via touch/mouse
+  const cropBox = document.getElementById('cropBox');
+  let isDragging = false;
+  let startX, startY, startLeft, startTop;
+
+  function onStart(e) {
+    e.preventDefault();
+    const touch = e.touches ? e.touches[0] : e;
+    isDragging = true;
+    startX = touch.clientX;
+    startY = touch.clientY;
+    startLeft = cropBox.offsetLeft;
+    startTop = cropBox.offsetTop;
+  }
+  function onMove(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    const touch = e.touches ? e.touches[0] : e;
+    const dx = touch.clientX - startX;
+    const dy = touch.clientY - startY;
+    const newLeft = Math.max(0, Math.min(overlay.clientWidth - cropBox.clientWidth, startLeft + dx));
+    const newTop = Math.max(0, Math.min(overlay.clientHeight - cropBox.clientHeight, startTop + dy));
+    cropBox.style.left = newLeft + 'px';
+    cropBox.style.top = newTop + 'px';
+  }
+  function onEnd() { isDragging = false; }
+
+  cropBox.addEventListener('touchstart', onStart, { passive: false });
+  cropBox.addEventListener('touchmove', onMove, { passive: false });
+  cropBox.addEventListener('touchend', onEnd);
+  cropBox.addEventListener('mousedown', onStart);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onEnd);
+}
+
+function cancelCrop() {
+  const overlay = document.getElementById('cropOverlay');
+  if (overlay) overlay.remove();
+}
+
+function applyCrop() {
+  const overlay = document.getElementById('cropOverlay');
+  const cropBox = document.getElementById('cropBox');
+  const img = document.getElementById('previewImage');
+  if (!overlay || !cropBox || !img || !window._pendingPhotoData) {
+    cancelCrop();
+    return;
+  }
+
+  // Calculate crop ratios relative to the displayed image
+  const overlayW = overlay.clientWidth;
+  const overlayH = overlay.clientHeight;
+  const cropLeft = cropBox.offsetLeft / overlayW;
+  const cropTop = cropBox.offsetTop / overlayH;
+  const cropW = cropBox.clientWidth / overlayW;
+  const cropH = cropBox.clientHeight / overlayH;
+
+  // Apply crop to the original image
+  const srcImg = new Image();
+  srcImg.onload = () => {
+    const sx = Math.round(cropLeft * srcImg.width);
+    const sy = Math.round(cropTop * srcImg.height);
+    const sw = Math.round(cropW * srcImg.width);
+    const sh = Math.round(cropH * srcImg.height);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = sw;
+    canvas.height = sh;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(srcImg, sx, sy, sw, sh, 0, 0, sw, sh);
+
+    // Re-apply date stamp to cropped image
+    const fontSize = Math.max(20, Math.round(canvas.width / 40));
+    const padding = 12;
+    const today = new Date();
+    const dateStr = today.toISOString().split('T')[0];
+    ctx.font = `${fontSize}px Arial, sans-serif`;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'bottom';
+    const textMetrics = ctx.measureText(dateStr);
+    const rectWidth = textMetrics.width + padding * 2;
+    const rectHeight = fontSize + padding;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(canvas.width - rectWidth, canvas.height - rectHeight, rectWidth, rectHeight);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(dateStr, canvas.width - padding, canvas.height - padding);
+
+    const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+    window._pendingPhotoData.stampedDataUrl = croppedDataUrl;
+    window._pendingPhotoData.originalDataUrl = croppedDataUrl;
+
+    // Update preview
+    img.src = croppedDataUrl;
+    img.style.transform = '';
+    window._pendingPhotoData.rotation = 0;
+
+    cancelCrop();
+  };
+  srcImg.src = window._pendingPhotoData.originalDataUrl;
 }
 
 function closePhotoPreviewModal() {
@@ -3833,36 +4055,100 @@ function closePhotoPreviewModal() {
   window._pendingPhotoData = null;
 }
 
+// Bake brightness, contrast, and rotation edits into the image data
+async function bakePhotoEdits(dataUrl, brightness, contrast, rotation) {
+  // Skip processing if no edits were made
+  if (brightness === 100 && contrast === 100 && (rotation === 0 || rotation === undefined)) {
+    return dataUrl;
+  }
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Handle rotation
+      const rad = (rotation || 0) * Math.PI / 180;
+      const isRotatedSideways = (rotation === 90 || rotation === 270);
+      canvas.width = isRotatedSideways ? img.height : img.width;
+      canvas.height = isRotatedSideways ? img.width : img.height;
+
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(rad);
+      ctx.drawImage(img, -img.width / 2, -img.height / 2);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+      // Apply brightness and contrast via pixel manipulation
+      if (brightness !== 100 || contrast !== 100) {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imageData.data;
+        const b = brightness / 100;
+        const c = (contrast / 100 - 1) * 255;
+        const factor = (259 * (c + 255)) / (255 * (259 - c));
+
+        for (let i = 0; i < pixels.length; i += 4) {
+          // Apply brightness then contrast
+          pixels[i] = Math.max(0, Math.min(255, factor * (pixels[i] * b - 128) + 128));
+          pixels[i + 1] = Math.max(0, Math.min(255, factor * (pixels[i + 1] * b - 128) + 128));
+          pixels[i + 2] = Math.max(0, Math.min(255, factor * (pixels[i + 2] * b - 128) + 128));
+        }
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      resolve(canvas.toDataURL('image/jpeg', 0.95));
+    };
+    img.src = dataUrl;
+  });
+}
+
 async function confirmPhotoPreview(fieldKey, label) {
   const data = window._pendingPhotoData;
   if (!data) return;
 
   closePhotoPreviewModal();
 
-  const photoId = `${currentSurveyId}_doc_${fieldKey}_${Date.now()}`;
-  const photo = {
-    id: photoId,
-    surveyId: currentSurveyId,
-    itemLabel: label,
-    dataUrl: data.stampedDataUrl,
-    annotated: false,
-    isDocPhoto: true,
-    docField: fieldKey,
-    createdAt: new Date().toISOString()
-  };
+  // Bake brightness, contrast, and rotation into the final image
+  const finalDataUrl = await bakePhotoEdits(data.stampedDataUrl, data.brightness || 100, data.contrast || 100, data.rotation || 0);
+  data.stampedDataUrl = finalDataUrl;
 
-  await savePhoto(photo);
+  if (currentSurveyId) {
+    // Survey exists — save photo to IndexedDB and link to survey
+    const photoId = `${currentSurveyId}_doc_${fieldKey}_${Date.now()}`;
+    const photo = {
+      id: photoId,
+      surveyId: currentSurveyId,
+      itemLabel: label,
+      dataUrl: data.stampedDataUrl,
+      annotated: false,
+      isDocPhoto: true,
+      docField: fieldKey,
+      createdAt: new Date().toISOString()
+    };
 
-  // Store the photo ID on the survey object
-  const survey = await getSurvey(currentSurveyId);
-  // Delete old photo if replacing
-  if (survey[fieldKey]) {
-    try { await deletePhoto(survey[fieldKey]); } catch(e) {}
+    await savePhoto(photo);
+
+    // Store the photo ID on the survey object
+    const survey = await getSurvey(currentSurveyId);
+    if (survey) {
+      // Delete old photo if replacing
+      if (survey[fieldKey]) {
+        try { await deletePhoto(survey[fieldKey]); } catch(e) {}
+      }
+      survey[fieldKey] = photoId;
+      await saveSurvey(survey);
+    }
+  } else {
+    // New survey form — survey doesn't exist yet.
+    // Store photo data temporarily; it will be saved when survey is created.
+    if (!window._pendingDocPhotos) window._pendingDocPhotos = {};
+    window._pendingDocPhotos[fieldKey] = {
+      label: label,
+      dataUrl: data.stampedDataUrl,
+      fileType: data.fileType
+    };
   }
-  survey[fieldKey] = photoId;
-  await saveSurvey(survey);
 
-  // Update UI with stamped preview
+  // Update UI with stamped preview (works regardless of survey state)
   updateDocPhotoPreview(fieldKey, data.stampedDataUrl);
   window._pendingPhotoData = null;
 }
