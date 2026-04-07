@@ -878,6 +878,7 @@ function getCompletionPercentage(survey) {
 // UI Rendering Functions
 function renderHome() {
   currentView = 'surveys';
+  history.replaceState({ view: 'surveys' }, '');
   const app = document.getElementById('app');
 
   app.innerHTML = `
@@ -985,6 +986,7 @@ function fetchExchangeRate() {
 
 function renderNewSurveyForm() {
   currentView = 'new-survey';
+  history.pushState({ view: 'new-survey' }, '');
   const existingFab = document.querySelector('.fab');
   if (existingFab) existingFab.remove();
   const reportBtnEl = document.getElementById('reportBtn');
@@ -2720,6 +2722,7 @@ function collectComparables() {
 }
   currentView = 'inspection';
   currentSurveyId = survey.id;
+  history.pushState({ view: 'inspection', surveyId: survey.id }, '');
 
   const app = document.getElementById('app');
 
@@ -3709,10 +3712,61 @@ function deleteSurveyConfirm(surveyId) {
   }
 }
 
-function backToHome() {
-  if (confirm('Go back to home? Make sure you saved your changes.')) {
-    renderHome();
+// Save all unsaved inspection data (text areas, bilge pumps, comparables, safety items)
+async function saveAllInspectionData() {
+  if (!currentSurveyId) return false;
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return false;
+
+  let changed = false;
+
+  // Save all item text areas that have content
+  document.querySelectorAll('textarea[id^="text-"]').forEach(textarea => {
+    const safeId = textarea.id.replace('text-', '');
+    // Find the matching item label by checking all items
+    for (const [label, data] of Object.entries(survey.items || {})) {
+      if (label.replace(/[^a-zA-Z0-9]/g, '_') === safeId) {
+        if (data.text !== textarea.value) {
+          data.text = textarea.value;
+          changed = true;
+        }
+        break;
+      }
+    }
+  });
+
+  // Save bilge pumps
+  const bilgePumps = collectBilgePumps();
+  if (bilgePumps.length > 0 || (survey.bilgePumps && survey.bilgePumps.length > 0)) {
+    survey.bilgePumps = bilgePumps;
+    changed = true;
   }
+
+  // Save comparables
+  const comparables = collectComparables();
+  if (comparables.length > 0 || (survey.comparables && survey.comparables.length > 0)) {
+    survey.comparables = comparables;
+    changed = true;
+  }
+
+  if (changed) {
+    await saveSurvey(survey);
+  }
+  return changed;
+}
+
+function backToHome() {
+  saveAllInspectionData().then(changed => {
+    const msg = changed
+      ? 'Your work has been saved. Return to home screen?'
+      : 'Return to home screen?';
+    if (confirm(msg)) {
+      // Remove report button when leaving inspection
+      const reportBtn = document.getElementById('reportBtn');
+      if (reportBtn) reportBtn.remove();
+      renderHome();
+    }
+  });
 }
 
 // Report generation
@@ -4696,6 +4750,24 @@ async function initApp() {
         }
       }
     }).observe(document.body, { childList: true, subtree: true });
+
+    // Browser back button / swipe-back handling
+    window.addEventListener('popstate', (e) => {
+      if (currentView === 'inspection') {
+        // Push state again to prevent actually navigating away
+        history.pushState({ view: 'inspection' }, '');
+        backToHome();
+      } else if (currentView === 'new-survey') {
+        history.pushState({ view: 'new-survey' }, '');
+        if (confirm('Discard this new survey and go back?')) {
+          renderHome();
+        }
+      }
+      // If already on home, let normal back behaviour happen
+    });
+
+    // Set initial history state
+    history.replaceState({ view: 'surveys' }, '');
 
     await initDB();
     await fetchDataFiles();
