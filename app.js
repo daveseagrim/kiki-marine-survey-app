@@ -1536,7 +1536,7 @@ function populateEngineMakes() {
   if (engineSelect) {
     // Keep the first "Select make" option, add "Other" at end
     engineSelect.innerHTML = '<option value="">Select make</option>';
-    engineDb.engines.forEach(e => {
+    [...engineDb.engines].sort((a, b) => a.make.localeCompare(b.make)).forEach(e => {
       const opt = document.createElement('option');
       opt.value = e.make;
       opt.textContent = e.make;
@@ -1551,7 +1551,7 @@ function populateEngineMakes() {
   const transSelect = document.getElementById('transmissionMake');
   if (transSelect) {
     transSelect.innerHTML = '<option value="">Select make</option>';
-    engineDb.transmissions.forEach(t => {
+    [...engineDb.transmissions].sort((a, b) => a.make.localeCompare(b.make)).forEach(t => {
       const opt = document.createElement('option');
       opt.value = t.make;
       opt.textContent = t.make;
@@ -1597,7 +1597,7 @@ function onEngineMakeChange() {
 
   const maker = engineDb.engines.find(e => e.make.toLowerCase() === makeVal.toLowerCase());
   if (maker) {
-    maker.models.forEach(m => {
+    [...maker.models].sort((a, b) => a.model.localeCompare(b.model)).forEach(m => {
       const opt = document.createElement('option');
       opt.value = m.model;
       opt.textContent = m.model;
@@ -1671,7 +1671,7 @@ function onTransmissionMakeChange() {
 
   const maker = engineDb.transmissions.find(t => t.make.toLowerCase() === makeVal.toLowerCase());
   if (maker) {
-    maker.models.forEach(m => {
+    [...maker.models].sort((a, b) => a.model.localeCompare(b.model)).forEach(m => {
       const opt = document.createElement('option');
       opt.value = m.model;
       opt.textContent = m.model;
