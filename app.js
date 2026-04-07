@@ -849,7 +849,8 @@ function createNewSurvey(formData) {
     valuationHigh: formData.valuationHigh,
     valuationCurrency: formData.valuationCurrency || 'USD',
     exchangeRate: formData.exchangeRate || 1.35,
-    valuationSource: formData.valuationSource,
+    valuationSources: formData.valuationSources || [],
+    valuationSource: formData.valuationSource, // backward compat
     valuationRationale: formData.valuationRationale,
     replacementCost: formData.replacementCost,
     overallCondition: formData.overallCondition,
@@ -1449,20 +1450,44 @@ function renderNewSurveyForm() {
       </div>
 
       <div class="form-group">
-        <label class="form-label">Valuation Source</label>
-        <select id="valuationSource">
-          <option value="">Select</option>
-          <option value="BUCValu">BUCValu</option>
-          <option value="Yachtworld comparables">Yachtworld comparables</option>
-          <option value="Combination">Combination (BUCValu + Yachtworld)</option>
-          <option value="Other">Other</option>
-        </select>
+        <label class="form-label">Valuation Sources Consulted</label>
+        <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">SAMS requires multiple independent sources. Check all that apply.</div>
+        <div id="valuationSources" style="display:flex;flex-direction:column;gap:6px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
+            <input type="checkbox" class="val-source" value="BUC Value Guide" onchange="updateValuationRationale()"> BUC Value Guide (book value)
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
+            <input type="checkbox" class="val-source" value="NADA Marine Guide" onchange="updateValuationRationale()"> NADA Marine Guide
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
+            <input type="checkbox" class="val-source" value="YachtWorld listings" onchange="updateValuationRationale()"> YachtWorld (current listings)
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
+            <input type="checkbox" class="val-source" value="Soldboats.com sales" onchange="updateValuationRationale()"> Soldboats.com (closed sales)
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
+            <input type="checkbox" class="val-source" value="Boats.com / BoatTrader" onchange="updateValuationRationale()"> Boats.com / BoatTrader
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
+            <input type="checkbox" class="val-source" value="Broker consultation" onchange="updateValuationRationale()"> Broker consultation
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
+            <input type="checkbox" class="val-source" value="Surveyor's professional experience" onchange="updateValuationRationale()"> Surveyor's professional experience
+          </label>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 16px;">
+        <button class="btn-secondary" style="font-size:12px;padding:6px 10px;" onclick="window.open('https://www.yachtworld.com/boats-for-sale/?keyword='+encodeURIComponent(document.getElementById('yearMakeModel')?.value||''),'_blank')">🔍 Search YachtWorld</button>
+        <button class="btn-secondary" style="font-size:12px;padding:6px 10px;" onclick="window.open('https://www.soldboats.com/cgi-bin/soldboats/search.cgi?searchStr='+encodeURIComponent(document.getElementById('yearMakeModel')?.value||''),'_blank')">🔍 Search Soldboats</button>
+        <button class="btn-secondary" style="font-size:12px;padding:6px 10px;" onclick="window.open('https://www.boats.com/search/?q='+encodeURIComponent(document.getElementById('yearMakeModel')?.value||''),'_blank')">🔍 Search Boats.com</button>
+        <button class="btn-secondary" style="font-size:12px;padding:6px 10px;" onclick="window.open('https://www.bucvalu.com','_blank')">📖 BUCValu</button>
       </div>
 
       <div class="form-group">
         <label class="form-label">Valuation Rationale</label>
-        <textarea id="valuationRationale" rows="5" placeholder="Based on the condition of the vessel as surveyed, comparable sales data, and current market conditions, the fair market value is estimated as follows..."></textarea>
-        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Auto-suggested rationale from the database above — edit as needed for the specific vessel condition.</div>
+        <textarea id="valuationRationale" rows="5" placeholder="Will auto-generate from sources checked above — or type your own..."></textarea>
+        <button class="btn-secondary" style="font-size:12px;margin-top:4px;padding:4px 10px;" onclick="updateValuationRationale()">🔄 Regenerate from sources</button>
       </div>
 
       <div class="form-group">
@@ -2244,26 +2269,45 @@ function suggestValuation() {
     const highCAD = '$' + Math.round(range.highUSD * usdcad).toLocaleString();
     const yearRange = range.from === range.to ? range.from : `${range.from}–${range.to}`;
 
+    const escInput = input.replace(/'/g, "\\'");
     card.innerHTML = `
-      <p style="color:#1e40af;font-weight:bold;margin:0 0 4px;">📊 Estimated Market Value — ${entry.make} ${entry.model} (${yearRange})</p>
-      <p style="color:#1e3a5f;font-size:20px;font-weight:bold;margin:4px 0;">${lowFmt} – ${highFmt} USD</p>
-      <p style="color:#374151;font-size:13px;margin:4px 0 8px;">${lowCAD} – ${highCAD} CAD @ ${usdcad.toFixed(2)}</p>
-      <p style="color:#374151;font-size:12px;margin:0 0 12px;line-height:1.5;">
-        <em>Based on BUC Book guide values and comparable Yachtworld listings. Verify with a current BUCValu subscription and live Yachtworld comparables. Adjust for actual condition, equipment, and location.</em>
+      <p style="color:#1e40af;font-weight:bold;margin:0 0 8px;">📊 Market Value Data — ${entry.make} ${entry.model} (${yearRange})</p>
+
+      <div style="background:white;border:1px solid #dbeafe;border-radius:6px;padding:10px 12px;margin-bottom:10px;">
+        <p style="color:#6b7280;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px;">Source: BUC Value Guide (built-in database)</p>
+        <p style="color:#1e3a5f;font-size:20px;font-weight:bold;margin:0;">${lowFmt} – ${highFmt} USD</p>
+        <p style="color:#374151;font-size:13px;margin:4px 0 0;">${lowCAD} – ${highCAD} CAD @ ${usdcad.toFixed(2)}</p>
+      </div>
+
+      <p style="color:#374151;font-size:12px;margin:0 0 4px;line-height:1.5;">
+        <em>BUC guide values reflect average condition. Adjust for actual condition, equipment, upgrades, and location. SAMS requires corroboration from additional sources.</em>
       </p>
-      <p style="color:#1e3a5f;font-size:13px;margin:0 0 12px;">${entry.rationale}</p>
+      <p style="color:#1e3a5f;font-size:13px;margin:0 0 10px;">${entry.rationale}</p>
+
+      <p style="color:#1e40af;font-weight:600;font-size:13px;margin:0 0 6px;">Search additional sources to corroborate:</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+        <button class="btn-secondary" style="font-size:12px;padding:6px 10px;"
+                onclick="window.open('https://www.yachtworld.com/boats-for-sale/?keyword=${encodeURIComponent(input)}','_blank')">
+          🌐 YachtWorld
+        </button>
+        <button class="btn-secondary" style="font-size:12px;padding:6px 10px;"
+                onclick="window.open('https://www.soldboats.com/cgi-bin/soldboats/search.cgi?searchStr=${encodeURIComponent(input)}','_blank')">
+          🔍 Soldboats
+        </button>
+        <button class="btn-secondary" style="font-size:12px;padding:6px 10px;"
+                onclick="window.open('https://www.boats.com/search/?q=${encodeURIComponent(input)}','_blank')">
+          🚤 Boats.com
+        </button>
+        <button class="btn-secondary" style="font-size:12px;padding:6px 10px;"
+                onclick="window.open('https://www.bucvalu.com','_blank')">
+          📖 BUCValu (live)
+        </button>
+      </div>
+
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn-primary" style="font-size:13px;"
                 onclick="applyValuationSuggestion(${range.lowUSD},${range.highUSD},'${entry.make} ${entry.model}')">
-          ✓ Apply This Range
-        </button>
-        <button class="btn-secondary" style="font-size:13px;"
-                onclick="window.open('https://www.yachtworld.com/boats-for-sale/?keyword=${encodeURIComponent(input)}','_blank')">
-          🌐 Yachtworld
-        </button>
-        <button class="btn-secondary" style="font-size:13px;"
-                onclick="window.open('https://www.bucvalu.com','_blank')">
-          📖 BUCValu
+          ✓ Apply BUC Range
         </button>
         <button class="btn-secondary" style="font-size:13px;"
                 onclick="document.getElementById('valuationSuggestionCard').remove()">
@@ -2365,19 +2409,44 @@ function generateVesselDescription() {
 function applyValuationSuggestion(low, high, modelName) {
   const lowEl = document.getElementById('valuationLow');
   const highEl = document.getElementById('valuationHigh');
-  const sourceEl = document.getElementById('valuationSource');
   const rationaleEl = document.getElementById('valuationRationale');
 
   if (lowEl) lowEl.value = low;
   if (highEl) highEl.value = high;
-  if (sourceEl) sourceEl.value = 'Combination';
 
-  if (rationaleEl && !rationaleEl.value) {
-    const result = findBoatValues(document.getElementById('yearMakeModel')?.value || modelName);
-    if (result) rationaleEl.value = result.entry.rationale;
-  }
+  // Auto-check BUC Value Guide source
+  const bucCheckbox = document.querySelector('.val-source[value="BUC Value Guide"]');
+  if (bucCheckbox) bucCheckbox.checked = true;
+
+  // Generate rationale
+  updateValuationRationale();
 
   document.getElementById('valuationSuggestionCard')?.remove();
+}
+
+function updateValuationRationale() {
+  const checkedSources = Array.from(document.querySelectorAll('.val-source:checked')).map(cb => cb.value);
+  const rationaleEl = document.getElementById('valuationRationale');
+  if (!rationaleEl || checkedSources.length === 0) return;
+
+  // Only auto-generate if empty or was previously auto-generated
+  const isAutoGenerated = !rationaleEl.value || rationaleEl.dataset.autoGenerated === 'true';
+  if (!isAutoGenerated) return;
+
+  const vessel = document.getElementById('yearMakeModel')?.value || 'the subject vessel';
+  const comparables = collectComparables ? collectComparables() : [];
+  const compCount = comparables.filter(c => c.vessel).length;
+
+  let rationale = `The Fair Market Value of the ${vessel} has been determined through consultation of the following independent sources: ${checkedSources.join(', ')}.`;
+
+  if (compCount > 0) {
+    rationale += ` A total of ${compCount} comparable vessel${compCount !== 1 ? 's were' : ' was'} reviewed to corroborate the valuation range.`;
+  }
+
+  rationale += ' The value range reflects the vessel in its current surveyed condition, taking into account age, equipment, maintenance history, and current market conditions. Values may vary based on geographic location, season, and individual negotiation.';
+
+  rationaleEl.value = rationale;
+  rationaleEl.dataset.autoGenerated = 'true';
 }
 
 function lookupSpecs() {
@@ -2463,7 +2532,8 @@ function startNewSurvey() {
     valuationLow: document.getElementById('valuationLow').value,
     valuationHigh: document.getElementById('valuationHigh').value,
     exchangeRate: parseFloat(document.getElementById('exchangeRate').value) || 1.35,
-    valuationSource: document.getElementById('valuationSource').value,
+    valuationSources: Array.from(document.querySelectorAll('.val-source:checked')).map(cb => cb.value),
+    valuationSource: Array.from(document.querySelectorAll('.val-source:checked')).map(cb => cb.value).join(', '),
     valuationRationale: document.getElementById('valuationRationale').value,
     replacementCost: document.getElementById('replacementCost').value,
     overallCondition: document.getElementById('overallCondition').value
@@ -4202,7 +4272,7 @@ ${survey.vesselDescription ? `
     </ul>
   </div>
   <table>
-    <tr><td style="width:40%;"><strong>Valuation Source</strong></td><td>${esc(survey.valuationSource) || 'N/A'}</td></tr>
+    <tr><td style="width:40%;"><strong>Valuation Sources</strong></td><td>${survey.valuationSources && survey.valuationSources.length > 0 ? survey.valuationSources.map(s => esc(s)).join('<br>') : esc(survey.valuationSource) || 'N/A'}</td></tr>
     <tr><td><strong>Fair Market Value (USD)</strong></td><td><strong>$${parseInt(survey.valuationLow || 0).toLocaleString()} – $${parseInt(survey.valuationHigh || 0).toLocaleString()} USD</strong></td></tr>
 `;
 
@@ -4241,8 +4311,8 @@ ${survey.vesselDescription ? `
   </table>
 
   <table style="margin-top:12px;">
-    <tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Primary Valuation Source</td></tr>
-    <tr><td style="width:40%;"><strong>Source</strong></td><td>${esc(survey.valuationSource) || 'N/A'}</td></tr>
+    <tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Valuation Sources Consulted</td></tr>
+    <tr><td style="width:40%;"><strong>Sources</strong></td><td>${survey.valuationSources && survey.valuationSources.length > 0 ? survey.valuationSources.map(s => '• ' + esc(s)).join('<br>') : esc(survey.valuationSource) || 'N/A'}</td></tr>
     <tr><td><strong>BUC Value Range (USD)</strong></td><td>$${parseInt(survey.valuationLow || 0).toLocaleString()} – $${parseInt(survey.valuationHigh || 0).toLocaleString()}</td></tr>
     ${survey.exchangeRate ? `<tr><td><strong>Exchange Rate (USD→CAD)</strong></td><td>${parseFloat(survey.exchangeRate).toFixed(4)}</td></tr>` : ''}
     ${survey.replacementCost ? `<tr><td><strong>Estimated Replacement Cost (USD)</strong></td><td>$${parseInt(survey.replacementCost).toLocaleString()}</td></tr>` : ''}
