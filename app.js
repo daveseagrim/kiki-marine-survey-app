@@ -937,23 +937,55 @@ function renderHome() {
     } else {
       let html = importBtn + '<div style="margin-bottom: 120px;">';
       surveys.forEach(survey => {
-        const date = new Date(survey.createdAt).toLocaleDateString();
         const completion = getCompletionPercentage(survey);
         const esc = (s) => (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-        const subtitle = esc(survey.yearMakeModel || '');
-        const client = survey.clientName ? `Client: ${esc(survey.clientName)}` : '';
-        const surveyDateStr = survey.surveyDate ? `Survey: ${esc(survey.surveyDate)}` : '';
-        const detailParts = [subtitle, client, surveyDateStr].filter(Boolean);
-        const typeBadge = survey.surveyType === 'Insurance survey'
-          ? '<span style="display:inline-block;background:#f59e0b;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle;">INSURANCE</span>'
-          : (survey.surveyType ? `<span style="display:inline-block;background:#1e3a5f;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle;">${esc(survey.surveyType).toUpperCase()}</span>` : '');
+
+        // Format date as "2026, April 7" from surveyDate (YYYY-MM-DD) or createdAt
+        const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        let cardDate = '';
+        const rawDate = survey.surveyDate || new Date(survey.createdAt).toISOString().split('T')[0];
+        if (rawDate) {
+          const parts = rawDate.split('-');
+          if (parts.length === 3) {
+            cardDate = `${parts[0]}, ${months[parseInt(parts[1], 10) - 1]} ${parseInt(parts[2], 10)}`;
+          } else {
+            cardDate = rawDate;
+          }
+        }
+
+        // Short survey type label
+        const typeShort = survey.surveyType === 'Insurance survey' ? 'Insurance'
+          : survey.surveyType === 'Pre-purchase survey' ? 'Pre-Purchase'
+          : survey.surveyType === 'Appraisal' ? 'Appraisal'
+          : '';
+
+        // Boat name with year/make/model: "Stardust a Beneteau First 2014"
+        const boatLabel = [
+          survey.vesselName ? esc(survey.vesselName) : '',
+          survey.yearMakeModel ? 'a ' + esc(survey.yearMakeModel) : ''
+        ].filter(Boolean).join(' ') || 'Unnamed';
+
+        // Build card title: 2026, April 7, Insurance, Alf Kwinter, Stardust a Beneteau First 2014, Outer Harbour Marina
+        const titleParts = [
+          cardDate,
+          typeShort,
+          survey.clientName ? esc(survey.clientName) : '',
+          boatLabel,
+          survey.location ? esc(survey.location) : ''
+        ].filter(Boolean);
+
+        // Type badge colour
+        const typeBadgeBg = survey.surveyType === 'Insurance survey' ? '#f59e0b' : '#1e3a5f';
+        const typeBadge = typeShort
+          ? `<span style="display:inline-block;background:${typeBadgeBg};color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;vertical-align:middle;">${esc(typeShort).toUpperCase()}</span>`
+          : '';
+
         html += `
           <div class="survey-card" onclick="openSurvey('${survey.id}')">
-            <p class="survey-name">${esc(survey.vesselName) || 'Unnamed Survey'}${typeBadge}</p>
-            ${subtitle ? `<p style="font-size:13px;color:#1e3a5f;margin:2px 0 0;font-weight:600;">${subtitle}</p>` : ''}
-            <p class="survey-date">${[date, client, surveyDateStr].filter(Boolean).join(' · ')}</p>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: ${completion}%; background-color: #1e3a5f;"></div>
+            <p class="survey-name" style="font-size:14px;line-height:1.5;">${titleParts.join(', ')}</p>
+            <div style="margin-top:6px;">${typeBadge}</div>
+            <div class="progress-bar" style="margin-top:8px;">
+              <div class="progress-fill" style="width: ${completion}%; background-color: ${completion === 100 ? '#16a34a' : '#1e3a5f'};"></div>
             </div>
             <div class="completion-text">${completion}% complete</div>
             <div style="display:flex;gap:8px;margin-top:12px;">
@@ -2826,18 +2858,22 @@ function renderInspection(survey) {
 
   Object.entries(ratedItemsByCategory).forEach(([categoryName, items]) => {
     const categoryCompletionCount = items.filter(item =>
-      survey.items[item.label]?.rating
+      survey.items[item.label]?.rating || survey.items[item.label]?.excluded
     ).length;
     const categoryCompletion = Math.round((categoryCompletionCount / items.length) * 100);
     const flaggedCount = items.filter(item => survey.items[item.label]?.flagged).length;
     const excludedCount = items.filter(item => survey.items[item.label]?.excluded).length;
     const allExcluded = excludedCount === items.length;
+    const isComplete = categoryCompletion === 100;
+    const incompleteDot = !isComplete ? '<span style="display:inline-block;width:10px;height:10px;background:#dc2626;border-radius:50%;margin-right:6px;flex-shrink:0;"></span>' : '<span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:50%;margin-right:6px;flex-shrink:0;"></span>';
+    const progressColor = isComplete ? '#16a34a' : '#dc2626';
 
     html += `
       <div class="category-accordion">
         <button class="accordion-header" onclick="toggleAccordion(this)">
+          ${incompleteDot}
           <span class="category-title">${categoryName}${flaggedCount > 0 ? ` <span style="color:#f59e0b;font-size:12px;">🚩${flaggedCount}</span>` : ''}${excludedCount > 0 ? ` <span style="color:#9ca3af;font-size:12px;">⊘${excludedCount}</span>` : ''}</span>
-          <span class="category-progress">${categoryCompletion}%</span>
+          <span class="category-progress" style="color:${progressColor};font-weight:700;">${categoryCompletion}%</span>
           <span style="margin-left: 12px;">▼</span>
         </button>
         <div class="accordion-content" style="display: none;">
