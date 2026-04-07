@@ -2156,6 +2156,259 @@ function onTransmission2ModelChange() {
   }
 }
 
+// ─── Edit Existing Survey Details ──────────────────────────────────────────
+
+function editSurveyDetails(surveyId) {
+  getSurvey(surveyId || currentSurveyId).then(survey => {
+    if (!survey) return;
+
+    // Render the same form as renderNewSurveyForm but in edit mode
+    currentView = 'edit-survey';
+    currentSurveyId = survey.id;
+    history.pushState({ view: 'edit-survey', surveyId: survey.id }, '');
+
+    const existingFab = document.querySelector('.fab');
+    if (existingFab) existingFab.remove();
+    const reportBtnEl = document.getElementById('reportBtn');
+    if (reportBtnEl) reportBtnEl.remove();
+
+    // Re-use the new survey form but swap header and buttons
+    renderNewSurveyForm();
+
+    // Change header
+    const header = document.querySelector('.header');
+    if (header) {
+      header.innerHTML = `
+        <button class="header-back" onclick="returnToInspection('${survey.id}')">←</button>
+        <div>
+          <div class="header-title">${(survey.vesselName || 'Survey').replace(/</g, '&lt;')}</div>
+          <div class="header-subtitle">Edit Vessel Information</div>
+        </div>
+      `;
+    }
+
+    // Change form action buttons
+    const formActions = document.querySelector('.form-actions');
+    if (formActions) {
+      formActions.innerHTML = `
+        <button class="btn-secondary" onclick="returnToInspection('${survey.id}')">Cancel</button>
+        <button class="btn-primary" onclick="saveSurveyDetails('${survey.id}')">Save & Return to Inspection</button>
+      `;
+    }
+
+    // Pre-populate all fields with existing survey data
+    setTimeout(() => {
+      const fields = {
+        vesselName: survey.vesselName,
+        yearMakeModel: survey.yearMakeModel,
+        clientName: survey.clientName,
+        surveyDate: survey.surveyDate,
+        location: survey.location,
+        surveyType: survey.surveyType,
+        vesselType: survey.vesselType,
+        boatStyle: survey.boatStyle,
+        hullType: survey.hullType,
+        loa: survey.loa,
+        lwl: survey.lwl,
+        beam: survey.beam,
+        displacement: survey.displacement,
+        ballast: survey.ballast,
+        maxDraft: survey.maxDraft,
+        totalSailArea: survey.totalSailArea,
+        construction: survey.construction,
+        keelType: survey.keelType,
+        numberCabins: survey.numberCabins,
+        electricalSystem: survey.electricalSystem,
+        changesToPlan: survey.changesToPlan,
+        personsInAttendance: survey.personsInAttendance,
+        reportDate: survey.reportDate,
+        weather: survey.weather,
+        onLandOrWater: survey.onLandOrWater,
+        seaTrial: survey.seaTrial,
+        powerAtTime: survey.powerAtTime,
+        waterAtTime: survey.waterAtTime,
+        storageDetails: survey.storageDetails,
+        engineMake: survey.engineMake,
+        engineModel: survey.engineModel,
+        engineSerial: survey.engineSerial,
+        engineHours: survey.engineHours,
+        engineHP: survey.engineHP,
+        fuelType: survey.fuelType,
+        transmissionMake: survey.transmissionMake,
+        transmissionModel: survey.transmissionModel,
+        transmissionSerial: survey.transmissionSerial,
+        engine2Make: survey.engine2Make,
+        engine2Model: survey.engine2Model,
+        engine2Serial: survey.engine2Serial,
+        engine2Hours: survey.engine2Hours,
+        engine2HP: survey.engine2HP,
+        fuelType2: survey.fuelType2,
+        transmission2Make: survey.transmission2Make,
+        transmission2Model: survey.transmission2Model,
+        transmission2Serial: survey.transmission2Serial,
+        vesselDescription: survey.vesselDescription,
+        hinNumber: survey.hinNumber,
+        tcLicenseType: survey.tcLicenseType,
+        tcLicense: survey.tcLicense,
+        taxStatus: survey.taxStatus,
+        compliancePlate: survey.compliancePlate,
+        valuationLow: survey.valuationLow,
+        valuationHigh: survey.valuationHigh,
+        exchangeRate: survey.exchangeRate,
+        valuationRationale: survey.valuationRationale,
+        replacementCost: survey.replacementCost,
+        overallCondition: survey.overallCondition
+      };
+
+      for (const [id, value] of Object.entries(fields)) {
+        if (value !== undefined && value !== null && value !== '') {
+          const el = document.getElementById(id);
+          if (el) el.value = value;
+        }
+      }
+
+      // Trigger boat style options update after setting vessel type
+      if (survey.vesselType) {
+        updateBoatStyleOptions();
+        // Re-select the boat style after options are rendered
+        if (survey.boatStyle) {
+          const boatStyleInput = document.getElementById('boatStyle');
+          if (boatStyleInput) boatStyleInput.value = survey.boatStyle;
+          updateBoatStyleOptions();
+        }
+      }
+
+      // Store location coordinates
+      if (survey.locationLat) window._surveyLat = survey.locationLat;
+      if (survey.locationLon) window._surveyLon = survey.locationLon;
+
+      // Load valuation source checkboxes
+      if (survey.valuationSources && survey.valuationSources.length > 0) {
+        document.querySelectorAll('.val-source').forEach(cb => {
+          cb.checked = survey.valuationSources.includes(cb.value);
+        });
+      }
+
+      // Load doc photo previews
+      const docPhotoFields = ['hinPhoto', 'compliancePhoto', 'licencePhoto', 'tcPaperLicencePhoto',
+        'coverPhoto', 'fourCornerPortBow', 'fourCornerStbdBow', 'fourCornerPortStern', 'fourCornerStbdStern',
+        'enginePhoto', 'enginePlatePhoto', 'engine2Photo', 'engine2PlatePhoto',
+        'transmissionPhoto', 'transmissionPlatePhoto', 'transmission2Photo', 'transmission2PlatePhoto'];
+      docPhotoFields.forEach(fieldKey => loadDocPhotoPreview(fieldKey));
+
+      // Populate comparables
+      if (survey.comparables && survey.comparables.length > 0) {
+        survey.comparables.forEach(comp => {
+          addComparableEntry();
+          const allEntries = document.querySelectorAll('#comparablesEntries > div');
+          if (allEntries.length > 0) {
+            const entry = allEntries[allEntries.length - 1];
+            if (entry.querySelector('.compSource')) entry.querySelector('.compSource').value = comp.source || '';
+            if (entry.querySelector('.compVessel')) entry.querySelector('.compVessel').value = comp.vessel || '';
+            if (entry.querySelector('.compPrice')) entry.querySelector('.compPrice').value = comp.price || '';
+            if (entry.querySelector('.compLocation')) entry.querySelector('.compLocation').value = comp.location || '';
+            if (entry.querySelector('.compDate')) entry.querySelector('.compDate').value = comp.date || '';
+            if (entry.querySelector('.compWater')) entry.querySelector('.compWater').value = comp.water || '';
+            if (entry.querySelector('.compNotes')) entry.querySelector('.compNotes').value = comp.notes || '';
+          }
+        });
+      }
+    }, 100);
+  });
+}
+
+function saveSurveyDetails(surveyId) {
+  getSurvey(surveyId).then(survey => {
+    if (!survey) return;
+
+    // Collect all form field values (same as startNewSurvey)
+    const updates = {
+      vesselName: document.getElementById('vesselName')?.value || survey.vesselName,
+      yearMakeModel: document.getElementById('yearMakeModel')?.value || survey.yearMakeModel,
+      clientName: document.getElementById('clientName')?.value || '',
+      surveyDate: document.getElementById('surveyDate')?.value || '',
+      location: document.getElementById('location')?.value || '',
+      locationLat: window._surveyLat || survey.locationLat,
+      locationLon: window._surveyLon || survey.locationLon,
+      surveyType: document.getElementById('surveyType')?.value || '',
+      vesselType: document.getElementById('vesselType')?.value || 'power',
+      boatStyle: document.getElementById('boatStyle')?.value || '',
+      hullType: document.getElementById('hullType')?.value || '',
+      loa: document.getElementById('loa')?.value || '',
+      lwl: document.getElementById('lwl')?.value || '',
+      beam: document.getElementById('beam')?.value || '',
+      displacement: document.getElementById('displacement')?.value || '',
+      ballast: document.getElementById('ballast')?.value || '',
+      maxDraft: document.getElementById('maxDraft')?.value || '',
+      totalSailArea: document.getElementById('totalSailArea')?.value || '',
+      construction: document.getElementById('construction')?.value || '',
+      keelType: document.getElementById('keelType')?.value || '',
+      numberCabins: document.getElementById('numberCabins')?.value || '',
+      electricalSystem: document.getElementById('electricalSystem')?.value || '',
+      changesToPlan: document.getElementById('changesToPlan')?.value || '',
+      personsInAttendance: document.getElementById('personsInAttendance')?.value || '',
+      reportDate: document.getElementById('reportDate')?.value || '',
+      weather: document.getElementById('weather')?.value || '',
+      onLandOrWater: document.getElementById('onLandOrWater')?.value || '',
+      seaTrial: document.getElementById('seaTrial')?.value || '',
+      powerAtTime: document.getElementById('powerAtTime')?.value || '',
+      waterAtTime: document.getElementById('waterAtTime')?.value || '',
+      storageDetails: document.getElementById('storageDetails')?.value || '',
+      engineMake: document.getElementById('engineMake')?.value || '',
+      engineModel: document.getElementById('engineModel')?.value || '',
+      engineSerial: document.getElementById('engineSerial')?.value || '',
+      engineHours: document.getElementById('engineHours')?.value || '',
+      engineHP: document.getElementById('engineHP')?.value || '',
+      fuelType: document.getElementById('fuelType')?.value || '',
+      transmissionMake: document.getElementById('transmissionMake')?.value || '',
+      transmissionModel: document.getElementById('transmissionModel')?.value || '',
+      transmissionMakeModel: (document.getElementById('transmissionMake')?.value || '') + (document.getElementById('transmissionModel')?.value ? ' ' + document.getElementById('transmissionModel')?.value : ''),
+      transmissionSerial: document.getElementById('transmissionSerial')?.value || '',
+      engine2Make: document.getElementById('engine2Make')?.value || '',
+      engine2Model: document.getElementById('engine2Model')?.value || '',
+      engine2Serial: document.getElementById('engine2Serial')?.value || '',
+      engine2Hours: document.getElementById('engine2Hours')?.value || '',
+      engine2HP: document.getElementById('engine2HP')?.value || '',
+      fuelType2: document.getElementById('fuelType2')?.value || '',
+      transmission2Make: document.getElementById('transmission2Make')?.value || '',
+      transmission2Model: document.getElementById('transmission2Model')?.value || '',
+      transmission2MakeModel: (document.getElementById('transmission2Make')?.value || '') + (document.getElementById('transmission2Model')?.value ? ' ' + document.getElementById('transmission2Model')?.value : ''),
+      transmission2Serial: document.getElementById('transmission2Serial')?.value || '',
+      vesselDescription: document.getElementById('vesselDescription')?.value || '',
+      hinNumber: document.getElementById('hinNumber')?.value || '',
+      tcLicenseType: document.getElementById('tcLicenseType')?.value || '',
+      tcLicense: document.getElementById('tcLicense')?.value || '',
+      taxStatus: document.getElementById('taxStatus')?.value || '',
+      compliancePlate: document.getElementById('compliancePlate')?.value || '',
+      valuationLow: document.getElementById('valuationLow')?.value || '',
+      valuationHigh: document.getElementById('valuationHigh')?.value || '',
+      exchangeRate: parseFloat(document.getElementById('exchangeRate')?.value) || 1.35,
+      valuationSources: Array.from(document.querySelectorAll('.val-source:checked')).map(cb => cb.value),
+      valuationSource: Array.from(document.querySelectorAll('.val-source:checked')).map(cb => cb.value).join(', '),
+      valuationRationale: document.getElementById('valuationRationale')?.value || '',
+      replacementCost: document.getElementById('replacementCost')?.value || '',
+      overallCondition: document.getElementById('overallCondition')?.value || '',
+      comparables: collectComparables()
+    };
+
+    // Merge updates into existing survey (preserving items, photos, etc.)
+    Object.assign(survey, updates);
+    saveSurvey(survey).then(() => {
+      renderInspection(survey);
+    });
+  });
+}
+
+function returnToInspection(surveyId) {
+  getSurvey(surveyId).then(survey => {
+    if (survey) {
+      renderInspection(survey);
+    } else {
+      renderHome();
+    }
+  });
+}
+
 // ─── Location Search & Map ─────────────────────────────────────────────────
 
 let _locationSearchTimeout = null;
@@ -3334,10 +3587,11 @@ function renderInspection(survey) {
   app.innerHTML = `
     <div class="header">
       <button class="header-back" onclick="backToHome()">←</button>
-      <div>
+      <div style="flex:1;">
         <div class="header-title">${esc(survey.vesselName)}</div>
         <div class="header-subtitle">Inspection</div>
       </div>
+      <button onclick="editSurveyDetails('${survey.id}')" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">✏️ Edit Info</button>
     </div>
     ${surveyTypeBanner}
     <div class="content" id="inspection-content">
@@ -6195,7 +6449,15 @@ async function initApp() {
 
     // Browser back button / swipe-back handling
     window.addEventListener('popstate', (e) => {
-      if (currentView === 'inspection') {
+      if (currentView === 'edit-survey') {
+        // Go back to inspection when pressing back from edit view
+        history.pushState({ view: 'edit-survey' }, '');
+        if (currentSurveyId) {
+          returnToInspection(currentSurveyId);
+        } else {
+          renderHome();
+        }
+      } else if (currentView === 'inspection') {
         // Push state again to prevent actually navigating away
         history.pushState({ view: 'inspection' }, '');
         backToHome();
