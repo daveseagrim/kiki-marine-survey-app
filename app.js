@@ -1280,19 +1280,21 @@ function renderNewSurveyForm() {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
           <div class="form-group" style="margin:0;">
             <label class="form-label" style="font-size:11px;">Engine Photo</label>
-            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-              📷 Engine
-              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('enginePhoto', 'Engine 1', event)" />
-            </label>
-            <div id="enginePhotoPreview" style="margin-top:4px;"></div>
+            <div data-photo-field="enginePhoto">
+              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+                📷 Engine
+                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('enginePhoto', 'Engine', event)" />
+              </label>
+            </div>
           </div>
           <div class="form-group" style="margin:0;">
             <label class="form-label" style="font-size:11px;">Data Plate Photo</label>
-            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-              📷 Data Plate
-              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('enginePlatePhoto', 'Engine 1 Data Plate', event)" />
-            </label>
-            <div id="enginePlatePhotoPreview" style="margin-top:4px;"></div>
+            <div data-photo-field="enginePlatePhoto">
+              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+                📷 Data Plate
+                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('enginePlatePhoto', 'Data Plate', event)" />
+              </label>
+            </div>
           </div>
         </div>
         <div style="font-weight:700;font-size:13px;color:#1e3a5f;margin:12px 0 8px;">Transmission 1</div>
@@ -1317,19 +1319,21 @@ function renderNewSurveyForm() {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
           <div class="form-group" style="margin:0;">
             <label class="form-label" style="font-size:11px;">Transmission Photo</label>
-            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-              📷 Transmission
-              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmissionPhoto', 'Transmission 1', event)" />
-            </label>
-            <div id="transmissionPhotoPreview" style="margin-top:4px;"></div>
+            <div data-photo-field="transmissionPhoto">
+              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+                📷 Transmission
+                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmissionPhoto', 'Transmission', event)" />
+              </label>
+            </div>
           </div>
           <div class="form-group" style="margin:0;">
             <label class="form-label" style="font-size:11px;">Serial Plate Photo</label>
-            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-              📷 Serial Plate
-              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmissionPlatePhoto', 'Transmission 1 Serial Plate', event)" />
-            </label>
-            <div id="transmissionPlatePhotoPreview" style="margin-top:4px;"></div>
+            <div data-photo-field="transmissionPlatePhoto">
+              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+                📷 Serial Plate
+                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmissionPlatePhoto', 'Serial Plate', event)" />
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -1379,19 +1383,21 @@ function renderNewSurveyForm() {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
           <div class="form-group" style="margin:0;">
             <label class="form-label" style="font-size:11px;">Engine Photo</label>
-            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-              📷 Engine
-              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('engine2Photo', 'Engine 2', event)" />
-            </label>
-            <div id="engine2PhotoPreview" style="margin-top:4px;"></div>
+            <div data-photo-field="engine2Photo">
+              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+                📷 Engine 2
+                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('engine2Photo', 'Engine 2', event)" />
+              </label>
+            </div>
           </div>
           <div class="form-group" style="margin:0;">
             <label class="form-label" style="font-size:11px;">Data Plate Photo</label>
-            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-              📷 Data Plate
-              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('engine2PlatePhoto', 'Engine 2 Data Plate', event)" />
-            </label>
-            <div id="engine2PlatePhotoPreview" style="margin-top:4px;"></div>
+            <div data-photo-field="engine2PlatePhoto">
+              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+                📷 Data Plate 2
+                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('engine2PlatePhoto', 'Data Plate 2', event)" />
+              </label>
+            </div>
           </div>
         </div>
         <div style="font-weight:700;font-size:13px;color:#1e3a5f;margin:12px 0 8px;">Transmission 2</div>
@@ -1416,19 +1422,21 @@ function renderNewSurveyForm() {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
           <div class="form-group" style="margin:0;">
             <label class="form-label" style="font-size:11px;">Transmission Photo</label>
-            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-              📷 Transmission
-              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmission2Photo', 'Transmission 2', event)" />
-            </label>
-            <div id="transmission2PhotoPreview" style="margin-top:4px;"></div>
+            <div data-photo-field="transmission2Photo">
+              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+                📷 Transmission 2
+                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmission2Photo', 'Transmission 2', event)" />
+              </label>
+            </div>
           </div>
           <div class="form-group" style="margin:0;">
             <label class="form-label" style="font-size:11px;">Serial Plate Photo</label>
-            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-              📷 Serial Plate
-              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmission2PlatePhoto', 'Transmission 2 Serial Plate', event)" />
-            </label>
-            <div id="transmission2PlatePhotoPreview" style="margin-top:4px;"></div>
+            <div data-photo-field="transmission2PlatePhoto">
+              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
+                📷 Serial Plate 2
+                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmission2PlatePhoto', 'Serial Plate 2', event)" />
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -1477,6 +1485,7 @@ function renderNewSurveyForm() {
           <option value="Vessel was on the hard, in a cradle, not winterized">Vessel was on the hard, in a cradle, not winterized</option>
           <option value="Vessel was on blocks, winterized">Vessel was on blocks, winterized</option>
           <option value="Vessel was on a trailer">Vessel was on a trailer</option>
+          <option value="Vessel was on a trailer, winterized">Vessel was on a trailer, winterized</option>
         </select>
       </div>
 
@@ -1531,14 +1540,15 @@ function renderNewSurveyForm() {
         <label class="form-label">Cover Photo of Vessel</label>
         <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">This photo will appear as the hero image on the report cover page. Take a clear, well-lit photo of the vessel.</div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:6px 12px;">
-            📷 Take Cover Photo
-            <input type="file" accept="image/*" capture="environment" style="display:none;"
-                   onchange="captureDocPhoto('coverPhoto', 'Cover Photo', event)" />
-          </label>
+          <div data-photo-field="coverPhoto">
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:6px 12px;">
+              📷 Take Cover Photo
+              <input type="file" accept="image/*" capture="environment" style="display:none;"
+                     onchange="captureDocPhoto('coverPhoto', 'Cover Photo', event)" />
+            </label>
+          </div>
           <span id="coverPhotoStatus" style="font-size:12px;color:#6b7280;"></span>
         </div>
-        <div id="coverPhotoPreview" style="margin-top:8px;"></div>
       </div>
 
       <h3 style="margin-top:16px;color:#1e3a5f;">Vessel Overview Photos (Four Corners)</h3>
@@ -1546,35 +1556,39 @@ function renderNewSurveyForm() {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div>
           <label class="form-label" style="font-size:12px;">Port Bow</label>
-          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:5px 10px;">
-            📷 Capture
-            <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('fourCornerPortBow', 'Port Bow', event)" />
-          </label>
-          <div id="fourCornerPortBowPreview" style="margin-top:4px;"></div>
+          <div data-photo-field="fourCornerPortBow">
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:5px 10px;">
+              📷 Capture
+              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('fourCornerPortBow', 'Port Bow', event)" />
+            </label>
+          </div>
         </div>
         <div>
           <label class="form-label" style="font-size:12px;">Starboard Bow</label>
-          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:5px 10px;">
-            📷 Capture
-            <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('fourCornerStbdBow', 'Starboard Bow', event)" />
-          </label>
-          <div id="fourCornerStbdBowPreview" style="margin-top:4px;"></div>
+          <div data-photo-field="fourCornerStbdBow">
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:5px 10px;">
+              📷 Capture
+              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('fourCornerStbdBow', 'Starboard Bow', event)" />
+            </label>
+          </div>
         </div>
         <div>
           <label class="form-label" style="font-size:12px;">Port Stern</label>
-          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:5px 10px;">
-            📷 Capture
-            <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('fourCornerPortStern', 'Port Stern', event)" />
-          </label>
-          <div id="fourCornerPortSternPreview" style="margin-top:4px;"></div>
+          <div data-photo-field="fourCornerPortStern">
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:5px 10px;">
+              📷 Capture
+              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('fourCornerPortStern', 'Port Stern', event)" />
+            </label>
+          </div>
         </div>
         <div>
           <label class="form-label" style="font-size:12px;">Starboard Stern</label>
-          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:5px 10px;">
-            📷 Capture
-            <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('fourCornerStbdStern', 'Starboard Stern', event)" />
-          </label>
-          <div id="fourCornerStbdSternPreview" style="margin-top:4px;"></div>
+          <div data-photo-field="fourCornerStbdStern">
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:5px 10px;">
+              📷 Capture
+              <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('fourCornerStbdStern', 'Starboard Stern', event)" />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -1593,33 +1607,36 @@ function renderNewSurveyForm() {
         <label class="form-label">Licence / Registration Number</label>
         <input type="text" id="tcLicense" placeholder="e.g., 12A34567">
         <div style="margin-top:8px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
-          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:6px 10px;">
-            📷 Licence Number on Hull
-            <input type="file" accept="image/*" capture="environment" style="display:none;"
-                   onchange="captureDocPhoto('licencePhoto', 'Licence Number on Hull', event)" />
-          </label>
-          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:6px 10px;">
-            📷 TC Paper Licence
-            <input type="file" accept="image/*" capture="environment" style="display:none;"
-                   onchange="captureDocPhoto('tcPaperLicencePhoto', 'TC Paper Licence', event)" />
-          </label>
+          <div data-photo-field="licencePhoto">
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:6px 10px;">
+              📷 Licence on Hull
+              <input type="file" accept="image/*" capture="environment" style="display:none;"
+                     onchange="captureDocPhoto('licencePhoto', 'Licence on Hull', event)" />
+            </label>
+          </div>
+          <div data-photo-field="tcPaperLicencePhoto">
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:6px 10px;">
+              📷 TC Paper Licence
+              <input type="file" accept="image/*" capture="environment" style="display:none;"
+                     onchange="captureDocPhoto('tcPaperLicencePhoto', 'TC Paper Licence', event)" />
+            </label>
+          </div>
         </div>
-        <div id="licencePhotoPreview" style="margin-top:8px;"></div>
-        <div id="tcPaperLicencePhotoPreview" style="margin-top:8px;"></div>
       </div>
 
       <div class="form-group">
         <label class="form-label">Hull Identification Number (HIN)</label>
         <input type="text" id="hinNumber" placeholder="">
         <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:6px 12px;">
-            📷 Photo of HIN Plate
-            <input type="file" accept="image/*" capture="environment" style="display:none;"
-                   onchange="captureDocPhoto('hinPhoto', 'HIN Plate', event)" />
-          </label>
+          <div data-photo-field="hinPhoto">
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:6px 12px;">
+              📷 HIN Plate
+              <input type="file" accept="image/*" capture="environment" style="display:none;"
+                     onchange="captureDocPhoto('hinPhoto', 'HIN Plate', event)" />
+            </label>
+          </div>
           <span id="hinPhotoStatus" style="font-size:12px;color:#6b7280;"></span>
         </div>
-        <div id="hinPhotoPreview" style="margin-top:8px;"></div>
       </div>
 
       <div class="form-group">
@@ -1631,14 +1648,15 @@ function renderNewSurveyForm() {
         <label class="form-label">NMMA/CE/TC Compliance Plate</label>
         <input type="text" id="compliancePlate" placeholder="Details or photo">
         <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:6px 12px;">
-            📷 Photo of Compliance Plate
-            <input type="file" accept="image/*" capture="environment" style="display:none;"
-                   onchange="captureDocPhoto('compliancePhoto', 'Compliance Plate', event)" />
-          </label>
+          <div data-photo-field="compliancePhoto">
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:6px 12px;">
+              📷 Compliance Plate
+              <input type="file" accept="image/*" capture="environment" style="display:none;"
+                     onchange="captureDocPhoto('compliancePhoto', 'Compliance Plate', event)" />
+            </label>
+          </div>
           <span id="compliancePhotoStatus" style="font-size:12px;color:#6b7280;"></span>
         </div>
-        <div id="compliancePhotoPreview" style="margin-top:8px;"></div>
       </div>
 
       <h2 class="form-heading" data-section="valuation">Valuation</h2>
@@ -3240,9 +3258,16 @@ function renderInspection(survey) {
   let totalRatedItems = 0;
   const ratedItemsByCategory = {};
 
+  // Categories to skip for powerboats (not applicable to power-driven vessels)
+  const sailOnlyCategories = ['Spars and rigging', 'Sails'];
+  const isPowerboat = (survey.vesselType || '').toLowerCase() === 'power';
+
   activeTemplate.forEach(section => {
     if (section.name === 'Kiki Marine Survey' && section.categories) {
       section.categories.forEach(category => {
+        // Skip sail-specific categories for powerboats
+        if (isPowerboat && sailOnlyCategories.includes(category.name)) return;
+
         if (category.items) {
           const ratedItems = category.items.filter(item => item.type === 'list');
           if (ratedItems.length > 0) {
@@ -3456,7 +3481,27 @@ function renderInspection(survey) {
     `;
   });
 
-  // ── Safety Equipment Section (TP 511) ──────────────────────────────────
+  // ── Comparable Vessels Section ────────────────────────────────────────────
+  const compCount = (survey.comparables && survey.comparables.length) || 0;
+  html += `
+    <div class="category-accordion">
+      <button class="accordion-header" onclick="toggleAccordion(this)" style="background: #065f46; color: white;">
+        <span class="category-title">📊 Comparable Vessels</span>
+        <span class="category-progress">${compCount} recorded</span>
+        <span style="margin-left: 12px;">▼</span>
+      </button>
+      <div class="accordion-content" style="display: none;">
+        <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">Add comparable sales from BUCValu, Soldboats.com, YachtWorld, and current listings to support your valuation.</div>
+        <div id="comparablesEntries"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="addComparableEntry()">+ Add Comparable</button>
+          <button class="btn-primary" style="font-size:12px;padding:6px 12px;" onclick="saveComparablesFromInspection()">💾 Save Comparables</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // ── Safety Equipment Section (TC TP 511) — always last ─────────────────
   // Auto-generate checklist if not already stored
   if (!survey.safetyEquipment || survey.safetyEquipment.length === 0) {
     const result = generateSafetyChecklist(survey);
@@ -3523,51 +3568,11 @@ function renderInspection(survey) {
     </div>
   `;
 
-  // ── Comparable Vessels Section ────────────────────────────────────────────
-  const compCount = (survey.comparables && survey.comparables.length) || 0;
-  html += `
-    <div class="category-accordion">
-      <button class="accordion-header" onclick="toggleAccordion(this)" style="background: #065f46; color: white;">
-        <span class="category-title">📊 Comparable Vessels</span>
-        <span class="category-progress">${compCount} recorded</span>
-        <span style="margin-left: 12px;">▼</span>
-      </button>
-      <div class="accordion-content" style="display: none;">
-        <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">Add comparable sales from BUCValu, Soldboats.com, YachtWorld, and current listings to support your valuation.</div>
-        <div id="comparablesEntries"></div>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="addComparableEntry()">+ Add Comparable</button>
-          <button class="btn-primary" style="font-size:12px;padding:6px 12px;" onclick="saveComparablesFromInspection()">💾 Save Comparables</button>
-        </div>
-      </div>
-    </div>
-  `;
-
   html += `</div>`;
   content.innerHTML = html;
 
   // Load and display photos
   loadAndDisplayPhotos(survey);
-
-  // Repopulate bilge pump entries if they exist
-  try {
-    if (survey.bilgePumps && survey.bilgePumps.length > 0) {
-      survey.bilgePumps.forEach(bp => {
-        addBilgePumpEntry();
-        const lastEntry = document.querySelectorAll('#bilgePumpEntries > div');
-        if (lastEntry.length > 0) {
-          const entry = lastEntry[lastEntry.length - 1];
-          if (entry.querySelector('.bilgePumpLocation')) entry.querySelector('.bilgePumpLocation').value = bp.location || '';
-          if (entry.querySelector('.bilgePumpType')) entry.querySelector('.bilgePumpType').value = bp.type || '';
-          if (entry.querySelector('.bilgePumpMakeModel')) entry.querySelector('.bilgePumpMakeModel').value = bp.makeModel || '';
-          if (entry.querySelector('.bilgePumpCapacity')) entry.querySelector('.bilgePumpCapacity').value = bp.capacity || '';
-          if (entry.querySelector('.bilgePumpFloatSwitch')) entry.querySelector('.bilgePumpFloatSwitch').value = bp.floatSwitch || '';
-          if (entry.querySelector('.bilgePumpTested')) entry.querySelector('.bilgePumpTested').value = bp.tested || '';
-          if (entry.querySelector('.bilgePumpDischarge')) entry.querySelector('.bilgePumpDischarge').value = bp.discharge || '';
-        }
-      });
-    }
-  } catch (e) { console.error('Error repopulating bilge pumps:', e); }
 
   // Repopulate comparable entries if they exist
   try {
@@ -3862,7 +3867,7 @@ async function confirmPhotoPreview(fieldKey, label) {
   window._pendingPhotoData = null;
 }
 
-// Remove a documentation photo
+// Remove a documentation photo and restore camera button
 async function removeDocPhoto(fieldKey) {
   const survey = await getSurvey(currentSurveyId);
   if (survey[fieldKey]) {
@@ -3870,26 +3875,117 @@ async function removeDocPhoto(fieldKey) {
     delete survey[fieldKey];
     await saveSurvey(survey);
   }
+  // Restore the camera button in the wrapper
+  const label = PHOTO_FIELD_LABELS[fieldKey] || fieldKey;
+  const wrapper = document.querySelector(`[data-photo-field="${fieldKey}"]`);
+  if (wrapper) {
+    wrapper.innerHTML = getDocPhotoButtonHTML(fieldKey, label);
+  }
   const preview = document.getElementById(fieldKey + 'Preview');
   if (preview) preview.innerHTML = '';
   const status = document.getElementById(fieldKey + 'Status');
-  if (status) status.textContent = '';
+  if (status) {
+    status.textContent = '';
+    status.style.color = '';
+  }
 }
 
-// Update the preview thumbnail for a documentation photo
+// Update the preview thumbnail for a documentation photo — replaces camera button inline
 function updateDocPhotoPreview(fieldKey, dataUrl) {
-  const preview = document.getElementById(fieldKey + 'Preview');
-  if (preview) {
-    preview.innerHTML = `
+  // Find the wrapper container for this photo field
+  const wrapper = document.querySelector(`[data-photo-field="${fieldKey}"]`);
+  if (wrapper) {
+    wrapper.innerHTML = `
       <div style="position:relative;display:inline-block;">
-        <img src="${dataUrl}" style="max-width:200px;max-height:150px;border:2px solid #ddd;border-radius:6px;" />
-        <button style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#dc2626;color:white;border:none;font-weight:bold;cursor:pointer;font-size:14px;"
-                onclick="removeDocPhoto('${fieldKey}')">×</button>
+        <img src="${dataUrl}" style="max-width:200px;max-height:150px;border:2px solid #16a34a;border-radius:6px;cursor:pointer;"
+             onclick="viewDocPhotoFull('${fieldKey}')" />
+        <button style="position:absolute;top:-8px;right:-8px;width:28px;height:28px;border-radius:50%;background:#dc2626;color:white;border:none;font-weight:bold;cursor:pointer;font-size:14px;box-shadow:0 1px 3px rgba(0,0,0,0.3);"
+                onclick="retakeDocPhoto('${fieldKey}')">↻</button>
+        <div style="text-align:center;font-size:10px;color:#16a34a;font-weight:600;margin-top:2px;">✓ Captured</div>
       </div>`;
+  } else {
+    // Fallback: try the old Preview div approach
+    const preview = document.getElementById(fieldKey + 'Preview');
+    if (preview) {
+      preview.innerHTML = `
+        <div style="position:relative;display:inline-block;">
+          <img src="${dataUrl}" style="max-width:200px;max-height:150px;border:2px solid #16a34a;border-radius:6px;" />
+          <button style="position:absolute;top:-8px;right:-8px;width:28px;height:28px;border-radius:50%;background:#dc2626;color:white;border:none;font-weight:bold;cursor:pointer;font-size:14px;"
+                  onclick="retakeDocPhoto('${fieldKey}')">↻</button>
+          <div style="text-align:center;font-size:10px;color:#16a34a;font-weight:600;margin-top:2px;">✓ Captured</div>
+        </div>`;
+    }
   }
   const status = document.getElementById(fieldKey + 'Status');
-  if (status) status.textContent = '✓ Photo captured';
-  status.style.color = '#16a34a';
+  if (status) {
+    status.textContent = '✓ Photo captured';
+    status.style.color = '#16a34a';
+  }
+}
+
+// View a doc photo full-screen
+function viewDocPhotoFull(fieldKey) {
+  getSurvey(currentSurveyId).then(async survey => {
+    if (!survey[fieldKey]) return;
+    const photo = await getPhotoById(survey[fieldKey]);
+    if (!photo || !photo.dataUrl) return;
+    let modal = document.getElementById('photoPreviewModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'photoPreviewModal';
+      modal.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:9999;padding:20px;box-sizing:border-box;overflow-y:auto;';
+      document.body.appendChild(modal);
+    }
+    modal.innerHTML = `
+      <div style="background:white;border-radius:12px;max-width:90vw;max-height:90vh;margin:20px auto;padding:16px;display:flex;flex-direction:column;align-items:center;">
+        <img src="${photo.dataUrl}" style="max-width:100%;max-height:70vh;border-radius:8px;margin-bottom:16px;">
+        <button class="btn-secondary" style="padding:8px 16px;" onclick="document.getElementById('photoPreviewModal').style.display='none'">Close</button>
+      </div>`;
+    modal.style.display = 'block';
+  });
+}
+
+// Retake a doc photo — restore the camera button and trigger capture
+function retakeDocPhoto(fieldKey) {
+  // Look up the label from the PHOTO_FIELD_LABELS map
+  const label = PHOTO_FIELD_LABELS[fieldKey] || fieldKey;
+  const wrapper = document.querySelector(`[data-photo-field="${fieldKey}"]`);
+  if (wrapper) {
+    wrapper.innerHTML = getDocPhotoButtonHTML(fieldKey, label);
+    // Auto-trigger the file input
+    const fileInput = wrapper.querySelector('input[type="file"]');
+    if (fileInput) fileInput.click();
+  }
+}
+
+// Map of fieldKey → display label for all doc photo fields
+const PHOTO_FIELD_LABELS = {
+  'enginePhoto': 'Engine',
+  'enginePlatePhoto': 'Data Plate',
+  'engine2Photo': 'Engine 2',
+  'engine2PlatePhoto': 'Data Plate 2',
+  'transmissionPhoto': 'Transmission',
+  'transmissionPlatePhoto': 'Serial Plate',
+  'transmission2Photo': 'Transmission 2',
+  'transmission2PlatePhoto': 'Serial Plate 2',
+  'coverPhoto': 'Cover Photo',
+  'fourCornerPortBow': 'Port Bow',
+  'fourCornerStbdBow': 'Starboard Bow',
+  'fourCornerPortStern': 'Port Stern',
+  'fourCornerStbdStern': 'Starboard Stern',
+  'hinPhoto': 'HIN Plate',
+  'compliancePhoto': 'Compliance Plate',
+  'licencePhoto': 'Licence on Hull',
+  'tcPaperLicencePhoto': 'TC Paper Licence'
+};
+
+// Generate the camera button HTML for a doc photo field
+function getDocPhotoButtonHTML(fieldKey, label) {
+  const displayLabel = label || PHOTO_FIELD_LABELS[fieldKey] || fieldKey;
+  return `<label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:6px 10px;">
+    📷 ${displayLabel}
+    <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('${fieldKey}', '${displayLabel}', event)" />
+  </label>`;
 }
 
 // Load documentation photo previews when navigating to the form
@@ -3914,9 +4010,38 @@ function selectRating(itemLabel, categoryName, rating) {
     survey.items[itemLabel].standards = [];
     survey.items[itemLabel].variantText = '';
 
+    // Remember which category accordion was open and scroll position
+    const openCategoryName = categoryName;
+    const scrollY = window.scrollY;
+
     saveSurvey(survey).then(() => {
       renderInspection(survey);
+      // Restore the open accordion and scroll position
+      restoreAccordionAndScroll(openCategoryName, itemLabel, scrollY);
     });
+  });
+}
+
+// After re-render, open the accordion that was open and scroll back to the item
+function restoreAccordionAndScroll(categoryName, itemLabel, scrollY) {
+  // Find the accordion header matching this category
+  const headers = document.querySelectorAll('.accordion-header');
+  for (const header of headers) {
+    const titleEl = header.querySelector('.category-title');
+    if (titleEl && titleEl.textContent.includes(categoryName)) {
+      // Open this accordion using same logic as toggleAccordion
+      const content = header.nextElementSibling;
+      if (content && content.style.display === 'none') {
+        content.style.display = 'block';
+        const chevron = header.querySelector('span:last-child');
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+      }
+      break;
+    }
+  }
+  // Scroll back to approximate position
+  requestAnimationFrame(() => {
+    window.scrollTo(0, scrollY);
   });
 }
 
