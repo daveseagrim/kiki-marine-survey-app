@@ -3709,35 +3709,35 @@
         "items": [
           {
             "type": "textsingle",
-            "label": "Item"
+            "label": "Item 1"
           },
           {
             "type": "textsingle",
-            "label": "Item"
+            "label": "Item 2"
           },
           {
             "type": "textsingle",
-            "label": "Item"
+            "label": "Item 3"
           },
           {
             "type": "textsingle",
-            "label": "Item"
+            "label": "Item 4"
           },
           {
             "type": "textsingle",
-            "label": "Item"
+            "label": "Item 5"
           },
           {
             "type": "textsingle",
-            "label": "Item"
+            "label": "Item 6"
           },
           {
             "type": "textsingle",
-            "label": "Item"
+            "label": "Item 7"
           },
           {
             "type": "textsingle",
-            "label": "Item"
+            "label": "Item 8"
           }
         ]
       }

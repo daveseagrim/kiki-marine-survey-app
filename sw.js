@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v55';
+const CACHE_NAME = 'kiki-marine-v56';
 const URLS_TO_CACHE = [
   './',
   'index.html',
@@ -13,6 +13,8 @@ const URLS_TO_CACHE = [
   'apple-touch-icon.png',
   'icon-192.png',
   'icon-512.png',
+  'icon-192-maskable.png',
+  'icon-512-maskable.png',
   'https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png',
 ];
 

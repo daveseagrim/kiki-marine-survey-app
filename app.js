@@ -293,7 +293,7 @@ function getTemplateForSurvey(survey) {
   if (survey && survey.surveyType === 'Insurance survey' && insuranceSurveyTemplate) {
     return insuranceSurveyTemplate;
   }
-  return surveyTemplate;
+  return surveyTemplate || [];
 }
 
 // Database operations
@@ -887,7 +887,7 @@ function createNewSurvey(formData) {
 
 // Calculate completion percentage
 function getCompletionPercentage(survey) {
-  if (survey.totalRatedItems === 0) return 0;
+  if (!survey || !survey.totalRatedItems) return 0;
   return Math.round((survey.completedCount / survey.totalRatedItems) * 100);
 }
 
@@ -2773,6 +2773,8 @@ function renderInspection(survey) {
   const existingFab = document.querySelector('.fab');
   if (existingFab) existingFab.remove();
 
+  const esc = (s) => (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+
   currentView = 'inspection';
   currentSurveyId = survey.id;
   history.pushState({ view: 'inspection', surveyId: survey.id }, '');
@@ -2780,14 +2782,14 @@ function renderInspection(survey) {
   const app = document.getElementById('app');
 
   const surveyTypeBanner = survey.surveyType
-    ? `<div style="background:${survey.surveyType === 'Insurance survey' ? '#f59e0b' : '#1e3a5f'};color:#fff;text-align:center;font-size:12px;font-weight:700;padding:4px 0;letter-spacing:0.5px;">${(survey.surveyType || '').toUpperCase()}</div>`
+    ? `<div style="background:${survey.surveyType === 'Insurance survey' ? '#f59e0b' : '#1e3a5f'};color:#fff;text-align:center;font-size:12px;font-weight:700;padding:4px 0;letter-spacing:0.5px;">${esc(survey.surveyType).toUpperCase()}</div>`
     : '';
 
   app.innerHTML = `
     <div class="header">
       <button class="header-back" onclick="backToHome()">←</button>
       <div>
-        <div class="header-title">${survey.vesselName}</div>
+        <div class="header-title">${esc(survey.vesselName)}</div>
         <div class="header-subtitle">Inspection</div>
       </div>
     </div>
