@@ -2371,6 +2371,15 @@ function updateBoatStyleOptions() {
     options.map(o => `<option value="${o}">${o}</option>`).join('');
 }
 
+// Look up engine type (Inboard/Outboard/Sterndrive) from engine_db for a given make and model
+function lookupEngineType(makeName, modelName) {
+  if (!engineDb || !makeName || !modelName) return '';
+  const maker = engineDb.engines.find(e => e.make.toLowerCase() === makeName.toLowerCase());
+  if (!maker) return '';
+  const mdl = maker.models.find(m => m.model.toLowerCase() === modelName.toLowerCase());
+  return mdl ? (mdl.engineType || '') : '';
+}
+
 // Generate a vessel description template from filled-in form fields
 function generateVesselDescription() {
   const ymm = document.getElementById('yearMakeModel')?.value || '';
@@ -2404,6 +2413,10 @@ function generateVesselDescription() {
   const transmissionMake = document.getElementById('transmissionMake')?.value || '';
   const transmissionModel = document.getElementById('transmissionModel')?.value || '';
 
+  // Look up engine type from database
+  const engineTypeFromDb = lookupEngineType(engineMake, engineModel);
+  const engineTypeStr = engineTypeFromDb ? engineTypeFromDb.toLowerCase() : '';
+
   // Determine rig description for sailboats
   let rigDesc = '';
   if (vesselType === 'sail') {
@@ -2416,14 +2429,18 @@ function generateVesselDescription() {
   const engMakeModel = (engineMake && engineModel) ? `${engineMake} ${engineModel}` :
                        engineMake ? `${engineMake} [MODEL]` : '[MAKE/MODEL]';
   const engFuel = fuelType || '[DIESEL/GASOLINE]';
-  const engHPStr = engineHP ? `${engineHP}` : '[XX]';
+  const engHPStr = engineHP ? `${engineHP}` : '[XX] horsepower';
   const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
                          transmissionMake ? `${transmissionMake} [MODEL]` : '[MAKE/MODEL]';
+
   let engineDesc = '';
   if (vesselType === 'sail') {
-    engineDesc = `Auxiliary power is provided by a ${engMakeModel} ${engFuel} [INBOARD/OUTBOARD] engine rated at ${engHPStr} horsepower, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a [SHAFT DRIVE/SAILDRIVE].`;
+    const engType = engineTypeStr || '[inboard/outboard]';
+    const driveType = engineTypeStr === 'inboard' ? '[shaft drive/saildrive]' : '[SHAFT DRIVE/SAILDRIVE]';
+    engineDesc = `Auxiliary power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a ${driveType}.`;
   } else {
-    engineDesc = `Power is provided by [NUMBER] ${engMakeModel} ${engFuel} [INBOARD/OUTBOARD/STERNDRIVE] engine(s) rated at ${engHPStr} horsepower each, coupled to ${transMakeModel} transmission(s), driving [FIXED/FOLDING] [3/4]-blade propeller(s) through [SHAFT DRIVE(S)/STERNDRIVE(S)].`;
+    const engType = engineTypeStr || '[inboard/outboard/sterndrive]';
+    engineDesc = `Power is provided by [NUMBER] ${engMakeModel} ${engFuel} ${engType} engine(s) rated at ${engHPStr} each, coupled to ${transMakeModel} transmission(s), driving [FIXED/FOLDING] [3/4]-blade propeller(s) through [SHAFT DRIVE(S)/STERNDRIVE(S)].`;
   }
 
   const constructionStr = construction || '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
@@ -2440,7 +2457,8 @@ function generateVesselDescription() {
   desc += engineDesc;
   desc += `\n\n`;
   desc += `The hull is [COLOUR] with a [COLOUR] boot stripe. The deck is [COLOUR] with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
-  desc += `The vessel features [NUMBER] cabin(s)${cabins ? ' (' + cabins + ')' : ''} with [NUMBER] berth(s), [NUMBER] head(s) with [MANUAL/ELECTRIC] marine toilet(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
+  const cabinStr = cabins || '[NUMBER]';
+  desc += `The vessel features ${cabinStr} cabin(s) with [NUMBER] berth(s), [NUMBER] head(s) with [MANUAL/ELECTRIC] marine toilet(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
   desc += `The galley is [PORT/STARBOARD/AFT] and includes a [PROPANE/ELECTRIC/ALCOHOL] stove with [OVEN], a [12V/120V] refrigerator, and a [SINGLE/DOUBLE] stainless steel sink.`;
   desc += `\n\n`;
   if (electrical) {
