@@ -2991,6 +2991,26 @@ function collectComparables() {
     </div>
   `;
 
+  // ── Comparable Vessels Section ────────────────────────────────────────────
+  const compCount = (survey.comparables && survey.comparables.length) || 0;
+  html += `
+    <div class="category-accordion">
+      <button class="accordion-header" onclick="toggleAccordion(this)" style="background: #065f46; color: white;">
+        <span class="category-title">📊 Comparable Vessels</span>
+        <span class="category-progress">${compCount} recorded</span>
+        <span style="margin-left: 12px;">▼</span>
+      </button>
+      <div class="accordion-content" style="display: none;">
+        <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">Add comparable sales from BUCValu, Soldboats.com, YachtWorld, and current listings to support your valuation.</div>
+        <div id="comparablesEntries"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="addComparableEntry()">+ Add Comparable</button>
+          <button class="btn-primary" style="font-size:12px;padding:6px 12px;" onclick="saveComparablesFromInspection()">💾 Save Comparables</button>
+        </div>
+      </div>
+    </div>
+  `;
+
   html += `</div>`;
   content.innerHTML = html;
 
@@ -3015,6 +3035,26 @@ function collectComparables() {
     });
   }
 
+  // Repopulate comparable entries if they exist
+  if (survey.comparables && survey.comparables.length > 0) {
+    survey.comparables.forEach(comp => {
+      addComparableEntry();
+      const allEntries = document.querySelectorAll('#comparablesEntries > div');
+      if (allEntries.length > 0) {
+        const entry = allEntries[allEntries.length - 1];
+        const sourceSelect = entry.querySelector('.compSource');
+        if (sourceSelect) sourceSelect.value = comp.source || '';
+        entry.querySelector('.compVessel').value = comp.vessel || '';
+        entry.querySelector('.compPrice').value = comp.price || '';
+        entry.querySelector('.compLocation').value = comp.location || '';
+        entry.querySelector('.compDate').value = comp.date || '';
+        const waterSelect = entry.querySelector('.compWater');
+        if (waterSelect) waterSelect.value = comp.water || '';
+        entry.querySelector('.compNotes').value = comp.notes || '';
+      }
+    });
+  }
+
   // Auto-fill single variants
   document.querySelectorAll('[data-auto-fill-item]').forEach(el => {
     const itemLabel = el.getAttribute('data-auto-fill-item');
@@ -3026,18 +3066,33 @@ function collectComparables() {
     }
   });
 
-  // Add floating report preview button
-  if (!document.getElementById('reportBtn')) {
-    const fab = document.querySelector('.fab');
-    if (fab) fab.remove();
+  // Add floating report preview button (ensured at end of render)
+  ensureReportButton();
+}
 
-    const reportBtn = document.createElement('button');
-    reportBtn.id = 'reportBtn';
-    reportBtn.style.cssText = 'position:fixed;bottom:calc(20px + env(safe-area-inset-bottom, 0px));right:calc(20px + env(safe-area-inset-right, 0px));background:#1e3a5f;color:white;border:none;border-radius:28px;padding:12px 18px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:100;cursor:pointer;';
-    reportBtn.innerHTML = '📄 Preview Report';
-    reportBtn.onclick = () => generateReport();
-    document.body.appendChild(reportBtn);
-  }
+function ensureReportButton() {
+  let btn = document.getElementById('reportBtn');
+  if (btn) return; // already exists
+  // Remove old fab if present
+  const fab = document.querySelector('.fab');
+  if (fab) fab.remove();
+
+  btn = document.createElement('button');
+  btn.id = 'reportBtn';
+  btn.style.cssText = 'position:fixed;bottom:calc(20px + env(safe-area-inset-bottom, 0px));right:calc(20px + env(safe-area-inset-right, 0px));background:#1e3a5f;color:white;border:none;border-radius:28px;padding:12px 18px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:100;cursor:pointer;';
+  btn.innerHTML = '📄 Preview Report';
+  btn.onclick = () => generateReport();
+  document.body.appendChild(btn);
+}
+
+// Save comparables from the inspection view
+function saveComparablesFromInspection() {
+  getSurvey(currentSurveyId).then(survey => {
+    survey.comparables = collectComparables();
+    saveSurvey(survey).then(() => {
+      showToast('Comparables saved (' + survey.comparables.length + ' entries)');
+    });
+  });
 }
 
 // Safety equipment interaction functions
