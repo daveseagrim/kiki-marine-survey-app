@@ -1120,13 +1120,13 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Vessel Name *</label>
-        <input type="text" id="vesselName" placeholder="e.g., Sea Dream II" autocapitalize="words" style="text-transform:capitalize;" onblur="this.value=capitalizeWords(this.value)">
+        <input type="text" id="vesselName" placeholder="e.g., Sea Dream II" autocapitalize="words" onblur="this.value=capitalizeWords(this.value)">
       </div>
 
       <div class="form-group">
         <label class="form-label">Year / Make / Model *</label>
         <input type="text" id="yearMakeModel" placeholder="e.g., 2015 Beneteau Oceanis 46"
-               onblur="checkSpecsOnBlur()" oninput="checkSpecsDebounced()" autocapitalize="words" style="text-transform:capitalize;">
+               onblur="checkSpecsOnBlur()" oninput="checkSpecsDebounced()" autocapitalize="words">
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Tip: Enter year, make and model — specs may auto-fill from built-in database</div>
       </div>
 
@@ -1141,7 +1141,7 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Client Name</label>
-        <input type="text" id="clientName" placeholder="Client name" autocapitalize="words" style="text-transform:capitalize;" onblur="this.value=capitalizeWords(this.value)">
+        <input type="text" id="clientName" placeholder="Client name" autocapitalize="words" onblur="this.value=capitalizeWords(this.value)">
       </div>
 
       <div class="form-group">
@@ -2163,9 +2163,7 @@ function editSurveyDetails(surveyId) {
     if (!survey) return;
 
     // Render the same form as renderNewSurveyForm but in edit mode
-    currentView = 'edit-survey';
     currentSurveyId = survey.id;
-    history.pushState({ view: 'edit-survey', surveyId: survey.id }, '');
 
     const existingFab = document.querySelector('.fab');
     if (existingFab) existingFab.remove();
@@ -2174,6 +2172,10 @@ function editSurveyDetails(surveyId) {
 
     // Re-use the new survey form but swap header and buttons
     renderNewSurveyForm();
+
+    // Set currentView AFTER renderNewSurveyForm (which sets it to 'new-survey')
+    currentView = 'edit-survey';
+    history.pushState({ view: 'edit-survey', surveyId: survey.id }, '');
 
     // Change header
     const header = document.querySelector('.header');
@@ -3640,7 +3642,7 @@ function renderInspection(survey) {
     const excludedCount = items.filter(item => survey.items[item.label]?.excluded).length;
     const allExcluded = excludedCount === items.length;
     const isComplete = categoryCompletion === 100;
-    const incompleteDot = !isComplete ? '<span style="display:inline-block;width:10px;height:10px;background:#dc2626;border-radius:50%;margin-right:6px;flex-shrink:0;"></span>' : '<span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:50%;margin-right:6px;flex-shrink:0;"></span>';
+    const incompleteDot = !isComplete ? '<span class="completion-dot" style="display:inline-block;width:10px;height:10px;background:#dc2626;border-radius:50%;margin-right:6px;flex-shrink:0;"></span>' : '<span class="completion-dot" style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:50%;margin-right:6px;flex-shrink:0;"></span>';
     const progressColor = isComplete ? '#16a34a' : '#dc2626';
 
     html += `
@@ -3692,7 +3694,7 @@ function renderInspection(survey) {
       `;
 
       // Text snippet cards (tap to insert)
-      if (itemData.rating && ['A - Critical', 'B - Needs Attention', 'C - Serviceable', 'Powered up only', 'Not tested / not verified', 'Not applicable'].includes(itemData.rating)) {
+      if (itemData.rating && ['A - Critical', 'B - Needs Attention', 'C - Serviceable', 'Powered up only', 'Not tested/not verified', 'Not applicable'].includes(itemData.rating)) {
         const baseRating = itemData.rating.charAt(0);
         const variants = findTextVariants(categoryName, item.label, baseRating);
 
@@ -4827,7 +4829,7 @@ function updateCategoryHeader(survey, categoryName) {
   const progressColor = isComplete ? '#16a34a' : '#dc2626';
 
   // Update the completion dot
-  const dot = header.querySelector('span:first-child');
+  const dot = header.querySelector('.completion-dot');
   if (dot && dot.style) {
     dot.style.background = isComplete ? '#16a34a' : '#dc2626';
   }
