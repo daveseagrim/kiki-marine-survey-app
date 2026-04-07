@@ -1169,13 +1169,15 @@ function renderNewSurveyForm() {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <div class="form-group">
           <label class="form-label" style="font-size:12px;">Engine Make</label>
-          <input type="text" id="engineMake" list="engineMakeList" placeholder="Start typing..." oninput="onEngineMakeChange()">
-          <datalist id="engineMakeList"></datalist>
+          <select id="engineMake" onchange="onEngineMakeChange()">
+            <option value="">Select make</option>
+          </select>
         </div>
         <div class="form-group">
           <label class="form-label" style="font-size:12px;">Engine Model</label>
-          <input type="text" id="engineModel" list="engineModelList" placeholder="Select make first..." oninput="onEngineModelChange()">
-          <datalist id="engineModelList"></datalist>
+          <select id="engineModel" onchange="onEngineModelChange()">
+            <option value="">Select make first</option>
+          </select>
         </div>
         <div class="form-group">
           <label class="form-label" style="font-size:12px;">Engine Serial No.</label>
@@ -1201,13 +1203,15 @@ function renderNewSurveyForm() {
         </div>
         <div class="form-group">
           <label class="form-label" style="font-size:12px;">Transmission Make</label>
-          <input type="text" id="transmissionMake" list="transmissionMakeList" placeholder="Start typing..." oninput="onTransmissionMakeChange()">
-          <datalist id="transmissionMakeList"></datalist>
+          <select id="transmissionMake" onchange="onTransmissionMakeChange()">
+            <option value="">Select make</option>
+          </select>
         </div>
         <div class="form-group">
           <label class="form-label" style="font-size:12px;">Transmission Model</label>
-          <input type="text" id="transmissionModel" list="transmissionModelList" placeholder="Select make first..." oninput="onTransmissionModelChange()">
-          <datalist id="transmissionModelList"></datalist>
+          <select id="transmissionModel" onchange="onTransmissionModelChange()">
+            <option value="">Select make first</option>
+          </select>
         </div>
         <div class="form-group">
           <label class="form-label" style="font-size:12px;">Transmission Serial No.</label>
@@ -1502,43 +1506,84 @@ function renderNewSurveyForm() {
 
 function populateEngineMakes() {
   if (!engineDb) return;
-  const list = document.getElementById('engineMakeList');
-  if (!list) return;
-  list.innerHTML = '';
-  engineDb.engines.forEach(e => {
-    const opt = document.createElement('option');
-    opt.value = e.make;
-    list.appendChild(opt);
-  });
 
-  // Populate transmission makes
-  const tList = document.getElementById('transmissionMakeList');
-  if (!tList) return;
-  tList.innerHTML = '';
-  engineDb.transmissions.forEach(t => {
-    const opt = document.createElement('option');
-    opt.value = t.make;
-    tList.appendChild(opt);
-  });
+  const engineSelect = document.getElementById('engineMake');
+  if (engineSelect) {
+    // Keep the first "Select make" option, add "Other" at end
+    engineSelect.innerHTML = '<option value="">Select make</option>';
+    engineDb.engines.forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e.make;
+      opt.textContent = e.make;
+      engineSelect.appendChild(opt);
+    });
+    const otherOpt = document.createElement('option');
+    otherOpt.value = '__other__';
+    otherOpt.textContent = '— Other (type manually) —';
+    engineSelect.appendChild(otherOpt);
+  }
+
+  const transSelect = document.getElementById('transmissionMake');
+  if (transSelect) {
+    transSelect.innerHTML = '<option value="">Select make</option>';
+    engineDb.transmissions.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.make;
+      opt.textContent = t.make;
+      transSelect.appendChild(opt);
+    });
+    const otherOpt = document.createElement('option');
+    otherOpt.value = '__other__';
+    otherOpt.textContent = '— Other (type manually) —';
+    transSelect.appendChild(otherOpt);
+  }
 }
 
 function onEngineMakeChange() {
   if (!engineDb) return;
-  const makeVal = document.getElementById('engineMake').value;
-  const list = document.getElementById('engineModelList');
-  if (!list) return;
-  list.innerHTML = '';
+  const select = document.getElementById('engineMake');
+  const makeVal = select.value;
+
+  // "Other" — swap select for a text input
+  if (makeVal === '__other__') {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'engineMake';
+    input.placeholder = 'Type engine make...';
+    input.style.cssText = select.style.cssText;
+    select.replaceWith(input);
+    input.focus();
+    // Also switch model to text input
+    const modelSelect = document.getElementById('engineModel');
+    if (modelSelect) {
+      const modelInput = document.createElement('input');
+      modelInput.type = 'text';
+      modelInput.id = 'engineModel';
+      modelInput.placeholder = 'Type engine model...';
+      modelSelect.replaceWith(modelInput);
+    }
+    return;
+  }
+
+  // Populate engine model dropdown
+  const modelSelect = document.getElementById('engineModel');
+  if (!modelSelect || modelSelect.tagName !== 'SELECT') return;
+  modelSelect.innerHTML = '<option value="">Select model</option>';
 
   const maker = engineDb.engines.find(e => e.make.toLowerCase() === makeVal.toLowerCase());
   if (maker) {
     maker.models.forEach(m => {
       const opt = document.createElement('option');
       opt.value = m.model;
-      list.appendChild(opt);
+      opt.textContent = m.model;
+      modelSelect.appendChild(opt);
     });
+    const otherOpt = document.createElement('option');
+    otherOpt.value = '__other__';
+    otherOpt.textContent = '— Other (type manually) —';
+    modelSelect.appendChild(otherOpt);
   }
   // Clear dependent fields
-  document.getElementById('engineModel').value = '';
   document.getElementById('engineHP').value = '';
   document.getElementById('fuelType').value = '';
 }
@@ -1546,13 +1591,24 @@ function onEngineMakeChange() {
 function onEngineModelChange() {
   if (!engineDb) return;
   const makeVal = document.getElementById('engineMake').value;
-  const modelVal = document.getElementById('engineModel').value;
+  const modelSelect = document.getElementById('engineModel');
+  const modelVal = modelSelect.value;
+
+  // "Other" — swap to text input
+  if (modelVal === '__other__') {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'engineModel';
+    input.placeholder = 'Type engine model...';
+    modelSelect.replaceWith(input);
+    input.focus();
+    return;
+  }
 
   const maker = engineDb.engines.find(e => e.make.toLowerCase() === makeVal.toLowerCase());
   if (maker) {
     const model = maker.models.find(m => m.model.toLowerCase() === modelVal.toLowerCase());
     if (model) {
-      // Auto-populate HP and fuel type
       const hpField = document.getElementById('engineHP');
       const fuelField = document.getElementById('fuelType');
       if (hpField) hpField.value = model.hp + 'HP / ' + model.kw + 'kW';
@@ -1563,34 +1619,58 @@ function onEngineModelChange() {
 
 function onTransmissionMakeChange() {
   if (!engineDb) return;
-  const makeVal = document.getElementById('transmissionMake').value;
-  const list = document.getElementById('transmissionModelList');
-  if (!list) return;
-  list.innerHTML = '';
+  const select = document.getElementById('transmissionMake');
+  const makeVal = select.value;
+
+  if (makeVal === '__other__') {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'transmissionMake';
+    input.placeholder = 'Type transmission make...';
+    select.replaceWith(input);
+    input.focus();
+    const modelSelect = document.getElementById('transmissionModel');
+    if (modelSelect) {
+      const modelInput = document.createElement('input');
+      modelInput.type = 'text';
+      modelInput.id = 'transmissionModel';
+      modelInput.placeholder = 'Type transmission model...';
+      modelSelect.replaceWith(modelInput);
+    }
+    return;
+  }
+
+  const modelSelect = document.getElementById('transmissionModel');
+  if (!modelSelect || modelSelect.tagName !== 'SELECT') return;
+  modelSelect.innerHTML = '<option value="">Select model</option>';
 
   const maker = engineDb.transmissions.find(t => t.make.toLowerCase() === makeVal.toLowerCase());
   if (maker) {
     maker.models.forEach(m => {
       const opt = document.createElement('option');
       opt.value = m.model;
-      list.appendChild(opt);
+      opt.textContent = m.model;
+      modelSelect.appendChild(opt);
     });
+    const otherOpt = document.createElement('option');
+    otherOpt.value = '__other__';
+    otherOpt.textContent = '— Other (type manually) —';
+    modelSelect.appendChild(otherOpt);
   }
-  // Clear dependent field
-  document.getElementById('transmissionModel').value = '';
 }
 
 function onTransmissionModelChange() {
   if (!engineDb) return;
-  const makeVal = document.getElementById('transmissionMake').value;
-  const modelVal = document.getElementById('transmissionModel').value;
+  const modelSelect = document.getElementById('transmissionModel');
+  const modelVal = modelSelect.value;
 
-  const maker = engineDb.transmissions.find(t => t.make.toLowerCase() === makeVal.toLowerCase());
-  if (maker) {
-    const model = maker.models.find(m => m.model.toLowerCase() === modelVal.toLowerCase());
-    if (model) {
-      // Model selected successfully - could add auto-population of other fields here if needed
-    }
+  if (modelVal === '__other__') {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'transmissionModel';
+    input.placeholder = 'Type transmission model...';
+    modelSelect.replaceWith(input);
+    input.focus();
   }
 }
 
@@ -4414,6 +4494,8 @@ async function initApp() {
     // Suppress iOS autofill bar (keys, credit card, location, checkmark)
     // by setting autocomplete="off" on all inputs as they're created
     const disableAutofill = (el) => {
+      // Don't suppress autocomplete on inputs linked to a datalist — they need it for suggestions
+      if (el.getAttribute('list')) return;
       el.setAttribute('autocomplete', 'off');
       el.setAttribute('autocorrect', 'off');
       el.setAttribute('autocapitalize', 'off');
