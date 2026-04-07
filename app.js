@@ -1438,7 +1438,18 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Persons in Attendance</label>
-        <input type="text" id="personsInAttendance" placeholder="e.g., Dave Seagrim (surveyor), John Smith (broker)" autocapitalize="words">
+        <div style="border:1px solid #e5e7eb;border-radius:8px;padding:10px;background:#f9fafb;margin-bottom:8px;">
+          <div id="attendeesList" style="margin-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;background:#dcfce7;border:1px solid #86efac;border-radius:6px;padding:8px 10px;margin-bottom:6px;">
+              <span style="font-size:13px;"><strong>Dave Seagrim</strong> (SAMS Surveyor Associate)</span>
+              <span style="font-size:12px;color:#6b7280;">Primary</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="addAttendeeField()">+ Add Person</button>
+          </div>
+        </div>
+        <input type="hidden" id="personsInAttendance" value="Dave Seagrim (SAMS Surveyor Associate)">
       </div>
 
       <div class="form-group">
@@ -1463,6 +1474,7 @@ function renderNewSurveyForm() {
           <option value="Vessel was in the travel lift slings for the inspection">Vessel was in the travel lift slings for the inspection</option>
           <option value="Vessel was on the cradle on shore, winterized">Vessel was on the cradle on shore, winterized</option>
           <option value="Vessel was on the hard, in a cradle, not winterized">Vessel was on the hard, in a cradle, not winterized</option>
+          <option value="Vessel was on blocks, winterized">Vessel was on blocks, winterized</option>
           <option value="Vessel was on a trailer">Vessel was on a trailer</option>
         </select>
       </div>
@@ -2908,15 +2920,70 @@ function confirmAbandonNewSurvey() {
   // Check if user has entered any data in the new survey form
   const fields = ['vesselName', 'yearMakeModel', 'clientName', 'location',
     'engineMake', 'engineSerial', 'engineHours', 'transmissionSerial',
-    'hinNumber', 'tcLicense', 'personsInAttendance', 'vesselDescription'];
+    'hinNumber', 'tcLicense', 'vesselDescription'];
   const hasData = fields.some(id => {
     const el = document.getElementById(id);
     return el && el.value && el.value.trim() !== '' && el.value !== 'Select' && el.value !== 'Select make';
   });
-  if (hasData) {
+  // Also check if they added extra attendees
+  const attendeesList = document.getElementById('attendeesList');
+  const hasExtraAttendees = attendeesList && attendeesList.querySelectorAll('[data-attendee-extra]').length > 0;
+  if (hasData || hasExtraAttendees) {
     if (!confirm('You have unsaved survey data. Discard and return to home?')) return;
   }
   renderHome();
+}
+
+// ─── Persons in Attendance Management ──────────────────────────────────────
+
+function addAttendeeField() {
+  const list = document.getElementById('attendeesList');
+  if (!list) return;
+
+  const idx = list.querySelectorAll('[data-attendee-extra]').length;
+  const div = document.createElement('div');
+  div.setAttribute('data-attendee-extra', idx);
+  div.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px;';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'attendee-name-input';
+  input.placeholder = 'e.g., John Smith (broker)';
+  input.style.cssText = 'flex:1;padding:6px 8px;border:1px solid #cbd5e1;border-radius:4px;font-size:13px;';
+  input.setAttribute('data-attendee-index', idx);
+  input.autocapitalize = 'words';
+
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'btn-secondary';
+  removeBtn.textContent = '✕';
+  removeBtn.style.cssText = 'width:28px;height:28px;padding:0;font-size:14px;';
+  removeBtn.onclick = (e) => {
+    e.preventDefault();
+    div.remove();
+    updateAttendeesList();
+  };
+
+  div.appendChild(input);
+  div.appendChild(removeBtn);
+  list.appendChild(div);
+  input.focus();
+  input.addEventListener('change', updateAttendeesList);
+  input.addEventListener('input', updateAttendeesList);
+}
+
+function updateAttendeesList() {
+  const list = document.getElementById('attendeesList');
+  const field = document.getElementById('personsInAttendance');
+  if (!list || !field) return;
+
+  const attendees = ['Dave Seagrim (SAMS Surveyor Associate)'];
+  const extras = list.querySelectorAll('[data-attendee-extra] input');
+  extras.forEach(input => {
+    const val = input.value.trim();
+    if (val) attendees.push(val);
+  });
+
+  field.value = attendees.join(', ');
 }
 
 function startNewSurvey() {
@@ -3660,18 +3727,63 @@ async function capturePhoto(itemLabel, event) {
 }
 
 // Capture a documentation photo (HIN plate, compliance plate, etc.)
+async function addDateStampToPhoto(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      // Add date stamp in bottom-right corner
+      const today = new Date();
+      const dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+      const fontSize = Math.max(20, Math.round(canvas.width / 40));
+      const padding = 12;
+
+      ctx.font = `${fontSize}px Arial, sans-serif`;
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'bottom';
+
+      // Background rect for date
+      const textMetrics = ctx.measureText(dateStr);
+      const rectWidth = textMetrics.width + padding * 2;
+      const rectHeight = fontSize + padding;
+      ctx.fillRect(
+        canvas.width - rectWidth,
+        canvas.height - rectHeight,
+        rectWidth,
+        rectHeight
+      );
+
+      // White text
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(dateStr, canvas.width - padding, canvas.height - padding);
+
+      resolve(canvas.toDataURL('image/jpeg', 0.95));
+    };
+    img.src = dataUrl;
+  });
+}
+
 async function captureDocPhoto(fieldKey, label, event) {
   const file = event.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
   reader.onload = async (e) => {
+    // Add date stamp to the photo
+    const stampedDataUrl = await addDateStampToPhoto(e.target.result);
+
     const photoId = `${currentSurveyId}_doc_${fieldKey}_${Date.now()}`;
     const photo = {
       id: photoId,
       surveyId: currentSurveyId,
       itemLabel: label,
-      dataUrl: e.target.result,
+      dataUrl: stampedDataUrl,
       annotated: false,
       isDocPhoto: true,
       docField: fieldKey,
@@ -3689,8 +3801,8 @@ async function captureDocPhoto(fieldKey, label, event) {
     survey[fieldKey] = photoId;
     await saveSurvey(survey);
 
-    // Update UI
-    updateDocPhotoPreview(fieldKey, e.target.result);
+    // Update UI with stamped preview
+    updateDocPhotoPreview(fieldKey, stampedDataUrl);
   };
 
   reader.readAsDataURL(file);
