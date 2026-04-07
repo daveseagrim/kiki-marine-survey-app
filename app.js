@@ -2062,6 +2062,14 @@ function findBoatValues(input) {
 
 // Apply found specs to the form fields
 function applyBoatSpecs(specs) {
+  // Update the Year/Make/Model field with the correct name
+  const ymmField = document.getElementById('yearMakeModel');
+  if (ymmField && specs.make && specs.model) {
+    const yearMatch = ymmField.value.trim().match(/\b((?:19|20)\d{2})\b/);
+    const year = yearMatch ? yearMatch[1] + ' ' : '';
+    ymmField.value = year + specs.make + ' ' + specs.model;
+  }
+
   // Clear all spec fields first so old values don't persist when switching boats
   const allFields = ['loa', 'lwl', 'beam', 'displacement', 'ballast', 'maxDraft', 'totalSailArea', 'construction'];
   for (const id of allFields) {
