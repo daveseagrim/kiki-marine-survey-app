@@ -1053,11 +1053,18 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Vessel Type (for TC safety equipment requirements)</label>
-        <select id="vesselType">
+        <select id="vesselType" onchange="updateBoatStyleOptions()">
           <option value="">Select</option>
           <option value="power">Power-driven</option>
           <option value="sail">Sailing vessel</option>
           <option value="human-powered">Human-powered (canoe, kayak, rowboat)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Boat Style / Rig Type</label>
+        <select id="boatStyle">
+          <option value="">Select vessel type first</option>
         </select>
       </div>
 
@@ -2121,6 +2128,7 @@ function applyBoatSpecs(specs) {
       const mappedType = typeMap[specs.type.toLowerCase()] || null;
       if (mappedType) {
         vesselTypeEl.value = mappedType;
+        updateBoatStyleOptions();
       }
     }
   }
@@ -2342,6 +2350,25 @@ function suggestValuation() {
   card.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
+// Update boat style dropdown options based on vessel type
+function updateBoatStyleOptions() {
+  const vesselType = document.getElementById('vesselType')?.value || '';
+  const boatStyleEl = document.getElementById('boatStyle');
+  if (!boatStyleEl) return;
+
+  const sailOptions = ['Sloop', 'Cutter', 'Ketch', 'Yawl', 'Schooner', 'Catamaran', 'Trimaran', 'Cat-rigged', 'Motorsailer'];
+  const powerOptions = ['Motor Yacht', 'Trawler', 'Express Cruiser', 'Sportfisherman', 'Centre Console', 'Cuddy Cabin', 'Bowrider', 'Pontoon', 'Cabin Cruiser', 'Lobster Boat', 'Tug', 'Workboat'];
+  const humanOptions = ['Canoe', 'Kayak', 'Rowboat', 'Dinghy', 'Paddleboard'];
+
+  let options = [];
+  if (vesselType === 'sail') options = sailOptions;
+  else if (vesselType === 'power') options = powerOptions;
+  else if (vesselType === 'human-powered') options = humanOptions;
+
+  boatStyleEl.innerHTML = '<option value="">Select</option>' +
+    options.map(o => `<option value="${o}">${o}</option>`).join('');
+}
+
 // Generate a vessel description template from filled-in form fields
 function generateVesselDescription() {
   const ymm = document.getElementById('yearMakeModel')?.value || '';
@@ -2367,19 +2394,34 @@ function generateVesselDescription() {
   const modelStr = model || '[MODEL]';
   const typeStr = boatStyle || (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : '[VESSEL TYPE]');
 
+  // Gather engine and transmission data from form
+  const engineMake = document.getElementById('engineMake')?.value || '';
+  const engineModel = document.getElementById('engineModel')?.value || '';
+  const engineHP = document.getElementById('engineHP')?.value || '';
+  const fuelType = document.getElementById('fuelType')?.value || '';
+  const transmissionMake = document.getElementById('transmissionMake')?.value || '';
+  const transmissionModel = document.getElementById('transmissionModel')?.value || '';
+
   // Determine rig description for sailboats
   let rigDesc = '';
   if (vesselType === 'sail') {
-    rigDesc = ' She is [SLOOP/CUTTER/KETCH]-rigged with a [DECK-STEPPED/KEEL-STEPPED] [ALUMINUM/CARBON FIBRE] mast.';
+    const rigType = boatStyle ? boatStyle.toLowerCase() : '[SLOOP/CUTTER/KETCH]';
+    rigDesc = ` She is ${rigType}-rigged with a [DECK-STEPPED/KEEL-STEPPED] [ALUMINUM/CARBON FIBRE] mast.`;
     if (sailArea) rigDesc += ` Total sail area is ${sailArea}.`;
   }
 
-  // Build engine description
+  // Build engine description using actual data where available
+  const engMakeModel = (engineMake && engineModel) ? `${engineMake} ${engineModel}` :
+                       engineMake ? `${engineMake} [MODEL]` : '[MAKE/MODEL]';
+  const engFuel = fuelType || '[DIESEL/GASOLINE]';
+  const engHPStr = engineHP ? `${engineHP}` : '[XX]';
+  const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
+                         transmissionMake ? `${transmissionMake} [MODEL]` : '[MAKE/MODEL]';
   let engineDesc = '';
   if (vesselType === 'sail') {
-    engineDesc = 'Auxiliary power is provided by a [MAKE/MODEL] [DIESEL/GASOLINE] [INBOARD/OUTBOARD] engine rated at [XX] horsepower, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a [SHAFT DRIVE/SAILDRIVE].';
+    engineDesc = `Auxiliary power is provided by a ${engMakeModel} ${engFuel} [INBOARD/OUTBOARD] engine rated at ${engHPStr} horsepower, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a [SHAFT DRIVE/SAILDRIVE].`;
   } else {
-    engineDesc = 'Power is provided by [NUMBER] [MAKE/MODEL] [DIESEL/GASOLINE] [INBOARD/OUTBOARD/STERNDRIVE] engine(s) rated at [XX] horsepower each, driving [FIXED/FOLDING] [3/4]-blade propeller(s) through [SHAFT DRIVE(S)/STERNDRIVE(S)].';
+    engineDesc = `Power is provided by [NUMBER] ${engMakeModel} ${engFuel} [INBOARD/OUTBOARD/STERNDRIVE] engine(s) rated at ${engHPStr} horsepower each, coupled to ${transMakeModel} transmission(s), driving [FIXED/FOLDING] [3/4]-blade propeller(s) through [SHAFT DRIVE(S)/STERNDRIVE(S)].`;
   }
 
   const constructionStr = construction || '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
