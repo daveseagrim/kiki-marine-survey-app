@@ -10,6 +10,7 @@ let textLibrary = null;
 let surveyTemplate = null;
 let boatSpecsDB = null;
 let boatValuesDB = null;
+let engineDb = null;
 let currentSurveyId = null;
 let currentView = 'surveys';
 
@@ -261,17 +262,19 @@ async function initDB() {
 // Fetch data files
 async function fetchDataFiles() {
   try {
-    const [templateRes, libraryRes, specsRes, valuesRes] = await Promise.all([
+    const [templateRes, libraryRes, specsRes, valuesRes, engineRes] = await Promise.all([
       fetch('survey_template.json'),
       fetch('text_library.json'),
       fetch('boat_specs_db.json'),
-      fetch('boat_values_db.json')
+      fetch('boat_values_db.json'),
+      fetch('engine_db.json')
     ]);
 
     surveyTemplate = await templateRes.json();
     textLibrary = await libraryRes.json();
     boatSpecsDB = await specsRes.json();
     boatValuesDB = await valuesRes.json();
+    engineDb = await engineRes.json();
   } catch (e) {
     console.error('Error fetching data files:', e);
   }
@@ -828,8 +831,35 @@ function renderHome() {
   });
 }
 
+// ─── Fetch USD/CAD exchange rate from API ─────────────────────────────────
+function fetchExchangeRate() {
+  const exchangeRateField = document.getElementById('exchangeRate');
+  if (!exchangeRateField) return;
+
+  try {
+    fetch('https://open.er-api.com/v6/latest/USD')
+      .then(res => res.json())
+      .then(data => {
+        if (data.rates && data.rates.CAD) {
+          const rate = data.rates.CAD.toFixed(2);
+          exchangeRateField.value = rate;
+        }
+      })
+      .catch(err => {
+        // Silently fail if offline or API unavailable — keep default
+      });
+  } catch (e) {
+    // Network error or offline
+  }
+}
+
 function renderNewSurveyForm() {
   currentView = 'new-survey';
+  const existingFab = document.querySelector('.fab');
+  if (existingFab) existingFab.remove();
+  const reportBtnEl = document.getElementById('reportBtn');
+  if (reportBtnEl) reportBtnEl.remove();
+
   const app = document.getElementById('app');
 
   app.innerHTML = `
@@ -1010,11 +1040,13 @@ function renderNewSurveyForm() {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <div class="form-group">
           <label class="form-label" style="font-size:12px;">Engine Make</label>
-          <input type="text" id="engineMake" placeholder="e.g., Yanmar">
+          <input type="text" id="engineMake" list="engineMakeList" placeholder="Start typing..." oninput="onEngineMakeChange()">
+          <datalist id="engineMakeList"></datalist>
         </div>
         <div class="form-group">
           <label class="form-label" style="font-size:12px;">Engine Model</label>
-          <input type="text" id="engineModel" placeholder="e.g., 4JH4-TE">
+          <input type="text" id="engineModel" list="engineModelList" placeholder="Select make first..." oninput="onEngineModelChange()">
+          <datalist id="engineModelList"></datalist>
         </div>
         <div class="form-group">
           <label class="form-label" style="font-size:12px;">Engine Serial No.</label>
@@ -1039,8 +1071,14 @@ function renderNewSurveyForm() {
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label" style="font-size:12px;">Transmission Make/Model</label>
-          <input type="text" id="transmissionMakeModel" placeholder="e.g., ZF 25A">
+          <label class="form-label" style="font-size:12px;">Transmission Make</label>
+          <input type="text" id="transmissionMake" list="transmissionMakeList" placeholder="Start typing..." oninput="onTransmissionMakeChange()">
+          <datalist id="transmissionMakeList"></datalist>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">Transmission Model</label>
+          <input type="text" id="transmissionModel" list="transmissionModelList" placeholder="Select make first..." oninput="onTransmissionModelChange()">
+          <datalist id="transmissionModelList"></datalist>
         </div>
         <div class="form-group">
           <label class="form-label" style="font-size:12px;">Transmission Serial No.</label>
@@ -1055,11 +1093,6 @@ function renderNewSurveyForm() {
         </label>
         <div id="enginePlatePhotoPreview" style="margin-top:4px;"></div>
       </div>
-
-      <h3 style="margin-top:16px;color:#1e3a5f;">Bilge Pumps</h3>
-      <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Document each bilge pump installed. Norm Behring requires: location, type, capacity, float switch, and test results.</div>
-      <div id="bilgePumpEntries"></div>
-      <button class="btn-secondary" style="font-size:12px;padding:6px 12px;margin-top:8px;" onclick="addBilgePumpEntry()">+ Add Bilge Pump</button>
 
       <div style="display: flex; gap: 8px; margin: 16px 0;">
         <button class="btn-secondary" style="flex: 1; font-size: 14px;" onclick="lookupSpecs()">
@@ -1328,6 +1361,108 @@ function renderNewSurveyForm() {
       </div>
     </div>
   `;
+
+  // Auto-populate exchange rate
+  fetchExchangeRate();
+
+  // Populate engine and transmission dropdowns
+  populateEngineMakes();
+}
+
+// ─── Engine & Transmission Dropdown Population ──────────────────────────────
+
+function populateEngineMakes() {
+  if (!engineDb) return;
+  const list = document.getElementById('engineMakeList');
+  if (!list) return;
+  list.innerHTML = '';
+  engineDb.engines.forEach(e => {
+    const opt = document.createElement('option');
+    opt.value = e.make;
+    list.appendChild(opt);
+  });
+
+  // Populate transmission makes
+  const tList = document.getElementById('transmissionMakeList');
+  if (!tList) return;
+  tList.innerHTML = '';
+  engineDb.transmissions.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t.make;
+    tList.appendChild(opt);
+  });
+}
+
+function onEngineMakeChange() {
+  if (!engineDb) return;
+  const makeVal = document.getElementById('engineMake').value;
+  const list = document.getElementById('engineModelList');
+  if (!list) return;
+  list.innerHTML = '';
+
+  const maker = engineDb.engines.find(e => e.make.toLowerCase() === makeVal.toLowerCase());
+  if (maker) {
+    maker.models.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.model;
+      list.appendChild(opt);
+    });
+  }
+  // Clear dependent fields
+  document.getElementById('engineModel').value = '';
+  document.getElementById('engineHP').value = '';
+  document.getElementById('fuelType').value = '';
+}
+
+function onEngineModelChange() {
+  if (!engineDb) return;
+  const makeVal = document.getElementById('engineMake').value;
+  const modelVal = document.getElementById('engineModel').value;
+
+  const maker = engineDb.engines.find(e => e.make.toLowerCase() === makeVal.toLowerCase());
+  if (maker) {
+    const model = maker.models.find(m => m.model.toLowerCase() === modelVal.toLowerCase());
+    if (model) {
+      // Auto-populate HP and fuel type
+      const hpField = document.getElementById('engineHP');
+      const fuelField = document.getElementById('fuelType');
+      if (hpField) hpField.value = model.hp + 'HP / ' + model.kw + 'kW';
+      if (fuelField) fuelField.value = model.fuel;
+    }
+  }
+}
+
+function onTransmissionMakeChange() {
+  if (!engineDb) return;
+  const makeVal = document.getElementById('transmissionMake').value;
+  const list = document.getElementById('transmissionModelList');
+  if (!list) return;
+  list.innerHTML = '';
+
+  const maker = engineDb.transmissions.find(t => t.make.toLowerCase() === makeVal.toLowerCase());
+  if (maker) {
+    maker.models.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.model;
+      list.appendChild(opt);
+    });
+  }
+  // Clear dependent field
+  document.getElementById('transmissionModel').value = '';
+}
+
+function onTransmissionModelChange() {
+  if (!engineDb) return;
+  const makeVal = document.getElementById('transmissionMake').value;
+  const modelVal = document.getElementById('transmissionModel').value;
+
+  const maker = engineDb.transmissions.find(t => t.make.toLowerCase() === makeVal.toLowerCase());
+  if (maker) {
+    const model = maker.models.find(m => m.model.toLowerCase() === modelVal.toLowerCase());
+    if (model) {
+      // Model selected successfully - could add auto-population of other fields here if needed
+    }
+  }
 }
 
 // ─── Location Search & Map ─────────────────────────────────────────────────
@@ -1561,63 +1696,90 @@ function parseYearMakeModel(input) {
   return { year, make, model };
 }
 
-// Find a boat in the specs database using fuzzy matching
-function findBoatSpecs(input) {
-  if (!boatSpecsDB || !boatSpecsDB.boats) return null;
-  const { year, make, model } = parseYearMakeModel(input);
-  const searchStr = `${make} ${model}`.toLowerCase().replace(/[^a-z0-9\s]/g, '');
+// Find boats in the specs database using order-agnostic fuzzy matching
+// Returns array of {boat, score} sorted by score descending
+function findBoatSpecsAll(input) {
+  if (!boatSpecsDB || !boatSpecsDB.boats) return [];
 
-  let bestMatch = null;
-  let bestScore = 0;
+  // Strip year, normalise input into words
+  const stripped = input.trim().replace(/^\d{4}\s*/, '').toLowerCase().replace(/[^a-z0-9\s]/g, '');
+  const searchWords = stripped.split(/\s+/).filter(w => w.length > 1);
+  if (searchWords.length === 0) return [];
+
+  // Also extract year for year-range filtering
+  const yearMatch = input.trim().match(/^\d{4}/);
+  const inputYear = yearMatch ? parseInt(yearMatch[0]) : null;
+
+  const results = [];
 
   for (const boat of boatSpecsDB.boats) {
-    // Check make
-    if (!boat.make.toLowerCase().includes(make.toLowerCase()) &&
-        !make.toLowerCase().includes(boat.make.toLowerCase())) continue;
-
-    // Build all match strings for this boat
+    // Build all candidate strings: "make model" + aliases
     const candidates = [
-      `${boat.make} ${boat.model}`.toLowerCase(),
-      ...(boat.aliases || []).map(a => a.toLowerCase())
+      `${boat.make} ${boat.model}`.toLowerCase().replace(/[^a-z0-9\s]/g, ''),
+      ...(boat.aliases || []).map(a => a.toLowerCase().replace(/[^a-z0-9\s]/g, ''))
     ];
 
-    for (const candidate of candidates) {
-      const candClean = candidate.replace(/[^a-z0-9\s]/g, '');
-      // Score: shared characters / max length
-      const searchWords = searchStr.split(/\s+/).filter(w => w.length > 1);
-      const candWords = candClean.split(/\s+/).filter(w => w.length > 1);
-      const overlap = searchWords.filter(w => candWords.some(c => c.includes(w) || w.includes(c))).length;
-      const score = searchWords.length > 0 ? overlap / searchWords.length : 0;
+    let bestScore = 0;
+    for (const cand of candidates) {
+      const candWords = cand.split(/\s+/).filter(w => w.length > 1);
 
-      if (score > bestScore) {
-        bestScore = score;
-        bestMatch = boat;
+      // Score: how many search words match a candidate word (order-agnostic)
+      let matchedSearch = 0;
+      let matchedCand = 0;
+      for (const sw of searchWords) {
+        if (candWords.some(cw => cw.includes(sw) || sw.includes(cw))) matchedSearch++;
       }
+      for (const cw of candWords) {
+        if (searchWords.some(sw => sw.includes(cw) || cw.includes(sw))) matchedCand++;
+      }
+      // Combined score: average of how much of the search matched AND how much of the candidate matched
+      const score = (matchedSearch / searchWords.length + matchedCand / candWords.length) / 2;
+      if (score > bestScore) bestScore = score;
+    }
+
+    // Bonus if year falls within production range
+    if (inputYear && boat.yearStart && boat.yearEnd) {
+      if (inputYear >= boat.yearStart && inputYear <= boat.yearEnd) bestScore += 0.1;
+    }
+
+    if (bestScore >= 0.4) {
+      results.push({ boat, score: bestScore });
     }
   }
 
-  // Require at least 50% word overlap
-  return bestScore >= 0.5 ? bestMatch : null;
+  results.sort((a, b) => b.score - a.score);
+  return results;
 }
 
-// Find value range in the values database
+// Backward-compatible single-match wrapper
+function findBoatSpecs(input) {
+  const results = findBoatSpecsAll(input);
+  return results.length > 0 ? results[0].boat : null;
+}
+
+// Find value range in the values database (order-agnostic matching)
 function findBoatValues(input) {
   if (!boatValuesDB || !boatValuesDB.values) return null;
-  const { year, make, model } = parseYearMakeModel(input);
-  const searchStr = `${make} ${model}`.toLowerCase().replace(/[^a-z0-9\s]/g, '');
+  const stripped = input.trim().replace(/^\d{4}\s*/, '').toLowerCase().replace(/[^a-z0-9\s]/g, '');
+  const searchWords = stripped.split(/\s+/).filter(w => w.length > 1);
+  if (searchWords.length === 0) return null;
 
   let bestEntry = null;
   let bestScore = 0;
 
   for (const entry of boatValuesDB.values) {
-    if (!entry.make.toLowerCase().includes(make.toLowerCase()) &&
-        !make.toLowerCase().includes(entry.make.toLowerCase())) continue;
-
     const candidate = `${entry.make} ${entry.model}`.toLowerCase().replace(/[^a-z0-9\s]/g, '');
-    const searchWords = searchStr.split(/\s+/).filter(w => w.length > 1);
     const candWords = candidate.split(/\s+/).filter(w => w.length > 1);
-    const overlap = searchWords.filter(w => candWords.some(c => c.includes(w) || w.includes(c))).length;
-    const score = searchWords.length > 0 ? overlap / searchWords.length : 0;
+
+    let matchedSearch = 0;
+    let matchedCand = 0;
+    for (const sw of searchWords) {
+      if (candWords.some(cw => cw.includes(sw) || sw.includes(cw))) matchedSearch++;
+    }
+    for (const cw of candWords) {
+      if (searchWords.some(sw => sw.includes(cw) || cw.includes(sw))) matchedCand++;
+    }
+    const score = (matchedSearch / searchWords.length + matchedCand / candWords.length) / 2;
 
     if (score > bestScore) {
       bestScore = score;
@@ -1625,7 +1787,7 @@ function findBoatValues(input) {
     }
   }
 
-  if (bestScore < 0.5 || !bestEntry) return null;
+  if (bestScore < 0.4 || !bestEntry) return null;
 
   // Find the matching year range
   const { year: inputYear } = parseYearMakeModel(input);
@@ -1713,41 +1875,64 @@ function checkSpecsOnBlur() {
   const existingBanner = document.getElementById('specsBanner');
   if (existingBanner) existingBanner.remove();
 
-  const specs = findBoatSpecs(input);
-  if (!specs) return;
+  const results = findBoatSpecsAll(input);
+  if (results.length === 0) return;
 
-  // Store specs globally for the auto-fill button
-  _pendingSpecs = specs;
+  // Take top matches (up to 20 for manufacturer-wide searches)
+  const topResults = results.slice(0, 20);
+  const best = topResults[0];
 
-  // Immediately set vessel type from the database match — don't wait for auto-fill click
-  if (specs.type) {
+  // Store best match globally for the auto-fill button
+  _pendingSpecs = best.boat;
+
+  // Immediately set vessel type from the best match
+  if (best.boat.type) {
     const vesselTypeEl = document.getElementById('vesselType');
     if (vesselTypeEl) {
       const typeMap = { 'sailboat': 'sail', 'powerboat': 'power', 'sail': 'sail', 'power': 'power', 'human-powered': 'human-powered' };
-      const mappedType = typeMap[specs.type.toLowerCase()] || null;
-      if (mappedType) {
-        vesselTypeEl.value = mappedType;
-      }
+      const mappedType = typeMap[best.boat.type.toLowerCase()] || null;
+      if (mappedType) vesselTypeEl.value = mappedType;
     }
   }
 
-  const label = `${specs.make} ${specs.model}${specs.yearStart ? ' (' + specs.yearStart + (specs.yearEnd ? '–' + specs.yearEnd : '+') + ')' : ''}`;
   const banner = document.createElement('div');
   banner.id = 'specsBanner';
-  banner.style.cssText = 'background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:12px 16px;margin:8px 0 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;';
-  banner.innerHTML = `
-    <span style="color:#065f46;font-size:14px;flex:1;">✓ Specs found: <strong>${label}</strong></span>
-    <button class="btn-primary" style="padding:8px 16px;font-size:13px;"
-            onclick="applyPendingSpecs()">
-      Auto-fill Specs
-    </button>
-    <button class="btn-secondary" style="padding:8px 12px;font-size:13px;"
-            onclick="document.getElementById('specsBanner').remove()">
-      Dismiss
-    </button>
-  `;
+  banner.style.cssText = 'background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:12px 16px;margin:8px 0 16px;';
 
-  // Insert after the yearMakeModel field
+  if (topResults.length === 1 || (best.score - (topResults[1]?.score || 0)) > 0.25) {
+    // Single clear match — show simple banner
+    const label = `${best.boat.make} ${best.boat.model}${best.boat.yearStart ? ' (' + best.boat.yearStart + (best.boat.yearEnd ? '–' + best.boat.yearEnd : '+') + ')' : ''}`;
+    banner.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="color:#065f46;font-size:14px;flex:1;">✓ Specs found: <strong>${label}</strong></span>
+        <button class="btn-primary" style="padding:8px 16px;font-size:13px;"
+                onclick="applyPendingSpecs()">Auto-fill Specs</button>
+        <button class="btn-secondary" style="padding:8px 12px;font-size:13px;"
+                onclick="document.getElementById('specsBanner').remove()">Dismiss</button>
+      </div>
+    `;
+  } else {
+    // Multiple close matches — let user pick
+    const scrollStyle = topResults.length > 6 ? 'max-height:280px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-right:4px;' : '';
+    let optionsHtml = '<div style="color:#065f46;font-size:14px;margin-bottom:8px;"><strong>Multiple matches found — select one:</strong></div>';
+    optionsHtml += `<div style="${scrollStyle}">`;
+    topResults.forEach((r, i) => {
+      const b = r.boat;
+      const label = `${b.make} ${b.model}${b.yearStart ? ' (' + b.yearStart + (b.yearEnd ? '–' + b.yearEnd : '+') + ')' : ''}`;
+      const yearRange = b.yearStart ? `${b.yearStart}–${b.yearEnd || 'present'}` : '';
+      optionsHtml += `
+        <button onclick="window._pendingSpecs=boatSpecsDB.boats.find(x=>x.id==='${b.id}');applyPendingSpecs();document.getElementById('specsBanner').remove();"
+                style="display:block;width:100%;text-align:left;background:${i === 0 ? '#ecfdf5' : 'white'};border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;margin:4px 0;cursor:pointer;font-size:13px;">
+          <strong>${label}</strong>
+          <span style="color:#6b7280;margin-left:8px;">${b.loa || ''} LOA${b.beam ? ' · ' + b.beam + ' beam' : ''}</span>
+        </button>`;
+    });
+    optionsHtml += '</div>'; // close scrollable container
+    optionsHtml += `<button class="btn-secondary" style="padding:6px 12px;font-size:12px;margin-top:6px;"
+            onclick="document.getElementById('specsBanner').remove()">Dismiss</button>`;
+    banner.innerHTML = optionsHtml;
+  }
+
   const field = document.getElementById('yearMakeModel');
   if (field) field.closest('.form-group').insertAdjacentElement('afterend', banner);
 }
@@ -2000,7 +2185,9 @@ function startNewSurvey() {
     engineHours: document.getElementById('engineHours')?.value || '',
     engineHP: document.getElementById('engineHP')?.value || '',
     fuelType: document.getElementById('fuelType')?.value || '',
-    transmissionMakeModel: document.getElementById('transmissionMakeModel')?.value || '',
+    transmissionMake: document.getElementById('transmissionMake')?.value || '',
+    transmissionModel: document.getElementById('transmissionModel')?.value || '',
+    transmissionMakeModel: (document.getElementById('transmissionMake')?.value || '') + (document.getElementById('transmissionModel')?.value ? ' ' + document.getElementById('transmissionModel')?.value : ''),
     transmissionSerial: document.getElementById('transmissionSerial')?.value || '',
 
     bilgePumps: collectBilgePumps(),
@@ -2023,11 +2210,6 @@ function startNewSurvey() {
     overallCondition: document.getElementById('overallCondition').value
   };
 
-  if (!formData.vesselName || !formData.yearMakeModel) {
-    alert('Vessel Name and Year/Make/Model are required');
-    return;
-  }
-
   const survey = createNewSurvey(formData);
   saveSurvey(survey).then(id => {
     currentSurveyId = id;
@@ -2036,6 +2218,9 @@ function startNewSurvey() {
 }
 
 function renderInspection(survey) {
+  // Remove any existing fab buttons from home or other views
+  const existingFab = document.querySelector('.fab');
+  if (existingFab) existingFab.remove();
 
 // ─── Rating tooltip guidance ──────────────────────────────────────────────
 function getRatingTooltip(rating) {
@@ -2340,6 +2525,22 @@ function collectComparables() {
             </div>
           `;
         });
+
+  // ── Bilge Pump Section (moved from new survey form) ──────────────────────
+  html += `
+    <div class="category-accordion">
+      <button class="accordion-header" onclick="toggleAccordion(this)">
+        <span class="category-title">⚙️ Bilge Pumps</span>
+        <span style="margin-left: 12px;">▼</span>
+      </button>
+      <div class="accordion-content" style="display: none;">
+        <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">Document each bilge pump installed: location, type, capacity, float switch, and test results.</div>
+        <div id="bilgePumpEntries"></div>
+        <button class="btn-secondary" style="font-size:12px;padding:6px 12px;margin-top:8px;" onclick="addBilgePumpEntry()">+ Add Bilge Pump</button>
+      </div>
+    </div>
+  `;
+
       }
 
       html += `
@@ -2453,6 +2654,24 @@ function collectComparables() {
 
   // Load and display photos
   loadAndDisplayPhotos(survey);
+
+  // Repopulate bilge pump entries if they exist
+  if (survey.bilgePumps && survey.bilgePumps.length > 0) {
+    survey.bilgePumps.forEach(bp => {
+      addBilgePumpEntry();
+      const lastEntry = document.querySelectorAll('#bilgePumpEntries > div');
+      if (lastEntry.length > 0) {
+        const entry = lastEntry[lastEntry.length - 1];
+        entry.querySelector('.bilgePumpLocation').value = bp.location || '';
+        entry.querySelector('.bilgePumpType').value = bp.type || '';
+        entry.querySelector('.bilgePumpMakeModel').value = bp.makeModel || '';
+        entry.querySelector('.bilgePumpCapacity').value = bp.capacity || '';
+        entry.querySelector('.bilgePumpFloatSwitch').value = bp.floatSwitch || '';
+        entry.querySelector('.bilgePumpTested').value = bp.tested || '';
+        entry.querySelector('.bilgePumpDischarge').value = bp.discharge || '';
+      }
+    });
+  }
 
   // Auto-fill single variants
   document.querySelectorAll('[data-auto-fill-item]').forEach(el => {
@@ -3472,6 +3691,7 @@ ${survey.vesselDescription ? `
       section.categories.forEach(category => {
         if (!category.items || category.name === 'Survey Specifications' || category.name === 'Vessel Specifications') return;
         const ratedItems = category.items.filter(i => i.type === 'list');
+        // Only include items with ratings in the checklist summary
         const answeredItems = ratedItems.filter(i => survey.items[i.label]?.rating && !survey.items[i.label]?.excluded);
         if (answeredItems.length === 0) return;
 
@@ -3586,21 +3806,29 @@ ${survey.vesselDescription ? `
         if (!category.items || category.name === 'Survey Specifications' || category.name === 'Vessel Specifications') return;
 
         const ratedItems = category.items.filter(item => item.type === 'list');
-        const itemsWithRatings = ratedItems.filter(item => survey.items[item.label]?.rating && !survey.items[item.label]?.excluded);
-        if (itemsWithRatings.length === 0) return;
+        // Include items that have: a rating OR text/notes OR photos (and are not excluded)
+        const completedItems = ratedItems.filter(item => {
+          const itemData = survey.items[item.label];
+          if (!itemData || itemData.excluded) return false;
+          const hasRating = itemData.rating && itemData.rating.trim();
+          const hasText = itemData.text && itemData.text.trim();
+          const hasPhotos = itemData.photos && itemData.photos.length > 0;
+          return hasRating || hasText || hasPhotos;
+        });
+        if (completedItems.length === 0) return;
 
         html += `<h2>${esc(category.name)}</h2>`;
 
-        itemsWithRatings.forEach(item => {
+        completedItems.forEach(item => {
           const itemData = survey.items[item.label];
-          const ratingLabel = itemData.rating;
+          const ratingLabel = itemData.rating || '';
           const ratingClass = ratingLabel.startsWith('A') ? 'rating-a' : ratingLabel.startsWith('B') ? 'rating-b' : ratingLabel.startsWith('C') ? 'rating-c' : 'rating-nt';
           const code = findingCodeMap[item.label];
           const codeTag = code ? ` <strong style="color:${RATING_COLORS[ratingLabel] || '#1e3a5f'};">(Finding ${code})</strong>` : '';
 
           html += `
   <div class="item" style="border-left-color: ${RATING_COLORS[ratingLabel] || '#1e3a5f'};">
-    <p><strong>${esc(item.label)}</strong> — <span class="${ratingClass}">${ratingLabel}</span>${codeTag}</p>
+    <p><strong>${esc(item.label)}</strong>${ratingLabel ? ` — <span class="${ratingClass}">${ratingLabel}</span>${codeTag}` : ''}</p>
     ${itemData.text ? `<p>${esc(itemData.text)}</p>` : ''}
     ${itemData.standards && itemData.standards.length > 0 ? `<p class="standards"><strong>Applicable Standards:</strong> ${itemData.standards.join(', ')}</p>` : ''}
   </div>`;

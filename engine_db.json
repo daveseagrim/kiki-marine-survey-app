@@ -1,0 +1,1448 @@
+{
+  "lastUpdated": "2026-04",
+  "engines": [
+    {
+      "make": "Yanmar",
+      "country": "Japan",
+      "type": "Diesel",
+      "models": [
+        {
+          "model": "1GM10",
+          "hp": "9",
+          "kw": "6.6",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.43L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "2GM20",
+          "hp": "18",
+          "kw": "13.4",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.88L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3GM30",
+          "hp": "27",
+          "kw": "20.1",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.34L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3JH40",
+          "hp": "40",
+          "kw": "29.4",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "2.0L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3JH2E",
+          "hp": "39",
+          "kw": "29",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "2.0L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH4-TE",
+          "hp": "54",
+          "kw": "39.7",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.77L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH45",
+          "hp": "45",
+          "kw": "33",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.77L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6LY2-STP",
+          "hp": "110",
+          "kw": "81",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.8L",
+          "engineType": "Inboard"
+        }
+      ]
+    },
+    {
+      "make": "Volvo Penta",
+      "country": "Sweden",
+      "type": "Diesel & Gasoline",
+      "models": [
+        {
+          "model": "D1-13",
+          "hp": "12.2",
+          "kw": "9",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.9L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D1-20",
+          "hp": "18.8",
+          "kw": "13.8",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "1.5L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D1-30",
+          "hp": "27",
+          "kw": "20",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "1.9L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D2-40",
+          "hp": "51",
+          "kw": "37.5",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.2L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D2-50",
+          "hp": "60",
+          "kw": "44",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.2L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D2-55",
+          "hp": "75",
+          "kw": "55",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.2L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D3-110",
+          "hp": "110",
+          "kw": "81",
+          "fuel": "Diesel",
+          "cylinders": "5",
+          "displacement": "2.4L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D3-140",
+          "hp": "140",
+          "kw": "103",
+          "fuel": "Diesel",
+          "cylinders": "5",
+          "displacement": "2.4L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D4-180",
+          "hp": "175",
+          "kw": "128",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "3.7L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D4-210",
+          "hp": "230",
+          "kw": "169",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "3.7L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D4-260",
+          "hp": "270",
+          "kw": "198",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "3.7L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D4-300",
+          "hp": "300",
+          "kw": "220",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "3.7L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D6-310",
+          "hp": "300",
+          "kw": "220",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.5L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D6-370",
+          "hp": "370",
+          "kw": "272",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.5L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "TAMD41A",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "4.0L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "TAMD62A",
+          "hp": "285",
+          "kw": "210",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "6.1L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4.3L Gasoline Sterndrive",
+          "hp": "220",
+          "kw": "161",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.3L",
+          "engineType": "Sterndrive"
+        },
+        {
+          "model": "5.0L Gasoline Sterndrive",
+          "hp": "270",
+          "kw": "198",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.0L",
+          "engineType": "Sterndrive"
+        },
+        {
+          "model": "5.7L Gasoline Sterndrive",
+          "hp": "320",
+          "kw": "235",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive"
+        }
+      ]
+    },
+    {
+      "make": "Mercruiser",
+      "country": "USA",
+      "type": "Gasoline",
+      "models": [
+        {
+          "model": "3.0L",
+          "hp": "150",
+          "kw": "110",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "3.0L",
+          "engineType": "Sterndrive"
+        },
+        {
+          "model": "4.3L",
+          "hp": "220",
+          "kw": "161",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.3L",
+          "engineType": "Sterndrive"
+        },
+        {
+          "model": "5.0L",
+          "hp": "270",
+          "kw": "198",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.0L",
+          "engineType": "Sterndrive"
+        },
+        {
+          "model": "5.7L",
+          "hp": "320",
+          "kw": "235",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive"
+        },
+        {
+          "model": "350 Mag",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive"
+        },
+        {
+          "model": "496 Mag",
+          "hp": "450",
+          "kw": "330",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "8.1L",
+          "engineType": "Sterndrive"
+        },
+        {
+          "model": "8.2L MAG H.O.",
+          "hp": "500",
+          "kw": "367",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "8.2L",
+          "engineType": "Sterndrive"
+        }
+      ]
+    },
+    {
+      "make": "Mercury",
+      "country": "USA",
+      "type": "Gasoline Outboard",
+      "models": [
+        {
+          "model": "15hp",
+          "hp": "15",
+          "kw": "11",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "25hp",
+          "hp": "25",
+          "kw": "18.4",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "40hp",
+          "hp": "40",
+          "kw": "29.4",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "60hp",
+          "hp": "60",
+          "kw": "44",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "75hp",
+          "hp": "75",
+          "kw": "55",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "90hp",
+          "hp": "90",
+          "kw": "66",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "115hp",
+          "hp": "115",
+          "kw": "84.5",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "150hp",
+          "hp": "150",
+          "kw": "110",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "200hp",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "225hp",
+          "hp": "225",
+          "kw": "165",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "250hp Verado",
+          "hp": "250",
+          "kw": "183",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "300hp Verado",
+          "hp": "300",
+          "kw": "220",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "350hp Verado",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Gasoline",
+          "cylinders": "10",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "400hp Verado",
+          "hp": "400",
+          "kw": "294",
+          "fuel": "Gasoline",
+          "cylinders": "10",
+          "engineType": "Outboard"
+        }
+      ]
+    },
+    {
+      "make": "Yamaha",
+      "country": "Japan",
+      "type": "Gasoline Outboard",
+      "models": [
+        {
+          "model": "15hp",
+          "hp": "15",
+          "kw": "11",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "25hp",
+          "hp": "25",
+          "kw": "18.4",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "40hp",
+          "hp": "40",
+          "kw": "29.4",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "60hp",
+          "hp": "60",
+          "kw": "44",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "75hp",
+          "hp": "75",
+          "kw": "55",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "90hp",
+          "hp": "90",
+          "kw": "66",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "115hp",
+          "hp": "115",
+          "kw": "84.5",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "150hp",
+          "hp": "150",
+          "kw": "110",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "200hp",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "250hp",
+          "hp": "250",
+          "kw": "183",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "300hp V6",
+          "hp": "300",
+          "kw": "220",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "350hp V8",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "425hp V8",
+          "hp": "425",
+          "kw": "312",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "engineType": "Outboard"
+        }
+      ]
+    },
+    {
+      "make": "Honda Marine",
+      "country": "Japan",
+      "type": "Gasoline Outboard",
+      "models": [
+        {
+          "model": "8hp",
+          "hp": "8",
+          "kw": "5.9",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "15hp",
+          "hp": "15",
+          "kw": "11",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "20hp",
+          "hp": "20",
+          "kw": "14.7",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "40hp",
+          "hp": "40",
+          "kw": "29.4",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "60hp",
+          "hp": "60",
+          "kw": "44",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "75hp",
+          "hp": "75",
+          "kw": "55",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "90hp",
+          "hp": "90",
+          "kw": "66",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "BF115",
+          "hp": "115",
+          "kw": "84.5",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "BF140",
+          "hp": "140",
+          "kw": "103",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "BF150",
+          "hp": "150",
+          "kw": "110",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "BF200",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "BF225",
+          "hp": "225",
+          "kw": "165",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "BF250",
+          "hp": "250",
+          "kw": "183",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "BF350",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "engineType": "Outboard"
+        }
+      ]
+    },
+    {
+      "make": "Suzuki Marine",
+      "country": "Japan",
+      "type": "Gasoline Outboard",
+      "models": [
+        {
+          "model": "25hp",
+          "hp": "25",
+          "kw": "18.4",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "40hp",
+          "hp": "40",
+          "kw": "29.4",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "60hp",
+          "hp": "60",
+          "kw": "44",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "90hp",
+          "hp": "90",
+          "kw": "66",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "115hp",
+          "hp": "115",
+          "kw": "84.5",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "140hp",
+          "hp": "140",
+          "kw": "103",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "150hp",
+          "hp": "150",
+          "kw": "110",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "200hp",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "250hp",
+          "hp": "250",
+          "kw": "183",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "300hp",
+          "hp": "300",
+          "kw": "220",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "engineType": "Outboard"
+        },
+        {
+          "model": "350hp",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "engineType": "Outboard"
+        }
+      ]
+    },
+    {
+      "make": "Crusader",
+      "country": "USA",
+      "type": "Gasoline Inboard",
+      "models": [
+        {
+          "model": "305 (5.0L)",
+          "hp": "305",
+          "kw": "224",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.0L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "350 XL (5.7L)",
+          "hp": "330",
+          "kw": "242",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "364 (6.0L)",
+          "hp": "375",
+          "kw": "275",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "6.0L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "454 XL (7.4L)",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "7.4L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "502 (8.1L)",
+          "hp": "405",
+          "kw": "297",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "8.1L",
+          "engineType": "Inboard"
+        }
+      ]
+    },
+    {
+      "make": "Cummins",
+      "country": "USA",
+      "type": "Diesel",
+      "models": [
+        {
+          "model": "4B",
+          "hp": "53",
+          "kw": "40",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "3.9L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6B",
+          "hp": "115",
+          "kw": "84.5",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.9L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6BT",
+          "hp": "215",
+          "kw": "158",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.9L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "QSB5.9",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.9L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "QSB6.7",
+          "hp": "400",
+          "kw": "294",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "6.7L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "QSC8.3",
+          "hp": "550",
+          "kw": "404",
+          "fuel": "Diesel",
+          "cylinders": "8",
+          "displacement": "8.3L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "QSM11",
+          "hp": "600",
+          "kw": "441",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "11L",
+          "engineType": "Inboard"
+        }
+      ]
+    },
+    {
+      "make": "Caterpillar",
+      "country": "USA",
+      "type": "Diesel",
+      "models": [
+        {
+          "model": "C7",
+          "hp": "275",
+          "kw": "202",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "10.5L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "C9",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "9.3L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "C12",
+          "hp": "700",
+          "kw": "515",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "12.0L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "C15",
+          "hp": "400",
+          "kw": "294",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "14.6L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3126B",
+          "hp": "330",
+          "kw": "242",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "7.2L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3208",
+          "hp": "280",
+          "kw": "206",
+          "fuel": "Diesel",
+          "cylinders": "8",
+          "displacement": "10.4L",
+          "engineType": "Inboard"
+        }
+      ]
+    },
+    {
+      "make": "Westerbeke",
+      "country": "USA",
+      "type": "Diesel",
+      "models": [
+        {
+          "model": "W10",
+          "hp": "10",
+          "kw": "7.4",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.5L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "W13",
+          "hp": "13.5",
+          "kw": "10",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.98L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "W21",
+          "hp": "21",
+          "kw": "15.5",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.47L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "W27",
+          "hp": "27",
+          "kw": "19.9",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "1.96L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "W40",
+          "hp": "40",
+          "kw": "29.4",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.72L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4-107",
+          "hp": "50",
+          "kw": "36.8",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "3.85L",
+          "engineType": "Inboard"
+        }
+      ]
+    },
+    {
+      "make": "Universal",
+      "country": "USA",
+      "type": "Diesel",
+      "models": [
+        {
+          "model": "M-12",
+          "hp": "11",
+          "kw": "8.1",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.63L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "M-18",
+          "hp": "18",
+          "kw": "13.2",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "0.95L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "M-25",
+          "hp": "23",
+          "kw": "16.9",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.4L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "M-30",
+          "hp": "30",
+          "kw": "22",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "1.85L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "M-35",
+          "hp": "30",
+          "kw": "22",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.33L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "M-40",
+          "hp": "35",
+          "kw": "26",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.6L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "M-50",
+          "hp": "44",
+          "kw": "32.4",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "3.1L",
+          "engineType": "Inboard"
+        }
+      ]
+    },
+    {
+      "make": "Perkins",
+      "country": "UK",
+      "type": "Diesel",
+      "models": [
+        {
+          "model": "4.108",
+          "hp": "51",
+          "kw": "37.5",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "1.77L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4.154",
+          "hp": "68",
+          "kw": "50",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.53L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4.236",
+          "hp": "96",
+          "kw": "71",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "3.87L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6.354",
+          "hp": "120",
+          "kw": "88",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.8L",
+          "engineType": "Inboard"
+        }
+      ]
+    },
+    {
+      "make": "MAN",
+      "country": "Germany",
+      "type": "Diesel",
+      "models": [
+        {
+          "model": "D0834",
+          "hp": "180",
+          "kw": "132",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "4.6L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D0836",
+          "hp": "220",
+          "kw": "161",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.9L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D2676",
+          "hp": "400",
+          "kw": "294",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "12.4L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "D2862",
+          "hp": "900",
+          "kw": "662",
+          "fuel": "Diesel",
+          "cylinders": "12",
+          "displacement": "25.5L",
+          "engineType": "Inboard"
+        }
+      ]
+    }
+  ],
+  "transmissions": [
+    {
+      "make": "ZF Marine",
+      "country": "Germany",
+      "models": [
+        {
+          "model": "ZF 10M",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "ZF 15M",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "ZF 25",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "ZF 25A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.5:1, 2.7:1, 3.0:1"
+        },
+        {
+          "model": "ZF 45A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.5:1, 3.0:1"
+        },
+        {
+          "model": "ZF 63A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.5:1, 3.0:1"
+        },
+        {
+          "model": "ZF 80A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.5:1, 3.0:1"
+        },
+        {
+          "model": "ZF 85A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.5:1, 3.0:1, 3.5:1"
+        }
+      ]
+    },
+    {
+      "make": "Hurth",
+      "country": "Germany",
+      "models": [
+        {
+          "model": "HBW 5",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1"
+        },
+        {
+          "model": "HBW 10",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "HBW 20",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "HBW 50",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.5:1, 3.0:1"
+        },
+        {
+          "model": "HBW 100",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.5:1, 3.0:1"
+        },
+        {
+          "model": "HBW 150",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.5:1, 3.0:1"
+        },
+        {
+          "model": "HBW 250",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.5:1, 3.0:1, 3.5:1"
+        }
+      ]
+    },
+    {
+      "make": "Twin Disc",
+      "country": "USA",
+      "models": [
+        {
+          "model": "MG-502",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "hp_rating": "70-386",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "MG-506",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "hp_rating": "150-600",
+          "ratios": "2.5:1, 3.0:1"
+        },
+        {
+          "model": "MG-507",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "hp_rating": "250-900",
+          "ratios": "2.5:1, 3.0:1, 3.5:1"
+        },
+        {
+          "model": "MG-509",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "hp_rating": "500-2000",
+          "ratios": "1.5:1, 2.0:1, 2.5:1, 3.0:1, 4.5:1"
+        },
+        {
+          "model": "MG-5050",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "hp_rating": "150-600",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "MG-5075",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "hp_rating": "500-2000",
+          "ratios": "2.0:1, 2.5:1, 3.0:1, 3.5:1"
+        }
+      ]
+    },
+    {
+      "make": "Borg-Warner",
+      "country": "USA",
+      "models": [
+        {
+          "model": "71C",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "72C",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.5:1, 3.0:1"
+        }
+      ]
+    },
+    {
+      "make": "Velvet Drive",
+      "country": "USA",
+      "models": [
+        {
+          "model": "71C",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "72C",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.5:1, 3.0:1"
+        }
+      ]
+    },
+    {
+      "make": "Technodrive",
+      "country": "Germany",
+      "models": [
+        {
+          "model": "TM 93",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.5:1"
+        },
+        {
+          "model": "TM 170",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "TM 345",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.5:1, 3.0:1"
+        },
+        {
+          "model": "TM 485",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.0:1, 2.5:1, 3.0:1, 3.5:1"
+        }
+      ]
+    },
+    {
+      "make": "Volvo Penta",
+      "country": "Sweden",
+      "models": [
+        {
+          "model": "MS (Mechanical Shaft)",
+          "type": "Mechanical",
+          "transmission_type": "Manual Shaft Drive",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "DP (Drive Package)",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Sterndrive",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "IPS (Inboard Performance System)",
+          "type": "Hydraulic",
+          "transmission_type": "Pod Drive",
+          "ratios": "2.0:1, 2.5:1"
+        }
+      ]
+    },
+    {
+      "make": "Mercruiser",
+      "country": "USA",
+      "models": [
+        {
+          "model": "Alpha One",
+          "type": "Mechanical",
+          "transmission_type": "Sterndrive",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "Bravo One",
+          "type": "Hydraulic",
+          "transmission_type": "Sterndrive",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "Bravo Two",
+          "type": "Hydraulic",
+          "transmission_type": "Sterndrive",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "Bravo Three",
+          "type": "Hydraulic",
+          "transmission_type": "Sterndrive",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        }
+      ]
+    }
+  ]
+}
