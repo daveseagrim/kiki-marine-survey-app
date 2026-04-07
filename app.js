@@ -370,6 +370,126 @@ async function deletePhoto(photoId) {
   });
 }
 
+// ─── Export / Import Surveys ────────────────────────────────────────────────
+
+async function exportSurvey(surveyId) {
+  try {
+    const survey = await getSurvey(surveyId);
+    if (!survey) { alert('Survey not found'); return; }
+
+    // Gather all photos for this survey
+    const photos = await new Promise((resolve) => {
+      const tx = db.transaction(['photos'], 'readonly');
+      const store = tx.objectStore('photos');
+      const index = store.index('surveyId');
+      const range = IDBKeyRange.only(surveyId);
+      const results = [];
+      index.openCursor(range).onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+          results.push(cursor.value);
+          cursor.continue();
+        } else {
+          resolve(results);
+        }
+      };
+    });
+
+    const exportData = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      appVersion: 'kiki-marine-v31',
+      survey: survey,
+      photos: photos
+    };
+
+    const json = JSON.stringify(exportData);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const vesselName = (survey.vesselName || 'survey').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const filename = `${vesselName}_${dateStr}.kikisurvey`;
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    // Show brief success message
+    showToast(`Exported: ${filename}`);
+  } catch (err) {
+    console.error('Export error:', err);
+    alert('Export failed: ' + err.message);
+  }
+}
+
+async function importSurvey() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.kikisurvey,.json';
+
+  input.onchange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      if (!data.survey || !data.version) {
+        alert('This file does not appear to be a valid Kiki Marine survey export.');
+        return;
+      }
+
+      const survey = data.survey;
+      const photos = data.photos || [];
+
+      // Check if survey already exists
+      const existing = await getSurvey(survey.id);
+      if (existing) {
+        const replace = confirm(
+          `A survey for "${existing.vesselName || 'Unnamed'}" already exists on this device.\n\nReplace it with the imported version?`
+        );
+        if (!replace) return;
+        // Delete existing photos first
+        await deleteSurvey(survey.id);
+      }
+
+      // Save the survey
+      await saveSurvey(survey);
+
+      // Save all photos
+      for (const photo of photos) {
+        await savePhoto(photo);
+      }
+
+      showToast(`Imported: ${survey.vesselName || 'Survey'} (${photos.length} photo${photos.length !== 1 ? 's' : ''})`);
+      renderHome();
+    } catch (err) {
+      console.error('Import error:', err);
+      alert('Import failed: ' + err.message);
+    }
+  };
+
+  input.click();
+}
+
+function showToast(message) {
+  const existing = document.getElementById('toast-msg');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'toast-msg';
+  toast.textContent = message;
+  toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1e3a5f;color:white;padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
 // Find applicable standards for a category/rating
 // Uses longest-key-wins: more specific keys take precedence over shorter keys
 // e.g. "Pilot house gauges" beats "Pilot house" for "Pilot house gauges and instrumentation"
@@ -782,16 +902,22 @@ function renderHome() {
   getAllSurveys().then(surveys => {
     const content = document.getElementById('surveys-content');
 
+    // Import button always visible at top
+    const importBtn = `<div style="text-align:right;margin-bottom:12px;">
+        <button class="btn-secondary" style="font-size:13px;padding:8px 16px;" onclick="importSurvey()">📥 Import Survey</button>
+      </div>`;
+
     if (surveys.length === 0) {
       content.innerHTML = `
+        ${importBtn}
         <div class="empty-state">
           <div class="empty-icon">⛵</div>
           <h2>No Surveys Yet</h2>
-          <p>Create your first survey to get started</p>
+          <p>Create your first survey or import one from another device</p>
         </div>
       `;
     } else {
-      let html = '<div style="margin-bottom: 120px;">';
+      let html = importBtn + '<div style="margin-bottom: 120px;">';
       surveys.forEach(survey => {
         const date = new Date(survey.createdAt).toLocaleDateString();
         const completion = getCompletionPercentage(survey);
@@ -809,7 +935,10 @@ function renderHome() {
               <div class="progress-fill" style="width: ${completion}%; background-color: #1e3a5f;"></div>
             </div>
             <div class="completion-text">${completion}% complete</div>
-            <button class="btn-secondary" style="margin-top: 12px; width: 100%;" onclick="event.stopPropagation(); deleteSurveyConfirm('${survey.id}')">Delete</button>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="btn-secondary" style="flex:1;" onclick="event.stopPropagation(); exportSurvey('${survey.id}')">📤 Export</button>
+              <button class="btn-secondary" style="flex:1;color:#dc2626;" onclick="event.stopPropagation(); deleteSurveyConfirm('${survey.id}')">🗑 Delete</button>
+            </div>
           </div>
         `;
       });
