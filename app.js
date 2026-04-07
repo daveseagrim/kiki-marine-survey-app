@@ -2779,14 +2779,19 @@ function renderInspection(survey) {
 
   const app = document.getElementById('app');
 
+  const surveyTypeBanner = survey.surveyType
+    ? `<div style="background:${survey.surveyType === 'Insurance survey' ? '#f59e0b' : '#1e3a5f'};color:#fff;text-align:center;font-size:12px;font-weight:700;padding:4px 0;letter-spacing:0.5px;">${(survey.surveyType || '').toUpperCase()}</div>`
+    : '';
+
   app.innerHTML = `
     <div class="header">
       <button class="header-back" onclick="backToHome()">←</button>
       <div>
         <div class="header-title">${survey.vesselName}</div>
-        <div class="header-subtitle">${survey.surveyType === 'Insurance survey' ? '<span style="background:#f59e0b;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;margin-right:4px;">INS</span>' : ''}Inspection</div>
+        <div class="header-subtitle">Inspection</div>
       </div>
     </div>
+    ${surveyTypeBanner}
     <div class="content" id="inspection-content">
       <div style="text-align: center; padding: 20px;">Loading inspection items...</div>
     </div>
@@ -3983,7 +3988,8 @@ async function generateReport() {
   <!-- Export toolbar (hidden when printing) -->
   <div id="exportToolbar" style="position:sticky;top:0;z-index:999;background:#1e3a5f;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:3px solid #f0c040;margin:-20px -20px 16px -20px;padding:12px 24px;">
     <span style="color:white;font-size:11pt;font-weight:bold;">Kiki Marine — Survey Report</span>
-    <div style="display:flex;gap:8px;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button onclick="window.close(); if(!window.closed) history.back();" style="background:#4ade80;color:#1e3a5f;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">← Back to Inspection</button>
       <button onclick="window.print()" style="background:#fff;color:#1e3a5f;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">🖨️ Print / PDF</button>
       <button onclick="exportToWord()" style="background:#f0c040;color:#1e3a5f;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">📥 Download as Word</button>
       <button onclick="toggleProseMode()" id="proseModeBtn" style="background:#e5e7eb;color:#333;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">📝 Prose Mode</button>
