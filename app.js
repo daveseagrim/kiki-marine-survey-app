@@ -4411,6 +4411,25 @@ if ('serviceWorker' in navigator) {
 // Init app
 async function initApp() {
   try {
+    // Suppress iOS autofill bar (keys, credit card, location, checkmark)
+    // by setting autocomplete="off" on all inputs as they're created
+    const disableAutofill = (el) => {
+      el.setAttribute('autocomplete', 'off');
+      el.setAttribute('autocorrect', 'off');
+      el.setAttribute('autocapitalize', 'off');
+    };
+    new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        for (const node of m.addedNodes) {
+          if (node.nodeType !== 1) continue;
+          if (node.tagName === 'INPUT' || node.tagName === 'TEXTAREA') disableAutofill(node);
+          if (node.querySelectorAll) {
+            node.querySelectorAll('input, textarea').forEach(disableAutofill);
+          }
+        }
+      }
+    }).observe(document.body, { childList: true, subtree: true });
+
     await initDB();
     await fetchDataFiles();
     renderHome();
