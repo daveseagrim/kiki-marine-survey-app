@@ -2631,11 +2631,6 @@ function startNewSurvey() {
   });
 }
 
-function renderInspection(survey) {
-  // Remove any existing fab buttons from home or other views
-  const existingFab = document.querySelector('.fab');
-  if (existingFab) existingFab.remove();
-
 // ─── Rating tooltip guidance ──────────────────────────────────────────────
 function getRatingTooltip(rating) {
   const tips = {
@@ -2748,6 +2743,12 @@ function collectComparables() {
   });
   return comps;
 }
+
+function renderInspection(survey) {
+  // Remove any existing fab buttons from home or other views
+  const existingFab = document.querySelector('.fab');
+  if (existingFab) existingFab.remove();
+
   currentView = 'inspection';
   currentSurveyId = survey.id;
   history.pushState({ view: 'inspection', surveyId: survey.id }, '');
