@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v52';
+const CACHE_NAME = 'kiki-marine-v53';
 const URLS_TO_CACHE = [
   './',
   'index.html',

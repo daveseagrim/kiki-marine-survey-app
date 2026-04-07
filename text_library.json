@@ -1660,7 +1660,7 @@
   ],
   "Flybridge": [
     {
-      "section": null,
+      "section": "Flybridge",
       "rating": "C",
       "text": "The ladder was solidly mounted and serviceable"
     },
@@ -1872,17 +1872,17 @@
   ],
   "Flybridge gauges and instrument": [
     {
-      "section": null,
+      "section": "Flybridge gauges and instruments",
       "rating": "A",
       "text": "The blower fan was functional. The venting from the fan was damaged in several places and requires repair to restore proper airflow."
     },
     {
-      "section": null,
+      "section": "Flybridge gauges and instruments",
       "rating": "B",
       "text": "The engine compartment blower was not functional. While not required for diesel engines, the blower assists with heat removal. Repair is recommended to ensure adequate ventilation."
     },
     {
-      "section": null,
+      "section": "Flybridge gauges and instruments",
       "rating": "C",
       "text": "The blower operated properly and vent tubing was clear and intact from the fan to the outside."
     },

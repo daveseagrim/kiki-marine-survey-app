@@ -232,7 +232,12 @@ const SHEET_MAPPING = {
   'Steering and hydraulics': 'Steering & Hydraulics',
   'Electrical': 'Electrical',
   'Electrical, other items': 'Electrical',
-  'Safety': 'Safety & Nav Equipment'
+  'Safety': 'Safety & Nav Equipment',
+  'Pilot house': 'Cockpit',
+  'Pilot house gauges and instrumentation': 'Gauges and Instrumentation',
+  'Sails': 'Spars and rigging',
+  'On board equipment': 'Safety & Nav Equipment',
+  'Vessel documentation and regulatory compliance': 'Hull'
 };
 
 // Init IndexedDB
@@ -1629,8 +1634,10 @@ function onEngineMakeChange() {
 
 function onEngineModelChange() {
   if (!engineDb) return;
-  const makeVal = document.getElementById('engineMake').value;
+  const makeEl = document.getElementById('engineMake');
   const modelSelect = document.getElementById('engineModel');
+  if (!makeEl || !modelSelect) return;
+  const makeVal = makeEl.value;
   const modelVal = modelSelect.value;
 
   // "Other" — swap to text input
@@ -1659,6 +1666,7 @@ function onEngineModelChange() {
 function onTransmissionMakeChange() {
   if (!engineDb) return;
   const select = document.getElementById('transmissionMake');
+  if (!select) return;
   const makeVal = select.value;
 
   if (makeVal === '__other__') {
@@ -1701,6 +1709,7 @@ function onTransmissionMakeChange() {
 function onTransmissionModelChange() {
   if (!engineDb) return;
   const modelSelect = document.getElementById('transmissionModel');
+  if (!modelSelect) return;
   const modelVal = modelSelect.value;
 
   if (modelVal === '__other__') {
@@ -2227,8 +2236,9 @@ function checkSpecsOnBlur() {
       const b = r.boat;
       const label = `${b.make} ${b.model}${b.yearStart ? ' (' + b.yearStart + (b.yearEnd ? '–' + b.yearEnd : '+') + ')' : ''}`;
       const yearRange = b.yearStart ? `${b.yearStart}–${b.yearEnd || 'present'}` : '';
+      const safeId = b.id.replace(/'/g, "\\'");
       optionsHtml += `
-        <button onclick="window._pendingSpecs=boatSpecsDB.boats.find(x=>x.id==='${b.id}');applyPendingSpecs();document.getElementById('specsBanner').remove();"
+        <button onclick="window._pendingSpecs=boatSpecsDB.boats.find(x=>x.id==='${safeId}');applyPendingSpecs();document.getElementById('specsBanner').remove();"
                 style="display:block;width:100%;text-align:left;background:${i === 0 ? '#ecfdf5' : 'white'};border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;margin:4px 0;cursor:pointer;font-size:13px;">
           <strong>${label}</strong>
           <span style="color:#6b7280;margin-left:8px;">${b.loa || ''} LOA${b.beam ? ' · ' + b.beam + ' beam' : ''}</span>
@@ -2558,38 +2568,38 @@ function lookupComparables() {
 
 function startNewSurvey() {
   const formData = {
-    vesselName: document.getElementById('vesselName').value,
-    yearMakeModel: document.getElementById('yearMakeModel').value,
-    clientName: document.getElementById('clientName').value,
-    surveyDate: document.getElementById('surveyDate').value,
-    location: document.getElementById('location').value,
+    vesselName: document.getElementById('vesselName')?.value || '',
+    yearMakeModel: document.getElementById('yearMakeModel')?.value || '',
+    clientName: document.getElementById('clientName')?.value || '',
+    surveyDate: document.getElementById('surveyDate')?.value || '',
+    location: document.getElementById('location')?.value || '',
     locationLat: window._surveyLat || null,
     locationLon: window._surveyLon || null,
-    surveyType: document.getElementById('surveyType').value,
+    surveyType: document.getElementById('surveyType')?.value || '',
 
     vesselType: document.getElementById('vesselType')?.value || 'power',
     boatStyle: document.getElementById('boatStyle')?.value || '',
-    hullType: document.getElementById('hullType').value,
-    loa: document.getElementById('loa').value,
-    lwl: document.getElementById('lwl').value,
-    beam: document.getElementById('beam').value,
-    displacement: document.getElementById('displacement').value,
-    ballast: document.getElementById('ballast').value,
-    maxDraft: document.getElementById('maxDraft').value,
-    totalSailArea: document.getElementById('totalSailArea').value,
-    construction: document.getElementById('construction').value,
-    keelType: document.getElementById('keelType').value,
-    numberCabins: document.getElementById('numberCabins').value,
-    electricalSystem: document.getElementById('electricalSystem').value,
-    changesToPlan: document.getElementById('changesToPlan').value,
+    hullType: document.getElementById('hullType')?.value || '',
+    loa: document.getElementById('loa')?.value || '',
+    lwl: document.getElementById('lwl')?.value || '',
+    beam: document.getElementById('beam')?.value || '',
+    displacement: document.getElementById('displacement')?.value || '',
+    ballast: document.getElementById('ballast')?.value || '',
+    maxDraft: document.getElementById('maxDraft')?.value || '',
+    totalSailArea: document.getElementById('totalSailArea')?.value || '',
+    construction: document.getElementById('construction')?.value || '',
+    keelType: document.getElementById('keelType')?.value || '',
+    numberCabins: document.getElementById('numberCabins')?.value || '',
+    electricalSystem: document.getElementById('electricalSystem')?.value || '',
+    changesToPlan: document.getElementById('changesToPlan')?.value || '',
 
-    personsInAttendance: document.getElementById('personsInAttendance').value,
-    reportDate: document.getElementById('reportDate').value,
-    weather: document.getElementById('weather').value,
-    onLandOrWater: document.getElementById('onLandOrWater').value,
-    seaTrial: document.getElementById('seaTrial').value,
-    powerAtTime: document.getElementById('powerAtTime').value,
-    waterAtTime: document.getElementById('waterAtTime').value,
+    personsInAttendance: document.getElementById('personsInAttendance')?.value || '',
+    reportDate: document.getElementById('reportDate')?.value || '',
+    weather: document.getElementById('weather')?.value || '',
+    onLandOrWater: document.getElementById('onLandOrWater')?.value || '',
+    seaTrial: document.getElementById('seaTrial')?.value || '',
+    powerAtTime: document.getElementById('powerAtTime')?.value || '',
+    waterAtTime: document.getElementById('waterAtTime')?.value || '',
     storageDetails: document.getElementById('storageDetails')?.value || '',
 
     engineMake: document.getElementById('engineMake')?.value || '',
@@ -2606,22 +2616,22 @@ function startNewSurvey() {
     bilgePumps: collectBilgePumps(),
     comparables: collectComparables(),
 
-    vesselDescription: document.getElementById('vesselDescription').value,
+    vesselDescription: document.getElementById('vesselDescription')?.value || '',
 
-    tcLicenseType: document.getElementById('tcLicenseType').value,
-    tcLicense: document.getElementById('tcLicense').value,
-    hinNumber: document.getElementById('hinNumber').value,
-    taxStatus: document.getElementById('taxStatus').value,
-    compliancePlate: document.getElementById('compliancePlate').value,
+    tcLicenseType: document.getElementById('tcLicenseType')?.value || '',
+    tcLicense: document.getElementById('tcLicense')?.value || '',
+    hinNumber: document.getElementById('hinNumber')?.value || '',
+    taxStatus: document.getElementById('taxStatus')?.value || '',
+    compliancePlate: document.getElementById('compliancePlate')?.value || '',
 
-    valuationLow: document.getElementById('valuationLow').value,
-    valuationHigh: document.getElementById('valuationHigh').value,
-    exchangeRate: parseFloat(document.getElementById('exchangeRate').value) || 1.35,
+    valuationLow: document.getElementById('valuationLow')?.value || '',
+    valuationHigh: document.getElementById('valuationHigh')?.value || '',
+    exchangeRate: parseFloat(document.getElementById('exchangeRate')?.value) || 1.35,
     valuationSources: Array.from(document.querySelectorAll('.val-source:checked')).map(cb => cb.value),
     valuationSource: Array.from(document.querySelectorAll('.val-source:checked')).map(cb => cb.value).join(', '),
-    valuationRationale: document.getElementById('valuationRationale').value,
-    replacementCost: document.getElementById('replacementCost').value,
-    overallCondition: document.getElementById('overallCondition').value
+    valuationRationale: document.getElementById('valuationRationale')?.value || '',
+    replacementCost: document.getElementById('replacementCost')?.value || '',
+    overallCondition: document.getElementById('overallCondition')?.value || ''
   };
 
   const survey = createNewSurvey(formData);
@@ -3508,11 +3518,12 @@ function saveItemData(itemLabel, categoryName) {
 
 function toggleAccordion(button) {
   const content = button.nextElementSibling;
+  if (!content) return;
   const isOpen = content.style.display !== 'none';
   content.style.display = isOpen ? 'none' : 'block';
 
   const chevron = button.querySelector('span:last-child');
-  chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+  if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
 }
 
 function viewPhotoAnnotation(photoId) {
@@ -3895,7 +3906,7 @@ async function generateReport() {
         font-family: Arial, Helvetica, sans-serif;
       }
       @bottom-left {
-        content: "${esc(survey.vesselName)}";
+        content: "${esc(survey.vesselName || 'Vessel Survey')}";
         font-size: 8pt;
         color: #666;
         font-family: Arial, Helvetica, sans-serif;
@@ -4122,11 +4133,11 @@ async function generateReport() {
   <!-- ═══ GENERAL VESSEL INFORMATION ═══ -->
   <h2>GENERAL VESSEL INFORMATION</h2>
   <table>
-    <tr><td style="width:40%;"><strong>Type of Survey Requested</strong></td><td>${esc(survey.surveyType)}</td></tr>
+    <tr><td style="width:40%;"><strong>Type of Survey Requested</strong></td><td>${esc(survey.surveyType) || 'N/A'}</td></tr>
     <tr><td><strong>Date of Survey Inspection</strong></td><td>${survey.surveyDate || 'N/A'}</td></tr>
     <tr><td><strong>Date of Report</strong></td><td>${reportDate}</td></tr>
-    <tr><td><strong>Vessel Name</strong></td><td>${esc(survey.vesselName)}</td></tr>
-    <tr><td><strong>Year/Make/Model</strong></td><td>${esc(survey.yearMakeModel)}</td></tr>
+    <tr><td><strong>Vessel Name</strong></td><td>${esc(survey.vesselName) || 'N/A'}</td></tr>
+    <tr><td><strong>Year/Make/Model</strong></td><td>${esc(survey.yearMakeModel) || 'N/A'}</td></tr>
     <tr><td><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
     ${(survey.tcLicense || survey.tcLicenseType) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}</td></tr>` : ''}
     <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
