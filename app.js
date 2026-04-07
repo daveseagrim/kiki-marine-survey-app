@@ -1007,7 +1007,7 @@ function renderNewSurveyForm() {
       <div class="form-group">
         <label class="form-label">Year / Make / Model *</label>
         <input type="text" id="yearMakeModel" placeholder="e.g., 2015 Beneteau Oceanis 46"
-               onblur="checkSpecsOnBlur()">
+               onblur="checkSpecsOnBlur()" oninput="checkSpecsDebounced()">
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Tip: Enter year, make and model — specs may auto-fill from built-in database</div>
       </div>
 
@@ -2039,6 +2039,13 @@ function applyBoatSpecs(specs) {
 // Check for specs on model field blur and show banner if found
 // Store the last matched specs globally so we don't need to embed JSON in HTML attributes
 let _pendingSpecs = null;
+
+// Debounced version — updates the picker as you type (500ms delay)
+let _specsDebounceTimer = null;
+function checkSpecsDebounced() {
+  clearTimeout(_specsDebounceTimer);
+  _specsDebounceTimer = setTimeout(() => checkSpecsOnBlur(), 500);
+}
 
 function checkSpecsOnBlur() {
   const input = document.getElementById('yearMakeModel')?.value || '';
