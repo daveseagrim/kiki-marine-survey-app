@@ -2863,16 +2863,16 @@ function collectComparables() {
     }
   });
 
-  // Add report button
+  // Add floating report preview button
   if (!document.getElementById('reportBtn')) {
     const fab = document.querySelector('.fab');
     if (fab) fab.remove();
 
     const reportBtn = document.createElement('button');
     reportBtn.id = 'reportBtn';
-    reportBtn.className = 'fab';
-    reportBtn.innerHTML = '📄';
-    reportBtn.onclick = generateReport;
+    reportBtn.style.cssText = 'position:fixed;bottom:calc(20px + env(safe-area-inset-bottom, 0px));right:calc(20px + env(safe-area-inset-right, 0px));background:#1e3a5f;color:white;border:none;border-radius:28px;padding:12px 18px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:100;cursor:pointer;';
+    reportBtn.innerHTML = '📄 Preview Report';
+    reportBtn.onclick = () => generateReport();
     document.body.appendChild(reportBtn);
   }
 }
