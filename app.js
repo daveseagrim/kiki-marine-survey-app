@@ -1853,13 +1853,40 @@ function findBoatSpecsAll(input) {
       const candWords = cand.split(/\s+/).filter(w => w.length > 1);
 
       // Score: how many search words match a candidate word (order-agnostic)
+      // Numbers must match exactly to avoid "38" matching "380"
+      // Text words use substring matching + typo tolerance (edit distance ≤ 2)
+      const isNumeric = (w) => /^\d+$/.test(w);
+      const editDist = (a, b) => {
+        if (Math.abs(a.length - b.length) > 2) return 3; // quick reject
+        const m = a.length, n = b.length;
+        const dp = Array.from({length: m + 1}, (_, i) => {
+          const row = new Array(n + 1);
+          row[0] = i;
+          return row;
+        });
+        for (let j = 0; j <= n; j++) dp[0][j] = j;
+        for (let i = 1; i <= m; i++)
+          for (let j = 1; j <= n; j++)
+            dp[i][j] = Math.min(dp[i-1][j] + 1, dp[i][j-1] + 1, dp[i-1][j-1] + (a[i-1] !== b[j-1] ? 1 : 0));
+        return dp[m][n];
+      };
+      const wordsMatch = (a, b) => {
+        if (isNumeric(a) || isNumeric(b)) {
+          return a === b;
+        }
+        // Exact substring match
+        if (a.includes(b) || b.includes(a)) return true;
+        // Typo tolerance: allow edit distance ≤ 2 for words of 4+ chars
+        if (a.length >= 4 && b.length >= 4 && editDist(a, b) <= 2) return true;
+        return false;
+      };
       let matchedSearch = 0;
       let matchedCand = 0;
       for (const sw of searchWords) {
-        if (candWords.some(cw => cw.includes(sw) || sw.includes(cw))) matchedSearch++;
+        if (candWords.some(cw => wordsMatch(sw, cw))) matchedSearch++;
       }
       for (const cw of candWords) {
-        if (searchWords.some(sw => sw.includes(cw) || cw.includes(sw))) matchedCand++;
+        if (searchWords.some(sw => wordsMatch(sw, cw))) matchedCand++;
       }
       // Combined score: average of how much of the search matched AND how much of the candidate matched
       const score = (matchedSearch / searchWords.length + matchedCand / candWords.length) / 2;
@@ -1930,6 +1957,16 @@ function findBoatValues(input) {
 
 // Apply found specs to the form fields
 function applyBoatSpecs(specs) {
+  // Clear all spec fields first so old values don't persist when switching boats
+  const allFields = ['loa', 'lwl', 'beam', 'displacement', 'ballast', 'maxDraft', 'totalSailArea', 'construction'];
+  for (const id of allFields) {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  }
+  // Remove any existing draft variant note
+  const existingVariantNote = document.getElementById('draftVariantNote');
+  if (existingVariantNote) existingVariantNote.remove();
+
   const fields = {
     loa: specs.loa, lwl: specs.lwl, beam: specs.beam,
     displacement: specs.displacement, ballast: specs.ballast,
@@ -1940,16 +1977,22 @@ function applyBoatSpecs(specs) {
     const el = document.getElementById(id);
     if (el && val) el.value = val;
   }
-  // Set dropdowns
+  // Reset and set dropdowns
   const hullEl = document.getElementById('hullType');
-  if (hullEl && specs.hullType) {
-    const opt = Array.from(hullEl.options).find(o => o.value === specs.hullType);
-    if (opt) hullEl.value = specs.hullType;
+  if (hullEl) {
+    hullEl.value = '';
+    if (specs.hullType) {
+      const opt = Array.from(hullEl.options).find(o => o.value === specs.hullType);
+      if (opt) hullEl.value = specs.hullType;
+    }
   }
   const keelEl = document.getElementById('keelType');
-  if (keelEl && specs.keelType) {
-    const opt = Array.from(keelEl.options).find(o => o.value === specs.keelType);
-    if (opt) keelEl.value = specs.keelType;
+  if (keelEl) {
+    keelEl.value = '';
+    if (specs.keelType) {
+      const opt = Array.from(keelEl.options).find(o => o.value === specs.keelType);
+      if (opt) keelEl.value = specs.keelType;
+    }
   }
 
   // Auto-set vessel type from specs database type field
