@@ -3320,7 +3320,7 @@ function renderInspection(survey) {
     const progressColor = isComplete ? '#16a34a' : '#dc2626';
 
     html += `
-      <div class="category-accordion">
+      <div class="category-accordion" data-category-name="${categoryName.replace(/"/g, '&quot;')}">
         <button class="accordion-header" onclick="toggleAccordion(this)">
           ${incompleteDot}
           <span class="category-title">${categoryName}${flaggedCount > 0 ? ` <span style="color:#f59e0b;font-size:12px;">🚩${flaggedCount}</span>` : ''}${excludedCount > 0 ? ` <span style="color:#9ca3af;font-size:12px;">⊘${excludedCount}</span>` : ''}</span>
@@ -3343,7 +3343,7 @@ function renderInspection(survey) {
 
       const isExcluded = itemData.excluded;
       html += `
-        <div class="rated-item" style="${isExcluded ? 'opacity:0.5;border-left:4px solid #d1d5db;' : itemData.flagged ? 'border-left:4px solid #f59e0b;' : ''}">
+        <div class="rated-item" data-item-label="${item.label.replace(/"/g, '&quot;')}" style="${isExcluded ? 'opacity:0.5;border-left:4px solid #d1d5db;' : itemData.flagged ? 'border-left:4px solid #f59e0b;' : ''}">
           <div class="item-name" style="${isExcluded ? 'text-decoration:line-through;color:#9ca3af;' : ''}">${itemData.flagged ? '🚩 ' : ''}${isExcluded ? '⊘ ' : ''}${item.label}</div>
 
           <div class="rating-options">
@@ -3724,36 +3724,14 @@ async function capturePhoto(itemLabel, event) {
 
   const reader = new FileReader();
   reader.onload = async (e) => {
-    const photoId = `${currentSurveyId}_${Date.now()}`;
-    const photo = {
-      id: photoId,
-      surveyId: currentSurveyId,
-      itemLabel: itemLabel,
-      dataUrl: e.target.result,
-      annotated: false,
-      createdAt: new Date().toISOString()
-    };
-
-    await savePhoto(photo);
-
-    // Update survey
-    const survey = await getSurvey(currentSurveyId);
-    if (!survey.items[itemLabel]) {
-      survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
-    }
-    if (!survey.items[itemLabel].photos) {
-      survey.items[itemLabel].photos = [];
-    }
-    survey.items[itemLabel].photos.push(photoId);
-    await saveSurvey(survey);
-
-    // Refresh inspection view
-    renderInspection(survey);
+    // Add date stamp, then show preview modal with editing tools (same as doc photos)
+    const stampedDataUrl = await addDateStampToPhoto(e.target.result);
+    // Use a special fieldKey prefix to distinguish checklist photos from doc photos
+    const fieldKey = `_checklist_${itemLabel}`;
+    showPhotoPreviewModal(fieldKey, itemLabel, stampedDataUrl, file.type);
   };
 
   reader.readAsDataURL(file);
-
-  // Reset input
   event.target.value = '';
 }
 
@@ -4111,6 +4089,39 @@ async function confirmPhotoPreview(fieldKey, label) {
   const finalDataUrl = await bakePhotoEdits(data.stampedDataUrl, data.brightness || 100, data.contrast || 100, data.rotation || 0);
   data.stampedDataUrl = finalDataUrl;
 
+  // Check if this is a checklist item photo (vs a doc photo like HIN plate)
+  if (fieldKey.startsWith('_checklist_')) {
+    const itemLabel = fieldKey.replace('_checklist_', '');
+    const photoId = `${currentSurveyId}_${Date.now()}`;
+    const photo = {
+      id: photoId,
+      surveyId: currentSurveyId,
+      itemLabel: itemLabel,
+      dataUrl: data.stampedDataUrl,
+      annotated: false,
+      createdAt: new Date().toISOString()
+    };
+
+    await savePhoto(photo);
+
+    // Update survey
+    const survey = await getSurvey(currentSurveyId);
+    if (!survey.items[itemLabel]) {
+      survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+    }
+    if (!survey.items[itemLabel].photos) {
+      survey.items[itemLabel].photos = [];
+    }
+    survey.items[itemLabel].photos.push(photoId);
+    await saveSurvey(survey);
+
+    // Update just this item in place (no full re-render)
+    updateItemInPlace(survey, itemLabel);
+    window._pendingPhotoData = null;
+    return;
+  }
+
+  // Doc photo flow (HIN plate, compliance plate, etc.)
   if (currentSurveyId) {
     // Survey exists — save photo to IndexedDB and link to survey
     const photoId = `${currentSurveyId}_doc_${fieldKey}_${Date.now()}`;
@@ -4286,6 +4297,233 @@ async function loadDocPhotoPreview(fieldKey) {
   }
 }
 
+// Build the inner HTML for a single rated item (used by both renderInspection and selectRating)
+function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
+  const safeLabel = itemLabel.replace(/'/g, "\\'");
+  const safeCat = categoryName.replace(/'/g, "\\'");
+  const isExcluded = itemData.excluded;
+  const isFlagged = itemData.flagged;
+
+  let html = `
+    <div class="item-name" style="${isExcluded ? 'text-decoration:line-through;color:#9ca3af;' : ''}">${isFlagged ? '🚩 ' : ''}${isExcluded ? '⊘ ' : ''}${itemLabel}</div>
+    <div class="rating-options">
+  `;
+
+  // Rating buttons
+  options.forEach(option => {
+    const isActive = itemData.rating === option;
+    const color = RATING_COLORS[option];
+    html += `
+      <button class="rating-btn ${isActive ? 'active' : ''}"
+              style="${isActive ? `background-color: ${color}; border-color: ${color};` : ''}"
+              title="${getRatingTooltip(option)}"
+              onclick="selectRating('${safeLabel}', '${safeCat}', '${option}')">
+        ${option}
+      </button>
+    `;
+  });
+
+  html += `</div>`;
+
+  // Text snippet cards (tap to insert)
+  if (itemData.rating && ['A - Critical', 'B - Needs Attention', 'C - Serviceable', 'Powered up only', 'Not tested / not verified', 'Not applicable'].includes(itemData.rating)) {
+    const baseRating = itemData.rating.charAt(0);
+    const variants = findTextVariants(categoryName, itemLabel, baseRating);
+
+    if (variants.length > 0) {
+      html += `
+        <div class="form-group">
+          <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>📋 Quick Insert (${variants.length} snippet${variants.length > 1 ? 's' : ''})</span>
+            <button class="btn-secondary" style="font-size:11px;padding:2px 8px;" onclick="toggleSnippets('${safeLabel}')">Show/Hide</button>
+          </label>
+          <div id="snippets-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}" style="display:none;max-height:300px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;">
+      `;
+      variants.forEach((variant, idx) => {
+        const preview = variant.text.length > 120 ? variant.text.substring(0, 120) + '…' : variant.text;
+        const escapedText = variant.text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+        const ratingBadge = variant.rating || baseRating;
+        const isActive = itemData.text === variant.text;
+        html += `
+            <div class="snippet-card" style="padding:10px 12px;border-bottom:1px solid #e5e7eb;cursor:pointer;${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}"
+                 onclick="insertSnippet('${safeLabel}', '${safeCat}', '${escapedText}')">
+              <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
+                <span style="font-size:12px;color:#333;line-height:1.4;">${preview}</span>
+                <span style="flex-shrink:0;font-size:10px;background:#e5e7eb;color:#374151;padding:2px 6px;border-radius:4px;white-space:nowrap;">${ratingBadge}</span>
+              </div>
+            </div>
+        `;
+      });
+      html += `
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Text field
+  html += `
+    <div class="form-group">
+      <label class="form-label">Notes / Description</label>
+      <textarea id="text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Add inspection notes..." style="min-height: 80px;" autocapitalize="sentences">${itemData.text || ''}</textarea>
+    </div>
+  `;
+
+  // Standards (for A and B ratings)
+  if (itemData.rating && (itemData.rating.startsWith('A') || itemData.rating.startsWith('B'))) {
+    const standards = getStandardsForCategory(categoryName, itemData.rating);
+    if (standards.length > 0) {
+      html += `
+        <div class="form-group">
+          <label class="form-label">Applicable Standards</label>
+          <div style="display: grid; gap: 8px;">
+      `;
+      standards.forEach(standard => {
+        const isChecked = itemData.standards && itemData.standards.includes(standard);
+        html += `
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" value="${standard}"
+                   ${isChecked ? 'checked' : ''}
+                   onchange="updateStandards('${safeLabel}', this)" />
+            <span>${standard}</span>
+          </label>
+        `;
+      });
+      html += `
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Photos section
+  html += `
+    <div class="form-group">
+      <label class="form-label">Photos</label>
+      <div class="photo-grid" id="photos-${itemLabel.replace(/'/g, '')}">
+  `;
+
+  if (itemData.photos && itemData.photos.length > 0) {
+    itemData.photos.forEach(photoId => {
+      html += `
+        <div class="photo-item" style="position: relative;">
+          <img src="" id="thumb-${photoId}" class="photo-thumbnail"
+               onclick="viewPhotoAnnotation('${photoId}')" />
+          <button style="position: absolute; top: -8px; right: -8px; width: 28px; height: 28px;
+                       border-radius: 50%; background: #dc2626; color: white; border: none;
+                       font-weight: bold; cursor: pointer;"
+                  onclick="deletePhotoAndRefresh('${photoId}')">×</button>
+        </div>
+      `;
+    });
+  }
+
+  html += `
+      </div>
+      <label class="btn-photo-upload">
+        📷 Capture Photo
+        <input type="file" accept="image/*" capture="environment" style="display: none;"
+               onchange="capturePhoto('${safeLabel}', event)" />
+      </label>
+    </div>
+  `;
+
+  // Save and flag buttons
+  html += `
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn-primary" style="flex:1;"
+              onclick="saveItemData('${safeLabel}', '${safeCat}')"
+      >Save Item</button>
+      <button class="btn-secondary" style="font-size:13px;padding:8px 12px;${isExcluded ? 'background:#fee2e2;border-color:#fca5a5;' : ''}"
+              onclick="toggleExclude('${safeLabel}')"
+              title="Exclude from report"
+      >${isExcluded ? '⊘ Excluded' : '⊘ Skip'}</button>
+      <button class="btn-secondary" style="font-size:13px;padding:8px 12px;${isFlagged ? 'background:#fef3c7;border-color:#f59e0b;' : ''}"
+              onclick="toggleFlag('${safeLabel}')"
+              title="Flag for follow-up"
+      >${isFlagged ? '🚩 Flagged' : '🏳️ Flag'}</button>
+    </div>
+  `;
+
+  return html;
+}
+
+// Get the rating options for an item from the survey template
+function getItemOptionsFromTemplate(survey, itemLabel) {
+  const activeTemplate = getTemplateForSurvey(survey);
+  for (const section of activeTemplate) {
+    if (section.name === 'Kiki Marine Survey' && section.categories) {
+      for (const category of section.categories) {
+        if (category.items) {
+          for (const item of category.items) {
+            if (item.label === itemLabel && item.type === 'list') {
+              return item.options;
+            }
+          }
+        }
+      }
+    }
+  }
+  return ['A - Critical', 'B - Needs Attention', 'C - Serviceable', 'Powered up only', 'Not tested/not verified', 'Not applicable'];
+}
+
+// Update the category header's completion percentage without full re-render
+function updateCategoryHeader(survey, categoryName) {
+  const accordion = document.querySelector(`.category-accordion[data-category-name="${categoryName.replace(/"/g, '\\"')}"]`);
+  if (!accordion) return;
+
+  const header = accordion.querySelector('.accordion-header');
+  if (!header) return;
+
+  // Get category items from template
+  const activeTemplate = getTemplateForSurvey(survey);
+  const sailOnlyCategories = ['Spars and rigging', 'Sails'];
+  const isPowerboat = (survey.vesselType || '').toLowerCase() === 'power';
+  let categoryItems = [];
+
+  for (const section of activeTemplate) {
+    if (section.name === 'Kiki Marine Survey' && section.categories) {
+      for (const category of section.categories) {
+        if (category.name === categoryName) {
+          if (isPowerboat && sailOnlyCategories.includes(category.name)) return;
+          categoryItems = category.items ? category.items.filter(i => i.type === 'list') : [];
+          break;
+        }
+      }
+    }
+  }
+
+  if (categoryItems.length === 0) return;
+
+  const completionCount = categoryItems.filter(item =>
+    survey.items[item.label]?.rating || survey.items[item.label]?.excluded
+  ).length;
+  const completionPct = Math.round((completionCount / categoryItems.length) * 100);
+  const isComplete = completionPct === 100;
+  const progressColor = isComplete ? '#16a34a' : '#dc2626';
+
+  // Update the completion dot
+  const dot = header.querySelector('span:first-child');
+  if (dot && dot.style) {
+    dot.style.background = isComplete ? '#16a34a' : '#dc2626';
+  }
+
+  // Update the percentage text
+  const progressEl = header.querySelector('.category-progress');
+  if (progressEl) {
+    progressEl.textContent = `${completionPct}%`;
+    progressEl.style.color = progressColor;
+  }
+
+  // Update flagged/excluded counts in title
+  const flaggedCount = categoryItems.filter(item => survey.items[item.label]?.flagged).length;
+  const excludedCount = categoryItems.filter(item => survey.items[item.label]?.excluded).length;
+  const titleEl = header.querySelector('.category-title');
+  if (titleEl) {
+    titleEl.innerHTML = `${categoryName}${flaggedCount > 0 ? ` <span style="color:#f59e0b;font-size:12px;">🚩${flaggedCount}</span>` : ''}${excludedCount > 0 ? ` <span style="color:#9ca3af;font-size:12px;">⊘${excludedCount}</span>` : ''}`;
+  }
+}
+
 function selectRating(itemLabel, categoryName, rating) {
   getSurvey(currentSurveyId).then(survey => {
     if (!survey.items[itemLabel]) {
@@ -4296,38 +4534,40 @@ function selectRating(itemLabel, categoryName, rating) {
     survey.items[itemLabel].standards = [];
     survey.items[itemLabel].variantText = '';
 
-    // Remember which category accordion was open and scroll position
-    const openCategoryName = categoryName;
-    const scrollY = window.scrollY;
-
     saveSurvey(survey).then(() => {
-      renderInspection(survey);
-      // Restore the open accordion and scroll position
-      restoreAccordionAndScroll(openCategoryName, itemLabel, scrollY);
-    });
-  });
-}
-
-// After re-render, open the accordion that was open and scroll back to the item
-function restoreAccordionAndScroll(categoryName, itemLabel, scrollY) {
-  // Find the accordion header matching this category
-  const headers = document.querySelectorAll('.accordion-header');
-  for (const header of headers) {
-    const titleEl = header.querySelector('.category-title');
-    if (titleEl && titleEl.textContent.includes(categoryName)) {
-      // Open this accordion using same logic as toggleAccordion
-      const content = header.nextElementSibling;
-      if (content && content.style.display === 'none') {
-        content.style.display = 'block';
-        const chevron = header.querySelector('span:last-child');
-        if (chevron) chevron.style.transform = 'rotate(180deg)';
+      // Find the specific item's DOM element and update in place
+      const itemDiv = document.querySelector(`.rated-item[data-item-label="${itemLabel.replace(/"/g, '\\"')}"]`);
+      if (!itemDiv) {
+        // Fallback: full re-render if item not found
+        renderInspection(survey);
+        return;
       }
-      break;
-    }
-  }
-  // Scroll back to approximate position
-  requestAnimationFrame(() => {
-    window.scrollTo(0, scrollY);
+
+      const options = getItemOptionsFromTemplate(survey, itemLabel);
+      const itemData = survey.items[itemLabel];
+
+      // Update the item's style (flagged/excluded border)
+      const isExcluded = itemData.excluded;
+      itemDiv.style.cssText = isExcluded ? 'opacity:0.5;border-left:4px solid #d1d5db;' : itemData.flagged ? 'border-left:4px solid #f59e0b;' : '';
+
+      // Rebuild only this item's inner HTML
+      itemDiv.innerHTML = buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options);
+
+      // Load photo thumbnails for this item
+      if (itemData.photos && itemData.photos.length > 0) {
+        itemData.photos.forEach(photoId => {
+          getPhotoById(photoId).then(photo => {
+            if (photo) {
+              const img = document.getElementById(`thumb-${photoId}`);
+              if (img) img.src = photo.dataUrl;
+            }
+          });
+        });
+      }
+
+      // Update the category header's completion percentage
+      updateCategoryHeader(survey, categoryName);
+    });
   });
 }
 
@@ -4397,7 +4637,7 @@ function toggleFlag(itemLabel) {
     }
     survey.items[itemLabel].flagged = !survey.items[itemLabel].flagged;
     saveSurvey(survey).then(() => {
-      renderInspection(survey);
+      updateItemInPlace(survey, itemLabel);
     });
   });
 }
@@ -4410,9 +4650,47 @@ function toggleExclude(itemLabel) {
     }
     survey.items[itemLabel].excluded = !survey.items[itemLabel].excluded;
     saveSurvey(survey).then(() => {
-      renderInspection(survey);
+      updateItemInPlace(survey, itemLabel);
     });
   });
+}
+
+// Update a single item in place without re-rendering the entire page
+function updateItemInPlace(survey, itemLabel) {
+  const itemDiv = document.querySelector(`.rated-item[data-item-label="${itemLabel.replace(/"/g, '\\"')}"]`);
+  if (!itemDiv) {
+    renderInspection(survey);
+    return;
+  }
+
+  // Find category name from parent accordion
+  const accordion = itemDiv.closest('.category-accordion');
+  const categoryName = accordion ? accordion.dataset.categoryName : '';
+
+  const options = getItemOptionsFromTemplate(survey, itemLabel);
+  const itemData = survey.items[itemLabel] || { rating: '', text: '', standards: [], photos: [] };
+
+  // Update the item's style
+  const isExcluded = itemData.excluded;
+  itemDiv.style.cssText = isExcluded ? 'opacity:0.5;border-left:4px solid #d1d5db;' : itemData.flagged ? 'border-left:4px solid #f59e0b;' : '';
+
+  // Rebuild only this item's inner HTML
+  itemDiv.innerHTML = buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options);
+
+  // Load photo thumbnails
+  if (itemData.photos && itemData.photos.length > 0) {
+    itemData.photos.forEach(photoId => {
+      getPhotoById(photoId).then(photo => {
+        if (photo) {
+          const img = document.getElementById(`thumb-${photoId}`);
+          if (img) img.src = photo.dataUrl;
+        }
+      });
+    });
+  }
+
+  // Update category header
+  if (categoryName) updateCategoryHeader(survey, categoryName);
 }
 
 // Toggle exclude for all items in a category
@@ -4675,13 +4953,22 @@ function viewPhotoAnnotation(photoId) {
 function deletePhotoAndRefresh(photoId) {
   deletePhoto(photoId).then(() => {
     getSurvey(currentSurveyId).then(survey => {
+      let affectedItemLabel = null;
       for (const itemLabel in survey.items) {
         if (survey.items[itemLabel].photos) {
+          const before = survey.items[itemLabel].photos.length;
           survey.items[itemLabel].photos = survey.items[itemLabel].photos.filter(id => id !== photoId);
+          if (survey.items[itemLabel].photos.length < before) {
+            affectedItemLabel = itemLabel;
+          }
         }
       }
       saveSurvey(survey).then(() => {
-        renderInspection(survey);
+        if (affectedItemLabel) {
+          updateItemInPlace(survey, affectedItemLabel);
+        } else {
+          renderInspection(survey);
+        }
       });
     });
   });
