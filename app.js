@@ -1120,12 +1120,12 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Vessel Name *</label>
-        <input type="text" id="vesselName" placeholder="e.g., Sea Dream II" autocapitalize="words" onblur="this.value=capitalizeWords(this.value)">
+        <input type="text" id="vesselName" class="capitalize-input" placeholder="e.g., Sea Dream II" autocapitalize="words" onblur="this.value=capitalizeWords(this.value)">
       </div>
 
       <div class="form-group">
         <label class="form-label">Year / Make / Model *</label>
-        <input type="text" id="yearMakeModel" placeholder="e.g., 2015 Beneteau Oceanis 46"
+        <input type="text" id="yearMakeModel" class="capitalize-input" placeholder="e.g., 2015 Beneteau Oceanis 46"
                onblur="checkSpecsOnBlur()" oninput="checkSpecsDebounced()" autocapitalize="words">
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Tip: Enter year, make and model — specs may auto-fill from built-in database</div>
       </div>
@@ -1141,7 +1141,7 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Client Name</label>
-        <input type="text" id="clientName" placeholder="Client name" autocapitalize="words" onblur="this.value=capitalizeWords(this.value)">
+        <input type="text" id="clientName" class="capitalize-input" placeholder="Client name" autocapitalize="words" onblur="this.value=capitalizeWords(this.value)">
       </div>
 
       <div class="form-group">

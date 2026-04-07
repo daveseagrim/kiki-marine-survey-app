@@ -437,11 +437,13 @@
                 font-size: 16px;
             }
         }
-        /* Capitalize typed text but not placeholder */
-        #vesselName:not(:placeholder-shown),
-        #clientName:not(:placeholder-shown),
-        #yearMakeModel:not(:placeholder-shown) {
+        /* Capitalize typed text */
+        .capitalize-input {
             text-transform: capitalize;
+        }
+        /* But keep placeholder lowercase */
+        .capitalize-input::placeholder {
+            text-transform: none;
         }
     </style>
 </head>
