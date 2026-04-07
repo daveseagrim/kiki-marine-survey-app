@@ -693,6 +693,23 @@ function createNewSurvey(formData) {
     seaTrial: formData.seaTrial,
     powerAtTime: formData.powerAtTime,
     waterAtTime: formData.waterAtTime,
+    storageDetails: formData.storageDetails,
+
+    // Engine/Transmission
+    engineMake: formData.engineMake,
+    engineModel: formData.engineModel,
+    engineSerial: formData.engineSerial,
+    engineHours: formData.engineHours,
+    engineHP: formData.engineHP,
+    fuelType: formData.fuelType,
+    transmissionMakeModel: formData.transmissionMakeModel,
+    transmissionSerial: formData.transmissionSerial,
+
+    // Bilge pumps
+    bilgePumps: formData.bilgePumps || [],
+
+    // Comparables
+    comparables: formData.comparables || [],
 
     // Vessel description
     vesselDescription: formData.vesselDescription,
@@ -989,6 +1006,61 @@ function renderNewSurveyForm() {
         <textarea id="changesToPlan" placeholder="Any modifications or changes"></textarea>
       </div>
 
+      <h3 style="margin-top:16px;color:#1e3a5f;">Engine & Transmission</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">Engine Make</label>
+          <input type="text" id="engineMake" placeholder="e.g., Yanmar">
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">Engine Model</label>
+          <input type="text" id="engineModel" placeholder="e.g., 4JH4-TE">
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">Engine Serial No.</label>
+          <input type="text" id="engineSerial" placeholder="">
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">Engine Hours</label>
+          <input type="text" id="engineHours" placeholder="">
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">HP / kW Rating</label>
+          <input type="text" id="engineHP" placeholder="e.g., 54HP / 39.7kW">
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">Fuel Type</label>
+          <select id="fuelType">
+            <option value="">Select</option>
+            <option value="Diesel">Diesel</option>
+            <option value="Gasoline">Gasoline</option>
+            <option value="Electric">Electric</option>
+            <option value="Hybrid">Hybrid</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">Transmission Make/Model</label>
+          <input type="text" id="transmissionMakeModel" placeholder="e.g., ZF 25A">
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">Transmission Serial No.</label>
+          <input type="text" id="transmissionSerial" placeholder="">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="font-size:12px;">Engine Data Plate Photo</label>
+        <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:5px 10px;">
+          📷 Capture Engine Plate
+          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('enginePlatePhoto', 'Engine Data Plate', event)" />
+        </label>
+        <div id="enginePlatePhotoPreview" style="margin-top:4px;"></div>
+      </div>
+
+      <h3 style="margin-top:16px;color:#1e3a5f;">Bilge Pumps</h3>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Document each bilge pump installed. Norm Behring requires: location, type, capacity, float switch, and test results.</div>
+      <div id="bilgePumpEntries"></div>
+      <button class="btn-secondary" style="font-size:12px;padding:6px 12px;margin-top:8px;" onclick="addBilgePumpEntry()">+ Add Bilge Pump</button>
+
       <div style="display: flex; gap: 8px; margin: 16px 0;">
         <button class="btn-secondary" style="flex: 1; font-size: 14px;" onclick="lookupSpecs()">
           🔍 Auto-Fill Specs
@@ -1026,7 +1098,15 @@ function renderNewSurveyForm() {
           <option value="Vessel was in water at the dock">Vessel was in water at the dock</option>
           <option value="Vessel was in the travel lift slings for the inspection">Vessel was in the travel lift slings for the inspection</option>
           <option value="Vessel was on the cradle on shore, winterized">Vessel was on the cradle on shore, winterized</option>
+          <option value="Vessel was on the hard, in a cradle, not winterized">Vessel was on the hard, in a cradle, not winterized</option>
+          <option value="Vessel was on a trailer">Vessel was on a trailer</option>
         </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Storage / Observation Details</label>
+        <textarea id="storageDetails" rows="2" placeholder="e.g., Mast unstepped and stored on rack. Vessel winterized with antifreeze in all systems. Steel cradle, 6-pad."></textarea>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Describe cradle type, winterization status, mast status (stepped/unstepped), and any relevant storage conditions.</div>
       </div>
 
       <div class="form-group">
@@ -1082,6 +1162,43 @@ function renderNewSurveyForm() {
           <span id="coverPhotoStatus" style="font-size:12px;color:#6b7280;"></span>
         </div>
         <div id="coverPhotoPreview" style="margin-top:8px;"></div>
+      </div>
+
+      <h3 style="margin-top:16px;color:#1e3a5f;">Vessel Overview Photos (Four Corners)</h3>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:10px;">SAMS requires four overview photos showing the vessel from each corner. These appear at the end of the report.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label class="form-label" style="font-size:12px;">Port Bow</label>
+          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:5px 10px;">
+            📷 Capture
+            <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('fourCornerPortBow', 'Port Bow', event)" />
+          </label>
+          <div id="fourCornerPortBowPreview" style="margin-top:4px;"></div>
+        </div>
+        <div>
+          <label class="form-label" style="font-size:12px;">Starboard Bow</label>
+          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:5px 10px;">
+            📷 Capture
+            <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('fourCornerStbdBow', 'Starboard Bow', event)" />
+          </label>
+          <div id="fourCornerStbdBowPreview" style="margin-top:4px;"></div>
+        </div>
+        <div>
+          <label class="form-label" style="font-size:12px;">Port Stern</label>
+          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:5px 10px;">
+            📷 Capture
+            <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('fourCornerPortStern', 'Port Stern', event)" />
+          </label>
+          <div id="fourCornerPortSternPreview" style="margin-top:4px;"></div>
+        </div>
+        <div>
+          <label class="form-label" style="font-size:12px;">Starboard Stern</label>
+          <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:5px 10px;">
+            📷 Capture
+            <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('fourCornerStbdStern', 'Starboard Stern', event)" />
+          </label>
+          <div id="fourCornerStbdSternPreview" style="margin-top:4px;"></div>
+        </div>
       </div>
 
       <div class="form-group">
@@ -1199,6 +1316,11 @@ function renderNewSurveyForm() {
           <option value="Restorable">Restorable — Enough hull and engine to restore to usable condition</option>
         </select>
       </div>
+
+      <h3 style="margin-top:16px;color:#1e3a5f;">Comparable Vessels</h3>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Add comparable sales from BUCValu, Soldboats.com, YachtWorld, and current listings to support your valuation.</div>
+      <div id="comparablesEntries"></div>
+      <button class="btn-secondary" style="font-size:12px;padding:6px 12px;margin-top:8px;" onclick="addComparableEntry()">+ Add Comparable</button>
 
       <div class="form-actions">
         <button class="btn-secondary" onclick="renderHome()">Cancel</button>
@@ -1870,6 +1992,19 @@ function startNewSurvey() {
     seaTrial: document.getElementById('seaTrial').value,
     powerAtTime: document.getElementById('powerAtTime').value,
     waterAtTime: document.getElementById('waterAtTime').value,
+    storageDetails: document.getElementById('storageDetails')?.value || '',
+
+    engineMake: document.getElementById('engineMake')?.value || '',
+    engineModel: document.getElementById('engineModel')?.value || '',
+    engineSerial: document.getElementById('engineSerial')?.value || '',
+    engineHours: document.getElementById('engineHours')?.value || '',
+    engineHP: document.getElementById('engineHP')?.value || '',
+    fuelType: document.getElementById('fuelType')?.value || '',
+    transmissionMakeModel: document.getElementById('transmissionMakeModel')?.value || '',
+    transmissionSerial: document.getElementById('transmissionSerial')?.value || '',
+
+    bilgePumps: collectBilgePumps(),
+    comparables: collectComparables(),
 
     vesselDescription: document.getElementById('vesselDescription').value,
 
@@ -1901,6 +2036,119 @@ function startNewSurvey() {
 }
 
 function renderInspection(survey) {
+
+// ─── Rating tooltip guidance ──────────────────────────────────────────────
+function getRatingTooltip(rating) {
+  const tips = {
+    'A - Critical': 'Safety hazard or code violation — must be corrected before vessel is next underway',
+    'B - Needs Attention': 'Needs repair soon — not immediately dangerous but should be scheduled',
+    'C - Serviceable': 'Functional and in acceptable condition — no action required',
+    'Not tested/not verified': 'Could not be tested or inspected due to conditions',
+    'Not applicable': 'Item does not apply to this vessel',
+    'Powered up only': 'Powered up and appears operational — not tested under load',
+    'Safety Equipment': 'Safety equipment item per TC TP 511'
+  };
+  return tips[rating] || '';
+}
+
+// ─── Bilge pump entries ──────────────────────────────────────────────────
+function addBilgePumpEntry() {
+  const container = document.getElementById('bilgePumpEntries');
+  if (!container) return;
+  const idx = container.children.length;
+  const div = document.createElement('div');
+  div.style.cssText = 'border:1px solid #e5e7eb;border-radius:8px;padding:10px;margin-bottom:8px;background:#fafafa;';
+  div.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <strong style="font-size:12px;">Bilge Pump ${idx + 1}</strong>
+      <button class="btn-secondary" style="font-size:11px;padding:2px 8px;color:#dc2626;" onclick="this.parentElement.parentElement.remove()">Remove</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <input type="text" class="bilgePumpLocation" placeholder="Location (e.g., main bilge, engine room)" style="font-size:12px;padding:6px;">
+      <input type="text" class="bilgePumpType" placeholder="Type (manual/electric)" style="font-size:12px;padding:6px;">
+      <input type="text" class="bilgePumpMakeModel" placeholder="Make/Model" style="font-size:12px;padding:6px;">
+      <input type="text" class="bilgePumpCapacity" placeholder="Capacity (GPH)" style="font-size:12px;padding:6px;">
+      <input type="text" class="bilgePumpFloatSwitch" placeholder="Float switch (yes/no/type)" style="font-size:12px;padding:6px;">
+      <input type="text" class="bilgePumpTested" placeholder="Tested? (yes/no/result)" style="font-size:12px;padding:6px;">
+    </div>
+    <input type="text" class="bilgePumpDischarge" placeholder="Discharge route and hose condition" style="font-size:12px;padding:6px;width:100%;margin-top:6px;box-sizing:border-box;">
+  `;
+  container.appendChild(div);
+}
+
+// ─── Comparable vessel entries ──────────────────────────────────────────
+function addComparableEntry() {
+  const container = document.getElementById('comparablesEntries');
+  if (!container) return;
+  const idx = container.children.length;
+  const div = document.createElement('div');
+  div.style.cssText = 'border:1px solid #e5e7eb;border-radius:8px;padding:10px;margin-bottom:8px;background:#fafafa;';
+  div.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <strong style="font-size:12px;">Comparable ${idx + 1}</strong>
+      <button class="btn-secondary" style="font-size:11px;padding:2px 8px;color:#dc2626;" onclick="this.parentElement.parentElement.remove()">Remove</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <select class="compSource" style="font-size:12px;padding:6px;">
+        <option value="">Source</option>
+        <option value="BUCValu">BUCValu</option>
+        <option value="Soldboats.com">Soldboats.com</option>
+        <option value="YachtWorld">YachtWorld</option>
+        <option value="Boat Trader">Boat Trader</option>
+        <option value="Other">Other</option>
+      </select>
+      <input type="text" class="compVessel" placeholder="Year/Make/Model" style="font-size:12px;padding:6px;">
+      <input type="text" class="compPrice" placeholder="Asking or sold price (USD)" style="font-size:12px;padding:6px;">
+      <input type="text" class="compLocation" placeholder="Location" style="font-size:12px;padding:6px;">
+      <input type="text" class="compDate" placeholder="Sale/listing date" style="font-size:12px;padding:6px;">
+      <select class="compWater" style="font-size:12px;padding:6px;">
+        <option value="">Water type</option>
+        <option value="Fresh water">Fresh water</option>
+        <option value="Salt water">Salt water</option>
+        <option value="Brackish">Brackish</option>
+        <option value="Unknown">Unknown</option>
+      </select>
+    </div>
+    <input type="text" class="compNotes" placeholder="Notes (condition, hours, differences)" style="font-size:12px;padding:6px;width:100%;margin-top:6px;box-sizing:border-box;">
+  `;
+  container.appendChild(div);
+}
+
+// Collect bilge pump data from form
+function collectBilgePumps() {
+  const entries = document.querySelectorAll('#bilgePumpEntries > div');
+  const pumps = [];
+  entries.forEach(entry => {
+    pumps.push({
+      location: entry.querySelector('.bilgePumpLocation')?.value || '',
+      type: entry.querySelector('.bilgePumpType')?.value || '',
+      makeModel: entry.querySelector('.bilgePumpMakeModel')?.value || '',
+      capacity: entry.querySelector('.bilgePumpCapacity')?.value || '',
+      floatSwitch: entry.querySelector('.bilgePumpFloatSwitch')?.value || '',
+      tested: entry.querySelector('.bilgePumpTested')?.value || '',
+      discharge: entry.querySelector('.bilgePumpDischarge')?.value || ''
+    });
+  });
+  return pumps;
+}
+
+// Collect comparable vessels data from form
+function collectComparables() {
+  const entries = document.querySelectorAll('#comparablesEntries > div');
+  const comps = [];
+  entries.forEach(entry => {
+    comps.push({
+      source: entry.querySelector('.compSource')?.value || '',
+      vessel: entry.querySelector('.compVessel')?.value || '',
+      price: entry.querySelector('.compPrice')?.value || '',
+      location: entry.querySelector('.compLocation')?.value || '',
+      date: entry.querySelector('.compDate')?.value || '',
+      water: entry.querySelector('.compWater')?.value || '',
+      notes: entry.querySelector('.compNotes')?.value || ''
+    });
+  });
+  return comps;
+}
   currentView = 'inspection';
   currentSurveyId = survey.id;
 
@@ -1988,6 +2236,7 @@ function renderInspection(survey) {
         html += `
           <button class="rating-btn ${isActive ? 'active' : ''}"
                   style="${isActive ? `background-color: ${color}; border-color: ${color};` : ''}"
+                  title="${getRatingTooltip(option)}"
                   onclick="selectRating('${item.label.replace(/'/g, "\\'")}', '${categoryName.replace(/'/g, "\\'")}', '${option}')">
             ${option}
           </button>
@@ -2608,28 +2857,37 @@ function viewPhotoAnnotation(photoId) {
 
         annotations.forEach(ann => {
           if (ann.type === 'circle') {
+            const radius = ann.radius || Math.max(40, Math.round(canvas.width / 20));
             ctx.beginPath();
-            ctx.arc(ann.x, ann.y, 50, 0, Math.PI * 2);
+            ctx.arc(ann.x, ann.y, radius, 0, Math.PI * 2);
             ctx.strokeStyle = '#dc2626';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = Math.max(3, Math.round(canvas.width / 400));
             ctx.stroke();
           } else if (ann.type === 'arrow') {
             drawArrow(ann.x1, ann.y1, ann.x2, ann.y2);
           } else if (ann.type === 'text') {
-            ctx.font = '16px sans-serif';
-            ctx.fillStyle = 'black';
+            const fontSize = Math.max(24, Math.round(canvas.width / 40));
+            ctx.font = 'bold ' + fontSize + 'px Arial, sans-serif';
+            // Draw background pill for readability
+            const metrics = ctx.measureText(ann.text);
+            const pad = 6;
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.beginPath();
+            ctx.roundRect(ann.x - pad, ann.y - fontSize - pad, metrics.width + pad * 2, fontSize + pad * 2, 4);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
             ctx.fillText(ann.text, ann.x, ann.y);
           }
         });
       };
 
       const drawArrow = (fromx, fromy, tox, toy) => {
-        const headlen = 15;
+        const headlen = Math.max(15, Math.round(canvas.width / 60));
         const angle = Math.atan2(toy - fromy, tox - fromx);
 
         ctx.strokeStyle = '#dc2626';
         ctx.fillStyle = '#dc2626';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = Math.max(3, Math.round(canvas.width / 400));
         ctx.beginPath();
         ctx.moveTo(fromx, fromy);
         ctx.lineTo(tox, toy);
@@ -2643,9 +2901,17 @@ function viewPhotoAnnotation(photoId) {
         ctx.fill();
       };
 
-      document.getElementById('circleBtn').onclick = () => { mode = 'circle'; };
-      document.getElementById('arrowBtn').onclick = () => { mode = 'arrow'; };
-      document.getElementById('textBtn').onclick = () => { mode = 'text'; };
+      const toolBtns = ['circleBtn', 'arrowBtn', 'textBtn'];
+      const setActiveBtn = (activeId) => {
+        toolBtns.forEach(id => {
+          const b = document.getElementById(id);
+          b.style.outline = id === activeId ? '3px solid #fff' : 'none';
+          b.style.outlineOffset = '2px';
+        });
+      };
+      document.getElementById('circleBtn').onclick = () => { mode = 'circle'; setActiveBtn('circleBtn'); };
+      document.getElementById('arrowBtn').onclick = () => { mode = 'arrow'; setActiveBtn('arrowBtn'); };
+      document.getElementById('textBtn').onclick = () => { mode = 'text'; setActiveBtn('textBtn'); };
       document.getElementById('undoBtn').onclick = () => {
         annotations.pop();
         drawAnnotations();
@@ -2659,6 +2925,46 @@ function viewPhotoAnnotation(photoId) {
           getSurvey(currentSurveyId).then(s => renderInspection(s));
         });
       };
+
+      // ── Mouse events (desktop) ──
+      canvas.addEventListener('mousedown', (e) => {
+        if (!mode) return;
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+        if (mode === 'circle') {
+          annotations.push({ type: 'circle', x, y });
+          drawAnnotations();
+        } else if (mode === 'arrow') {
+          annotations.push({ type: 'arrow', x1: x, y1: y, x2: x, y2: y });
+        } else if (mode === 'text') {
+          const text = prompt('Enter annotation text:');
+          if (text) {
+            annotations.push({ type: 'text', x, y, text });
+            drawAnnotations();
+          }
+        }
+      });
+
+      canvas.addEventListener('mousemove', (e) => {
+        if (!isDrawing || mode !== 'arrow') return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+        const lastAnn = annotations[annotations.length - 1];
+        if (lastAnn && lastAnn.type === 'arrow') {
+          lastAnn.x2 = x;
+          lastAnn.y2 = y;
+          drawAnnotations();
+        }
+      });
+
+      canvas.addEventListener('mouseup', () => {
+        isDrawing = false;
+      });
 
       canvas.addEventListener('touchstart', (e) => {
         if (!mode) return;
@@ -2780,6 +3086,11 @@ async function generateReport() {
     const p = await getPhotoById(survey.coverPhoto);
     if (p && p.dataUrl) coverPhotoDataUrl = p.dataUrl;
   }
+  let enginePlatePhotoDataUrl = '';
+  if (survey.enginePlatePhoto) {
+    const p = await getPhotoById(survey.enginePlatePhoto);
+    if (p && p.dataUrl) enginePlatePhotoDataUrl = p.dataUrl;
+  }
 
   // ── Pass 1: collect all findings ──────────────────────────────────────
   let findingCount = { A: 0, B: 0, C: 0, NT: 0 };
@@ -2894,6 +3205,7 @@ async function generateReport() {
     <div style="display:flex;gap:8px;">
       <button onclick="window.print()" style="background:#fff;color:#1e3a5f;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">🖨️ Print / PDF</button>
       <button onclick="exportToWord()" style="background:#f0c040;color:#1e3a5f;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">📥 Download as Word</button>
+      <button onclick="toggleProseMode()" id="proseModeBtn" style="background:#e5e7eb;color:#333;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">📝 Prose Mode</button>
     </div>
   </div>
 
@@ -3061,9 +3373,9 @@ async function generateReport() {
     <tr><td><strong>Date of Report</strong></td><td>${reportDate}</td></tr>
     <tr><td><strong>Vessel Name</strong></td><td>${esc(survey.vesselName)}</td></tr>
     <tr><td><strong>Year/Make/Model</strong></td><td>${esc(survey.yearMakeModel)}</td></tr>
-    <tr><td><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" style="max-width:280px;max-height:180px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
+    <tr><td><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
     <tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}</td></tr>
-    <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" style="max-width:280px;max-height:180px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
+    <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
     <tr><td><strong>Vessel Material</strong></td><td>${esc(survey.construction) || 'N/A'}</td></tr>
     <tr><td><strong>LOA (Length Overall)</strong></td><td>${esc(survey.loa) || 'N/A'}</td></tr>
     <tr><td><strong>LWL (Length at Waterline)</strong></td><td>${esc(survey.lwl) || 'N/A'}</td></tr>
@@ -3100,6 +3412,12 @@ ${survey.locationLat && survey.locationLon ? `
     <tr><td><strong>Number of Cabins</strong></td><td>${esc(survey.numberCabins) || 'N/A'}</td></tr>
     <tr><td><strong>Electrical System</strong></td><td>${esc(survey.electricalSystem) || 'N/A'}</td></tr>
     <tr><td><strong>Changes to Original Plan</strong></td><td>${esc(survey.changesToPlan) || 'None noted'}</td></tr>
+    ${survey.engineMake ? `<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Engine &amp; Transmission</td></tr>` : ''}
+    ${survey.engineMake ? `<tr><td><strong>Engine</strong></td><td>${esc(survey.engineMake)} ${esc(survey.engineModel || '')} — SN: ${esc(survey.engineSerial) || 'N/A'}${enginePlatePhotoDataUrl ? '<br><img src="' + enginePlatePhotoDataUrl + '" alt="Engine Data Plate" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>` : ''}
+    ${survey.engineHP ? `<tr><td><strong>Power Rating</strong></td><td>${esc(survey.engineHP)}</td></tr>` : ''}
+    ${survey.engineHours ? `<tr><td><strong>Engine Hours</strong></td><td>${esc(survey.engineHours)}</td></tr>` : ''}
+    ${survey.fuelType ? `<tr><td><strong>Fuel Type</strong></td><td>${esc(survey.fuelType)}</td></tr>` : ''}
+    ${survey.transmissionMakeModel ? `<tr><td><strong>Transmission</strong></td><td>${esc(survey.transmissionMakeModel)} — SN: ${esc(survey.transmissionSerial) || 'N/A'}</td></tr>` : ''}
   </table>
 
   <!-- ═══ SURVEY CONDITIONS ═══ -->
@@ -3107,6 +3425,7 @@ ${survey.locationLat && survey.locationLon ? `
   <table>
     <tr><td style="width:40%;"><strong>Weather</strong></td><td>${esc(survey.weather) || 'N/A'}</td></tr>
     <tr><td><strong>On Land or In Water</strong></td><td>${esc(survey.onLandOrWater) || 'N/A'}</td></tr>
+    ${survey.storageDetails ? `<tr><td><strong>Storage / Observation Details</strong></td><td>${esc(survey.storageDetails)}</td></tr>` : ''}
     <tr><td><strong>Limited Trial Run</strong></td><td>${esc(survey.seaTrial) || 'N/A'}</td></tr>
     <tr><td><strong>Power at Time of Survey</strong></td><td>${esc(survey.powerAtTime) || 'N/A'}</td></tr>
     <tr><td><strong>Water at Time of Survey</strong></td><td>${esc(survey.waterAtTime) || 'N/A'}</td></tr>
@@ -3115,10 +3434,10 @@ ${survey.locationLat && survey.locationLon ? `
   <!-- ═══ VESSEL DOCUMENTATION ═══ -->
   <h2>VESSEL DOCUMENTATION DATA</h2>
   <table>
-    <tr><td style="width:40%;"><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" style="max-width:300px;max-height:200px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
-    <tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${licencePhotoDataUrl ? '<br><img src="' + licencePhotoDataUrl + '" alt="TC Licence Photo" style="max-width:300px;max-height:200px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
+    <tr><td style="width:40%;"><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
+    <tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${licencePhotoDataUrl ? '<br><img src="' + licencePhotoDataUrl + '" alt="TC Licence Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
     <tr><td><strong>Tax Status (Duties Paid)</strong></td><td>${esc(survey.taxStatus) || 'N/A'}</td></tr>
-    <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" style="max-width:300px;max-height:200px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
+    <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
   </table>
 
 ${survey.vesselDescription ? `
@@ -3250,6 +3569,16 @@ ${survey.vesselDescription ? `
 
   // ── DETAILED SURVEY FINDINGS (body sections) ──────────────────────
   html += `<h2 style="background:#1e3a5f;font-size:14pt;">DETAILED SURVEY FINDINGS</h2>`;
+
+  // Bilge pump detail table (if data exists)
+  if (survey.bilgePumps && survey.bilgePumps.length > 0) {
+    html += `<h3>Bilge Pump Detail</h3>`;
+    html += `<table><thead><tr><th>Location</th><th>Type</th><th>Make/Model</th><th>Capacity</th><th>Float Switch</th><th>Tested</th><th>Discharge</th></tr></thead><tbody>`;
+    survey.bilgePumps.forEach(bp => {
+      html += `<tr><td>${esc(bp.location)}</td><td>${esc(bp.type)}</td><td>${esc(bp.makeModel)}</td><td>${esc(bp.capacity)}</td><td>${esc(bp.floatSwitch)}</td><td>${esc(bp.tested)}</td><td>${esc(bp.discharge)}</td></tr>`;
+    });
+    html += `</tbody></table>`;
+  }
 
   surveyTemplate.forEach(section => {
     if (section.name === 'Kiki Marine Survey' && section.categories) {
@@ -3433,11 +3762,13 @@ ${survey.vesselDescription ? `
   </table>
 
   <table style="margin-top:12px;">
-    <tr><td colspan="4" style="background:#e8edf2;font-weight:bold;">Comparable Vessels / Market Research</td></tr>
+    <tr><td colspan="6" style="background:#e8edf2;font-weight:bold;">Comparable Vessels / Market Research</td></tr>
     <tr>
       <th>Source</th>
       <th>Vessel</th>
-      <th>Asking/Sold Price</th>
+      <th>Price (USD)</th>
+      <th>Location</th>
+      <th>Date</th>
       <th>Notes</th>
     </tr>
     ${(survey.comparables && survey.comparables.length > 0) ? survey.comparables.map(c => `
@@ -3445,9 +3776,11 @@ ${survey.vesselDescription ? `
       <td>${esc(c.source)}</td>
       <td>${esc(c.vessel)}</td>
       <td>${esc(c.price)}</td>
-      <td>${esc(c.notes)}</td>
+      <td>${esc(c.location || '')}</td>
+      <td>${esc(c.date || '')}</td>
+      <td>${esc(c.notes)}${c.water ? ' (' + esc(c.water) + ')' : ''}</td>
     </tr>`).join('') : `
-    <tr><td colspan="4" style="text-align:center;color:#666;font-style:italic;">No comparables recorded. Check BUCValu, soldboats.com, and yachtworld.com for comparable sales and current listings.</td></tr>`}
+    <tr><td colspan="6" style="text-align:center;color:#666;font-style:italic;">No comparables recorded. Check BUCValu, soldboats.com, and yachtworld.com for comparable sales and current listings.</td></tr>`}
   </table>
 
   <div class="scope-text" style="margin-top:12px;">
@@ -3482,8 +3815,35 @@ ${survey.vesselDescription ? `
       </div>
     </div>
   </div>
+  `;
 
-<script>
+  // ── FOUR CORNERS VESSEL PHOTOS ──────────────────────────────────────
+  let fourCornerPhotos = {};
+  const cornerKeys = ['fourCornerPortBow', 'fourCornerStbdBow', 'fourCornerPortStern', 'fourCornerStbdStern'];
+  const cornerLabels = {'fourCornerPortBow': 'Port Bow', 'fourCornerStbdBow': 'Starboard Bow', 'fourCornerPortStern': 'Port Stern', 'fourCornerStbdStern': 'Starboard Stern'};
+  for (const key of cornerKeys) {
+    if (survey[key]) {
+      const p = await getPhotoById(survey[key]);
+      if (p && p.dataUrl) fourCornerPhotos[key] = p.dataUrl;
+    }
+  }
+
+  if (Object.keys(fourCornerPhotos).length > 0) {
+    html += `<div class="page-break"></div>`;
+    html += `<h2>VESSEL OVERVIEW PHOTOGRAPHS</h2>`;
+    html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">`;
+    for (const key of cornerKeys) {
+      if (fourCornerPhotos[key]) {
+        html += `<div style="text-align:center;">
+          <img src="${fourCornerPhotos[key]}" alt="${cornerLabels[key]}" style="max-width:100%;max-height:350px;border:1px solid #ccc;border-radius:4px;" />
+          <p style="font-size:10pt;color:#555;margin-top:4px;font-style:italic;">${cornerLabels[key]}</p>
+        </div>`;
+      }
+    }
+    html += `</div>`;
+  }
+
+  html += `<script>
 async function exportToWord() {
   var btn = document.querySelector('#exportToolbar button:last-child');
   var origText = btn.textContent;
@@ -3584,6 +3944,41 @@ async function exportToWord() {
 
   btn.textContent = origText;
   btn.disabled = false;
+}
+
+function toggleProseMode() {
+  const items = document.querySelectorAll('.item');
+  const btn = document.getElementById('proseModeBtn');
+  const isCurrentlyProse = btn.textContent.includes('Table');
+
+  if (isCurrentlyProse) {
+    // Switch back to table mode
+    items.forEach(item => {
+      item.style.borderLeft = '';
+      item.style.padding = '';
+      item.style.margin = '';
+    });
+    document.querySelectorAll('.checklist-table').forEach(t => t.style.display = '');
+    btn.textContent = '📝 Prose Mode';
+    btn.style.background = '#e5e7eb';
+  } else {
+    // Switch to prose mode - hide the big checklist table, keep findings visible
+    const summaryTables = document.querySelectorAll('.checklist-table');
+    summaryTables.forEach(t => {
+      // Only hide the main checklist summary, not safety equipment
+      if (!t.closest('h2')?.textContent?.includes('SAFETY')) {
+        t.style.display = 'none';
+      }
+    });
+    // Compact the detailed findings
+    items.forEach(item => {
+      item.style.borderLeft = '3px solid #1e3a5f';
+      item.style.padding = '4px 8px';
+      item.style.margin = '6px 0';
+    });
+    btn.textContent = '📊 Table Mode';
+    btn.style.background = '#d1fae5';
+  }
 }
 </script>
 </body>
