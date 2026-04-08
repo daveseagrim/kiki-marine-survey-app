@@ -4370,9 +4370,6 @@ async function captureDocPhoto(fieldKey, label, event) {
     // Add date stamp to the photo
     const stampedDataUrl = await addDateStampToPhoto(e.target.result);
 
-    // Save a copy to the device camera roll / downloads
-    savePhotoToDevice(stampedDataUrl, label);
-
     // Show preview modal
     showPhotoPreviewModal(fieldKey, label, stampedDataUrl, file.type);
   };
