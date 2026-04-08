@@ -32,31 +32,6 @@
         "items": [
           {
             "type": "list",
-            "label": "Boat style",
-            "options": [
-              "Motor, cuddy cabin (outboard)",
-              "Motor, cuddy cabin (inboard/outboard)",
-              "Motor, cuddy cabin (inboard)",
-              "Motor, cabin cruiser",
-              "Motor, express-cruiser (sport-cruiser) cabin boat",
-              "Motor, fishing boat (outboard)",
-              "Motor, fishing boat (inboard/outboard)",
-              "Motor, fishing boat (inboard)",
-              "Motor, fishing, sport",
-              "Motor, flybridge cruiser",
-              "Motor, trawler (outboard)",
-              "Motor, trawler (inboard/outboard)",
-              "Sail, cutter",
-              "Sail, sloop (fixed keel monohull)",
-              "Sail, sloop (swing keel)",
-              "Sail, sloop (catamaran)",
-              "Sail, sloop (trimaran)",
-              "Sail, ketch (fixed keel monohull)",
-              "Other"
-            ]
-          },
-          {
-            "type": "list",
             "label": "Hull type",
             "options": [
               "Catamaran",

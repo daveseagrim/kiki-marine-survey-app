@@ -4258,9 +4258,6 @@ async function capturePhoto(itemLabel, event) {
 
         await savePhoto(photo);
 
-        // Also save a copy to the device camera roll / downloads
-        savePhotoToDevice(stampedDataUrl, itemLabel);
-
         // Update survey
         const survey = await getSurvey(currentSurveyId);
         if (!survey.items[itemLabel]) {
@@ -5144,20 +5141,7 @@ function selectRating(itemLabel, categoryName, rating) {
 
     // Sync special spec items to top-level survey properties
     const currentRating = survey.items[itemLabel].rating;
-    if (itemLabel === 'Boat style') {
-      survey.boatStyle = currentRating;
-      // Auto-detect vessel type from boat style
-      survey.vesselType = currentRating ? getVesselType(currentRating) : '';
-      // Auto-suggest hull type based on boat style
-      const autoHull = currentRating ? inferHullType(currentRating) : '';
-      if (autoHull) {
-        survey.hullType = autoHull;
-        if (!survey.items['Hull type']) {
-          survey.items['Hull type'] = { rating: '', text: '', standards: [], photos: [] };
-        }
-        survey.items['Hull type'].rating = autoHull;
-      }
-    } else if (itemLabel === 'Hull type') {
+    if (itemLabel === 'Hull type') {
       survey.hullType = currentRating;
     }
 
