@@ -66,22 +66,6 @@
             "label": "Construction"
           },
           {
-            "type": "list",
-            "label": "Keel type",
-            "options": [
-              "Bulb",
-              "Cutaway forefoot",
-              "Fin",
-              "Fin with bulb",
-              "Full, encapsulated",
-              "Full, bolted",
-              "Wing",
-              "Shoal",
-              "Swing"
-            ],
-            "sailOnly": true
-          },
-          {
             "type": "textsingle",
             "label": "Number of cabins"
           },
