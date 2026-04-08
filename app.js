@@ -7366,7 +7366,11 @@ function collapseCurrentSection() {
   const openContent = document.querySelector('.accordion-content[style*="display: block"], .accordion-content[style*="display:block"]');
   if (openContent) {
     const header = openContent.previousElementSibling;
-    if (header) toggleAccordion(header);
+    if (header) {
+      toggleAccordion(header);
+      // Keep the collapsed header visible in the centre of the screen
+      setTimeout(() => header.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+    }
   }
 }
 
