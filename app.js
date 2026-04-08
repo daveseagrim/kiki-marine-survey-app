@@ -8096,6 +8096,17 @@ async function initApp() {
       }
     }, true);
 
+    // Monitor visualViewport for unexpected zoom — reset immediately.
+    // This catches cases where the camera return zooms the viewport
+    // and none of the timed recalcs caught it.
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        if (window.visualViewport.scale > 1.05) {
+          forceViewportRecalc();
+        }
+      });
+    }
+
     await initDB();
     await fetchDataFiles();
     renderHome();
