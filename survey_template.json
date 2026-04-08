@@ -31,25 +31,6 @@
         "name": "Vessel Specifications",
         "items": [
           {
-            "type": "list",
-            "label": "Hull type",
-            "options": [
-              "Catamaran",
-              "Chined",
-              "Displacement",
-              "Double ended",
-              "Flat bottom",
-              "Multi-chined",
-              "Planing",
-              "Pontoon",
-              "Round bottom",
-              "Scow",
-              "Semi-displacement",
-              "Trimaran",
-              "V-bottom"
-            ]
-          },
-          {
             "type": "textsingle",
             "label": "LOA (length overall)"
           },

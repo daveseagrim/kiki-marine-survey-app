@@ -5183,12 +5183,6 @@ function selectRating(itemLabel, categoryName, rating) {
       survey.items[itemLabel].variantText = '';
     }
 
-    // Sync special spec items to top-level survey properties
-    const currentRating = survey.items[itemLabel].rating;
-    if (itemLabel === 'Hull type') {
-      survey.hullType = currentRating;
-    }
-
     saveSurvey(survey).then(() => {
       // Find the specific item's DOM element and update in place
       const itemDiv = document.querySelector(`.rated-item[data-item-label="${itemLabel.replace(/"/g, '\\"')}"]`);
