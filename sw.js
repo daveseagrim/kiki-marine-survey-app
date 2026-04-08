@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v97';
+const CACHE_NAME = 'kiki-marine-v98';
 const URLS_TO_CACHE = [
   './',
   'index.html',
@@ -59,10 +59,34 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // JSON data files use network-first strategy so updates (new boat specs,
+  // text library entries, template changes) are picked up immediately.
+  // Falls back to cache when offline.
+  const isDataFile = url.pathname.endsWith('.json');
+
+  if (isDataFile) {
+    event.respondWith(
+      fetch(event.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      }).catch(() => {
+        // Network failed — serve from cache (offline fallback)
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
+
+  // App shell (HTML, JS, CSS, images) uses stale-while-revalidate
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (response) {
-        // Serve from cache but also fetch in background to update (stale-while-revalidate)
+        // Serve from cache but also fetch in background to update
         const fetchPromise = fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             const responseToCache = networkResponse.clone();

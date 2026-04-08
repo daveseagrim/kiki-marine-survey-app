@@ -4815,6 +4815,35 @@ function savePhotoToDevice(dataUrl, label) {
   }
 }
 
+/**
+ * Force the browser to recalculate viewport dimensions.
+ * Fixes Android Chrome issue where returning from the camera app in landscape
+ * leaves the PWA stuck at landscape dimensions. Works by briefly tweaking the
+ * viewport meta tag and forcing a reflow.
+ */
+function forceViewportRecalc() {
+  const viewport = document.querySelector('meta[name="viewport"]');
+  if (!viewport) return;
+
+  const original = viewport.content;
+
+  // Step 1: Force a scroll to top (camera may have shifted scroll position)
+  window.scrollTo(0, 0);
+
+  // Step 2: Briefly set viewport to a fixed width to force recalculation,
+  // then restore. The 10ms delay lets the browser process the change.
+  viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover';
+  document.body.style.display = 'none';
+  // Force reflow
+  void document.body.offsetHeight;
+  document.body.style.display = '';
+
+  setTimeout(() => {
+    viewport.content = original;
+    window.scrollTo(0, 0);
+  }, 50);
+}
+
 async function capturePhoto(itemLabel, event) {
   // If called without event (e.g., from area photo button), trigger a file input
   if (!event || !event.target || !event.target.files) {
@@ -4824,6 +4853,8 @@ async function capturePhoto(itemLabel, event) {
     input.capture = 'environment';
     input.multiple = true;
     input.onchange = (e) => capturePhoto(itemLabel, e);
+    // Mark camera active for the visibilitychange handler (landscape fix)
+    window._cameraActive = true;
     input.click();
     return;
   }
@@ -4869,6 +4900,10 @@ async function capturePhoto(itemLabel, event) {
   }
 
   event.target.value = '';
+
+  // Force viewport recalculation after returning from camera (Android Chrome
+  // can get stuck at landscape dimensions after taking a landscape photo)
+  forceViewportRecalc();
 
   // Refresh the item to show all new thumbnails
   const survey = await getSurvey(currentSurveyId);
@@ -7953,6 +7988,24 @@ async function initApp() {
 
     // Set initial history state
     history.replaceState({ view: 'surveys' }, '');
+
+    // Fix Android Chrome landscape photo issue: when returning from the camera
+    // app, the viewport may be stuck at landscape dimensions. Force a recalc
+    // whenever the page regains visibility.
+    window._cameraActive = false;
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && window._cameraActive) {
+        window._cameraActive = false;
+        setTimeout(forceViewportRecalc, 100);
+      }
+    });
+    // Mark camera as active whenever a file input with capture is clicked
+    document.addEventListener('click', (e) => {
+      const input = e.target.closest('input[type="file"]');
+      if (input && (input.capture || input.accept === 'image/*')) {
+        window._cameraActive = true;
+      }
+    }, true);
 
     await initDB();
     await fetchDataFiles();
