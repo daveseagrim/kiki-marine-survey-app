@@ -4891,13 +4891,26 @@ function renderInspection(survey) {
     `;
   });
 
+  // Build list of already-added custom item names for disabling in the dropdown
+  const addedCustomNames = survey.safetyEquipment.filter(e => e.custom).map(e => e.name);
+
   html += `
         <div style="margin-top:16px;padding-top:12px;border-top:1px solid #e5e7eb;">
-          <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Vessel has additional safety equipment not in the standard list?</div>
-          <div style="display:flex;gap:8px;">
-            <input type="text" id="customSafetyName" placeholder="e.g., Life raft, EPIRB, dye markers..."
-                   style="flex:1;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;" />
-            <button class="btn-primary" style="font-size:12px;padding:6px 14px;white-space:nowrap;" onclick="addCustomSafetyItem()">+ Add</button>
+          <div style="font-weight:600;font-size:13px;color:#1e3a5f;margin-bottom:6px;">Add Additional Safety Equipment</div>
+          <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Select items found on board that are not in the standard TC TP 511 list.</div>
+          <div id="customSafetyOptions" style="display:flex;flex-direction:column;gap:6px;">
+            ${ADDITIONAL_SAFETY_ITEMS.map(item => {
+              const alreadyAdded = addedCustomNames.includes(item);
+              return `<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:${alreadyAdded ? '#f0fdf4' : '#f9fafb'};border:1px solid ${alreadyAdded ? '#bbf7d0' : '#e5e7eb'};border-radius:6px;cursor:pointer;font-size:13px;">
+                <input type="checkbox" value="${item}" ${alreadyAdded ? 'checked disabled' : ''} onchange="toggleAdditionalSafetyItem(this)" style="width:18px;height:18px;accent-color:#2563eb;" />
+                ${item}${alreadyAdded ? ' <span style="color:#16a34a;font-size:11px;margin-left:auto;">✓ Added</span>' : ''}
+              </label>`;
+            }).join('')}
+            <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+              <input type="text" id="customSafetyOther" placeholder="Other — type item name..."
+                     style="flex:1;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;" />
+              <button class="btn-primary" style="font-size:12px;padding:6px 14px;white-space:nowrap;" onclick="addCustomSafetyItem()">+ Add</button>
+            </div>
           </div>
         </div>
       </div>
@@ -5036,9 +5049,56 @@ async function updateSafetyNote(idx, note) {
   await saveSurvey(survey);
 }
 
-// Add a custom safety equipment item not in the standard TC TP 511 list
+// Predefined additional safety items not in TC TP 511 standard list
+const ADDITIONAL_SAFETY_ITEMS = [
+  'EPIRB (Emergency Position Indicating Radio Beacon)',
+  'Life raft',
+  'Axe / hatchet',
+  'Radar reflector',
+  'First aid kit',
+  'Dye markers',
+  'Sea anchor / drogue',
+  'Jacklines and tethers',
+  'Man overboard module (MOM)',
+  'AIS transponder',
+  'Immersion suit(s)',
+  'Smoke signals'
+];
+
+// Toggle a predefined additional safety item via checkbox
+async function toggleAdditionalSafetyItem(checkbox) {
+  const name = checkbox.value;
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  if (checkbox.checked) {
+    // Add item
+    survey.safetyEquipment.push({
+      name: name,
+      category: 'Additional Equipment',
+      requirement: 'N/A',
+      checked: false,
+      notes: '',
+      photos: [],
+      custom: true
+    });
+    await saveSurvey(survey);
+    renderInspection(survey);
+    showToast('Added: ' + name);
+  } else {
+    // Remove item
+    const idx = survey.safetyEquipment.findIndex(e => e.custom && e.name === name);
+    if (idx >= 0) {
+      survey.safetyEquipment.splice(idx, 1);
+      await saveSurvey(survey);
+      renderInspection(survey);
+      showToast('Removed: ' + name);
+    }
+  }
+}
+
+// Add a custom typed safety equipment item (the "Other" field)
 async function addCustomSafetyItem() {
-  const nameInput = document.getElementById('customSafetyName');
+  const nameInput = document.getElementById('customSafetyOther');
   if (!nameInput || !nameInput.value.trim()) return;
   const survey = await getSurvey(currentSurveyId);
   if (!survey) return;
