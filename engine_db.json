@@ -6,314 +6,1608 @@
       "country": "Japan",
       "type": "Diesel",
       "models": [
-        { "model": "YSE8", "hp": "8", "kw": "5.9", "fuel": "Diesel", "cylinders": "1", "displacement": "0.39L", "engineType": "Inboard" },
-        { "model": "YSE12", "hp": "12", "kw": "8.8", "fuel": "Diesel", "cylinders": "1", "displacement": "0.58L", "engineType": "Inboard" },
-        { "model": "YSB8", "hp": "8", "kw": "5.9", "fuel": "Diesel", "cylinders": "1", "displacement": "0.39L", "engineType": "Inboard" },
-        { "model": "YSB12", "hp": "12", "kw": "8.8", "fuel": "Diesel", "cylinders": "1", "displacement": "0.58L", "engineType": "Inboard" },
-        { "model": "YSM8", "hp": "8", "kw": "5.9", "fuel": "Diesel", "cylinders": "1", "displacement": "0.39L", "engineType": "Inboard" },
-        { "model": "YSM12", "hp": "12", "kw": "8.8", "fuel": "Diesel", "cylinders": "1", "displacement": "0.58L", "engineType": "Inboard" },
-        { "model": "SB8", "hp": "8", "kw": "5.9", "fuel": "Diesel", "cylinders": "1", "displacement": "0.39L", "engineType": "Inboard" },
-        { "model": "SB12", "hp": "12", "kw": "8.8", "fuel": "Diesel", "cylinders": "1", "displacement": "0.58L", "engineType": "Inboard" },
-        { "model": "1GM", "hp": "7", "kw": "5.1", "fuel": "Diesel", "cylinders": "1", "displacement": "0.33L", "engineType": "Inboard" },
-        { "model": "1GM10", "hp": "9", "kw": "6.6", "fuel": "Diesel", "cylinders": "1", "displacement": "0.43L", "engineType": "Inboard" },
-        { "model": "1GM10F", "hp": "9", "kw": "6.6", "fuel": "Diesel", "cylinders": "1", "displacement": "0.43L", "engineType": "Inboard" },
-        { "model": "2GM", "hp": "13", "kw": "9.7", "fuel": "Diesel", "cylinders": "2", "displacement": "0.66L", "engineType": "Inboard" },
-        { "model": "2GM20", "hp": "18", "kw": "13.4", "fuel": "Diesel", "cylinders": "2", "displacement": "0.88L", "engineType": "Inboard" },
-        { "model": "2GM20F", "hp": "18", "kw": "13.4", "fuel": "Diesel", "cylinders": "2", "displacement": "0.88L", "engineType": "Inboard" },
-        { "model": "3GM30", "hp": "27", "kw": "20.1", "fuel": "Diesel", "cylinders": "3", "displacement": "1.34L", "engineType": "Inboard" },
-        { "model": "3GM30F", "hp": "27", "kw": "20.1", "fuel": "Diesel", "cylinders": "3", "displacement": "1.34L", "engineType": "Inboard" },
-        { "model": "3HM35", "hp": "34", "kw": "25.4", "fuel": "Diesel", "cylinders": "3", "displacement": "1.5L", "engineType": "Inboard" },
-        { "model": "3HM35F", "hp": "34", "kw": "25.4", "fuel": "Diesel", "cylinders": "3", "displacement": "1.5L", "engineType": "Inboard" },
-        { "model": "2QM15", "hp": "14", "kw": "10.3", "fuel": "Diesel", "cylinders": "2", "displacement": "0.54L", "engineType": "Inboard" },
-        { "model": "2QM20", "hp": "18", "kw": "13.2", "fuel": "Diesel", "cylinders": "2", "displacement": "0.66L", "engineType": "Inboard" },
-        { "model": "3QM30", "hp": "27", "kw": "19.9", "fuel": "Diesel", "cylinders": "3", "displacement": "1.0L", "engineType": "Inboard" },
-        { "model": "2YM15", "hp": "14", "kw": "10.3", "fuel": "Diesel", "cylinders": "2", "displacement": "0.57L", "engineType": "Inboard" },
-        { "model": "3YM20", "hp": "21", "kw": "15.3", "fuel": "Diesel", "cylinders": "3", "displacement": "0.85L", "engineType": "Inboard" },
-        { "model": "3YM30", "hp": "29", "kw": "21.3", "fuel": "Diesel", "cylinders": "3", "displacement": "1.12L", "engineType": "Inboard" },
-        { "model": "3YM30AE", "hp": "29", "kw": "21.3", "fuel": "Diesel", "cylinders": "3", "displacement": "1.27L", "engineType": "Inboard" },
-        { "model": "3JH2E", "hp": "39", "kw": "28.7", "fuel": "Diesel", "cylinders": "3", "displacement": "1.64L", "engineType": "Inboard" },
-        { "model": "3JH3E", "hp": "39", "kw": "28.7", "fuel": "Diesel", "cylinders": "3", "displacement": "1.64L", "engineType": "Inboard" },
-        { "model": "3JH5E", "hp": "39", "kw": "28.7", "fuel": "Diesel", "cylinders": "3", "displacement": "1.64L", "engineType": "Inboard" },
-        { "model": "3JH40", "hp": "40", "kw": "29.4", "fuel": "Diesel", "cylinders": "3", "displacement": "1.64L", "engineType": "Inboard" },
-        { "model": "4JH2-DTE", "hp": "50", "kw": "36.8", "fuel": "Diesel", "cylinders": "4", "displacement": "2.19L", "engineType": "Inboard" },
-        { "model": "4JH2-TE", "hp": "75", "kw": "55", "fuel": "Diesel", "cylinders": "4", "displacement": "2.19L", "engineType": "Inboard" },
-        { "model": "4JH2-UTE", "hp": "68", "kw": "50", "fuel": "Diesel", "cylinders": "4", "displacement": "2.19L", "engineType": "Inboard" },
-        { "model": "4JH3-TE", "hp": "75", "kw": "55", "fuel": "Diesel", "cylinders": "4", "displacement": "2.19L", "engineType": "Inboard" },
-        { "model": "4JH3-DTE", "hp": "100", "kw": "73.5", "fuel": "Diesel", "cylinders": "4", "displacement": "2.19L", "engineType": "Inboard" },
-        { "model": "4JH3-HTE", "hp": "100", "kw": "73.5", "fuel": "Diesel", "cylinders": "4", "displacement": "2.19L", "engineType": "Inboard" },
-        { "model": "4JH4-TE", "hp": "54", "kw": "39.7", "fuel": "Diesel", "cylinders": "4", "displacement": "2.77L", "engineType": "Inboard" },
-        { "model": "4JH4-HTE", "hp": "110", "kw": "74", "fuel": "Diesel", "cylinders": "4", "displacement": "2.77L", "engineType": "Inboard" },
-        { "model": "4JH45", "hp": "45", "kw": "33", "fuel": "Diesel", "cylinders": "4", "displacement": "2.77L", "engineType": "Inboard" },
-        { "model": "4JH57", "hp": "57", "kw": "41.9", "fuel": "Diesel", "cylinders": "4", "displacement": "2.19L", "engineType": "Inboard" },
-        { "model": "4JH80", "hp": "80", "kw": "58.8", "fuel": "Diesel", "cylinders": "4", "displacement": "2.77L", "engineType": "Inboard" },
-        { "model": "4JH110", "hp": "110", "kw": "80.9", "fuel": "Diesel", "cylinders": "4", "displacement": "2.0L", "engineType": "Inboard" },
-        { "model": "4LV150", "hp": "150", "kw": "110", "fuel": "Diesel", "cylinders": "4", "displacement": "2.76L", "engineType": "Inboard" },
-        { "model": "4LV170", "hp": "170", "kw": "125", "fuel": "Diesel", "cylinders": "4", "displacement": "2.76L", "engineType": "Inboard" },
-        { "model": "4LV195", "hp": "195", "kw": "143", "fuel": "Diesel", "cylinders": "4", "displacement": "2.76L", "engineType": "Inboard" },
-        { "model": "4LV230", "hp": "230", "kw": "169", "fuel": "Diesel", "cylinders": "4", "displacement": "2.76L", "engineType": "Inboard" },
-        { "model": "4LV250", "hp": "250", "kw": "184", "fuel": "Diesel", "cylinders": "4", "displacement": "2.76L", "engineType": "Inboard" },
-        { "model": "6LP-DTE", "hp": "250", "kw": "184", "fuel": "Diesel", "cylinders": "6", "displacement": "4.2L", "engineType": "Inboard" },
-        { "model": "6LP-STE", "hp": "300", "kw": "221", "fuel": "Diesel", "cylinders": "6", "displacement": "4.2L", "engineType": "Inboard" },
-        { "model": "6LPA-STP2", "hp": "315", "kw": "232", "fuel": "Diesel", "cylinders": "6", "displacement": "4.2L", "engineType": "Inboard" },
-        { "model": "6LY-STE", "hp": "350", "kw": "257", "fuel": "Diesel", "cylinders": "6", "displacement": "5.8L", "engineType": "Inboard" },
-        { "model": "6LY2-STE", "hp": "440", "kw": "324", "fuel": "Diesel", "cylinders": "6", "displacement": "5.8L", "engineType": "Inboard" },
-        { "model": "6LY2-STP", "hp": "440", "kw": "324", "fuel": "Diesel", "cylinders": "6", "displacement": "5.8L", "engineType": "Inboard" },
-        { "model": "6LY2A-STP", "hp": "440", "kw": "324", "fuel": "Diesel", "cylinders": "6", "displacement": "5.8L", "engineType": "Inboard" },
-        { "model": "6LY3-ETP", "hp": "480", "kw": "353", "fuel": "Diesel", "cylinders": "6", "displacement": "5.81L", "engineType": "Inboard" },
-        { "model": "6LY3-STP", "hp": "440", "kw": "324", "fuel": "Diesel", "cylinders": "6", "displacement": "5.81L", "engineType": "Inboard" },
-        { "model": "6LY3-UTP", "hp": "370", "kw": "272", "fuel": "Diesel", "cylinders": "6", "displacement": "5.81L", "engineType": "Inboard" },
-        { "model": "6LY400", "hp": "400", "kw": "294", "fuel": "Diesel", "cylinders": "6", "displacement": "5.81L", "engineType": "Inboard" },
-        { "model": "6LY440", "hp": "440", "kw": "324", "fuel": "Diesel", "cylinders": "6", "displacement": "5.81L", "engineType": "Inboard" },
-        { "model": "8LV320", "hp": "320", "kw": "235", "fuel": "Diesel", "cylinders": "8", "displacement": "4.46L", "engineType": "Inboard" },
-        { "model": "8LV350", "hp": "350", "kw": "257", "fuel": "Diesel", "cylinders": "8", "displacement": "4.46L", "engineType": "Inboard" },
-        { "model": "8LV370", "hp": "370", "kw": "272", "fuel": "Diesel", "cylinders": "8", "displacement": "4.46L", "engineType": "Inboard" }
+        {
+          "model": "YSE8",
+          "hp": "8",
+          "kw": "5.9",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.39L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "YSE12",
+          "hp": "12",
+          "kw": "8.8",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.58L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "YSB8",
+          "hp": "8",
+          "kw": "5.9",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.39L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "YSB12",
+          "hp": "12",
+          "kw": "8.8",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.58L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "YSM8",
+          "hp": "8",
+          "kw": "5.9",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.39L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "YSM12",
+          "hp": "12",
+          "kw": "8.8",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.58L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "SB8",
+          "hp": "8",
+          "kw": "5.9",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.39L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "SB12",
+          "hp": "12",
+          "kw": "8.8",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.58L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "1GM",
+          "hp": "7",
+          "kw": "5.1",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.33L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "1GM10",
+          "hp": "9",
+          "kw": "6.6",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.43L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "1GM10F",
+          "hp": "9",
+          "kw": "6.6",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.43L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "2GM",
+          "hp": "13",
+          "kw": "9.7",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.66L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "2GM20",
+          "hp": "18",
+          "kw": "13.4",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.88L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "2GM20F",
+          "hp": "18",
+          "kw": "13.4",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.88L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3GM30",
+          "hp": "27",
+          "kw": "20.1",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.34L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3GM30F",
+          "hp": "27",
+          "kw": "20.1",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.34L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3HM35",
+          "hp": "34",
+          "kw": "25.4",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.5L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3HM35F",
+          "hp": "34",
+          "kw": "25.4",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.5L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "2QM15",
+          "hp": "14",
+          "kw": "10.3",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.54L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "2QM20",
+          "hp": "18",
+          "kw": "13.2",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.66L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3QM30",
+          "hp": "27",
+          "kw": "19.9",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.0L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "2YM15",
+          "hp": "14",
+          "kw": "10.3",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.57L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3YM20",
+          "hp": "21",
+          "kw": "15.3",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "0.85L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3YM30",
+          "hp": "29",
+          "kw": "21.3",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.12L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3YM30AE",
+          "hp": "29",
+          "kw": "21.3",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.27L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3JH2E",
+          "hp": "39",
+          "kw": "28.7",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.64L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3JH3E",
+          "hp": "39",
+          "kw": "28.7",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.64L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3JH5E",
+          "hp": "39",
+          "kw": "28.7",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.64L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3JH40",
+          "hp": "40",
+          "kw": "29.4",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.64L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH2-DTE",
+          "hp": "50",
+          "kw": "36.8",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.19L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH2-TE",
+          "hp": "75",
+          "kw": "55",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.19L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH2-UTE",
+          "hp": "68",
+          "kw": "50",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.19L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH3-TE",
+          "hp": "75",
+          "kw": "55",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.19L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH3-DTE",
+          "hp": "100",
+          "kw": "73.5",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.19L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH3-HTE",
+          "hp": "100",
+          "kw": "73.5",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.19L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH4-TE",
+          "hp": "54",
+          "kw": "39.7",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.77L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH4-HTE",
+          "hp": "110",
+          "kw": "74",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.77L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH45",
+          "hp": "45",
+          "kw": "33",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.77L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH57",
+          "hp": "57",
+          "kw": "41.9",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.19L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH80",
+          "hp": "80",
+          "kw": "58.8",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.77L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH110",
+          "hp": "110",
+          "kw": "80.9",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.0L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4LV150",
+          "hp": "150",
+          "kw": "110",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.76L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4LV170",
+          "hp": "170",
+          "kw": "125",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.76L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4LV195",
+          "hp": "195",
+          "kw": "143",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.76L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4LV230",
+          "hp": "230",
+          "kw": "169",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.76L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4LV250",
+          "hp": "250",
+          "kw": "184",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.76L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6LP-DTE",
+          "hp": "250",
+          "kw": "184",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "4.2L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6LP-STE",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "4.2L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6LPA-STP2",
+          "hp": "315",
+          "kw": "232",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "4.2L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6LY-STE",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.8L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6LY2-STE",
+          "hp": "440",
+          "kw": "324",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.8L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6LY2-STP",
+          "hp": "440",
+          "kw": "324",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.8L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6LY2A-STP",
+          "hp": "440",
+          "kw": "324",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.8L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6LY3-ETP",
+          "hp": "480",
+          "kw": "353",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.81L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6LY3-STP",
+          "hp": "440",
+          "kw": "324",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.81L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6LY3-UTP",
+          "hp": "370",
+          "kw": "272",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.81L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6LY400",
+          "hp": "400",
+          "kw": "294",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.81L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "6LY440",
+          "hp": "440",
+          "kw": "324",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.81L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "8LV320",
+          "hp": "320",
+          "kw": "235",
+          "fuel": "Diesel",
+          "cylinders": "8",
+          "displacement": "4.46L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "8LV350",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Diesel",
+          "cylinders": "8",
+          "displacement": "4.46L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "8LV370",
+          "hp": "370",
+          "kw": "272",
+          "fuel": "Diesel",
+          "cylinders": "8",
+          "displacement": "4.46L",
+          "engineType": "Inboard"
+        }
       ]
     },
     {
       "make": "Volvo Penta",
       "country": "Sweden",
-      "type": "Diesel & Gasoline",
+      "type": "Gasoline/Diesel",
       "models": [
         {
-          "model": "D1-13",
-          "hp": "12.2",
-          "kw": "9",
-          "fuel": "Diesel",
-          "cylinders": "2",
-          "displacement": "0.9L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "D1-20",
-          "hp": "18.8",
-          "kw": "13.8",
-          "fuel": "Diesel",
-          "cylinders": "2",
-          "displacement": "1.5L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "D1-30",
-          "hp": "27",
-          "kw": "20",
-          "fuel": "Diesel",
-          "cylinders": "2",
-          "displacement": "1.9L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "D2-40",
-          "hp": "51",
-          "kw": "37.5",
-          "fuel": "Diesel",
-          "cylinders": "4",
-          "displacement": "2.2L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "D2-50",
-          "hp": "60",
-          "kw": "44",
-          "fuel": "Diesel",
-          "cylinders": "4",
-          "displacement": "2.2L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "D2-55",
-          "hp": "75",
-          "kw": "55",
-          "fuel": "Diesel",
-          "cylinders": "4",
-          "displacement": "2.2L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "D3-110",
-          "hp": "110",
-          "kw": "81",
-          "fuel": "Diesel",
-          "cylinders": "5",
-          "displacement": "2.4L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "D3-140",
-          "hp": "140",
-          "kw": "103",
-          "fuel": "Diesel",
-          "cylinders": "5",
-          "displacement": "2.4L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "D4-180",
-          "hp": "175",
-          "kw": "128",
-          "fuel": "Diesel",
-          "cylinders": "4",
-          "displacement": "3.7L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "D4-210",
-          "hp": "230",
-          "kw": "169",
-          "fuel": "Diesel",
-          "cylinders": "4",
-          "displacement": "3.7L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "D4-260",
-          "hp": "270",
-          "kw": "198",
-          "fuel": "Diesel",
-          "cylinders": "4",
-          "displacement": "3.7L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "D4-300",
-          "hp": "300",
-          "kw": "220",
-          "fuel": "Diesel",
-          "cylinders": "4",
-          "displacement": "3.7L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "D6-310",
-          "hp": "300",
-          "kw": "220",
-          "fuel": "Diesel",
-          "cylinders": "6",
-          "displacement": "5.5L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "D6-370",
-          "hp": "370",
-          "kw": "272",
-          "fuel": "Diesel",
-          "cylinders": "6",
-          "displacement": "5.5L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "TAMD41A",
+          "model": "V6-SX",
           "hp": "200",
           "kw": "147",
-          "fuel": "Diesel",
-          "cylinders": "4",
-          "displacement": "4.0L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "TAMD62A",
-          "hp": "285",
-          "kw": "210",
-          "fuel": "Diesel",
-          "cylinders": "6",
-          "displacement": "6.1L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "4.3L Gasoline Sterndrive",
-          "hp": "220",
-          "kw": "161",
           "fuel": "Gasoline",
           "cylinders": "6",
           "displacement": "4.3L",
-          "engineType": "Sterndrive"
+          "engineType": "Sterndrive",
+          "description": "GDI (Gasoline Direct Injection); 2020-Present; Current V6 SX single-propeller sterndrive, freshwater-cooled DI gasoline"
         },
         {
-          "model": "5.0L Gasoline Sterndrive",
-          "hp": "270",
-          "kw": "198",
+          "model": "V6-DPS",
+          "hp": "200",
+          "kw": "147",
           "fuel": "Gasoline",
-          "cylinders": "8",
-          "displacement": "5.0L",
-          "engineType": "Sterndrive"
+          "cylinders": "6",
+          "displacement": "4.3L",
+          "engineType": "Sterndrive",
+          "description": "GDI; 2008-Present; V6 DuoProp sterndrive, dual-propeller configuration"
         },
         {
-          "model": "5.7L Gasoline Sterndrive",
+          "model": "V8-DPS",
           "hp": "320",
           "kw": "235",
           "fuel": "Gasoline",
           "cylinders": "8",
-          "displacement": "5.7L",
-          "engineType": "Sterndrive"
-        }
-      ]
-    },
-    {
-      "make": "Mercruiser",
-      "country": "USA",
-      "type": "Gasoline",
-      "models": [
-        {
-          "model": "3.0L",
-          "hp": "150",
-          "kw": "110",
-          "fuel": "Gasoline",
-          "cylinders": "6",
-          "displacement": "3.0L",
-          "engineType": "Sterndrive"
+          "displacement": "5.3L",
+          "engineType": "Sterndrive",
+          "description": "GDI; 2008-Present; V8 DuoProp dual-propeller sterndrive, large displacement options"
         },
         {
-          "model": "4.3L",
-          "hp": "220",
-          "kw": "161",
+          "model": "4.3L GL",
+          "hp": "200",
+          "kw": "147",
           "fuel": "Gasoline",
           "cylinders": "6",
           "displacement": "4.3L",
-          "engineType": "Sterndrive"
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1995-2003; Legacy GM-based gasoline Aquamatic sterndrive"
         },
         {
-          "model": "5.0L",
-          "hp": "270",
-          "kw": "198",
+          "model": "4.3L Gi",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.3L",
+          "engineType": "Sterndrive",
+          "description": "EFI; 1998-2008; 4.3L with electronic fuel injection"
+        },
+        {
+          "model": "4.3L GXi",
+          "hp": "225",
+          "kw": "165",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.3L",
+          "engineType": "Sterndrive",
+          "description": "EFI; 2000-2008; Higher-output 4.3L EFI variant"
+        },
+        {
+          "model": "5.0L GL",
+          "hp": "240",
+          "kw": "177",
           "fuel": "Gasoline",
           "cylinders": "8",
           "displacement": "5.0L",
-          "engineType": "Sterndrive"
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1995-2003; Legacy GM 305 carbureted V8"
         },
         {
-          "model": "5.7L",
-          "hp": "320",
-          "kw": "235",
+          "model": "5.0L Gi",
+          "hp": "250",
+          "kw": "184",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.0L",
+          "engineType": "Sterndrive",
+          "description": "EFI; 1998-2008; 5.0L with electronic fuel injection"
+        },
+        {
+          "model": "5.0L GXi",
+          "hp": "280",
+          "kw": "206",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.0L",
+          "engineType": "Sterndrive",
+          "description": "EFI; 2000-2008; Higher-output 5.0L EFI variant"
+        },
+        {
+          "model": "5.7L GL",
+          "hp": "300",
+          "kw": "221",
           "fuel": "Gasoline",
           "cylinders": "8",
           "displacement": "5.7L",
-          "engineType": "Sterndrive"
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1995-2003; Legacy GM 350 carbureted big block"
         },
         {
-          "model": "350 Mag",
+          "model": "5.7L Gi",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "EFI; 1998-2008; 5.7L with electronic fuel injection"
+        },
+        {
+          "model": "5.7L GXi",
           "hp": "350",
           "kw": "257",
           "fuel": "Gasoline",
           "cylinders": "8",
           "displacement": "5.7L",
-          "engineType": "Sterndrive"
+          "engineType": "Sterndrive",
+          "description": "EFI; 2000-2008; Higher-output 5.7L EFI variant"
         },
         {
-          "model": "496 Mag",
-          "hp": "450",
-          "kw": "330",
+          "model": "7.4L GL",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "7.4L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1995-2003; Legacy GM 454 carbureted big block"
+        },
+        {
+          "model": "7.4L Gi",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "7.4L",
+          "engineType": "Sterndrive",
+          "description": "EFI; 1998-2008; 7.4L with electronic fuel injection"
+        },
+        {
+          "model": "7.4L GXi",
+          "hp": "400",
+          "kw": "294",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "7.4L",
+          "engineType": "Sterndrive",
+          "description": "EFI; 2000-2008; Higher-output 7.4L EFI variant"
+        },
+        {
+          "model": "8.1L OSi",
+          "hp": "430",
+          "kw": "316",
           "fuel": "Gasoline",
           "cylinders": "8",
           "displacement": "8.1L",
-          "engineType": "Sterndrive"
+          "engineType": "Sterndrive",
+          "description": "EFI; 2004-2008; Offshore 8.1L EFI variant, high-output big block"
         },
         {
-          "model": "8.2L MAG H.O.",
-          "hp": "500",
-          "kw": "367",
+          "model": "D4-DPH",
+          "hp": "150",
+          "kw": "110",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "3.7L",
+          "engineType": "Sterndrive",
+          "description": "Common-rail diesel; 2008-Present; Diesel Aquamatic sterndrive, inline 4-cylinder, double overhead cam, turbo"
+        },
+        {
+          "model": "D4-DPI",
+          "hp": "150",
+          "kw": "110",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "3.7L",
+          "engineType": "Sterndrive",
+          "description": "Common-rail diesel; 2020-Present; Upgraded D4 diesel sterndrive variant"
+        },
+        {
+          "model": "D6-DPI",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.5L",
+          "engineType": "Sterndrive",
+          "description": "Common-rail diesel; 2008-Present; Diesel Aquamatic sterndrive, inline 6-cylinder, double overhead cam, turbo"
+        },
+        {
+          "model": "SX-130 Diesel",
+          "hp": "130",
+          "kw": "96",
+          "fuel": "Diesel",
+          "cylinders": "",
+          "displacement": "N/A",
+          "engineType": "Sterndrive",
+          "description": "Diesel; 2020-Present; Current SX single-propeller diesel sterndrive option"
+        },
+        {
+          "model": "SX-160 Diesel",
+          "hp": "160",
+          "kw": "118",
+          "fuel": "Diesel",
+          "cylinders": "",
+          "displacement": "N/A",
+          "engineType": "Sterndrive",
+          "description": "Diesel; 2020-Present; Current SX single-propeller diesel sterndrive option"
+        },
+        {
+          "model": "D4 Inboard",
+          "hp": "150",
+          "kw": "110",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "3.7L",
+          "engineType": "Inboard",
+          "description": "Common-rail diesel; 2008-Present; Diesel inboard, common-rail injection, DHOC, turbo, flexible mounting"
+        },
+        {
+          "model": "D6 Inboard",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.5L",
+          "engineType": "Inboard",
+          "description": "Common-rail diesel; 2008-Present; Diesel inboard, inline 6-cylinder, common-rail, DHOC, turbo"
+        },
+        {
+          "model": "D13 Inboard",
+          "hp": "425",
+          "kw": "313",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "12.8L",
+          "engineType": "Inboard",
+          "description": "High-pressure unit injector diesel; 2010-Present; Large displacement diesel, OHC, twin-entry turbo, yacht applications"
+        },
+        {
+          "model": "4.3L Inboard",
+          "hp": "220",
+          "kw": "162",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.3L",
+          "engineType": "Inboard",
+          "description": "EFI; 2000-2010; Legacy gasoline inboard, GM-based"
+        },
+        {
+          "model": "5.0L Inboard",
+          "hp": "280",
+          "kw": "206",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.0L",
+          "engineType": "Inboard",
+          "description": "EFI; 2000-2010; Legacy gasoline inboard, GM 305 block"
+        },
+        {
+          "model": "5.7L Inboard",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Inboard",
+          "description": "EFI; 2000-2010; Legacy gasoline inboard, GM 350 block"
+        },
+        {
+          "model": "7.4L Inboard",
+          "hp": "400",
+          "kw": "294",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "7.4L",
+          "engineType": "Inboard",
+          "description": "EFI; 2000-2010; Legacy gasoline inboard, GM 454 big block"
+        },
+        {
+          "model": "8.1L Inboard",
+          "hp": "430",
+          "kw": "316",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "8.1L",
+          "engineType": "Inboard",
+          "description": "EFI; 2004-2010; Legacy gasoline inboard, GM 8.1L big block"
+        },
+        {
+          "model": "IPS 15",
+          "hp": "0",
+          "kw": "0",
+          "fuel": "Diesel",
+          "cylinders": "",
+          "displacement": "D8 series or custom",
+          "engineType": "Inboard",
+          "description": "Diesel; 2023-Present; Latest IPS inboard pod, works with D8 series diesel engines, +/-40\u00b0 rotation, joystick steering"
+        },
+        {
+          "model": "IPS 600",
+          "hp": "0",
+          "kw": "0",
+          "fuel": "Diesel",
+          "cylinders": "",
+          "displacement": "Variable",
+          "engineType": "Inboard",
+          "description": "Diesel; 2015-Present; IPS inboard pod system, allows two connected propulsion units with dual engine options"
+        },
+        {
+          "model": "IPS Professional Platform",
+          "hp": "0",
+          "kw": "0",
+          "fuel": "Diesel",
+          "cylinders": "13",
+          "displacement": "Variable",
+          "engineType": "Inboard",
+          "description": "Diesel/Hybrid electric; 2024-Present; Dual D13 diesel or D13+electric motor hybrid, +/-40\u00b0 rotation, joystick control, dual prop IPS"
+        }
+      ]
+    },
+    {
+      "make": "Mercury MerCruiser",
+      "country": "USA",
+      "type": "Gasoline",
+      "models": [
+        {
+          "model": "120",
+          "hp": "120",
+          "kw": "88",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "2.5L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1964-1989; GM-based 2.5L, earliest models had variable configurations"
+        },
+        {
+          "model": "140",
+          "hp": "135",
+          "kw": "99",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "3.0L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1963-2015; GM 3.0L, long production run, cornerstone entry-level engine"
+        },
+        {
+          "model": "150",
+          "hp": "150",
+          "kw": "110",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "2.5L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1964-1966; Legacy model, early production"
+        },
+        {
+          "model": "160",
+          "hp": "160",
+          "kw": "118",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "2.6L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1967-1969; Legacy model, power trim variants available"
+        },
+        {
+          "model": "165",
+          "hp": "165",
+          "kw": "121",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.1L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1970-1982; GM 4.1L inline 6, common in 1970s cruisers"
+        },
+        {
+          "model": "170",
+          "hp": "170",
+          "kw": "125",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "3.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1976-1982; 4-cylinder, Mercury-designed aluminum block"
+        },
+        {
+          "model": "180",
+          "hp": "180",
+          "kw": "132",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "4.0L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1975-1982; Higher output 4-cylinder variant"
+        },
+        {
+          "model": "190",
+          "hp": "190",
+          "kw": "140",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "4.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1963-1964; Early V8 variant, limited production"
+        },
+        {
+          "model": "200",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.0L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1969-1985; GM 305 V8 carbureted"
+        },
+        {
+          "model": "205",
+          "hp": "205",
+          "kw": "151",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.0L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1975-1982; Higher output 5.0L variant"
+        },
+        {
+          "model": "215",
+          "hp": "215",
+          "kw": "158",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1971-1977; Early big block, Chevrolet 350 platform"
+        },
+        {
+          "model": "228",
+          "hp": "228",
+          "kw": "168",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted 4-barrel; 1977-1982; 4-barrel carbureted, common in 1970s-80s boats"
+        },
+        {
+          "model": "225-S",
+          "hp": "225",
+          "kw": "165",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted 4-barrel; 1973-1974; Stereo designation variant"
+        },
+        {
+          "model": "233",
+          "hp": "233",
+          "kw": "171",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1975-1977; High-output 350, Ford V8 option"
+        },
+        {
+          "model": "250",
+          "hp": "250",
+          "kw": "184",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1978-1982; Late carbureted 350 variant"
+        },
+        {
+          "model": "255-TRS",
+          "hp": "255",
+          "kw": "188",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted Thunderbolt; 1978-1982; Thunderbolt RapidStart system"
+        },
+        {
+          "model": "260",
+          "hp": "260",
+          "kw": "191",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1983-1989; High-output carbureted 350"
+        },
+        {
+          "model": "470",
+          "hp": "170",
+          "kw": "125",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "3.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1976-1982; Mercury-designed aluminum block, early 4-cyl design"
+        },
+        {
+          "model": "485",
+          "hp": "185",
+          "kw": "136",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "3.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1980-1982; Higher-output 224ci variant"
+        },
+        {
+          "model": "488",
+          "hp": "188",
+          "kw": "138",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "3.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1978-1982; 224ci with tuned camshaft"
+        },
+        {
+          "model": "898",
+          "hp": "190",
+          "kw": "140",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "3.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1978-1982; High-output 4-cylinder variant"
+        },
+        {
+          "model": "3.0L TKS",
+          "hp": "135",
+          "kw": "99",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "3.0L",
+          "engineType": "Sterndrive",
+          "description": "MPI (Multi-Port Injection); 1998-2017; Turn-Key-Start system, updated 3.0L with fuel injection"
+        },
+        {
+          "model": "3.0L Alpha TKS",
+          "hp": "135",
+          "kw": "99",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "3.0L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 1998-2015; 3.0L paired with Alpha sterndrive"
+        },
+        {
+          "model": "3.0L MPI",
+          "hp": "135",
+          "kw": "99",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "3.0L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 1998-2017; Standard fuel-injected 3.0L"
+        },
+        {
+          "model": "4.3L LX",
+          "hp": "190",
+          "kw": "140",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.3L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1985-1997; GM 4.3L V6, low-output carbureted variant"
+        },
+        {
+          "model": "4.3L LXH",
+          "hp": "210",
+          "kw": "154",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.3L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1990-1997; 4.3L high-output carbureted"
+        },
+        {
+          "model": "4.3L EFI",
+          "hp": "210",
+          "kw": "154",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.3L",
+          "engineType": "Sterndrive",
+          "description": "EFI (Electronic Fuel Injection); 1998-2004; Electronic fuel injection variant"
+        },
+        {
+          "model": "4.3L TKS",
+          "hp": "220",
+          "kw": "162",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.3L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 1998-2015; Turn-Key-Start with multi-port injection"
+        },
+        {
+          "model": "4.3L MPI",
+          "hp": "220",
+          "kw": "162",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.3L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 1998-2015; Standard fuel-injected 4.3L V6"
+        },
+        {
+          "model": "4.3L Alpha",
+          "hp": "210",
+          "kw": "154",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.3L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1992-1997; 4.3L paired with Alpha sterndrive"
+        },
+        {
+          "model": "4.3L Bravo",
+          "hp": "220",
+          "kw": "162",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.3L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 1998-2015; 4.3L with Bravo sterndrive"
+        },
+        {
+          "model": "5.0L Carb",
+          "hp": "230",
+          "kw": "169",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.0L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1985-1997; GM 305ci carbureted, 2-barrel and 4-barrel variants"
+        },
+        {
+          "model": "5.0L EFI",
+          "hp": "240",
+          "kw": "177",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.0L",
+          "engineType": "Sterndrive",
+          "description": "EFI; 1998-1999; 5.0L with electronic fuel injection"
+        },
+        {
+          "model": "5.0L TKS",
+          "hp": "220",
+          "kw": "162",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.0L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 2000-2015; Turn-Key-Start 5.0L"
+        },
+        {
+          "model": "5.0L MPI",
+          "hp": "260",
+          "kw": "191",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.0L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 1998-2015; Multi-port injected 5.0L, standard HP variant"
+        },
+        {
+          "model": "5.0L Alpha",
+          "hp": "230",
+          "kw": "169",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.0L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1991-1997; 5.0L paired with Alpha sterndrive"
+        },
+        {
+          "model": "5.0L Bravo",
+          "hp": "260",
+          "kw": "191",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.0L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 1998-2015; 5.0L with Bravo sterndrive package"
+        },
+        {
+          "model": "5.7L Carb",
+          "hp": "270",
+          "kw": "199",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1985-1997; GM 350ci carbureted, classic big block"
+        },
+        {
+          "model": "5.7L TBI",
+          "hp": "260",
+          "kw": "191",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "TBI (Throttle Body Injection); 1987-1997; Throttle-body injected 350"
+        },
+        {
+          "model": "5.7L EFI",
+          "hp": "280",
+          "kw": "206",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "EFI; 1998-1999; 5.7L with electronic fuel injection"
+        },
+        {
+          "model": "5.7L TKS",
+          "hp": "260",
+          "kw": "191",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 2000-2015; Turn-Key-Start 5.7L"
+        },
+        {
+          "model": "5.7L MPI",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 1998-2015; Multi-port injected 5.7L, high-output variant"
+        },
+        {
+          "model": "5.7L Alpha",
+          "hp": "270",
+          "kw": "199",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1991-1997; 5.7L paired with Alpha sterndrive"
+        },
+        {
+          "model": "5.7L Bravo",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 1998-2015; 5.7L with Bravo sterndrive package"
+        },
+        {
+          "model": "350 MAG Carb",
+          "hp": "310",
+          "kw": "228",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1990-1997; Magnum carbureted 350, high-performance variant"
+        },
+        {
+          "model": "350 MAG TBI",
+          "hp": "310",
+          "kw": "228",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "TBI; 1987-1997; Magnum throttle-body injected"
+        },
+        {
+          "model": "350 MAG MPI",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 1998-2015; Magnum multi-port injected, replaces all pre-2015 5.0L/5.7L/6.2L applications"
+        },
+        {
+          "model": "350 MAG Bravo",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 1998-2015; 350 MAG paired with Bravo sterndrive"
+        },
+        {
+          "model": "350 MAG Alpha",
+          "hp": "310",
+          "kw": "228",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.7L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted/TBI; 1991-1997; 350 MAG paired with Alpha sterndrive"
+        },
+        {
+          "model": "357 Alpha 4V",
+          "hp": "275",
+          "kw": "202",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.8L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted 4-barrel; 1995-2001; Stroker variant, 4-valve performance engine"
+        },
+        {
+          "model": "377 MAG",
+          "hp": "320",
+          "kw": "235",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "6.2L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 2002-2015; Magnum 6.2L, throttle range 4,800-5,200 rpm"
+        },
+        {
+          "model": "383 MAG Stroker",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "6.3L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 2005-2015; Stroker variant, 390 lb/ft torque at 4,200 rpm"
+        },
+        {
+          "model": "454 MAG Carb",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "7.4L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1990-1997; Big block 454 carbureted Magnum variant"
+        },
+        {
+          "model": "454 MAG TBI",
+          "hp": "350",
+          "kw": "257",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "7.4L",
+          "engineType": "Sterndrive",
+          "description": "TBI; 1987-1997; 7.4L throttle-body injected"
+        },
+        {
+          "model": "454 MAG MPI",
+          "hp": "385",
+          "kw": "283",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "7.4L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 1998-2007; 454 multi-port injected, 385 hp at prop, 4,200-4,600 rpm"
+        },
+        {
+          "model": "454 MAG Bravo",
+          "hp": "385",
+          "kw": "283",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "7.4L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 1998-2007; 454 MAG with Bravo sterndrive"
+        },
+        {
+          "model": "7.4L MPI",
+          "hp": "310",
+          "kw": "228",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "7.4L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 1998-2007; Standard 7.4L MPI (non-Magnum variant)"
+        },
+        {
+          "model": "7.4L EFI",
+          "hp": "290",
+          "kw": "213",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "7.4L",
+          "engineType": "Sterndrive",
+          "description": "EFI; 1998-1999; 7.4L with electronic fuel injection"
+        },
+        {
+          "model": "6.2L MAG",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "6.2L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted/TBI; 1993-2001; Earlier Magnum 6.2L variant before 377 MAG designation"
+        },
+        {
+          "model": "502 MAG MPI",
+          "hp": "415",
+          "kw": "305",
           "fuel": "Gasoline",
           "cylinders": "8",
           "displacement": "8.2L",
-          "engineType": "Sterndrive"
+          "engineType": "Sterndrive",
+          "description": "MPI; 2008-2015; 8.2L Magnum, 2012 model 415 hp variant"
+        },
+        {
+          "model": "502 MAG HO",
+          "hp": "430",
+          "kw": "316",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "8.2L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 2008-2015; High-Output 502 MAG, 8.2L displacement"
+        },
+        {
+          "model": "8.2L MAG",
+          "hp": "380",
+          "kw": "279",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "8.2L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted/TBI; 1998-2007; 8.2L Magnum, standard carbureted/TBI variant"
+        },
+        {
+          "model": "8.2L MAG HO",
+          "hp": "425",
+          "kw": "313",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "8.2L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted/TBI; 1998-2007; 8.2L High-Output Magnum variant"
+        },
+        {
+          "model": "8.2L MAG Bravo",
+          "hp": "430",
+          "kw": "316",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "8.2L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 2008-2015; 8.2L MAG with Bravo sterndrive"
+        },
+        {
+          "model": "496 MAG",
+          "hp": "375",
+          "kw": "276",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "8.1L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 1998-2007; 8.1L Magnum, carbureted variant"
+        },
+        {
+          "model": "496 MAG MPI",
+          "hp": "400",
+          "kw": "294",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "8.1L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 2002-2015; 8.1L Magnum multi-port injected"
+        },
+        {
+          "model": "496 MAG HO",
+          "hp": "425",
+          "kw": "313",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "8.1L",
+          "engineType": "Sterndrive",
+          "description": "MPI; 1998-2015; 8.1L High-Output Magnum, 4,600-5,000 rpm full throttle"
+        },
+        {
+          "model": "8.1L Horizon",
+          "hp": "370",
+          "kw": "272",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "8.1L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted; 2001-2007; 8.1L Horizon inboard variant"
+        },
+        {
+          "model": "8.1L HO",
+          "hp": "425",
+          "kw": "313",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "8.1L",
+          "engineType": "Sterndrive",
+          "description": "Carbureted/TBI; 1998-2007; 8.1L High-Output variant"
+        },
+        {
+          "model": "4.5L",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.5L",
+          "engineType": "Sterndrive",
+          "description": "ECT (Electronic Control Technology) MPI; 2024-Present; All-new 2024+ design, V6 power with V8 performance, replaces 4.3L"
+        },
+        {
+          "model": "6.2L",
+          "hp": "320",
+          "kw": "235",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "6.2L",
+          "engineType": "Sterndrive",
+          "description": "ECT MPI; 2020-Present; Modern 6.2L with electronic control, Towsport inboard configurations"
+        },
+        {
+          "model": "8.2L",
+          "hp": "430",
+          "kw": "316",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "8.2L",
+          "engineType": "Sterndrive",
+          "description": "ECT MPI; 2015-Present; Current 8.2L with modern electronics and control systems"
         }
       ]
     },
@@ -323,116 +1617,254 @@
       "type": "Gasoline Outboard",
       "models": [
         {
-          "model": "15hp",
+          "model": "2.5 FourStroke",
+          "hp": "2",
+          "kw": "1",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "displacement": "0.212L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2010-Present; Lightest Mercury outboard, 38 lbs, portable option"
+        },
+        {
+          "model": "5 FourStroke",
+          "hp": "5",
+          "kw": "4",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "displacement": "0.412L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2010-Present; Portable 4-stroke option"
+        },
+        {
+          "model": "FourStroke 15-25 hp",
           "hp": "15",
           "kw": "11",
           "fuel": "Gasoline",
-          "cylinders": "2",
-          "engineType": "Outboard"
+          "cylinders": "4",
+          "displacement": "0.616L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2011-Present; Tiller models, lightweight 4-stroke options"
         },
         {
-          "model": "25hp",
+          "model": "FourStroke 25-30 hp",
           "hp": "25",
-          "kw": "18.4",
+          "kw": "18",
           "fuel": "Gasoline",
-          "cylinders": "3",
-          "engineType": "Outboard"
+          "cylinders": "4",
+          "displacement": "0.616L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2008-Present; 4-cyl 4-stroke, reliable fuel economy"
         },
         {
-          "model": "40hp",
+          "model": "FourStroke 40-60 hp",
           "hp": "40",
-          "kw": "29.4",
+          "kw": "29",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "1.0L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2008-Present; Mid-range 4-stroke, outboard equivalent of sterndrive"
         },
         {
-          "model": "60hp",
-          "hp": "60",
-          "kw": "44",
-          "fuel": "Gasoline",
-          "cylinders": "4",
-          "engineType": "Outboard"
-        },
-        {
-          "model": "75hp",
+          "model": "FourStroke 75-150 hp",
           "hp": "75",
           "kw": "55",
           "fuel": "Gasoline",
-          "cylinders": "4",
-          "engineType": "Outboard"
+          "cylinders": "6",
+          "displacement": "2.0L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2011-Present; V6 4-stroke, 35 amp alternator for 75-115hp, 60 amp for 150hp"
         },
         {
-          "model": "90hp",
-          "hp": "90",
-          "kw": "66",
+          "model": "Optimax 135",
+          "hp": "135",
+          "kw": "99",
           "fuel": "Gasoline",
-          "cylinders": "4",
-          "engineType": "Outboard"
+          "cylinders": "6",
+          "displacement": "2.5L",
+          "engineType": "Outboard",
+          "description": "DFI (Direct Fuel Injection) 2-Stroke; 2000-2010; Direct injection 2-stroke, 45% better fuel economy than carbureted"
         },
         {
-          "model": "115hp",
-          "hp": "115",
-          "kw": "84.5",
-          "fuel": "Gasoline",
-          "cylinders": "4",
-          "engineType": "Outboard"
-        },
-        {
-          "model": "150hp",
+          "model": "Optimax 150",
           "hp": "150",
           "kw": "110",
           "fuel": "Gasoline",
-          "cylinders": "4",
-          "engineType": "Outboard"
+          "cylinders": "6",
+          "displacement": "2.5L",
+          "engineType": "Outboard",
+          "description": "DFI 2-Stroke; 2000-2010; DFI 2-stroke variant, loop-charged 60\u00b0 V6"
         },
         {
-          "model": "200hp",
+          "model": "Optimax 175",
+          "hp": "175",
+          "kw": "129",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "2.5L",
+          "engineType": "Outboard",
+          "description": "DFI 2-Stroke; 2000-2010; High-output DFI 2-stroke variant"
+        },
+        {
+          "model": "Optimax 200XS",
           "hp": "200",
           "kw": "147",
           "fuel": "Gasoline",
           "cylinders": "6",
-          "engineType": "Outboard"
+          "displacement": "2.5L",
+          "engineType": "Outboard",
+          "description": "DFI 2-Stroke; 2000-2010; XS extended shaft variant"
         },
         {
-          "model": "225hp",
+          "model": "Pro XS 175",
+          "hp": "175",
+          "kw": "129",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "3.4L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2019-Present; Performance-tuned V6, throaty sportscar-like exhaust tone"
+        },
+        {
+          "model": "Pro XS 200",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "4.6L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2019-Present; V8 performance variant for tournament anglers"
+        },
+        {
+          "model": "Pro XS 225",
           "hp": "225",
           "kw": "165",
           "fuel": "Gasoline",
-          "cylinders": "6",
-          "engineType": "Outboard"
+          "cylinders": "8",
+          "displacement": "4.6L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2019-Present; Mid-range V8 Pro XS"
         },
         {
-          "model": "250hp Verado",
+          "model": "Pro XS 250",
           "hp": "250",
-          "kw": "183",
-          "fuel": "Gasoline",
-          "cylinders": "6",
-          "engineType": "Outboard"
-        },
-        {
-          "model": "300hp Verado",
-          "hp": "300",
-          "kw": "220",
+          "kw": "184",
           "fuel": "Gasoline",
           "cylinders": "8",
-          "engineType": "Outboard"
+          "displacement": "4.6L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2019-Present; High-output V8 tournament engine"
         },
         {
-          "model": "350hp Verado",
-          "hp": "350",
-          "kw": "257",
+          "model": "Pro XS 300",
+          "hp": "300",
+          "kw": "221",
           "fuel": "Gasoline",
-          "cylinders": "10",
-          "engineType": "Outboard"
+          "cylinders": "8",
+          "displacement": "4.6L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2019-Present; Maximum Pro XS performance variant"
         },
         {
-          "model": "400hp Verado",
-          "hp": "400",
-          "kw": "294",
+          "model": "Verado 175",
+          "hp": "175",
+          "kw": "129",
           "fuel": "Gasoline",
-          "cylinders": "10",
-          "engineType": "Outboard"
+          "cylinders": "6",
+          "displacement": "3.4L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2019-Present; Premium luxury V6 Verado"
+        },
+        {
+          "model": "Verado 200",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "4.6L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2019-Present; V8 premium variant"
+        },
+        {
+          "model": "Verado 225",
+          "hp": "225",
+          "kw": "165",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "4.6L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2019-Present; Mid-range V8 Verado premium engine"
+        },
+        {
+          "model": "Verado 250",
+          "hp": "250",
+          "kw": "184",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "4.6L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2019-Present; High-output V8 Verado"
+        },
+        {
+          "model": "Verado 300",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "4.6L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2019-Present; Maximum Verado luxury performance, most refined outboard"
+        },
+        {
+          "model": "SeaPro 200",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "3.4L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2019-Present; Commercial-duty V6 SeaPro for high-hour applications"
+        },
+        {
+          "model": "SeaPro 225",
+          "hp": "225",
+          "kw": "165",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "4.6L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2019-Present; V8 commercial-duty variant for fishing, ecotourism, cargo"
+        },
+        {
+          "model": "SeaPro 250",
+          "hp": "250",
+          "kw": "184",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "4.6L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2019-Present; High-output V8 commercial variant"
+        },
+        {
+          "model": "SeaPro 300",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "4.6L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2019-Present; Maximum commercial-duty V8 SeaPro"
+        },
+        {
+          "model": "SeaPro 300 AMS",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "4.6L",
+          "engineType": "Outboard",
+          "description": "4-Stroke MPI; 2019-Present; Advanced MidSection variant for enhanced performance"
         }
       ]
     },
@@ -442,108 +1874,878 @@
       "type": "Gasoline Outboard",
       "models": [
         {
-          "model": "15hp",
+          "model": "2.5 hp",
+          "hp": "2",
+          "kw": "1",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "displacement": "0.072L",
+          "engineType": "Outboard",
+          "description": "Portable, single-cylinder, 4-stroke"
+        },
+        {
+          "model": "4 hp",
+          "hp": "4",
+          "kw": "3",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "displacement": "0.139L",
+          "engineType": "Outboard",
+          "description": "Portable, 4-stroke"
+        },
+        {
+          "model": "6 hp",
+          "hp": "6",
+          "kw": "4",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "displacement": "0.139L",
+          "engineType": "Outboard",
+          "description": "Portable, 4-stroke, tiller"
+        },
+        {
+          "model": "8 hp",
+          "hp": "8",
+          "kw": "6",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.212L",
+          "engineType": "Outboard",
+          "description": "Portable, 2-cylinder, 4-stroke"
+        },
+        {
+          "model": "9.9 hp",
+          "hp": "9",
+          "kw": "7",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.212L",
+          "engineType": "Outboard",
+          "description": "Portable, common sailboat auxiliary"
+        },
+        {
+          "model": "15 hp",
           "hp": "15",
           "kw": "11",
           "fuel": "Gasoline",
           "cylinders": "2",
-          "engineType": "Outboard"
+          "displacement": "0.362L",
+          "engineType": "Outboard",
+          "description": "Portable, tiller or remote"
         },
         {
-          "model": "25hp",
+          "model": "20 hp",
+          "hp": "20",
+          "kw": "15",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.362L",
+          "engineType": "Outboard",
+          "description": "4-stroke, tiller or remote"
+        },
+        {
+          "model": "25 hp",
           "hp": "25",
-          "kw": "18.4",
+          "kw": "18",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.432L",
+          "engineType": "Outboard",
+          "description": "4-stroke, EFI"
+        },
+        {
+          "model": "F25",
+          "hp": "25",
+          "kw": "18",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.432L",
+          "engineType": "Outboard",
+          "description": "4-stroke EFI; current model designation"
+        },
+        {
+          "model": "F30",
+          "hp": "30",
+          "kw": "22",
           "fuel": "Gasoline",
           "cylinders": "3",
-          "engineType": "Outboard"
+          "displacement": "0.747L",
+          "engineType": "Outboard",
+          "description": "In-line 3-cylinder, 4-stroke EFI"
         },
         {
-          "model": "40hp",
+          "model": "F40",
           "hp": "40",
-          "kw": "29.4",
+          "kw": "29",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "displacement": "0.747L",
+          "engineType": "Outboard",
+          "description": "In-line 3-cylinder, 4-stroke EFI"
+        },
+        {
+          "model": "T50",
+          "hp": "50",
+          "kw": "37",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "0.996L",
+          "engineType": "Outboard",
+          "description": "High-thrust, 4-stroke, for pontoons/heavy boats"
         },
         {
-          "model": "60hp",
+          "model": "F50",
+          "hp": "50",
+          "kw": "37",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "0.996L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke EFI"
+        },
+        {
+          "model": "T60",
           "hp": "60",
           "kw": "44",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "0.996L",
+          "engineType": "Outboard",
+          "description": "High-thrust variant, 4-stroke EFI"
         },
         {
-          "model": "75hp",
+          "model": "F60",
+          "hp": "60",
+          "kw": "44",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "0.996L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke EFI"
+        },
+        {
+          "model": "F70",
+          "hp": "70",
+          "kw": "51",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "0.996L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke EFI"
+        },
+        {
+          "model": "F75",
           "hp": "75",
           "kw": "55",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "1.0L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke EFI"
         },
         {
-          "model": "90hp",
+          "model": "F90",
           "hp": "90",
           "kw": "66",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "1.0L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke EFI"
         },
         {
-          "model": "115hp",
-          "hp": "115",
-          "kw": "84.5",
+          "model": "F100",
+          "hp": "100",
+          "kw": "74",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "1.0L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke EFI"
         },
         {
-          "model": "150hp",
+          "model": "F115",
+          "hp": "115",
+          "kw": "85",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "1.8L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke EFI"
+        },
+        {
+          "model": "F150",
           "hp": "150",
           "kw": "110",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "2.7L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke EFI"
         },
         {
-          "model": "200hp",
+          "model": "F175",
+          "hp": "175",
+          "kw": "129",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "2.8L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke EFI"
+        },
+        {
+          "model": "F200",
           "hp": "200",
           "kw": "147",
           "fuel": "Gasoline",
-          "cylinders": "6",
-          "engineType": "Outboard"
+          "cylinders": "4",
+          "displacement": "2.8L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke EFI; largest I4"
         },
         {
-          "model": "250hp",
+          "model": "V6 F225",
+          "hp": "225",
+          "kw": "165",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "3.3L",
+          "engineType": "Outboard",
+          "description": "V6, 4-stroke EFI"
+        },
+        {
+          "model": "V6 F250",
           "hp": "250",
-          "kw": "183",
+          "kw": "184",
           "fuel": "Gasoline",
           "cylinders": "6",
-          "engineType": "Outboard"
+          "displacement": "4.2L",
+          "engineType": "Outboard",
+          "description": "V6, 4-stroke EFI"
         },
         {
-          "model": "300hp V6",
+          "model": "V6 F300",
           "hp": "300",
-          "kw": "220",
+          "kw": "221",
           "fuel": "Gasoline",
           "cylinders": "6",
-          "engineType": "Outboard"
+          "displacement": "4.2L",
+          "engineType": "Outboard",
+          "description": "V6, 4-stroke EFI; top V6 model"
         },
         {
-          "model": "350hp V8",
+          "model": "V8 F300",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.6L",
+          "engineType": "Outboard",
+          "description": "V8 XTO, 4-stroke EFI"
+        },
+        {
+          "model": "V8 F350",
           "hp": "350",
           "kw": "257",
           "fuel": "Gasoline",
           "cylinders": "8",
-          "engineType": "Outboard"
+          "displacement": "5.6L",
+          "engineType": "Outboard",
+          "description": "V8 5.6L, 4-stroke EFI"
         },
         {
-          "model": "425hp V8",
-          "hp": "425",
-          "kw": "312",
+          "model": "V8 F375",
+          "hp": "375",
+          "kw": "276",
           "fuel": "Gasoline",
           "cylinders": "8",
-          "engineType": "Outboard"
+          "displacement": "5.6L",
+          "engineType": "Outboard",
+          "description": "V8 XTO Offshore, 4-stroke EFI"
+        },
+        {
+          "model": "V8 F425",
+          "hp": "425",
+          "kw": "313",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "5.6L",
+          "engineType": "Outboard",
+          "description": "V8 XTO Offshore, 4-stroke EFI; top model"
+        },
+        {
+          "model": "115 TLRP (2-stroke)",
+          "hp": "115",
+          "kw": "85",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "1.7L",
+          "engineType": "Outboard",
+          "description": "Legacy 2-stroke, carbureted, 1990s-2000s"
+        },
+        {
+          "model": "150 TXRP (2-stroke)",
+          "hp": "150",
+          "kw": "110",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "2.6L",
+          "engineType": "Outboard",
+          "description": "Legacy V6 2-stroke, carbureted/EFI, 1990s-2000s"
+        },
+        {
+          "model": "200 TXRP (2-stroke)",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "2.6L",
+          "engineType": "Outboard",
+          "description": "Legacy V6 2-stroke, EFI, 1990s-2005"
+        },
+        {
+          "model": "225 FETO (2-stroke)",
+          "hp": "225",
+          "kw": "165",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "3.1L",
+          "engineType": "Outboard",
+          "description": "Legacy V6 2-stroke, fuel injected, 1990s-2005"
+        },
+        {
+          "model": "250 HPDI (2-stroke)",
+          "hp": "250",
+          "kw": "184",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "3.3L",
+          "engineType": "Outboard",
+          "description": "Legacy High-Pressure Direct Injection 2-stroke, 2000-2010"
+        },
+        {
+          "model": "300 HPDI (2-stroke)",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "3.3L",
+          "engineType": "Outboard",
+          "description": "Legacy HPDI V6, 2-stroke DI, 2003-2009"
+        }
+      ]
+    },
+    {
+      "make": "Evinrude/Johnson",
+      "country": "USA/Canada",
+      "type": "Gasoline Outboard",
+      "models": [
+        {
+          "model": "E-TEC 25",
+          "hp": "25",
+          "kw": "18",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.576L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 2-stroke DI; 2004-2020"
+        },
+        {
+          "model": "E-TEC 30",
+          "hp": "30",
+          "kw": "22",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.576L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 2-stroke DI; 2004-2020"
+        },
+        {
+          "model": "E-TEC 40",
+          "hp": "40",
+          "kw": "29",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.576L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 2-stroke DI; 2004-2020"
+        },
+        {
+          "model": "E-TEC 50",
+          "hp": "50",
+          "kw": "37",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.865L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 2-stroke DI; 2004-2020"
+        },
+        {
+          "model": "E-TEC 60",
+          "hp": "60",
+          "kw": "44",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.865L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 2-stroke DI; 2004-2020"
+        },
+        {
+          "model": "E-TEC 75",
+          "hp": "75",
+          "kw": "55",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "displacement": "1.3L",
+          "engineType": "Outboard",
+          "description": "3-cylinder, 2-stroke DI; 2004-2020"
+        },
+        {
+          "model": "E-TEC 90",
+          "hp": "90",
+          "kw": "66",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "displacement": "1.3L",
+          "engineType": "Outboard",
+          "description": "3-cylinder, 2-stroke DI; 2004-2020"
+        },
+        {
+          "model": "E-TEC 115",
+          "hp": "115",
+          "kw": "85",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "1.7L",
+          "engineType": "Outboard",
+          "description": "V4, 2-stroke DI; 2004-2020"
+        },
+        {
+          "model": "E-TEC 130",
+          "hp": "130",
+          "kw": "96",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "1.7L",
+          "engineType": "Outboard",
+          "description": "V4, 2-stroke DI; 2008-2020"
+        },
+        {
+          "model": "E-TEC 150",
+          "hp": "150",
+          "kw": "110",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "2.6L",
+          "engineType": "Outboard",
+          "description": "V6, 2-stroke DI; 2004-2020"
+        },
+        {
+          "model": "E-TEC 175",
+          "hp": "175",
+          "kw": "129",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "2.6L",
+          "engineType": "Outboard",
+          "description": "V6, 2-stroke DI; 2004-2020"
+        },
+        {
+          "model": "E-TEC 200",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "3.3L",
+          "engineType": "Outboard",
+          "description": "V6, 2-stroke DI; 2004-2020"
+        },
+        {
+          "model": "E-TEC G2 150",
+          "hp": "150",
+          "kw": "110",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "2.7L",
+          "engineType": "Outboard",
+          "description": "V6, 2nd gen 2-stroke DI; 2014-2020"
+        },
+        {
+          "model": "E-TEC G2 175",
+          "hp": "175",
+          "kw": "129",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "2.7L",
+          "engineType": "Outboard",
+          "description": "V6, 2nd gen 2-stroke DI; 2014-2020"
+        },
+        {
+          "model": "E-TEC G2 200",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "2.7L",
+          "engineType": "Outboard",
+          "description": "V6, 2nd gen 2-stroke DI; 2016-2020"
+        },
+        {
+          "model": "E-TEC G2 225",
+          "hp": "225",
+          "kw": "165",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "3.4L",
+          "engineType": "Outboard",
+          "description": "V6, 2nd gen 2-stroke DI; 2016-2020"
+        },
+        {
+          "model": "E-TEC G2 250",
+          "hp": "250",
+          "kw": "184",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "3.4L",
+          "engineType": "Outboard",
+          "description": "V6, 2nd gen 2-stroke DI; 2016-2020"
+        },
+        {
+          "model": "E-TEC G2 300",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "3.4L",
+          "engineType": "Outboard",
+          "description": "V6, 2nd gen 2-stroke DI; 2018-2020"
+        },
+        {
+          "model": "9.9 (2-stroke)",
+          "hp": "9",
+          "kw": "7",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.263L",
+          "engineType": "Outboard",
+          "description": "Legacy 2-stroke carbureted; extremely common, 1970s-2005"
+        },
+        {
+          "model": "15 (2-stroke)",
+          "hp": "15",
+          "kw": "11",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.302L",
+          "engineType": "Outboard",
+          "description": "Legacy 2-stroke carbureted; 1970s-2005"
+        },
+        {
+          "model": "25 (2-stroke)",
+          "hp": "25",
+          "kw": "18",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.521L",
+          "engineType": "Outboard",
+          "description": "Legacy 2-stroke carbureted; 1970s-2005"
+        },
+        {
+          "model": "40 (2-stroke)",
+          "hp": "40",
+          "kw": "29",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.584L",
+          "engineType": "Outboard",
+          "description": "Legacy 2-stroke carbureted; 1980s-2005"
+        },
+        {
+          "model": "50 (2-stroke)",
+          "hp": "50",
+          "kw": "37",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.849L",
+          "engineType": "Outboard",
+          "description": "Legacy 2-stroke carbureted; 1980s-2005"
+        },
+        {
+          "model": "70 (2-stroke)",
+          "hp": "70",
+          "kw": "51",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "displacement": "1.2L",
+          "engineType": "Outboard",
+          "description": "Legacy 3-cylinder 2-stroke; 1985-2005"
+        },
+        {
+          "model": "90 (2-stroke)",
+          "hp": "90",
+          "kw": "66",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "displacement": "1.3L",
+          "engineType": "Outboard",
+          "description": "Legacy V4/3-cyl 2-stroke; 1990s-2005"
+        },
+        {
+          "model": "115 (2-stroke)",
+          "hp": "115",
+          "kw": "85",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "1.7L",
+          "engineType": "Outboard",
+          "description": "Legacy V4 2-stroke; very common, 1980s-2005"
+        },
+        {
+          "model": "150 (2-stroke)",
+          "hp": "150",
+          "kw": "110",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "2.6L",
+          "engineType": "Outboard",
+          "description": "Legacy V6 2-stroke; 1980s-2005"
+        },
+        {
+          "model": "175 FICHT",
+          "hp": "175",
+          "kw": "129",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "2.6L",
+          "engineType": "Outboard",
+          "description": "V6, FICHT fuel injection 2-stroke; 1999-2005"
+        },
+        {
+          "model": "200 FICHT",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "3.3L",
+          "engineType": "Outboard",
+          "description": "V6, FICHT fuel injection 2-stroke; 1999-2005"
+        },
+        {
+          "model": "225 FICHT",
+          "hp": "225",
+          "kw": "165",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "3.3L",
+          "engineType": "Outboard",
+          "description": "V6, FICHT fuel injection 2-stroke; 1999-2005"
+        }
+      ]
+    },
+    {
+      "make": "Tohatsu",
+      "country": "Japan",
+      "type": "Gasoline Outboard",
+      "models": [
+        {
+          "model": "MFS2.5C",
+          "hp": "2",
+          "kw": "1",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "displacement": "0.086L",
+          "engineType": "Outboard",
+          "description": "Single-cylinder, 4-stroke, portable"
+        },
+        {
+          "model": "MFS3.5C",
+          "hp": "3",
+          "kw": "2",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "displacement": "0.086L",
+          "engineType": "Outboard",
+          "description": "Single-cylinder, 4-stroke, portable"
+        },
+        {
+          "model": "MFS5C",
+          "hp": "5",
+          "kw": "4",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "displacement": "0.139L",
+          "engineType": "Outboard",
+          "description": "Single-cylinder, 4-stroke"
+        },
+        {
+          "model": "MFS6C",
+          "hp": "6",
+          "kw": "4",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "displacement": "0.139L",
+          "engineType": "Outboard",
+          "description": "Single-cylinder, 4-stroke"
+        },
+        {
+          "model": "MFS8A",
+          "hp": "8",
+          "kw": "6",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.209L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 4-stroke"
+        },
+        {
+          "model": "MFS9.8A",
+          "hp": "9",
+          "kw": "7",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.209L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 4-stroke; common sailboat auxiliary"
+        },
+        {
+          "model": "MFS15E",
+          "hp": "15",
+          "kw": "11",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.351L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "MFS20E",
+          "hp": "20",
+          "kw": "15",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.351L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "MFS25C",
+          "hp": "25",
+          "kw": "18",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "displacement": "0.526L",
+          "engineType": "Outboard",
+          "description": "3-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "MFS30C",
+          "hp": "30",
+          "kw": "22",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "displacement": "0.526L",
+          "engineType": "Outboard",
+          "description": "3-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "MFS40A",
+          "hp": "40",
+          "kw": "29",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "displacement": "0.866L",
+          "engineType": "Outboard",
+          "description": "3-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "MFS50A",
+          "hp": "50",
+          "kw": "37",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "0.866L",
+          "engineType": "Outboard",
+          "description": "4-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "MFS60C",
+          "hp": "60",
+          "kw": "44",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "1.0L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "MFS75A",
+          "hp": "75",
+          "kw": "55",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "1.5L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "MFS90A",
+          "hp": "90",
+          "kw": "66",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "1.5L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "MFS100A",
+          "hp": "100",
+          "kw": "74",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "1.5L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "MFS115A",
+          "hp": "115",
+          "kw": "85",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "2.0L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "BFT150A",
+          "hp": "150",
+          "kw": "110",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "2.0L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "BFT200D",
+          "hp": "200",
+          "kw": "147",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "2.0L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "BFT250D",
+          "hp": "250",
+          "kw": "184",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.0L",
+          "engineType": "Outboard",
+          "description": "V6, 4-stroke, EFI; OEM supplier for other brands"
         }
       ]
     },
@@ -553,76 +2755,194 @@
       "type": "Gasoline Outboard",
       "models": [
         {
-          "model": "8hp",
-          "hp": "8",
-          "kw": "5.9",
+          "model": "BF2.3",
+          "hp": "2",
+          "kw": "1",
           "fuel": "Gasoline",
           "cylinders": "1",
-          "engineType": "Outboard"
+          "displacement": "0.057L",
+          "engineType": "Outboard",
+          "description": "Smallest Honda, single-cylinder, 4-stroke, air-cooled"
         },
         {
-          "model": "15hp",
+          "model": "BF4",
+          "hp": "4",
+          "kw": "3",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "displacement": "0.127L",
+          "engineType": "Outboard",
+          "description": "Single-cylinder, 4-stroke"
+        },
+        {
+          "model": "BF5",
+          "hp": "5",
+          "kw": "4",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "displacement": "0.127L",
+          "engineType": "Outboard",
+          "description": "Single-cylinder, 4-stroke"
+        },
+        {
+          "model": "BF6",
+          "hp": "6",
+          "kw": "4",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "displacement": "0.127L",
+          "engineType": "Outboard",
+          "description": "Single-cylinder, 4-stroke"
+        },
+        {
+          "model": "BF8",
+          "hp": "8",
+          "kw": "6",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.222L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 4-stroke"
+        },
+        {
+          "model": "BF9.9",
+          "hp": "9",
+          "kw": "7",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.222L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 4-stroke; common sailboat auxiliary"
+        },
+        {
+          "model": "BF10",
+          "hp": "10",
+          "kw": "7",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.222L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 4-stroke"
+        },
+        {
+          "model": "BF15",
           "hp": "15",
           "kw": "11",
           "fuel": "Gasoline",
           "cylinders": "2",
-          "engineType": "Outboard"
+          "displacement": "0.350L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 4-stroke, electric start option"
         },
         {
-          "model": "20hp",
+          "model": "BF20",
           "hp": "20",
-          "kw": "14.7",
+          "kw": "15",
           "fuel": "Gasoline",
           "cylinders": "2",
-          "engineType": "Outboard"
+          "displacement": "0.350L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 4-stroke, PGM-FI"
         },
         {
-          "model": "40hp",
-          "hp": "40",
-          "kw": "29.4",
+          "model": "BF25",
+          "hp": "25",
+          "kw": "18",
           "fuel": "Gasoline",
-          "cylinders": "4",
-          "engineType": "Outboard"
+          "cylinders": "3",
+          "displacement": "0.552L",
+          "engineType": "Outboard",
+          "description": "3-cylinder, 4-stroke, PGM-FI"
         },
         {
-          "model": "60hp",
+          "model": "BF30",
+          "hp": "30",
+          "kw": "22",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "displacement": "0.552L",
+          "engineType": "Outboard",
+          "description": "3-cylinder, 4-stroke, PGM-FI"
+        },
+        {
+          "model": "BF40",
+          "hp": "40",
+          "kw": "29",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "displacement": "0.808L",
+          "engineType": "Outboard",
+          "description": "3-cylinder, 4-stroke, PGM-FI"
+        },
+        {
+          "model": "BF50",
+          "hp": "50",
+          "kw": "37",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "displacement": "0.808L",
+          "engineType": "Outboard",
+          "description": "3-cylinder, 4-stroke, PGM-FI"
+        },
+        {
+          "model": "BF60",
           "hp": "60",
           "kw": "44",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "0.998L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, PGM-FI"
         },
         {
-          "model": "75hp",
+          "model": "BF75",
           "hp": "75",
           "kw": "55",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "1.5L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, VTEC, 4-stroke"
         },
         {
-          "model": "90hp",
+          "model": "BF90",
           "hp": "90",
           "kw": "66",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "1.5L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, VTEC, 4-stroke"
+        },
+        {
+          "model": "BF100",
+          "hp": "100",
+          "kw": "74",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "1.5L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, VTEC, 4-stroke"
         },
         {
           "model": "BF115",
           "hp": "115",
-          "kw": "84.5",
+          "kw": "85",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "2.4L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, VTEC, 4-stroke"
         },
         {
-          "model": "BF140",
-          "hp": "140",
-          "kw": "103",
+          "model": "BF135",
+          "hp": "135",
+          "kw": "99",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "2.4L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, VTEC, 4-stroke"
         },
         {
           "model": "BF150",
@@ -630,7 +2950,9 @@
           "kw": "110",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "2.4L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, VTEC, 4-stroke"
         },
         {
           "model": "BF200",
@@ -638,7 +2960,9 @@
           "kw": "147",
           "fuel": "Gasoline",
           "cylinders": "6",
-          "engineType": "Outboard"
+          "displacement": "3.5L",
+          "engineType": "Outboard",
+          "description": "V6, VTEC, 4-stroke"
         },
         {
           "model": "BF225",
@@ -646,23 +2970,19 @@
           "kw": "165",
           "fuel": "Gasoline",
           "cylinders": "6",
-          "engineType": "Outboard"
+          "displacement": "3.5L",
+          "engineType": "Outboard",
+          "description": "V6, VTEC, 4-stroke"
         },
         {
           "model": "BF250",
           "hp": "250",
-          "kw": "183",
+          "kw": "184",
           "fuel": "Gasoline",
           "cylinders": "6",
-          "engineType": "Outboard"
-        },
-        {
-          "model": "BF350",
-          "hp": "350",
-          "kw": "257",
-          "fuel": "Gasoline",
-          "cylinders": "8",
-          "engineType": "Outboard"
+          "displacement": "3.6L",
+          "engineType": "Outboard",
+          "description": "V6, VTEC, 4-stroke"
         }
       ]
     },
@@ -672,92 +2992,254 @@
       "type": "Gasoline Outboard",
       "models": [
         {
-          "model": "25hp",
+          "model": "DF2.5",
+          "hp": "2",
+          "kw": "1",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "displacement": "0.068L",
+          "engineType": "Outboard",
+          "description": "Single-cylinder, 4-stroke, portable"
+        },
+        {
+          "model": "DF4A",
+          "hp": "4",
+          "kw": "3",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "displacement": "0.138L",
+          "engineType": "Outboard",
+          "description": "Single-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "DF6A",
+          "hp": "6",
+          "kw": "4",
+          "fuel": "Gasoline",
+          "cylinders": "1",
+          "displacement": "0.138L",
+          "engineType": "Outboard",
+          "description": "Single-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "DF9.9B",
+          "hp": "9",
+          "kw": "7",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.327L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "DF15A",
+          "hp": "15",
+          "kw": "11",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.327L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "DF20A",
+          "hp": "20",
+          "kw": "15",
+          "fuel": "Gasoline",
+          "cylinders": "2",
+          "displacement": "0.327L",
+          "engineType": "Outboard",
+          "description": "2-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "DF25A",
           "hp": "25",
-          "kw": "18.4",
+          "kw": "18",
           "fuel": "Gasoline",
           "cylinders": "3",
-          "engineType": "Outboard"
+          "displacement": "0.490L",
+          "engineType": "Outboard",
+          "description": "3-cylinder, 4-stroke, EFI"
         },
         {
-          "model": "40hp",
-          "hp": "40",
-          "kw": "29.4",
+          "model": "DF30A",
+          "hp": "30",
+          "kw": "22",
           "fuel": "Gasoline",
-          "cylinders": "4",
-          "engineType": "Outboard"
+          "cylinders": "3",
+          "displacement": "0.490L",
+          "engineType": "Outboard",
+          "description": "3-cylinder, 4-stroke, EFI"
         },
         {
-          "model": "60hp",
+          "model": "DF40A",
+          "hp": "40",
+          "kw": "29",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "displacement": "0.941L",
+          "engineType": "Outboard",
+          "description": "3-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "DF50A",
+          "hp": "50",
+          "kw": "37",
+          "fuel": "Gasoline",
+          "cylinders": "3",
+          "displacement": "0.941L",
+          "engineType": "Outboard",
+          "description": "3-cylinder, 4-stroke, EFI"
+        },
+        {
+          "model": "DF60A",
           "hp": "60",
           "kw": "44",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "0.941L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, lean-burn EFI"
         },
         {
-          "model": "90hp",
+          "model": "DF70A",
+          "hp": "70",
+          "kw": "51",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "1.5L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, lean-burn EFI"
+        },
+        {
+          "model": "DF90A",
           "hp": "90",
           "kw": "66",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "1.5L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, lean-burn EFI"
         },
         {
-          "model": "115hp",
-          "hp": "115",
-          "kw": "84.5",
+          "model": "DF100B",
+          "hp": "100",
+          "kw": "74",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "1.5L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, lean-burn EFI"
         },
         {
-          "model": "140hp",
+          "model": "DF115B",
+          "hp": "115",
+          "kw": "85",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "2.0L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, lean-burn EFI"
+        },
+        {
+          "model": "DF140B",
           "hp": "140",
           "kw": "103",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "2.0L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, lean-burn EFI"
         },
         {
-          "model": "150hp",
+          "model": "DF150AP",
           "hp": "150",
           "kw": "110",
           "fuel": "Gasoline",
           "cylinders": "4",
-          "engineType": "Outboard"
+          "displacement": "2.0L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, lean-burn EFI"
         },
         {
-          "model": "200hp",
+          "model": "DF175AP",
+          "hp": "175",
+          "kw": "129",
+          "fuel": "Gasoline",
+          "cylinders": "4",
+          "displacement": "2.0L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, lean-burn EFI"
+        },
+        {
+          "model": "DF200AP",
           "hp": "200",
           "kw": "147",
           "fuel": "Gasoline",
-          "cylinders": "6",
-          "engineType": "Outboard"
+          "cylinders": "4",
+          "displacement": "2.0L",
+          "engineType": "Outboard",
+          "description": "In-line 4-cylinder, 4-stroke, lean-burn EFI"
         },
         {
-          "model": "250hp",
+          "model": "DF250AP",
           "hp": "250",
-          "kw": "183",
+          "kw": "184",
           "fuel": "Gasoline",
           "cylinders": "6",
-          "engineType": "Outboard"
+          "displacement": "4.0L",
+          "engineType": "Outboard",
+          "description": "V6, 4-stroke, lean-burn EFI"
         },
         {
-          "model": "300hp",
+          "model": "DF250SS",
+          "hp": "250",
+          "kw": "184",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.0L",
+          "engineType": "Outboard",
+          "description": "V6, 4-stroke, sport series, contra-rotating prop"
+        },
+        {
+          "model": "DF300AP",
           "hp": "300",
-          "kw": "220",
+          "kw": "221",
           "fuel": "Gasoline",
           "cylinders": "6",
-          "engineType": "Outboard"
+          "displacement": "4.0L",
+          "engineType": "Outboard",
+          "description": "V6, 4-stroke, lean-burn EFI"
         },
         {
-          "model": "350hp",
+          "model": "DF300B",
+          "hp": "300",
+          "kw": "221",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.4L",
+          "engineType": "Outboard",
+          "description": "V6, 4-stroke, newest generation"
+        },
+        {
+          "model": "DF325A",
+          "hp": "325",
+          "kw": "239",
+          "fuel": "Gasoline",
+          "cylinders": "6",
+          "displacement": "4.4L",
+          "engineType": "Outboard",
+          "description": "V6, 4-stroke, performance variant"
+        },
+        {
+          "model": "DF350A",
           "hp": "350",
           "kw": "257",
           "fuel": "Gasoline",
-          "cylinders": "8",
-          "engineType": "Outboard"
+          "cylinders": "6",
+          "displacement": "4.4L",
+          "engineType": "Outboard",
+          "description": "V6, dual-prop, contra-rotating propellers"
         }
       ]
     },
@@ -1166,23 +3648,98 @@
     {
       "make": "Kanzaki",
       "country": "Japan",
-      "note": "Yanmar's transmission division — standard gearbox on most Yanmar marine diesels",
+      "note": "Yanmar's transmission division \u2014 standard gearbox on most Yanmar marine diesels",
       "models": [
-        { "model": "KM2P", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.21:1, 2.62:1" },
-        { "model": "KM2P-1", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.21:1, 2.62:1" },
-        { "model": "KM3P", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.21:1, 2.62:1" },
-        { "model": "KM3P4", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.62:1" },
-        { "model": "KM3A", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.21:1, 2.62:1" },
-        { "model": "KM3A2", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.21:1, 2.62:1" },
-        { "model": "KM4A", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.21:1, 2.62:1" },
-        { "model": "KM4A2", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.21:1, 2.62:1, 3.05:1" },
-        { "model": "KBW10", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.36:1, 2.62:1" },
-        { "model": "KBW20", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.36:1, 2.62:1, 2.82:1" },
-        { "model": "KBW21", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.62:1, 2.82:1, 3.05:1" },
-        { "model": "KMH4A", "type": "Hydraulic", "transmission_type": "Hydraulic Shift", "ratios": "2.21:1, 2.62:1, 3.05:1" },
-        { "model": "KMH4A2", "type": "Hydraulic", "transmission_type": "Hydraulic Shift", "ratios": "2.04:1, 2.62:1, 3.05:1" },
-        { "model": "KMH50A", "type": "Hydraulic", "transmission_type": "Hydraulic Shift", "ratios": "2.21:1, 2.62:1, 3.05:1" },
-        { "model": "KMH61A", "type": "Hydraulic", "transmission_type": "Hydraulic Shift", "ratios": "2.04:1, 2.33:1, 2.62:1" }
+        {
+          "model": "KM2P",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.21:1, 2.62:1"
+        },
+        {
+          "model": "KM2P-1",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.21:1, 2.62:1"
+        },
+        {
+          "model": "KM3P",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.21:1, 2.62:1"
+        },
+        {
+          "model": "KM3P4",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.62:1"
+        },
+        {
+          "model": "KM3A",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.21:1, 2.62:1"
+        },
+        {
+          "model": "KM3A2",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.21:1, 2.62:1"
+        },
+        {
+          "model": "KM4A",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.21:1, 2.62:1"
+        },
+        {
+          "model": "KM4A2",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.21:1, 2.62:1, 3.05:1"
+        },
+        {
+          "model": "KBW10",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.36:1, 2.62:1"
+        },
+        {
+          "model": "KBW20",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.36:1, 2.62:1, 2.82:1"
+        },
+        {
+          "model": "KBW21",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.62:1, 2.82:1, 3.05:1"
+        },
+        {
+          "model": "KMH4A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.21:1, 2.62:1, 3.05:1"
+        },
+        {
+          "model": "KMH4A2",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.04:1, 2.62:1, 3.05:1"
+        },
+        {
+          "model": "KMH50A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.21:1, 2.62:1, 3.05:1"
+        },
+        {
+          "model": "KMH61A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.04:1, 2.33:1, 2.62:1"
+        }
       ]
     },
     {
@@ -1190,17 +3747,72 @@
       "country": "UK",
       "note": "Common on European and North American sailboats and small powerboats",
       "models": [
-        { "model": "PRM 60", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.0:1, 2.5:1, 3.0:1" },
-        { "model": "PRM 80", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.0:1, 2.5:1, 3.0:1" },
-        { "model": "PRM 90", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.0:1, 2.5:1" },
-        { "model": "PRM 120", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.0:1, 2.5:1, 3.0:1" },
-        { "model": "PRM 125", "type": "Mechanical", "transmission_type": "Cone Clutch", "ratios": "2.0:1, 2.5:1, 3.0:1" },
-        { "model": "PRM 150", "type": "Hydraulic", "transmission_type": "Hydraulic Shift", "ratios": "2.0:1, 2.5:1, 3.0:1" },
-        { "model": "PRM 160", "type": "Hydraulic", "transmission_type": "Hydraulic Shift", "ratios": "2.0:1, 2.5:1, 3.0:1" },
-        { "model": "PRM 260", "type": "Hydraulic", "transmission_type": "Hydraulic Shift", "ratios": "2.0:1, 2.5:1, 3.0:1" },
-        { "model": "PRM 500", "type": "Hydraulic", "transmission_type": "Hydraulic Shift", "ratios": "2.0:1, 2.5:1, 3.0:1, 3.5:1" },
-        { "model": "PRM 750", "type": "Hydraulic", "transmission_type": "Hydraulic Shift", "ratios": "2.0:1, 2.5:1, 3.0:1" },
-        { "model": "PRM 1000", "type": "Hydraulic", "transmission_type": "Hydraulic Shift", "ratios": "2.0:1, 2.5:1, 3.0:1, 3.5:1" }
+        {
+          "model": "PRM 60",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "PRM 80",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "PRM 90",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "PRM 120",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "PRM 125",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "PRM 150",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "PRM 160",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "PRM 260",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "PRM 500",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.0:1, 2.5:1, 3.0:1, 3.5:1"
+        },
+        {
+          "model": "PRM 750",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "PRM 1000",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.0:1, 2.5:1, 3.0:1, 3.5:1"
+        }
       ]
     },
     {
@@ -1208,11 +3820,36 @@
       "country": "USA",
       "note": "Common on older boats with Universal, Chris-Craft, and Palmer engines",
       "models": [
-        { "model": "P-21", "type": "Mechanical", "transmission_type": "Manual", "ratios": "2.0:1, 2.5:1" },
-        { "model": "P-22", "type": "Mechanical", "transmission_type": "Manual", "ratios": "2.0:1, 2.5:1" },
-        { "model": "P-31", "type": "Mechanical", "transmission_type": "Manual", "ratios": "2.0:1, 2.5:1" },
-        { "model": "P-32", "type": "Hydraulic", "transmission_type": "Hydraulic Shift", "ratios": "2.0:1, 2.5:1" },
-        { "model": "P-35", "type": "Hydraulic", "transmission_type": "Hydraulic Shift", "ratios": "2.0:1, 2.5:1, 3.0:1" }
+        {
+          "model": "P-21",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "P-22",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "P-31",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "P-32",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "P-35",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        }
       ]
     },
     {
@@ -1220,17 +3857,37 @@
       "country": "USA",
       "note": "Found on older classic and vintage marine engines",
       "models": [
-        { "model": "Capitol A", "type": "Mechanical", "transmission_type": "Manual", "ratios": "2.0:1" },
-        { "model": "Capitol B", "type": "Mechanical", "transmission_type": "Manual", "ratios": "2.0:1, 2.5:1" }
+        {
+          "model": "Capitol A",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1"
+        },
+        {
+          "model": "Capitol B",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1"
+        }
       ]
     },
     {
       "make": "Walter",
       "country": "USA",
-      "note": "V-drive specialist — common on ski boats, wake boats, and inboard runabouts",
+      "note": "V-drive specialist \u2014 common on ski boats, wake boats, and inboard runabouts",
       "models": [
-        { "model": "V-Drive (Light Duty)", "type": "Mechanical", "transmission_type": "V-Drive", "ratios": "1.5:1, 2.0:1" },
-        { "model": "V-Drive (Heavy Duty)", "type": "Mechanical", "transmission_type": "V-Drive", "ratios": "1.5:1, 2.0:1, 2.5:1" }
+        {
+          "model": "V-Drive (Light Duty)",
+          "type": "Mechanical",
+          "transmission_type": "V-Drive",
+          "ratios": "1.5:1, 2.0:1"
+        },
+        {
+          "model": "V-Drive (Heavy Duty)",
+          "type": "Mechanical",
+          "transmission_type": "V-Drive",
+          "ratios": "1.5:1, 2.0:1, 2.5:1"
+        }
       ]
     },
     {

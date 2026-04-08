@@ -1058,12 +1058,10 @@ function showMediaSheet(itemLabel, categoryName) {
 }
 
 // Capture photo from media sheet, then refresh the sheet
-function capturePhotoFromSheet(itemLabel, categoryName, event) {
-  capturePhoto(itemLabel, event);
-  // Refresh the media sheet after a short delay to show new photos
-  setTimeout(() => {
-    showMediaSheet(itemLabel, categoryName);
-  }, 500);
+async function capturePhotoFromSheet(itemLabel, categoryName, event) {
+  await capturePhoto(itemLabel, event);
+  // Refresh the media sheet after capture completes to show new photos
+  showMediaSheet(itemLabel, categoryName);
 }
 
 // Delete photo from media sheet and refresh
@@ -2830,7 +2828,7 @@ function onEngineMakeChange() {
     [...maker.models].sort((a, b) => a.model.localeCompare(b.model)).forEach(m => {
       const opt = document.createElement('option');
       opt.value = m.model;
-      opt.textContent = m.model;
+      opt.textContent = m.hp ? `${m.model} (${m.hp} HP)` : m.model;
       modelSelect.appendChild(opt);
     });
     const otherOpt = document.createElement('option');
@@ -2907,7 +2905,7 @@ function onTransmissionMakeChange() {
     [...maker.models].sort((a, b) => a.model.localeCompare(b.model)).forEach(m => {
       const opt = document.createElement('option');
       opt.value = m.model;
-      opt.textContent = m.model;
+      opt.textContent = m.hp ? `${m.model} (${m.hp} HP)` : m.model;
       modelSelect.appendChild(opt);
     });
     const otherOpt = document.createElement('option');
@@ -6988,9 +6986,39 @@ function toggleAccordion(button) {
   const titleSpan = button.querySelector('.category-title');
   _openAccordionCategory = isOpen ? null : (titleSpan ? titleSpan.textContent.replace(/^[^\w]*/, '').trim() : null);
 
+  // Show/hide the floating collapse button
+  updateCollapseButton(!isOpen);
+
   // Scroll the opened category to the top of the screen
   if (!isOpen) {
     button.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// Floating "Collapse" button — always visible when a section is expanded
+function updateCollapseButton(show) {
+  let btn = document.getElementById('floatingCollapseBtn');
+  if (show) {
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.id = 'floatingCollapseBtn';
+      btn.style.cssText = 'position:fixed;bottom:80px;right:16px;z-index:999;background:#1e3a5f;color:white;border:none;border-radius:50%;width:48px;height:48px;font-size:18px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;';
+      btn.innerHTML = '▲';
+      btn.title = 'Collapse section';
+      btn.onclick = collapseCurrentSection;
+      document.body.appendChild(btn);
+    }
+    btn.style.display = 'flex';
+  } else if (btn) {
+    btn.style.display = 'none';
+  }
+}
+
+function collapseCurrentSection() {
+  const openContent = document.querySelector('.accordion-content[style*="display: block"], .accordion-content[style*="display:block"]');
+  if (openContent) {
+    const header = openContent.previousElementSibling;
+    if (header) toggleAccordion(header);
   }
 }
 
