@@ -803,15 +803,14 @@ function showNotesSheet(itemLabel, categoryName) {
       if (variants.length > 0) {
         snippetsHtml = `<div class="sheet-section-title">Quick Insert (${variants.length} snippets)</div>`;
         variants.forEach(variant => {
-          const preview = variant.text.length > 120 ? variant.text.substring(0, 120) + '…' : variant.text;
           const escapedText = variant.text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
           const ratingBadge = variant.rating || baseRating;
           const isActive = itemData.text === variant.text;
           snippetsHtml += `
-            <div style="padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}"
-                 onclick="insertSnippetFromSheet('${safeLabel}', '${safeCat}', '${escapedText}')">
+            <div class="snippet-card-sheet" style="padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}"
+                 onclick="insertSnippetFromSheet('${safeLabel}', '${safeCat}', '${escapedText}', this)">
               <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
-                <span style="font-size:13px;color:#333;line-height:1.4;">${preview}</span>
+                <span style="font-size:13px;color:#333;line-height:1.5;">${variant.text}</span>
                 <span style="flex-shrink:0;font-size:10px;background:#e5e7eb;color:#374151;padding:2px 6px;border-radius:4px;">${ratingBadge}</span>
               </div>
             </div>
@@ -867,7 +866,7 @@ function showNotesSheet(itemLabel, categoryName) {
 }
 
 // Insert snippet from notes sheet into the textarea within the sheet
-function insertSnippetFromSheet(itemLabel, categoryName, text) {
+function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl) {
   const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
   const textarea = document.getElementById(`sheet-text-${sanitizedLabel}`);
   if (textarea) {
@@ -880,6 +879,20 @@ function insertSnippetFromSheet(itemLabel, categoryName, text) {
       textarea.value += ' ';
     }
     textarea.value += text;
+  }
+
+  // Highlight the selected card
+  if (cardEl) {
+    // Clear previous highlights in same panel
+    const parent = cardEl.parentElement;
+    if (parent) {
+      parent.querySelectorAll('.snippet-card-sheet').forEach(c => {
+        c.style.background = '';
+        c.style.borderLeft = '';
+      });
+    }
+    cardEl.style.background = '#d1fae5';
+    cardEl.style.borderLeft = '4px solid #16a34a';
   }
 }
 
@@ -1461,6 +1474,7 @@ function findTextVariants(categoryName, itemLabel, baseRating) {
   let resolvedLabel = itemLabel.replace(/^Head \d+ — /, 'Head, ');
 
   // Use explicit mapping if available, otherwise keep the resolved label
+  const hadExplicitMap = !!ITEM_SNIPPET_MAP[resolvedLabel];
   resolvedLabel = ITEM_SNIPPET_MAP[resolvedLabel] || resolvedLabel;
 
   const matchLabel = resolvedLabel.toLowerCase();
@@ -1473,20 +1487,25 @@ function findTextVariants(categoryName, itemLabel, baseRating) {
     return entry.section.toLowerCase() === matchLabel;
   });
 
-  // 2. If no exact match, try contains match but prefer shorter (more specific) sections
+  // If we had an explicit ITEM_SNIPPET_MAP entry, the section name is known —
+  // don't fall through to fuzzy matching which pulls in wrong sections.
+  // (If no entries found, it means that rating level needs entries added.)
+  if (hadExplicitMap) return matches;
+
+  // 2. If no exact match, try contains match — only where the FULL search label
+  // appears inside the section name (not the reverse, which is too loose)
   if (matches.length === 0) {
     matches = sheet.filter(entry => {
       if (!entry.section || !entry.rating) return false;
       const section = entry.section.toLowerCase();
       const isRatingMatch = entry.rating.toString().charAt(0) === baseRating;
       if (!isRatingMatch) return false;
-      return section.includes(matchLabel) || matchLabel.includes(section);
+      return section.includes(matchLabel);
     });
     // If multiple sections matched, prefer the one closest in length to the search label
     if (matches.length > 1) {
       const sections = [...new Set(matches.map(m => m.section))];
       if (sections.length > 1) {
-        // Pick the section with the smallest length difference to the match label
         let bestSection = sections[0];
         let bestDiff = Math.abs(sections[0].length - resolvedLabel.length);
         for (const s of sections) {
@@ -1501,15 +1520,28 @@ function findTextVariants(categoryName, itemLabel, baseRating) {
     }
   }
 
-  // 3. If still no match, try fuzzy word overlap matching
+  // 3. If still no match, try fuzzy word overlap — pick only the BEST matching
+  // section to avoid pulling in loosely related sections
   if (matches.length === 0) {
-    matches = sheet.filter(entry => {
-      if (!entry.section || !entry.rating) return false;
-      const isRatingMatch = entry.rating.toString().charAt(0) === baseRating;
-      if (!isRatingMatch) return false;
+    let bestScore = 0;
+    let bestSection = null;
+    const seen = new Set();
+    for (const entry of sheet) {
+      if (!entry.section || !entry.rating || seen.has(entry.section)) continue;
+      seen.add(entry.section);
       const score = matchScore(entry.section, matchLabel);
-      return score >= 0.5;
-    });
+      if (score > bestScore && score >= 0.6) {
+        bestScore = score;
+        bestSection = entry.section;
+      }
+    }
+    if (bestSection) {
+      matches = sheet.filter(entry => {
+        if (!entry.section || !entry.rating) return false;
+        const isRatingMatch = entry.rating.toString().charAt(0) === baseRating;
+        return isRatingMatch && entry.section === bestSection;
+      });
+    }
   }
 
   return matches;
@@ -5961,15 +5993,14 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
           <div id="snippets-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}" style="display:none;max-height:300px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;">
       `;
       variants.forEach((variant, idx) => {
-        const preview = variant.text.length > 120 ? variant.text.substring(0, 120) + '…' : variant.text;
         const escapedText = variant.text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
         const ratingBadge = variant.rating || baseRating;
         const isActive = itemData.text === variant.text;
         html += `
             <div class="snippet-card" style="padding:10px 12px;border-bottom:1px solid #e5e7eb;cursor:pointer;${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}"
-                 onclick="insertSnippet('${safeLabel}', '${safeCat}', '${escapedText}')">
+                 onclick="insertSnippet('${safeLabel}', '${safeCat}', '${escapedText}', this)">
               <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
-                <span style="font-size:12px;color:#333;line-height:1.4;">${preview}</span>
+                <span style="font-size:12px;color:#333;line-height:1.5;">${variant.text}</span>
                 <span style="flex-shrink:0;font-size:10px;background:#e5e7eb;color:#374151;padding:2px 6px;border-radius:4px;white-space:nowrap;">${ratingBadge}</span>
               </div>
             </div>
@@ -6248,7 +6279,7 @@ function toggleSnippets(itemLabel) {
 }
 
 // Insert a snippet into the textarea and save
-function insertSnippet(itemLabel, categoryName, text) {
+function insertSnippet(itemLabel, categoryName, text, cardEl) {
   const safeId = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
   const textarea = document.getElementById('text-' + safeId);
   if (textarea) {
@@ -6268,6 +6299,19 @@ function insertSnippet(itemLabel, categoryName, text) {
     textarea.style.height = textarea.scrollHeight + 'px';
   }
 
+  // Highlight the selected card
+  if (cardEl) {
+    const panel = cardEl.parentElement;
+    if (panel) {
+      panel.querySelectorAll('.snippet-card').forEach(c => {
+        c.style.background = '';
+        c.style.borderLeft = '';
+      });
+    }
+    cardEl.style.background = '#d1fae5';
+    cardEl.style.borderLeft = '4px solid #16a34a';
+  }
+
   // Save to survey
   getSurvey(currentSurveyId).then(survey => {
     if (!survey.items[itemLabel]) {
@@ -6275,19 +6319,7 @@ function insertSnippet(itemLabel, categoryName, text) {
     }
     survey.items[itemLabel].text = textarea ? textarea.value : text;
     survey.items[itemLabel].variantText = text;
-    saveSurvey(survey).then(() => {
-      // Highlight the selected snippet card briefly
-      const safeLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
-      const panel = document.getElementById('snippets-' + safeLabel);
-      if (panel) {
-        panel.querySelectorAll('.snippet-card').forEach(card => {
-          card.style.background = '';
-          card.style.borderLeft = '';
-        });
-        // Find and highlight the matching card
-        // Re-render is not needed — just visual feedback
-      }
-    });
+    saveSurvey(survey);
   });
 }
 
