@@ -2299,7 +2299,7 @@
           },
           {
             "type": "media",
-            "label": "Nameplate"
+            "label": "Engine nameplate"
           },
           {
             "type": "list",
@@ -2424,7 +2424,7 @@
           },
           {
             "type": "media",
-            "label": "Name plate(s)"
+            "label": "Engine name plate(s)"
           },
           {
             "type": "list",
@@ -2452,7 +2452,7 @@
           },
           {
             "type": "list",
-            "label": "Cooling water intake seacock(s) and strainer(s)",
+            "label": "Cooling water intake seacock(s)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -3033,7 +3033,7 @@
           },
           {
             "type": "list",
-            "label": "Generator valve and sea strainer",
+            "label": "Generator valve",
             "options": [
               "A - Critical",
               "B - Needs Attention",
