@@ -884,6 +884,18 @@ function updateCompactItem(survey, itemLabel, categoryName) {
   const itemData = survey.items[itemLabel] || { rating: '', text: '', standards: [], photos: [] };
   const options = getItemOptionsFromTemplate(survey, itemLabel);
   itemDiv.innerHTML = buildCompactItemHTML(itemLabel, categoryName, itemData, options);
+
+  // Load photo thumbnails for inline display
+  if (itemData.photos && itemData.photos.length > 0) {
+    itemData.photos.forEach(photoId => {
+      getPhotoById(photoId).then(photo => {
+        if (photo) {
+          const img = document.getElementById(`thumb-${photoId}`);
+          if (img) img.src = photo.dataUrl;
+        }
+      });
+    });
+  }
 }
 
 // Find applicable standards for a category/rating
@@ -5065,6 +5077,9 @@ function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
   const photoCount = (itemData.photos || []).length;
   const optionsAttr = options.map(o => o.replace(/"/g, '&quot;')).join('|||');
 
+  // Notes preview (truncated)
+  const notePreview = hasNotes ? (itemData.text.trim().length > 80 ? itemData.text.trim().substring(0, 80) + '…' : itemData.text.trim()) : '';
+
   // Compact card row: label + rating badge
   let html = `
     <div class="compact-item ${isExcluded ? 'excluded' : ''} ${isFlagged ? 'flagged' : ''}">
@@ -5078,12 +5093,34 @@ function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
         ${itemData.rating || 'Select response'}
       </button>
     </div>
+  `;
+
+  // Notes preview under the rating
+  if (notePreview) {
+    html += `
+      <div style="padding:0 12px 4px 12px;cursor:pointer;" onclick="showNotesSheet('${safeLabel}', '${safeCat}')">
+        <div style="font-size:12px;color:#6b7280;line-height:1.3;background:#f9fafb;padding:6px 10px;border-radius:6px;border-left:3px solid ${ratingColor};">${notePreview}</div>
+      </div>
+    `;
+  }
+
+  // Photo thumbnails row
+  if (photoCount > 0) {
+    html += `<div class="compact-photo-thumbs" style="display:flex;gap:4px;padding:2px 12px 4px 12px;flex-wrap:wrap;">`;
+    itemData.photos.forEach(pid => {
+      html += `<img id="thumb-${pid}" src="" style="width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid #ddd;cursor:pointer;" onclick="showMediaSheet('${safeLabel}', '${safeCat}')" />`;
+    });
+    html += `</div>`;
+  }
+
+  // Action row
+  html += `
     <div class="compact-action-row">
       <button class="compact-action-btn ${hasNotes ? 'has-content' : ''}" onclick="showNotesSheet('${safeLabel}', '${safeCat}')">
         📝 ${hasNotes ? 'Notes ✓' : 'Add note'}
       </button>
       <button class="compact-action-btn ${photoCount > 0 ? 'has-content' : ''}" onclick="showMediaSheet('${safeLabel}', '${safeCat}')">
-        📷 ${photoCount > 0 ? `Media (${photoCount})` : 'Media'}
+        📷 ${photoCount > 0 ? `Photos (${photoCount})` : 'Photos'}
       </button>
       <button class="compact-action-btn ${isFlagged ? 'has-content' : ''}" onclick="toggleFlag('${safeLabel}')"
               title="Flag for follow-up">
@@ -5351,8 +5388,10 @@ function selectRating(itemLabel, categoryName, rating) {
     } else {
       survey.items[itemLabel].rating = rating;
       survey.items[itemLabel].text = '';
-      survey.items[itemLabel].standards = [];
       survey.items[itemLabel].variantText = '';
+      // Auto-apply all applicable standards for A and B ratings
+      const applicableStandards = getStandardsForCategory(categoryName, rating);
+      survey.items[itemLabel].standards = applicableStandards.length > 0 ? [...applicableStandards] : [];
     }
 
     saveSurvey(survey).then(() => {
@@ -5362,6 +5401,17 @@ function selectRating(itemLabel, categoryName, rating) {
         const options = getItemOptionsFromTemplate(survey, itemLabel);
         const itemData = survey.items[itemLabel];
         compactDiv.innerHTML = buildCompactItemHTML(itemLabel, categoryName, itemData, options);
+        // Load photo thumbnails for inline display
+        if (itemData.photos && itemData.photos.length > 0) {
+          itemData.photos.forEach(photoId => {
+            getPhotoById(photoId).then(photo => {
+              if (photo) {
+                const img = document.getElementById(`thumb-${photoId}`);
+                if (img) img.src = photo.dataUrl;
+              }
+            });
+          });
+        }
         updateCategoryHeader(survey, categoryName);
         return;
       }
@@ -5490,6 +5540,17 @@ function updateItemInPlace(survey, itemLabel) {
     const options = getItemOptionsFromTemplate(survey, itemLabel);
     const itemData = survey.items[itemLabel] || { rating: '', text: '', standards: [], photos: [] };
     compactDiv.innerHTML = buildCompactItemHTML(itemLabel, categoryName, itemData, options);
+    // Load photo thumbnails
+    if (itemData.photos && itemData.photos.length > 0) {
+      itemData.photos.forEach(photoId => {
+        getPhotoById(photoId).then(photo => {
+          if (photo) {
+            const img = document.getElementById(`thumb-${photoId}`);
+            if (img) img.src = photo.dataUrl;
+          }
+        });
+      });
+    }
     if (categoryName) updateCategoryHeader(survey, categoryName);
     return;
   }
