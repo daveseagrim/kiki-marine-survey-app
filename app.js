@@ -288,6 +288,108 @@ const SHEET_MAPPING = {
   'Vessel documentation and regulatory compliance': 'Hull'
 };
 
+// Maps template item labels to their exact text library section names
+// Only includes entries where the names differ
+const ITEM_SNIPPET_MAP = {
+  'Anti-vibration mounts': 'Anti vibration mounts',
+  'Arch - cockpit (interior condition)': 'Arch',
+  'Arch - external condition and equipment': 'Arch – external condition and equipment',
+  'Battery ventillation': 'Battery ventilation',
+  'Bilge, stringers and ribs (those accessible from cabin)': 'Bilge, stringers and ribs – accessible from cabin',
+  'Boom, gooseneck, boomvang, outhaul, cunningham and reefing lines': 'Boom, gooseneck, boomvang, outhaul, and reefing lines',
+  'Bowsprit, deck and coachroof/pilot house conductivity testing': 'Deck and coachroof/pilothouse conductivity testing',
+  'Bowsprit, deck and coachroof/pilot house impact and resonance testing': 'Bowsprit, deck and coachroof/pilothouse impact and resonance testing',
+  'Chainplates (exterior) pins and bolts': 'Chainplates (exterior)pins and bolts',
+  'Cockpit lockers': 'Cockpit lockers and lazarettes',
+  'Cockpit lockers/lazarettes': 'Cockpit lockers and lazarettes',
+  'Cockpit sink and drain': 'Sink, faucets and drain',
+  'Cockpit sink, faucets and drain': 'Sink, faucets and drain',
+  'Deck and coachroof/pilot house conductivity testing': 'Deck and coachroof/pilothouse conductivity testing',
+  'Deck and coachroof/pilot house impact and resonance testing': 'Bowsprit, deck and coachroof/pilothouse impact and resonance testing',
+  'Deck hatch(es), windows and portholes (exterior observations)': 'Deck hatches, windows, and portholes – exterior observations',
+  'Deck hatches, windows and portholes (interior observations)': 'Deck hatches, windows and portholes – interior observations',
+  'Drive coupling(s), interior propeller shaft(s), stuffing box(es)/packing gland(s)/dripless seal(s), interior stern tube(s)': 'Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)',
+  'Electrical - other features': 'Electrical – other features',
+  'Emergency tiller and connection': 'Emergency tiller',
+  'Engine controls (throttle, gearshift, etc.)': 'Engine gearshift and throttle',
+  'Engine gauges (tachometer, speedometer, fuel, temperature, etc.)': 'Engine gauges',
+  'Engine start/stop': 'Engine start and stop',
+  'Engine, general condition/impression': 'Engine condition',
+  'Fire extinguisher(s)': 'Fire extinguisher',
+  'Flood lights/deck lights': 'Flood lights and deck lights',
+  'Flybridge Engine gauges (tachometer, speedometer, fuel, temperature, etc.)': 'Engine gauges',
+  'Flybridge Engine gearshift and throttle': 'Engine gearshift and throttle',
+  'Flybridge Engine start/stop': 'Engine start and stop',
+  'Flybridge conductivity testing': 'flyridge conductivity testing',
+  'Flybridge drain(s)': 'flyridge drains',
+  'Flybridge floor, seats and coaming (spider cracks, etc.)': 'flyridge, floor, seats and coaming (spider cracks, etc.)',
+  'Flybridge lighting': 'flyridge lighting',
+  'Flybridge percussion testing': 'flyridge percussion testing',
+  'Flybridge table': 'flyridge table',
+  'Flybridge lockers and lazarettes': 'flyridge lockers and lazarettes',
+  'Fresh water pump': 'Freshwater pump',
+  'Fresh water tank(s) and plumbing': 'Freshwater tank and plumbing',
+  'Gearbox general condition/impressions': 'Gearbox general condition and impressions',
+  'Hull-deck joint (exterior)': 'Hull–deck joint (exterior)',
+  'Hull and rudder(s)/drive(s) condition (below the waterline)': 'Hull and rudder(s) condition (below the waterline)',
+  'Hull and rudder(s) (if applicable) impact and resonance testing': 'Hull and rudder(s) impact and resonance testing',
+  'Hull and rudder(s) (if applicable) conductivity testing': 'Hull and rudder(s) conductivity testing',
+  'Hydraulic steering': 'Hydraulic steering (hoses, fittings, steering cylinder, tiller arm or tie bar, rudder post and stuffing box, etc.)',
+  'LPG cut-off solenoid valve switch': 'LPG cut off solenoid valve switch',
+  'Life ring/heaving line': 'Life ring or heaving line',
+  'Lifelines/safety rail': 'Lifelines and safety rail',
+  'Lifejackets/PFDs': 'Lifejackets and PFDs',
+  'MFD/Chartplotter': 'MFD or Chartplotter',
+  'Main sheet and traveller': 'Main sheet',
+  'Manifold(s) and riser(s)': 'Manifolds and risers',
+  'Outboard anode(s)': 'Outboard anodes',
+  'Outboard general condition/impression': 'Outboard general condition and impression',
+  'Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows': 'Outdrive(s) corrosion, anodes, propeller(s), boots and bellows',
+  'Pilot house Engine controls (throttle, gearshift, etc.)': 'Engine gearshift and throttle',
+  'Pilot house Engine gauges (tachometer, speedometer, fuel, temperature, etc.)': 'Engine gauges',
+  'Pilot house Engine start/stop': 'Engine start and stop',
+  'Propane valve, regulator, gauge, storage compartment and vent.': 'Propane valve, regulator, gauge, storage compartment and vent',
+  'Sail drive(s) - (external), corrosion, propeller(s), anode(s)': 'Sail drive(s) (external), corrosion, propeller(s), anode(s)',
+  'Signs of water ingress?': 'Signs of water ingress',
+  'Swim platform and ladder - condition and conductivity readings': 'Swim platform and ladder',
+  'Swim platform and ladder - condition and moisture readings': 'Swim platform and ladder',
+  'Steering wheel, steering': 'Steering wheel and steering',
+  'Flybridge steering wheel, steering': 'Steering wheel and steering',
+  'Cabin windows and hatches (interior observations)': 'Deck hatches, windows and portholes – interior observations',
+  'Cabin sole': 'Floor and carpet',
+  'Berths and upholstery': 'Upholstery',
+  'Interior lighting': 'Cabin lights',
+  'Refrigerator/freezer': 'Refrigerator / icebox',
+  'Sink, faucet and drain (galley)': 'Galley faucet, sink and drain',
+  'Shower, sump and drain': 'Head, shower, drain, sump and pump',
+  'Horn/sound signal': 'Horn or sound signalling device',
+  'Horn/sound signal (powered)': 'Horn or sound signalling device',
+  'Spotlight/searchlight': 'Search light',
+  'Entertainment/stereo': 'Stereo and speakers',
+  'Windshield wipers': 'Wiper blade operation',
+  'Trim tab controls': 'Trim tabs',
+  'VHF radio and antenna': 'VHF',
+  'Wind instruments (direction, speed, etc.)': 'Wind instruments',
+  'Windshield, pilot house windows, frames and seals': 'Windshield, pilothouse windows, frames, and studs',
+  'Bow thruster controls': 'Bow thruster',
+  'Flybridge Safety rails': 'Safety rails',
+  'Flybridge Bimini/dodger/hardtop': 'Bimini, dodger and canvas enclosure',
+  'Flybridge Sink, faucet and drain': 'Sink, faucets and drain',
+  'Flybridge Stereo and speakers': 'Stereo and speakers',
+  'Deck and coachroof/pilot house condition (spider cracks, etc.)': 'Deck and coachroof/pilothouse condition',
+  'Cockpit, floor, seats and coaming (spider cracks, etc.)': 'Cockpit, floor, seats and coaming',
+  'Battery(ies), house': 'House battery(ies)',
+  'Battery(ies), starter': 'Starter battery(ies)',
+  'Toerail/gunwale': 'Toerail and gunwale',
+  'Fuel and water fill ports, and waste deck pump-out port': 'Fuel and water fill ports and waste deck pump-out port',
+  'Aft deck condition': 'Aft deck condition (spider cracks, etc.)',
+  'Condition (spider cracks, etc.)': 'Aft deck condition (spider cracks, etc.)',
+  'Conductivity testing': 'Aft deck conductivity testing',
+  'Percussion testing': 'Aft deck impact and resonance testing',
+  'Mechanical steering': 'Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)',
+  'Trim tab mechanism (interior)': 'Trim tab hydraulic pump and system'
+};
+
 // Init IndexedDB
 async function initDB() {
   return new Promise((resolve, reject) => {
@@ -1351,25 +1453,57 @@ function findTextVariants(categoryName, itemLabel, baseRating) {
   if (!sheet) return [];
 
   // Strip "Head N — " prefix for matching expanded head items back to base snippets
-  const matchLabel = itemLabel.replace(/^Head \d+ — /, 'Head, ').toLowerCase();
+  let resolvedLabel = itemLabel.replace(/^Head \d+ — /, 'Head, ');
 
-  // First try exact contains match
+  // Use explicit mapping if available, otherwise keep the resolved label
+  resolvedLabel = ITEM_SNIPPET_MAP[resolvedLabel] || resolvedLabel;
+
+  const matchLabel = resolvedLabel.toLowerCase();
+
+  // 1. Exact section name match (case-insensitive)
   let matches = sheet.filter(entry => {
     if (!entry.section || !entry.rating) return false;
-    const section = entry.section.toLowerCase();
-    const isLabelMatch = section.includes(matchLabel) || matchLabel.includes(section);
     const isRatingMatch = entry.rating.toString().charAt(0) === baseRating;
-    return isLabelMatch && isRatingMatch;
+    if (!isRatingMatch) return false;
+    return entry.section.toLowerCase() === matchLabel;
   });
 
-  // If no exact match, try fuzzy word overlap matching
+  // 2. If no exact match, try contains match but prefer shorter (more specific) sections
+  if (matches.length === 0) {
+    matches = sheet.filter(entry => {
+      if (!entry.section || !entry.rating) return false;
+      const section = entry.section.toLowerCase();
+      const isRatingMatch = entry.rating.toString().charAt(0) === baseRating;
+      if (!isRatingMatch) return false;
+      return section.includes(matchLabel) || matchLabel.includes(section);
+    });
+    // If multiple sections matched, prefer the one closest in length to the search label
+    if (matches.length > 1) {
+      const sections = [...new Set(matches.map(m => m.section))];
+      if (sections.length > 1) {
+        // Pick the section with the smallest length difference to the match label
+        let bestSection = sections[0];
+        let bestDiff = Math.abs(sections[0].length - resolvedLabel.length);
+        for (const s of sections) {
+          const diff = Math.abs(s.length - resolvedLabel.length);
+          if (diff < bestDiff) {
+            bestDiff = diff;
+            bestSection = s;
+          }
+        }
+        matches = matches.filter(m => m.section === bestSection);
+      }
+    }
+  }
+
+  // 3. If still no match, try fuzzy word overlap matching
   if (matches.length === 0) {
     matches = sheet.filter(entry => {
       if (!entry.section || !entry.rating) return false;
       const isRatingMatch = entry.rating.toString().charAt(0) === baseRating;
       if (!isRatingMatch) return false;
       const score = matchScore(entry.section, matchLabel);
-      return score >= 0.5; // At least 50% word overlap
+      return score >= 0.5;
     });
   }
 
@@ -4352,21 +4486,62 @@ function renderInspection(survey) {
     `;
   });
 
-  // ── Comparable Vessels Section ────────────────────────────────────────────
+  // ── Valuation & Comparables Section ────────────────────────────────────────
   const compCount = (survey.comparables && survey.comparables.length) || 0;
+  const valLow = survey.valuationLow || '';
+  const valHigh = survey.valuationHigh || '';
+  const valSummary = valLow && valHigh ? `$${Number(valLow).toLocaleString()} – $${Number(valHigh).toLocaleString()} USD` : (valLow || valHigh ? `$${Number(valLow || valHigh).toLocaleString()} USD` : 'Not set');
+  const valCondition = survey.overallCondition || 'Not rated';
   html += `
     <div class="category-accordion">
       <button class="accordion-header" onclick="toggleAccordion(this)" style="background: #065f46; color: white;">
-        <span class="category-title">📊 Comparable Vessels</span>
-        <span class="category-progress">${compCount} recorded</span>
+        <span class="category-title">💰 Valuation & Comparables</span>
+        <span class="category-progress">${valSummary} · ${compCount} comp${compCount !== 1 ? 's' : ''}</span>
         <span style="margin-left: 12px;">▼</span>
       </button>
       <div class="accordion-content" style="display: none;">
+
+        <div style="font-size:13px;color:#374151;margin-bottom:12px;padding:10px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
+          <strong>Fair Market Value:</strong> ${valSummary}<br/>
+          <strong>Condition:</strong> ${valCondition}
+          ${survey.replacementCost ? '<br/><strong>Replacement Cost:</strong> $' + Number(survey.replacementCost).toLocaleString() + ' USD' : ''}
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" style="font-size:13px;">FMV Low (USD)</label>
+          <input type="text" id="inspValLow" value="${valLow}" placeholder="e.g., 150000"
+                 onchange="saveValuationFromInspection()" style="font-size:14px;padding:8px;">
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" style="font-size:13px;">FMV High (USD)</label>
+          <input type="text" id="inspValHigh" value="${valHigh}" placeholder="e.g., 175000"
+                 onchange="saveValuationFromInspection()" style="font-size:14px;padding:8px;">
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" style="font-size:13px;">Condition Rating</label>
+          <select id="inspCondition" onchange="saveValuationFromInspection()" style="font-size:14px;padding:8px;">
+            <option value="">Select condition</option>
+            <option value="Excellent (Bristol)" ${valCondition === 'Excellent (Bristol)' ? 'selected' : ''}>Excellent (Bristol)</option>
+            <option value="Above Average" ${valCondition === 'Above Average' ? 'selected' : ''}>Above Average</option>
+            <option value="Average" ${valCondition === 'Average' ? 'selected' : ''}>Average</option>
+            <option value="Fair" ${valCondition === 'Fair' ? 'selected' : ''}>Fair</option>
+            <option value="Poor" ${valCondition === 'Poor' ? 'selected' : ''}>Poor</option>
+            <option value="Restorable" ${valCondition === 'Restorable' ? 'selected' : ''}>Restorable</option>
+          </select>
+        </div>
+
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 16px;">
+          <button class="btn-secondary" style="font-size:11px;padding:5px 8px;" onclick="window.open('https://www.yachtworld.com/boats-for-sale/?keyword='+encodeURIComponent(survey.yearMakeModel||''),'_blank')">🔍 YachtWorld</button>
+          <button class="btn-secondary" style="font-size:11px;padding:5px 8px;" onclick="window.open('https://www.soldboats.com/cgi-bin/soldboats/search.cgi?searchStr='+encodeURIComponent(survey.yearMakeModel||''),'_blank')">🔍 Soldboats</button>
+          <button class="btn-secondary" style="font-size:11px;padding:5px 8px;" onclick="window.open('https://www.bucvalu.com','_blank')">📖 BUCValu</button>
+        </div>
+
+        <h4 style="margin:16px 0 8px;color:#1e3a5f;font-size:14px;border-top:1px solid #e5e7eb;padding-top:12px;">Comparable Vessels</h4>
         <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">Add comparable sales from BUCValu, Soldboats.com, YachtWorld, and current listings to support your valuation.</div>
         <div id="comparablesEntries"></div>
         <div style="display:flex;gap:8px;margin-top:8px;">
           <button class="btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="addComparableEntry()">+ Add Comparable</button>
-          <button class="btn-primary" style="font-size:12px;padding:6px 12px;" onclick="saveComparablesFromInspection()">💾 Save Comparables</button>
+          <button class="btn-primary" style="font-size:12px;padding:6px 12px;" onclick="saveComparablesFromInspection()">💾 Save All</button>
         </div>
       </div>
     </div>
@@ -4518,10 +4693,31 @@ function ensureReportButton() {
 function saveComparablesFromInspection() {
   getSurvey(currentSurveyId).then(survey => {
     survey.comparables = collectComparables();
+    // Also save valuation fields if they exist in the inspection view
+    const lowEl = document.getElementById('inspValLow');
+    const highEl = document.getElementById('inspValHigh');
+    const condEl = document.getElementById('inspCondition');
+    if (lowEl) survey.valuationLow = lowEl.value;
+    if (highEl) survey.valuationHigh = highEl.value;
+    if (condEl) survey.overallCondition = condEl.value;
     saveSurvey(survey).then(() => {
-      showToast('Comparables saved (' + survey.comparables.length + ' entries)');
+      showToast('Valuation & comparables saved');
     });
   });
+}
+
+// Save valuation fields from inspection view
+async function saveValuationFromInspection() {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  const lowEl = document.getElementById('inspValLow');
+  const highEl = document.getElementById('inspValHigh');
+  const condEl = document.getElementById('inspCondition');
+  if (lowEl) survey.valuationLow = lowEl.value;
+  if (highEl) survey.valuationHigh = highEl.value;
+  if (condEl) survey.overallCondition = condEl.value;
+  await saveSurvey(survey);
+  showToast('Valuation saved');
 }
 
 // Safety equipment interaction functions
@@ -4811,6 +5007,7 @@ function showPhotoPreviewModal(fieldKey, label, stampedDataUrl, fileType) {
           <button class="btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="resetPhotoFilters()">Reset</button>
           <button class="btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="rotatePreviewPhoto()">↻ Rotate</button>
           <button class="btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="startPhotoCrop()">✂ Crop</button>
+          <button class="btn-secondary" style="font-size:11px;padding:4px 10px;background:#fef3c7;border-color:#f59e0b;" onclick="startAnnotation()">✏️ Annotate</button>
         </div>
       </div>
 
@@ -5029,6 +5226,319 @@ function closePhotoPreviewModal() {
   const modal = document.getElementById('photoPreviewModal');
   if (modal) modal.style.display = 'none';
   window._pendingPhotoData = null;
+}
+
+// ── Photo Annotation ────────────────────────────────────────────────────────
+// Full-screen annotation mode with circle, arrow, and text tools
+function startAnnotation() {
+  if (!window._pendingPhotoData) return;
+
+  // Close any existing overlay
+  const existing = document.getElementById('annotationOverlay');
+  if (existing) existing.remove();
+
+  window._annotationState = {
+    tool: 'circle',       // 'circle', 'arrow', 'text'
+    colour: '#dc2626',    // red
+    lineWidth: 3,
+    drawings: [],         // stored draw operations for undo
+    isDrawing: false,
+    startX: 0, startY: 0
+  };
+
+  const overlay = document.createElement('div');
+  overlay.id = 'annotationOverlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:10001;display:flex;flex-direction:column;';
+
+  overlay.innerHTML = `
+    <div id="annoToolbar" style="display:flex;gap:6px;padding:10px 12px;background:#1e293b;align-items:center;flex-wrap:wrap;">
+      <button id="annoToolCircle" onclick="setAnnotationTool('circle')" style="padding:6px 12px;border-radius:6px;border:2px solid #3b82f6;background:#1e3a5f;color:white;font-size:13px;font-weight:600;cursor:pointer;">⭕ Circle</button>
+      <button id="annoToolArrow" onclick="setAnnotationTool('arrow')" style="padding:6px 12px;border-radius:6px;border:2px solid transparent;background:#374151;color:white;font-size:13px;font-weight:600;cursor:pointer;">➜ Arrow</button>
+      <button id="annoToolText" onclick="setAnnotationTool('text')" style="padding:6px 12px;border-radius:6px;border:2px solid transparent;background:#374151;color:white;font-size:13px;font-weight:600;cursor:pointer;">Aa Text</button>
+      <div style="flex:1;"></div>
+      <button onclick="undoAnnotation()" style="padding:6px 12px;border-radius:6px;border:none;background:#6b7280;color:white;font-size:13px;font-weight:600;cursor:pointer;">↩ Undo</button>
+    </div>
+    <div id="annoColourBar" style="display:flex;gap:8px;padding:6px 12px;background:#0f172a;align-items:center;">
+      <span style="color:#9ca3af;font-size:11px;">Colour:</span>
+      <button onclick="setAnnotationColour('#dc2626')" style="width:28px;height:28px;border-radius:50%;background:#dc2626;border:3px solid white;cursor:pointer;" id="annoColour_dc2626"></button>
+      <button onclick="setAnnotationColour('#f59e0b')" style="width:28px;height:28px;border-radius:50%;background:#f59e0b;border:3px solid transparent;cursor:pointer;" id="annoColour_f59e0b"></button>
+      <button onclick="setAnnotationColour('#3b82f6')" style="width:28px;height:28px;border-radius:50%;background:#3b82f6;border:3px solid transparent;cursor:pointer;" id="annoColour_3b82f6"></button>
+      <button onclick="setAnnotationColour('#ffffff')" style="width:28px;height:28px;border-radius:50%;background:#ffffff;border:3px solid transparent;cursor:pointer;" id="annoColour_ffffff"></button>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;" id="annoContainer">
+      <canvas id="annoCanvas" style="touch-action:none;cursor:crosshair;"></canvas>
+    </div>
+    <div style="display:flex;gap:12px;padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px));background:#1e293b;">
+      <button onclick="cancelAnnotation()" style="flex:1;padding:12px;border-radius:8px;border:none;background:#6b7280;color:white;font-size:15px;font-weight:600;cursor:pointer;">Cancel</button>
+      <button onclick="applyAnnotation()" style="flex:1;padding:12px;border-radius:8px;border:none;background:#16a34a;color:white;font-size:15px;font-weight:600;cursor:pointer;">✓ Done</button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // Load image onto canvas
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.getElementById('annoCanvas');
+    const container = document.getElementById('annoContainer');
+    if (!canvas || !container) return;
+
+    // Fit image to container
+    const cw = container.clientWidth;
+    const ch = container.clientHeight;
+    const scale = Math.min(cw / img.width, ch / img.height, 1);
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+    canvas.style.width = canvas.width + 'px';
+    canvas.style.height = canvas.height + 'px';
+
+    window._annotationState.img = img;
+    window._annotationState.scale = scale;
+    window._annotationState.canvasW = canvas.width;
+    window._annotationState.canvasH = canvas.height;
+
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    // Set up touch/mouse handlers
+    setupAnnotationHandlers(canvas);
+  };
+  img.src = window._pendingPhotoData.stampedDataUrl;
+}
+
+function setAnnotationTool(tool) {
+  window._annotationState.tool = tool;
+  ['circle', 'arrow', 'text'].forEach(t => {
+    const btn = document.getElementById('annoTool' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (btn) {
+      btn.style.borderColor = (t === tool) ? '#3b82f6' : 'transparent';
+      btn.style.background = (t === tool) ? '#1e3a5f' : '#374151';
+    }
+  });
+}
+
+function setAnnotationColour(colour) {
+  window._annotationState.colour = colour;
+  document.querySelectorAll('[id^="annoColour_"]').forEach(btn => {
+    const c = btn.id.replace('annoColour_', '');
+    btn.style.borderColor = ('#' + c === colour) ? 'white' : 'transparent';
+  });
+}
+
+function setupAnnotationHandlers(canvas) {
+  const state = window._annotationState;
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches ? e.touches[0] : e;
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+  }
+
+  function onStart(e) {
+    e.preventDefault();
+    const pos = getPos(e);
+    state.isDrawing = true;
+    state.startX = pos.x;
+    state.startY = pos.y;
+
+    if (state.tool === 'text') {
+      state.isDrawing = false;
+      promptAnnotationText(pos.x, pos.y);
+    }
+  }
+
+  function onMove(e) {
+    if (!state.isDrawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    // Redraw canvas with all existing drawings + preview of current
+    redrawAnnotationCanvas(canvas);
+    drawAnnotationPreview(canvas, state.startX, state.startY, pos.x, pos.y);
+  }
+
+  function onEnd(e) {
+    if (!state.isDrawing) return;
+    state.isDrawing = false;
+    const pos = e.changedTouches ? { x: e.changedTouches[0].clientX - canvas.getBoundingClientRect().left, y: e.changedTouches[0].clientY - canvas.getBoundingClientRect().top } : getPos(e);
+
+    // Only add if there's meaningful movement
+    const dx = pos.x - state.startX;
+    const dy = pos.y - state.startY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 5) return;
+
+    state.drawings.push({
+      tool: state.tool,
+      colour: state.colour,
+      lineWidth: state.lineWidth,
+      x1: state.startX, y1: state.startY,
+      x2: pos.x, y2: pos.y
+    });
+    redrawAnnotationCanvas(canvas);
+  }
+
+  canvas.addEventListener('touchstart', onStart, { passive: false });
+  canvas.addEventListener('touchmove', onMove, { passive: false });
+  canvas.addEventListener('touchend', onEnd);
+  canvas.addEventListener('mousedown', onStart);
+  canvas.addEventListener('mousemove', onMove);
+  canvas.addEventListener('mouseup', onEnd);
+}
+
+function promptAnnotationText(x, y) {
+  const state = window._annotationState;
+  // Custom inline text input instead of native prompt()
+  let inputDiv = document.getElementById('annoTextInput');
+  if (inputDiv) inputDiv.remove();
+
+  inputDiv = document.createElement('div');
+  inputDiv.id = 'annoTextInput';
+  inputDiv.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#1e293b;padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px));z-index:10003;display:flex;gap:8px;align-items:center;';
+  inputDiv.innerHTML = `
+    <input type="text" id="annoTextValue" placeholder="Enter text..." autofocus
+           style="flex:1;padding:10px 12px;border:1px solid #3b82f6;border-radius:8px;font-size:15px;background:white;color:#333;" />
+    <button onclick="confirmAnnotationText(${x}, ${y})" style="padding:10px 16px;border:none;border-radius:8px;background:#16a34a;color:white;font-size:14px;font-weight:600;cursor:pointer;">Add</button>
+    <button onclick="document.getElementById('annoTextInput').remove();" style="padding:10px 12px;border:none;border-radius:8px;background:#6b7280;color:white;font-size:14px;cursor:pointer;">✕</button>
+  `;
+  document.body.appendChild(inputDiv);
+  setTimeout(() => document.getElementById('annoTextValue')?.focus(), 100);
+}
+
+function confirmAnnotationText(x, y) {
+  const input = document.getElementById('annoTextValue');
+  const text = input?.value?.trim();
+  const inputDiv = document.getElementById('annoTextInput');
+  if (inputDiv) inputDiv.remove();
+  if (!text) return;
+
+  const state = window._annotationState;
+  state.drawings.push({
+    tool: 'text',
+    colour: state.colour,
+    x1: x, y1: y,
+    text: text
+  });
+  const canvas = document.getElementById('annoCanvas');
+  if (canvas) redrawAnnotationCanvas(canvas);
+}
+
+function redrawAnnotationCanvas(canvas) {
+  const ctx = canvas.getContext('2d');
+  const state = window._annotationState;
+  // Redraw base image
+  ctx.drawImage(state.img, 0, 0, canvas.width, canvas.height);
+  // Redraw all committed annotations
+  state.drawings.forEach(d => drawAnnotation(ctx, d));
+}
+
+function drawAnnotationPreview(canvas, x1, y1, x2, y2) {
+  const ctx = canvas.getContext('2d');
+  const state = window._annotationState;
+  drawAnnotation(ctx, {
+    tool: state.tool, colour: state.colour, lineWidth: state.lineWidth,
+    x1, y1, x2, y2
+  });
+}
+
+function drawAnnotation(ctx, d) {
+  ctx.strokeStyle = d.colour;
+  ctx.fillStyle = d.colour;
+  ctx.lineWidth = d.lineWidth || 3;
+
+  if (d.tool === 'circle') {
+    const cx = (d.x1 + d.x2) / 2;
+    const cy = (d.y1 + d.y2) / 2;
+    const rx = Math.abs(d.x2 - d.x1) / 2;
+    const ry = Math.abs(d.y2 - d.y1) / 2;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (d.tool === 'arrow') {
+    const headLen = 14;
+    const angle = Math.atan2(d.y2 - d.y1, d.x2 - d.x1);
+    // Line
+    ctx.beginPath();
+    ctx.moveTo(d.x1, d.y1);
+    ctx.lineTo(d.x2, d.y2);
+    ctx.stroke();
+    // Arrowhead
+    ctx.beginPath();
+    ctx.moveTo(d.x2, d.y2);
+    ctx.lineTo(d.x2 - headLen * Math.cos(angle - Math.PI / 6), d.y2 - headLen * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(d.x2 - headLen * Math.cos(angle + Math.PI / 6), d.y2 - headLen * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+  } else if (d.tool === 'text') {
+    const fontSize = Math.max(16, Math.round(ctx.canvas.width / 25));
+    ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    // Background
+    const metrics = ctx.measureText(d.text);
+    const pad = 4;
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(d.x1 - pad, d.y1 - pad, metrics.width + pad * 2, fontSize + pad * 2);
+    // Text
+    ctx.fillStyle = d.colour;
+    ctx.fillText(d.text, d.x1, d.y1);
+  }
+}
+
+function undoAnnotation() {
+  const state = window._annotationState;
+  if (state.drawings.length === 0) return;
+  state.drawings.pop();
+  const canvas = document.getElementById('annoCanvas');
+  if (canvas) redrawAnnotationCanvas(canvas);
+}
+
+function cancelAnnotation() {
+  const overlay = document.getElementById('annotationOverlay');
+  if (overlay) overlay.remove();
+  window._annotationState = null;
+}
+
+function applyAnnotation() {
+  const state = window._annotationState;
+  if (!state || !window._pendingPhotoData) {
+    cancelAnnotation();
+    return;
+  }
+
+  // Bake annotations onto the original-resolution image
+  const srcImg = new Image();
+  srcImg.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = srcImg.width;
+    canvas.height = srcImg.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(srcImg, 0, 0);
+
+    // Scale factor from annotation canvas to original image
+    const scaleX = srcImg.width / state.canvasW;
+    const scaleY = srcImg.height / state.canvasH;
+
+    // Draw each annotation at full resolution
+    state.drawings.forEach(d => {
+      drawAnnotation(ctx, {
+        ...d,
+        x1: d.x1 * scaleX, y1: d.y1 * scaleY,
+        x2: (d.x2 || 0) * scaleX, y2: (d.y2 || 0) * scaleY,
+        lineWidth: (d.lineWidth || 3) * Math.max(scaleX, scaleY)
+      });
+    });
+
+    const annotatedDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+    window._pendingPhotoData.stampedDataUrl = annotatedDataUrl;
+    window._pendingPhotoData.originalDataUrl = annotatedDataUrl;
+
+    // Update the preview image
+    const previewImg = document.getElementById('previewImage');
+    if (previewImg) previewImg.src = annotatedDataUrl;
+
+    cancelAnnotation();
+  };
+  srcImg.src = window._pendingPhotoData.stampedDataUrl;
 }
 
 // Bake brightness, contrast, and rotation edits into the image data
