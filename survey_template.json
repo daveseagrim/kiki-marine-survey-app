@@ -2105,6 +2105,18 @@
               "Not applicable",
               "Not tested/not verified"
             ]
+          },
+          {
+            "type": "list",
+            "label": "Generator valve and sea strainer",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
           }
         ]
       },

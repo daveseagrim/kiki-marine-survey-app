@@ -7340,9 +7340,9 @@ function updateCollapseButton(show) {
     if (!btn) {
       btn = document.createElement('button');
       btn.id = 'floatingCollapseBtn';
-      btn.style.cssText = 'position:fixed;bottom:80px;right:16px;z-index:999;background:#1e3a5f;color:white;border:none;border-radius:50%;width:48px;height:48px;font-size:18px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;';
-      btn.innerHTML = '▲';
-      btn.title = 'Collapse section';
+      btn.style.cssText = 'position:fixed;bottom:100px;right:16px;z-index:9998;background:#1e3a5f;color:white;border:none;border-radius:24px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.35);display:flex;align-items:center;gap:6px;';
+      btn.innerHTML = '▲ Collapse';
+      btn.title = 'Collapse current section';
       btn.onclick = collapseCurrentSection;
       document.body.appendChild(btn);
     }
@@ -7374,6 +7374,7 @@ function restoreAccordionState() {
           content.style.display = 'block';
           const chevron = header.querySelector('span:last-child');
           if (chevron) chevron.style.transform = 'rotate(180deg)';
+          updateCollapseButton(true);
           // Scroll back to it
           setTimeout(() => header.scrollIntoView({ behavior: 'auto', block: 'start' }), 50);
         }
