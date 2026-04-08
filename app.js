@@ -4858,27 +4858,56 @@ function savePhotoToDevice(dataUrl, label) {
  * leaves the PWA stuck at landscape dimensions. Works by briefly tweaking the
  * viewport meta tag and forcing a reflow.
  */
+/**
+ * Force the browser to reset viewport zoom/scale after returning from
+ * the camera app. On Android Chrome, taking a landscape photo can leave
+ * the PWA viewport zoomed in or stuck at wrong dimensions.
+ *
+ * Uses multiple recovery strategies in sequence for reliability.
+ */
 function forceViewportRecalc() {
   const viewport = document.querySelector('meta[name="viewport"]');
   if (!viewport) return;
 
-  const original = viewport.content;
-
-  // Step 1: Force a scroll to top (camera may have shifted scroll position)
+  // Strategy 1: Reset scroll position
   window.scrollTo(0, 0);
 
-  // Step 2: Briefly set viewport to a fixed width to force recalculation,
-  // then restore. The 10ms delay lets the browser process the change.
-  viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover';
-  document.body.style.display = 'none';
-  // Force reflow
-  void document.body.offsetHeight;
-  document.body.style.display = '';
+  // Strategy 2: Use visualViewport API to detect and fix zoom
+  if (window.visualViewport && window.visualViewport.scale > 1.01) {
+    // Viewport is zoomed — force reset by cycling the viewport meta tag
+    viewport.content = 'width=device-width, initial-scale=0.99, maximum-scale=0.99, user-scalable=no, viewport-fit=cover';
+    setTimeout(() => {
+      viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+      window.scrollTo(0, 0);
+    }, 50);
+    return;
+  }
 
-  setTimeout(() => {
-    viewport.content = original;
+  // Strategy 3: Even if visualViewport looks OK, the layout viewport may
+  // be wrong. Force a full viewport reset cycle.
+  viewport.content = 'width=device-width, initial-scale=0.99, maximum-scale=0.99, user-scalable=no, viewport-fit=cover';
+
+  requestAnimationFrame(() => {
+    viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
     window.scrollTo(0, 0);
-  }, 50);
+
+    // Strategy 4: After a brief delay, check again and force a second
+    // reset if the viewport is still wrong (Android Chrome can be slow
+    // to recalculate after orientation changes)
+    setTimeout(() => {
+      if (window.visualViewport && window.visualViewport.scale > 1.01) {
+        viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+      }
+      window.scrollTo(0, 0);
+      // Force reflow on the app container
+      const app = document.getElementById('app');
+      if (app) {
+        app.style.display = 'none';
+        void app.offsetHeight;
+        app.style.display = '';
+      }
+    }, 300);
+  });
 }
 
 async function capturePhoto(itemLabel, event) {
@@ -8032,13 +8061,31 @@ async function initApp() {
     history.replaceState({ view: 'surveys' }, '');
 
     // Fix Android Chrome landscape photo issue: when returning from the camera
-    // app, the viewport may be stuck at landscape dimensions. Force a recalc
-    // whenever the page regains visibility.
+    // app, the viewport may be stuck zoomed in or at landscape dimensions.
+    // Run viewport recalc multiple times with increasing delays since Android
+    // Chrome can be very slow to settle after camera app closes.
     window._cameraActive = false;
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && window._cameraActive) {
         window._cameraActive = false;
-        setTimeout(forceViewportRecalc, 100);
+        // Run recalc at multiple intervals — Android Chrome is unpredictable
+        // about when it finishes resizing after camera return
+        forceViewportRecalc();
+        setTimeout(forceViewportRecalc, 200);
+        setTimeout(forceViewportRecalc, 600);
+        setTimeout(forceViewportRecalc, 1200);
+      }
+    });
+    // Also listen for resize events after camera — another signal the
+    // viewport has changed
+    let _resizeAfterCamera = false;
+    window.addEventListener('resize', () => {
+      if (window._cameraActive || _resizeAfterCamera) {
+        _resizeAfterCamera = true;
+        setTimeout(() => {
+          forceViewportRecalc();
+          _resizeAfterCamera = false;
+        }, 150);
       }
     });
     // Mark camera as active whenever a file input with capture is clicked
