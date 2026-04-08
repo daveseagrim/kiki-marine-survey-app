@@ -804,16 +804,20 @@ function showNotesSheet(itemLabel, categoryName) {
       const baseRating = itemData.rating.charAt(0);
       const variants = findTextVariants(categoryName, itemLabel, baseRating);
       if (variants.length > 0) {
+        // Pre-compute diff-highlighted display texts for bottom sheet
+        const highlightedTexts = highlightSnippetDiffs(variants);
+
         snippetsHtml = `<div class="sheet-section-title">Quick Insert (${variants.length} snippets)</div>`;
-        variants.forEach(variant => {
+        variants.forEach((variant, idx) => {
           const escapedText = variant.text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
           const ratingBadge = variant.rating || baseRating;
           const isActive = itemData.text === variant.text;
+          const displayText = highlightedTexts[idx] || escSnippet(variant.text);
           snippetsHtml += `
             <div class="snippet-card-sheet" style="padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}"
                  onclick="insertSnippetFromSheet('${safeLabel}', '${safeCat}', '${escapedText}', this)">
               <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
-                <span style="font-size:13px;color:#333;line-height:1.5;">${variant.text}</span>
+                <span style="font-size:13px;color:#333;line-height:1.5;">${displayText}</span>
                 <span style="flex-shrink:0;font-size:10px;background:#e5e7eb;color:#374151;padding:2px 6px;border-radius:4px;">${ratingBadge}</span>
               </div>
             </div>
@@ -1534,6 +1538,101 @@ function matchScore(text1, text2) {
 
   const overlap = words1.filter(w => words2.some(w2 => w2.includes(w) || w.includes(w2))).length;
   return overlap / Math.min(words1.length, words2.length);
+}
+
+// ─── Snippet Diff Highlighting ──────────────────────────────────────────────
+// Compare an array of snippet texts and return HTML versions where the
+// differing portions are wrapped in <strong> tags. This makes it easy
+// to choose between similar snippets in the field.
+
+function highlightSnippetDiffs(variants) {
+  if (!variants || variants.length < 2) {
+    return variants.map(v => escSnippet(v.text));
+  }
+
+  const wordArrays = variants.map(v => v.text.split(/\s+/).filter(w => w.length > 0));
+  const highlightedTexts = variants.map(v => escSnippet(v.text));
+
+  // For each snippet, find the most similar peer (longest LCS)
+  // and bold only the words that differ from that peer.
+  // Only highlight if similarity >= 50% (otherwise snippets are too different).
+  wordArrays.forEach((words, i) => {
+    let bestLcs = [];
+    wordArrays.forEach((otherWords, j) => {
+      if (i === j) return;
+      // Only compare snippets with the same rating
+      if ((variants[i].rating || '') !== (variants[j].rating || '')) return;
+      const lcs = lcsWords(words, otherWords);
+      if (lcs.length > bestLcs.length) bestLcs = lcs;
+    });
+
+    const similarity = bestLcs.length / Math.max(words.length, 1);
+    if (similarity >= 0.5 && bestLcs.length > 0) {
+      highlightedTexts[i] = markDiffWords(words, bestLcs);
+    }
+  });
+
+  return highlightedTexts;
+}
+
+// Longest common subsequence of two word arrays
+function lcsWords(a, b) {
+  const m = a.length, n = b.length;
+  // For very long texts, limit to avoid performance issues
+  if (m > 200 || n > 200) return [];
+
+  const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (a[i-1].toLowerCase() === b[j-1].toLowerCase()) {
+        dp[i][j] = dp[i-1][j-1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+      }
+    }
+  }
+  // Backtrack to find the actual subsequence
+  const result = [];
+  let i = m, j = n;
+  while (i > 0 && j > 0) {
+    if (a[i-1].toLowerCase() === b[j-1].toLowerCase()) {
+      result.unshift(a[i-1].toLowerCase());
+      i--; j--;
+    } else if (dp[i-1][j] > dp[i][j-1]) {
+      i--;
+    } else {
+      j--;
+    }
+  }
+  return result;
+}
+
+// Mark words that are NOT in the common subsequence with <strong> tags
+function markDiffWords(words, commonSeq) {
+  const result = [];
+  let csIdx = 0;
+  let inBold = false;
+
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    const isCommon = csIdx < commonSeq.length &&
+                     word.toLowerCase() === commonSeq[csIdx].toLowerCase();
+
+    if (isCommon) {
+      if (inBold) { result.push('</strong>'); inBold = false; }
+      result.push(escSnippet(word));
+      csIdx++;
+    } else {
+      if (!inBold) { result.push('<strong>'); inBold = true; }
+      result.push(escSnippet(word));
+    }
+  }
+  if (inBold) result.push('</strong>');
+  return result.join(' ').replace(/ <\/strong>/g, '</strong> ').replace(/<strong> /g, ' <strong>');
+}
+
+function escSnippet(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 // Find text variants from library
@@ -6167,6 +6266,9 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
     const variants = findTextVariants(categoryName, itemLabel, baseRating);
 
     if (variants.length > 0) {
+      // Pre-compute diff-highlighted display texts
+      const highlightedTexts = highlightSnippetDiffs(variants);
+
       html += `
         <div class="form-group">
           <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
@@ -6179,11 +6281,12 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
         const escapedText = variant.text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
         const ratingBadge = variant.rating || baseRating;
         const isActive = itemData.text === variant.text;
+        const displayText = highlightedTexts[idx] || escSnippet(variant.text);
         html += `
             <div class="snippet-card" style="padding:10px 12px;border-bottom:1px solid #e5e7eb;cursor:pointer;${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}"
                  onclick="insertSnippet('${safeLabel}', '${safeCat}', '${escapedText}', this)">
               <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
-                <span style="font-size:12px;color:#333;line-height:1.5;">${variant.text}</span>
+                <span style="font-size:12px;color:#333;line-height:1.5;">${displayText}</span>
                 <span style="flex-shrink:0;font-size:10px;background:#e5e7eb;color:#374151;padding:2px 6px;border-radius:4px;white-space:nowrap;">${ratingBadge}</span>
               </div>
             </div>
