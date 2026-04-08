@@ -2338,6 +2338,9 @@ function renderNewSurveyForm() {
           <div class="form-group">
             <label class="form-label" style="font-size:12px;">Engine Hours</label>
             <input type="text" id="engineHours" placeholder="">
+            <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#6b7280;margin-top:2px;cursor:pointer;">
+              <input type="checkbox" id="engineHoursNA" onchange="if(this.checked){document.getElementById('engineHours').value='Hours not available';document.getElementById('engineHours').disabled=true;}else{document.getElementById('engineHours').value='';document.getElementById('engineHours').disabled=false;}"> Hours not available
+            </label>
           </div>
           <div class="form-group">
             <label class="form-label" style="font-size:12px;">HP / kW Rating</label>
@@ -2441,6 +2444,9 @@ function renderNewSurveyForm() {
           <div class="form-group">
             <label class="form-label" style="font-size:12px;">Engine Hours</label>
             <input type="text" id="engine2Hours" placeholder="">
+            <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#6b7280;margin-top:2px;cursor:pointer;">
+              <input type="checkbox" id="engine2HoursNA" onchange="if(this.checked){document.getElementById('engine2Hours').value='Hours not available';document.getElementById('engine2Hours').disabled=true;}else{document.getElementById('engine2Hours').value='';document.getElementById('engine2Hours').disabled=false;}"> Hours not available
+            </label>
           </div>
           <div class="form-group">
             <label class="form-label" style="font-size:12px;">HP / kW Rating</label>
@@ -3021,6 +3027,34 @@ function showEngine2() {
   if (section) section.style.display = 'block';
   if (btn) btn.style.display = 'none';
   populateEngine2Makes();
+
+  // Auto-populate Engine 2 with Engine 1's make/model (same powerplant, different serial/hours)
+  const e1Make = document.getElementById('engineMake');
+  const e1Model = document.getElementById('engineModel');
+  if (e1Make && e1Make.value) {
+    const e2Make = document.getElementById('engine2Make');
+    if (e2Make && e2Make.tagName === 'SELECT') {
+      e2Make.value = e1Make.value;
+      onEngine2MakeChange();
+      // After models populate, set the same model
+      setTimeout(() => {
+        if (e1Model && e1Model.value) {
+          const e2Model = document.getElementById('engine2Model');
+          if (e2Model && e2Model.tagName === 'SELECT') {
+            e2Model.value = e1Model.value;
+            onEngine2ModelChange();
+          }
+        }
+        // Copy HP and fuel type too
+        const hp1 = document.getElementById('engineHP');
+        const hp2 = document.getElementById('engine2HP');
+        if (hp1 && hp2 && hp1.value && !hp2.value) hp2.value = hp1.value;
+        const fuel1 = document.getElementById('fuelType');
+        const fuel2 = document.getElementById('fuelType2');
+        if (fuel1 && fuel2 && fuel1.value) fuel2.value = fuel1.value;
+      }, 50);
+    }
+  }
 }
 
 function removeEngine2() {
@@ -4829,7 +4863,7 @@ function renderInspection(survey) {
     }
     const checkedAttr = eq.checked ? 'checked' : '';
     const safetyPhotoCount = (eq.photos && eq.photos.length) || 0;
-    const safetyPhotoLabel = `safety_eq_${idx}`;
+    const isCustom = eq.custom ? true : false;
     html += `
       <div class="rated-item" style="border-left: 4px solid ${eq.checked ? '#16a34a' : '#2563eb'}; padding: 8px 10px; margin-bottom: 8px;">
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
@@ -4838,9 +4872,10 @@ function renderInspection(survey) {
                  style="margin-top:3px;width:18px;height:18px;accent-color:#2563eb;" />
           <div style="flex:1;">
             <strong>${eq.name}</strong>
-            <span style="display:inline-block;background:#2563eb;color:white;font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;">Req: ${eq.requirement}</span>
+            ${isCustom ? '<span style="display:inline-block;background:#f59e0b;color:white;font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;">Custom</span>' : `<span style="display:inline-block;background:#2563eb;color:white;font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;">Req: ${eq.requirement}</span>`}
             ${eq.checked ? '<span style="color:#16a34a;font-weight:bold;margin-left:6px;">✓ On board</span>' : '<span style="color:#dc2626;font-size:11px;margin-left:6px;">Not verified</span>'}
           </div>
+          ${isCustom ? `<button onclick="event.preventDefault();removeCustomSafetyItem(${idx})" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;padding:0 4px;" title="Remove">✕</button>` : ''}
         </label>
         <div style="margin-top:4px;margin-left:28px;display:flex;gap:8px;align-items:center;">
           <input type="text" placeholder="Notes (condition, expiry date, location...)"
@@ -4857,6 +4892,14 @@ function renderInspection(survey) {
   });
 
   html += `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #e5e7eb;">
+          <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Vessel has additional safety equipment not in the standard list?</div>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="customSafetyName" placeholder="e.g., Life raft, EPIRB, dye markers..."
+                   style="flex:1;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;" />
+            <button class="btn-primary" style="font-size:12px;padding:6px 14px;white-space:nowrap;" onclick="addCustomSafetyItem()">+ Add</button>
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -4991,6 +5034,37 @@ async function updateSafetyNote(idx, note) {
   if (!survey || !survey.safetyEquipment[idx]) return;
   survey.safetyEquipment[idx].notes = note;
   await saveSurvey(survey);
+}
+
+// Add a custom safety equipment item not in the standard TC TP 511 list
+async function addCustomSafetyItem() {
+  const nameInput = document.getElementById('customSafetyName');
+  if (!nameInput || !nameInput.value.trim()) return;
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  survey.safetyEquipment.push({
+    name: nameInput.value.trim(),
+    category: 'Additional Equipment',
+    requirement: 'N/A',
+    checked: false,
+    notes: '',
+    photos: [],
+    custom: true
+  });
+  await saveSurvey(survey);
+  renderInspection(survey);
+  showToast('Added: ' + nameInput.value.trim());
+}
+
+// Remove a custom safety equipment item
+async function removeCustomSafetyItem(idx) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !survey.safetyEquipment[idx]) return;
+  const name = survey.safetyEquipment[idx].name;
+  survey.safetyEquipment.splice(idx, 1);
+  await saveSurvey(survey);
+  renderInspection(survey);
+  showToast('Removed: ' + name);
 }
 
 // Capture photo for a safety equipment item
@@ -6099,29 +6173,23 @@ async function removeDocPhoto(fieldKey) {
 
 // Update the preview thumbnail for a documentation photo — replaces camera button inline
 function updateDocPhotoPreview(fieldKey, dataUrl) {
+  const photoHtml = `
+    <div style="position:relative;display:inline-block;">
+      <img src="${dataUrl}" style="max-width:200px;max-height:150px;border:2px solid #16a34a;border-radius:6px;cursor:pointer;"
+           onclick="viewDocPhotoFull('${fieldKey}')" />
+      <div style="text-align:center;font-size:10px;color:#16a34a;font-weight:600;margin-top:2px;">✓ Captured</div>
+      <div style="display:flex;gap:4px;justify-content:center;margin-top:4px;">
+        <button class="btn-secondary" style="font-size:11px;padding:3px 8px;" onclick="retakeDocPhoto('${fieldKey}')">↻ Retake</button>
+        <button class="btn-secondary" style="font-size:11px;padding:3px 8px;color:#dc2626;border-color:#fca5a5;" onclick="deleteDocPhoto('${fieldKey}')">✕ Delete</button>
+      </div>
+    </div>`;
   // Find the wrapper container for this photo field
   const wrapper = document.querySelector(`[data-photo-field="${fieldKey}"]`);
   if (wrapper) {
-    wrapper.innerHTML = `
-      <div style="position:relative;display:inline-block;">
-        <img src="${dataUrl}" style="max-width:200px;max-height:150px;border:2px solid #16a34a;border-radius:6px;cursor:pointer;"
-             onclick="viewDocPhotoFull('${fieldKey}')" />
-        <button style="position:absolute;top:-8px;right:-8px;width:28px;height:28px;border-radius:50%;background:#dc2626;color:white;border:none;font-weight:bold;cursor:pointer;font-size:14px;box-shadow:0 1px 3px rgba(0,0,0,0.3);"
-                onclick="retakeDocPhoto('${fieldKey}')">↻</button>
-        <div style="text-align:center;font-size:10px;color:#16a34a;font-weight:600;margin-top:2px;">✓ Captured</div>
-      </div>`;
+    wrapper.innerHTML = photoHtml;
   } else {
-    // Fallback: try the old Preview div approach
     const preview = document.getElementById(fieldKey + 'Preview');
-    if (preview) {
-      preview.innerHTML = `
-        <div style="position:relative;display:inline-block;">
-          <img src="${dataUrl}" style="max-width:200px;max-height:150px;border:2px solid #16a34a;border-radius:6px;" />
-          <button style="position:absolute;top:-8px;right:-8px;width:28px;height:28px;border-radius:50%;background:#dc2626;color:white;border:none;font-weight:bold;cursor:pointer;font-size:14px;"
-                  onclick="retakeDocPhoto('${fieldKey}')">↻</button>
-          <div style="text-align:center;font-size:10px;color:#16a34a;font-weight:600;margin-top:2px;">✓ Captured</div>
-        </div>`;
-    }
+    if (preview) preview.innerHTML = photoHtml;
   }
   const status = document.getElementById(fieldKey + 'Status');
   if (status) {
@@ -6163,6 +6231,26 @@ function retakeDocPhoto(fieldKey) {
     const fileInput = wrapper.querySelector('input[type="file"]');
     if (fileInput) fileInput.click();
   }
+}
+
+// Delete a doc photo entirely — removes from IndexedDB and restores camera button
+function deleteDocPhoto(fieldKey) {
+  getSurvey(currentSurveyId).then(async survey => {
+    if (!survey) return;
+    // Delete the photo from the photos store
+    if (survey[fieldKey]) {
+      try { await deletePhoto(survey[fieldKey]); } catch (e) {}
+      survey[fieldKey] = null;
+      await saveSurvey(survey);
+    }
+    // Restore the camera button (without auto-triggering capture)
+    const label = PHOTO_FIELD_LABELS[fieldKey] || fieldKey;
+    const wrapper = document.querySelector(`[data-photo-field="${fieldKey}"]`);
+    if (wrapper) {
+      wrapper.innerHTML = getDocPhotoButtonHTML(fieldKey, label);
+    }
+    showToast('Photo deleted');
+  });
 }
 
 // Map of fieldKey → display label for all doc photo fields
