@@ -2056,7 +2056,12 @@ function renderHome() {
             <div class="completion-text">${completion}% complete</div>
             <div style="display:flex;gap:8px;margin-top:12px;">
               <button class="btn-secondary" style="flex:1;" onclick="event.stopPropagation(); exportSurvey('${survey.id}')">📤 Export</button>
-              <button class="btn-secondary" style="flex:1;color:#dc2626;" onclick="event.stopPropagation(); deleteSurveyConfirm('${survey.id}')">🗑 Delete</button>
+              <div style="position:relative;flex:1;" onclick="event.stopPropagation();">
+                <button class="btn-secondary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:4px;"
+                        onclick="toggleSurveyMenu(this, '${survey.id}')">
+                  More ▾
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -7617,6 +7622,52 @@ function openSurvey(surveyId) {
     }
     renderInspection(survey);
   });
+}
+
+function toggleSurveyMenu(btn, surveyId) {
+  // Close any other open menus
+  document.querySelectorAll('.survey-action-menu').forEach(m => m.remove());
+
+  const wrapper = btn.parentElement;
+  const existing = wrapper.querySelector('.survey-action-menu');
+  if (existing) { existing.remove(); return; }
+
+  const menu = document.createElement('div');
+  menu.className = 'survey-action-menu';
+  menu.style.cssText = 'position:absolute;bottom:100%;left:0;right:0;background:white;border:1px solid #d1d5db;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);overflow:hidden;z-index:100;margin-bottom:4px;';
+
+  menu.innerHTML = `
+    <button onclick="event.stopPropagation(); duplicateSurvey('${surveyId}'); this.closest('.survey-action-menu').remove();"
+            style="width:100%;padding:10px 14px;border:none;background:white;text-align:left;font-size:14px;cursor:pointer;border-bottom:1px solid #e5e7eb;">
+      📋 Duplicate
+    </button>
+    <button onclick="event.stopPropagation(); this.closest('.survey-action-menu').remove(); deleteSurveyConfirm('${surveyId}');"
+            style="width:100%;padding:10px 14px;border:none;background:white;text-align:left;font-size:14px;cursor:pointer;color:#dc2626;">
+      🗑 Delete
+    </button>
+  `;
+  wrapper.appendChild(menu);
+
+  // Close menu when tapping anywhere else
+  const closeHandler = (e) => {
+    if (!menu.contains(e.target) && e.target !== btn) {
+      menu.remove();
+      document.removeEventListener('click', closeHandler, true);
+    }
+  };
+  setTimeout(() => document.addEventListener('click', closeHandler, true), 10);
+}
+
+async function duplicateSurvey(surveyId) {
+  const survey = await getSurvey(surveyId);
+  if (!survey) return;
+  const clone = JSON.parse(JSON.stringify(survey));
+  clone.id = Date.now();
+  clone.vesselName = (clone.vesselName || 'Survey') + ' (copy)';
+  clone.createdAt = new Date().toISOString();
+  await saveSurvey(clone);
+  showToast('Survey duplicated');
+  renderHome();
 }
 
 async function deleteSurveyConfirm(surveyId) {
