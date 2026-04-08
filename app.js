@@ -3695,7 +3695,7 @@ function renderInspection(survey) {
           <div id="area-photos-${mediaItem.label.replace(/[^a-zA-Z0-9]/g, '_')}" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
             ${(mediaData.photos || []).map(pid => `
               <div style="position:relative;width:80px;height:80px;">
-                <img id="thumb-${pid}" src="" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;" onclick="viewPhotoAnnotation('${pid}')">
+                <img id="thumb-${pid}" src="" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;" onclick="editSavedPhoto('${pid}', '${mediaItem.label.replace(/'/g, "\\'")}')">
                 <button onclick="deletePhotoAndRefresh('${pid}', '${mediaItem.label.replace(/'/g, "\\'")}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;">×</button>
               </div>
             `).join('')}
@@ -3823,7 +3823,7 @@ function renderInspection(survey) {
           html += `
             <div class="photo-item" style="position: relative;">
               <img src="" id="thumb-${photoId}" class="photo-thumbnail"
-                   onclick="viewPhotoAnnotation('${photoId}')" />
+                   onclick="editSavedPhoto('${photoId}', '${item.label.replace(/'/g, "\\'")}')" />
               <button style="position: absolute; top: -8px; right: -8px; width: 28px; height: 28px;
                            border-radius: 50%; background: #dc2626; color: white; border: none;
                            font-weight: bold; cursor: pointer;"
@@ -3839,7 +3839,7 @@ function renderInspection(survey) {
           </div>
           <label class="btn-photo-upload">
             📷 Capture Photo
-            <input type="file" accept="image/*" capture="environment" style="display: none;"
+            <input type="file" accept="image/*" capture="environment" multiple style="display: none;"
                    onchange="capturePhoto('${item.label.replace(/'/g, "\\'")}', event)" />
           </label>
         </div>
@@ -4087,20 +4087,100 @@ async function loadAndDisplayPhotos(survey) {
 }
 
 async function capturePhoto(itemLabel, event) {
-  const file = event.target.files[0];
-  if (!file) return;
+  // If called without event (e.g., from area photo button), trigger a file input
+  if (!event || !event.target || !event.target.files) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.multiple = true;
+    input.onchange = (e) => capturePhoto(itemLabel, e);
+    input.click();
+    return;
+  }
 
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    // Add date stamp, then show preview modal with editing tools (same as doc photos)
-    const stampedDataUrl = await addDateStampToPhoto(e.target.result);
-    // Use a special fieldKey prefix to distinguish checklist photos from doc photos
-    const fieldKey = `_checklist_${itemLabel}`;
-    showPhotoPreviewModal(fieldKey, itemLabel, stampedDataUrl, file.type);
-  };
+  const files = Array.from(event.target.files);
+  if (files.length === 0) return;
 
-  reader.readAsDataURL(file);
+  // Show a brief "Saving X photos..." toast
+  if (files.length > 1) showToast(`Saving ${files.length} photos...`);
+
+  // Process all selected photos — save directly with date stamp, no preview modal
+  for (const file of files) {
+    await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const stampedDataUrl = await addDateStampToPhoto(e.target.result);
+        const photoId = `${currentSurveyId}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+        const photo = {
+          id: photoId,
+          surveyId: currentSurveyId,
+          itemLabel: itemLabel,
+          dataUrl: stampedDataUrl,
+          annotated: false,
+          createdAt: new Date().toISOString()
+        };
+
+        await savePhoto(photo);
+
+        // Update survey
+        const survey = await getSurvey(currentSurveyId);
+        if (!survey.items[itemLabel]) {
+          survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+        }
+        if (!survey.items[itemLabel].photos) {
+          survey.items[itemLabel].photos = [];
+        }
+        survey.items[itemLabel].photos.push(photoId);
+        await saveSurvey(survey);
+        resolve();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   event.target.value = '';
+
+  // Refresh the item to show all new thumbnails
+  const survey = await getSurvey(currentSurveyId);
+  updateItemInPlace(survey, itemLabel);
+  showToast(`${files.length} photo${files.length > 1 ? 's' : ''} saved`);
+}
+
+// Open edit modal for an already-saved photo (tap thumbnail to edit)
+async function editSavedPhoto(photoId, itemLabel) {
+  const photo = await getPhotoById(photoId);
+  if (!photo) return;
+
+  const fieldKey = `_edit_${photoId}`;
+  window._editingPhotoId = photoId;
+  window._editingItemLabel = itemLabel;
+  showPhotoPreviewModal(fieldKey, itemLabel, photo.dataUrl, 'image/jpeg');
+
+  // Override confirm button to update existing photo instead of creating new
+  setTimeout(() => {
+    const confirmBtn = document.querySelector('#photoPreviewModal .btn-primary');
+    if (confirmBtn) {
+      confirmBtn.onclick = async () => {
+        const data = window._pendingPhotoData;
+        if (!data) return;
+        closePhotoPreviewModal();
+
+        const finalDataUrl = await bakePhotoEdits(data.stampedDataUrl, data.brightness || 100, data.contrast || 100, data.rotation || 0);
+
+        // Update existing photo
+        photo.dataUrl = finalDataUrl;
+        photo.editedAt = new Date().toISOString();
+        await savePhoto(photo);
+
+        // Refresh item
+        const survey = await getSurvey(currentSurveyId);
+        updateItemInPlace(survey, itemLabel);
+        showToast('Photo updated');
+        window._pendingPhotoData = null;
+      };
+    }
+  }, 100);
 }
 
 // Capture a documentation photo (HIN plate, compliance plate, etc.)
@@ -4776,7 +4856,7 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
       html += `
         <div class="photo-item" style="position: relative;">
           <img src="" id="thumb-${photoId}" class="photo-thumbnail"
-               onclick="viewPhotoAnnotation('${photoId}')" />
+               onclick="editSavedPhoto('${photoId}', '${safeLabel}')" />
           <button style="position: absolute; top: -8px; right: -8px; width: 28px; height: 28px;
                        border-radius: 50%; background: #dc2626; color: white; border: none;
                        font-weight: bold; cursor: pointer;"
@@ -4790,7 +4870,7 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
       </div>
       <label class="btn-photo-upload">
         📷 Capture Photo
-        <input type="file" accept="image/*" capture="environment" style="display: none;"
+        <input type="file" accept="image/*" capture="environment" multiple style="display: none;"
                onchange="capturePhoto('${safeLabel}', event)" />
       </label>
     </div>
