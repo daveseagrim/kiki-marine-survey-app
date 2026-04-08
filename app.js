@@ -6812,6 +6812,22 @@ async function generateReport() {
     if (p && p.dataUrl) transmission2PlatePhotoDataUrl = p.dataUrl;
   }
 
+  // ── Pre-fetch all per-item photos ─────────────────────────────────────
+  const itemPhotoCache = {};
+  for (const itemLabel of Object.keys(survey.items || {})) {
+    const itemData = survey.items[itemLabel];
+    if (itemData.photos && itemData.photos.length > 0) {
+      for (const photoId of itemData.photos) {
+        if (!itemPhotoCache[photoId]) {
+          const p = await getPhotoById(photoId);
+          if (p && p.dataUrl) {
+            itemPhotoCache[photoId] = p.dataUrl;
+          }
+        }
+      }
+    }
+  }
+
   // ── Pass 1: collect all findings ──────────────────────────────────────
   let findingCount = { A: 0, B: 0, C: 0, NT: 0 };
   let findings = { A: [], B: [], C: [], NT: [] };
@@ -7344,11 +7360,24 @@ ${survey.vesselDescription ? `
           const code = findingCodeMap[item.label];
           const codeTag = code ? ` <strong style="color:${RATING_COLORS[ratingLabel] || '#1e3a5f'};">(Finding ${code})</strong>` : '';
 
+          // Build photo HTML for this item
+          let itemPhotosHtml = '';
+          if (itemData.photos && itemData.photos.length > 0) {
+            const photoImgs = itemData.photos
+              .filter(pid => itemPhotoCache[pid])
+              .map(pid => `<img src="${itemPhotoCache[pid]}" alt="${esc(item.label)}" style="max-width:480px;max-height:360px;border:1px solid #ccc;border-radius:4px;" />`)
+              .join('');
+            if (photoImgs) {
+              itemPhotosHtml = `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:10px;">${photoImgs}</div>`;
+            }
+          }
+
           html += `
   <div class="item" style="border-left-color: ${RATING_COLORS[ratingLabel] || '#1e3a5f'};">
     <p><strong>${esc(item.label)}</strong>${ratingLabel ? ` — <span class="${ratingClass}">${ratingLabel}</span>${codeTag}` : ''}</p>
     ${itemData.text ? `<p>${esc(itemData.text)}</p>` : ''}
     ${itemData.standards && itemData.standards.length > 0 ? `<p class="standards"><strong>Applicable Standards:</strong> ${itemData.standards.join(', ')}</p>` : ''}
+    ${itemPhotosHtml}
   </div>`;
         });
       });
@@ -7367,6 +7396,16 @@ ${survey.vesselDescription ? `
     <p><em>When performing repairs, diagnosing, adjustments, and/or replacements of any component; always follow proper marine mechanical and/or electrical repair and safety practices. Consult and/or hire a certified marine technician, if required.</em></p>
   </div>`;
 
+  // Helper to build finding photo HTML
+  function findingPhotos(f) {
+    if (!f.photos || f.photos.length === 0) return '';
+    const imgs = f.photos
+      .filter(pid => itemPhotoCache[pid])
+      .map(pid => `<img src="${itemPhotoCache[pid]}" alt="${esc(f.label)}" style="max-width:480px;max-height:360px;border:1px solid #ccc;border-radius:4px;" />`)
+      .join('');
+    return imgs ? `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:10px;">${imgs}</div>` : '';
+  }
+
   // Type A findings
   html += `<h3 style="color:#dc2626;">Findings &amp; Recommendations (Type A — Critical / Safety)</h3>`;
   if (findings.A.length === 0) {
@@ -7377,6 +7416,7 @@ ${survey.vesselDescription ? `
         <strong style="color:#dc2626;">Finding ${f.code}</strong> — ${esc(f.label)}
         ${f.text ? `<p>${esc(f.text)}</p>` : ''}
         ${f.standards && f.standards.length ? `<p class="standards"><em>Standards: ${f.standards.join(', ')}</em></p>` : ''}
+        ${findingPhotos(f)}
         <p style="font-style:italic;color:#555;margin-top:4px;"><strong>Recommendation:</strong> Immediate correction required before the vessel is next underway. This finding represents a direct safety risk or code violation.</p>
       </div>`;
     });
@@ -7392,6 +7432,7 @@ ${survey.vesselDescription ? `
         <strong style="color:#d97706;">Finding ${f.code}</strong> — ${esc(f.label)}
         ${f.text ? `<p>${esc(f.text)}</p>` : ''}
         ${f.standards && f.standards.length ? `<p class="standards"><em>Standards: ${f.standards.join(', ')}</em></p>` : ''}
+        ${findingPhotos(f)}
         <p style="font-style:italic;color:#555;margin-top:4px;"><strong>Recommendation:</strong> Schedule repairs in the near future to maintain compliance with applicable codes, regulations, standards, or recommended practices.</p>
       </div>`;
     });
@@ -7407,6 +7448,7 @@ ${survey.vesselDescription ? `
         <strong style="color:#16a34a;">Finding ${f.code}</strong> — ${esc(f.label)}
         ${f.text ? `<p>${esc(f.text)}</p>` : ''}
         ${f.standards && f.standards.length ? `<p class="standards"><em>Standards: ${f.standards.join(', ')}</em></p>` : ''}
+        ${findingPhotos(f)}
         <p style="font-style:italic;color:#555;margin-top:4px;"><strong>Recommendation:</strong> Address in keeping with good marine maintenance practices or as an upgrade when convenient.</p>
       </div>`;
     });
@@ -7419,6 +7461,7 @@ ${survey.vesselDescription ? `
       html += `<div class="finding-section">
         <strong style="color:#6b7280;">Finding ${f.code}</strong> — ${esc(f.label)}
         ${f.text ? `<p>${esc(f.text)}</p>` : ''}
+        ${findingPhotos(f)}
         <p style="font-style:italic;color:#555;margin-top:4px;"><strong>Note:</strong> A comprehensive inspection was attempted but was not possible due to constraints imposed upon the surveyor. Further inspection is recommended when conditions permit.</p>
       </div>`;
     });
