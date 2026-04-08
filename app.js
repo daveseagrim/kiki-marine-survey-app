@@ -4785,66 +4785,8 @@ function renderInspection(survey) {
     `;
   });
 
-  // ── Valuation & Comparables Section ────────────────────────────────────────
-  const compCount = (survey.comparables && survey.comparables.length) || 0;
-  const valLow = survey.valuationLow || '';
-  const valHigh = survey.valuationHigh || '';
-  const valSummary = valLow && valHigh ? `$${Number(valLow).toLocaleString()} – $${Number(valHigh).toLocaleString()} USD` : (valLow || valHigh ? `$${Number(valLow || valHigh).toLocaleString()} USD` : 'Not set');
-  const valCondition = survey.overallCondition || 'Not rated';
-  html += `
-    <div class="category-accordion">
-      <button class="accordion-header" onclick="toggleAccordion(this)" style="background: #065f46; color: white;">
-        <span class="category-title">💰 Valuation & Comparables</span>
-        <span class="category-progress">${valSummary} · ${compCount} comp${compCount !== 1 ? 's' : ''}</span>
-        <span style="margin-left: 12px;">▼</span>
-      </button>
-      <div class="accordion-content" style="display: none;">
-
-        <div style="font-size:13px;color:#374151;margin-bottom:12px;padding:10px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
-          <strong>Fair Market Value:</strong> ${valSummary}<br/>
-          <strong>Condition:</strong> ${valCondition}
-          ${survey.replacementCost ? '<br/><strong>Replacement Cost:</strong> $' + Number(survey.replacementCost).toLocaleString() + ' USD' : ''}
-        </div>
-
-        <div class="form-group" style="margin-bottom:12px;">
-          <label class="form-label" style="font-size:13px;">FMV Low (USD)</label>
-          <input type="text" id="inspValLow" value="${valLow}" placeholder="e.g., 150000"
-                 onchange="saveValuationFromInspection()" style="font-size:14px;padding:8px;">
-        </div>
-        <div class="form-group" style="margin-bottom:12px;">
-          <label class="form-label" style="font-size:13px;">FMV High (USD)</label>
-          <input type="text" id="inspValHigh" value="${valHigh}" placeholder="e.g., 175000"
-                 onchange="saveValuationFromInspection()" style="font-size:14px;padding:8px;">
-        </div>
-        <div class="form-group" style="margin-bottom:12px;">
-          <label class="form-label" style="font-size:13px;">Condition Rating</label>
-          <select id="inspCondition" onchange="saveValuationFromInspection()" style="font-size:14px;padding:8px;">
-            <option value="">Select condition</option>
-            <option value="Excellent (Bristol)" ${valCondition === 'Excellent (Bristol)' ? 'selected' : ''}>Excellent (Bristol)</option>
-            <option value="Above Average" ${valCondition === 'Above Average' ? 'selected' : ''}>Above Average</option>
-            <option value="Average" ${valCondition === 'Average' ? 'selected' : ''}>Average</option>
-            <option value="Fair" ${valCondition === 'Fair' ? 'selected' : ''}>Fair</option>
-            <option value="Poor" ${valCondition === 'Poor' ? 'selected' : ''}>Poor</option>
-            <option value="Restorable" ${valCondition === 'Restorable' ? 'selected' : ''}>Restorable</option>
-          </select>
-        </div>
-
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 16px;">
-          <button class="btn-secondary" style="font-size:11px;padding:5px 8px;" onclick="window.open('https://www.yachtworld.com/boats-for-sale/?keyword='+encodeURIComponent(survey.yearMakeModel||''),'_blank')">🔍 YachtWorld</button>
-          <button class="btn-secondary" style="font-size:11px;padding:5px 8px;" onclick="window.open('https://www.soldboats.com/cgi-bin/soldboats/search.cgi?searchStr='+encodeURIComponent(survey.yearMakeModel||''),'_blank')">🔍 Soldboats</button>
-          <button class="btn-secondary" style="font-size:11px;padding:5px 8px;" onclick="window.open('https://www.bucvalu.com','_blank')">📖 BUCValu</button>
-        </div>
-
-        <h4 style="margin:16px 0 8px;color:#1e3a5f;font-size:14px;border-top:1px solid #e5e7eb;padding-top:12px;">Comparable Vessels</h4>
-        <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">Add comparable sales from BUCValu, Soldboats.com, YachtWorld, and current listings to support your valuation.</div>
-        <div id="comparablesEntries"></div>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="addComparableEntry()">+ Add Comparable</button>
-          <button class="btn-primary" style="font-size:12px;padding:6px 12px;" onclick="saveComparablesFromInspection()">💾 Save All</button>
-        </div>
-      </div>
-    </div>
-  `;
+  // Valuation & Comparables removed from inspection screen — lives on the
+  // survey detail / edit page only (first section).
 
   // ── Safety Equipment Section (TC TP 511) — always last ─────────────────
   // Auto-generate checklist if not already stored
@@ -7368,8 +7310,15 @@ function collapseCurrentSection() {
     const header = openContent.previousElementSibling;
     if (header) {
       toggleAccordion(header);
-      // Keep the collapsed header visible in the centre of the screen
-      setTimeout(() => header.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+      // Keep the collapsed header visible in the centre of the screen.
+      // Use multiple scroll attempts — iOS Safari needs time to reflow
+      // after a large section disappears from the DOM.
+      const scrollToHeader = () => header.scrollIntoView({ behavior: 'auto', block: 'center' });
+      requestAnimationFrame(() => {
+        scrollToHeader();
+        setTimeout(scrollToHeader, 80);
+        setTimeout(scrollToHeader, 250);
+      });
     }
   }
 }
