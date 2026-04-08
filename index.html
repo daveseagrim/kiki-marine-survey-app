@@ -445,6 +445,180 @@
         .capitalize-input::placeholder {
             text-transform: none;
         }
+
+        /* ── Compact Checklist Cards ─────────────────────────── */
+        .compact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            min-height: 48px;
+        }
+        .compact-item.excluded {
+            opacity: 0.5;
+            border-left: 4px solid #d1d5db;
+        }
+        .compact-item.flagged {
+            border-left: 4px solid #f59e0b;
+        }
+        .compact-item-label {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            line-height: 1.3;
+        }
+        .compact-item-label.struck {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+        .compact-rating-badge {
+            flex-shrink: 0;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            white-space: nowrap;
+            border: none;
+            min-width: 100px;
+            text-align: center;
+        }
+        .compact-rating-badge.unrated {
+            background: #e5e7eb;
+            color: #6b7280;
+            border: 1px dashed #9ca3af;
+        }
+        .compact-action-row {
+            display: flex;
+            gap: 4px;
+            padding: 0 12px 8px 12px;
+            margin-top: -2px;
+        }
+        .compact-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            padding: 4px 8px;
+            font-size: 11px;
+            color: #6b7280;
+            background: none;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .compact-action-btn.has-content {
+            color: #1e3a5f;
+            border-color: #1e3a5f;
+            background: #eff6ff;
+        }
+
+        /* ── Bottom Sheet ────────────────────────────────────── */
+        .bottom-sheet-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 9999;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .bottom-sheet {
+            background: white;
+            border-radius: 16px 16px 0 0;
+            width: 100%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 0;
+            animation: sheetSlideUp 0.25s ease-out;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        @keyframes sheetSlideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .bottom-sheet-handle {
+            width: 36px;
+            height: 4px;
+            background: #d1d5db;
+            border-radius: 2px;
+            margin: 10px auto 6px auto;
+        }
+        .bottom-sheet-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            padding: 8px 20px 12px 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .sheet-rating-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            font-size: 15px;
+            color: #333;
+        }
+        .sheet-rating-option:active {
+            background: #f9fafb;
+        }
+        .sheet-rating-option .rating-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .sheet-rating-option .radio-circle {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid #d1d5db;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .sheet-rating-option .radio-circle.selected {
+            border-color: #1e3a5f;
+        }
+        .sheet-rating-option .radio-circle.selected::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #1e3a5f;
+        }
+        .sheet-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 20px 6px 20px;
+        }
+        .sheet-btn-row {
+            display: flex;
+            gap: 10px;
+            padding: 16px 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .sheet-btn-row button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>

@@ -608,6 +608,284 @@ function showConfirm(message, confirmLabel, cancelLabel) {
   });
 }
 
+// ── Bottom Sheet: Rating Selection ──────────────────────────────────────────
+function showRatingSheet(itemLabel, categoryName, options) {
+  // Close any existing sheet
+  const existing = document.getElementById('bottomSheetOverlay');
+  if (existing) existing.remove();
+
+  getSurvey(currentSurveyId).then(survey => {
+    const itemData = survey.items[itemLabel] || { rating: '', text: '', standards: [], photos: [] };
+    const currentRating = itemData.rating || '';
+    const safeLabel = itemLabel.replace(/'/g, "\\'");
+    const safeCat = categoryName.replace(/'/g, "\\'");
+
+    let optionsHtml = '';
+    options.forEach(option => {
+      const color = RATING_COLORS[option] || '#6b7280';
+      const isSelected = currentRating === option;
+      optionsHtml += `
+        <div class="sheet-rating-option" onclick="selectRatingFromSheet('${safeLabel}', '${safeCat}', '${option}')">
+          <div class="radio-circle ${isSelected ? 'selected' : ''}"></div>
+          <div class="rating-dot" style="background:${color};"></div>
+          <span>${option}</span>
+        </div>
+      `;
+    });
+
+    // Add "Clear rating" option if currently rated
+    if (currentRating) {
+      optionsHtml += `
+        <div class="sheet-rating-option" onclick="selectRatingFromSheet('${safeLabel}', '${safeCat}', '')">
+          <div class="radio-circle"></div>
+          <div class="rating-dot" style="background:#e5e7eb;border:1px solid #d1d5db;"></div>
+          <span style="color:#9ca3af;">Clear rating</span>
+        </div>
+      `;
+    }
+
+    const overlay = document.createElement('div');
+    overlay.id = 'bottomSheetOverlay';
+    overlay.className = 'bottom-sheet-overlay';
+    overlay.innerHTML = `
+      <div class="bottom-sheet" onclick="event.stopPropagation();">
+        <div class="bottom-sheet-handle"></div>
+        <div class="bottom-sheet-title">${itemLabel}</div>
+        ${optionsHtml}
+      </div>
+    `;
+    overlay.addEventListener('click', () => overlay.remove());
+    document.body.appendChild(overlay);
+  });
+}
+
+// Select rating from bottom sheet, then close it
+function selectRatingFromSheet(itemLabel, categoryName, rating) {
+  const overlay = document.getElementById('bottomSheetOverlay');
+  if (overlay) overlay.remove();
+
+  if (rating === '') {
+    // Clear rating — same as deselecting
+    getSurvey(currentSurveyId).then(survey => {
+      if (survey.items[itemLabel]) {
+        survey.items[itemLabel].rating = '';
+        survey.items[itemLabel].text = '';
+        survey.items[itemLabel].standards = [];
+        survey.items[itemLabel].variantText = '';
+      }
+      saveSurvey(survey).then(() => {
+        updateCompactItem(survey, itemLabel, categoryName);
+        updateCategoryHeader(survey, categoryName);
+      });
+    });
+  } else {
+    selectRating(itemLabel, categoryName, rating);
+  }
+}
+
+// ── Bottom Sheet: Notes / Snippets / Standards ──────────────────────────────
+function showNotesSheet(itemLabel, categoryName) {
+  const existing = document.getElementById('bottomSheetOverlay');
+  if (existing) existing.remove();
+
+  getSurvey(currentSurveyId).then(survey => {
+    const itemData = survey.items[itemLabel] || { rating: '', text: '', standards: [], photos: [] };
+    const safeLabel = itemLabel.replace(/'/g, "\\'");
+    const safeCat = categoryName.replace(/'/g, "\\'");
+    const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
+
+    let snippetsHtml = '';
+    if (itemData.rating) {
+      const baseRating = itemData.rating.charAt(0);
+      const variants = findTextVariants(categoryName, itemLabel, baseRating);
+      if (variants.length > 0) {
+        snippetsHtml = `<div class="sheet-section-title">Quick Insert (${variants.length} snippets)</div>`;
+        variants.forEach(variant => {
+          const preview = variant.text.length > 120 ? variant.text.substring(0, 120) + '…' : variant.text;
+          const escapedText = variant.text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+          const ratingBadge = variant.rating || baseRating;
+          const isActive = itemData.text === variant.text;
+          snippetsHtml += `
+            <div style="padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}"
+                 onclick="insertSnippetFromSheet('${safeLabel}', '${safeCat}', '${escapedText}')">
+              <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
+                <span style="font-size:13px;color:#333;line-height:1.4;">${preview}</span>
+                <span style="flex-shrink:0;font-size:10px;background:#e5e7eb;color:#374151;padding:2px 6px;border-radius:4px;">${ratingBadge}</span>
+              </div>
+            </div>
+          `;
+        });
+      }
+    }
+
+    // Standards section
+    let standardsHtml = '';
+    if (itemData.rating && (itemData.rating.startsWith('A') || itemData.rating.startsWith('B'))) {
+      const standards = getStandardsForCategory(categoryName, itemData.rating);
+      if (standards.length > 0) {
+        standardsHtml = `<div class="sheet-section-title">Applicable Standards</div>`;
+        standards.forEach(standard => {
+          const isChecked = itemData.standards && itemData.standards.includes(standard);
+          standardsHtml += `
+            <label style="display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;">
+              <input type="checkbox" value="${standard}" ${isChecked ? 'checked' : ''}
+                     onchange="updateStandards('${safeLabel}', this)"
+                     style="width:18px;height:18px;accent-color:#1e3a5f;" />
+              <span style="font-size:13px;">${standard}</span>
+            </label>
+          `;
+        });
+      }
+    }
+
+    const overlay = document.createElement('div');
+    overlay.id = 'bottomSheetOverlay';
+    overlay.className = 'bottom-sheet-overlay';
+    overlay.innerHTML = `
+      <div class="bottom-sheet" onclick="event.stopPropagation();">
+        <div class="bottom-sheet-handle"></div>
+        <div class="bottom-sheet-title">${itemLabel} — Notes</div>
+        <div style="padding:12px 20px;">
+          <textarea id="sheet-text-${sanitizedLabel}" placeholder="Add inspection notes..." style="min-height:100px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;" autocapitalize="sentences">${itemData.text || ''}</textarea>
+        </div>
+        ${snippetsHtml}
+        ${standardsHtml}
+        <div class="sheet-btn-row">
+          <button onclick="document.getElementById('bottomSheetOverlay').remove();" style="background:#e5e7eb;color:#374151;">Cancel</button>
+          <button onclick="saveNotesFromSheet('${safeLabel}', '${safeCat}', '${sanitizedLabel}');" style="background:#1e3a5f;color:white;">Save Notes</button>
+        </div>
+      </div>
+    `;
+    overlay.addEventListener('click', () => {
+      // Auto-save before closing
+      saveNotesFromSheet(itemLabel, categoryName, sanitizedLabel);
+    });
+    document.body.appendChild(overlay);
+  });
+}
+
+// Insert snippet from notes sheet into the textarea within the sheet
+function insertSnippetFromSheet(itemLabel, categoryName, text) {
+  const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
+  const textarea = document.getElementById(`sheet-text-${sanitizedLabel}`);
+  if (textarea) {
+    if (textarea.value && !textarea.value.endsWith(' ') && !textarea.value.endsWith('\n')) {
+      textarea.value += ' ';
+    }
+    textarea.value += text;
+  }
+}
+
+// Save notes from the notes sheet and close
+function saveNotesFromSheet(itemLabel, categoryName, sanitizedLabel) {
+  const textarea = document.getElementById(`sheet-text-${sanitizedLabel}`);
+  if (!textarea) return;
+  const newText = textarea.value.trim();
+
+  getSurvey(currentSurveyId).then(survey => {
+    if (!survey.items[itemLabel]) {
+      survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+    }
+    survey.items[itemLabel].text = newText;
+    saveSurvey(survey).then(() => {
+      const overlay = document.getElementById('bottomSheetOverlay');
+      if (overlay) overlay.remove();
+      updateCompactItem(survey, itemLabel, categoryName);
+    });
+  });
+}
+
+// ── Bottom Sheet: Media / Photos ────────────────────────────────────────────
+function showMediaSheet(itemLabel, categoryName) {
+  const existing = document.getElementById('bottomSheetOverlay');
+  if (existing) existing.remove();
+
+  getSurvey(currentSurveyId).then(survey => {
+    const itemData = survey.items[itemLabel] || { rating: '', text: '', standards: [], photos: [] };
+    const safeLabel = itemLabel.replace(/'/g, "\\'");
+    const safeCat = categoryName.replace(/'/g, "\\'");
+    const photoCount = (itemData.photos || []).length;
+
+    let photosHtml = '';
+    if (itemData.photos && itemData.photos.length > 0) {
+      photosHtml = '<div style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 20px;">';
+      itemData.photos.forEach(photoId => {
+        photosHtml += `
+          <div style="position:relative;width:80px;height:80px;">
+            <img id="sheet-thumb-${photoId}" src="" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;"
+                 onclick="editSavedPhoto('${photoId}', '${safeLabel}')" />
+            <button onclick="deletePhotoFromSheet('${photoId}', '${safeLabel}', '${safeCat}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;">×</button>
+          </div>
+        `;
+      });
+      photosHtml += '</div>';
+    }
+
+    const overlay = document.createElement('div');
+    overlay.id = 'bottomSheetOverlay';
+    overlay.className = 'bottom-sheet-overlay';
+    overlay.innerHTML = `
+      <div class="bottom-sheet" onclick="event.stopPropagation();">
+        <div class="bottom-sheet-handle"></div>
+        <div class="bottom-sheet-title">${itemLabel} — Photos (${photoCount})</div>
+        ${photosHtml}
+        <div style="padding:12px 20px;">
+          <label style="display:block;background:white;border:2px dashed #ddd;border-radius:8px;padding:16px;text-align:center;font-size:14px;font-weight:600;color:#1e3a5f;cursor:pointer;">
+            📷 Capture Photos
+            <input type="file" accept="image/*" capture="environment" multiple style="display:none;"
+                   onchange="capturePhotoFromSheet('${safeLabel}', '${safeCat}', event)" />
+          </label>
+        </div>
+        <div class="sheet-btn-row">
+          <button onclick="document.getElementById('bottomSheetOverlay').remove();" style="background:#1e3a5f;color:white;">Done</button>
+        </div>
+      </div>
+    `;
+    overlay.addEventListener('click', () => overlay.remove());
+    document.body.appendChild(overlay);
+
+    // Load existing photo thumbnails
+    if (itemData.photos && itemData.photos.length > 0) {
+      itemData.photos.forEach(photoId => {
+        getPhotoById(photoId).then(photo => {
+          if (photo) {
+            const img = document.getElementById(`sheet-thumb-${photoId}`);
+            if (img) img.src = photo.dataUrl;
+          }
+        });
+      });
+    }
+  });
+}
+
+// Capture photo from media sheet, then refresh the sheet
+function capturePhotoFromSheet(itemLabel, categoryName, event) {
+  capturePhoto(itemLabel, event);
+  // Refresh the media sheet after a short delay to show new photos
+  setTimeout(() => {
+    showMediaSheet(itemLabel, categoryName);
+  }, 500);
+}
+
+// Delete photo from media sheet and refresh
+function deletePhotoFromSheet(photoId, itemLabel, categoryName) {
+  deletePhotoAndRefresh(photoId, itemLabel);
+  // Refresh media sheet
+  setTimeout(() => {
+    showMediaSheet(itemLabel, categoryName);
+  }, 300);
+}
+
+// ── Update a single compact item's DOM without full re-render ───────────────
+function updateCompactItem(survey, itemLabel, categoryName) {
+  const itemDiv = document.querySelector(`.compact-item-wrapper[data-item-label="${itemLabel.replace(/"/g, '\\"')}"]`);
+  if (!itemDiv) return;
+
+  const itemData = survey.items[itemLabel] || { rating: '', text: '', standards: [], photos: [] };
+  const options = getItemOptionsFromTemplate(survey, itemLabel);
+  itemDiv.innerHTML = buildCompactItemHTML(itemLabel, categoryName, itemData, options);
+}
+
 // Find applicable standards for a category/rating
 // Uses longest-key-wins: more specific keys take precedence over shorter keys
 // e.g. "Pilot house gauges" beats "Pilot house" for "Pilot house gauges and instrumentation"
@@ -3842,160 +4120,9 @@ function renderInspection(survey) {
 
     items.forEach(item => {
       const itemData = survey.items[item.label] || { rating: '', text: '', standards: [], photos: [] };
-      const ratingColor = RATING_COLORS[itemData.rating] || '#6b7280';
-      const ratingLabel = itemData.rating || 'Not rated';
-
-      const isExcluded = itemData.excluded;
-      html += `
-        <div class="rated-item" data-item-label="${item.label.replace(/"/g, '&quot;')}" style="${isExcluded ? 'opacity:0.5;border-left:4px solid #d1d5db;' : itemData.flagged ? 'border-left:4px solid #f59e0b;' : ''}">
-          <div class="item-name" style="${isExcluded ? 'text-decoration:line-through;color:#9ca3af;' : ''}">${itemData.flagged ? '🚩 ' : ''}${isExcluded ? '⊘ ' : ''}${item.label}</div>
-
-          <div class="rating-options">
-      `;
-
-      // Rating buttons
-      item.options.forEach(option => {
-        const isActive = itemData.rating === option;
-        const color = RATING_COLORS[option] || '#1e3a5f';
-        html += `
-          <button class="rating-btn ${isActive ? 'active' : ''}"
-                  style="${isActive ? `background-color: ${color}; border-color: ${color};` : ''}"
-                  title="${getRatingTooltip(option)}"
-                  onclick="selectRating('${item.label.replace(/'/g, "\\'")}', '${categoryName.replace(/'/g, "\\'")}', '${option}')">
-            ${option}
-          </button>
-        `;
-      });
-
-      html += `
-          </div>
-      `;
-
-      // Text snippet cards (tap to insert)
-      if (itemData.rating && ['A - Critical', 'B - Needs Attention', 'C - Serviceable', 'Powered up only', 'Not tested/not verified', 'Not applicable'].includes(itemData.rating)) {
-        const baseRating = itemData.rating.charAt(0);
-        const variants = findTextVariants(categoryName, item.label, baseRating);
-
-        if (variants.length > 0) {
-          const safeLabel = item.label.replace(/'/g, "\\'");
-          const safeCat = categoryName.replace(/'/g, "\\'");
-          html += `
-            <div class="form-group">
-              <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
-                <span>📋 Quick Insert (${variants.length} snippet${variants.length > 1 ? 's' : ''})</span>
-                <button class="btn-secondary" style="font-size:11px;padding:2px 8px;" onclick="toggleSnippets('${safeLabel}')">Show/Hide</button>
-              </label>
-              <div id="snippets-${item.label.replace(/[^a-zA-Z0-9]/g, '_')}" style="display:none;max-height:300px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;">
-          `;
-          variants.forEach((variant, idx) => {
-            const preview = variant.text.length > 120 ? variant.text.substring(0, 120) + '…' : variant.text;
-            const escapedText = variant.text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
-            const ratingBadge = variant.rating || baseRating;
-            const isActive = itemData.text === variant.text;
-            html += `
-                <div class="snippet-card" style="padding:10px 12px;border-bottom:1px solid #e5e7eb;cursor:pointer;${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}"
-                     onclick="insertSnippet('${safeLabel}', '${safeCat}', '${escapedText}')">
-                  <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
-                    <span style="font-size:12px;color:#333;line-height:1.4;">${preview}</span>
-                    <span style="flex-shrink:0;font-size:10px;background:#e5e7eb;color:#374151;padding:2px 6px;border-radius:4px;white-space:nowrap;">${ratingBadge}</span>
-                  </div>
-                </div>
-            `;
-          });
-          html += `
-              </div>
-            </div>
-          `;
-        }
-      }
-
-      // Text field
-      html += `
-          <div class="form-group">
-            <label class="form-label">Notes / Description</label>
-            <textarea id="text-${item.label.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Add inspection notes..." style="min-height: 80px;" autocapitalize="sentences" onblur="autoSaveItemText('${item.label.replace(/'/g, "\\'")}', '${categoryName.replace(/'/g, "\\'")}')">${itemData.text || ''}</textarea>
-          </div>
-      `;
-
-      // Standards (for A and B ratings)
-      if (itemData.rating && (itemData.rating.startsWith('A') || itemData.rating.startsWith('B'))) {
-        const standards = getStandardsForCategory(categoryName, itemData.rating);
-        if (standards.length > 0) {
-          html += `
-            <div class="form-group">
-              <label class="form-label">Applicable Standards</label>
-              <div style="display: grid; gap: 8px;">
-          `;
-          standards.forEach(standard => {
-            const isChecked = itemData.standards && itemData.standards.includes(standard);
-            html += `
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="checkbox" value="${standard}"
-                       ${isChecked ? 'checked' : ''}
-                       onchange="updateStandards('${item.label.replace(/'/g, "\\'")}', this)" />
-                <span>${standard}</span>
-              </label>
-            `;
-          });
-          html += `
-              </div>
-            </div>
-          `;
-        }
-      }
-
-      // Photos section
-      html += `
-        <div class="form-group">
-          <label class="form-label">Photos</label>
-          <div class="photo-grid" id="photos-${item.label.replace(/'/g, '')}">
-      `;
-
-      if (itemData.photos && itemData.photos.length > 0) {
-        itemData.photos.forEach(photoId => {
-          html += `
-            <div class="photo-item" style="position: relative;">
-              <img src="" id="thumb-${photoId}" class="photo-thumbnail"
-                   onclick="editSavedPhoto('${photoId}', '${item.label.replace(/'/g, "\\'")}')" />
-              <button style="position: absolute; top: -8px; right: -8px; width: 28px; height: 28px;
-                           border-radius: 50%; background: #dc2626; color: white; border: none;
-                           font-weight: bold; cursor: pointer;"
-                      onclick="deletePhotoAndRefresh('${photoId}')">×</button>
-            </div>
-          `;
-        });
-
-
-      }
-
-      html += `
-          </div>
-          <label class="btn-photo-upload">
-            📷 Capture Photo
-            <input type="file" accept="image/*" capture="environment" multiple style="display: none;"
-                   onchange="capturePhoto('${item.label.replace(/'/g, "\\'")}', event)" />
-          </label>
-        </div>
-      `;
-
-      // Flag and exclude buttons (no save button — auto-saves on blur)
-      const isFlagged = itemData.flagged;
-      html += `
-        <div style="display:flex;gap:8px;margin-top:12px;">
-          <button class="btn-secondary" style="flex:1;font-size:13px;padding:8px 12px;${isExcluded ? 'background:#fee2e2;border-color:#fca5a5;' : ''}"
-                  onclick="toggleExclude('${item.label.replace(/'/g, "\\'")}')"
-                  title="Exclude from report"
-          >${isExcluded ? '⊘ Excluded' : '⊘ Skip'}</button>
-          <button class="btn-secondary" style="flex:1;font-size:13px;padding:8px 12px;${isFlagged ? 'background:#fef3c7;border-color:#f59e0b;' : ''}"
-                  onclick="toggleFlag('${item.label.replace(/'/g, "\\'")}')"
-                  title="Flag for follow-up"
-          >${isFlagged ? '🚩 Flagged' : '🏳️ Flag'}</button>
-        </div>
-      `;
-
-      html += `
-        </div>
-      `;
+      html += `<div class="compact-item-wrapper" data-item-label="${item.label.replace(/"/g, '&quot;')}">`;
+      html += buildCompactItemHTML(item.label, categoryName, itemData, item.options);
+      html += `</div>`;
     });
 
     html += `
@@ -4927,7 +5054,52 @@ async function loadDocPhotoPreview(fieldKey) {
   }
 }
 
-// Build the inner HTML for a single rated item (used by both renderInspection and selectRating)
+// Build compact card HTML for a single item (SafetyCulture-style)
+function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
+  const safeLabel = itemLabel.replace(/'/g, "\\'");
+  const safeCat = categoryName.replace(/'/g, "\\'");
+  const isExcluded = itemData.excluded;
+  const isFlagged = itemData.flagged;
+  const ratingColor = RATING_COLORS[itemData.rating] || '#6b7280';
+  const hasNotes = !!(itemData.text && itemData.text.trim());
+  const photoCount = (itemData.photos || []).length;
+  const optionsAttr = options.map(o => o.replace(/"/g, '&quot;')).join('|||');
+
+  // Compact card row: label + rating badge
+  let html = `
+    <div class="compact-item ${isExcluded ? 'excluded' : ''} ${isFlagged ? 'flagged' : ''}">
+      <div class="compact-item-label ${isExcluded ? 'struck' : ''}">
+        ${isFlagged ? '🚩 ' : ''}${isExcluded ? '⊘ ' : ''}${itemLabel}
+      </div>
+      <button class="compact-rating-badge ${itemData.rating ? '' : 'unrated'}"
+              style="${itemData.rating ? `background:${ratingColor};` : ''}"
+              data-options="${optionsAttr}"
+              onclick="showRatingSheet('${safeLabel}', '${safeCat}', this.getAttribute('data-options').split('|||'))">
+        ${itemData.rating || 'Select response'}
+      </button>
+    </div>
+    <div class="compact-action-row">
+      <button class="compact-action-btn ${hasNotes ? 'has-content' : ''}" onclick="showNotesSheet('${safeLabel}', '${safeCat}')">
+        📝 ${hasNotes ? 'Notes ✓' : 'Add note'}
+      </button>
+      <button class="compact-action-btn ${photoCount > 0 ? 'has-content' : ''}" onclick="showMediaSheet('${safeLabel}', '${safeCat}')">
+        📷 ${photoCount > 0 ? `Media (${photoCount})` : 'Media'}
+      </button>
+      <button class="compact-action-btn ${isFlagged ? 'has-content' : ''}" onclick="toggleFlag('${safeLabel}')"
+              title="Flag for follow-up">
+        ${isFlagged ? '🚩' : '🏳️'} Flag
+      </button>
+      <button class="compact-action-btn ${isExcluded ? 'has-content' : ''}" onclick="toggleExclude('${safeLabel}')"
+              title="Exclude from report">
+        ⊘ ${isExcluded ? 'Excluded' : 'Skip'}
+      </button>
+    </div>
+  `;
+
+  return html;
+}
+
+// Build the inner HTML for a single rated item (used by selectRating for targeted DOM updates)
 function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
   const safeLabel = itemLabel.replace(/'/g, "\\'");
   const safeCat = categoryName.replace(/'/g, "\\'");
@@ -5184,10 +5356,19 @@ function selectRating(itemLabel, categoryName, rating) {
     }
 
     saveSurvey(survey).then(() => {
-      // Find the specific item's DOM element and update in place
+      // Try compact card update first (new layout)
+      const compactDiv = document.querySelector(`.compact-item-wrapper[data-item-label="${itemLabel.replace(/"/g, '\\"')}"]`);
+      if (compactDiv) {
+        const options = getItemOptionsFromTemplate(survey, itemLabel);
+        const itemData = survey.items[itemLabel];
+        compactDiv.innerHTML = buildCompactItemHTML(itemLabel, categoryName, itemData, options);
+        updateCategoryHeader(survey, categoryName);
+        return;
+      }
+
+      // Fallback: old rated-item layout
       const itemDiv = document.querySelector(`.rated-item[data-item-label="${itemLabel.replace(/"/g, '\\"')}"]`);
       if (!itemDiv) {
-        // Fallback: full re-render if item not found
         renderInspection(survey);
         return;
       }
@@ -5195,14 +5376,10 @@ function selectRating(itemLabel, categoryName, rating) {
       const options = getItemOptionsFromTemplate(survey, itemLabel);
       const itemData = survey.items[itemLabel];
 
-      // Update the item's style (flagged/excluded border)
       const isExcluded = itemData.excluded;
       itemDiv.style.cssText = isExcluded ? 'opacity:0.5;border-left:4px solid #d1d5db;' : itemData.flagged ? 'border-left:4px solid #f59e0b;' : '';
-
-      // Rebuild only this item's inner HTML
       itemDiv.innerHTML = buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options);
 
-      // Load photo thumbnails for this item
       if (itemData.photos && itemData.photos.length > 0) {
         itemData.photos.forEach(photoId => {
           getPhotoById(photoId).then(photo => {
@@ -5214,13 +5391,7 @@ function selectRating(itemLabel, categoryName, rating) {
         });
       }
 
-      // Update the category header's completion percentage
       updateCategoryHeader(survey, categoryName);
-
-      // If boat style was changed, also refresh the Hull type item's DOM
-      if (itemLabel === 'Boat style' && survey.items['Hull type']?.rating) {
-        updateItemInPlace(survey, 'Hull type');
-      }
     });
   });
 }
@@ -5311,27 +5482,35 @@ function toggleExclude(itemLabel) {
 
 // Update a single item in place without re-rendering the entire page
 function updateItemInPlace(survey, itemLabel) {
+  // Try compact card first
+  const compactDiv = document.querySelector(`.compact-item-wrapper[data-item-label="${itemLabel.replace(/"/g, '\\"')}"]`);
+  if (compactDiv) {
+    const accordion = compactDiv.closest('.category-accordion');
+    const categoryName = accordion ? accordion.dataset.categoryName : '';
+    const options = getItemOptionsFromTemplate(survey, itemLabel);
+    const itemData = survey.items[itemLabel] || { rating: '', text: '', standards: [], photos: [] };
+    compactDiv.innerHTML = buildCompactItemHTML(itemLabel, categoryName, itemData, options);
+    if (categoryName) updateCategoryHeader(survey, categoryName);
+    return;
+  }
+
+  // Fallback: old rated-item layout
   const itemDiv = document.querySelector(`.rated-item[data-item-label="${itemLabel.replace(/"/g, '\\"')}"]`);
   if (!itemDiv) {
     renderInspection(survey);
     return;
   }
 
-  // Find category name from parent accordion
   const accordion = itemDiv.closest('.category-accordion');
   const categoryName = accordion ? accordion.dataset.categoryName : '';
 
   const options = getItemOptionsFromTemplate(survey, itemLabel);
   const itemData = survey.items[itemLabel] || { rating: '', text: '', standards: [], photos: [] };
 
-  // Update the item's style
   const isExcluded = itemData.excluded;
   itemDiv.style.cssText = isExcluded ? 'opacity:0.5;border-left:4px solid #d1d5db;' : itemData.flagged ? 'border-left:4px solid #f59e0b;' : '';
-
-  // Rebuild only this item's inner HTML
   itemDiv.innerHTML = buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options);
 
-  // Load photo thumbnails
   if (itemData.photos && itemData.photos.length > 0) {
     itemData.photos.forEach(photoId => {
       getPhotoById(photoId).then(photo => {
@@ -5343,7 +5522,6 @@ function updateItemInPlace(survey, itemLabel) {
     });
   }
 
-  // Update category header
   if (categoryName) updateCategoryHeader(survey, categoryName);
 }
 
