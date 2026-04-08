@@ -96,6 +96,10 @@
         "name": "Hull exterior, keel and propulsion",
         "items": [
           {
+            "type": "media",
+            "label": "Hull exterior photos"
+          },
+          {
             "type": "list",
             "label": "Hull and rudder(s)/drive(s) condition (below the waterline)",
             "options": [
@@ -158,31 +162,19 @@
           },
           {
             "type": "list",
-            "label": "Hull anodes",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Propeller/drive anode(s)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
             "label": "Skeg(s)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Through-hulls, strainers",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -206,7 +198,31 @@
           },
           {
             "type": "list",
+            "label": "Propeller shaft(s)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
             "label": "Propeller(s)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Propeller/drive anode(s)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -243,6 +259,18 @@
           },
           {
             "type": "list",
+            "label": "Stern tube(s) (external)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
             "label": "Bow thruster",
             "options": [
               "A - Critical",
@@ -267,7 +295,31 @@
           },
           {
             "type": "list",
-            "label": "Swim platform and ladder - condition and conductivity readings",
+            "label": "Transducers (speed, depth, etc.)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Hull anodes",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Underwater lighting",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -291,7 +343,7 @@
           },
           {
             "type": "list",
-            "label": "Through-hulls, strainers",
+            "label": "Hull side windows and portholes (exterior observations)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -303,7 +355,7 @@
           },
           {
             "type": "list",
-            "label": "Transducers (speed, depth, etc.)",
+            "label": "Hull-deck joint (exterior)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -315,7 +367,7 @@
           },
           {
             "type": "list",
-            "label": "Stern tube(s) (external)",
+            "label": "Rub rail",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -327,7 +379,19 @@
           },
           {
             "type": "list",
-            "label": "Propeller shaft(s)",
+            "label": "Transom",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Swim platform and ladder - condition and conductivity readings",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -363,30 +427,6 @@
           },
           {
             "type": "list",
-            "label": "Underwater lighting",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Transom",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
             "label": "Ventilation grills/covers",
             "options": [
               "A - Critical",
@@ -396,376 +436,6 @@
               "Not applicable",
               "Not tested/not verified"
             ]
-          },
-          {
-            "type": "list",
-            "label": "Hull side windows and portholes (exterior observations)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Rub rail",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Hull-deck joint (exterior)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Spars and rigging",
-        "items": [
-          {
-            "type": "media",
-            "label": "Spars and rigging photos"
-          },
-          {
-            "type": "question",
-            "label": "Rigging type"
-          },
-          {
-            "type": "list",
-            "label": "Forestay (as inspected from the deck)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Shrouds, swages and turnbuckles",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Chainplates (exterior) pins and bolts",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Main mast",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Mast partner, mast collar, mast step",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Spreaders/boots",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Boom, gooseneck, boomvang, outhaul, cunningham and reefing lines",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Winch (main mast)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Deckline organizers, blocks, fairleads and clutches",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Jib/genoa furler, furling line and tackle",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Halyards",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Winch(es) and cleats (cabin-top and cockpit)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Jib/genoa tracks/cars",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Main sheet and traveller",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Backstay, turnbuckle(s), retaining rings/pins and chainplate(s)/tang(s)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Spinnaker/whisker pole, uphaul and downhaul",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          }
-        ]
-      },
-      {
-        "name": "Sails",
-        "items": [
-          {
-            "type": "media",
-            "label": "Sails photos"
-          },
-          {
-            "type": "list",
-            "label": "Main",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Genoa 1 (largest)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Genoa 2 (mid-size)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Genoa 3 (smallest)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Spinnaker",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Staysail",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Misen",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Sails - other",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
           }
         ]
       },
@@ -1120,6 +790,340 @@
               "Not applicable",
               "Not tested/not verified"
             ]
+          }
+        ]
+      },
+      {
+        "name": "Spars and rigging",
+        "items": [
+          {
+            "type": "media",
+            "label": "Spars and rigging photos"
+          },
+          {
+            "type": "question",
+            "label": "Rigging type"
+          },
+          {
+            "type": "list",
+            "label": "Forestay (as inspected from the deck)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Shrouds, swages and turnbuckles",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Chainplates (exterior) pins and bolts",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Main mast",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Mast partner, mast collar, mast step",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Spreaders/boots",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Boom, gooseneck, boomvang, outhaul, cunningham and reefing lines",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Winch (main mast)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Deckline organizers, blocks, fairleads and clutches",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Jib/genoa furler, furling line and tackle",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Halyards",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Winch(es) and cleats (cabin-top and cockpit)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Jib/genoa tracks/cars",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Main sheet and traveller",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Backstay, turnbuckle(s), retaining rings/pins and chainplate(s)/tang(s)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Spinnaker/whisker pole, uphaul and downhaul",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          }
+        ]
+      },
+      {
+        "name": "Sails",
+        "items": [
+          {
+            "type": "media",
+            "label": "Sails photos"
+          },
+          {
+            "type": "list",
+            "label": "Main",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Genoa 1 (largest)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Genoa 2 (mid-size)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Genoa 3 (smallest)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Spinnaker",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Staysail",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Misen",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Sails - other",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
           }
         ]
       },
@@ -1557,6 +1561,10 @@
         "name": "Gauges, instrumentation and entertainment",
         "items": [
           {
+            "type": "media",
+            "label": "Gauges and instrumentation photos"
+          },
+          {
             "type": "list",
             "label": "Engine start/stop",
             "options": [
@@ -1892,6 +1900,18 @@
               "Not tested/not verified"
             ],
             "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Heating and/or air conditioning system",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
           }
         ]
       },
@@ -1943,6 +1963,10 @@
       {
         "name": "Fuel, water and waste",
         "items": [
+          {
+            "type": "media",
+            "label": "Fuel, water and waste photos"
+          },
           {
             "type": "list",
             "label": "Fuel tank(s)",
@@ -2011,6 +2035,10 @@
           {
             "type": "media",
             "label": "Engine(s) and drive(s) photos"
+          },
+          {
+            "type": "textsingle",
+            "label": "Engine hours"
           },
           {
             "type": "textsingle",
@@ -2171,12 +2199,28 @@
               "Not applicable",
               "Not tested/not verified"
             ]
+          },
+          {
+            "type": "list",
+            "label": "Generator (if installed)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
           }
         ]
       },
       {
         "name": "Steering and trim mechanics",
         "items": [
+          {
+            "type": "media",
+            "label": "Steering photos"
+          },
           {
             "type": "list",
             "label": "Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)",
@@ -2218,6 +2262,10 @@
       {
         "name": "Electrical",
         "items": [
+          {
+            "type": "media",
+            "label": "Electrical photos"
+          },
           {
             "type": "list",
             "label": "Shore power cable(s)",

@@ -4659,6 +4659,9 @@ function renderInspection(survey) {
   ensureReportButton();
   // Fallback: if button didn't appear (e.g. timing issue), retry after DOM settles
   setTimeout(() => ensureReportButton(), 500);
+
+  // Restore the previously open accordion so the user doesn't lose their place
+  restoreAccordionState();
 }
 
 function ensureReportButton() {
@@ -6338,14 +6341,23 @@ function updateHeadCount(count) {
 
 function toggleCategoryExclude(categoryName, exclude) {
   getSurvey(currentSurveyId).then(survey => {
-    const template = survey.template || {};
-    const ratedItemsByCategory = template.ratedItemsByCategory || {};
-    const items = ratedItemsByCategory[categoryName] || [];
-    items.forEach(item => {
-      if (!survey.items[item.label]) {
-        survey.items[item.label] = { rating: '', text: '', standards: [], photos: [] };
+    // Find the category items from the active template
+    const activeTemplate = getTemplateForSurvey(survey);
+    let itemLabels = [];
+    activeTemplate.forEach(section => {
+      if (section.categories) {
+        section.categories.forEach(cat => {
+          if (cat.name === categoryName && cat.items) {
+            itemLabels = cat.items.filter(i => i.type === 'list').map(i => i.label);
+          }
+        });
       }
-      survey.items[item.label].excluded = exclude;
+    });
+    itemLabels.forEach(label => {
+      if (!survey.items[label]) {
+        survey.items[label] = { rating: '', text: '', standards: [], photos: [] };
+      }
+      survey.items[label].excluded = exclude;
     });
     saveSurvey(survey).then(() => {
       renderInspection(survey);
@@ -6407,6 +6419,9 @@ function showToast(message) {
   toast._timeout = setTimeout(() => { toast.style.opacity = '0'; }, 1500);
 }
 
+// Track which accordion is open so we can restore it after re-renders
+let _openAccordionCategory = null;
+
 function toggleAccordion(button) {
   const content = button.nextElementSibling;
   if (!content) return;
@@ -6426,9 +6441,36 @@ function toggleAccordion(button) {
   const chevron = button.querySelector('span:last-child');
   if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
 
+  // Store which category is open (read from the title span)
+  const titleSpan = button.querySelector('.category-title');
+  _openAccordionCategory = isOpen ? null : (titleSpan ? titleSpan.textContent.replace(/^[^\w]*/, '').trim() : null);
+
   // Scroll the opened category to the top of the screen
   if (!isOpen) {
     button.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// Restore the previously open accordion after a re-render
+function restoreAccordionState() {
+  if (!_openAccordionCategory) return;
+  const headers = document.querySelectorAll('.accordion-header');
+  for (const header of headers) {
+    const titleSpan = header.querySelector('.category-title');
+    if (titleSpan) {
+      const title = titleSpan.textContent.replace(/^[^\w]*/, '').trim();
+      if (title === _openAccordionCategory) {
+        const content = header.nextElementSibling;
+        if (content) {
+          content.style.display = 'block';
+          const chevron = header.querySelector('span:last-child');
+          if (chevron) chevron.style.transform = 'rotate(180deg)';
+          // Scroll back to it
+          setTimeout(() => header.scrollIntoView({ behavior: 'auto', block: 'start' }), 50);
+        }
+        break;
+      }
+    }
   }
 }
 
