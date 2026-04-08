@@ -1350,12 +1350,14 @@ function findTextVariants(categoryName, itemLabel, baseRating) {
 
   if (!sheet) return [];
 
+  // Strip "Head N — " prefix for matching expanded head items back to base snippets
+  const matchLabel = itemLabel.replace(/^Head \d+ — /, 'Head, ').toLowerCase();
+
   // First try exact contains match
   let matches = sheet.filter(entry => {
     if (!entry.section || !entry.rating) return false;
     const section = entry.section.toLowerCase();
-    const label = itemLabel.toLowerCase();
-    const isLabelMatch = section.includes(label) || label.includes(section);
+    const isLabelMatch = section.includes(matchLabel) || matchLabel.includes(section);
     const isRatingMatch = entry.rating.toString().charAt(0) === baseRating;
     return isLabelMatch && isRatingMatch;
   });
@@ -1366,7 +1368,7 @@ function findTextVariants(categoryName, itemLabel, baseRating) {
       if (!entry.section || !entry.rating) return false;
       const isRatingMatch = entry.rating.toString().charAt(0) === baseRating;
       if (!isRatingMatch) return false;
-      const score = matchScore(entry.section, itemLabel);
+      const score = matchScore(entry.section, matchLabel);
       return score >= 0.5; // At least 50% word overlap
     });
   }
@@ -4243,6 +4245,29 @@ function renderInspection(survey) {
     }
   });
 
+  // ── Multiply Head(s) items by head count ──────────────────────────────
+  const headCount = survey.headCount || 1;
+  if (ratedItemsByCategory['Head(s)'] && headCount > 1) {
+    const baseHeadItems = ratedItemsByCategory['Head(s)'];
+    const baseMediaItems = mediaItemsByCategory['Head(s)'] || [];
+    const expandedItems = [];
+    const expandedMedia = [];
+    for (let h = 1; h <= headCount; h++) {
+      baseMediaItems.forEach(mi => {
+        expandedMedia.push({ ...mi, label: `Head ${h} — photos` });
+      });
+      baseHeadItems.forEach(item => {
+        // Strip leading "Head, " from label for cleaner naming
+        const shortLabel = item.label.replace(/^Head,\s*/, '');
+        expandedItems.push({ ...item, label: `Head ${h} — ${shortLabel}` });
+      });
+    }
+    ratedItemsByCategory['Head(s)'] = expandedItems;
+    mediaItemsByCategory['Head(s)'] = expandedMedia;
+    // Recalculate total
+    totalRatedItems = totalRatedItems - baseHeadItems.length + expandedItems.length;
+  }
+
   survey.totalRatedItems = totalRatedItems;
 
   // Render categories
@@ -4277,6 +4302,19 @@ function renderInspection(survey) {
             </button>
           </div>
     `;
+
+    // Head count selector for Head(s) category
+    if (categoryName === 'Head(s)') {
+      html += `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;">
+          <span style="font-size:14px;font-weight:600;color:#1e3a5f;">Number of heads:</span>
+          <select id="headCountSelect" onchange="updateHeadCount(parseInt(this.value))"
+                  style="padding:8px 12px;border:1px solid #93c5fd;border-radius:6px;font-size:15px;font-weight:600;background:white;color:#1e3a5f;min-width:60px;">
+            ${[1,2,3,4].map(n => `<option value="${n}" ${headCount === n ? 'selected' : ''}>${n}</option>`).join('')}
+          </select>
+        </div>
+      `;
+    }
 
     // Render area photos at top of category
     const catMediaItems = mediaItemsByCategory[categoryName] || [];
@@ -5778,6 +5816,16 @@ function updateItemInPlace(survey, itemLabel) {
 }
 
 // Toggle exclude for all items in a category
+// Update the number of heads and re-render inspection
+function updateHeadCount(count) {
+  getSurvey(currentSurveyId).then(survey => {
+    survey.headCount = count;
+    saveSurvey(survey).then(() => {
+      renderInspection(survey);
+    });
+  });
+}
+
 function toggleCategoryExclude(categoryName, exclude) {
   getSurvey(currentSurveyId).then(survey => {
     const template = survey.template || {};
