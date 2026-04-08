@@ -58,27 +58,27 @@
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B - hull ok. Rudder needs help.",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of ### to ###, which are not considered abnormal for the vessel\u2019s age. Suggest monitoring the photographed areas between seasons. However, the rudder displayed numerous saturated spots, many at 999, suggesting internal conductivity accumulation. To mitigate any spread, off-season venting or drainage may be attempted. However, foam cores often retain conductivity. Rudder removal and rebuild may be required in future if conditions persist"
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of ### to ###, which are not considered abnormal for the vessel’s age. Suggest monitoring the photographed areas between seasons. However, the rudder displayed numerous saturated spots, many at 999, suggesting internal conductivity accumulation. To mitigate any spread, off-season venting or drainage may be attempted. However, foam cores often retain conductivity. Rudder removal and rebuild may be required in future if conditions persist"
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B - Both elevated. No action required.",
-      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull returned elevated yet expected readings of [###\u2013###]. The rudder returned readings of [###\u2013###]. No softness or delamination was observed. Monitor the higher-reading areas seasonally for signs of osmosis or delamination."
+      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull returned elevated yet expected readings of [###–###]. The rudder returned readings of [###–###]. No softness or delamination was observed. Monitor the higher-reading areas seasonally for signs of osmosis or delamination."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C - Rudder issue not high",
-      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull presented no areas of concern. The rudder showed elevated readings of [###\u2013###] that are not unusual for the vessel\u2019s age. Recheck seasonally to confirm stability."
+      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull presented no areas of concern. The rudder showed elevated readings of [###–###] that are not unusual for the vessel’s age. Recheck seasonally to confirm stability."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C - Hull and rudder not high",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [###\u2013###]. The rudder returned readings of [###\u2013###]. These values are not considered abnormal or concerning for a vessel of this age. Monitor the photographed areas between seasons for signs of osmosis or delamination."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [###–###]. The rudder returned readings of [###–###]. These values are not considered abnormal or concerning for a vessel of this age. Monitor the photographed areas between seasons for signs of osmosis or delamination."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of  #### to #### that are not considered abnormal for the vessel\u2019s age. Monitor the photographed areas between seasons. The rudders were bronze and not prone to conductivity uptake."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of  #### to #### that are not considered abnormal for the vessel’s age. Monitor the photographed areas between seasons. The rudders were bronze and not prone to conductivity uptake."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
@@ -486,7 +486,7 @@
       "text": "The rub rail was solidly affixed to the hull and deck joint and was serviceable."
     },
     {
-      "section": "Hull\u2013deck joint (exterior)",
+      "section": "Hull–deck joint (exterior)",
       "rating": "C",
       "text": "The hull and deck joint was serviceable and in good condition."
     },
@@ -519,6 +519,76 @@
       "section": "Propeller shaft(s)",
       "rating": "A",
       "text": "The propeller shaft exhibited significant wear, deep scoring, or corrosion. The shaft was not serviceable in its current condition and required immediate professional inspection and likely replacement."
+    },
+    {
+      "section": "Through-hulls, strainers",
+      "rating": "A",
+      "text": "Through-hull fittings are corroded, leaking, or showing signs of failure. Immediate repair or replacement is critical to prevent water ingress."
+    },
+    {
+      "section": "Through-hulls, strainers",
+      "rating": "B",
+      "text": "Strainer elements are clogged or through-hull fittings show minor corrosion. Service the strainers and inspect seacocks for smooth operation."
+    },
+    {
+      "section": "Transom",
+      "rating": "A",
+      "text": "The transom is deteriorated or delaminated, compromising structural integrity. This is a safety-critical issue requiring immediate repair."
+    },
+    {
+      "section": "Transom",
+      "rating": "B",
+      "text": "The transom shows signs of moisture absorption or minor damage. Inspect and treat to prevent further deterioration."
+    },
+    {
+      "section": "Swim platform and ladder",
+      "rating": "A",
+      "text": "The swim platform or ladder is structurally compromised or unsafe. Repair or replacement is required before use."
+    },
+    {
+      "section": "Swim platform and ladder",
+      "rating": "B",
+      "text": "The platform or ladder shows wear and loose fittings. Service and tighten hardware to ensure safe use."
+    },
+    {
+      "section": "Hull–deck joint (exterior)",
+      "rating": "A",
+      "text": "The hull–deck joint is cracked or delaminated, allowing water ingress. This requires immediate structural repair."
+    },
+    {
+      "section": "Hull–deck joint (exterior)",
+      "rating": "B",
+      "text": "The joint shows minor cracking or sealant deterioration. Re-caulk or re-seal to prevent water ingress."
+    },
+    {
+      "section": "Stern tube(s) (external)",
+      "rating": "A",
+      "text": "The stern tube is leaking or corroded severely. Repair or replacement is required to prevent water ingress and potential engine damage."
+    },
+    {
+      "section": "Stern tube(s) (external)",
+      "rating": "B",
+      "text": "The stern tube shows minor corrosion or weeping. Inspect for proper stuffing box or dripless seal function and service as needed."
+    },
+    {
+      "section": "Skeg(s)",
+      "rating": "A",
+      "text": "The skeg is damaged or bent, affecting steering or propeller protection. Repair or replacement is required."
+    },
+    {
+      "section": "Skeg(s)",
+      "rating": "B",
+      "text": "The skeg shows corrosion or minor damage. Inspect for proper alignment and address corrosion as needed."
+    },
+    {
+      "section": "Exhaust discharge position and condition",
+      "rating": "A",
+      "text": "The exhaust discharge is leaking, cracked, or positioned dangerously. Immediate repair is required."
+    },
+    {
+      "section": "Exhaust discharge position and condition",
+      "rating": "B",
+      "text": "The discharge fitting shows corrosion or minor deterioration. Service or replacement should be addressed in the near term."
     }
   ],
   "Spars and rigging": [
@@ -711,6 +781,96 @@
       "section": "Backstay, turnbuckle(s), retaining rings/pins and chainplate(s)/tang(s)",
       "rating": "C",
       "text": "The hydraulic backstay was functional and firmly attached at the transom, with all required pins present."
+    },
+    {
+      "section": "Genoa 1 (largest)",
+      "rating": "A",
+      "text": "The sail is damaged beyond safe repair or is missing critical battens or hardware. Do not use until repairs are complete."
+    },
+    {
+      "section": "Genoa 1 (largest)",
+      "rating": "B",
+      "text": "The sail shows wear with minor tears or loose stitching. Repair or replacement should be addressed."
+    },
+    {
+      "section": "Genoa 1 (largest)",
+      "rating": "C",
+      "text": "The sail is in serviceable condition and safe for use."
+    },
+    {
+      "section": "Genoa 2 (mid-size)",
+      "rating": "A",
+      "text": "The sail is damaged beyond safe repair or is missing critical battens or hardware. Do not use until repairs are complete."
+    },
+    {
+      "section": "Genoa 2 (mid-size)",
+      "rating": "B",
+      "text": "The sail shows wear with minor tears or loose stitching. Repair or replacement should be addressed."
+    },
+    {
+      "section": "Genoa 2 (mid-size)",
+      "rating": "C",
+      "text": "The sail is in serviceable condition and safe for use."
+    },
+    {
+      "section": "Genoa 3 (smallest)",
+      "rating": "A",
+      "text": "The sail is damaged beyond safe repair or is missing critical battens or hardware. Do not use until repairs are complete."
+    },
+    {
+      "section": "Genoa 3 (smallest)",
+      "rating": "B",
+      "text": "The sail shows wear with minor tears or loose stitching. Repair or replacement should be addressed."
+    },
+    {
+      "section": "Genoa 3 (smallest)",
+      "rating": "C",
+      "text": "The sail is in serviceable condition and safe for use."
+    },
+    {
+      "section": "Staysail",
+      "rating": "A",
+      "text": "The sail is damaged beyond safe repair or is missing critical battens or hardware. Do not use until repairs are complete."
+    },
+    {
+      "section": "Staysail",
+      "rating": "B",
+      "text": "The sail shows wear with minor tears or loose stitching. Repair or replacement should be addressed."
+    },
+    {
+      "section": "Staysail",
+      "rating": "C",
+      "text": "The sail is in serviceable condition and safe for use."
+    },
+    {
+      "section": "Misen",
+      "rating": "A",
+      "text": "The mizzen sail is damaged beyond safe repair or is missing critical battens or hardware. Do not use until repairs are complete."
+    },
+    {
+      "section": "Misen",
+      "rating": "B",
+      "text": "The mizzen sail shows wear with minor tears or loose stitching. Repair or replacement should be addressed."
+    },
+    {
+      "section": "Misen",
+      "rating": "C",
+      "text": "The mizzen sail is in serviceable condition and safe for use."
+    },
+    {
+      "section": "Sails - other",
+      "rating": "A",
+      "text": "Additional sails are damaged beyond safe repair or are missing critical hardware. Do not use until repairs are complete."
+    },
+    {
+      "section": "Sails - other",
+      "rating": "B",
+      "text": "Additional sails show wear with minor tears or loose stitching. Repair or replacement should be addressed."
+    },
+    {
+      "section": "Sails - other",
+      "rating": "C",
+      "text": "Additional sails are in serviceable condition and safe for use."
     }
   ],
   "Deck & Bowsprit": [
@@ -945,22 +1105,22 @@
       "text": "The brightwork was generally in good condition."
     },
     {
-      "section": "Deck hatches, windows, and portholes \u2013 exterior observations",
+      "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "B - sealant issue",
       "text": "Sealant around several windows was lifting. Renew sealant to prevent water ingress."
     },
     {
-      "section": "Deck hatches, windows, and portholes \u2013 exterior observations",
+      "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "C",
       "text": "The single deck hatch appeared serviceable from the exterior."
     },
     {
-      "section": "Deck hatches, windows, and portholes \u2013 exterior observations",
+      "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "C",
       "text": "All deck hatches, windows, and portholes appeared serviceable from the exterior."
     },
     {
-      "section": "Deck hatches, windows, and portholes \u2013 exterior observations",
+      "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "C",
       "text": "Despite age-typical crazing, all deck hatches, windows, and portholes appeared serviceable from the exterior."
     },
@@ -985,14 +1145,114 @@
       "text": "The windshield, pilothouse windows, frames, and studs were structurally sound, solid, and serviceable."
     },
     {
-      "section": "Arch \u2013 external condition and equipment",
+      "section": "Arch – external condition and equipment",
       "rating": "B",
       "text": "The arch was solidly attached and was serviceable. Cracking was present along the top at the bases of mounted instruments."
     },
     {
-      "section": "Arch \u2013 external condition and equipment",
+      "section": "Arch – external condition and equipment",
       "rating": "C",
       "text": "The arch was solidly attached and was serviceable."
+    },
+    {
+      "section": "Deck and coachroof/pilothouse condition",
+      "rating": "A",
+      "text": "The deck or pilothouse shows significant cracking, delamination, or structural compromise. Immediate repair is required."
+    },
+    {
+      "section": "Deck and coachroof/pilothouse condition",
+      "rating": "B",
+      "text": "The deck or pilothouse shows spider cracks or minor moisture signs. Monitor and treat to prevent deterioration."
+    },
+    {
+      "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
+      "rating": "A",
+      "text": "Percussion testing revealed multiple soft or delaminated areas indicating structural failure. Repair is critical."
+    },
+    {
+      "section": "Pulpit",
+      "rating": "A",
+      "text": "The pulpit is structurally compromised or loose, posing a safety hazard. Immediate repair or replacement is required."
+    },
+    {
+      "section": "Bow roller",
+      "rating": "A",
+      "text": "The bow roller is broken or non-functional, preventing safe anchor deployment. Replacement is required."
+    },
+    {
+      "section": "Primary anchor, chain and rode",
+      "rating": "A",
+      "text": "The anchor, chain, or rode is damaged or corroded beyond safe use. Replacement or significant repair is required."
+    },
+    {
+      "section": "Windlass",
+      "rating": "A",
+      "text": "The windlass is non-functional or poses a safety hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Windlass",
+      "rating": "B",
+      "text": "The windlass operates but shows signs of wear or intermittent function. Service is recommended."
+    },
+    {
+      "section": "Anchor locker",
+      "rating": "A",
+      "text": "The anchor locker is damaged or corroded, compromising safe anchor stowage. Repair is required."
+    },
+    {
+      "section": "Anchor locker",
+      "rating": "B",
+      "text": "The locker shows corrosion or minor damage with areas of moisture. Treatment and ventilation improvement are advisable."
+    },
+    {
+      "section": "Stanchions",
+      "rating": "A",
+      "text": "Multiple stanchions are loose or cracked, creating a safety hazard. Immediate repair or replacement is required."
+    },
+    {
+      "section": "Lifelines and safety rail",
+      "rating": "A",
+      "text": "The lifelines or safety rail are broken or loose, creating a fall hazard. Immediate repair is required."
+    },
+    {
+      "section": "Fuel and water fill ports and waste deck pump-out port",
+      "rating": "A",
+      "text": "The ports are leaking, cracked, or non-functional. Repair or replacement is required to prevent water ingress or spills."
+    },
+    {
+      "section": "Mooring cleats and chocks",
+      "rating": "A",
+      "text": "Cleats or chocks are broken or corroded, compromising mooring security. Replacement is required."
+    },
+    {
+      "section": "Mooring cleats and chocks",
+      "rating": "B",
+      "text": "Cleats or chocks show corrosion or loose fasteners. Service and tighten as needed."
+    },
+    {
+      "section": "Toerail and gunwale",
+      "rating": "A",
+      "text": "The toerail or gunwale is cracked, loose, or deteriorated, affecting structural integrity. Repair or replacement is required."
+    },
+    {
+      "section": "Grab rails",
+      "rating": "A",
+      "text": "Grab rails are loose, cracked, or missing, creating a safety hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Brightwork",
+      "rating": "A",
+      "text": "Brightwork is severely deteriorated or rotted, compromising structural integrity. Replacement is required."
+    },
+    {
+      "section": "Deck hatches, windows, and portholes – exterior observations",
+      "rating": "A",
+      "text": "Hatches or portholes are cracked, leaking, or non-functional. Immediate repair or replacement is required."
+    },
+    {
+      "section": "Arch – external condition and equipment",
+      "rating": "A",
+      "text": "The arch is structurally compromised, bent, or showing signs of failure. Repair or replacement is required."
     }
   ],
   "Aft Deck": [
@@ -1045,6 +1305,96 @@
       "section": "Aft deck conductivity testing",
       "rating": "C",
       "text": "conductivity testing of the aft deck indicated a serviceable condition with no elevated conductivity detected."
+    },
+    {
+      "section": "Cover",
+      "rating": "A",
+      "text": "The cover is badly deteriorated or torn, compromising weather protection and potentially allowing water ingress. Replace or repair immediately to protect the deck area."
+    },
+    {
+      "section": "Cover",
+      "rating": "B",
+      "text": "The cover is showing wear with minor tears and fading. Repairs or replacement should be addressed in the near term to maintain adequate protection."
+    },
+    {
+      "section": "Cover",
+      "rating": "C",
+      "text": "The cover is in serviceable condition and provides adequate weather protection."
+    },
+    {
+      "section": "Seating",
+      "rating": "A",
+      "text": "Seating is unsafe due to structural failure or significant deterioration. This poses a safety hazard and should be repaired or replaced before use."
+    },
+    {
+      "section": "Seating",
+      "rating": "B",
+      "text": "Upholstery is worn and cushions are degraded. Restoration or replacement is recommended for improved comfort and appearance."
+    },
+    {
+      "section": "Seating",
+      "rating": "C",
+      "text": "Seating is in good condition and provides safe, serviceable use."
+    },
+    {
+      "section": "Storage",
+      "rating": "A",
+      "text": "Storage compartments are damaged or inoperable, preventing safe storage of equipment and supplies. Repairs are required."
+    },
+    {
+      "section": "Storage",
+      "rating": "B",
+      "text": "Latches are worn and seals are degraded, compromising weather protection. Service or replacement is advisable."
+    },
+    {
+      "section": "Storage",
+      "rating": "C",
+      "text": "Storage compartments are functional with secure latches and effective seals."
+    },
+    {
+      "section": "Lighting",
+      "rating": "A",
+      "text": "Lighting is non-functional or poses a safety hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Lighting",
+      "rating": "B",
+      "text": "Some fixtures are not working. Service the non-functional fixtures to restore adequate lighting."
+    },
+    {
+      "section": "Lighting",
+      "rating": "C",
+      "text": "Lighting is fully operational."
+    },
+    {
+      "section": "Drainage",
+      "rating": "A",
+      "text": "Drains are blocked or non-functional, leading to water pooling and potential structural damage. Clear and repair immediately."
+    },
+    {
+      "section": "Drainage",
+      "rating": "B",
+      "text": "Drainage is slow with debris present in drain lines. Cleaning and maintenance are recommended."
+    },
+    {
+      "section": "Drainage",
+      "rating": "C",
+      "text": "Drains are clear and functional."
+    },
+    {
+      "section": "Sink, faucet and drain",
+      "rating": "A",
+      "text": "Plumbing is non-functional or leaking significantly, requiring immediate repair to prevent water damage."
+    },
+    {
+      "section": "Sink, faucet and drain",
+      "rating": "B",
+      "text": "Faucet is dripping and fittings are worn. Service the fixtures to stop leaks and restore proper function."
+    },
+    {
+      "section": "Sink, faucet and drain",
+      "rating": "C",
+      "text": "Plumbing is in working order."
     }
   ],
   "Outboard": [
@@ -1449,6 +1799,146 @@
       "section": "Companionway",
       "rating": "C - washboards",
       "text": "The companionway top slid open and closed smoothly, and the washboards were in serviceable condition."
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "A",
+      "text": "The floor or seats show major cracking or delamination, compromising structural integrity and safety. Repair is critical."
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "B",
+      "text": "The cockpit shows spider cracks or minor water signs. Monitor and seal to prevent deterioration."
+    },
+    {
+      "section": "Cockpit drains",
+      "rating": "B",
+      "text": "Drains are partially clogged or slow. Cleaning is recommended to ensure proper drainage."
+    },
+    {
+      "section": "Cockpit table",
+      "rating": "A",
+      "text": "The table is cracked, loose, or structurally unstable. Repair or replacement is required."
+    },
+    {
+      "section": "Cockpit table",
+      "rating": "B",
+      "text": "The table shows wear or minor damage. Refinishing or tightening is advisable."
+    },
+    {
+      "section": "Cockpit lighting",
+      "rating": "A",
+      "text": "Lighting is non-functional or poses an electrical hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Cockpit lockers and lazarettes",
+      "rating": "A",
+      "text": "Lockers or lazarettes are damaged or non-functional. Repair is required."
+    },
+    {
+      "section": "Cockpit lockers and lazarettes",
+      "rating": "B",
+      "text": "Seals are degraded or latches are worn. Service or replacement is advisable."
+    },
+    {
+      "section": "Remote compressor and condensing refrigeration unit",
+      "rating": "A",
+      "text": "The unit is non-functional or poses a safety hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Remote compressor and condensing refrigeration unit",
+      "rating": "B",
+      "text": "The unit operates but shows signs of wear or reduced efficiency. Servicing is recommended."
+    },
+    {
+      "section": "Engine locker lid",
+      "rating": "A",
+      "text": "The lid is cracked, loose, or non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Binnacle",
+      "rating": "A",
+      "text": "The binnacle is cracked or loose, affecting instrument security. Repair or replacement is required."
+    },
+    {
+      "section": "Binnacle",
+      "rating": "B",
+      "text": "The binnacle shows minor corrosion or loose fasteners. Service as needed."
+    },
+    {
+      "section": "Magnetic compass",
+      "rating": "A",
+      "text": "The compass is non-functional or severely damaged. Replacement is required."
+    },
+    {
+      "section": "Tiller",
+      "rating": "A",
+      "text": "The tiller is cracked or loose, compromising steering control. Immediate repair is required."
+    },
+    {
+      "section": "Sink, faucets and drain",
+      "rating": "A",
+      "text": "Plumbing is non-functional or leaking significantly. Repair is required."
+    },
+    {
+      "section": "Sink, faucets and drain",
+      "rating": "B",
+      "text": "Faucet is dripping or fittings are worn. Service the fixtures."
+    },
+    {
+      "section": "Sink, faucets and drain",
+      "rating": "C",
+      "text": "Plumbing is in working order."
+    },
+    {
+      "section": "Pushpit",
+      "rating": "A",
+      "text": "The pushpit is loose or cracked, creating a safety hazard. Immediate repair is required."
+    },
+    {
+      "section": "Propane valve, regulator, gauge, storage compartment and vent",
+      "rating": "A",
+      "text": "The system is non-functional or poses a safety hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Propane valve, regulator, gauge, storage compartment and vent",
+      "rating": "B",
+      "text": "Components show minor wear or the system has reduced functionality. Service is recommended."
+    },
+    {
+      "section": "BBQ or grill",
+      "rating": "A",
+      "text": "The grill is non-functional or poses a fire hazard. Repair or replacement is required."
+    },
+    {
+      "section": "BBQ or grill",
+      "rating": "B",
+      "text": "The grill shows rust or operational issues. Cleaning or component replacement is advisable."
+    },
+    {
+      "section": "Arch",
+      "rating": "A",
+      "text": "The arch is structurally compromised or loose. Repair or replacement is required."
+    },
+    {
+      "section": "Arch",
+      "rating": "B",
+      "text": "The arch shows corrosion or loose fasteners. Service as needed."
+    },
+    {
+      "section": "Davits",
+      "rating": "A",
+      "text": "The davits are broken or non-functional, preventing safe dinghy deployment. Repair or replacement is required."
+    },
+    {
+      "section": "Davits",
+      "rating": "B",
+      "text": "The davits show rust or operational issues. Service and lubrication are recommended."
+    },
+    {
+      "section": "Companionway",
+      "rating": "A",
+      "text": "The companionway is cracked or non-functional, affecting structural integrity. Repair is required."
     }
   ],
   "Gauges and Instrumentation": [
@@ -1696,6 +2186,176 @@
       "section": "Flood lights and deck lights",
       "rating": "Not tested",
       "text": "Flood lights and deck lights were not tested."
+    },
+    {
+      "section": "AIS",
+      "rating": "A",
+      "text": "The AIS is non-functional. Repair or replacement is recommended for navigational safety and regulatory compliance."
+    },
+    {
+      "section": "AIS",
+      "rating": "B",
+      "text": "The AIS is intermittent or the information appears outdated. Service or software update is recommended."
+    },
+    {
+      "section": "AIS",
+      "rating": "C",
+      "text": "The AIS is operational and actively transmitting vessel information."
+    },
+    {
+      "section": "Engine start and stop",
+      "rating": "A",
+      "text": "The start/stop system is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Engine start and stop",
+      "rating": "B",
+      "text": "The system operates intermittently or with difficulty. Service is recommended."
+    },
+    {
+      "section": "Engine gauges",
+      "rating": "A",
+      "text": "Critical gauges are non-functional, preventing safe engine monitoring. Repair is required."
+    },
+    {
+      "section": "Engine gauges",
+      "rating": "B",
+      "text": "Gauges show readings but appear inaccurate. Inspection and calibration are advisable."
+    },
+    {
+      "section": "Engine gearshift and throttle",
+      "rating": "A",
+      "text": "The controls are non-functional or stuck. Repair is required."
+    },
+    {
+      "section": "Engine gearshift and throttle",
+      "rating": "B",
+      "text": "Controls operate stiffly or with slight sticking. Service is recommended."
+    },
+    {
+      "section": "Outdrive tilt",
+      "rating": "B",
+      "text": "The system operates but with reduced speed or minor intermittent function. Service is recommended."
+    },
+    {
+      "section": "Outdrive tilt",
+      "rating": "C",
+      "text": "The tilt system is operational."
+    },
+    {
+      "section": "Trim tabs",
+      "rating": "B",
+      "text": "The system operates but with slow response or minor issues. Service is recommended."
+    },
+    {
+      "section": "Bow thruster",
+      "rating": "B",
+      "text": "The system operates but with reduced thrust or intermittent function. Service is recommended."
+    },
+    {
+      "section": "Bow thruster",
+      "rating": "C",
+      "text": "The thruster is operational."
+    },
+    {
+      "section": "Anchor windlass controls",
+      "rating": "A",
+      "text": "The controls are non-functional. Repair is required."
+    },
+    {
+      "section": "Anchor windlass controls",
+      "rating": "B",
+      "text": "The controls operate but respond slowly. Service is recommended."
+    },
+    {
+      "section": "Radar",
+      "rating": "A",
+      "text": "The radar is non-functional or poses a safety hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Radar",
+      "rating": "B",
+      "text": "The radar operates but displays are weak or intermittent. Service or antenna inspection is recommended."
+    },
+    {
+      "section": "Radar",
+      "rating": "C",
+      "text": "The radar is operational and displaying clearly."
+    },
+    {
+      "section": "Depth sounder",
+      "rating": "A",
+      "text": "The sounder is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Depth sounder",
+      "rating": "B",
+      "text": "The sounder operates but shows inconsistent readings. Service or transducer inspection is recommended."
+    },
+    {
+      "section": "Log",
+      "rating": "A",
+      "text": "The log is non-functional or poses a safety hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Log",
+      "rating": "B",
+      "text": "The log operates but shows inaccurate speed readings. Service or transducer inspection is recommended."
+    },
+    {
+      "section": "Log",
+      "rating": "C",
+      "text": "The log is operational and accurate."
+    },
+    {
+      "section": "12V or USB outlets",
+      "rating": "A",
+      "text": "Outlets are non-functional or pose an electrical hazard. Repair is required."
+    },
+    {
+      "section": "12V or USB outlets",
+      "rating": "B",
+      "text": "Some outlets are non-functional or provide inconsistent power. Service is recommended."
+    },
+    {
+      "section": "12V or USB outlets",
+      "rating": "C",
+      "text": "All outlets are operational."
+    },
+    {
+      "section": "Stereo and speakers",
+      "rating": "A",
+      "text": "The system is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Stereo and speakers",
+      "rating": "B",
+      "text": "The system operates but with weak sound or intermittent function. Service is recommended."
+    },
+    {
+      "section": "Search light",
+      "rating": "A",
+      "text": "The light is non-functional or poses an electrical hazard. Repair is required."
+    },
+    {
+      "section": "Search light",
+      "rating": "B",
+      "text": "The light operates but with reduced brightness. Lamp or lens replacement may improve function."
+    },
+    {
+      "section": "Flood lights and deck lights",
+      "rating": "A",
+      "text": "Lights are non-functional or pose an electrical hazard. Repair is required."
+    },
+    {
+      "section": "Flood lights and deck lights",
+      "rating": "B",
+      "text": "Some lights are non-functional or dim. Service or lamp replacement is recommended."
+    },
+    {
+      "section": "Flood lights and deck lights",
+      "rating": "C",
+      "text": "All lights are operational."
     }
   ],
   "Flybridge": [
@@ -1913,6 +2573,106 @@
       "section": "Bimini, dodger and canvas enclosure",
       "rating": "C",
       "text": "The bimini was in good condition. All zippers, snaps, and buttons were securely attached and working properly."
+    },
+    {
+      "section": "Flybridge ladder/staircase",
+      "rating": "A",
+      "text": "The ladder or staircase is broken or unsafe. Immediate replacement is required."
+    },
+    {
+      "section": "Flybridge ladder/staircase",
+      "rating": "B",
+      "text": "The ladder shows wear or loose fasteners. Service and tightening are recommended."
+    },
+    {
+      "section": "flyridge, floor, seats and coaming (spider cracks, etc.)",
+      "rating": "A",
+      "text": "Major cracking or delamination compromises structural integrity. Repair is critical."
+    },
+    {
+      "section": "flyridge, floor, seats and coaming (spider cracks, etc.)",
+      "rating": "B",
+      "text": "Spider cracks or minor moisture signs are visible. Monitor and seal as needed."
+    },
+    {
+      "section": "flyridge drains",
+      "rating": "B",
+      "text": "Drains are partially clogged. Cleaning is recommended."
+    },
+    {
+      "section": "flyridge table",
+      "rating": "A",
+      "text": "The table is cracked or unstable. Repair or replacement is required."
+    },
+    {
+      "section": "flyridge table",
+      "rating": "B",
+      "text": "Minor damage or loose fasteners are present. Service as needed."
+    },
+    {
+      "section": "flyridge lighting",
+      "rating": "A",
+      "text": "Lighting is non-functional or poses an electrical hazard. Repair is required."
+    },
+    {
+      "section": "flyridge lockers and lazarettes",
+      "rating": "A",
+      "text": "Lockers are damaged or non-functional. Repair is required."
+    },
+    {
+      "section": "flyridge lockers and lazarettes",
+      "rating": "B",
+      "text": "Seals are degraded or latches are worn. Service is advisable."
+    },
+    {
+      "section": "Remote compressor and condensing refrigeration unit",
+      "rating": "A",
+      "text": "The unit is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Remote compressor and condensing refrigeration unit",
+      "rating": "B",
+      "text": "The unit operates but shows signs of wear. Service is recommended."
+    },
+    {
+      "section": "Magnetic compass",
+      "rating": "A",
+      "text": "The compass is non-functional or severely damaged. Replacement is required."
+    },
+    {
+      "section": "Sink, faucets and drain",
+      "rating": "A",
+      "text": "Plumbing is non-functional or leaking. Repair is required."
+    },
+    {
+      "section": "Sink, faucets and drain",
+      "rating": "B",
+      "text": "Faucet is dripping or fittings are worn. Service as needed."
+    },
+    {
+      "section": "Sink, faucets and drain",
+      "rating": "C",
+      "text": "Plumbing is in working order."
+    },
+    {
+      "section": "Safety rail",
+      "rating": "A",
+      "text": "The safety rail is loose or cracked. Immediate repair is required."
+    },
+    {
+      "section": "Arch",
+      "rating": "A",
+      "text": "The arch is structurally compromised. Repair is required."
+    },
+    {
+      "section": "Arch",
+      "rating": "B",
+      "text": "The arch shows corrosion or loose fasteners. Service as needed."
+    },
+    {
+      "section": "Bimini, dodger and canvas enclosure",
+      "rating": "A",
+      "text": "Canvas is torn or compromised. Repair or replacement is required."
     }
   ],
   "Flybridge gauges and instrument": [
@@ -2145,6 +2905,161 @@
       "section": "Flood lights and deck lights",
       "rating": "Not tested",
       "text": "Flood lights and deck lights were not tested."
+    },
+    {
+      "section": "Engine start and stop",
+      "rating": "A",
+      "text": "The start/stop system is non-functional. Repair is required."
+    },
+    {
+      "section": "Engine start and stop",
+      "rating": "B",
+      "text": "The system operates intermittently. Service is recommended."
+    },
+    {
+      "section": "Engine gauges",
+      "rating": "A",
+      "text": "Critical gauges are non-functional. Repair is required."
+    },
+    {
+      "section": "Engine gauges",
+      "rating": "B",
+      "text": "Gauges show inaccurate readings. Inspection and calibration are advisable."
+    },
+    {
+      "section": "Engine gearshift and throttle",
+      "rating": "A",
+      "text": "The controls are non-functional. Repair is required."
+    },
+    {
+      "section": "Engine gearshift and throttle",
+      "rating": "B",
+      "text": "Controls operate stiffly. Service is recommended."
+    },
+    {
+      "section": "Outdrive tilt",
+      "rating": "B",
+      "text": "The system operates but slowly. Service is recommended."
+    },
+    {
+      "section": "Outdrive tilt",
+      "rating": "C",
+      "text": "The tilt system is operational."
+    },
+    {
+      "section": "Trim tabs",
+      "rating": "B",
+      "text": "The system operates with slow response or minor issues. Service is recommended."
+    },
+    {
+      "section": "Bow thruster",
+      "rating": "B",
+      "text": "The system operates but with reduced thrust. Service is recommended."
+    },
+    {
+      "section": "Bow thruster",
+      "rating": "C",
+      "text": "The thruster is operational."
+    },
+    {
+      "section": "Anchor windlass controls",
+      "rating": "A",
+      "text": "The controls are non-functional. Repair is required."
+    },
+    {
+      "section": "Anchor windlass controls",
+      "rating": "B",
+      "text": "The controls operate slowly. Service is recommended."
+    },
+    {
+      "section": "Radar",
+      "rating": "A",
+      "text": "The radar is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Radar",
+      "rating": "B",
+      "text": "The radar operates but displays are weak. Service is recommended."
+    },
+    {
+      "section": "Radar",
+      "rating": "C",
+      "text": "The radar is operational and displaying clearly."
+    },
+    {
+      "section": "Depth sounder",
+      "rating": "A",
+      "text": "The sounder is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Depth sounder",
+      "rating": "B",
+      "text": "The sounder shows inconsistent readings. Service is recommended."
+    },
+    {
+      "section": "Log",
+      "rating": "A",
+      "text": "The log is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Log",
+      "rating": "B",
+      "text": "The log shows inaccurate readings. Service is recommended."
+    },
+    {
+      "section": "Log",
+      "rating": "C",
+      "text": "The log is operational and accurate."
+    },
+    {
+      "section": "12V or USB outlets",
+      "rating": "A",
+      "text": "Outlets are non-functional or pose an electrical hazard. Repair is required."
+    },
+    {
+      "section": "12V or USB outlets",
+      "rating": "B",
+      "text": "Some outlets are non-functional. Service is recommended."
+    },
+    {
+      "section": "12V or USB outlets",
+      "rating": "C",
+      "text": "All outlets are operational."
+    },
+    {
+      "section": "Stereo and speakers",
+      "rating": "A",
+      "text": "The system is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Stereo and speakers",
+      "rating": "B",
+      "text": "The system operates with weak sound. Service is recommended."
+    },
+    {
+      "section": "Search light",
+      "rating": "A",
+      "text": "The light is non-functional. Repair is required."
+    },
+    {
+      "section": "Search light",
+      "rating": "B",
+      "text": "The light operates with reduced brightness. Lamp replacement may help."
+    },
+    {
+      "section": "Flood lights and deck lights",
+      "rating": "A",
+      "text": "Lights are non-functional. Repair is required."
+    },
+    {
+      "section": "Flood lights and deck lights",
+      "rating": "B",
+      "text": "Some lights are non-functional or dim. Service is recommended."
+    },
+    {
+      "section": "Flood lights and deck lights",
+      "rating": "C",
+      "text": "All lights are operational."
     }
   ],
   "Cabin and conveniences": [
@@ -2209,12 +3124,12 @@
       "text": "The cabin lining and ceiling were in good condition throughout the vessel."
     },
     {
-      "section": "Deck hatches, windows and portholes \u2013 interior observations",
+      "section": "Deck hatches, windows and portholes – interior observations",
       "rating": "C - min crazing",
       "text": "All deck hatches and portholes opened and closed properly. Hatches, portholes, and windows were serviceable with minimal crazing."
     },
     {
-      "section": "Deck hatches, windows and portholes \u2013 interior observations",
+      "section": "Deck hatches, windows and portholes – interior observations",
       "rating": "C - expected crazing",
       "text": "All deck hatches and portholes opened and closed properly. Hatches, portholes, and windows were serviceable with age expected crazing."
     },
@@ -2409,22 +3324,22 @@
       "text": "A protective sheet covered the floor and its condition was not verified. Exposed carpet areas were in good condition."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from cabin",
+      "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "A",
       "text": "The cabin bilge was full of water and the bilge pump was non functional. This does not meet ABYC H 22 for bilge pumping systems and ABYC S 30 for bilge pump electrical systems. Pumps must be operational and able to keep the bilge reasonably dry to reduce flooding risk. Immediate correction is required."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from cabin",
+      "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "B - water in bilge. Deck stepped mast.",
       "text": "Although the amount of water was not alarming, there was some water in the bilge. Watermarks in the bilge indicate this is a recurring condition, which is not unusual for a vessel this age. However, because the boat has a deck-stepped rig, water is likely entering the bilge from somewhere on the deck. This should be investigated further by running a hose over the deck and checking for leaks."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from cabin",
+      "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "C",
       "text": "Some water was present in the bilge, typical of a keel-stepped mast on a vessel of this age. From the cabin view, ribs and stringers appeared solid and serviceable with no apparent damage consistent with a hard grounding."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from cabin",
+      "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "C",
       "text": "Stringers and ribs that were visible from the cabin bilge appeared to be in serviceable condition."
     },
@@ -2442,13 +3357,228 @@
       "section": "Keel bolts",
       "rating": "Not tested",
       "text": "The keel bolts appeared serviceable with minimal corrosion and no noticeable looseness. Torque was not tested. Torque testing is recommended at least every five years while the boat is in the cradle."
+    },
+    {
+      "section": "Oven",
+      "rating": "A",
+      "text": "The oven is non-functional or there is a risk of gas leak. This is a safety hazard and requires immediate repair or replacement."
+    },
+    {
+      "section": "Oven",
+      "rating": "B",
+      "text": "The oven operates but requires servicing to restore optimal performance or address minor safety concerns."
+    },
+    {
+      "section": "Oven",
+      "rating": "C",
+      "text": "The oven is in serviceable condition and operates safely."
+    },
+    {
+      "section": "Heating and/or air conditioning system",
+      "rating": "A",
+      "text": "The system is non-functional and requires repair or replacement."
+    },
+    {
+      "section": "Heating and/or air conditioning system",
+      "rating": "B",
+      "text": "The system operates but at reduced capacity. Service is recommended to restore full capability."
+    },
+    {
+      "section": "Heating and/or air conditioning system",
+      "rating": "C",
+      "text": "The system is functional and effective."
+    },
+    {
+      "section": "Signs of water ingress",
+      "rating": "A",
+      "text": "Significant water damage is visible, indicating active leaks. Locate and repair the source immediately."
+    },
+    {
+      "section": "Hull deck joint (interior)",
+      "rating": "A",
+      "text": "The joint shows cracking or delamination. Structural repair is required."
+    },
+    {
+      "section": "Hull deck joint (interior)",
+      "rating": "B",
+      "text": "Minor cracking or moisture signs are visible. Monitor and re-seal as needed."
+    },
+    {
+      "section": "Cabin lining and ceiling",
+      "rating": "A",
+      "text": "Lining or ceiling is severely damaged, deteriorated, or water-stained. Replacement is required."
+    },
+    {
+      "section": "Cabin lining and ceiling",
+      "rating": "B",
+      "text": "Minor stains or loose panels are visible. Repair or re-gluing is advisable."
+    },
+    {
+      "section": "Deck hatches, windows and portholes – interior observations",
+      "rating": "A",
+      "text": "Visible leaking or significant water damage around hatches or portholes. Repair is critical."
+    },
+    {
+      "section": "Deck hatches, windows and portholes – interior observations",
+      "rating": "B",
+      "text": "Minor moisture stains or loose frames are visible. Service seals and fasteners."
+    },
+    {
+      "section": "Cabin lights",
+      "rating": "A",
+      "text": "Lighting is non-functional or poses an electrical hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Woodwork, doors and framing",
+      "rating": "A",
+      "text": "Wood is severely rotted or doors are non-functional. Replacement is required."
+    },
+    {
+      "section": "Woodwork, doors and framing",
+      "rating": "B",
+      "text": "Minor rot, loose hinges, or minor damage is visible. Repair or refinishing is advisable."
+    },
+    {
+      "section": "Upholstery",
+      "rating": "A",
+      "text": "Upholstery is severely torn or stained beyond use. Replacement is required."
+    },
+    {
+      "section": "Table",
+      "rating": "A",
+      "text": "The table is cracked, loose, or unstable. Repair or replacement is required."
+    },
+    {
+      "section": "Navigation table",
+      "rating": "A",
+      "text": "The table is cracked, loose, or non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Navigation table",
+      "rating": "B",
+      "text": "Minor damage or loose fasteners are present. Service as needed."
+    },
+    {
+      "section": "Storage, galley cabinets, drawers and galley counter",
+      "rating": "A",
+      "text": "Cabinets or drawers are broken or non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Storage, galley cabinets, drawers and galley counter",
+      "rating": "B",
+      "text": "Hinges are loose or worn and seals are degraded. Service as needed."
+    },
+    {
+      "section": "Galley faucet, sink and drain",
+      "rating": "A",
+      "text": "Plumbing is non-functional or leaking. Repair is required."
+    },
+    {
+      "section": "Galley faucet, sink and drain",
+      "rating": "B",
+      "text": "Faucet is dripping or fittings are worn. Service as needed."
+    },
+    {
+      "section": "Seawater pump for galley sink",
+      "rating": "A",
+      "text": "The pump is non-functional or poses a safety hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Seawater pump for galley sink",
+      "rating": "B",
+      "text": "The pump operates but with reduced flow or intermittent function. Service is recommended."
+    },
+    {
+      "section": "Refrigerator / icebox",
+      "rating": "A",
+      "text": "The unit is non-functional and cannot maintain temperature. Repair or replacement is required."
+    },
+    {
+      "section": "Refrigerator / icebox",
+      "rating": "B",
+      "text": "The unit operates but shows reduced cooling capacity. Servicing or compressor inspection is recommended."
+    },
+    {
+      "section": "Stove",
+      "rating": "A",
+      "text": "The stove is non-functional or poses a safety hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Stove",
+      "rating": "B",
+      "text": "The stove operates but some burners may be weak or uneven. Servicing or burner adjustment is recommended."
+    },
+    {
+      "section": "Microwave",
+      "rating": "B",
+      "text": "The microwave operates but shows signs of wear or reduced power. Service may improve performance."
+    },
+    {
+      "section": "Microwave",
+      "rating": "C",
+      "text": "The microwave is operational."
+    },
+    {
+      "section": "Television",
+      "rating": "A",
+      "text": "The television is non-functional or poses an electrical hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Television",
+      "rating": "B",
+      "text": "The television displays a weak picture or intermittent signal. Service or antenna adjustment is recommended."
+    },
+    {
+      "section": "Television",
+      "rating": "C",
+      "text": "The television is operational and functions properly."
+    },
+    {
+      "section": "Cabin fan or fans",
+      "rating": "A",
+      "text": "Fans are non-functional or pose a safety hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Cabin fan or fans",
+      "rating": "B",
+      "text": "Fans operate but with reduced speed or noise. Service or motor inspection is recommended."
+    },
+    {
+      "section": "Floor and carpet",
+      "rating": "A",
+      "text": "The floor or carpet is severely damaged or shows signs of rot. Replacement is required."
+    },
+    {
+      "section": "Floor and carpet",
+      "rating": "B",
+      "text": "Minor stains, wear, or loose fasteners are visible. Cleaning or repair is advisable."
+    },
+    {
+      "section": "Bulkheads",
+      "rating": "A",
+      "text": "Bulkheads are cracked or show structural damage. Repair is required."
+    },
+    {
+      "section": "Bulkheads",
+      "rating": "B",
+      "text": "Minor cracking or moisture is visible. Monitor and seal as needed."
+    },
+    {
+      "section": "Keel bolts",
+      "rating": "B",
+      "text": "Keel bolts are accessible but show minor corrosion. Inspection and potential re-torquing is advisable."
+    },
+    {
+      "section": "Keel bolts",
+      "rating": "C",
+      "text": "Keel bolts are secure and not showing concerning corrosion."
     }
   ],
   "Head": [
     {
       "section": "Head, toilet and seacock",
       "rating": "A",
-      "text": "The toilet was not tested as the vessel was out of the water. No leakage was observed, and the intake seacock was securely attached and operated smoothly. However, a disused seacock\u2014likely part of the waste discharge system\u2014was found uncapped. Under ABYC H-27 (Seacocks and Through-Hull Fittings), any hull penetration below the maximum heeled waterline must have a means of positive shut-off and the unused seacock must be securely capped or removed, and the opening faired to prevent the risk of water ingress."
+      "text": "The toilet was not tested as the vessel was out of the water. No leakage was observed, and the intake seacock was securely attached and operated smoothly. However, a disused seacock—likely part of the waste discharge system—was found uncapped. Under ABYC H-27 (Seacocks and Through-Hull Fittings), any hull penetration below the maximum heeled waterline must have a means of positive shut-off and the unused seacock must be securely capped or removed, and the opening faired to prevent the risk of water ingress."
     },
     {
       "section": "Head, toilet and seacock",
@@ -2484,13 +3614,33 @@
       "section": "Head, shower, drain, sump and pump",
       "rating": "Not tested",
       "text": "The head, shower, drain, sump, and pump were not tested because the vessel was out of the water."
+    },
+    {
+      "section": "Head, faucet, sink and drain",
+      "rating": "A",
+      "text": "Plumbing is non-functional or leaking significantly. Repair is required."
+    },
+    {
+      "section": "Head, faucet, sink and drain",
+      "rating": "B",
+      "text": "Faucet is dripping or fittings are worn. Service is recommended."
+    },
+    {
+      "section": "Head, shower, drain, sump and pump",
+      "rating": "A",
+      "text": "The shower, drain, or pump is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Head, shower, drain, sump and pump",
+      "rating": "B",
+      "text": "The system operates but shows signs of wear or reduced flow. Service is recommended."
     }
   ],
   "Fuel & Tanks": [
     {
       "section": "Fuel tank(s)",
       "rating": "A",
-      "text": "The vessel\u2019s fuel system lacked a shut-off valve at the tank outlet; the supply line was connected directly to the tank. Install a readily accessible shut-off valve at the tank outlet in compliance with Transport Canada Small Vessel Regulations and ABYC H-33, using a metallic or approved composite valve securely mounted and operable without tools."
+      "text": "The vessel’s fuel system lacked a shut-off valve at the tank outlet; the supply line was connected directly to the tank. Install a readily accessible shut-off valve at the tank outlet in compliance with Transport Canada Small Vessel Regulations and ABYC H-33, using a metallic or approved composite valve securely mounted and operable without tools."
     },
     {
       "section": "Fuel tank(s)",
@@ -2606,6 +3756,106 @@
       "section": "Deck wash pump, plumbing and electrical",
       "rating": "Not tested",
       "text": "The deck wash could not be tested because the vessel was out of the water."
+    },
+    {
+      "section": "Hot water tank(s), plumbing and electrical",
+      "rating": "B",
+      "text": "The system operates but with reduced temperature or minor leaks. Service is recommended."
+    },
+    {
+      "section": "Black water tank(s) and plumbing",
+      "rating": "A",
+      "text": "The tank or plumbing is leaking or compromised. Repair or replacement is critical."
+    },
+    {
+      "section": "Black water tank(s) and plumbing",
+      "rating": "B",
+      "text": "Minor leaks or deterioration is visible. Service or replacement is advisable."
+    },
+    {
+      "section": "Black water vacuum pump(s)",
+      "rating": "A",
+      "text": "The pump is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Black water vacuum pump(s)",
+      "rating": "B",
+      "text": "The pump operates but with reduced suction or noise. Service is recommended."
+    },
+    {
+      "section": "Black water vacuum pump(s)",
+      "rating": "C",
+      "text": "The pump is operational."
+    },
+    {
+      "section": "Black water macerator(s)",
+      "rating": "A",
+      "text": "The macerator is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Black water macerator(s)",
+      "rating": "B",
+      "text": "The macerator operates but with reduced power. Service is recommended."
+    },
+    {
+      "section": "Black water macerator(s)",
+      "rating": "C",
+      "text": "The macerator is operational."
+    },
+    {
+      "section": "Black water gauge",
+      "rating": "A",
+      "text": "The gauge is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Black water gauge",
+      "rating": "B",
+      "text": "The gauge shows inaccurate readings. Service or replacement is advisable."
+    },
+    {
+      "section": "Freshwater tank and plumbing",
+      "rating": "A",
+      "text": "The tank or plumbing is leaking. Repair or replacement is critical."
+    },
+    {
+      "section": "Freshwater tank and plumbing",
+      "rating": "B",
+      "text": "Minor leaks or deterioration is visible. Service is advisable."
+    },
+    {
+      "section": "Freshwater pump",
+      "rating": "A",
+      "text": "The pump is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Freshwater pump",
+      "rating": "B",
+      "text": "The pump operates but with reduced flow. Service is recommended."
+    },
+    {
+      "section": "Freshwater level gauge",
+      "rating": "A",
+      "text": "The gauge is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Freshwater level gauge",
+      "rating": "B",
+      "text": "The gauge shows inaccurate readings. Service or replacement is advisable."
+    },
+    {
+      "section": "Freshwater level gauge",
+      "rating": "C",
+      "text": "The gauge is operational and accurate."
+    },
+    {
+      "section": "Deck wash pump, plumbing and electrical",
+      "rating": "A",
+      "text": "The system is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Deck wash pump, plumbing and electrical",
+      "rating": "B",
+      "text": "The system operates with reduced flow or minor leaks. Service is recommended."
     }
   ],
   "Engine & Powertrain": [
@@ -2850,9 +4100,69 @@
       "text": "Because the boat was on shore, the drive coupling, propeller shaft, and stuffing box were not tested. However, all appeared serviceable. Recommend testing when the boat is launched to ensure the stuffing box does not leak when the boat is stationary and drips approximately two to three drops per minute while the boat is underway."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from engine bay",
+      "section": "Bilge, stringers and ribs – accessible from engine bay",
       "rating": "C",
       "text": "Visible areas of the engine bay appeared serviceable and free of apparent damage. The compartment was noted to be clean."
+    },
+    {
+      "section": "Generator (if installed)",
+      "rating": "A",
+      "text": "The generator is non-functional or poses a safety hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Generator (if installed)",
+      "rating": "B",
+      "text": "The generator runs but requires servicing for optimal performance and safety."
+    },
+    {
+      "section": "Generator (if installed)",
+      "rating": "C",
+      "text": "The generator is operational and provides reliable power generation."
+    },
+    {
+      "section": "Engine condition",
+      "rating": "A",
+      "text": "The engine is damaged or non-functional. Major repair or replacement is required."
+    },
+    {
+      "section": "Hoses",
+      "rating": "A",
+      "text": "Hoses are cracked, split, or severely deteriorated. Replacement is critical to prevent fluid leakage."
+    },
+    {
+      "section": "Automatic engine compartment fire extinguishing system",
+      "rating": "A",
+      "text": "The system is non-functional or expired. Repair or replacement is required."
+    },
+    {
+      "section": "Automatic engine compartment fire extinguishing system",
+      "rating": "B",
+      "text": "The system is present but approaching expiry. Servicing or replacement is advisable."
+    },
+    {
+      "section": "Automatic engine compartment fire extinguishing system",
+      "rating": "C",
+      "text": "The system is functional and current."
+    },
+    {
+      "section": "Gearbox general condition and impressions",
+      "rating": "A",
+      "text": "The gearbox is damaged or non-functional. Major repair or replacement is required."
+    },
+    {
+      "section": "Gearbox general condition and impressions",
+      "rating": "B",
+      "text": "The gearbox shows signs of wear or minor fluid leaks. Service is recommended."
+    },
+    {
+      "section": "Bilge, stringers and ribs – accessible from engine bay",
+      "rating": "A",
+      "text": "Significant water, oil, or debris is present. Clean the bilge and investigate for leaks."
+    },
+    {
+      "section": "Bilge, stringers and ribs – accessible from engine bay",
+      "rating": "B",
+      "text": "Minor water or debris is visible. Cleaning is recommended."
     }
   ],
   "Steering & Hydraulics": [
@@ -2905,6 +4215,21 @@
       "section": "Trim tab hydraulic pump and system",
       "rating": "Not tested",
       "text": "The trim tab hydraulic system was not tested."
+    },
+    {
+      "section": "Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)",
+      "rating": "A",
+      "text": "The steering system is broken or severely compromised. Repair is critical for safety."
+    },
+    {
+      "section": "Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)",
+      "rating": "B",
+      "text": "Steering is stiff or shows minor wear. Service and lubrication are recommended."
+    },
+    {
+      "section": "Hydraulic steering (hoses, fittings, steering cylinder, tiller arm or tie bar, rudder post and stuffing box, etc.)",
+      "rating": "A",
+      "text": "The system is leaking or non-functional. Repair is critical for safety."
     }
   ],
   "Electrical": [
@@ -2931,7 +4256,7 @@
     {
       "section": "Inverter and grounding",
       "rating": "A",
-      "text": "The inverter\u2019s metallic case was not bonded to the vessel\u2019s grounding and bonding system. Bond the case per best practice to improve corrosion protection and safety."
+      "text": "The inverter’s metallic case was not bonded to the vessel’s grounding and bonding system. Bond the case per best practice to improve corrosion protection and safety."
     },
     {
       "section": "Inverter and grounding",
@@ -2946,7 +4271,7 @@
     {
       "section": "Inverter/charger and grounding",
       "rating": "C",
-      "text": "An inverter/charger was installed in (location here). The unit was tested under shore power and operated as expected, charging the vessel\u2019s batteries and switching cleanly between inverter and charger modes. No abnormal sounds, overheating, or wiring issues were observed, and the system appeared serviceable."
+      "text": "An inverter/charger was installed in (location here). The unit was tested under shore power and operated as expected, charging the vessel’s batteries and switching cleanly between inverter and charger modes. No abnormal sounds, overheating, or wiring issues were observed, and the system appeared serviceable."
     },
     {
       "section": "Inverter/charger and grounding",
@@ -3001,7 +4326,7 @@
     {
       "section": "Starter battery(ies)",
       "rating": "C - singular, box",
-      "text": "The vessel\u2019s starter battery was secured in a plastic battery box with an appropriate tie down strap. Terminal connections were clean and tight."
+      "text": "The vessel’s starter battery was secured in a plastic battery box with an appropriate tie down strap. Terminal connections were clean and tight."
     },
     {
       "section": "Starter battery(ies)",
@@ -3051,7 +4376,7 @@
     {
       "section": "House battery(ies)",
       "rating": "pre-purchase battery survey",
-      "text": "A Deep Cycle flooded lead-acid house battery (Model No. 31DC130) was installed, rated at 230 minutes reserve capacity and 1000 MCA, with a 20-hour rate of 130 Ah. The manufacturer\u2019s date code on the label indicated D19, corresponding to April 2019. The battery was fitted in a dedicated battery box and appeared properly secured. No corrosion was noted on the terminals. No leakage was observed at the time of inspection, and the unit otherwise appeared serviceable. The onboard electrics were run during the survey. However, the battery indicated very low voltage. Suggest attaching a trickle charger (solar or otherwise) to maintain battery health. It should be noted that typical lead-acid batteries last approximately four to six years. Replacement of this battery may be required in the short term."
+      "text": "A Deep Cycle flooded lead-acid house battery (Model No. 31DC130) was installed, rated at 230 minutes reserve capacity and 1000 MCA, with a 20-hour rate of 130 Ah. The manufacturer’s date code on the label indicated D19, corresponding to April 2019. The battery was fitted in a dedicated battery box and appeared properly secured. No corrosion was noted on the terminals. No leakage was observed at the time of inspection, and the unit otherwise appeared serviceable. The onboard electrics were run during the survey. However, the battery indicated very low voltage. Suggest attaching a trickle charger (solar or otherwise) to maintain battery health. It should be noted that typical lead-acid batteries last approximately four to six years. Replacement of this battery may be required in the short term."
     },
     {
       "section": "Battery hydrometer test",
@@ -3174,7 +4499,7 @@
       "text": "AC outlets were not tested because the vessel was not connected to AC power."
     },
     {
-      "section": "Electrical \u2013 other features",
+      "section": "Electrical – other features",
       "rating": "Not tested",
       "text": "Not tested."
     },
@@ -3202,6 +4527,221 @@
       "section": "Shore power receptacle",
       "rating": "Not tested",
       "text": "Not tested."
+    },
+    {
+      "section": "Solar panel(s)",
+      "rating": "A",
+      "text": "The solar panels are damaged or non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Solar panel(s)",
+      "rating": "B",
+      "text": "The panels are degraded or underperforming. Cleaning, wiring inspection, or panel replacement may improve output."
+    },
+    {
+      "section": "Solar panel(s)",
+      "rating": "C",
+      "text": "The solar panels are operational and generating power effectively."
+    },
+    {
+      "section": "Generator",
+      "rating": "A",
+      "text": "The generator is non-functional or unsafe to operate. Repair or replacement is required."
+    },
+    {
+      "section": "Generator",
+      "rating": "B",
+      "text": "The generator operates but requires servicing for optimal performance and safety."
+    },
+    {
+      "section": "Generator",
+      "rating": "C",
+      "text": "The generator is operational and provides reliable power generation."
+    },
+    {
+      "section": "Shore power overcurrent protection",
+      "rating": "A",
+      "text": "Protection is absent or non-functional, posing a fire hazard. Installation or repair is critical."
+    },
+    {
+      "section": "Shore power overcurrent protection",
+      "rating": "B",
+      "text": "Protection is present but shows signs of age or corrosion. Service is recommended."
+    },
+    {
+      "section": "Galvanic isolator",
+      "rating": "A",
+      "text": "The isolator is non-functional or absent, risking hull electrolysis. Installation or repair is required."
+    },
+    {
+      "section": "Galvanic isolator",
+      "rating": "B",
+      "text": "The isolator is present but shows signs of age. Testing or replacement is recommended."
+    },
+    {
+      "section": "Galvanic isolator",
+      "rating": "C",
+      "text": "The isolator is functional and protecting the hull."
+    },
+    {
+      "section": "Isolation transformer",
+      "rating": "A",
+      "text": "The transformer is non-functional or absent. Installation or repair is required for safe shore power connection."
+    },
+    {
+      "section": "Isolation transformer",
+      "rating": "B",
+      "text": "The transformer is present but shows signs of age or overheating. Service or replacement is advisable."
+    },
+    {
+      "section": "Isolation transformer",
+      "rating": "C",
+      "text": "The transformer is functional and providing electrical isolation."
+    },
+    {
+      "section": "Inverter/charger and grounding",
+      "rating": "A",
+      "text": "The system is non-functional or poses a safety hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Inverter/charger and grounding",
+      "rating": "B",
+      "text": "The system operates but shows signs of wear. Service is recommended."
+    },
+    {
+      "section": "Battery charger and grounding",
+      "rating": "A",
+      "text": "The charger is non-functional or poses a safety hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Battery charger and grounding",
+      "rating": "B",
+      "text": "The charger operates but shows signs of age. Service is recommended."
+    },
+    {
+      "section": "Battery selector switch, combiner, VSR",
+      "rating": "A",
+      "text": "The switch or combiner is non-functional or poses a safety hazard. Repair or replacement is required."
+    },
+    {
+      "section": "Battery selector switch, combiner, VSR",
+      "rating": "B",
+      "text": "The switch or combiner shows corrosion or stiff operation. Service is recommended."
+    },
+    {
+      "section": "Battery ventilation",
+      "rating": "A",
+      "text": "Ventilation is absent or blocked, creating a safety hazard. Installation or unblocking is required."
+    },
+    {
+      "section": "Battery ventilation",
+      "rating": "B",
+      "text": "Ventilation is partially obstructed. Cleaning or improvement is recommended."
+    },
+    {
+      "section": "Battery hydrometer test",
+      "rating": "A",
+      "text": "Batteries show severely low specific gravity, indicating discharge or failure. Charging or replacement is required."
+    },
+    {
+      "section": "Battery hydrometer test",
+      "rating": "B",
+      "text": "Batteries show low specific gravity in some cells. Charging and equalisation may help."
+    },
+    {
+      "section": "Battery hydrometer test",
+      "rating": "C",
+      "text": "Battery specific gravity is within normal range."
+    },
+    {
+      "section": "Battery load test",
+      "rating": "A",
+      "text": "Batteries failed the load test, indicating failure. Replacement is required."
+    },
+    {
+      "section": "Battery load test",
+      "rating": "B",
+      "text": "Batteries show marginal performance under load. Service or replacement is advisable."
+    },
+    {
+      "section": "Battery load test",
+      "rating": "C",
+      "text": "Batteries passed the load test and are functioning properly."
+    },
+    {
+      "section": "Battery(ies) overcurrent protection",
+      "rating": "A",
+      "text": "Protection is absent or non-functional. Installation or repair is critical for fire safety."
+    },
+    {
+      "section": "Battery(ies) overcurrent protection",
+      "rating": "B",
+      "text": "Protection is present but shows signs of age. Service or replacement is recommended."
+    },
+    {
+      "section": "Distribution panel 12V",
+      "rating": "A",
+      "text": "The panel is damaged or non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Distribution panel 12V",
+      "rating": "B",
+      "text": "The panel shows signs of corrosion or loose connections. Service is recommended."
+    },
+    {
+      "section": "Reverse polarity light",
+      "rating": "A",
+      "text": "The light is absent or non-functional, creating a safety hazard. Installation or repair is required."
+    },
+    {
+      "section": "Reverse polarity light",
+      "rating": "B",
+      "text": "The light is present but dim or intermittent. Service or lamp replacement is recommended."
+    },
+    {
+      "section": "Reverse polarity light",
+      "rating": "C",
+      "text": "The reverse polarity light is functional."
+    },
+    {
+      "section": "Heating and air conditioning",
+      "rating": "A",
+      "text": "The system is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Heating and air conditioning",
+      "rating": "B",
+      "text": "The system operates but with reduced efficiency. Service is recommended."
+    },
+    {
+      "section": "Heating and air conditioning",
+      "rating": "C",
+      "text": "The system is operational and effective."
+    },
+    {
+      "section": "Electrical – other features",
+      "rating": "A",
+      "text": "Critical electrical features are non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Electrical – other features",
+      "rating": "B",
+      "text": "Some electrical features show signs of wear or intermittent function. Service is recommended."
+    },
+    {
+      "section": "Electrical – other features",
+      "rating": "C",
+      "text": "Electrical features are operational."
+    },
+    {
+      "section": "Shore power cable(s)",
+      "rating": "A",
+      "text": "The cable is damaged or non-functional. Replacement is critical for safety."
+    },
+    {
+      "section": "Shore power cable(s)",
+      "rating": "B",
+      "text": "The cable shows signs of wear or damage. Repair or replacement is advisable."
     }
   ],
   "Safety & Nav Equipment": [
@@ -3413,7 +4953,7 @@
     {
       "section": "Navigation lights (port, starboard, anchor, steaming, other)",
       "rating": "A",
-      "text": "The vessel\u2019s navigation lights were non operational during inspection. This does not meet ABYC A 16 guidance and COLREGS Rules 20 and 21 for visibility. Repair or replacement is required to meet range requirements such as two nautical miles for vessels under twelve metres and to satisfy ABYC electrical practice."
+      "text": "The vessel’s navigation lights were non operational during inspection. This does not meet ABYC A 16 guidance and COLREGS Rules 20 and 21 for visibility. Repair or replacement is required to meet range requirements such as two nautical miles for vessels under twelve metres and to satisfy ABYC electrical practice."
     },
     {
       "section": "Navigation lights (port, starboard, anchor, steaming, other)",
@@ -3429,6 +4969,91 @@
       "section": "Navigation lights (port, starboard, anchor, steaming, other)",
       "rating": "Not tested - can't see steaming or anchor light",
       "text": "The red port, green starboard, white stern light, and white steaming light were clear and functioning properly. It was bright daylight at the time of inspection, so the anchor light could not be verified."
+    },
+    {
+      "section": "EPIRB",
+      "rating": "A",
+      "text": "The EPIRB is expired or non-functional. Immediate replacement or battery replacement is required for safety compliance."
+    },
+    {
+      "section": "EPIRB",
+      "rating": "B",
+      "text": "The EPIRB is approaching expiry or showing signs of degradation. Plan for replacement or servicing in the near term."
+    },
+    {
+      "section": "EPIRB",
+      "rating": "C",
+      "text": "The EPIRB is registered and current, ready for emergency use."
+    },
+    {
+      "section": "Radar reflector",
+      "rating": "A",
+      "text": "No radar reflector is installed, creating a safety hazard for vessel visibility. Installation is required."
+    },
+    {
+      "section": "Radar reflector",
+      "rating": "B",
+      "text": "The radar reflector is damaged and should be repaired or replaced to maintain radar visibility."
+    },
+    {
+      "section": "Radar reflector",
+      "rating": "C",
+      "text": "The radar reflector is properly mounted and functional."
+    },
+    {
+      "section": "Watertight flashlight",
+      "rating": "B",
+      "text": "The flashlight operates but with weak light. Battery replacement or service is recommended."
+    },
+    {
+      "section": "Lifejackets and PFDs",
+      "rating": "B",
+      "text": "Some jackets or PFDs show wear or sealing degradation. Replacement or repair is advisable."
+    },
+    {
+      "section": "Bilge pump, manual",
+      "rating": "A",
+      "text": "The pump is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Bilge pump, manual",
+      "rating": "B",
+      "text": "The pump operates but with reduced capacity. Service is recommended."
+    },
+    {
+      "section": "Propane gas detector",
+      "rating": "A",
+      "text": "The detector is absent or non-functional. Installation or replacement is required for safety."
+    },
+    {
+      "section": "Propane gas detector",
+      "rating": "B",
+      "text": "The detector is present but shows signs of age. Battery replacement or service is advisable."
+    },
+    {
+      "section": "Propane gas detector",
+      "rating": "C",
+      "text": "The detector is functional and operational."
+    },
+    {
+      "section": "LPG cut off solenoid valve switch",
+      "rating": "A",
+      "text": "The valve or switch is non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "LPG cut off solenoid valve switch",
+      "rating": "B",
+      "text": "The system operates but shows signs of wear. Service is recommended."
+    },
+    {
+      "section": "Emergency tiller",
+      "rating": "A",
+      "text": "The tiller is missing or non-functional. Installation or repair is required for emergency steering."
+    },
+    {
+      "section": "Emergency tiller",
+      "rating": "B",
+      "text": "The tiller is present but shows signs of wear. Service or replacement is advisable."
     }
   ]
 }
