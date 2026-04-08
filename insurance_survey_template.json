@@ -328,30 +328,6 @@
           },
           {
             "type": "list",
-            "label": "Swim platform and ladder - condition and moisture readings",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Transom",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
             "label": "Hull exterior above the waterline",
             "options": [
               "A - Critical",
@@ -377,6 +353,30 @@
           {
             "type": "list",
             "label": "Hull-deck joint (exterior)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Transom",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Swim platform and ladder - condition and moisture readings",
             "options": [
               "A - Critical",
               "B - Needs Attention",
