@@ -2174,7 +2174,7 @@ function renderNewSurveyForm() {
         </select>
       </div>
 
-      <div class="form-group">
+      <div class="form-group sail-only-field">
         <label class="form-label">Keel Type</label>
         <select id="keelType">
           <option value="">Select keel type</option>
@@ -4636,14 +4636,15 @@ function renderInspection(survey) {
     const allExcluded = excludedCount === items.length;
     const isComplete = categoryCompletion === 100;
     const incompleteDot = !isComplete ? '<span class="completion-dot" style="display:inline-block;width:10px;height:10px;background:#dc2626;border-radius:50%;margin-right:6px;flex-shrink:0;"></span>' : '<span class="completion-dot" style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:50%;margin-right:6px;flex-shrink:0;"></span>';
-    const progressColor = isComplete ? '#16a34a' : '#dc2626';
+    const progressColor = allExcluded ? '#9ca3af' : (isComplete ? '#16a34a' : '#dc2626');
+    const progressText = allExcluded ? 'Skipped' : `${categoryCompletion}%`;
 
     html += `
       <div class="category-accordion" data-category-name="${categoryName.replace(/"/g, '&quot;')}">
         <button class="accordion-header" onclick="toggleAccordion(this)">
           ${incompleteDot}
           <span class="category-title">${categoryName}${flaggedCount > 0 ? ` <span style="color:#f59e0b;font-size:12px;">🚩${flaggedCount}</span>` : ''}${excludedCount > 0 ? ` <span style="color:#9ca3af;font-size:12px;">⊘${excludedCount}</span>` : ''}</span>
-          <span class="category-progress" style="color:${progressColor};font-weight:700;">${categoryCompletion}%</span>
+          <span class="category-progress" style="color:${progressColor};font-weight:700;">${progressText}</span>
           <span style="margin-left: 12px;">▼</span>
         </button>
         <div class="accordion-content" style="display: none;">
@@ -6134,6 +6135,15 @@ function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
     `;
   }
 
+  // Standards tags (show selected ABYC/TC standards persistently)
+  if (itemData.standards && itemData.standards.length > 0) {
+    html += `<div style="padding:0 12px 4px 12px;display:flex;flex-wrap:wrap;gap:4px;">`;
+    itemData.standards.forEach(std => {
+      html += `<span style="font-size:10px;background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;border:1px solid #fcd34d;white-space:nowrap;">⚠️ ${std}</span>`;
+    });
+    html += `</div>`;
+  }
+
   // Photo thumbnails row
   if (photoCount > 0) {
     html += `<div class="compact-photo-thumbs" style="display:flex;gap:4px;padding:2px 12px 4px 12px;flex-wrap:wrap;">`;
@@ -6448,9 +6458,11 @@ function updateCategoryHeader(survey, categoryName) {
   const completionCount = categoryItems.filter(item =>
     survey.items[item.label]?.rating || survey.items[item.label]?.excluded
   ).length;
+  const excludedCount = categoryItems.filter(item => survey.items[item.label]?.excluded).length;
+  const allExcluded = excludedCount === categoryItems.length && categoryItems.length > 0;
   const completionPct = Math.round((completionCount / categoryItems.length) * 100);
   const isComplete = completionPct === 100;
-  const progressColor = isComplete ? '#16a34a' : '#dc2626';
+  const progressColor = allExcluded ? '#9ca3af' : (isComplete ? '#16a34a' : '#dc2626');
 
   // Update the completion dot
   const dot = header.querySelector('.completion-dot');
@@ -6461,7 +6473,7 @@ function updateCategoryHeader(survey, categoryName) {
   // Update the percentage text
   const progressEl = header.querySelector('.category-progress');
   if (progressEl) {
-    progressEl.textContent = `${completionPct}%`;
+    progressEl.textContent = allExcluded ? 'Skipped' : `${completionPct}%`;
     progressEl.style.color = progressColor;
   }
 
@@ -6714,12 +6726,20 @@ function toggleCategoryExclude(categoryName, exclude) {
   getSurvey(currentSurveyId).then(survey => {
     // Find the category items from the active template
     const activeTemplate = getTemplateForSurvey(survey);
+
+    // Auto-skip associated gauges categories when skipping Pilot house or Flybridge
+    const linkedCategories = {
+      'Pilot house': ['Pilot house gauges and instrumentation'],
+      'Flybridge': ['Flybridge gauges and instrumentation'],
+    };
+    const categoriesToSkip = [categoryName, ...(linkedCategories[categoryName] || [])];
+
     let itemLabels = [];
     activeTemplate.forEach(section => {
       if (section.categories) {
         section.categories.forEach(cat => {
-          if (cat.name === categoryName && cat.items) {
-            itemLabels = cat.items.filter(i => i.type === 'list').map(i => i.label);
+          if (categoriesToSkip.includes(cat.name) && cat.items) {
+            itemLabels.push(...cat.items.filter(i => i.type === 'list').map(i => i.label));
           }
         });
       }
@@ -7710,20 +7730,22 @@ ${survey.locationLat && survey.locationLon ? `
   </div>
 ` : ''}
 
-  <!-- ═══ VESSEL SPECIFICATIONS ═══ -->
+  <!-- ═══ VESSEL SPECIFICATIONS ═══ -->`;
+  const isSail = (survey.vesselType || '').toLowerCase() === 'sail';
+  html += `
   <h2>VESSEL SPECIFICATIONS</h2>
   <table>
     <tr><td style="width:40%;"><strong>Boat Style</strong></td><td>${esc(survey.boatStyle) || 'N/A'}</td></tr>
     <tr><td><strong>Construction</strong></td><td>${esc(survey.construction) || 'N/A'}</td></tr>
     <tr><td><strong>Hull Type</strong></td><td>${esc(survey.hullType) || 'N/A'}</td></tr>
-    <tr><td><strong>Keel Type</strong></td><td>${esc(survey.keelType) || 'N/A'}</td></tr>
+    ${isSail ? `<tr><td><strong>Keel Type</strong></td><td>${esc(survey.keelType) || 'N/A'}</td></tr>` : ''}
     <tr><td><strong>LOA</strong></td><td>${esc(survey.loa) || 'N/A'}</td></tr>
     <tr><td><strong>LWL</strong></td><td>${esc(survey.lwl) || 'N/A'}</td></tr>
     <tr><td><strong>Beam</strong></td><td>${esc(survey.beam) || 'N/A'}</td></tr>
     <tr><td><strong>Displacement</strong></td><td>${esc(survey.displacement) || 'N/A'}</td></tr>
-    <tr><td><strong>Ballast</strong></td><td>${esc(survey.ballast) || 'N/A'}</td></tr>
-    <tr><td><strong>Max Draft</strong></td><td>${esc(survey.maxDraft) || 'N/A'}</td></tr>
-    <tr><td><strong>Total Sail Area</strong></td><td>${esc(survey.totalSailArea) || 'N/A'}</td></tr>
+    ${isSail ? `<tr><td><strong>Ballast</strong></td><td>${esc(survey.ballast) || 'N/A'}</td></tr>` : ''}
+    ${isSail ? `<tr><td><strong>Max Draft</strong></td><td>${esc(survey.maxDraft) || 'N/A'}</td></tr>` : ''}
+    ${isSail ? `<tr><td><strong>Total Sail Area</strong></td><td>${esc(survey.totalSailArea) || 'N/A'}</td></tr>` : ''}
     <tr><td><strong>Number of Cabins</strong></td><td>${esc(survey.numberCabins) || 'N/A'}</td></tr>
     <tr><td><strong>Electrical System</strong></td><td>${esc(survey.electricalSystem) || 'N/A'}</td></tr>
     <tr><td><strong>Changes to Original Plan</strong></td><td>${esc(survey.changesToPlan) || 'None noted'}</td></tr>
