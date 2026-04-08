@@ -84,7 +84,8 @@
           },
           {
             "type": "textsingle",
-            "label": "Total sail area"
+            "label": "Total sail area",
+            "sailOnly": true
           },
           {
             "type": "textsingle",
@@ -96,11 +97,13 @@
           },
           {
             "type": "textsingle",
-            "label": "Ballast"
+            "label": "Ballast",
+            "sailOnly": true
           },
           {
             "type": "textsingle",
-            "label": "Max draft"
+            "label": "Max draft",
+            "sailOnly": true
           },
           {
             "type": "question",
@@ -119,7 +122,8 @@
               "Wing",
               "Shoal",
               "Swing"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "textsingle",
@@ -157,11 +161,11 @@
         ]
       },
       {
-        "name": "Hull exterior , keel and propulsion",
+        "name": "Hull exterior, keel and propulsion",
         "items": [
           {
             "type": "list",
-            "label": "Evident damage or repairs to hull and rudder below the waterline",
+            "label": "Hull and rudder(s)/drive(s) condition (below the waterline)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -173,7 +177,7 @@
           },
           {
             "type": "list",
-            "label": "Hull and rudder(s) (if applicable) percussion testing",
+            "label": "Hull and rudder(s) (if applicable) impact and resonance testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -185,7 +189,7 @@
           },
           {
             "type": "list",
-            "label": "Hull and rudder(s) (if applicable) moisture testing",
+            "label": "Hull and rudder(s) (if applicable) conductivity testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -217,59 +221,12 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Through-hulls, strainers",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Transducers (speed, depth, etc.)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
             "label": "Hull anodes",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Stern tube(s) (external)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Propeller shaft(s)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -349,6 +306,103 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Bow thruster",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Stern thruster",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Swim platform and ladder - condition and conductivity readings",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Hull exterior above the waterline",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Through-hulls, strainers",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Transducers (speed, depth, etc.)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Stern tube(s) (external)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Propeller shaft(s)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
             ]
           },
           {
@@ -389,55 +443,7 @@
           },
           {
             "type": "list",
-            "label": "Bow thruster",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Stern thruster",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Swim platform and ladder - condition and moisture readings",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
             "label": "Transom",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Hull exterior above the waterline",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -494,18 +500,6 @@
               "Not applicable",
               "Not tested/not verified"
             ]
-          },
-          {
-            "type": "list",
-            "label": "Hull exterior and propulsion - other",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
           }
         ]
       },
@@ -522,18 +516,6 @@
           },
           {
             "type": "list",
-            "label": "Jib/genoa furler, furling line and tackle",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
             "label": "Forestay (as inspected from the deck)",
             "options": [
               "A - Critical",
@@ -542,19 +524,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Spinnaker/whisker pole, uphaul and downhaul",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
@@ -566,7 +537,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
@@ -578,19 +550,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Spreaders/boots",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
@@ -602,7 +563,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
@@ -614,11 +576,12 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
-            "label": "Boom, gooseneck, boomvang, outhaul, and reefing lines",
+            "label": "Spreaders/boots",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -626,7 +589,21 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Boom, gooseneck, boomvang, outhaul, cunningham and reefing lines",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
@@ -638,7 +615,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
@@ -650,7 +628,21 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Jib/genoa furler, furling line and tackle",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
@@ -662,7 +654,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
@@ -674,7 +667,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
@@ -686,11 +680,12 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
-            "label": "Main sheet",
+            "label": "Main sheet and traveller",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -698,19 +693,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Traveller and tackle",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
@@ -722,11 +706,12 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
-            "label": "Spars and rigging - other",
+            "label": "Spinnaker/whisker pole, uphaul and downhaul",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -734,7 +719,121 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
+          }
+        ]
+      },
+      {
+        "name": "Sails",
+        "items": [
+          {
+            "type": "media",
+            "label": "Sails photos"
+          },
+          {
+            "type": "list",
+            "label": "Main",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Genoa 1 (largest)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Genoa 2 (mid-size)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Genoa 3 (smallest)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Spinnaker",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Staysail",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Misen",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Sails - other",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
           }
         ]
       },
@@ -747,31 +846,31 @@
           },
           {
             "type": "list",
+            "label": "Bowsprit, deck and coachroof/pilot house impact and resonance testing",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Bowsprit, deck and coachroof/pilot house conductivity testing",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
             "label": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Deck and coachroof/pilot percussion testing",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Deck and coachroof/pilot house moisture testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -795,7 +894,7 @@
           },
           {
             "type": "list",
-            "label": "Bow roller",
+            "label": "Primary anchor, chain and rode",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -807,7 +906,7 @@
           },
           {
             "type": "list",
-            "label": "Primary anchor, chain and rode",
+            "label": "Bow roller",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -867,7 +966,7 @@
           },
           {
             "type": "list",
-            "label": "Fuel and water fill ports, and waste deck pump-out port",
+            "label": "Shore water hookup",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -879,7 +978,7 @@
           },
           {
             "type": "list",
-            "label": "Shore water hookup",
+            "label": "Grab rails",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -915,7 +1014,7 @@
           },
           {
             "type": "list",
-            "label": "Grab rails",
+            "label": "Fuel and water fill ports, and waste deck pump-out port",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -972,18 +1071,6 @@
               "Not applicable",
               "Not tested/not verified"
             ]
-          },
-          {
-            "type": "list",
-            "label": "Deck and coachroof/pilot house - other features",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
           }
         ]
       },
@@ -1020,7 +1107,7 @@
           },
           {
             "type": "list",
-            "label": "Moisture testing",
+            "label": "Conductivity testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -1101,143 +1188,6 @@
               "Not applicable",
               "Not tested/not verified"
             ]
-          },
-          {
-            "type": "list",
-            "label": "Aft deck - other features",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Outboard engine",
-        "items": [
-          {
-            "type": "media",
-            "label": "Outboard engine photos"
-          },
-          {
-            "type": "textsingle",
-            "label": "Outboard manufacturer, model # and serial number (if available)"
-          },
-          {
-            "type": "media",
-            "label": "Nameplate"
-          },
-          {
-            "type": "list",
-            "label": "Outboard general condition/impression",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Engine mount",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Throttle, gearshift, choke",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Outboard tilt",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Outboard anode(s)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Outboard propeller",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Outboard oil",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Fuel tank, fuel line, primer bulb and supports",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Outboard engine - other features",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
           }
         ]
       },
@@ -1250,7 +1200,7 @@
           },
           {
             "type": "list",
-            "label": "Cockpit, floor, seats and coaming",
+            "label": "Cockpit impact and resonance testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -1262,19 +1212,7 @@
           },
           {
             "type": "list",
-            "label": "Cockpit percussion testing",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Cockpit moisture testing",
+            "label": "Cockpit conductivity testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -1287,54 +1225,6 @@
           {
             "type": "list",
             "label": "Cockpit drains",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Cockpit table(s)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Cockpit lockers/lazarettes",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "remote compressor/condensing refrigeration unit",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Engine locker lid",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -1366,19 +1256,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Magnetic compass",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
@@ -1390,11 +1269,12 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
-            "label": "Cockpit sink, faucets and drain",
+            "label": "Emergency tiller",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -1402,7 +1282,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
@@ -1418,7 +1299,7 @@
           },
           {
             "type": "list",
-            "label": "Propane valve, regulator, gauge, storage compartment and vent.",
+            "label": "Arch - cockpit (interior condition)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -1430,7 +1311,7 @@
           },
           {
             "type": "list",
-            "label": "BBQ/grill",
+            "label": "Propane valve, regulator, gauge, storage compartment and vent",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -1438,19 +1319,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Arch",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
+            ],
+            "conditional": "propane"
           },
           {
             "type": "list",
@@ -1466,7 +1336,7 @@
           },
           {
             "type": "list",
-            "label": "Swim platform shower",
+            "label": "Cockpit lockers",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -1478,312 +1348,7 @@
           },
           {
             "type": "list",
-            "label": "Bimini, dodger and canvas enclosure",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Companionway",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Cockpit - other features",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Cockpit gauges, instrumentation and entertainment",
-        "items": [
-          {
-            "type": "list",
-            "label": "Blower",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Engine start/stop",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Engine gauges (tachometer, speedometer, fuel, temperature, etc.)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Engine controls (throttle, gearshift, etc.)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Outdrive tilt",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Trim tab controls",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Bow thruster controls",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Anchor windlass control",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Autopilot",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Lighting",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Cockpit lighting",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "MFD/Chartplotter",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Radar",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Depth sounder",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Wind instruments (direction, speed, etc.)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Log",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "VHF radio and antenna",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "12V or USB",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Windshield wiper(s) operation",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Stereo and speakers",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Search light",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Flood lights/deck lights",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Cockpit - other gauges and instrumentation",
+            "label": "Cockpit sink and drain",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -1840,7 +1405,7 @@
           },
           {
             "type": "list",
-            "label": "Flybridge moisture testing",
+            "label": "Flybridge conductivity testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2057,11 +1622,11 @@
         ]
       },
       {
-        "name": "Flybridge gauges and instrumentation",
+        "name": "Gauges, instrumentation and entertainment",
         "items": [
           {
             "type": "list",
-            "label": "Flybridge Blower",
+            "label": "Engine start/stop",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2073,7 +1638,7 @@
           },
           {
             "type": "list",
-            "label": "Flybridge Engine start/stop",
+            "label": "Engine gauges (tachometer, speedometer, fuel, temperature, etc.)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2085,7 +1650,7 @@
           },
           {
             "type": "list",
-            "label": "Flybridge Engine gauges (tachometer, speedometer, fuel, temperature, etc.)",
+            "label": "Engine controls (throttle, gearshift, etc.)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2097,7 +1662,33 @@
           },
           {
             "type": "list",
-            "label": "Flybridge Engine gearshift and throttle",
+            "label": "Bow thruster controls",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "conditional": "bowThruster"
+          },
+          {
+            "type": "list",
+            "label": "Stern thruster controls",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "conditional": "sternThruster"
+          },
+          {
+            "type": "list",
+            "label": "Trim tab controls",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2109,7 +1700,7 @@
           },
           {
             "type": "list",
-            "label": "Flybridge Outdrive tilt",
+            "label": "Autopilot",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2121,7 +1712,7 @@
           },
           {
             "type": "list",
-            "label": "Flybridge Trim tabs",
+            "label": "MFD/Chartplotter",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2133,7 +1724,7 @@
           },
           {
             "type": "list",
-            "label": "Flybridge Bow thruster/stern thruster controls",
+            "label": "Depth sounder",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2145,7 +1736,7 @@
           },
           {
             "type": "list",
-            "label": "Flybridge Anchor windlass control",
+            "label": "VHF radio and antenna",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2157,7 +1748,7 @@
           },
           {
             "type": "list",
-            "label": "Flybridge Autopilot",
+            "label": "Radar",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2169,7 +1760,7 @@
           },
           {
             "type": "list",
-            "label": "Flybridge MFD/Chartplotter",
+            "label": "AIS",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2181,7 +1772,7 @@
           },
           {
             "type": "list",
-            "label": "Flybridge Depth sounder",
+            "label": "Entertainment/stereo",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2193,7 +1784,7 @@
           },
           {
             "type": "list",
-            "label": "Flybridge Wind instruments (direction, speed, etc.)",
+            "label": "Windshield wipers",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2205,7 +1796,7 @@
           },
           {
             "type": "list",
-            "label": "Flybridge Log",
+            "label": "Horn/sound signal (powered)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2217,429 +1808,7 @@
           },
           {
             "type": "list",
-            "label": "Flybridge VHF radio and antenna",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Flybridge 12V or USB",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Flybridge Stereo and speakers",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Flybridge Searchlight",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Flybridge Flood lights/deck lights",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Flybridge Magnetic compass",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Flybridge Radar",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Flybridge - other gauges and instrumentation",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Pilot house",
-        "items": [
-          {
-            "type": "media",
-            "label": "Pilot house photos"
-          },
-          {
-            "type": "list",
-            "label": "Pilot house steering wheel",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house, floor and seat(s)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Stereo and speakers",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house 12V or USB",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house - other features",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Pilot house gauges and instrumentation",
-        "items": [
-          {
-            "type": "list",
-            "label": "Pilot house Blower",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Engine start/stop",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Engine gauges (tachometer, speedometer, fuel, temperature, etc.)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Engine controls (throttle, gearshift, etc.)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Outdrive tilt",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Trim tab controls",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Bow thruster/stern thruster controls",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Anchor windlass control",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Autopilot",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Lighting",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house MFD/Chartplotter",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Radar",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Depth sounder",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Log",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house VHF radio and antenna",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house 12V or USB",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Windshield wiper(s) operation",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Stereo speakers",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Searchlight",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Flood lights/deck lights",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Magnetic compass",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house - other gauges and instrumentation",
+            "label": "Spotlight/searchlight",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2660,30 +1829,6 @@
           },
           {
             "type": "list",
-            "label": "Signs of water ingress?",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Hull deck joint (interior)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
             "label": "Chainplates (interior)",
             "options": [
               "A - Critical",
@@ -2692,11 +1837,12 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
-            "label": "Cabin lining and ceiling",
+            "label": "Cabin sole",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2708,7 +1854,7 @@
           },
           {
             "type": "list",
-            "label": "Deck hatches, windows and portholes (interior observations)",
+            "label": "Berths and upholstery",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2720,7 +1866,7 @@
           },
           {
             "type": "list",
-            "label": "Cabin lights",
+            "label": "Interior lighting",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2732,91 +1878,7 @@
           },
           {
             "type": "list",
-            "label": "Woodwork, doors, framing and storage",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Upholstery",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Table",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Navigation table",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Storage, galley cabinets, drawers and galley counter",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Galley faucet, sink and drain",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Seawater pump for galley sink",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Refrigerator/freezer/icebox/drain",
+            "label": "Cabin windows and hatches (interior observations)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2840,7 +1902,7 @@
           },
           {
             "type": "list",
-            "label": "Microwave",
+            "label": "Oven",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2852,7 +1914,7 @@
           },
           {
             "type": "list",
-            "label": "Television",
+            "label": "Refrigerator/freezer",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2864,31 +1926,7 @@
           },
           {
             "type": "list",
-            "label": "Stereo and speakers",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Fan(s)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Floor/carpet",
+            "label": "Sink, faucet and drain (galley)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2912,18 +1950,6 @@
           },
           {
             "type": "list",
-            "label": "Bulkheads",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
             "label": "Keel bolts",
             "options": [
               "A - Critical",
@@ -2932,11 +1958,12 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
-            "label": "Cabin and conveniences - other features",
+            "label": "Protected positive battery lugs and positive bus bars",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2981,79 +2008,7 @@
           },
           {
             "type": "list",
-            "label": "Head, shower, drain, sump and pump",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Secondary head photos",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Head, secondary, toilet and seacock",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Head, secondary, faucet, sink and drain",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Head, secondary, shower, drain, sump and pump",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Shower (independent)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Shower 2 (independent)",
+            "label": "Shower, sump and drain",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -3106,30 +2061,6 @@
           },
           {
             "type": "list",
-            "label": "Black water vacuum pump(s)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Black water mascerator(s)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
             "label": "Black water gauge",
             "options": [
               "A - Critical",
@@ -3143,54 +2074,6 @@
           {
             "type": "list",
             "label": "Fresh water tank(s) and plumbing",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Fresh water pump",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Fresh water level gauge",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Deck wash pump, plumbing and electrical.",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Fuel, water and waste - other features",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -3238,10 +2121,6 @@
             "label": "Horsepower"
           },
           {
-            "type": "textsingle",
-            "label": "Hours"
-          },
-          {
             "type": "list",
             "label": "Cooling water intake seacock(s) and strainer(s)",
             "options": [
@@ -3254,36 +2133,12 @@
             ]
           },
           {
-            "type": "list",
-            "label": "Manifold(s) and riser(s)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "textsingle",
+            "type": "question",
             "label": "Exhaust type"
           },
           {
             "type": "list",
             "label": "Exhaust condition",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Manual fuel pump(s)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -3354,42 +2209,6 @@
             ]
           },
           {
-            "type": "list",
-            "label": "Automatic engine compartment fire extinguishing system",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Firewall installed on air entrance",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Gas vapour detector",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
             "type": "media",
             "label": "Gearbox nameplate(s)"
           },
@@ -3432,62 +2251,6 @@
               "Not applicable",
               "Not tested/not verified"
             ]
-          },
-          {
-            "type": "media",
-            "label": "Sail drive name plate(s)"
-          },
-          {
-            "type": "textsingle",
-            "label": "Sail drive manufacturer and model #"
-          },
-          {
-            "type": "list",
-            "label": "Sail drive oil",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Bilge, stringers, ribs and bulkheads (those accessible from engine bay",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Inner transom",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Engines and drives - other features",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
           }
         ]
       },
@@ -3508,7 +2271,7 @@
           },
           {
             "type": "list",
-            "label": "Hydraulic steering (hoses, fittings, steering cylinder, tiller arm / tiller bolt or tie-bar, rudder post and stuffing box, etc.)",
+            "label": "Hydraulic steering",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -3520,31 +2283,7 @@
           },
           {
             "type": "list",
-            "label": "Outdrive trim/tilt hydraulic pump and system",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Trim tab hydraulic pump and system",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Steering and trim mechanics - other features",
+            "label": "Trim tab mechanism (interior)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -3560,12 +2299,8 @@
         "name": "Electrical",
         "items": [
           {
-            "type": "media",
-            "label": "Electrical photos"
-          },
-          {
             "type": "list",
-            "label": "Shore power overcurrent protection",
+            "label": "Shore power cable(s)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -3577,43 +2312,7 @@
           },
           {
             "type": "list",
-            "label": "Galvanic isolator",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Isolation transformer",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Inverter and grounding",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Inverter/charger and grounding",
+            "label": "Shore power receptacle",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -3649,7 +2348,7 @@
           },
           {
             "type": "list",
-            "label": "Battery ventillation",
+            "label": "Battery ventilation",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -3661,7 +2360,7 @@
           },
           {
             "type": "list",
-            "label": "Starter battery(ies)",
+            "label": "Battery(ies), house",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -3673,43 +2372,7 @@
           },
           {
             "type": "list",
-            "label": "House battery(ies)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Battery hydrometer test",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Battery load test",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Battery(ies) overcurrent protection",
+            "label": "Battery(ies), starter",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -3778,235 +2441,6 @@
               "Not applicable",
               "Not tested/not verified"
             ]
-          },
-          {
-            "type": "list",
-            "label": "Heating and air conditioning",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "AC outlets",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Shore power cable(s)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Shore power receptacle",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Electrical - other features",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Electrical, other items",
-        "items": [
-          {
-            "type": "media",
-            "label": "Electrical, other, photos"
-          },
-          {
-            "type": "textsingle",
-            "label": "Solar panels confirmation of charging"
-          },
-          {
-            "type": "textsingle",
-            "label": "Solar panels manufacturer and model #"
-          },
-          {
-            "type": "list",
-            "label": "Solar panels controller",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Solar panels wiring",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "textsingle",
-            "label": "Generator Manufacturer and model #"
-          },
-          {
-            "type": "media",
-            "label": "Generator nameplate"
-          },
-          {
-            "type": "list",
-            "label": "Generator operation",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Generator valve and sea strainer",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Generator exhaust",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Generator oil level and condition",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Generator air filter",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Generator hoses",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Generator anti-siphon",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Generator battery",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Wind generator manufacturer and model #",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Electrical, other, additional features",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
           }
         ]
       },
@@ -4014,8 +2448,16 @@
         "name": "Safety",
         "items": [
           {
-            "type": "media",
-            "label": "Safety, photos"
+            "type": "list",
+            "label": "Navigation lights (port, starboard, anchor, steaming, other)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
           },
           {
             "type": "list",
@@ -4056,18 +2498,6 @@
           {
             "type": "list",
             "label": "Horn/sound signal",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Extra anchor, chain and rode",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -4127,18 +2557,6 @@
           },
           {
             "type": "list",
-            "label": "Smoke detector(s)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
             "label": "Carbon monoxide detector(s)",
             "options": [
               "A - Critical",
@@ -4159,7 +2577,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "conditional": "propane"
           },
           {
             "type": "list",
@@ -4171,257 +2590,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "High water alarm",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Emergency tiller and connection",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Radar reflector",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Life raft",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "EPIRB",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Axe",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Bell",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Navigation lights (port, starboard, anchor, steaming, other)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Safety - other features",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Sails",
-        "items": [
-          {
-            "type": "media",
-            "label": "Sails photos"
-          },
-          {
-            "type": "list",
-            "label": "Main",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Genoa 1 (largest)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Genoa 2 (mid-size)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Genoa 3 (smallest)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Spinnaker",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Staysail",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Misen",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Sails - other",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "On board equipment",
-        "items": [
-          {
-            "type": "textsingle",
-            "label": "Item 1"
-          },
-          {
-            "type": "textsingle",
-            "label": "Item 2"
-          },
-          {
-            "type": "textsingle",
-            "label": "Item 3"
-          },
-          {
-            "type": "textsingle",
-            "label": "Item 4"
-          },
-          {
-            "type": "textsingle",
-            "label": "Item 5"
-          },
-          {
-            "type": "textsingle",
-            "label": "Item 6"
-          },
-          {
-            "type": "textsingle",
-            "label": "Item 7"
-          },
-          {
-            "type": "textsingle",
-            "label": "Item 8"
+            ],
+            "conditional": "propane"
           }
         ]
       }

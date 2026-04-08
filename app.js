@@ -950,10 +950,13 @@ function createNewSurvey(formData) {
   return survey;
 }
 
-// Calculate completion percentage
+// Calculate completion percentage (excludes fully-excluded categories from the count)
 function getCompletionPercentage(survey) {
   if (!survey || !survey.totalRatedItems) return 0;
-  return Math.round((survey.completedCount / survey.totalRatedItems) * 100);
+  // Count items that are rated OR excluded
+  const completedOrExcluded = Object.values(survey.items || {})
+    .filter(item => (item.rating && item.rating !== '') || item.excluded).length;
+  return Math.round((completedOrExcluded / survey.totalRatedItems) * 100);
 }
 
 // UI Rendering Functions
@@ -3606,9 +3609,26 @@ function renderInspection(survey) {
   let totalRatedItems = 0;
   const ratedItemsByCategory = {};
 
-  // Categories to skip for powerboats (not applicable to power-driven vessels)
+  // Determine vessel type for filtering
   const sailOnlyCategories = ['Spars and rigging', 'Sails'];
   const isPowerboat = (survey.vesselType || '').toLowerCase() === 'power';
+
+  // Check if conditional items should be shown
+  function shouldShowItem(item) {
+    if (isPowerboat && item.sailOnly) return false;
+    if (item.conditional) {
+      const thrusterRating = survey.items['Bow thruster']?.rating;
+      const sternThrusterRating = survey.items['Stern thruster']?.rating;
+      const propaneRating = survey.items['Propane valve, regulator, gauge, storage compartment and vent']?.rating;
+      if (item.conditional === 'bowThruster' && (!thrusterRating || thrusterRating === 'Not applicable')) return false;
+      if (item.conditional === 'sternThruster' && (!sternThrusterRating || sternThrusterRating === 'Not applicable')) return false;
+      if (item.conditional === 'propane' && (!propaneRating || propaneRating === 'Not applicable')) return false;
+    }
+    return true;
+  }
+
+  // Track media items per category for area photos
+  const mediaItemsByCategory = {};
 
   activeTemplate.forEach(section => {
     if (section.name === 'Kiki Marine Survey' && section.categories) {
@@ -3617,9 +3637,11 @@ function renderInspection(survey) {
         if (isPowerboat && sailOnlyCategories.includes(category.name)) return;
 
         if (category.items) {
-          const ratedItems = category.items.filter(item => item.type === 'list');
-          if (ratedItems.length > 0) {
+          const ratedItems = category.items.filter(item => item.type === 'list' && shouldShowItem(item));
+          const mediaItems = category.items.filter(item => item.type === 'media');
+          if (ratedItems.length > 0 || mediaItems.length > 0) {
             ratedItemsByCategory[category.name] = ratedItems;
+            mediaItemsByCategory[category.name] = mediaItems;
             totalRatedItems += ratedItems.length;
           }
         }
@@ -3661,6 +3683,29 @@ function renderInspection(survey) {
             </button>
           </div>
     `;
+
+    // Render area photos at top of category
+    const catMediaItems = mediaItemsByCategory[categoryName] || [];
+    catMediaItems.forEach(mediaItem => {
+      const mediaData = survey.items[mediaItem.label] || { photos: [] };
+      const photoCount = (mediaData.photos || []).length;
+      html += `
+        <div style="margin-bottom:16px;padding:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
+          <div style="font-weight:600;font-size:14px;color:#0369a1;margin-bottom:8px;">📷 ${mediaItem.label}</div>
+          <div id="area-photos-${mediaItem.label.replace(/[^a-zA-Z0-9]/g, '_')}" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+            ${(mediaData.photos || []).map(pid => `
+              <div style="position:relative;width:80px;height:80px;">
+                <img id="thumb-${pid}" src="" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;" onclick="viewPhotoAnnotation('${pid}')">
+                <button onclick="deletePhotoAndRefresh('${pid}', '${mediaItem.label.replace(/'/g, "\\'")}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;">×</button>
+              </div>
+            `).join('')}
+          </div>
+          <button class="btn-secondary" style="font-size:13px;padding:6px 12px;" onclick="capturePhoto('${mediaItem.label.replace(/'/g, "\\'")}')">
+            📷 ${photoCount > 0 ? `Add More (${photoCount})` : 'Take Photos'}
+          </button>
+        </div>
+      `;
+    });
 
     items.forEach(item => {
       const itemData = survey.items[item.label] || { rating: '', text: '', standards: [], photos: [] };
@@ -4795,18 +4840,31 @@ function updateCategoryHeader(survey, categoryName) {
   const header = accordion.querySelector('.accordion-header');
   if (!header) return;
 
-  // Get category items from template
+  // Get category items from template (with sail-only and conditional filtering)
   const activeTemplate = getTemplateForSurvey(survey);
   const sailOnlyCategories = ['Spars and rigging', 'Sails'];
   const isPowerboat = (survey.vesselType || '').toLowerCase() === 'power';
   let categoryItems = [];
+
+  function shouldShowHeaderItem(item) {
+    if (isPowerboat && item.sailOnly) return false;
+    if (item.conditional) {
+      const thrusterRating = survey.items['Bow thruster']?.rating;
+      const sternThrusterRating = survey.items['Stern thruster']?.rating;
+      const propaneRating = survey.items['Propane valve, regulator, gauge, storage compartment and vent']?.rating;
+      if (item.conditional === 'bowThruster' && (!thrusterRating || thrusterRating === 'Not applicable')) return false;
+      if (item.conditional === 'sternThruster' && (!sternThrusterRating || sternThrusterRating === 'Not applicable')) return false;
+      if (item.conditional === 'propane' && (!propaneRating || propaneRating === 'Not applicable')) return false;
+    }
+    return true;
+  }
 
   for (const section of activeTemplate) {
     if (section.name === 'Kiki Marine Survey' && section.categories) {
       for (const category of section.categories) {
         if (category.name === categoryName) {
           if (isPowerboat && sailOnlyCategories.includes(category.name)) return;
-          categoryItems = category.items ? category.items.filter(i => i.type === 'list') : [];
+          categoryItems = category.items ? category.items.filter(i => i.type === 'list' && shouldShowHeaderItem(i)) : [];
           break;
         }
       }
@@ -6430,13 +6488,57 @@ function toggleProseMode() {
 </html>
   `;
 
+  // Try opening in new tab first; fall back to in-page rendering for iOS
   const reportWindow = window.open('', '_blank');
-  if (reportWindow) {
-    reportWindow.document.write(html);
-    reportWindow.document.close();
+  if (reportWindow && reportWindow.document) {
+    try {
+      reportWindow.document.write(html);
+      reportWindow.document.close();
+    } catch (e) {
+      // Fallback for iOS Chrome: render in current page
+      reportWindow.close();
+      renderReportInPage(html);
+    }
   } else {
-    alert('Popup blocked — please allow popups for this site and try again.');
+    // Popup blocked or iOS restriction — render in current page
+    renderReportInPage(html);
   }
+}
+
+function renderReportInPage(html) {
+  const previousView = currentView;
+  currentView = 'report';
+  history.pushState({ view: 'report' }, '');
+
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div style="position:fixed;top:0;left:0;right:0;z-index:100;background:#1e3a5f;padding:12px 16px;display:flex;align-items:center;gap:12px;">
+      <button onclick="history.back()" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">←</button>
+      <span style="color:white;font-weight:600;">Survey Report</span>
+      <button onclick="window.print()" style="margin-left:auto;background:#16a34a;color:white;border:none;padding:8px 16px;border-radius:6px;font-size:14px;cursor:pointer;">🖨️ Print/PDF</button>
+    </div>
+    <div style="margin-top:56px;">
+      <iframe id="reportFrame" style="width:100%;border:none;min-height:100vh;" sandbox="allow-same-origin allow-scripts"></iframe>
+    </div>
+  `;
+
+  const iframe = document.getElementById('reportFrame');
+  const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+  iframeDoc.open();
+  iframeDoc.write(html);
+  iframeDoc.close();
+
+  // Auto-resize iframe to content
+  iframe.onload = () => {
+    try {
+      iframe.style.height = iframeDoc.body.scrollHeight + 'px';
+    } catch(e) {}
+  };
+  setTimeout(() => {
+    try {
+      iframe.style.height = iframeDoc.body.scrollHeight + 'px';
+    } catch(e) {}
+  }, 500);
 }
 
 // Service Worker registration
