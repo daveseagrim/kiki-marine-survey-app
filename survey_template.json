@@ -1960,18 +1960,6 @@
               "Not tested/not verified"
             ],
             "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Protected positive battery lugs and positive bus bars",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
           }
         ]
       },
@@ -2433,6 +2421,18 @@
           {
             "type": "list",
             "label": "Bundling support and wiring",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Protected positive battery lugs and positive bus bars",
             "options": [
               "A - Critical",
               "B - Needs Attention",
