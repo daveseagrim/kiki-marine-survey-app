@@ -3159,7 +3159,15 @@ function updateBoatStyleOptions() {
     return;
   }
 
-  const currentValue = boatStyleInput.value;
+  // Auto-select a default boat style if none is currently chosen
+  // (or if the current choice doesn't match the vessel type options)
+  let currentValue = boatStyleInput.value;
+  if (!currentValue || !options.includes(currentValue)) {
+    // Default: first option in the list for each vessel type
+    currentValue = options[0];
+    boatStyleInput.value = currentValue;
+  }
+
   const buttonsHtml = options.map(o => `
     <button type="button" onclick="selectBoatStyle('${o}')" style="padding:8px 10px;border:2px solid ${currentValue === o ? '#3b82f6' : '#e5e7eb'};background:${currentValue === o ? '#dbeafe' : '#ffffff'};color:${currentValue === o ? '#1e40af' : '#374151'};border-radius:6px;font-size:12px;font-weight:${currentValue === o ? '600' : '400'};cursor:pointer;transition:all 0.2s;">${o}</button>
   `).join('');
