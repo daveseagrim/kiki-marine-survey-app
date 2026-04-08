@@ -450,7 +450,7 @@ async function deletePhoto(photoId) {
 async function exportSurvey(surveyId) {
   try {
     const survey = await getSurvey(surveyId);
-    if (!survey) { alert('Survey not found'); return; }
+    if (!survey) { showAlert('Survey not found'); return; }
 
     // Gather all photos for this survey
     const photos = await new Promise((resolve) => {
@@ -498,7 +498,7 @@ async function exportSurvey(surveyId) {
     showToast(`Exported: ${filename}`);
   } catch (err) {
     console.error('Export error:', err);
-    alert('Export failed: ' + err.message);
+    showAlert('Export failed: ' + err.message);
   }
 }
 
@@ -516,7 +516,7 @@ async function importSurvey() {
       const data = JSON.parse(text);
 
       if (!data.survey || !data.version) {
-        alert('This file does not appear to be a valid Kiki Marine survey export.');
+        await showAlert('This file does not appear to be a valid Kiki Marine survey export.');
         return;
       }
 
@@ -526,8 +526,9 @@ async function importSurvey() {
       // Check if survey already exists
       const existing = await getSurvey(survey.id);
       if (existing) {
-        const replace = confirm(
-          `A survey for "${existing.vesselName || 'Unnamed'}" already exists on this device.\n\nReplace it with the imported version?`
+        const replace = await showConfirm(
+          `A survey for "${existing.vesselName || 'Unnamed'}" already exists on this device. Replace it with the imported version?`,
+          'Replace', 'Cancel'
         );
         if (!replace) return;
         // Delete existing photos first
@@ -546,7 +547,7 @@ async function importSurvey() {
       renderHome();
     } catch (err) {
       console.error('Import error:', err);
-      alert('Import failed: ' + err.message);
+      showAlert('Import failed: ' + err.message);
     }
   };
 
@@ -563,6 +564,48 @@ function showToast(message) {
   toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1e3a5f;color:white;padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
+}
+
+// Custom modal to replace native alert() — avoids iOS "Suppress dialogs" option
+function showAlert(message) {
+  return new Promise((resolve) => {
+    let overlay = document.getElementById('customModalOverlay');
+    if (overlay) overlay.remove();
+    overlay = document.createElement('div');
+    overlay.id = 'customModalOverlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.innerHTML = `
+      <div style="background:white;border-radius:14px;padding:20px 24px;max-width:320px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,0.3);text-align:center;">
+        <p style="font-size:15px;color:#333;margin:0 0 18px 0;line-height:1.4;">${message}</p>
+        <button onclick="document.getElementById('customModalOverlay').remove();window._modalResolve&&window._modalResolve(true);"
+                style="width:100%;padding:12px;background:#1e3a5f;color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">OK</button>
+      </div>`;
+    window._modalResolve = resolve;
+    document.body.appendChild(overlay);
+  });
+}
+
+// Custom modal to replace native confirm() — avoids iOS "Suppress dialogs" option
+function showConfirm(message, confirmLabel, cancelLabel) {
+  return new Promise((resolve) => {
+    let overlay = document.getElementById('customModalOverlay');
+    if (overlay) overlay.remove();
+    overlay = document.createElement('div');
+    overlay.id = 'customModalOverlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.innerHTML = `
+      <div style="background:white;border-radius:14px;padding:20px 24px;max-width:320px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,0.3);text-align:center;">
+        <p style="font-size:15px;color:#333;margin:0 0 18px 0;line-height:1.4;">${message}</p>
+        <div style="display:flex;gap:10px;">
+          <button onclick="document.getElementById('customModalOverlay').remove();window._modalResolve&&window._modalResolve(false);"
+                  style="flex:1;padding:12px;background:#e5e7eb;color:#374151;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">${cancelLabel || 'Cancel'}</button>
+          <button onclick="document.getElementById('customModalOverlay').remove();window._modalResolve&&window._modalResolve(true);"
+                  style="flex:1;padding:12px;background:#dc2626;color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">${confirmLabel || 'OK'}</button>
+        </div>
+      </div>`;
+    window._modalResolve = resolve;
+    document.body.appendChild(overlay);
+  });
 }
 
 // Find applicable standards for a category/rating
@@ -3031,7 +3074,7 @@ function applyPendingSpecs() {
 // Show auto-suggested valuation card
 function suggestValuation() {
   const input = document.getElementById('yearMakeModel')?.value || '';
-  if (!input) { alert('Enter Year/Make/Model first'); return; }
+  if (!input) { showAlert('Enter Year/Make/Model first'); return; }
 
   const result = findBoatValues(input);
 
@@ -3191,7 +3234,7 @@ function lookupEngineType(makeName, modelName) {
 }
 
 // Generate a vessel description template from filled-in form fields
-function generateVesselDescription() {
+async function generateVesselDescription() {
   const ymm = document.getElementById('yearMakeModel')?.value || '';
   const { year, make, model } = parseYearMakeModel(ymm);
   const vesselType = document.getElementById('vesselType')?.value || '';
@@ -3283,7 +3326,10 @@ function generateVesselDescription() {
 
   const textarea = document.getElementById('vesselDescription');
   if (textarea) {
-    if (textarea.value.trim() && !confirm('This will replace the current description. Continue?')) return;
+    if (textarea.value.trim()) {
+      const yes = await showConfirm('This will replace the current description. Continue?', 'Replace', 'Cancel');
+      if (!yes) return;
+    }
     textarea.value = desc;
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight + 'px';
@@ -3312,11 +3358,11 @@ function applyValuationSuggestion(low, high, modelName) {
 // Called by the Regenerate button — always overwrites the rationale
 function regenerateValuationRationale() {
   const rationaleEl = document.getElementById('valuationRationale');
-  if (!rationaleEl) { alert('Rationale field not found'); return; }
+  if (!rationaleEl) { showAlert('Rationale field not found'); return; }
 
   const checkedSources = Array.from(document.querySelectorAll('.val-source:checked')).map(cb => cb.value);
   if (checkedSources.length === 0) {
-    alert('Please check at least one valuation source above first.');
+    showAlert('Please check at least one valuation source above first.');
     return;
   }
 
@@ -3346,7 +3392,7 @@ function updateValuationRationale() {
 
 function lookupSpecs() {
   const input = document.getElementById('yearMakeModel')?.value || '';
-  if (!input) { alert('Enter Year/Make/Model first'); return; }
+  if (!input) { showAlert('Enter Year/Make/Model first'); return; }
 
   // Try built-in database first
   const specs = findBoatSpecs(input);
@@ -3366,7 +3412,7 @@ function lookupComparables() {
   suggestValuation();
 }
 
-function confirmAbandonNewSurvey() {
+async function confirmAbandonNewSurvey() {
   // Check if user has entered any data in the new survey form
   const fields = ['vesselName', 'yearMakeModel', 'clientName', 'location',
     'engineMake', 'engineSerial', 'engineHours', 'transmissionSerial',
@@ -3379,7 +3425,8 @@ function confirmAbandonNewSurvey() {
   const attendeesList = document.getElementById('attendeesList');
   const hasExtraAttendees = attendeesList && attendeesList.querySelectorAll('[data-attendee-extra]').length > 0;
   if (hasData || hasExtraAttendees) {
-    if (!confirm('You have unsaved survey data. Discard and return to home?')) return;
+    const yes = await showConfirm('You have unsaved survey data. Discard and return to home?', 'Discard', 'Cancel');
+    if (!yes) return;
   }
   renderHome();
 }
@@ -5623,11 +5670,11 @@ function openSurvey(surveyId) {
   });
 }
 
-function deleteSurveyConfirm(surveyId) {
-  if (confirm('Delete this survey? This cannot be undone.')) {
-    deleteSurvey(surveyId).then(() => {
-      renderHome();
-    });
+async function deleteSurveyConfirm(surveyId) {
+  const yes = await showConfirm('Delete this survey? This cannot be undone.', 'Delete', 'Cancel');
+  if (yes) {
+    await deleteSurvey(surveyId);
+    renderHome();
   }
 }
 
@@ -5674,18 +5721,20 @@ async function saveAllInspectionData() {
   return changed;
 }
 
-function backToHome() {
-  saveAllInspectionData().then(changed => {
-    const msg = changed
-      ? 'Your work has been saved. Return to home screen?'
-      : 'Return to home screen?';
-    if (confirm(msg)) {
-      // Remove report button when leaving inspection
-      const reportBtn = document.getElementById('reportBtn');
-      if (reportBtn) reportBtn.remove();
-      renderHome();
-    }
-  });
+async function backToHome() {
+  const changed = await saveAllInspectionData();
+  const msg = changed
+    ? 'Your work has been saved. Return to home screen?'
+    : 'Return to home screen?';
+  const yes = await showConfirm(msg, 'Go Home', 'Stay');
+  if (yes) {
+    // Remove report and backup buttons when leaving inspection
+    const reportBtn = document.getElementById('reportBtn');
+    if (reportBtn) reportBtn.remove();
+    const backupBtn = document.getElementById('backupBtn');
+    if (backupBtn) backupBtn.remove();
+    renderHome();
+  }
 }
 
 // Report generation
@@ -6644,7 +6693,7 @@ async function exportToWord() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   } catch(e) {
-    alert('Export failed: ' + e.message);
+    showAlert('Export failed: ' + e.message);
   }
 
   btn.textContent = origText;
@@ -6790,9 +6839,9 @@ async function initApp() {
         backToHome();
       } else if (currentView === 'new-survey') {
         history.pushState({ view: 'new-survey' }, '');
-        if (confirm('Discard this new survey and go back?')) {
-          renderHome();
-        }
+        showConfirm('Discard this new survey and go back?', 'Discard', 'Cancel').then(yes => {
+          if (yes) renderHome();
+        });
       }
       // If already on home, let normal back behaviour happen
     });
