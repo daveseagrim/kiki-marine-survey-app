@@ -586,7 +586,7 @@ async function exportSurvey(surveyId) {
 
     const vesselName = (survey.vesselName || 'survey').replace(/[^a-zA-Z0-9_-]/g, '_');
     const dateStr = new Date().toISOString().slice(0, 10);
-    const filename = `${vesselName}_${dateStr}.kikisurvey`;
+    const filename = `${vesselName}_${dateStr}.json`;
 
     const a = document.createElement('a');
     a.href = url;
@@ -6872,6 +6872,19 @@ async function saveAllInspectionData() {
 
 async function backToHome() {
   const changed = await saveAllInspectionData();
+
+  // If there are unsaved backup changes, prompt to back up first
+  if (window._hasUnsavedBackup && currentSurveyId) {
+    const backup = await showConfirm(
+      'You have changes that haven\'t been backed up. Would you like to save a backup first?',
+      '💾 Backup First', 'Skip'
+    );
+    if (backup) {
+      await exportSurvey(currentSurveyId);
+      window._hasUnsavedBackup = false;
+    }
+  }
+
   const msg = changed
     ? 'Your work has been saved. Return to home screen?'
     : 'Return to home screen?';
