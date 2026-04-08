@@ -7906,26 +7906,49 @@ async function initApp() {
     }).observe(document.body, { childList: true, subtree: true });
 
     // Browser back button / swipe-back handling
+    let _handlingPopstate = false;
     window.addEventListener('popstate', (e) => {
+      if (_handlingPopstate) return;
+      _handlingPopstate = true;
+
+      const state = e.state;
+      const targetView = state ? state.view : 'surveys';
+
       if (currentView === 'edit-survey') {
-        // Go back to inspection when pressing back from edit view
-        history.pushState({ view: 'edit-survey' }, '');
         if (currentSurveyId) {
           returnToInspection(currentSurveyId);
         } else {
           renderHome();
         }
       } else if (currentView === 'inspection') {
-        // Push state again to prevent actually navigating away
-        history.pushState({ view: 'inspection' }, '');
-        backToHome();
-      } else if (currentView === 'new-survey') {
-        history.pushState({ view: 'new-survey' }, '');
-        showConfirm('Discard this new survey and go back?', 'Discard', 'Cancel').then(yes => {
-          if (yes) renderHome();
+        // Save data silently and go home (no confirm on back — data is auto-saved)
+        saveAllInspectionData().then(() => {
+          const reportBtn = document.getElementById('reportBtn');
+          if (reportBtn) reportBtn.remove();
+          const backupBtn = document.getElementById('backupBtn');
+          if (backupBtn) backupBtn.remove();
+          renderHome();
         });
+      } else if (currentView === 'new-survey') {
+        showConfirm('Discard this new survey and go back?', 'Discard', 'Cancel').then(yes => {
+          if (yes) {
+            renderHome();
+          } else {
+            // User chose to stay — re-push the state so back works again
+            history.pushState({ view: 'new-survey' }, '');
+          }
+        });
+      } else if (currentView === 'report') {
+        // Back from report preview goes to inspection
+        if (currentSurveyId) {
+          returnToInspection(currentSurveyId);
+        } else {
+          renderHome();
+        }
       }
       // If already on home, let normal back behaviour happen
+
+      setTimeout(() => { _handlingPopstate = false; }, 300);
     });
 
     // Set initial history state

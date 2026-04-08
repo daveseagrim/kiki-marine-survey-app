@@ -958,111 +958,6 @@
         ]
       },
       {
-        "name": "Sails",
-        "items": [
-          {
-            "type": "media",
-            "label": "Sails photos"
-          },
-          {
-            "type": "list",
-            "label": "Main",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Genoa 1 (largest)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Genoa 2 (mid-size)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Genoa 3 (smallest)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Spinnaker",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Staysail",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Misen",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Sails - other",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          }
-        ]
-      },
-      {
         "name": "Cockpit",
         "items": [
           {
@@ -3365,6 +3260,111 @@
           {
             "type": "list",
             "label": "Electrical, other, additional features",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Sails",
+        "items": [
+          {
+            "type": "media",
+            "label": "Sails photos"
+          },
+          {
+            "type": "list",
+            "label": "Main",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Genoa 1 (largest)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Genoa 2 (mid-size)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Genoa 3 (smallest)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Spinnaker",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Staysail",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Misen",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Sails - other",
             "options": [
               "A - Critical",
               "B - Needs Attention",
