@@ -871,6 +871,11 @@ function insertSnippetFromSheet(itemLabel, categoryName, text) {
   const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
   const textarea = document.getElementById(`sheet-text-${sanitizedLabel}`);
   if (textarea) {
+    // Prevent duplicate insertion — if the snippet is already in the text, skip
+    if (textarea.value.includes(text.trim())) {
+      showToast('Already added');
+      return;
+    }
     if (textarea.value && !textarea.value.endsWith(' ') && !textarea.value.endsWith('\n')) {
       textarea.value += ' ';
     }
@@ -6247,6 +6252,11 @@ function insertSnippet(itemLabel, categoryName, text) {
   const safeId = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
   const textarea = document.getElementById('text-' + safeId);
   if (textarea) {
+    // Prevent duplicate insertion — if the snippet is already in the text, skip
+    if (textarea.value.includes(text.trim())) {
+      showToast('Already added');
+      return;
+    }
     // If textarea is empty, replace. If it has content, append with a space.
     if (textarea.value.trim()) {
       textarea.value = textarea.value.trim() + ' ' + text;

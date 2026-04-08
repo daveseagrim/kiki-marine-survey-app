@@ -2,6 +2,16 @@
   "Hull": [
     {
       "section": "Hull and rudder(s) condition (below the waterline)",
+      "rating": "A",
+      "text": "Below the waterline, the hull exhibited significant structural damage including deep gouging, delamination, or blistering that compromises hull integrity. Immediate haul-out and professional repair is required."
+    },
+    {
+      "section": "Hull and rudder(s) condition (below the waterline)",
+      "rating": "A - rudder",
+      "text": "Below the waterline, the hull showed severe damage. The rudder was found to be structurally compromised with cracking and delamination. Immediate professional repair is critical before the vessel can be launched."
+    },
+    {
+      "section": "Hull and rudder(s) condition (below the waterline)",
       "rating": "B",
       "text": "The barrier coat appeared intact. Multiple areas of the hull and rudder showed oxidation, cracking, and flaking of the anti-fouling. Sand to a sound surface and reapply anti-fouling to restore protection."
     },
@@ -32,6 +42,16 @@
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "A",
+      "text": "Percussion testing revealed extensive delamination and voids across multiple areas of the hull. The laminate produced hollow, inconsistent tones indicating widespread structural deterioration. Immediate professional assessment and repair is required before the vessel can be considered safe for use."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "A - hull and rudder",
+      "text": "Percussion testing of both the hull and rudder revealed severe delamination and saturated core material. The hull produced dull, inconsistent tones across large areas, and the rudder was soft to percussion throughout. Structural integrity is compromised. Immediate professional repair is critical."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
       "rating": "B",
       "text": "Percussion testing of the hull and rudder produced and showed signs of saturation in ###### localized areas (see photos).  To mitigate spread, these areas should be repaired before the next launch."
     },
@@ -54,6 +74,16 @@
       "section": "Hull and rudder(s) impact and resonance testing",
       "rating": "C - two rudders",
       "text": "Percussion testing of the hull and rudders produced a clear and even tone with no indications of delamination or voids."
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "A",
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned readings consistently at or near 999 across large areas, indicating severe and widespread moisture saturation. Immediate investigation and remediation is required to assess the extent of osmotic damage or delamination."
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "A - hull and rudder",
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. Both the hull and rudder returned readings consistently at or near 999, indicating severe moisture saturation throughout. The extent of the readings suggests structural compromise. Professional assessment and remediation is critical."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
