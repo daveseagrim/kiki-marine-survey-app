@@ -350,9 +350,21 @@ async function saveSurvey(survey) {
     const store = tx.objectStore('surveys');
     const request = store.put(survey);
     request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(survey.id);
+    request.onsuccess = () => {
+      // Mark that there are unsaved changes for backup reminder
+      window._hasUnsavedBackup = true;
+      resolve(survey.id);
+    };
   });
 }
+
+// Warn before leaving if there are unsaved backup changes
+window.addEventListener('beforeunload', (e) => {
+  if (window._hasUnsavedBackup && currentSurveyId) {
+    e.preventDefault();
+    e.returnValue = 'You have survey data that has not been backed up. Use the Backup button before leaving.';
+  }
+});
 
 async function getSurvey(id) {
   return new Promise((resolve, reject) => {
@@ -960,6 +972,65 @@ function getCompletionPercentage(survey) {
 }
 
 // UI Rendering Functions
+// Emergency data recovery — attempts to read all surveys from IndexedDB and export as JSON
+async function emergencyRecovery() {
+  const statusEl = document.getElementById('recovery-status');
+  if (statusEl) statusEl.innerHTML = '<p style="color:#0369a1;">Attempting to read IndexedDB...</p>';
+
+  try {
+    const result = await new Promise((resolve, reject) => {
+      const request = indexedDB.open('KikiSurveyDB');
+      request.onerror = () => reject(new Error('Cannot open database: ' + (request.error || 'unknown error')));
+      request.onsuccess = () => {
+        const recoveryDb = request.result;
+        const storeNames = Array.from(recoveryDb.objectStoreNames);
+
+        if (!storeNames.includes('surveys')) {
+          recoveryDb.close();
+          resolve({ found: false, reason: 'No surveys store found. Store names: ' + storeNames.join(', ') });
+          return;
+        }
+
+        const tx = recoveryDb.transaction(['surveys'], 'readonly');
+        const store = tx.objectStore('surveys');
+        const getAll = store.getAll();
+        getAll.onsuccess = () => {
+          const surveys = getAll.result;
+          recoveryDb.close();
+          resolve({ found: surveys.length > 0, surveys: surveys, count: surveys.length });
+        };
+        getAll.onerror = () => {
+          recoveryDb.close();
+          reject(new Error('Failed to read surveys: ' + getAll.error));
+        };
+      };
+    });
+
+    if (result.found) {
+      // Success — export as downloadable JSON
+      const json = JSON.stringify(result.surveys, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      if (statusEl) statusEl.innerHTML = `
+        <p style="color:#16a34a;font-weight:bold;">Found ${result.count} survey(s)!</p>
+        <a href="${url}" download="kiki_survey_recovery_${Date.now()}.json"
+           style="display:inline-block;margin:8px 0;padding:12px 24px;background:#16a34a;color:white;border-radius:8px;text-decoration:none;font-weight:bold;">
+           Download Survey Data (JSON)
+        </a>
+        <p style="font-size:12px;color:#666;">Save this file, then use Import Survey to reload it.</p>
+        <div style="margin-top:12px;max-height:200px;overflow:auto;background:#f1f5f9;padding:8px;border-radius:4px;font-size:11px;text-align:left;">
+          <pre style="white-space:pre-wrap;word-break:break-all;">${json.substring(0, 2000)}${json.length > 2000 ? '\n... (truncated for display)' : ''}</pre>
+        </div>
+      `;
+    } else {
+      if (statusEl) statusEl.innerHTML = `<p style="color:#dc2626;">No survey data found in database. ${result.reason || ''}</p>`;
+    }
+  } catch (e) {
+    if (statusEl) statusEl.innerHTML = `<p style="color:#dc2626;">Recovery error: ${e.message}</p>
+      <p style="font-size:12px;color:#666;">The database backing store may be corrupted at the browser level.</p>`;
+  }
+}
+
 function renderHome() {
   currentView = 'surveys';
   history.replaceState({ view: 'surveys' }, '');
@@ -1000,6 +1071,13 @@ function renderHome() {
           <div class="empty-icon">⛵</div>
           <h2>No Surveys Yet</h2>
           <p>Create your first survey or import one from another device</p>
+          <div style="margin-top:20px;padding:16px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;">
+            <p style="font-size:14px;font-weight:600;color:#92400e;margin-bottom:8px;">Missing a survey?</p>
+            <button onclick="emergencyRecovery()" style="padding:10px 20px;background:#dc2626;color:white;border:none;border-radius:6px;font-weight:bold;cursor:pointer;font-size:14px;">
+              Attempt Data Recovery
+            </button>
+            <div id="recovery-status" style="margin-top:12px;"></div>
+          </div>
         </div>
       `;
     } else {
@@ -4012,6 +4090,19 @@ function ensureReportButton() {
   const fab = document.querySelector('.fab');
   if (fab) fab.remove();
 
+  // Backup button (left side)
+  const backupBtn = document.createElement('button');
+  backupBtn.id = 'backupBtn';
+  backupBtn.style.cssText = 'position:fixed;bottom:calc(20px + env(safe-area-inset-bottom, 0px));left:calc(20px + env(safe-area-inset-left, 0px));background:#16a34a;color:white;border:none;border-radius:28px;padding:12px 18px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:100;cursor:pointer;';
+  backupBtn.innerHTML = '💾 Backup';
+  backupBtn.onclick = () => {
+    exportSurvey(currentSurveyId).then(() => {
+      window._hasUnsavedBackup = false;
+    });
+  };
+  document.body.appendChild(backupBtn);
+
+  // Report button (right side)
   btn = document.createElement('button');
   btn.id = 'reportBtn';
   btn.style.cssText = 'position:fixed;bottom:calc(20px + env(safe-area-inset-bottom, 0px));right:calc(20px + env(safe-area-inset-right, 0px));background:#1e3a5f;color:white;border:none;border-radius:28px;padding:12px 18px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:100;cursor:pointer;';
@@ -4086,6 +4177,42 @@ async function loadAndDisplayPhotos(survey) {
   }
 }
 
+// Save a copy of the photo to the device (camera roll on iOS, downloads on desktop)
+// This ensures photos survive a browser data clear
+function savePhotoToDevice(dataUrl, label) {
+  try {
+    // Convert data URL to blob
+    const byteString = atob(dataUrl.split(',')[1]);
+    const mimeType = dataUrl.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([ab], { type: mimeType });
+
+    // Build a descriptive filename: KikiMarine_HullExterior_2026-04-07_143022.jpg
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '');
+    const safeLabel = (label || 'photo').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 40);
+    const ext = mimeType.includes('png') ? 'png' : 'jpg';
+    const filename = `KikiMarine_${safeLabel}_${dateStr}_${timeStr}.${ext}`;
+
+    // Create download link — on iOS this triggers "Save to Photos" in share sheet
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  } catch (err) {
+    console.error('savePhotoToDevice error:', err);
+  }
+}
+
 async function capturePhoto(itemLabel, event) {
   // If called without event (e.g., from area photo button), trigger a file input
   if (!event || !event.target || !event.target.files) {
@@ -4122,6 +4249,9 @@ async function capturePhoto(itemLabel, event) {
         };
 
         await savePhoto(photo);
+
+        // Also save a copy to the device camera roll / downloads
+        savePhotoToDevice(stampedDataUrl, itemLabel);
 
         // Update survey
         const survey = await getSurvey(currentSurveyId);
@@ -4234,6 +4364,9 @@ async function captureDocPhoto(fieldKey, label, event) {
   reader.onload = async (e) => {
     // Add date stamp to the photo
     const stampedDataUrl = await addDateStampToPhoto(e.target.result);
+
+    // Save a copy to the device camera roll / downloads
+    savePhotoToDevice(stampedDataUrl, label);
 
     // Show preview modal
     showPhotoPreviewModal(fieldKey, label, stampedDataUrl, file.type);
