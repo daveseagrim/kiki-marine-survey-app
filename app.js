@@ -839,6 +839,36 @@ function showNotesSheet(itemLabel, categoryName) {
       }
     }
 
+    // Mast options for Main mast item in bottom sheet
+    let mastOptionsHtml = '';
+    if (itemLabel === 'Main mast') {
+      const mastStepping = itemData.mastStepping || '';
+      const mastTrackType = itemData.mastTrackType || '';
+      mastOptionsHtml = `
+        <div style="padding:4px 20px 8px 20px;display:flex;gap:10px;">
+          <div style="flex:1;">
+            <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Mast Stepping</label>
+            <select id="sheet-mastStepping" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+                    onchange="saveMastOption('${safeLabel}', 'mastStepping', this.value)">
+              <option value="">Select...</option>
+              <option value="Deck-stepped" ${mastStepping === 'Deck-stepped' ? 'selected' : ''}>Deck-stepped</option>
+              <option value="Keel-stepped" ${mastStepping === 'Keel-stepped' ? 'selected' : ''}>Keel-stepped</option>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Sail Track Type</label>
+            <select id="sheet-mastTrackType" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+                    onchange="saveMastOption('${safeLabel}', 'mastTrackType', this.value)">
+              <option value="">Select...</option>
+              <option value="In-mast roller furling" ${mastTrackType === 'In-mast roller furling' ? 'selected' : ''}>In-mast roller furling</option>
+              <option value="External track" ${mastTrackType === 'External track' ? 'selected' : ''}>External track</option>
+              <option value="Internal track" ${mastTrackType === 'Internal track' ? 'selected' : ''}>Internal track</option>
+            </select>
+          </div>
+        </div>
+      `;
+    }
+
     const overlay = document.createElement('div');
     overlay.id = 'bottomSheetOverlay';
     overlay.className = 'bottom-sheet-overlay';
@@ -846,6 +876,7 @@ function showNotesSheet(itemLabel, categoryName) {
       <div class="bottom-sheet" onclick="event.stopPropagation();">
         <div class="bottom-sheet-handle"></div>
         <div class="bottom-sheet-title">${itemLabel} — Notes</div>
+        ${mastOptionsHtml}
         <div style="padding:12px 20px;">
           <textarea id="sheet-text-${sanitizedLabel}" placeholder="Add inspection notes..." style="min-height:100px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;" autocapitalize="sentences">${itemData.text || ''}</textarea>
         </div>
@@ -3908,7 +3939,12 @@ async function generateVesselDescription() {
   let rigDesc = '';
   if (vesselType === 'sail') {
     const rigType = boatStyle ? boatStyle.toLowerCase() : '[SLOOP/CUTTER/KETCH]';
-    rigDesc = ` She is ${rigType}-rigged with a [DECK-STEPPED/KEEL-STEPPED] [ALUMINUM/CARBON FIBRE] mast.`;
+    // Pull mast stepping and track type from saved survey data
+    const survey = await getSurvey(currentSurveyId);
+    const mastData = survey?.items?.['Main mast'] || {};
+    const steppingStr = mastData.mastStepping ? mastData.mastStepping.toLowerCase() : '[deck-stepped/keel-stepped]';
+    const trackStr = mastData.mastTrackType ? ` with ${mastData.mastTrackType.toLowerCase()}` : '';
+    rigDesc = ` She is ${rigType}-rigged with a ${steppingStr} [aluminium/carbon fibre] mast${trackStr}.`;
     if (sailArea) rigDesc += ` Total sail area is ${sailArea}.`;
   }
 
@@ -4715,10 +4751,16 @@ function ensureReportButton() {
   backupBtn.id = 'backupBtn';
   backupBtn.style.cssText = 'position:fixed;bottom:calc(20px + env(safe-area-inset-bottom, 0px));left:calc(20px + env(safe-area-inset-left, 0px));background:#16a34a;color:white;border:none;border-radius:28px;padding:12px 18px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:100;cursor:pointer;';
   backupBtn.innerHTML = '💾 Backup';
-  backupBtn.onclick = () => {
-    exportSurvey(currentSurveyId).then(() => {
-      window._hasUnsavedBackup = false;
-    });
+  backupBtn.onclick = async () => {
+    // Save scroll position and open accordion state before export
+    const content = document.querySelector('.content');
+    const scrollPos = content ? content.scrollTop : 0;
+    await exportSurvey(currentSurveyId);
+    window._hasUnsavedBackup = false;
+    // Restore scroll position after brief delay (export may cause reflow)
+    setTimeout(() => {
+      if (content) content.scrollTop = scrollPos;
+    }, 100);
   };
   document.body.appendChild(backupBtn);
 
@@ -6009,6 +6051,33 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
 
   html += `</div>`;
 
+  // Mast options selector (for Main mast item)
+  if (itemLabel === 'Main mast') {
+    const mastStepping = itemData.mastStepping || '';
+    const mastTrackType = itemData.mastTrackType || '';
+    html += `
+      <div class="form-group" style="margin-top:8px;">
+        <label class="form-label">Mast Stepping</label>
+        <select id="mastStepping-select" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;"
+                onchange="saveMastOption('${safeLabel}', 'mastStepping', this.value)">
+          <option value="">Select mast stepping...</option>
+          <option value="Deck-stepped" ${mastStepping === 'Deck-stepped' ? 'selected' : ''}>Deck-stepped</option>
+          <option value="Keel-stepped" ${mastStepping === 'Keel-stepped' ? 'selected' : ''}>Keel-stepped</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-top:8px;">
+        <label class="form-label">Sail Track Type</label>
+        <select id="mastTrackType-select" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;"
+                onchange="saveMastOption('${safeLabel}', 'mastTrackType', this.value)">
+          <option value="">Select sail track type...</option>
+          <option value="In-mast roller furling" ${mastTrackType === 'In-mast roller furling' ? 'selected' : ''}>In-mast roller furling</option>
+          <option value="External track" ${mastTrackType === 'External track' ? 'selected' : ''}>External track</option>
+          <option value="Internal track" ${mastTrackType === 'Internal track' ? 'selected' : ''}>Internal track</option>
+        </select>
+      </div>
+    `;
+  }
+
   // Text snippet cards (tap to insert)
   if (itemData.rating && ['A - Critical', 'B - Needs Attention', 'C - Serviceable', 'Powered up only', 'Not tested / not verified', 'Not applicable'].includes(itemData.rating)) {
     const baseRating = itemData.rating.charAt(0);
@@ -6232,9 +6301,15 @@ function selectRating(itemLabel, categoryName, rating) {
       survey.items[itemLabel].standards = [];
       survey.items[itemLabel].variantText = '';
     } else {
+      const oldText = survey.items[itemLabel].text || '';
+      const oldVariant = survey.items[itemLabel].variantText || '';
       survey.items[itemLabel].rating = rating;
-      survey.items[itemLabel].text = '';
-      survey.items[itemLabel].variantText = '';
+      // Only clear text if it was auto-inserted from a snippet (matches variantText).
+      // If the user has manually edited the notes, preserve them.
+      if (oldText === oldVariant || oldText === '') {
+        survey.items[itemLabel].text = '';
+        survey.items[itemLabel].variantText = '';
+      }
       // Auto-apply the single most relevant standard for A and B ratings
       const itemStandard = getStandardForItem(itemLabel, categoryName);
       survey.items[itemLabel].standards = itemStandard ? [itemStandard] : [];
@@ -6508,6 +6583,19 @@ function autoSaveItemText(itemLabel, categoryName) {
 
     survey.items[itemLabel].text = text;
 
+    saveSurvey(survey).then(() => {
+      showToast('Saved');
+    });
+  });
+}
+
+// Save mast option (stepping or track type)
+function saveMastOption(itemLabel, field, value) {
+  getSurvey(currentSurveyId).then(survey => {
+    if (!survey.items[itemLabel]) {
+      survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+    }
+    survey.items[itemLabel][field] = value;
     saveSurvey(survey).then(() => {
       showToast('Saved');
     });
@@ -7166,7 +7254,7 @@ async function generateReport() {
     </ul>
 
     <h3>Conductivity Testing</h3>
-    <p>A conductivity (moisture) meter measured conductivity in the hull and deck. Readings are relative indicators only and may be influenced by material or surface conditions. High readings are not a certainty of underlying moisture; therefore, careful interpretation and further investigation are recommended.</p>
+    <p>A conductivity meter measured conductivity in the hull and deck. Readings are relative indicators only and may be influenced by material or surface conditions. High readings are not a certainty of underlying issues; therefore, careful interpretation and further investigation are recommended.</p>
 
     <h3>Disclaimers and Legal Considerations</h3>
     <p>This report reflects the surveyor's professional opinion on visible and accessible conditions only. It is not an inventory, warranty, or guarantee, and does not include naval architectural or stability analysis. Dimensions and weights are from published sources; no independent measurements were taken. Compliance with all standards, codes, and regulations is not guaranteed. Non-destructive test results are subjective indicators. This report supersedes all prior statements and is for the exclusive use of the client and associated lenders/underwriters. It is not assignable. The surveyor holds no financial interest in the vessel. By accepting this report, the client acknowledges its limitations and the potential need for further invasive inspection.</p>
@@ -7187,7 +7275,7 @@ async function generateReport() {
       <tr><td style="vertical-align:top;"><strong>Bonding System</strong></td><td>A system of electrically connecting metallic non-current-carrying parts of a vessel to reduce corrosion and minimize the risk of electric shock.</td></tr>
       <tr><td style="vertical-align:top;"><strong>BUC</strong></td><td>BUC International Corp. — publisher of the BUC Used Boat Price Guide, an industry-accepted reference for marine vessel valuation.</td></tr>
       <tr><td style="vertical-align:top;"><strong>Canada Shipping Act, 2001</strong></td><td>The primary federal legislation governing safety in Canadian marine transportation, including construction and equipment requirements for small vessels.</td></tr>
-      <tr><td style="vertical-align:top;"><strong>Conductivity Meter</strong></td><td>A non-destructive testing instrument that measures the electrical conductivity of hull and deck laminates to detect elevated moisture levels. Readings are relative indicators only.</td></tr>
+      <tr><td style="vertical-align:top;"><strong>Conductivity Meter</strong></td><td>A non-destructive testing instrument that measures the electrical conductivity of hull and deck laminates to detect elevated conductivity levels. Readings are relative indicators only.</td></tr>
       <tr><td style="vertical-align:top;"><strong>Fair Market Value (FMV)</strong></td><td>The most probable price a vessel should bring in a competitive and open market under all conditions requisite to a fair sale, with buyer and seller each acting prudently and knowledgeably.</td></tr>
       <tr><td style="vertical-align:top;"><strong>Estimated Replacement Cost</strong></td><td>The estimated cost to replace the surveyed vessel with one of like kind and quality at current market prices, excluding applicable taxes.</td></tr>
       <tr><td style="vertical-align:top;"><strong>HIN</strong></td><td>Hull Identification Number — a unique serial number assigned to a vessel by the manufacturer, required by Transport Canada and the USCG for identification and registration.</td></tr>
@@ -7537,9 +7625,21 @@ ${survey.vesselDescription ? `
             }
           }
 
+          // Mast options info for Main mast item
+          let mastOptionsHtml = '';
+          if (item.label === 'Main mast') {
+            const parts = [];
+            if (itemData.mastStepping) parts.push(itemData.mastStepping);
+            if (itemData.mastTrackType) parts.push(itemData.mastTrackType);
+            if (parts.length > 0) {
+              mastOptionsHtml = `<p><em>Mast type: ${esc(parts.join(', '))}</em></p>`;
+            }
+          }
+
           html += `
   <div class="item" style="border-left-color: ${RATING_COLORS[ratingLabel] || '#1e3a5f'};">
     <p><strong>${esc(item.label)}</strong>${ratingLabel ? ` — <span class="${ratingClass}">${ratingLabel}</span>${codeTag}` : ''}</p>
+    ${mastOptionsHtml}
     ${itemData.text ? `<p>${esc(itemData.text)}</p>` : ''}
     ${itemData.standards && itemData.standards.length > 0 ? `<p class="standards"><strong>Applicable Standards:</strong> ${itemData.standards.join(', ')}</p>` : ''}
     ${itemPhotosHtml}

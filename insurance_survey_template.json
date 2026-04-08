@@ -122,7 +122,7 @@
           },
           {
             "type": "list",
-            "label": "Hull and rudder(s) (if applicable) moisture testing",
+            "label": "Hull and rudder(s) (if applicable) conductivity testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -147,18 +147,6 @@
           {
             "type": "list",
             "label": "Keel and keel joint",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Through-hulls, strainers",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -239,6 +227,10 @@
               "Not applicable",
               "Not tested/not verified"
             ]
+          },
+          {
+            "type": "media",
+            "label": "Rudder photo(s)"
           },
           {
             "type": "list",
@@ -376,7 +368,7 @@
           },
           {
             "type": "list",
-            "label": "Swim platform and ladder - condition and moisture readings",
+            "label": "Swim platform and ladder - condition and conductivity readings",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -433,7 +425,7 @@
           },
           {
             "type": "list",
-            "label": "Deck and coachroof/pilot house moisture testing",
+            "label": "Deck and coachroof/pilot house conductivity testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -518,18 +510,6 @@
           {
             "type": "list",
             "label": "Lifelines/safety rail",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Fuel and water fill ports, and waste deck pump-out port",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -658,7 +638,7 @@
           },
           {
             "type": "list",
-            "label": "Moisture testing",
+            "label": "conductivity testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -968,7 +948,7 @@
           },
           {
             "type": "list",
-            "label": "Cockpit moisture testing",
+            "label": "Cockpit conductivity testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -981,18 +961,6 @@
           {
             "type": "list",
             "label": "Cockpit drains",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Cockpit lockers/lazarettes",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -1238,7 +1206,7 @@
           },
           {
             "type": "list",
-            "label": "Flybridge moisture testing",
+            "label": "Flybridge conductivity testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2524,18 +2492,6 @@
           },
           {
             "type": "list",
-            "label": "Manual fuel pump(s)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
             "label": "Oil level and condition",
             "options": [
               "A - Critical",
@@ -2824,30 +2780,6 @@
           },
           {
             "type": "list",
-            "label": "Galvanic isolator",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Isolation transformer",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
             "label": "Inverter and grounding",
             "options": [
               "A - Critical",
@@ -2897,54 +2829,6 @@
           {
             "type": "list",
             "label": "Battery ventillation",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Starter battery(ies)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "House battery(ies)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Battery hydrometer test",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Battery load test",
             "options": [
               "A - Critical",
               "B - Needs Attention",

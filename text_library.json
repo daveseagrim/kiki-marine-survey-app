@@ -78,12 +78,12 @@
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned readings consistently at or near 999 across large areas, indicating severe and widespread moisture saturation. Immediate investigation and remediation is required to assess the extent of osmotic damage or delamination."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned readings consistently at or near 999 across large areas, indicating severe and widespread elevated conductivity. Immediate investigation and remediation is required to assess the extent of osmotic damage or delamination."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A - hull and rudder",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. Both the hull and rudder returned readings consistently at or near 999, indicating severe moisture saturation throughout. The extent of the readings suggests structural compromise. Professional assessment and remediation is critical."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. Both the hull and rudder returned readings consistently at or near 999, indicating severe elevated conductivity throughout. The extent of the readings suggests structural compromise. Professional assessment and remediation is critical."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
@@ -169,6 +169,16 @@
       "section": "Keel and keel joint",
       "rating": "C",
       "text": "The keel was encapsulated and was in good condition."
+    },
+    {
+      "section": "Keel and keel joint",
+      "rating": "C - stainless steel",
+      "text": "The stainless steel keel was in good condition with no visible corrosion, cracking, or damage at the keel joint. The fairing was intact."
+    },
+    {
+      "section": "Keel and keel joint",
+      "rating": "B - stainless steel",
+      "text": "The stainless steel keel showed surface staining and minor corrosion. The keel joint should be inspected more closely and the keel fairing assessed for any signs of movement or cracking."
     },
     {
       "section": "Through-hulls, strainers",
@@ -541,6 +551,36 @@
       "text": "The propellers showed moderate wear with minor blade damage, pitting, or corrosion that merited attention. The propellers should be removed, inspected, and reconditioned or replaced as necessary."
     },
     {
+      "section": "Propeller(s)",
+      "rating": "C - fixed three-blade",
+      "text": "The fixed three-blade propeller was in good condition with no significant damage, pitting, or corrosion. Blades were intact and securely attached to the shaft."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C - fixed two-blade",
+      "text": "The fixed two-blade propeller was in good condition with no significant damage, pitting, or corrosion. Blades were intact and securely attached to the shaft."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C - folding three-blade",
+      "text": "The folding three-blade propeller opened and closed smoothly. It was properly secured with no significant damage, pitting, or corrosion."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C - feathering",
+      "text": "The feathering propeller blades rotated smoothly through their full range. The mechanism was properly secured with no significant damage, pitting, or corrosion."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C - twin fixed",
+      "text": "Both fixed propellers were in good condition with no significant damage, pitting, or corrosion. Blades were intact and securely attached to their respective shafts."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C - controllable pitch",
+      "text": "The controllable pitch propeller was in good condition. The pitch mechanism operated smoothly and the blades showed no significant damage, pitting, or corrosion."
+    },
+    {
       "section": "Propeller shaft(s)",
       "rating": "B",
       "text": "The propeller shaft showed signs of wear, scoring, or minor corrosion that merited attention. The shaft should be inspected by a qualified marine mechanic and reconditioned or replaced as necessary."
@@ -568,7 +608,7 @@
     {
       "section": "Transom",
       "rating": "B",
-      "text": "The transom shows signs of moisture absorption or minor damage. Inspect and treat to prevent further deterioration."
+      "text": "The transom shows signs of elevated conductivity or minor damage. Inspect and treat to prevent further deterioration."
     },
     {
       "section": "Swim platform and ladder",
@@ -901,6 +941,26 @@
       "section": "Sails - other",
       "rating": "C",
       "text": "Additional sails are in serviceable condition and safe for use."
+    },
+    {
+      "section": "Mast(s)",
+      "rating": "C - external track",
+      "text": "The mast was fitted with an external track and slides for the mainsail. The track was securely fastened with no loose or missing rivets. The slides operated smoothly."
+    },
+    {
+      "section": "Mast(s)",
+      "rating": "C - in-mast furling",
+      "text": "The mast was fitted with an in-mast roller furling system. The furling mechanism operated smoothly and the sail deployed and retracted without binding or jamming."
+    },
+    {
+      "section": "Mast(s)",
+      "rating": "B - external track",
+      "text": "The mast was fitted with an external track and slides for the mainsail. Some slides were stiff or corroded and several rivets securing the track showed wear. Service the track and replace worn slides."
+    },
+    {
+      "section": "Mast(s)",
+      "rating": "B - in-mast furling",
+      "text": "The mast was fitted with an in-mast roller furling system. The furling mechanism was stiff or showed hesitation during operation. Service the furling mechanism and inspect the foil and bearings."
     }
   ],
   "Deck & Bowsprit": [
@@ -917,7 +977,7 @@
     {
       "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
       "rating": "C - one or two minor areas",
-      "text": "Percussion testing of most of the cockpit floor produced a clear and even tone across most areas with no indications of delamination or voids. However, ##### localized areas produced dull thuds suggestive of present or past saturation with core deterioration. The photographs show the hammer tip indicating the areas. Monitor and plan localized repair if softness develops."
+      "text": "Percussion testing of most of the deck and coachroof produced a clear and even tone across most areas with no indications of delamination or voids. However, ##### localized areas produced dull thuds suggestive of present or past saturation with core deterioration. The photographs show the hammer tip indicating the areas. Monitor and plan localized repair if softness develops."
     },
     {
       "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
@@ -1192,7 +1252,7 @@
     {
       "section": "Deck and coachroof/pilothouse condition",
       "rating": "B",
-      "text": "The deck or pilothouse shows spider cracks or minor moisture signs. Monitor and treat to prevent deterioration."
+      "text": "The deck or pilothouse shows spider cracks or minor signs of elevated conductivity. Monitor and treat to prevent deterioration."
     },
     {
       "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
@@ -1232,7 +1292,7 @@
     {
       "section": "Anchor locker",
       "rating": "B",
-      "text": "The locker shows corrosion or minor damage with areas of moisture. Treatment and ventilation improvement are advisable."
+      "text": "The locker shows corrosion or minor damage with areas of elevated conductivity. Treatment and ventilation improvement are advisable."
     },
     {
       "section": "Stanchions",
@@ -1969,6 +2029,21 @@
       "section": "Companionway",
       "rating": "A",
       "text": "The companionway is cracked or non-functional, affecting structural integrity. Repair is required."
+    },
+    {
+      "section": "Cockpit drains",
+      "rating": "Not applicable",
+      "text": "Cockpit drains were not applicable to this vessel. Water exits the cockpit via an open gangway in the transom."
+    },
+    {
+      "section": "Pushpit/pulpit",
+      "rating": "C - with seating",
+      "text": "The pushpit was in serviceable condition with seating incorporated into the design. The structure was securely mounted with no cracking or corrosion at the base fittings."
+    },
+    {
+      "section": "Pushpit/pulpit",
+      "rating": "B - with seating",
+      "text": "The pushpit with incorporated seating showed wear at the base fittings. Minor corrosion was present. Service the fittings and monitor for any structural movement."
     }
   ],
   "Gauges and Instrumentation": [
@@ -2622,7 +2697,7 @@
     {
       "section": "flyridge, floor, seats and coaming (spider cracks, etc.)",
       "rating": "B",
-      "text": "Spider cracks or minor moisture signs are visible. Monitor and seal as needed."
+      "text": "Spider cracks or minor signs of elevated conductivity are visible. Monitor and seal as needed."
     },
     {
       "section": "flyridge drains",
@@ -3431,7 +3506,7 @@
     {
       "section": "Hull deck joint (interior)",
       "rating": "B",
-      "text": "Minor cracking or moisture signs are visible. Monitor and re-seal as needed."
+      "text": "Minor cracking or signs of elevated conductivity are visible. Monitor and re-seal as needed."
     },
     {
       "section": "Cabin lining and ceiling",
@@ -3451,7 +3526,7 @@
     {
       "section": "Deck hatches, windows and portholes – interior observations",
       "rating": "B",
-      "text": "Minor moisture stains or loose frames are visible. Service seals and fasteners."
+      "text": "Minor water stains or loose frames are visible. Service seals and fasteners."
     },
     {
       "section": "Cabin lights",
@@ -3591,7 +3666,7 @@
     {
       "section": "Bulkheads",
       "rating": "B",
-      "text": "Minor cracking or moisture is visible. Monitor and seal as needed."
+      "text": "Minor cracking or elevated conductivity was detected. Monitor and seal as needed."
     },
     {
       "section": "Keel bolts",
@@ -4193,6 +4268,46 @@
       "section": "Bilge, stringers and ribs – accessible from engine bay",
       "rating": "B",
       "text": "Minor water or debris is visible. Cleaning is recommended."
+    },
+    {
+      "section": "Drive coupling",
+      "rating": "C",
+      "text": "The drive coupling was securely fastened with no visible wear or misalignment. All fasteners were tight and the coupling showed no signs of corrosion or deterioration."
+    },
+    {
+      "section": "Drive coupling",
+      "rating": "B",
+      "text": "The drive coupling showed signs of wear or minor misalignment. Fasteners should be checked for torque and the coupling alignment verified. Service at next scheduled maintenance."
+    },
+    {
+      "section": "Drive coupling",
+      "rating": "A",
+      "text": "The drive coupling exhibited significant wear, corrosion, or misalignment. The coupling requires immediate replacement or realignment to prevent shaft or transmission damage."
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "C - traditional packing",
+      "text": "The traditional stuffing box with packing gland was in serviceable condition. The drip rate was within acceptable limits at approximately one to two drops per minute under load. The packing nut was accessible and properly adjusted."
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "C - dripless seal",
+      "text": "The dripless shaft seal was in serviceable condition with no visible leaking. The bellows were supple and free of cracking or deterioration."
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "B - traditional packing",
+      "text": "The traditional stuffing box was dripping at a rate exceeding acceptable limits. The packing should be repacked or the gland adjusted. Inspect the shaft sleeve for scoring."
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "B - dripless seal",
+      "text": "The dripless shaft seal showed early signs of deterioration. The bellows exhibited minor cracking or stiffness. Monitor closely and plan replacement before the next haul-out."
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "A",
+      "text": "The stuffing box or shaft seal was leaking significantly and requires immediate repair or replacement. The vessel should not be operated until the seal is addressed."
     }
   ],
   "Steering & Hydraulics": [

@@ -173,6 +173,10 @@
             ]
           },
           {
+            "type": "media",
+            "label": "Rudder photo(s)"
+          },
+          {
             "type": "list",
             "label": "Through-hulls, strainers",
             "options": [
@@ -977,7 +981,7 @@
           },
           {
             "type": "list",
-            "label": "Main sheet and traveller",
+            "label": "Main sheet",
             "options": [
               "A - Critical",
               "B - Needs Attention",
