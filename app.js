@@ -4644,6 +4644,10 @@ async function editSavedPhoto(photoId, itemLabel) {
   const photo = await getPhotoById(photoId);
   if (!photo) return;
 
+  // Close any open bottom sheet first so it doesn't interfere with the preview modal
+  const bottomSheet = document.getElementById('bottomSheetOverlay');
+  if (bottomSheet) bottomSheet.remove();
+
   const fieldKey = `_edit_${photoId}`;
   window._editingPhotoId = photoId;
   window._editingItemLabel = itemLabel;
@@ -4843,62 +4847,78 @@ function startPhotoCrop() {
   const img = document.getElementById('previewImage');
   if (!img) return;
 
-  // Create a canvas-based crop overlay
-  const rect = img.getBoundingClientRect();
+  // Use a full-screen overlay so crop controls are easy to use on mobile
   const overlay = document.createElement('div');
   overlay.id = 'cropOverlay';
-  overlay.style.cssText = `position:fixed;top:${rect.top}px;left:${rect.left}px;width:${rect.width}px;height:${rect.height}px;z-index:10001;cursor:crosshair;touch-action:none;`;
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:10001;display:flex;flex-direction:column;align-items:center;justify-content:center;';
 
-  // Dark border overlay
+  // Create an image element for cropping that fills available space
   overlay.innerHTML = `
-    <div style="position:absolute;top:0;left:0;right:0;bottom:0;border:2px dashed #3b82f6;box-sizing:border-box;"></div>
-    <div id="cropBox" style="position:absolute;top:10%;left:10%;width:80%;height:80%;border:3px solid #3b82f6;background:rgba(59,130,246,0.1);box-sizing:border-box;touch-action:none;">
-      <div style="position:absolute;top:-6px;left:-6px;width:12px;height:12px;background:#3b82f6;border-radius:50%;"></div>
-      <div style="position:absolute;top:-6px;right:-6px;width:12px;height:12px;background:#3b82f6;border-radius:50%;"></div>
-      <div style="position:absolute;bottom:-6px;left:-6px;width:12px;height:12px;background:#3b82f6;border-radius:50%;"></div>
-      <div style="position:absolute;bottom:-6px;right:-6px;width:12px;height:12px;background:#3b82f6;border-radius:50%;"></div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;width:100%;position:relative;overflow:hidden;" id="cropImageContainer">
+      <img id="cropSourceImage" src="${window._pendingPhotoData.originalDataUrl}" style="max-width:95%;max-height:70vh;display:block;">
     </div>
-    <div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:10002;">
-      <button class="btn-secondary" style="padding:10px 20px;font-size:14px;background:white;" onclick="cancelCrop()">Cancel</button>
-      <button class="btn-primary" style="padding:10px 20px;font-size:14px;" onclick="applyCrop()">Apply Crop</button>
+    <div id="cropBox" style="position:absolute;border:3px solid #3b82f6;background:rgba(59,130,246,0.15);box-sizing:border-box;touch-action:none;z-index:10002;">
+      <div style="position:absolute;top:-8px;left:-8px;width:16px;height:16px;background:#3b82f6;border-radius:50%;"></div>
+      <div style="position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:#3b82f6;border-radius:50%;"></div>
+      <div style="position:absolute;bottom:-8px;left:-8px;width:16px;height:16px;background:#3b82f6;border-radius:50%;"></div>
+      <div style="position:absolute;bottom:-8px;right:-8px;width:16px;height:16px;background:#3b82f6;border-radius:50%;"></div>
+    </div>
+    <div style="display:flex;gap:12px;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom, 0px));z-index:10002;">
+      <button class="btn-secondary" style="padding:12px 24px;font-size:15px;background:white;" onclick="cancelCrop()">Cancel</button>
+      <button class="btn-primary" style="padding:12px 24px;font-size:15px;" onclick="applyCrop()">Apply Crop</button>
     </div>
   `;
 
   document.body.appendChild(overlay);
 
-  // Make crop box draggable via touch/mouse
-  const cropBox = document.getElementById('cropBox');
-  let isDragging = false;
-  let startX, startY, startLeft, startTop;
+  // Position crop box over the image after it renders
+  setTimeout(() => {
+    const cropImg = document.getElementById('cropSourceImage');
+    const cropBox = document.getElementById('cropBox');
+    if (cropImg && cropBox) {
+      const imgRect = cropImg.getBoundingClientRect();
+      cropBox.style.left = (imgRect.left + imgRect.width * 0.1) + 'px';
+      cropBox.style.top = (imgRect.top + imgRect.height * 0.1) + 'px';
+      cropBox.style.width = (imgRect.width * 0.8) + 'px';
+      cropBox.style.height = (imgRect.height * 0.8) + 'px';
+    }
+  }, 50);
 
-  function onStart(e) {
-    e.preventDefault();
-    const touch = e.touches ? e.touches[0] : e;
-    isDragging = true;
-    startX = touch.clientX;
-    startY = touch.clientY;
-    startLeft = cropBox.offsetLeft;
-    startTop = cropBox.offsetTop;
-  }
-  function onMove(e) {
-    if (!isDragging) return;
-    e.preventDefault();
-    const touch = e.touches ? e.touches[0] : e;
-    const dx = touch.clientX - startX;
-    const dy = touch.clientY - startY;
-    const newLeft = Math.max(0, Math.min(overlay.clientWidth - cropBox.clientWidth, startLeft + dx));
-    const newTop = Math.max(0, Math.min(overlay.clientHeight - cropBox.clientHeight, startTop + dy));
-    cropBox.style.left = newLeft + 'px';
-    cropBox.style.top = newTop + 'px';
-  }
-  function onEnd() { isDragging = false; }
+  // Make crop box draggable via touch/mouse (set up after DOM renders)
+  setTimeout(() => {
+    const cb = document.getElementById('cropBox');
+    if (!cb) return;
+    let isDragging = false;
+    let startX, startY, startLeft, startTop;
 
-  cropBox.addEventListener('touchstart', onStart, { passive: false });
-  cropBox.addEventListener('touchmove', onMove, { passive: false });
-  cropBox.addEventListener('touchend', onEnd);
-  cropBox.addEventListener('mousedown', onStart);
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup', onEnd);
+    function onStart(e) {
+      e.preventDefault();
+      const touch = e.touches ? e.touches[0] : e;
+      isDragging = true;
+      startX = touch.clientX;
+      startY = touch.clientY;
+      const rect = cb.getBoundingClientRect();
+      startLeft = rect.left;
+      startTop = rect.top;
+    }
+    function onMove(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+      const touch = e.touches ? e.touches[0] : e;
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+      cb.style.left = (startLeft + dx) + 'px';
+      cb.style.top = (startTop + dy) + 'px';
+    }
+    function onEnd() { isDragging = false; }
+
+    cb.addEventListener('touchstart', onStart, { passive: false });
+    cb.addEventListener('touchmove', onMove, { passive: false });
+    cb.addEventListener('touchend', onEnd);
+    cb.addEventListener('mousedown', onStart);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onEnd);
+  }, 100);
 }
 
 function cancelCrop() {
@@ -4909,19 +4929,19 @@ function cancelCrop() {
 function applyCrop() {
   const overlay = document.getElementById('cropOverlay');
   const cropBox = document.getElementById('cropBox');
-  const img = document.getElementById('previewImage');
-  if (!overlay || !cropBox || !img || !window._pendingPhotoData) {
+  const cropImg = document.getElementById('cropSourceImage');
+  if (!overlay || !cropBox || !cropImg || !window._pendingPhotoData) {
     cancelCrop();
     return;
   }
 
-  // Calculate crop ratios relative to the displayed image
-  const overlayW = overlay.clientWidth;
-  const overlayH = overlay.clientHeight;
-  const cropLeft = cropBox.offsetLeft / overlayW;
-  const cropTop = cropBox.offsetTop / overlayH;
-  const cropW = cropBox.clientWidth / overlayW;
-  const cropH = cropBox.clientHeight / overlayH;
+  // Calculate crop ratios relative to the displayed crop source image
+  const imgRect = cropImg.getBoundingClientRect();
+  const boxRect = cropBox.getBoundingClientRect();
+  const cropLeft = Math.max(0, (boxRect.left - imgRect.left) / imgRect.width);
+  const cropTop = Math.max(0, (boxRect.top - imgRect.top) / imgRect.height);
+  const cropW = Math.min(1 - cropLeft, boxRect.width / imgRect.width);
+  const cropH = Math.min(1 - cropTop, boxRect.height / imgRect.height);
 
   // Apply crop to the original image
   const srcImg = new Image();
