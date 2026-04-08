@@ -5423,10 +5423,25 @@ function toggleAccordion(button) {
   const content = button.nextElementSibling;
   if (!content) return;
   const isOpen = content.style.display !== 'none';
-  content.style.display = isOpen ? 'none' : 'block';
 
+  // Close all other open accordions first
+  document.querySelectorAll('.accordion-content').forEach(el => {
+    if (el !== content && el.style.display !== 'none') {
+      el.style.display = 'none';
+      const otherChevron = el.previousElementSibling?.querySelector('span:last-child');
+      if (otherChevron) otherChevron.style.transform = 'rotate(0deg)';
+    }
+  });
+
+  // Toggle the clicked one
+  content.style.display = isOpen ? 'none' : 'block';
   const chevron = button.querySelector('span:last-child');
   if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+
+  // Scroll the opened category to the top of the screen
+  if (!isOpen) {
+    button.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 function viewPhotoAnnotation(photoId) {
