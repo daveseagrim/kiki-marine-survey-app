@@ -274,23 +274,12 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "powerOnly": true
           },
           {
             "type": "list",
             "label": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Exhaust discharge position and condition",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -310,7 +299,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "powerOnly": true
           },
           {
             "type": "list",
@@ -1453,7 +1443,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "powerOnly": true
           },
           {
             "type": "list",
@@ -1465,7 +1456,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "powerOnly": true
           },
           {
             "type": "list",
@@ -1686,7 +1678,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "powerOnly": true
           },
           {
             "type": "list",
@@ -1698,7 +1691,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "powerOnly": true
           },
           {
             "type": "list",
@@ -1931,7 +1925,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "powerOnly": true
           },
           {
             "type": "list",
@@ -1943,7 +1938,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "powerOnly": true
           },
           {
             "type": "list",
@@ -2789,7 +2785,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "powerOnly": true
           },
           {
             "type": "list",
@@ -2801,7 +2798,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "powerOnly": true
           },
           {
             "type": "list",

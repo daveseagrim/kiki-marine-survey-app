@@ -242,7 +242,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "powerOnly": true
           },
           {
             "type": "list",
@@ -423,7 +424,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "powerOnly": true
           },
           {
             "type": "list",
@@ -1523,7 +1525,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "powerOnly": true
           },
           {
             "type": "list",
@@ -2142,7 +2145,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "powerOnly": true
           }
         ]
       },

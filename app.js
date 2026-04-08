@@ -4379,10 +4379,12 @@ function renderInspection(survey) {
   // Determine vessel type for filtering
   const sailOnlyCategories = ['Spars and rigging', 'Sails'];
   const isPowerboat = (survey.vesselType || '').toLowerCase() === 'power';
+  const isSailboat = (survey.vesselType || '').toLowerCase() === 'sail';
 
   // Check if conditional items should be shown
   function shouldShowItem(item) {
     if (isPowerboat && item.sailOnly) return false;
+    if (isSailboat && item.powerOnly) return false;
     if (item.conditional) {
       const thrusterRating = survey.items['Bow thruster']?.rating;
       const sternThrusterRating = survey.items['Stern thruster']?.rating;
@@ -6157,10 +6159,12 @@ function updateCategoryHeader(survey, categoryName) {
   const activeTemplate = getTemplateForSurvey(survey);
   const sailOnlyCategories = ['Spars and rigging', 'Sails'];
   const isPowerboat = (survey.vesselType || '').toLowerCase() === 'power';
+  const isSailboat = (survey.vesselType || '').toLowerCase() === 'sail';
   let categoryItems = [];
 
   function shouldShowHeaderItem(item) {
     if (isPowerboat && item.sailOnly) return false;
+    if (isSailboat && item.powerOnly) return false;
     if (item.conditional) {
       const thrusterRating = survey.items['Bow thruster']?.rating;
       const sternThrusterRating = survey.items['Stern thruster']?.rating;
