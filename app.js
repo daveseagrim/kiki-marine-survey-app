@@ -7309,16 +7309,13 @@ function collapseCurrentSection() {
   if (openContent) {
     const header = openContent.previousElementSibling;
     if (header) {
-      toggleAccordion(header);
-      // Keep the collapsed header visible in the centre of the screen.
-      // Use multiple scroll attempts — iOS Safari needs time to reflow
-      // after a large section disappears from the DOM.
-      const scrollToHeader = () => header.scrollIntoView({ behavior: 'auto', block: 'center' });
-      requestAnimationFrame(() => {
-        scrollToHeader();
-        setTimeout(scrollToHeader, 80);
-        setTimeout(scrollToHeader, 250);
-      });
+      // Scroll the header into the centre of the viewport FIRST,
+      // then collapse. This way the long content below the header
+      // disappears and the header stays roughly centred — rather than
+      // collapsing first and ending up at the bottom of a short page.
+      header.scrollIntoView({ behavior: 'auto', block: 'center' });
+      // Small delay so the browser finishes the scroll before the reflow
+      setTimeout(() => toggleAccordion(header), 60);
     }
   }
 }
