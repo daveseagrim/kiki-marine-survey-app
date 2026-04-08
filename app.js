@@ -3735,7 +3735,7 @@ function renderInspection(survey) {
       html += `
           <div class="form-group">
             <label class="form-label">Notes / Description</label>
-            <textarea id="text-${item.label.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Add inspection notes..." style="min-height: 80px;" autocapitalize="sentences">${itemData.text || ''}</textarea>
+            <textarea id="text-${item.label.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Add inspection notes..." style="min-height: 80px;" autocapitalize="sentences" onblur="autoSaveItemText('${item.label.replace(/'/g, "\\'")}', '${categoryName.replace(/'/g, "\\'")}')">${itemData.text || ''}</textarea>
           </div>
       `;
 
@@ -3800,18 +3800,15 @@ function renderInspection(survey) {
         </div>
       `;
 
-      // Save and flag buttons
+      // Flag and exclude buttons (no save button — auto-saves on blur)
       const isFlagged = itemData.flagged;
       html += `
         <div style="display:flex;gap:8px;margin-top:12px;">
-          <button class="btn-primary" style="flex:1;"
-                  onclick="saveItemData('${item.label.replace(/'/g, "\\'")}', '${categoryName.replace(/'/g, "\\'")}')"
-          >Save Item</button>
-          <button class="btn-secondary" style="font-size:13px;padding:8px 12px;${isExcluded ? 'background:#fee2e2;border-color:#fca5a5;' : ''}"
+          <button class="btn-secondary" style="flex:1;font-size:13px;padding:8px 12px;${isExcluded ? 'background:#fee2e2;border-color:#fca5a5;' : ''}"
                   onclick="toggleExclude('${item.label.replace(/'/g, "\\'")}')"
                   title="Exclude from report"
           >${isExcluded ? '⊘ Excluded' : '⊘ Skip'}</button>
-          <button class="btn-secondary" style="font-size:13px;padding:8px 12px;${isFlagged ? 'background:#fef3c7;border-color:#f59e0b;' : ''}"
+          <button class="btn-secondary" style="flex:1;font-size:13px;padding:8px 12px;${isFlagged ? 'background:#fef3c7;border-color:#f59e0b;' : ''}"
                   onclick="toggleFlag('${item.label.replace(/'/g, "\\'")}')"
                   title="Flag for follow-up"
           >${isFlagged ? '🚩 Flagged' : '🏳️ Flag'}</button>
@@ -4691,7 +4688,7 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
   html += `
     <div class="form-group">
       <label class="form-label">Notes / Description</label>
-      <textarea id="text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Add inspection notes..." style="min-height: 80px;" autocapitalize="sentences">${itemData.text || ''}</textarea>
+      <textarea id="text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Add inspection notes..." style="min-height: 80px;" autocapitalize="sentences" onblur="autoSaveItemText('${safeLabel}', '${safeCat}')">${itemData.text || ''}</textarea>
     </div>
   `;
 
@@ -4754,17 +4751,14 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
     </div>
   `;
 
-  // Save and flag buttons
+  // Flag and exclude buttons (no save button — auto-saves on blur)
   html += `
     <div style="display:flex;gap:8px;margin-top:12px;">
-      <button class="btn-primary" style="flex:1;"
-              onclick="saveItemData('${safeLabel}', '${safeCat}')"
-      >Save Item</button>
-      <button class="btn-secondary" style="font-size:13px;padding:8px 12px;${isExcluded ? 'background:#fee2e2;border-color:#fca5a5;' : ''}"
+      <button class="btn-secondary" style="flex:1;font-size:13px;padding:8px 12px;${isExcluded ? 'background:#fee2e2;border-color:#fca5a5;' : ''}"
               onclick="toggleExclude('${safeLabel}')"
               title="Exclude from report"
       >${isExcluded ? '⊘ Excluded' : '⊘ Skip'}</button>
-      <button class="btn-secondary" style="font-size:13px;padding:8px 12px;${isFlagged ? 'background:#fef3c7;border-color:#f59e0b;' : ''}"
+      <button class="btn-secondary" style="flex:1;font-size:13px;padding:8px 12px;${isFlagged ? 'background:#fef3c7;border-color:#f59e0b;' : ''}"
               onclick="toggleFlag('${safeLabel}')"
               title="Flag for follow-up"
       >${isFlagged ? '🚩 Flagged' : '🏳️ Flag'}</button>
@@ -4855,28 +4849,37 @@ function selectRating(itemLabel, categoryName, rating) {
     if (!survey.items[itemLabel]) {
       survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
     }
-    survey.items[itemLabel].rating = rating;
-    survey.items[itemLabel].text = '';
-    survey.items[itemLabel].standards = [];
-    survey.items[itemLabel].variantText = '';
+
+    // Deselect: if tapping the same rating, clear it
+    if (survey.items[itemLabel].rating === rating) {
+      survey.items[itemLabel].rating = '';
+      survey.items[itemLabel].text = '';
+      survey.items[itemLabel].standards = [];
+      survey.items[itemLabel].variantText = '';
+    } else {
+      survey.items[itemLabel].rating = rating;
+      survey.items[itemLabel].text = '';
+      survey.items[itemLabel].standards = [];
+      survey.items[itemLabel].variantText = '';
+    }
 
     // Sync special spec items to top-level survey properties
+    const currentRating = survey.items[itemLabel].rating;
     if (itemLabel === 'Boat style') {
-      survey.boatStyle = rating;
+      survey.boatStyle = currentRating;
       // Auto-detect vessel type from boat style
-      survey.vesselType = getVesselType(rating);
+      survey.vesselType = currentRating ? getVesselType(currentRating) : '';
       // Auto-suggest hull type based on boat style
-      const autoHull = inferHullType(rating);
+      const autoHull = currentRating ? inferHullType(currentRating) : '';
       if (autoHull) {
         survey.hullType = autoHull;
-        // Also update the Hull type item rating if it exists
         if (!survey.items['Hull type']) {
           survey.items['Hull type'] = { rating: '', text: '', standards: [], photos: [] };
         }
         survey.items['Hull type'].rating = autoHull;
       }
     } else if (itemLabel === 'Hull type') {
-      survey.hullType = rating;
+      survey.hullType = currentRating;
     }
 
     saveSurvey(survey).then(() => {
@@ -5075,6 +5078,11 @@ function updateStandards(itemLabel, checkbox) {
 }
 
 function saveItemData(itemLabel, categoryName) {
+  autoSaveItemText(itemLabel, categoryName);
+}
+
+// Auto-save item text on blur — no alert, just a subtle toast
+function autoSaveItemText(itemLabel, categoryName) {
   getSurvey(currentSurveyId).then(survey => {
     const textareaId = `text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}`;
     const textArea = document.getElementById(textareaId);
@@ -5084,17 +5092,30 @@ function saveItemData(itemLabel, categoryName) {
       survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
     }
 
+    // Only save if text actually changed
+    if (survey.items[itemLabel].text === text) return;
+
     survey.items[itemLabel].text = text;
 
-    // Update completed count
-    survey.completedCount = Object.values(survey.items)
-      .filter(item => item.rating && item.rating !== '' && !item.rating.includes('Not'))
-      .length;
-
     saveSurvey(survey).then(() => {
-      alert('Item saved');
+      showToast('Saved');
     });
   });
+}
+
+// Subtle toast notification (replaces alert)
+function showToast(message) {
+  let toast = document.getElementById('auto-save-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'auto-save-toast';
+    toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);color:white;padding:8px 20px;border-radius:20px;font-size:13px;z-index:9999;transition:opacity 0.3s;pointer-events:none;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.style.opacity = '1';
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => { toast.style.opacity = '0'; }, 1500);
 }
 
 function toggleAccordion(button) {
