@@ -1,0 +1,76 @@
+{
+  "lastUpdated": "2026-04",
+  "outdrives": [
+    {
+      "make": "Mercury MerCruiser",
+      "models": [
+        { "model": "Alpha One Gen I", "description": "Single-prop, up to 220 HP, dog clutch in lower unit, water pump in foot" },
+        { "model": "Alpha One Gen II", "description": "Single-prop, up to 300 HP, improved exhaust and water flow over Gen I" },
+        { "model": "Bravo One", "description": "Single-prop, up to 600 HP, cone clutch in upper housing, belt-driven sea water pump" },
+        { "model": "Bravo One X", "description": "Single-prop, high-performance variant of Bravo One with larger gears, up to 525 HP" },
+        { "model": "Bravo One XR", "description": "Single-prop, racing variant, strengthened internals for high-performance applications" },
+        { "model": "Bravo Two", "description": "Single-prop with large-diameter prop, up to 450 HP, designed for heavier displacement hulls" },
+        { "model": "Bravo Two X", "description": "Single-prop, performance variant of Bravo Two for heavier boats at higher speeds" },
+        { "model": "Bravo Three", "description": "Dual counter-rotating props, up to 425 HP, excellent tracking and reduced steering torque" },
+        { "model": "Bravo Three X", "description": "Dual counter-rotating props, performance variant with higher gear ratio" },
+        { "model": "Bravo Three XR", "description": "Dual counter-rotating props, racing variant with strengthened components" },
+        { "model": "#6 (MR/MC)", "description": "Legacy Mercury drive, transom-mount design, pre-Alpha era" }
+      ]
+    },
+    {
+      "make": "Volvo Penta",
+      "models": [
+        { "model": "SX (single-prop)", "description": "Single-prop, up to 225 HP, ideal for small to mid-sized recreational boats" },
+        { "model": "SX-A (single-prop)", "description": "Single-prop, updated SX with improved corrosion protection, up to 225 HP" },
+        { "model": "DP (DuoProp)", "description": "Original dual counter-rotating prop drive, up to 350 HP" },
+        { "model": "DP-S (DuoProp)", "description": "Redesigned DuoProp with shared gear case housing with SX, up to 350 HP" },
+        { "model": "DPS-A (DuoProp)", "description": "Updated DuoProp, improved hydraulic shift, up to 350 HP gasoline" },
+        { "model": "DPS-B (DuoProp)", "description": "Latest generation DuoProp, electronic shift actuator, up to 430 HP" },
+        { "model": "DP-E (diesel DuoProp)", "description": "Diesel-rated DuoProp, up to 350 HP diesel applications" },
+        { "model": "IPS (pod drive)", "description": "Inboard Performance System, forward-facing pods, joystick docking" },
+        { "model": "270 / 275", "description": "Legacy single-prop drive, 1970s–1980s era" },
+        { "model": "280 / 285 / 290", "description": "Legacy single-prop drive, widely used through 1980s–1990s" },
+        { "model": "SP / DP (early)", "description": "Early single-prop (SP) and dual-prop (DP) drives, 1980s–1990s" }
+      ]
+    },
+    {
+      "make": "OMC (Outboard Marine Corp.)",
+      "models": [
+        { "model": "Stringer (400/800 series)", "description": "Pre-Cobra design, 1978–1985, dog clutch shifting" },
+        { "model": "Cobra", "description": "1986–1993, improved shifting over Stringer, I4 and V6/V8 applications" },
+        { "model": "King Cobra", "description": "1988–1993, high-performance variant of Cobra, larger gears" }
+      ]
+    },
+    {
+      "make": "Yanmar",
+      "models": [
+        { "model": "ZT350", "description": "Diesel sterndrive, hydraulic shift, dual counter-rotating props, 150–350 HP" },
+        { "model": "ZT370", "description": "Diesel sterndrive, hydraulic shift, dual counter-rotating props, 150–370 HP" },
+        { "model": "ZT370e", "description": "Electronic-shift variant of ZT370, paired with BY2/LP/8LV diesel engines" }
+      ]
+    },
+    {
+      "make": "Ilmor",
+      "models": [
+        { "model": "6.2L GDI sterndrive", "description": "6.2L V8 gasoline direct injection, 380 HP, paired with Bravo-compatible drives" },
+        { "model": "5.3L GDI sterndrive", "description": "5.3L V8 gasoline direct injection, 320 HP, paired with Bravo-compatible drives" }
+      ]
+    },
+    {
+      "make": "Konrad",
+      "models": [
+        { "model": "500 Series", "description": "Heavy-duty sterndrive for commercial and high-performance, up to 500 HP" },
+        { "model": "600 Series", "description": "Heavy-duty sterndrive for commercial applications, up to 600 HP diesel or gas" },
+        { "model": "680 Series", "description": "Extra-heavy-duty sterndrive, designed for large displacement vessels" }
+      ]
+    },
+    {
+      "make": "ZF Marine",
+      "models": [
+        { "model": "SD10", "description": "Compact sterndrive for diesel engines, single-prop, up to 200 HP" },
+        { "model": "SD12", "description": "Mid-range sterndrive for diesel engines, single-prop, up to 300 HP" },
+        { "model": "SD15", "description": "Heavy-duty sterndrive for diesel engines, up to 500 HP" }
+      ]
+    }
+  ]
+}

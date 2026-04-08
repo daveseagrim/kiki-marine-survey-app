@@ -12,6 +12,7 @@ let insuranceSurveyTemplate = null;
 let boatSpecsDB = null;
 let boatValuesDB = null;
 let engineDb = null;
+let outdriveDb = null;
 let currentSurveyId = null;
 let currentView = 'surveys';
 
@@ -417,13 +418,14 @@ async function initDB() {
 // Fetch data files
 async function fetchDataFiles() {
   try {
-    const [templateRes, insuranceTemplateRes, libraryRes, specsRes, valuesRes, engineRes] = await Promise.all([
+    const [templateRes, insuranceTemplateRes, libraryRes, specsRes, valuesRes, engineRes, outdriveRes] = await Promise.all([
       fetch('survey_template.json'),
       fetch('insurance_survey_template.json'),
       fetch('text_library.json'),
       fetch('boat_specs_db.json'),
       fetch('boat_values_db.json'),
-      fetch('engine_db.json')
+      fetch('engine_db.json'),
+      fetch('outdrive_db.json')
     ]);
 
     surveyTemplate = await templateRes.json();
@@ -432,6 +434,7 @@ async function fetchDataFiles() {
     boatSpecsDB = await specsRes.json();
     boatValuesDB = await valuesRes.json();
     engineDb = await engineRes.json();
+    outdriveDb = await outdriveRes.json();
   } catch (e) {
     console.error('Error fetching data files:', e);
   }
@@ -869,6 +872,46 @@ function showNotesSheet(itemLabel, categoryName) {
       `;
     }
 
+    // Outdrive options for outdrive items in bottom sheet
+    let outdriveOptionsHtml = '';
+    if (itemLabel.startsWith('Outdrive') && outdriveDb) {
+      const odMake = itemData.outdriveMake || '';
+      const odModel = itemData.outdriveModel || '';
+      let sheetMakeOpts = '<option value="">Select manufacturer...</option>';
+      [...outdriveDb.outdrives].sort((a, b) => a.make.localeCompare(b.make)).forEach(od => {
+        sheetMakeOpts += `<option value="${od.make}" ${odMake === od.make ? 'selected' : ''}>${od.make}</option>`;
+      });
+      sheetMakeOpts += '<option value="__other__">— Other (type manually) —</option>';
+      let sheetModelOpts = '<option value="">Select model...</option>';
+      if (odMake) {
+        const maker = outdriveDb.outdrives.find(od => od.make === odMake);
+        if (maker) {
+          maker.models.forEach(m => {
+            sheetModelOpts += `<option value="${m.model}" ${odModel === m.model ? 'selected' : ''}>${m.model} — ${m.description}</option>`;
+          });
+          sheetModelOpts += '<option value="__other__">— Other (type manually) —</option>';
+        }
+      }
+      outdriveOptionsHtml = `
+        <div style="padding:4px 20px 8px 20px;">
+          <div style="margin-bottom:8px;">
+            <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Outdrive Manufacturer</label>
+            <select id="sheet-outdriveMake" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+                    onchange="onSheetOutdriveMakeChange('${safeLabel}')">
+              ${sheetMakeOpts}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Outdrive Model</label>
+            <select id="sheet-outdriveModel" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+                    onchange="saveOutdriveOption('${safeLabel}', 'outdriveModel', this.value)">
+              ${sheetModelOpts}
+            </select>
+          </div>
+        </div>
+      `;
+    }
+
     const overlay = document.createElement('div');
     overlay.id = 'bottomSheetOverlay';
     overlay.className = 'bottom-sheet-overlay';
@@ -877,6 +920,7 @@ function showNotesSheet(itemLabel, categoryName) {
         <div class="bottom-sheet-handle"></div>
         <div class="bottom-sheet-title">${itemLabel} — Notes</div>
         ${mastOptionsHtml}
+        ${outdriveOptionsHtml}
         <div style="padding:12px 20px;">
           <textarea id="sheet-text-${sanitizedLabel}" placeholder="Add inspection notes..." style="min-height:100px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;" autocapitalize="sentences">${itemData.text || ''}</textarea>
         </div>
@@ -6078,6 +6122,45 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
     `;
   }
 
+  // Outdrive manufacturer/model selector (for outdrive items — powerOnly)
+  if (itemLabel.startsWith('Outdrive') && outdriveDb) {
+    const odMake = itemData.outdriveMake || '';
+    const odModel = itemData.outdriveModel || '';
+    // Build make options
+    let makeOpts = '<option value="">Select manufacturer...</option>';
+    [...outdriveDb.outdrives].sort((a, b) => a.make.localeCompare(b.make)).forEach(od => {
+      makeOpts += `<option value="${od.make}" ${odMake === od.make ? 'selected' : ''}>${od.make}</option>`;
+    });
+    makeOpts += '<option value="__other__">— Other (type manually) —</option>';
+    // Build model options for selected make
+    let modelOpts = '<option value="">Select model...</option>';
+    if (odMake) {
+      const maker = outdriveDb.outdrives.find(od => od.make === odMake);
+      if (maker) {
+        maker.models.forEach(m => {
+          modelOpts += `<option value="${m.model}" ${odModel === m.model ? 'selected' : ''}>${m.model} — ${m.description}</option>`;
+        });
+        modelOpts += '<option value="__other__">— Other (type manually) —</option>';
+      }
+    }
+    html += `
+      <div class="form-group" style="margin-top:8px;">
+        <label class="form-label">Outdrive Manufacturer</label>
+        <select id="outdriveMake-select" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;"
+                onchange="onOutdriveMakeChange('${safeLabel}', '${safeCat}')">
+          ${makeOpts}
+        </select>
+      </div>
+      <div class="form-group" style="margin-top:8px;">
+        <label class="form-label">Outdrive Model</label>
+        <select id="outdriveModel-select" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;"
+                onchange="onOutdriveModelChange('${safeLabel}')">
+          ${modelOpts}
+        </select>
+      </div>
+    `;
+  }
+
   // Text snippet cards (tap to insert)
   if (itemData.rating && ['A - Critical', 'B - Needs Attention', 'C - Serviceable', 'Powered up only', 'Not tested / not verified', 'Not applicable'].includes(itemData.rating)) {
     const baseRating = itemData.rating.charAt(0);
@@ -6583,6 +6666,145 @@ function autoSaveItemText(itemLabel, categoryName) {
 
     survey.items[itemLabel].text = text;
 
+    saveSurvey(survey).then(() => {
+      showToast('Saved');
+    });
+  });
+}
+
+// ─── Outdrive Make/Model Cascading Dropdowns ─────────────────────────────
+
+function onOutdriveMakeChange(itemLabel, categoryName) {
+  const select = document.getElementById('outdriveMake-select');
+  const makeVal = select.value;
+
+  // "Other" — swap to text input
+  if (makeVal === '__other__') {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'outdriveMake-select';
+    input.placeholder = 'Type outdrive manufacturer...';
+    input.style.cssText = 'width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;';
+    input.onblur = function() { saveOutdriveOption(itemLabel, 'outdriveMake', this.value); };
+    select.replaceWith(input);
+    input.focus();
+    // Also swap model to text input
+    const modelSelect = document.getElementById('outdriveModel-select');
+    if (modelSelect) {
+      const modelInput = document.createElement('input');
+      modelInput.type = 'text';
+      modelInput.id = 'outdriveModel-select';
+      modelInput.placeholder = 'Type outdrive model...';
+      modelInput.style.cssText = 'width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;';
+      modelInput.onblur = function() { saveOutdriveOption(itemLabel, 'outdriveModel', this.value); };
+      modelSelect.replaceWith(modelInput);
+    }
+    return;
+  }
+
+  // Save the make
+  saveOutdriveOption(itemLabel, 'outdriveMake', makeVal);
+
+  // Populate model dropdown
+  const modelSelect = document.getElementById('outdriveModel-select');
+  if (!modelSelect || modelSelect.tagName !== 'SELECT') return;
+  modelSelect.innerHTML = '<option value="">Select model...</option>';
+
+  if (outdriveDb && makeVal) {
+    const maker = outdriveDb.outdrives.find(od => od.make === makeVal);
+    if (maker) {
+      maker.models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.model;
+        opt.textContent = `${m.model} — ${m.description}`;
+        modelSelect.appendChild(opt);
+      });
+      const otherOpt = document.createElement('option');
+      otherOpt.value = '__other__';
+      otherOpt.textContent = '— Other (type manually) —';
+      modelSelect.appendChild(otherOpt);
+    }
+  }
+  // Clear model when make changes
+  saveOutdriveOption(itemLabel, 'outdriveModel', '');
+}
+
+function onOutdriveModelChange(itemLabel) {
+  const modelSelect = document.getElementById('outdriveModel-select');
+  const modelVal = modelSelect.value;
+
+  // "Other" — swap to text input
+  if (modelVal === '__other__') {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'outdriveModel-select';
+    input.placeholder = 'Type outdrive model...';
+    input.style.cssText = 'width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;';
+    input.onblur = function() { saveOutdriveOption(itemLabel, 'outdriveModel', this.value); };
+    modelSelect.replaceWith(input);
+    input.focus();
+    return;
+  }
+
+  saveOutdriveOption(itemLabel, 'outdriveModel', modelVal);
+}
+
+function onSheetOutdriveMakeChange(itemLabel) {
+  const select = document.getElementById('sheet-outdriveMake');
+  const makeVal = select.value;
+
+  if (makeVal === '__other__') {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'sheet-outdriveMake';
+    input.placeholder = 'Type manufacturer...';
+    input.style.cssText = 'width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;';
+    input.onblur = function() { saveOutdriveOption(itemLabel, 'outdriveMake', this.value); };
+    select.replaceWith(input);
+    input.focus();
+    const modelSelect = document.getElementById('sheet-outdriveModel');
+    if (modelSelect) {
+      const modelInput = document.createElement('input');
+      modelInput.type = 'text';
+      modelInput.id = 'sheet-outdriveModel';
+      modelInput.placeholder = 'Type model...';
+      modelInput.style.cssText = 'width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;';
+      modelInput.onblur = function() { saveOutdriveOption(itemLabel, 'outdriveModel', this.value); };
+      modelSelect.replaceWith(modelInput);
+    }
+    return;
+  }
+
+  saveOutdriveOption(itemLabel, 'outdriveMake', makeVal);
+
+  const modelSelect = document.getElementById('sheet-outdriveModel');
+  if (!modelSelect || modelSelect.tagName !== 'SELECT') return;
+  modelSelect.innerHTML = '<option value="">Select model...</option>';
+
+  if (outdriveDb && makeVal) {
+    const maker = outdriveDb.outdrives.find(od => od.make === makeVal);
+    if (maker) {
+      maker.models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.model;
+        opt.textContent = `${m.model} — ${m.description}`;
+        modelSelect.appendChild(opt);
+      });
+      const otherOpt = document.createElement('option');
+      otherOpt.value = '__other__';
+      otherOpt.textContent = '— Other (type manually) —';
+      modelSelect.appendChild(otherOpt);
+    }
+  }
+  saveOutdriveOption(itemLabel, 'outdriveModel', '');
+}
+
+function saveOutdriveOption(itemLabel, field, value) {
+  getSurvey(currentSurveyId).then(survey => {
+    if (!survey.items[itemLabel]) {
+      survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+    }
+    survey.items[itemLabel][field] = value;
     saveSurvey(survey).then(() => {
       showToast('Saved');
     });
@@ -7625,6 +7847,15 @@ ${survey.vesselDescription ? `
             }
           }
 
+          // Outdrive info for report
+          let outdriveInfoHtml = '';
+          if (item.label.startsWith('Outdrive') && (itemData.outdriveMake || itemData.outdriveModel)) {
+            const parts = [];
+            if (itemData.outdriveMake) parts.push(itemData.outdriveMake);
+            if (itemData.outdriveModel) parts.push(itemData.outdriveModel);
+            outdriveInfoHtml = `<p><em>Outdrive: ${esc(parts.join(' — '))}</em></p>`;
+          }
+
           // Mast options info for Main mast item
           let mastOptionsHtml = '';
           if (item.label === 'Main mast') {
@@ -7639,6 +7870,7 @@ ${survey.vesselDescription ? `
           html += `
   <div class="item" style="border-left-color: ${RATING_COLORS[ratingLabel] || '#1e3a5f'};">
     <p><strong>${esc(item.label)}</strong>${ratingLabel ? ` — <span class="${ratingClass}">${ratingLabel}</span>${codeTag}` : ''}</p>
+    ${outdriveInfoHtml}
     ${mastOptionsHtml}
     ${itemData.text ? `<p>${esc(itemData.text)}</p>` : ''}
     ${itemData.standards && itemData.standards.length > 0 ? `<p class="standards"><strong>Applicable Standards:</strong> ${itemData.standards.join(', ')}</p>` : ''}
