@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v114';
+const CACHE_NAME = 'kiki-marine-v116';
 const URLS_TO_CACHE = [
   './',
   'index.html',
@@ -11,6 +11,7 @@ const URLS_TO_CACHE = [
   'boat_values_db.json',
   'engine_db.json',
   'outdrive_db.json',
+  'winch_db.json',
   'apple-touch-icon.png',
   'icon-192.png',
   'icon-512.png',

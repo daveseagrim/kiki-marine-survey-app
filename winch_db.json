@@ -1,0 +1,135 @@
+{
+  "winches": [
+    {
+      "make": "Lewmar",
+      "country": "UK",
+      "models": [
+        { "model": "EVO 15ST", "description": "Self-tailing, 1-speed, max line 10mm" },
+        { "model": "EVO 30ST", "description": "Self-tailing, 2-speed, max line 12mm" },
+        { "model": "EVO 40ST", "description": "Self-tailing, 2-speed, max line 14mm" },
+        { "model": "EVO 45ST", "description": "Self-tailing, 2-speed, max line 16mm" },
+        { "model": "EVO 50ST", "description": "Self-tailing, 2-speed, max line 16mm" },
+        { "model": "EVO 55ST", "description": "Self-tailing, 2-speed, max line 18mm" },
+        { "model": "EVO 65ST", "description": "Self-tailing, 3-speed, max line 18mm" },
+        { "model": "EVO 15EST", "description": "Electric self-tailing, 1-speed" },
+        { "model": "EVO 30EST", "description": "Electric self-tailing, 2-speed" },
+        { "model": "EVO 40EST", "description": "Electric self-tailing, 2-speed" },
+        { "model": "EVO 45EST", "description": "Electric self-tailing, 2-speed" },
+        { "model": "EVO 50EST", "description": "Electric self-tailing, 2-speed" },
+        { "model": "EVO 55EST", "description": "Electric self-tailing, 2-speed" },
+        { "model": "EVO 65EST", "description": "Electric self-tailing, 3-speed" },
+        { "model": "Ocean 14ST", "description": "Self-tailing, alloy drum, 1-speed" },
+        { "model": "Ocean 16ST", "description": "Self-tailing, alloy drum, 1-speed" },
+        { "model": "Ocean 24ST", "description": "Self-tailing, alloy drum, 2-speed" },
+        { "model": "Ocean 30ST", "description": "Self-tailing, alloy drum, 2-speed" },
+        { "model": "Ocean 40ST", "description": "Self-tailing, alloy drum, 2-speed" },
+        { "model": "Ocean 48ST", "description": "Self-tailing, alloy drum, 2-speed" },
+        { "model": "Ocean 50ST", "description": "Self-tailing, alloy drum, 2-speed" }
+      ]
+    },
+    {
+      "make": "Harken",
+      "country": "USA",
+      "models": [
+        { "model": "B6", "description": "Plain-top, 1-speed, 6:1 power ratio" },
+        { "model": "B8", "description": "Plain-top, 1-speed, 8:1 power ratio" },
+        { "model": "B15", "description": "Plain-top, 1-speed, 15:1 power ratio" },
+        { "model": "B20", "description": "2-speed, 20:1 power ratio" },
+        { "model": "B32", "description": "Self-tailing, 2-speed, 32:1 max power" },
+        { "model": "B35", "description": "Self-tailing, 2-speed, 35:1 max power" },
+        { "model": "B40", "description": "Self-tailing, 2-speed, 40:1 max power" },
+        { "model": "B44", "description": "Self-tailing, 2-speed, 44:1 max power" },
+        { "model": "B46", "description": "Self-tailing, 2-speed, 46:1 max power" },
+        { "model": "B50", "description": "Self-tailing, 2-speed, 50:1 max power" },
+        { "model": "B60", "description": "Self-tailing, 3-speed, 60:1 max power" },
+        { "model": "B70", "description": "Self-tailing, 3-speed, 70:1 max power" },
+        { "model": "B80", "description": "Self-tailing, 3-speed, 80:1 max power" },
+        { "model": "B32 Electric", "description": "Electric, self-tailing, 12V or 24V" },
+        { "model": "B40 Electric", "description": "Electric, self-tailing, 12V or 24V" },
+        { "model": "B46 Electric", "description": "Electric, self-tailing, 12V" },
+        { "model": "B50 Electric", "description": "Electric, self-tailing, 12V or 24V" },
+        { "model": "B60 Electric", "description": "Electric, self-tailing, 12V or 24V" },
+        { "model": "B70 Electric", "description": "Electric, self-tailing, 24V" },
+        { "model": "B80 Electric", "description": "Electric, self-tailing, 24V" },
+        { "model": "Radial 15", "description": "Compact 2-speed, Radial series" },
+        { "model": "Radial 20", "description": "Compact 2-speed, Radial series" },
+        { "model": "Radial 35", "description": "Self-tailing, 2-speed, Radial series" },
+        { "model": "Radial 40", "description": "Self-tailing, 2-speed, Radial series" },
+        { "model": "Radial 46", "description": "Self-tailing, 2-speed, Radial series" },
+        { "model": "Performa 20", "description": "Alloy, 2-speed, racing" },
+        { "model": "Performa 40", "description": "Alloy, 2-speed, racing" },
+        { "model": "Performa 50", "description": "Alloy, 2-speed, racing" }
+      ]
+    },
+    {
+      "make": "Andersen",
+      "country": "Denmark",
+      "models": [
+        { "model": "28ST", "description": "Self-tailing, 2-speed, bronze" },
+        { "model": "34ST", "description": "Self-tailing, 2-speed, bronze" },
+        { "model": "40ST", "description": "Self-tailing, 2-speed, bronze" },
+        { "model": "46ST", "description": "Self-tailing, 2-speed, bronze" },
+        { "model": "52ST", "description": "Self-tailing, 2-speed, bronze" },
+        { "model": "56ST", "description": "Self-tailing, 3-speed, bronze" },
+        { "model": "62ST", "description": "Self-tailing, 3-speed, bronze" },
+        { "model": "68ST", "description": "Self-tailing, 3-speed, bronze" },
+        { "model": "28EST", "description": "Electric self-tailing, 12V" },
+        { "model": "34EST", "description": "Electric self-tailing, 12V" },
+        { "model": "40EST", "description": "Electric self-tailing, 12V/24V" },
+        { "model": "46EST", "description": "Electric self-tailing, 12V/24V" },
+        { "model": "52EST", "description": "Electric self-tailing, 24V" },
+        { "model": "56EST", "description": "Electric self-tailing, 24V" }
+      ]
+    },
+    {
+      "make": "Antal",
+      "country": "Italy",
+      "models": [
+        { "model": "XT32", "description": "Self-tailing, 2-speed, anodized alloy" },
+        { "model": "XT40", "description": "Self-tailing, 2-speed, anodized alloy" },
+        { "model": "XT48", "description": "Self-tailing, 2-speed, anodized alloy" },
+        { "model": "XT56", "description": "Self-tailing, 2-speed, anodized alloy" },
+        { "model": "XT64", "description": "Self-tailing, 3-speed, anodized alloy" }
+      ]
+    },
+    {
+      "make": "Barient",
+      "country": "USA",
+      "models": [
+        { "model": "10", "description": "Legacy plain-top, 1-speed, pre-1985" },
+        { "model": "16", "description": "Legacy, 1-speed, pre-1985" },
+        { "model": "21", "description": "Legacy, 2-speed, common on 1970s-80s sailboats" },
+        { "model": "22", "description": "Legacy, 2-speed" },
+        { "model": "27", "description": "Legacy, 2-speed, mid-size" },
+        { "model": "28", "description": "Legacy, 2-speed, self-tailing option" },
+        { "model": "32", "description": "Legacy, 2-speed, self-tailing" },
+        { "model": "35", "description": "Legacy, 3-speed" },
+        { "model": "36", "description": "Legacy, 3-speed, self-tailing" }
+      ]
+    },
+    {
+      "make": "Barlow",
+      "country": "Australia",
+      "models": [
+        { "model": "15", "description": "Legacy, 1-speed, common on older boats" },
+        { "model": "16", "description": "Legacy, 1-speed" },
+        { "model": "22", "description": "Legacy, 2-speed" },
+        { "model": "24", "description": "Legacy, 2-speed" },
+        { "model": "25", "description": "Legacy, 2-speed" },
+        { "model": "26", "description": "Legacy, 2-speed, self-tailing" },
+        { "model": "30", "description": "Legacy, 2-speed, self-tailing" },
+        { "model": "32", "description": "Legacy, 3-speed" }
+      ]
+    },
+    {
+      "make": "Pontos",
+      "country": "France",
+      "models": [
+        { "model": "35ST", "description": "Self-tailing, 2-speed, compact" },
+        { "model": "42ST", "description": "Self-tailing, 2-speed" },
+        { "model": "50ST", "description": "Self-tailing, 2-speed" },
+        { "model": "58ST", "description": "Self-tailing, 3-speed" }
+      ]
+    }
+  ]
+}

@@ -13,8 +13,27 @@ let boatSpecsDB = null;
 let boatValuesDB = null;
 let engineDb = null;
 let outdriveDb = null;
+let winchDb = null;
 let currentSurveyId = null;
 let currentView = 'surveys';
+
+// Camera active flag — persisted to sessionStorage so it survives
+// iOS Chrome tab suspension when the camera app is open.
+function setCameraActive(val) {
+  window._cameraActive = val;
+  if (val) {
+    try {
+      sessionStorage.setItem('_cameraActive', '1');
+      if (currentSurveyId) {
+        sessionStorage.setItem('_cameraSurveyId', currentSurveyId);
+      }
+    } catch (e) { /* sessionStorage may not be available in some contexts */ }
+  } else {
+    try {
+      sessionStorage.removeItem('_cameraActive');
+    } catch (e) {}
+  }
+}
 
 // Capitalize each word in a string (for name fields)
 function capitalizeWords(str) {
@@ -418,14 +437,15 @@ async function initDB() {
 // Fetch data files
 async function fetchDataFiles() {
   try {
-    const [templateRes, insuranceTemplateRes, libraryRes, specsRes, valuesRes, engineRes, outdriveRes] = await Promise.all([
+    const [templateRes, insuranceTemplateRes, libraryRes, specsRes, valuesRes, engineRes, outdriveRes, winchRes] = await Promise.all([
       fetch('survey_template.json'),
       fetch('insurance_survey_template.json'),
       fetch('text_library.json'),
       fetch('boat_specs_db.json'),
       fetch('boat_values_db.json'),
       fetch('engine_db.json'),
-      fetch('outdrive_db.json')
+      fetch('outdrive_db.json'),
+      fetch('winch_db.json')
     ]);
 
     surveyTemplate = await templateRes.json();
@@ -435,6 +455,7 @@ async function fetchDataFiles() {
     boatValuesDB = await valuesRes.json();
     engineDb = await engineRes.json();
     outdriveDb = await outdriveRes.json();
+    winchDb = await winchRes.json();
   } catch (e) {
     console.error('Error fetching data files:', e);
   }
@@ -916,6 +937,55 @@ function showNotesSheet(itemLabel, categoryName) {
       `;
     }
 
+    // Winch options for winch items in bottom sheet
+    let winchOptionsHtml = '';
+    if (itemLabel.toLowerCase().includes('winch') && winchDb) {
+      const wMake = itemData.winchMake || '';
+      const wModel = itemData.winchModel || '';
+      const isElectric = itemData.winchElectric || false;
+      let sheetWMakeOpts = '<option value="">Select manufacturer...</option>';
+      [...winchDb.winches].sort((a, b) => a.make.localeCompare(b.make)).forEach(w => {
+        sheetWMakeOpts += `<option value="${w.make}" ${wMake === w.make ? 'selected' : ''}>${w.make}</option>`;
+      });
+      sheetWMakeOpts += '<option value="__other__">— Other (type manually) —</option>';
+      let sheetWModelOpts = '<option value="">Select model...</option>';
+      if (wMake) {
+        const maker = winchDb.winches.find(w => w.make === wMake);
+        if (maker) {
+          maker.models.forEach(m => {
+            sheetWModelOpts += `<option value="${m.model}" ${wModel === m.model ? 'selected' : ''}>${m.model} — ${m.description}</option>`;
+          });
+          sheetWModelOpts += '<option value="__other__">— Other (type manually) —</option>';
+        }
+      }
+      winchOptionsHtml = `
+        <div style="padding:4px 20px 8px 20px;">
+          <div style="margin-bottom:8px;">
+            <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Winch Manufacturer</label>
+            <select id="sheet-winchMake" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+                    onchange="onSheetWinchMakeChange('${safeLabel}')">
+              ${sheetWMakeOpts}
+            </select>
+          </div>
+          <div style="margin-bottom:8px;">
+            <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Winch Model</label>
+            <select id="sheet-winchModel" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+                    onchange="saveWinchOption('${safeLabel}', 'winchModel', this.value)">
+              ${sheetWModelOpts}
+            </select>
+          </div>
+          <div>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+              <input type="checkbox" id="sheet-winchElectric" ${isElectric ? 'checked' : ''}
+                     onchange="saveWinchOption('${safeLabel}', 'winchElectric', this.checked)"
+                     style="width:16px;height:16px;">
+              Electric winch
+            </label>
+          </div>
+        </div>
+      `;
+    }
+
     const overlay = document.createElement('div');
     overlay.id = 'bottomSheetOverlay';
     overlay.className = 'bottom-sheet-overlay';
@@ -925,6 +995,7 @@ function showNotesSheet(itemLabel, categoryName) {
         <div class="bottom-sheet-title">${itemLabel} — Notes</div>
         ${mastOptionsHtml}
         ${outdriveOptionsHtml}
+        ${winchOptionsHtml}
         <div style="padding:12px 20px;">
           <textarea id="sheet-text-${sanitizedLabel}" placeholder="Add inspection notes..." style="min-height:100px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;" autocapitalize="sentences">${itemData.text || ''}</textarea>
         </div>
@@ -4804,6 +4875,8 @@ function renderInspection(survey) {
       html += `<div style="font-weight:bold;margin-top:14px;margin-bottom:6px;color:#1e3a5f;font-size:13px;border-bottom:1px solid #ddd;padding-bottom:4px;">${eq.category}</div>`;
     }
     const checkedAttr = eq.checked ? 'checked' : '';
+    const safetyPhotoCount = (eq.photos && eq.photos.length) || 0;
+    const safetyPhotoLabel = `safety_eq_${idx}`;
     html += `
       <div class="rated-item" style="border-left: 4px solid ${eq.checked ? '#16a34a' : '#2563eb'}; padding: 8px 10px; margin-bottom: 8px;">
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
@@ -4816,12 +4889,16 @@ function renderInspection(survey) {
             ${eq.checked ? '<span style="color:#16a34a;font-weight:bold;margin-left:6px;">✓ On board</span>' : '<span style="color:#dc2626;font-size:11px;margin-left:6px;">Not verified</span>'}
           </div>
         </label>
-        <div style="margin-top:4px;margin-left:28px;">
+        <div style="margin-top:4px;margin-left:28px;display:flex;gap:8px;align-items:center;">
           <input type="text" placeholder="Notes (condition, expiry date, location...)"
                  value="${(eq.notes || '').replace(/"/g, '&quot;')}"
                  onchange="updateSafetyNote(${idx}, this.value)"
-                 style="width:100%;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;" />
+                 style="flex:1;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;" />
+          <button onclick="captureSafetyPhoto(${idx})" style="background:#2563eb;color:white;border:none;border-radius:4px;padding:4px 8px;font-size:11px;white-space:nowrap;cursor:pointer;">
+            📷${safetyPhotoCount > 0 ? ` ${safetyPhotoCount}` : ''}
+          </button>
         </div>
+        <div id="safety-thumbs-${idx}" style="margin-top:4px;margin-left:28px;display:flex;flex-wrap:wrap;gap:4px;"></div>
       </div>
     `;
   });
@@ -4836,6 +4913,7 @@ function renderInspection(survey) {
 
   // Load and display photos
   loadAndDisplayPhotos(survey);
+  loadAllSafetyThumbnails();
 
   // Repopulate comparable entries if they exist
   try {
@@ -4962,6 +5040,85 @@ async function updateSafetyNote(idx, note) {
   await saveSurvey(survey);
 }
 
+// Capture photo for a safety equipment item
+async function captureSafetyPhoto(idx) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment';
+  input.multiple = true;
+  input.onchange = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    if (files.length > 1) showToast(`Saving ${files.length} photos...`);
+
+    const survey = await getSurvey(currentSurveyId);
+    if (!survey || !survey.safetyEquipment[idx]) return;
+
+    if (!survey.safetyEquipment[idx].photos) {
+      survey.safetyEquipment[idx].photos = [];
+    }
+
+    for (const file of files) {
+      await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = async (re) => {
+          const stampedDataUrl = await addDateStampToPhoto(re.target.result);
+          const photoId = `safety_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+          const photo = {
+            id: photoId,
+            surveyId: currentSurveyId,
+            itemLabel: `safety_eq_${idx}`,
+            dataUrl: stampedDataUrl,
+            annotated: false,
+            createdAt: new Date().toISOString()
+          };
+          await savePhoto(photo);
+          survey.safetyEquipment[idx].photos.push(photoId);
+          resolve();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    await saveSurvey(survey);
+    showToast(`${files.length} photo${files.length > 1 ? 's' : ''} saved`);
+    // Refresh thumbnails inline
+    loadSafetyThumbnails(idx, survey.safetyEquipment[idx].photos);
+  };
+  setCameraActive(true);
+  input.click();
+}
+
+// Load thumbnails for a safety equipment item
+async function loadSafetyThumbnails(idx, photoIds) {
+  const container = document.getElementById(`safety-thumbs-${idx}`);
+  if (!container || !photoIds || photoIds.length === 0) {
+    if (container) container.innerHTML = '';
+    return;
+  }
+  let thumbsHtml = '';
+  for (const pid of photoIds) {
+    const photo = await getPhotoById(pid);
+    if (photo) {
+      thumbsHtml += `<img src="${photo.dataUrl}" style="width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', 'safety_eq_${idx}')" />`;
+    }
+  }
+  container.innerHTML = thumbsHtml;
+}
+
+// Load all safety thumbnails after rendering
+async function loadAllSafetyThumbnails() {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !survey.safetyEquipment) return;
+  survey.safetyEquipment.forEach((eq, idx) => {
+    if (eq.photos && eq.photos.length > 0) {
+      loadSafetyThumbnails(idx, eq.photos);
+    }
+  });
+}
+
 async function regenerateSafetyChecklist() {
   const survey = await getSurvey(currentSurveyId);
   if (!survey) return;
@@ -4970,13 +5127,14 @@ async function regenerateSafetyChecklist() {
   const previousMap = {};
   if (survey.safetyEquipment) {
     survey.safetyEquipment.forEach(eq => {
-      previousMap[eq.name] = { checked: eq.checked, notes: eq.notes };
+      previousMap[eq.name] = { checked: eq.checked, notes: eq.notes, photos: eq.photos || [] };
     });
   }
   result.checklist.forEach(eq => {
     if (previousMap[eq.name]) {
       eq.checked = previousMap[eq.name].checked;
       eq.notes = previousMap[eq.name].notes;
+      eq.photos = previousMap[eq.name].photos;
     }
   });
   survey.safetyEquipment = result.checklist;
@@ -5105,8 +5263,9 @@ async function capturePhoto(itemLabel, event) {
     input.capture = 'environment';
     input.multiple = true;
     input.onchange = (e) => capturePhoto(itemLabel, e);
-    // Mark camera active for the visibilitychange handler (landscape fix)
-    window._cameraActive = true;
+    // Mark camera active — persisted to sessionStorage so it survives
+    // iOS tab suspension/reload
+    setCameraActive(true);
     input.click();
     return;
   }
@@ -6268,6 +6427,52 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
     `;
   }
 
+  // Winch manufacturer/model selector (for winch items — sailOnly)
+  if (itemLabel.toLowerCase().includes('winch') && winchDb) {
+    const wMake = itemData.winchMake || '';
+    const wModel = itemData.winchModel || '';
+    const isElectric = itemData.winchElectric || false;
+    let wMakeOpts = '<option value="">Select manufacturer...</option>';
+    [...winchDb.winches].sort((a, b) => a.make.localeCompare(b.make)).forEach(w => {
+      wMakeOpts += `<option value="${w.make}" ${wMake === w.make ? 'selected' : ''}>${w.make}</option>`;
+    });
+    wMakeOpts += '<option value="__other__">— Other (type manually) —</option>';
+    let wModelOpts = '<option value="">Select model...</option>';
+    if (wMake) {
+      const maker = winchDb.winches.find(w => w.make === wMake);
+      if (maker) {
+        maker.models.forEach(m => {
+          wModelOpts += `<option value="${m.model}" ${wModel === m.model ? 'selected' : ''}>${m.model} — ${m.description}</option>`;
+        });
+        wModelOpts += '<option value="__other__">— Other (type manually) —</option>';
+      }
+    }
+    html += `
+      <div class="form-group" style="margin-top:8px;">
+        <label class="form-label">Winch Manufacturer</label>
+        <select id="winchMake-select" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;"
+                onchange="onWinchMakeChange('${safeLabel}', '${safeCat}')">
+          ${wMakeOpts}
+        </select>
+      </div>
+      <div class="form-group" style="margin-top:8px;">
+        <label class="form-label">Winch Model</label>
+        <select id="winchModel-select" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;"
+                onchange="onWinchModelChange('${safeLabel}')">
+          ${wModelOpts}
+        </select>
+      </div>
+      <div class="form-group" style="margin-top:8px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
+          <input type="checkbox" id="winchElectric-check" ${isElectric ? 'checked' : ''}
+                 onchange="saveWinchOption('${safeLabel}', 'winchElectric', this.checked)"
+                 style="width:18px;height:18px;">
+          Electric winch
+        </label>
+      </div>
+    `;
+  }
+
   // Text snippet cards (tap to insert)
   if (itemData.rating && ['A - Critical', 'B - Needs Attention', 'C - Serviceable', 'Powered up only', 'Not tested / not verified', 'Not applicable'].includes(itemData.rating)) {
     const baseRating = itemData.rating.charAt(0);
@@ -6932,6 +7137,139 @@ function saveOutdriveOption(itemLabel, field, value) {
   });
 }
 
+// ─── Winch Make/Model Cascading Dropdowns ─────────────────────────────
+
+function onWinchMakeChange(itemLabel, categoryName) {
+  const select = document.getElementById('winchMake-select');
+  const makeVal = select.value;
+
+  if (makeVal === '__other__') {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'winchMake-select';
+    input.placeholder = 'Type winch manufacturer...';
+    input.style.cssText = 'width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;';
+    input.onblur = function() { saveWinchOption(itemLabel, 'winchMake', this.value); };
+    select.replaceWith(input);
+    input.focus();
+    const modelSelect = document.getElementById('winchModel-select');
+    if (modelSelect) {
+      const modelInput = document.createElement('input');
+      modelInput.type = 'text';
+      modelInput.id = 'winchModel-select';
+      modelInput.placeholder = 'Type winch model...';
+      modelInput.style.cssText = 'width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;';
+      modelInput.onblur = function() { saveWinchOption(itemLabel, 'winchModel', this.value); };
+      modelSelect.replaceWith(modelInput);
+    }
+    return;
+  }
+
+  saveWinchOption(itemLabel, 'winchMake', makeVal);
+
+  const modelSelect = document.getElementById('winchModel-select');
+  if (!modelSelect || modelSelect.tagName !== 'SELECT') return;
+  modelSelect.innerHTML = '<option value="">Select model...</option>';
+
+  if (winchDb && makeVal) {
+    const maker = winchDb.winches.find(w => w.make === makeVal);
+    if (maker) {
+      maker.models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.model;
+        opt.textContent = `${m.model} — ${m.description}`;
+        modelSelect.appendChild(opt);
+      });
+      const otherOpt = document.createElement('option');
+      otherOpt.value = '__other__';
+      otherOpt.textContent = '— Other (type manually) —';
+      modelSelect.appendChild(otherOpt);
+    }
+  }
+  saveWinchOption(itemLabel, 'winchModel', '');
+}
+
+function onWinchModelChange(itemLabel) {
+  const modelSelect = document.getElementById('winchModel-select');
+  const modelVal = modelSelect.value;
+
+  if (modelVal === '__other__') {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'winchModel-select';
+    input.placeholder = 'Type winch model...';
+    input.style.cssText = 'width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;';
+    input.onblur = function() { saveWinchOption(itemLabel, 'winchModel', this.value); };
+    modelSelect.replaceWith(input);
+    input.focus();
+    return;
+  }
+
+  saveWinchOption(itemLabel, 'winchModel', modelVal);
+}
+
+function onSheetWinchMakeChange(itemLabel) {
+  const select = document.getElementById('sheet-winchMake');
+  const makeVal = select.value;
+
+  if (makeVal === '__other__') {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'sheet-winchMake';
+    input.placeholder = 'Type manufacturer...';
+    input.style.cssText = 'width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;';
+    input.onblur = function() { saveWinchOption(itemLabel, 'winchMake', this.value); };
+    select.replaceWith(input);
+    input.focus();
+    const modelSelect = document.getElementById('sheet-winchModel');
+    if (modelSelect) {
+      const modelInput = document.createElement('input');
+      modelInput.type = 'text';
+      modelInput.id = 'sheet-winchModel';
+      modelInput.placeholder = 'Type model...';
+      modelInput.style.cssText = 'width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;';
+      modelInput.onblur = function() { saveWinchOption(itemLabel, 'winchModel', this.value); };
+      modelSelect.replaceWith(modelInput);
+    }
+    return;
+  }
+
+  saveWinchOption(itemLabel, 'winchMake', makeVal);
+
+  const modelSelect = document.getElementById('sheet-winchModel');
+  if (!modelSelect || modelSelect.tagName !== 'SELECT') return;
+  modelSelect.innerHTML = '<option value="">Select model...</option>';
+
+  if (winchDb && makeVal) {
+    const maker = winchDb.winches.find(w => w.make === makeVal);
+    if (maker) {
+      maker.models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.model;
+        opt.textContent = `${m.model} — ${m.description}`;
+        modelSelect.appendChild(opt);
+      });
+      const otherOpt = document.createElement('option');
+      otherOpt.value = '__other__';
+      otherOpt.textContent = '— Other (type manually) —';
+      modelSelect.appendChild(otherOpt);
+    }
+  }
+  saveWinchOption(itemLabel, 'winchModel', '');
+}
+
+function saveWinchOption(itemLabel, field, value) {
+  getSurvey(currentSurveyId).then(survey => {
+    if (!survey.items[itemLabel]) {
+      survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+    }
+    survey.items[itemLabel][field] = value;
+    saveSurvey(survey).then(() => {
+      showToast('Saved');
+    });
+  });
+}
+
 // Save mast option (stepping or track type)
 function saveMastOption(itemLabel, field, value) {
   getSurvey(currentSurveyId).then(survey => {
@@ -7454,6 +7792,22 @@ async function generateReport() {
     }
   }
 
+  // Also pre-load safety equipment photos
+  if (survey.safetyEquipment) {
+    for (const eq of survey.safetyEquipment) {
+      if (eq.photos && eq.photos.length > 0) {
+        for (const photoId of eq.photos) {
+          if (!itemPhotoCache[photoId]) {
+            const p = await getPhotoById(photoId);
+            if (p && p.dataUrl) {
+              itemPhotoCache[photoId] = p.dataUrl;
+            }
+          }
+        }
+      }
+    }
+  }
+
   // ── Pass 1: collect all findings ──────────────────────────────────────
   let findingCount = { A: 0, B: 0, C: 0, NT: 0 };
   let findings = { A: [], B: [], C: [], NT: [] };
@@ -7928,6 +8282,18 @@ ${survey.vesselDescription ? `
     survey.safetyEquipment.forEach((eq, idx) => {
       const statusColor = eq.checked ? '#16a34a' : '#dc2626';
       const statusText = eq.checked ? '✓ Yes' : '✗ MISSING';
+      let safetyPhotoRow = '';
+      if (eq.photos && eq.photos.length > 0) {
+        let photoImgs = '';
+        for (const pid of eq.photos) {
+          if (itemPhotoCache[pid]) {
+            photoImgs += `<img src="${itemPhotoCache[pid]}" style="width:80px;height:80px;object-fit:cover;border-radius:4px;margin:2px;" />`;
+          }
+        }
+        if (photoImgs) {
+          safetyPhotoRow = `<tr><td colspan="6" style="padding:4px 8px;">${photoImgs}</td></tr>`;
+        }
+      }
       html += `<tr>
         <td style="text-align:center;">${idx + 1}</td>
         <td>${esc(eq.name)}</td>
@@ -7935,7 +8301,7 @@ ${survey.vesselDescription ? `
         <td style="text-align:center;font-weight:bold;color:${statusColor};">${statusText}</td>
         <td style="font-size:9pt;">${esc(eq.category)}</td>
         <td style="font-size:9pt;">${esc(eq.notes || '—')}</td>
-      </tr>`;
+      </tr>${safetyPhotoRow}`;
     });
 
     html += `</tbody></table>
@@ -8009,6 +8375,16 @@ ${survey.vesselDescription ? `
             outdriveInfoHtml = `<p><em>Outdrive: ${esc(parts.join(' — '))}</em></p>`;
           }
 
+          // Winch info for report
+          let winchInfoHtml = '';
+          if (item.label.toLowerCase().includes('winch') && (itemData.winchMake || itemData.winchModel)) {
+            const parts = [];
+            if (itemData.winchMake) parts.push(itemData.winchMake);
+            if (itemData.winchModel) parts.push(itemData.winchModel);
+            if (itemData.winchElectric) parts.push('Electric');
+            winchInfoHtml = `<p><em>Winch: ${esc(parts.join(' — '))}</em></p>`;
+          }
+
           // Mast options info for Main mast item
           let mastOptionsHtml = '';
           if (item.label === 'Main mast') {
@@ -8024,6 +8400,7 @@ ${survey.vesselDescription ? `
   <div class="item" style="border-left-color: ${RATING_COLORS[ratingLabel] || '#1e3a5f'};">
     <p><strong>${esc(item.label)}</strong>${ratingLabel ? ` — <span class="${ratingClass}">${ratingLabel}</span>${codeTag}` : ''}</p>
     ${outdriveInfoHtml}
+    ${winchInfoHtml}
     ${mastOptionsHtml}
     ${itemData.text ? `<p>${esc(itemData.text)}</p>` : ''}
     ${itemData.standards && itemData.standards.length > 0 ? `<p class="standards"><strong>Applicable Standards:</strong> ${itemData.standards.join(', ')}</p>` : ''}
@@ -8517,6 +8894,14 @@ async function initApp() {
     let _handlingPopstate = false;
     window.addEventListener('popstate', (e) => {
       if (_handlingPopstate) return;
+      // If camera is active, iOS may fire a spurious popstate on return.
+      // Suppress it and re-push the current state so the user stays put.
+      if (window._cameraActive) {
+        const curState = { view: currentView };
+        if (currentSurveyId) curState.surveyId = currentSurveyId;
+        history.pushState(curState, '');
+        return;
+      }
       _handlingPopstate = true;
 
       const state = e.state;
@@ -8562,14 +8947,22 @@ async function initApp() {
     // Set initial history state
     history.replaceState({ view: 'surveys' }, '');
 
-    // Fix Android Chrome landscape photo issue: when returning from the camera
-    // app, the viewport may be stuck zoomed in or at landscape dimensions.
-    // Run viewport recalc multiple times with increasing delays since Android
-    // Chrome can be very slow to settle after camera app closes.
-    window._cameraActive = false;
+    // === Camera return / viewport fix ===
+    // On iOS Chrome, opening the camera can suspend or discard the PWA tab.
+    // When the user returns, we must:
+    //   (a) not navigate away from the inspection (guard popstate)
+    //   (b) recalculate the viewport (Android landscape bug)
+    //   (c) recover the inspection view if the page was fully reloaded
+    //
+    // We persist the camera flag to sessionStorage so it survives tab
+    // suspension/restore cycles.
+    window._cameraActive = sessionStorage.getItem('_cameraActive') === '1';
+
+    // setCameraActive is defined at module scope (see below initApp)
+
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && window._cameraActive) {
-        window._cameraActive = false;
+        setCameraActive(false);
         // Run recalc at multiple intervals — Android Chrome is unpredictable
         // about when it finishes resizing after camera return
         forceViewportRecalc();
@@ -8578,6 +8971,18 @@ async function initApp() {
         setTimeout(forceViewportRecalc, 1200);
       }
     });
+
+    // pageshow fires when the page is restored from BFCache (iOS Safari/Chrome).
+    // event.persisted === true means the page was restored, not freshly loaded.
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted && window._cameraActive) {
+        setCameraActive(false);
+        forceViewportRecalc();
+        setTimeout(forceViewportRecalc, 300);
+        setTimeout(forceViewportRecalc, 800);
+      }
+    });
+
     // Also listen for resize events after camera — another signal the
     // viewport has changed
     let _resizeAfterCamera = false;
@@ -8590,17 +8995,16 @@ async function initApp() {
         }, 150);
       }
     });
+
     // Mark camera as active whenever a file input with capture is clicked
     document.addEventListener('click', (e) => {
       const input = e.target.closest('input[type="file"]');
       if (input && (input.capture || input.accept === 'image/*')) {
-        window._cameraActive = true;
+        setCameraActive(true);
       }
     }, true);
 
     // Monitor visualViewport for unexpected zoom — reset immediately.
-    // This catches cases where the camera return zooms the viewport
-    // and none of the timed recalcs caught it.
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', () => {
         if (window.visualViewport.scale > 1.05) {
@@ -8609,8 +9013,37 @@ async function initApp() {
       });
     }
 
+    // === Camera recovery on full page reload ===
+    // If iOS discarded the tab entirely and the page reloads, check if
+    // we were mid-camera and restore the inspection view automatically.
+    const cameraSurveyId = sessionStorage.getItem('_cameraSurveyId');
+    if (cameraSurveyId && sessionStorage.getItem('_cameraActive') === '1') {
+      sessionStorage.removeItem('_cameraActive');
+      sessionStorage.removeItem('_cameraSurveyId');
+      // Defer until after initDB/fetchDataFiles so data is ready
+      window._cameraRecoverySurveyId = cameraSurveyId;
+    }
+
     await initDB();
     await fetchDataFiles();
+
+    // If recovering from camera-induced page reload, go straight back
+    // to the inspection instead of showing the home screen
+    if (window._cameraRecoverySurveyId) {
+      const recoverId = window._cameraRecoverySurveyId;
+      delete window._cameraRecoverySurveyId;
+      try {
+        const survey = await getSurvey(recoverId);
+        if (survey) {
+          showToast('Restored inspection after camera');
+          renderInspection(survey);
+          return;
+        }
+      } catch (recoverErr) {
+        console.warn('Camera recovery failed, showing home:', recoverErr);
+      }
+    }
+
     renderHome();
   } catch (e) {
     console.error('Init error:', e);
