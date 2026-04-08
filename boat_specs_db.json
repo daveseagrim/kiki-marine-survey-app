@@ -2006,6 +2006,38 @@
       "construction": "Fibreglass"
     },
     {
+      "id": "catalina-470",
+      "make": "Catalina",
+      "model": "470",
+      "aliases": [
+        "catalina470",
+        "cat 470"
+      ],
+      "yearStart": 1998,
+      "yearEnd": 2008,
+      "type": "sailboat",
+      "loa": "46'6\"",
+      "lwl": "39'4\"",
+      "beam": "14'0\"",
+      "displacement": "27,000 lbs",
+      "ballast": "9,600 lbs",
+      "maxDraft": "7'10\"",
+      "totalSailArea": "918 sq ft",
+      "hullType": "Fin keel",
+      "keelType": "Fin",
+      "construction": "Fibreglass",
+      "draftVariants": [
+        {
+          "label": "Fin keel",
+          "draft": "7'10\""
+        },
+        {
+          "label": "Wing keel",
+          "draft": "5'6\""
+        }
+      ]
+    },
+    {
       "id": "chris-craft-commander-28",
       "make": "Chris-Craft",
       "model": "Commander 28",
