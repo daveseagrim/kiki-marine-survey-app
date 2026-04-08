@@ -99,16 +99,8 @@
             "label": "Transport Canada licensing type and number"
           },
           {
-            "type": "media",
-            "label": "(HIN) Hull identification number"
-          },
-          {
             "type": "question",
             "label": "Tax status for navigation in Canada (duties and taxes paid)"
-          },
-          {
-            "type": "media",
-            "label": "NMMA/CE/TC Compliance plate"
           }
         ]
       },
