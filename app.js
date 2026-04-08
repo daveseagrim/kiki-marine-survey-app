@@ -2927,6 +2927,9 @@ function onEngineMakeChange() {
   // Clear dependent fields
   document.getElementById('engineHP').value = '';
   document.getElementById('fuelType').value = '';
+
+  // Sync to Engine 2 if visible and empty
+  syncEngine1ToEngine2();
 }
 
 function onEngineModelChange() {
@@ -2957,6 +2960,45 @@ function onEngineModelChange() {
       if (hpField) hpField.value = model.hp + 'HP / ' + model.kw + 'kW';
       if (fuelField) fuelField.value = model.fuel;
     }
+  }
+
+  // Sync to Engine 2 if visible and empty
+  syncEngine1ToEngine2();
+}
+
+// When Engine 1 make/model changes, sync to Engine 2 if it's visible
+// and its fields are still empty (user hasn't manually set them).
+function syncEngine1ToEngine2() {
+  const e2Section = document.getElementById('engine2Section');
+  if (!e2Section || e2Section.style.display === 'none') return;
+
+  const e1Make = document.getElementById('engineMake');
+  const e1Model = document.getElementById('engineModel');
+  const e2Make = document.getElementById('engine2Make');
+  const e2Model = document.getElementById('engine2Model');
+  if (!e1Make || !e2Make) return;
+
+  // Only sync if Engine 2 make is empty or is a select with no value chosen
+  const e2MakeEmpty = !e2Make.value || e2Make.value === '';
+  if (!e2MakeEmpty) return;
+
+  if (e1Make.value && e2Make.tagName === 'SELECT') {
+    e2Make.value = e1Make.value;
+    onEngine2MakeChange();
+    // Set model after models dropdown populates
+    setTimeout(() => {
+      if (e1Model && e1Model.value && e2Model && e2Model.tagName === 'SELECT') {
+        e2Model.value = e1Model.value;
+        onEngine2ModelChange();
+      }
+      // Copy HP and fuel
+      const hp1 = document.getElementById('engineHP');
+      const hp2 = document.getElementById('engine2HP');
+      if (hp1 && hp2 && hp1.value && !hp2.value) hp2.value = hp1.value;
+      const fuel1 = document.getElementById('fuelType');
+      const fuel2 = document.getElementById('fuelType2');
+      if (fuel1 && fuel2 && fuel1.value) fuel2.value = fuel1.value;
+    }, 50);
   }
 }
 
