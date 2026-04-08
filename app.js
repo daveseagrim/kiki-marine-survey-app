@@ -607,7 +607,7 @@ async function exportSurvey(surveyId) {
 async function importSurvey() {
   const input = document.createElement('input');
   input.type = 'file';
-  input.accept = '.kikisurvey,.json';
+  input.accept = '.kikisurvey,.json,application/json,*/*';
 
   input.onchange = async (event) => {
     const file = event.target.files[0];
