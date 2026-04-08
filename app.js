@@ -437,15 +437,14 @@ async function initDB() {
 // Fetch data files
 async function fetchDataFiles() {
   try {
-    const [templateRes, insuranceTemplateRes, libraryRes, specsRes, valuesRes, engineRes, outdriveRes, winchRes] = await Promise.all([
+    const [templateRes, insuranceTemplateRes, libraryRes, specsRes, valuesRes, engineRes, outdriveRes] = await Promise.all([
       fetch('survey_template.json'),
       fetch('insurance_survey_template.json'),
       fetch('text_library.json'),
       fetch('boat_specs_db.json'),
       fetch('boat_values_db.json'),
       fetch('engine_db.json'),
-      fetch('outdrive_db.json'),
-      fetch('winch_db.json')
+      fetch('outdrive_db.json')
     ]);
 
     surveyTemplate = await templateRes.json();
@@ -455,7 +454,14 @@ async function fetchDataFiles() {
     boatValuesDB = await valuesRes.json();
     engineDb = await engineRes.json();
     outdriveDb = await outdriveRes.json();
-    winchDb = await winchRes.json();
+
+    // Winch DB is optional — fetch separately so a missing file cannot break the app
+    try {
+      const winchRes = await fetch('winch_db.json');
+      if (winchRes.ok) winchDb = await winchRes.json();
+    } catch (winchErr) {
+      console.warn('winch_db.json not available:', winchErr);
+    }
   } catch (e) {
     console.error('Error fetching data files:', e);
   }
@@ -6687,7 +6693,6 @@ function updateCategoryHeader(survey, categoryName) {
 
   // Update flagged/excluded counts in title
   const flaggedCount = categoryItems.filter(item => survey.items[item.label]?.flagged).length;
-  const excludedCount = categoryItems.filter(item => survey.items[item.label]?.excluded).length;
   const titleEl = header.querySelector('.category-title');
   if (titleEl) {
     titleEl.innerHTML = `${categoryName}${flaggedCount > 0 ? ` <span style="color:#f59e0b;font-size:12px;">🚩${flaggedCount}</span>` : ''}${excludedCount > 0 ? ` <span style="color:#9ca3af;font-size:12px;">⊘${excludedCount}</span>` : ''}`;
