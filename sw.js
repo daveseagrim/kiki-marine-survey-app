@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v122';
+const CACHE_NAME = 'kiki-marine-v123';
 const URLS_TO_CACHE = [
   './',
   'index.html',
@@ -20,11 +20,18 @@ const URLS_TO_CACHE = [
   'https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png',
 ];
 
-// Install event - cache essential files
+// Install event - cache essential files (tolerates individual failures
+// so one missing file cannot prevent the service worker from installing)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(URLS_TO_CACHE);
+      return Promise.all(
+        URLS_TO_CACHE.map((url) =>
+          cache.add(url).catch((err) => {
+            console.warn('SW: failed to cache', url, err);
+          })
+        )
+      );
     })
   );
   self.skipWaiting();
