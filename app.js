@@ -920,6 +920,177 @@ function getStandardsForCategory(categoryName, rating) {
   return bestMatch || [];
 }
 
+// Item-level standard mapping — returns the single most relevant standard for a finding
+// If no specific match, returns null (no standard auto-applied)
+const ITEM_STANDARD_MAP = {
+  // Hull exterior, keel and propulsion
+  'Hull and rudder': 'TP1332 - Construction Standards for Small Vessels',
+  'Primer, barrier coat': 'TP1332 - Construction Standards for Small Vessels',
+  'Keel and keel joint': 'TP1332 - Construction Standards for Small Vessels',
+  'Hull anodes': 'ABYC E-2 - Cathodic Protection',
+  'Propeller/drive anode': 'ABYC E-2 - Cathodic Protection',
+  'Cutlass bearing': 'ABYC P-4 - Inboard Engines',
+  'Propeller': 'ABYC P-4 - Inboard Engines',
+  'Outdrive': 'ABYC P-4 - Inboard Engines',
+  'Sail drive': 'ABYC P-4 - Inboard Engines',
+  'Bow thruster': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Stern thruster': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Through-hull': 'ABYC TH-27 - Seacocks/Through-Hull Fittings',
+  'Exhaust discharge': 'ABYC P-1 - Installation of Exhaust Systems',
+  'Underwater lighting': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Swim platform': 'ABYC E-2 - Cathodic Protection',
+  'Transom': 'TP1332 - Construction Standards for Small Vessels',
+  'Hull-deck joint': 'TP1332 - Construction Standards for Small Vessels',
+  'Stern tube': 'ABYC P-4 - Inboard Engines',
+  'Propeller shaft': 'ABYC P-4 - Inboard Engines',
+  'Trim tab': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Rub rail': 'TP1332 - Construction Standards for Small Vessels',
+
+  // Spars and rigging
+  'Forestay': 'ABYC S-9 - Standing Rigging (Vessels 30 ft or More)',
+  'Shrouds': 'ABYC S-9 - Standing Rigging (Vessels 30 ft or More)',
+  'Chainplate': 'ABYC S-9 - Standing Rigging (Vessels 30 ft or More)',
+  'Main mast': 'ABYC S-9 - Standing Rigging (Vessels 30 ft or More)',
+  'Mast partner': 'ABYC S-9 - Standing Rigging (Vessels 30 ft or More)',
+  'Spreader': 'ABYC S-9 - Standing Rigging (Vessels 30 ft or More)',
+  'Backstay': 'ABYC S-9 - Standing Rigging (Vessels 30 ft or More)',
+  'Boom': 'ABYC S-10 - Running Rigging (Vessels 30 ft or More)',
+  'Halyard': 'ABYC S-10 - Running Rigging (Vessels 30 ft or More)',
+  'Jib/genoa furler': 'ABYC S-10 - Running Rigging (Vessels 30 ft or More)',
+  'Main sheet': 'ABYC S-10 - Running Rigging (Vessels 30 ft or More)',
+  'Spinnaker': 'ABYC S-10 - Running Rigging (Vessels 30 ft or More)',
+  'Winch': 'ABYC S-10 - Running Rigging (Vessels 30 ft or More)',
+  'Deckline organizer': 'ABYC S-10 - Running Rigging (Vessels 30 ft or More)',
+  'Jib/genoa track': 'ABYC S-10 - Running Rigging (Vessels 30 ft or More)',
+
+  // Deck
+  'Bowsprit': 'TP1332 - Construction Standards for Small Vessels',
+  'Deck and coachroof': 'TP1332 - Construction Standards for Small Vessels',
+  'Pulpit': 'TP1332 - Construction Standards for Small Vessels',
+  'anchor': 'TP1332 - Construction Standards for Small Vessels',
+  'Windlass': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Stanchion': 'TP1332 - Construction Standards for Small Vessels',
+  'Lifeline': 'TP1332 - Construction Standards for Small Vessels',
+  'Shore water': 'ABYC H-27 - Potable Water Systems',
+  'Mooring cleat': 'TP1332 - Construction Standards for Small Vessels',
+  'Deck hatch': 'TP1332 - Construction Standards for Small Vessels',
+  'Windshield': 'TP1332 - Construction Standards for Small Vessels',
+
+  // Outboard
+  'Outboard': 'ABYC P-6 - Outboard Engines',
+
+  // Cockpit
+  'Cockpit drain': 'ABYC A-31 - Cockpit Design',
+  'Steering wheel': 'ABYC P-11 - Steering Systems',
+  'Steering': 'ABYC P-11 - Steering Systems',
+  'Tiller': 'ABYC P-11 - Steering Systems',
+  'Emergency tiller': 'ABYC P-11 - Steering Systems',
+  'Propane': 'ABYC A-1 - Marine Liquefied Petroleum Gas (LPG) Systems',
+  'Davit': 'TP1332 - Construction Standards for Small Vessels',
+
+  // Gauges and instrumentation
+  'Engine start': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Engine gauge': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Engine control': 'ABYC P-4 - Inboard Engines',
+  'Autopilot': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'MFD': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Chartplotter': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Depth sounder': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'VHF': 'TP14693 - Navigation Safety Regulations (SOR/2005-134)',
+  'Radar': 'TP14693 - Navigation Safety Regulations (SOR/2005-134)',
+  'AIS': 'TP14693 - Navigation Safety Regulations (SOR/2005-134)',
+  'Horn': 'Small Vessel Regulations (SOR/2010-91)',
+  'Spotlight': 'ABYC A-16 - Electrical Navigation Lights',
+  'Windshield wiper': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+
+  // Cabin
+  'Cabin sole': 'TP1332 - Construction Standards for Small Vessels',
+  'Interior lighting': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Stove': 'ABYC A-1 - Marine Liquefied Petroleum Gas (LPG) Systems',
+  'Oven': 'ABYC A-1 - Marine Liquefied Petroleum Gas (LPG) Systems',
+  'Refrigerator': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Sink': 'ABYC H-27 - Potable Water Systems',
+  'Bilge': 'ABYC H-22 - DC Electric Bilge Pumps',
+  'Keel bolt': 'TP1332 - Construction Standards for Small Vessels',
+
+  // Head
+  'Head': 'ABYC TH-27 - Seacocks/Through-Hull Fittings',
+  'Toilet': 'ABYC TH-27 - Seacocks/Through-Hull Fittings',
+  'Shower': 'ABYC H-27 - Potable Water Systems',
+
+  // Fuel, water and waste
+  'Fuel tank': 'ABYC H-33 - Diesel Fuel Systems',
+  'Hot water tank': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Black water': 'Vessel Pollution and Dangerous Chemicals Regulations (SOR/2012-69)',
+  'Fresh water': 'ABYC H-27 - Potable Water Systems',
+
+  // Engine
+  'Engine': 'ABYC P-4 - Inboard Engines',
+  'Cooling water intake': 'ABYC TH-27 - Seacocks/Through-Hull Fittings',
+  'Exhaust condition': 'ABYC P-1 - Installation of Exhaust Systems',
+  'Oil level': 'ABYC P-4 - Inboard Engines',
+  'Coolant': 'ABYC P-4 - Inboard Engines',
+  'Belt': 'ABYC P-4 - Inboard Engines',
+  'Anti-vibration': 'ABYC P-4 - Inboard Engines',
+  'Hose': 'ABYC P-4 - Inboard Engines',
+  'Gearbox': 'ABYC P-4 - Inboard Engines',
+  'Drive coupling': 'ABYC P-4 - Inboard Engines',
+  'Stuffing box': 'ABYC P-4 - Inboard Engines',
+  'Packing gland': 'ABYC P-4 - Inboard Engines',
+  'Dripless seal': 'ABYC P-4 - Inboard Engines',
+
+  // Steering and trim
+  'Mechanical steering': 'ABYC P-11 - Steering Systems',
+  'Hydraulic steering': 'ABYC P-11 - Steering Systems',
+
+  // Electrical — all items map to E-11
+  'Shore power cable': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Shore power receptacle': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Battery charger': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Battery selector': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Battery ventilation': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Battery': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Distribution panel': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Reverse polarity': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Voltmeter': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Ammeter': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Bundling support': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Wiring': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Protected positive': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Bus bar': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+
+  // Safety
+  'Navigation light': 'ABYC A-16 - Electrical Navigation Lights',
+  'Lifejacket': 'Small Vessel Regulations (SOR/2010-91)',
+  'PFD': 'Small Vessel Regulations (SOR/2010-91)',
+  'Life ring': 'Small Vessel Regulations (SOR/2010-91)',
+  'Bilge pump': 'ABYC H-22 - DC Electric Bilge Pumps',
+  'Flare': 'Small Vessel Regulations (SOR/2010-91)',
+  'Fire extinguisher': 'NFPA 302 - Fire Protection Standard for Pleasure and Commercial Motor Craft',
+  'Carbon monoxide': 'ABYC A-24 - Carbon Monoxide Detection Systems',
+  'Propane gas detector': 'ABYC A-1 - Marine Liquefied Petroleum Gas (LPG) Systems',
+  'LPG': 'ABYC A-1 - Marine Liquefied Petroleum Gas (LPG) Systems',
+  'Solenoid': 'ABYC A-1 - Marine Liquefied Petroleum Gas (LPG) Systems'
+};
+
+// Find the single most relevant standard for an item based on its label
+// Uses longest-keyword-wins matching against ITEM_STANDARD_MAP
+function getStandardForItem(itemLabel, categoryName) {
+  const labelLower = itemLabel.toLowerCase();
+  let bestMatch = null;
+  let bestMatchLength = 0;
+
+  for (const [keyword, standard] of Object.entries(ITEM_STANDARD_MAP)) {
+    const keyLower = keyword.toLowerCase();
+    if (labelLower.includes(keyLower) && keyLower.length > bestMatchLength) {
+      bestMatch = standard;
+      bestMatchLength = keyLower.length;
+    }
+  }
+
+  return bestMatch;
+}
+
 // ── Transport Canada TP 511 Safety Equipment Requirements ────────────────
 // Based on Small Vessel Regulations (SOR/2010-91) and TP 511E Safe Boating Guide
 // Organized by vessel type and length bracket
@@ -5389,9 +5560,9 @@ function selectRating(itemLabel, categoryName, rating) {
       survey.items[itemLabel].rating = rating;
       survey.items[itemLabel].text = '';
       survey.items[itemLabel].variantText = '';
-      // Auto-apply all applicable standards for A and B ratings
-      const applicableStandards = getStandardsForCategory(categoryName, rating);
-      survey.items[itemLabel].standards = applicableStandards.length > 0 ? [...applicableStandards] : [];
+      // Auto-apply the single most relevant standard for A and B ratings
+      const itemStandard = getStandardForItem(itemLabel, categoryName);
+      survey.items[itemLabel].standards = itemStandard ? [itemStandard] : [];
     }
 
     saveSurvey(survey).then(() => {

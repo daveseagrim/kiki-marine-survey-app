@@ -58,27 +58,27 @@
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B - hull ok. Rudder needs help.",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of ### to ###, which are not considered abnormal for the vessel\u2019s age. Suggest monitoring the photographed areas between seasons. However, the rudder displayed numerous saturated spots, many at 999, suggesting internal conductivity accumulation. To mitigate any spread, off-season venting or drainage may be attempted. However, foam cores often retain conductivity. Rudder removal and rebuild may be required in future if conditions persist"
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of ### to ###, which are not considered abnormal for the vessel’s age. Suggest monitoring the photographed areas between seasons. However, the rudder displayed numerous saturated spots, many at 999, suggesting internal conductivity accumulation. To mitigate any spread, off-season venting or drainage may be attempted. However, foam cores often retain conductivity. Rudder removal and rebuild may be required in future if conditions persist"
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B - Both elevated. No action required.",
-      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull returned elevated yet expected readings of [###\u2013###]. The rudder returned readings of [###\u2013###]. No softness or delamination was observed. Monitor the higher-reading areas seasonally for signs of osmosis or delamination."
+      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull returned elevated yet expected readings of [###–###]. The rudder returned readings of [###–###]. No softness or delamination was observed. Monitor the higher-reading areas seasonally for signs of osmosis or delamination."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C - Rudder issue not high",
-      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull presented no areas of concern. The rudder showed elevated readings of [###\u2013###] that are not unusual for the vessel\u2019s age. Recheck seasonally to confirm stability."
+      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull presented no areas of concern. The rudder showed elevated readings of [###–###] that are not unusual for the vessel’s age. Recheck seasonally to confirm stability."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C - Hull and rudder not high",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [###\u2013###]. The rudder returned readings of [###\u2013###]. These values are not considered abnormal or concerning for a vessel of this age. Monitor the photographed areas between seasons for signs of osmosis or delamination."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [###–###]. The rudder returned readings of [###–###]. These values are not considered abnormal or concerning for a vessel of this age. Monitor the photographed areas between seasons for signs of osmosis or delamination."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of  #### to #### that are not considered abnormal for the vessel\u2019s age. Monitor the photographed areas between seasons. The rudders were bronze and not prone to conductivity uptake."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of  #### to #### that are not considered abnormal for the vessel’s age. Monitor the photographed areas between seasons. The rudders were bronze and not prone to conductivity uptake."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
@@ -248,7 +248,7 @@
     {
       "section": "Cutlass bearing(s)",
       "rating": "C - large diameter",
-      "text": "The cutlass bearings appeared serviceable. Due to the large shaft diameter, manual play testing was inconclusive. Confirm integrity during limited trial run."
+      "text": "The cutlass bearings appeared serviceable. Due to the large shaft diameter, manual play testing was inconclusive. Confirm integrity during sea trial."
     },
     {
       "section": "Cutlass bearing(s)",
@@ -323,7 +323,7 @@
     {
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
       "rating": "C",
-      "text": "The trim tabs, actuators, and mounts were in good condition and functioned properly during limited trial run."
+      "text": "The trim tabs, actuators, and mounts were in good condition and functioned properly during sea trial."
     },
     {
       "section": "Underwater lighting",
@@ -486,12 +486,17 @@
       "text": "The rub rail was solidly affixed to the hull and deck joint and was serviceable."
     },
     {
-      "section": "Hull\u2013deck joint (exterior)",
+      "section": "Hull–deck joint (exterior)",
       "rating": "C",
       "text": "The hull and deck joint was serviceable and in good condition."
     }
   ],
   "Spars and rigging": [
+    {
+      "section": "Spars and rigging photos",
+      "rating": "mast was unstepped",
+      "text": "The mast was unstepped and laying across the boat for winter storage."
+    },
     {
       "section": "Jib/genoa furler, furling line and tackle",
       "rating": "C",
@@ -767,7 +772,7 @@
     {
       "section": "Windlass",
       "rating": "C",
-      "text": "The windlass was serviceable and performed well during limited trial run testing."
+      "text": "The windlass was serviceable and performed well during sea trial testing."
     },
     {
       "section": "Windlass",
@@ -910,22 +915,22 @@
       "text": "The brightwork was generally in good condition."
     },
     {
-      "section": "Deck hatches, windows, and portholes \u2013 exterior observations",
+      "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "B - sealant issue",
       "text": "Sealant around several windows was lifting. Renew sealant to prevent water ingress."
     },
     {
-      "section": "Deck hatches, windows, and portholes \u2013 exterior observations",
+      "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "C",
       "text": "The single deck hatch appeared serviceable from the exterior."
     },
     {
-      "section": "Deck hatches, windows, and portholes \u2013 exterior observations",
+      "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "C",
       "text": "All deck hatches, windows, and portholes appeared serviceable from the exterior."
     },
     {
-      "section": "Deck hatches, windows, and portholes \u2013 exterior observations",
+      "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "C",
       "text": "Despite age-typical crazing, all deck hatches, windows, and portholes appeared serviceable from the exterior."
     },
@@ -950,12 +955,12 @@
       "text": "The windshield, pilothouse windows, frames, and studs were structurally sound, solid, and serviceable."
     },
     {
-      "section": "Arch \u2013 external condition and equipment",
+      "section": "Arch – external condition and equipment",
       "rating": "B",
       "text": "The arch was solidly attached and was serviceable. Cracking was present along the top at the bases of mounted instruments."
     },
     {
-      "section": "Arch \u2013 external condition and equipment",
+      "section": "Arch – external condition and equipment",
       "rating": "C",
       "text": "The arch was solidly attached and was serviceable."
     }
@@ -1016,7 +1021,7 @@
     {
       "section": "Outboard general condition and impression",
       "rating": "A",
-      "text": "The outboard was in good overall condition and was serviceable. Starting, idling, throttle response, and shifting were normal during limited trial run."
+      "text": "The outboard was in good overall condition and was serviceable. Starting, idling, throttle response, and shifting were normal during sea trial."
     },
     {
       "section": "Outboard general condition and impression",
@@ -1041,7 +1046,7 @@
     {
       "section": "Engine mount",
       "rating": "C",
-      "text": "The engine mount was securely mounted to the swim platform. During limited trial run, expected vibration occurred in forward and reverse."
+      "text": "The engine mount was securely mounted to the swim platform. During sea trial, expected vibration occurred in forward and reverse."
     },
     {
       "section": "Throttle, gearshift, choke",
@@ -1091,7 +1096,7 @@
     {
       "section": "Outboard anodes",
       "rating": "A",
-      "text": "The stainless propeller was free of damage and securely fastened. Performance was smooth with no discernible vibration or cavitation during limited trial run."
+      "text": "The stainless propeller was free of damage and securely fastened. Performance was smooth with no discernible vibration or cavitation during sea trial."
     },
     {
       "section": "Outboard anodes",
@@ -1101,7 +1106,7 @@
     {
       "section": "Outboard anodes",
       "rating": "C",
-      "text": "Aside from a couple of very minor dings, the stainless propeller was in good condition. It performed well during limited trial run and no discernible vibration or cavitation was evident."
+      "text": "Aside from a couple of very minor dings, the stainless propeller was in good condition. It performed well during sea trial and no discernible vibration or cavitation was evident."
     },
     {
       "section": "Outboard oil",
@@ -1438,6 +1443,11 @@
       "text": "The blower operated properly and vent tubing was clear and intact from the fan to the outside."
     },
     {
+      "section": "Blower",
+      "rating": "N/A",
+      "text": "No blower was installed. The engine was diesel and a blower was not required."
+    },
+    {
       "section": "Engine start and stop",
       "rating": "C",
       "text": "The engine started and stopped easily."
@@ -1450,7 +1460,7 @@
     {
       "section": "Engine gauges",
       "rating": "C",
-      "text": "The engine tachometer, oil pressure, speed, and temperature gauges at the helm functioned properly. During limited trial run, engine temperature and oil pressure for given speeds and RPMs remained within expected ranges."
+      "text": "The engine tachometer, oil pressure, speed, and temperature gauges at the helm functioned properly. During sea trial, engine temperature and oil pressure for given speeds and RPMs remained within expected ranges."
     },
     {
       "section": "Engine gauges",
@@ -1505,7 +1515,7 @@
     {
       "section": "Bow thruster",
       "rating": "A",
-      "text": "The bow thruster functioned properly during limited trial run."
+      "text": "The bow thruster functioned properly during sea trial."
     },
     {
       "section": "Bow thruster",
@@ -1525,7 +1535,7 @@
     {
       "section": "Autopilot",
       "rating": "C",
-      "text": "The autopilot was tested during limited trial run and functioned properly."
+      "text": "The autopilot was tested during sea trial and functioned properly."
     },
     {
       "section": "Autopilot",
@@ -1540,7 +1550,7 @@
     {
       "section": "MFD or Chartplotter",
       "rating": "C",
-      "text": "The chartplotter was tested during limited trial run and appeared to function properly. Not all features were tested."
+      "text": "The chartplotter was tested during sea trial and appeared to function properly. Not all features were tested."
     },
     {
       "section": "MFD or Chartplotter",
@@ -1660,7 +1670,7 @@
   ],
   "Flybridge": [
     {
-      "section": "Flybridge",
+      "section": "Flybridge ladder/staircase",
       "rating": "C",
       "text": "The ladder was solidly mounted and serviceable"
     },
@@ -1718,6 +1728,11 @@
       "section": "flyridge conductivity testing",
       "rating": "Not tested",
       "text": "conductivity testing of the flyridge floor was not possible because the surface was covered with PE or EVA foam material."
+    },
+    {
+      "section": "Flybridge ladder/staircase",
+      "rating": "",
+      "text": "The flybridge ladder/staircase was firmly affixed."
     },
     {
       "section": "Safety rails",
@@ -1872,19 +1887,29 @@
   ],
   "Flybridge gauges and instrument": [
     {
-      "section": "Flybridge gauges and instruments",
+      "section": "Blower",
+      "rating": "A",
+      "text": "The bilge blower was inoperative during testing. This violates ABYC H-2.7.3 for gasoline ventilation and Transport Canada Small Vessel Regulations for gasoline-powered vessels. Fuel vapours may accumulate in engine spaces and create explosion risk. Immediate repair or replacement is required. Verification should include an operational test of the motor, inspection of ducting for obstructions or damage, and confirmation of a properly labelled overboard exhaust outlet. Airflow should meet the minimum of two cubic feet per minute per cubic foot of net engine compartment volume."
+    },
+    {
+      "section": "Blower",
       "rating": "A",
       "text": "The blower fan was functional. The venting from the fan was damaged in several places and requires repair to restore proper airflow."
     },
     {
-      "section": "Flybridge gauges and instruments",
+      "section": "Blower",
       "rating": "B",
       "text": "The engine compartment blower was not functional. While not required for diesel engines, the blower assists with heat removal. Repair is recommended to ensure adequate ventilation."
     },
     {
-      "section": "Flybridge gauges and instruments",
+      "section": "Blower",
       "rating": "C",
       "text": "The blower operated properly and vent tubing was clear and intact from the fan to the outside."
+    },
+    {
+      "section": "Blower",
+      "rating": "N/A",
+      "text": "No blower was installed. The engine was diesel and a blower was not required."
     },
     {
       "section": "Engine start and stop",
@@ -1899,7 +1924,7 @@
     {
       "section": "Engine gauges",
       "rating": "C",
-      "text": "The engine tachometer, oil pressure, speed, and temperature gauges at the helm functioned properly. During limited trial run, engine temperature and oil pressure for given speeds and RPMs remained within expected ranges."
+      "text": "The engine tachometer, oil pressure, speed, and temperature gauges at the helm functioned properly. During sea trial, engine temperature and oil pressure for given speeds and RPMs remained within expected ranges."
     },
     {
       "section": "Engine gauges",
@@ -1954,7 +1979,7 @@
     {
       "section": "Bow thruster",
       "rating": "A",
-      "text": "The bow thruster functioned properly during limited trial run."
+      "text": "The bow thruster functioned properly during sea trial."
     },
     {
       "section": "Bow thruster",
@@ -1974,7 +1999,7 @@
     {
       "section": "Autopilot",
       "rating": "C",
-      "text": "The autopilot was tested during limited trial run and functioned properly."
+      "text": "The autopilot was tested during sea trial and functioned properly."
     },
     {
       "section": "Autopilot",
@@ -1989,7 +2014,7 @@
     {
       "section": "MFD or Chartplotter",
       "rating": "C",
-      "text": "The chartplotter was tested during limited trial run and appeared to function properly. Not all features were tested."
+      "text": "The chartplotter was tested during sea trial and appeared to function properly. Not all features were tested."
     },
     {
       "section": "MFD or Chartplotter",
@@ -2154,12 +2179,12 @@
       "text": "The cabin lining and ceiling were in good condition throughout the vessel."
     },
     {
-      "section": "Deck hatches, windows and portholes \u2013 interior observations",
+      "section": "Deck hatches, windows and portholes – interior observations",
       "rating": "C - min crazing",
       "text": "All deck hatches and portholes opened and closed properly. Hatches, portholes, and windows were serviceable with minimal crazing."
     },
     {
-      "section": "Deck hatches, windows and portholes \u2013 interior observations",
+      "section": "Deck hatches, windows and portholes – interior observations",
       "rating": "C - expected crazing",
       "text": "All deck hatches and portholes opened and closed properly. Hatches, portholes, and windows were serviceable with age expected crazing."
     },
@@ -2354,22 +2379,22 @@
       "text": "A protective sheet covered the floor and its condition was not verified. Exposed carpet areas were in good condition."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from cabin",
+      "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "A",
       "text": "The cabin bilge was full of water and the bilge pump was non functional. This does not meet ABYC H 22 for bilge pumping systems and ABYC S 30 for bilge pump electrical systems. Pumps must be operational and able to keep the bilge reasonably dry to reduce flooding risk. Immediate correction is required."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from cabin",
+      "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "B - water in bilge. Deck stepped mast.",
       "text": "Although the amount of water was not alarming, there was some water in the bilge. Watermarks in the bilge indicate this is a recurring condition, which is not unusual for a vessel this age. However, because the boat has a deck-stepped rig, water is likely entering the bilge from somewhere on the deck. This should be investigated further by running a hose over the deck and checking for leaks."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from cabin",
+      "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "C",
       "text": "Some water was present in the bilge, typical of a keel-stepped mast on a vessel of this age. From the cabin view, ribs and stringers appeared solid and serviceable with no apparent damage consistent with a hard grounding."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from cabin",
+      "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "C",
       "text": "Stringers and ribs that were visible from the cabin bilge appeared to be in serviceable condition."
     },
@@ -2393,7 +2418,7 @@
     {
       "section": "Head, toilet and seacock",
       "rating": "A",
-      "text": "The toilet was not tested as the vessel was out of the water. No leakage was observed, and the intake seacock was securely attached and operated smoothly. However, a disused seacock\u2014likely part of the waste discharge system\u2014was found uncapped. Under ABYC H-27 (Seacocks and Through-Hull Fittings), any hull penetration below the maximum heeled waterline must have a means of positive shut-off and the unused seacock must be securely capped or removed, and the opening faired to prevent the risk of water ingress."
+      "text": "The toilet was not tested as the vessel was out of the water. No leakage was observed, and the intake seacock was securely attached and operated smoothly. However, a disused seacock—likely part of the waste discharge system—was found uncapped. Under ABYC H-27 (Seacocks and Through-Hull Fittings), any hull penetration below the maximum heeled waterline must have a means of positive shut-off and the unused seacock must be securely capped or removed, and the opening faired to prevent the risk of water ingress."
     },
     {
       "section": "Head, toilet and seacock",
@@ -2435,7 +2460,7 @@
     {
       "section": "Fuel tank(s)",
       "rating": "A",
-      "text": "The vessel\u2019s fuel system lacked a shut-off valve at the tank outlet; the supply line was connected directly to the tank. Install a readily accessible shut-off valve at the tank outlet in compliance with Transport Canada Small Vessel Regulations and ABYC H-33, using a metallic or approved composite valve securely mounted and operable without tools."
+      "text": "The vessel’s fuel system lacked a shut-off valve at the tank outlet; the supply line was connected directly to the tank. Install a readily accessible shut-off valve at the tank outlet in compliance with Transport Canada Small Vessel Regulations and ABYC H-33, using a metallic or approved composite valve securely mounted and operable without tools."
     },
     {
       "section": "Fuel tank(s)",
@@ -2777,7 +2802,7 @@
     {
       "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
       "rating": "A",
-      "text": "The drive coupling and the visible length of the propeller shaft appeared serviceable. During limited trial run the stuffing box did not drip. Adjustment of the retaining nut and replacement of the internal flax are still recommended as necessary."
+      "text": "The drive coupling and the visible length of the propeller shaft appeared serviceable. During sea trial the stuffing box did not drip. Adjustment of the retaining nut and replacement of the internal flax are still recommended as necessary."
     },
     {
       "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
@@ -2795,7 +2820,7 @@
       "text": "Because the boat was on shore, the drive coupling, propeller shaft, and stuffing box were not tested. However, all appeared serviceable. Recommend testing when the boat is launched to ensure the stuffing box does not leak when the boat is stationary and drips approximately two to three drops per minute while the boat is underway."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from engine bay",
+      "section": "Bilge, stringers and ribs – accessible from engine bay",
       "rating": "C",
       "text": "Visible areas of the engine bay appeared serviceable and free of apparent damage. The compartment was noted to be clean."
     }
@@ -2876,7 +2901,7 @@
     {
       "section": "Inverter and grounding",
       "rating": "A",
-      "text": "The inverter\u2019s metallic case was not bonded to the vessel\u2019s grounding and bonding system. Bond the case per best practice to improve corrosion protection and safety."
+      "text": "The inverter’s metallic case was not bonded to the vessel’s grounding and bonding system. Bond the case per best practice to improve corrosion protection and safety."
     },
     {
       "section": "Inverter and grounding",
@@ -2891,7 +2916,7 @@
     {
       "section": "Inverter/charger and grounding",
       "rating": "C",
-      "text": "An inverter/charger was installed in (location here). The unit was tested under shore power and operated as expected, charging the vessel\u2019s batteries and switching cleanly between inverter and charger modes. No abnormal sounds, overheating, or wiring issues were observed, and the system appeared serviceable."
+      "text": "An inverter/charger was installed in (location here). The unit was tested under shore power and operated as expected, charging the vessel’s batteries and switching cleanly between inverter and charger modes. No abnormal sounds, overheating, or wiring issues were observed, and the system appeared serviceable."
     },
     {
       "section": "Inverter/charger and grounding",
@@ -2946,7 +2971,7 @@
     {
       "section": "Starter battery(ies)",
       "rating": "C - singular, box",
-      "text": "The vessel\u2019s starter battery was secured in a plastic battery box with an appropriate tie down strap. Terminal connections were clean and tight."
+      "text": "The vessel’s starter battery was secured in a plastic battery box with an appropriate tie down strap. Terminal connections were clean and tight."
     },
     {
       "section": "Starter battery(ies)",
@@ -2996,7 +3021,7 @@
     {
       "section": "House battery(ies)",
       "rating": "pre-purchase battery survey",
-      "text": "A Deep Cycle flooded lead-acid house battery (Model No. 31DC130) was installed, rated at 230 minutes reserve capacity and 1000 MCA, with a 20-hour rate of 130 Ah. The manufacturer\u2019s date code on the label indicated D19, corresponding to April 2019. The battery was fitted in a dedicated battery box and appeared properly secured. No corrosion was noted on the terminals. No leakage was observed at the time of inspection, and the unit otherwise appeared serviceable. The onboard electrics were run during the survey. However, the battery indicated very low voltage. Suggest attaching a trickle charger (solar or otherwise) to maintain battery health. It should be noted that typical lead-acid batteries last approximately four to six years. Replacement of this battery may be required in the short term."
+      "text": "A Deep Cycle flooded lead-acid house battery (Model No. 31DC130) was installed, rated at 230 minutes reserve capacity and 1000 MCA, with a 20-hour rate of 130 Ah. The manufacturer’s date code on the label indicated D19, corresponding to April 2019. The battery was fitted in a dedicated battery box and appeared properly secured. No corrosion was noted on the terminals. No leakage was observed at the time of inspection, and the unit otherwise appeared serviceable. The onboard electrics were run during the survey. However, the battery indicated very low voltage. Suggest attaching a trickle charger (solar or otherwise) to maintain battery health. It should be noted that typical lead-acid batteries last approximately four to six years. Replacement of this battery may be required in the short term."
     },
     {
       "section": "Battery hydrometer test",
@@ -3119,7 +3144,7 @@
       "text": "AC outlets were not tested because the vessel was not connected to AC power."
     },
     {
-      "section": "Electrical \u2013 other features",
+      "section": "Electrical – other features",
       "rating": "Not tested",
       "text": "Not tested."
     },
@@ -3341,6 +3366,11 @@
       "text": "An LPG shut-off was found adjacent to the galley, but it was not tested."
     },
     {
+      "section": "LPG cut off solenoid valve switch",
+      "rating": "N/A",
+      "text": "There was an alcohol stove on board."
+    },
+    {
       "section": "Emergency tiller",
       "rating": "C",
       "text": "An appropriate emergency tiller was found on board."
@@ -3353,7 +3383,7 @@
     {
       "section": "Navigation lights (port, starboard, anchor, steaming, other)",
       "rating": "A",
-      "text": "The vessel\u2019s navigation lights were non operational during inspection. This does not meet ABYC A 16 guidance and COLREGS Rules 20 and 21 for visibility. Repair or replacement is required to meet range requirements such as two nautical miles for vessels under twelve metres and to satisfy ABYC electrical practice."
+      "text": "The vessel’s navigation lights were non operational during inspection. This does not meet ABYC A 16 guidance and COLREGS Rules 20 and 21 for visibility. Repair or replacement is required to meet range requirements such as two nautical miles for vessels under twelve metres and to satisfy ABYC electrical practice."
     },
     {
       "section": "Navigation lights (port, starboard, anchor, steaming, other)",
