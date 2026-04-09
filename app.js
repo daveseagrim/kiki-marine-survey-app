@@ -2138,7 +2138,7 @@ function renderNewSurveyForm() {
       <div class="form-group">
         <label class="form-label">Year / Make / Model *</label>
         <input type="text" id="yearMakeModel" class="capitalize-input" placeholder="e.g., 2015 Beneteau Oceanis 46"
-               onblur="checkSpecsOnBlur()" oninput="checkSpecsDebounced()" autocapitalize="words">
+               onblur="checkSpecsOnBlur()" oninput="_specsAppliedForInput='';checkSpecsDebounced()" autocapitalize="words">
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Tip: Enter year, make and model — specs may auto-fill from built-in database</div>
       </div>
 
@@ -3953,6 +3953,8 @@ function applyBoatSpecs(specs) {
 // Check for specs on model field blur and show banner if found
 // Store the last matched specs globally so we don't need to embed JSON in HTML attributes
 let _pendingSpecs = null;
+// Track when specs have been applied so we don't re-show the banner
+let _specsAppliedForInput = '';
 
 // Debounced version — updates the picker as you type (500ms delay)
 let _specsDebounceTimer = null;
@@ -3964,6 +3966,9 @@ function checkSpecsDebounced() {
 function checkSpecsOnBlur() {
   const input = document.getElementById('yearMakeModel')?.value || '';
   if (!input || input.length < 5) return;
+
+  // Don't re-show banner if specs were already applied for this input
+  if (_specsAppliedForInput && input.toLowerCase().includes(_specsAppliedForInput.toLowerCase())) return;
 
   const existingBanner = document.getElementById('specsBanner');
   if (existingBanner) existingBanner.remove();
@@ -3993,35 +3998,36 @@ function checkSpecsOnBlur() {
   banner.style.cssText = 'background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:12px 16px;margin:8px 0 16px;';
 
   if (topResults.length === 1 || (best.score - (topResults[1]?.score || 0)) > 0.25) {
-    // Single clear match — show simple banner
+    // Single clear match — auto-apply immediately and show confirmation
     const label = `${best.boat.make} ${best.boat.model}${best.boat.yearStart ? ' (' + best.boat.yearStart + (best.boat.yearEnd ? '–' + best.boat.yearEnd : '+') + ')' : ''}`;
+    applyBoatSpecs(best.boat);
+    _specsAppliedForInput = best.boat.make + ' ' + best.boat.model;
     banner.innerHTML = `
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <span style="color:#065f46;font-size:14px;flex:1;">✓ Specs found: <strong>${label}</strong></span>
-        <button class="btn-primary" style="padding:8px 16px;font-size:13px;"
-                onclick="applyPendingSpecs()">Auto-fill Specs</button>
-        <button class="btn-secondary" style="padding:8px 12px;font-size:13px;"
-                onclick="document.getElementById('specsBanner').remove()">Dismiss</button>
+        <span style="color:#065f46;font-size:14px;flex:1;">✅ Specs applied: <strong>${label}</strong></span>
+        <button class="btn-secondary" style="padding:6px 12px;font-size:12px;"
+                onclick="document.getElementById('specsBanner').remove()">OK</button>
       </div>
     `;
+    // Auto-dismiss the confirmation after 4 seconds
+    setTimeout(() => { const b = document.getElementById('specsBanner'); if (b) b.remove(); }, 4000);
   } else {
     // Multiple close matches — let user pick
     const scrollStyle = topResults.length > 6 ? 'max-height:280px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-right:4px;' : '';
-    let optionsHtml = '<div style="color:#065f46;font-size:14px;margin-bottom:8px;"><strong>Multiple matches found — select one:</strong></div>';
+    let optionsHtml = '<div style="color:#065f46;font-size:14px;margin-bottom:8px;"><strong>Multiple matches — tap to apply:</strong></div>';
     optionsHtml += `<div style="${scrollStyle}">`;
     topResults.forEach((r, i) => {
       const b = r.boat;
       const label = `${b.make} ${b.model}${b.yearStart ? ' (' + b.yearStart + (b.yearEnd ? '–' + b.yearEnd : '+') + ')' : ''}`;
-      const yearRange = b.yearStart ? `${b.yearStart}–${b.yearEnd || 'present'}` : '';
       const safeId = b.id.replace(/'/g, "\\'");
       optionsHtml += `
-        <button onclick="window._pendingSpecs=boatSpecsDB.boats.find(x=>x.id==='${safeId}');applyPendingSpecs();document.getElementById('specsBanner').remove();"
-                style="display:block;width:100%;text-align:left;background:${i === 0 ? '#ecfdf5' : 'white'};border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;margin:4px 0;cursor:pointer;font-size:13px;">
+        <button onclick="applySpecsById('${safeId}')"
+                style="display:block;width:100%;text-align:left;background:${i === 0 ? '#ecfdf5' : 'white'};border:1px solid #d1d5db;border-radius:6px;padding:10px 12px;margin:4px 0;cursor:pointer;font-size:13px;">
           <strong>${label}</strong>
           <span style="color:#6b7280;margin-left:8px;">${b.loa || ''} LOA${b.beam ? ' · ' + b.beam + ' beam' : ''}</span>
         </button>`;
     });
-    optionsHtml += '</div>'; // close scrollable container
+    optionsHtml += '</div>';
     optionsHtml += `<button class="btn-secondary" style="padding:6px 12px;font-size:12px;margin-top:6px;"
             onclick="document.getElementById('specsBanner').remove()">Dismiss</button>`;
     banner.innerHTML = optionsHtml;
@@ -4031,8 +4037,34 @@ function checkSpecsOnBlur() {
   if (field) field.closest('.form-group').insertAdjacentElement('afterend', banner);
 }
 
+// Apply specs from a multi-match selection by boat ID
+function applySpecsById(id) {
+  const boat = boatSpecsDB.boats.find(x => x.id === id);
+  if (boat) {
+    _pendingSpecs = boat;
+    applyBoatSpecs(boat);
+    _specsAppliedForInput = boat.make + ' ' + boat.model;
+    // Replace the picker with a green confirmation
+    const banner = document.getElementById('specsBanner');
+    if (banner) {
+      const label = `${boat.make} ${boat.model}${boat.yearStart ? ' (' + boat.yearStart + (boat.yearEnd ? '–' + boat.yearEnd : '+') + ')' : ''}`;
+      banner.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <span style="color:#065f46;font-size:14px;flex:1;">✅ Specs applied: <strong>${label}</strong></span>
+          <button class="btn-secondary" style="padding:6px 12px;font-size:12px;"
+                  onclick="document.getElementById('specsBanner').remove()">OK</button>
+        </div>`;
+      setTimeout(() => { const b = document.getElementById('specsBanner'); if (b) b.remove(); }, 4000);
+    }
+    showToast('Specs applied: ' + boat.make + ' ' + boat.model);
+  }
+}
+
 function applyPendingSpecs() {
-  if (_pendingSpecs) applyBoatSpecs(_pendingSpecs);
+  if (_pendingSpecs) {
+    applyBoatSpecs(_pendingSpecs);
+    _specsAppliedForInput = (_pendingSpecs.make || '') + ' ' + (_pendingSpecs.model || '');
+  }
 }
 
 // Show auto-suggested valuation card
