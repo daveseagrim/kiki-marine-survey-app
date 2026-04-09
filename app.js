@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v168';
+const APP_VERSION = 'v169';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -5344,6 +5344,7 @@ function renderInspection(survey) {
       <div class="accordion-content" style="display: none;">
         <div style="padding: 10px 0; font-size: 13px; color: #555; border-bottom: 1px solid #e5e7eb; margin-bottom: 12px;">
           <em>Photograph each instrument or electronic device. Mark whether it is operational, then optionally use AI to identify make, model and year.</em>
+          <br/><button onclick="updateGeminiApiKey()" style="margin-top:6px;background:none;border:1px solid #7c3aed;color:#7c3aed;padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;">⚙️ ${localStorage.getItem('geminiApiKey') ? 'Update' : 'Set'} Gemini API Key</button>
         </div>
   `;
 
@@ -5939,25 +5940,13 @@ async function identifyInstrument(idx) {
     return;
   }
 
-  // Get API key from settings
-  let settings;
-  try {
-    const tx = db.transaction('settings', 'readonly');
-    const store = tx.objectStore('settings');
-    settings = await new Promise((resolve, reject) => {
-      const req = store.get('appSettings');
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  } catch(e) {}
-
-  const apiKey = settings && settings.geminiApiKey;
+  // Get API key from localStorage
+  let apiKey = localStorage.getItem('geminiApiKey');
   if (!apiKey) {
     const key = prompt('AI identification requires a free Google Gemini API key.\n\nGet one at aistudio.google.com, then paste it here:');
     if (key && key.trim()) {
-      await saveGeminiApiKey(key.trim());
+      localStorage.setItem('geminiApiKey', key.trim());
       showToast('API key saved — identifying...');
-      // Continue with identification using the new key
       return identifyInstrument(idx);
     }
     showToast('No API key entered — fill in details manually');
@@ -6050,7 +6039,8 @@ If you cannot identify the device, still provide your best guess for the name fi
     if (err.message.includes('API error 400')) {
       showToast('AI could not process the image. Try a clearer photo.');
     } else if (err.message.includes('API error 403') || err.message.includes('API error 401')) {
-      showToast('Invalid API key. Check your Gemini key in Settings.');
+      localStorage.removeItem('geminiApiKey');
+      showToast('Invalid API key — tap Identify to enter a new one');
     } else if (err.name === 'SyntaxError') {
       showToast('AI response was not in expected format. Try again.');
     } else {
@@ -6059,22 +6049,19 @@ If you cannot identify the device, still provide your best guess for the name fi
   }
 }
 
-// Save Gemini API key to settings
-async function saveGeminiApiKey(key) {
-  const tx = db.transaction('settings', 'readwrite');
-  const store = tx.objectStore('settings');
-  let settings;
-  try {
-    settings = await new Promise((resolve, reject) => {
-      const req = store.get('appSettings');
-      req.onsuccess = () => resolve(req.result || { id: 'appSettings' });
-      req.onerror = () => reject(req.error);
-    });
-  } catch(e) {
-    settings = { id: 'appSettings' };
+// Update Gemini API key (called from settings or prompt)
+function updateGeminiApiKey() {
+  const current = localStorage.getItem('geminiApiKey');
+  const key = prompt('Enter your Gemini API key:', current || '');
+  if (key !== null) {
+    if (key.trim()) {
+      localStorage.setItem('geminiApiKey', key.trim());
+      showToast('Gemini API key saved');
+    } else {
+      localStorage.removeItem('geminiApiKey');
+      showToast('Gemini API key removed');
+    }
   }
-  settings.geminiApiKey = key;
-  store.put(settings);
 }
 
 // Load thumbnails for an instrument item
