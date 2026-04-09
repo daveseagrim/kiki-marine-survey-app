@@ -8606,17 +8606,8 @@ ${survey.vesselDescription ? `
           const code = findingCodeMap[item.label];
           const codeTag = code ? ` <strong style="color:${RATING_COLORS[ratingLabel] || '#1e3a5f'};">(Finding ${code})</strong>` : '';
 
-          // Build photo HTML for this item
-          let itemPhotosHtml = '';
-          if (itemData.photos && itemData.photos.length > 0) {
-            const photoImgs = itemData.photos
-              .filter(pid => itemPhotoCache[pid])
-              .map(pid => `<img src="${itemPhotoCache[pid]}" alt="${esc(item.label)}" style="max-width:480px;max-height:360px;border:1px solid #ccc;border-radius:4px;" />`)
-              .join('');
-            if (photoImgs) {
-              itemPhotosHtml = `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:10px;">${photoImgs}</div>`;
-            }
-          }
+          // Photos are shown in the Findings & Recommendations section to avoid duplication
+          const itemPhotosHtml = '';
 
           // Outdrive info for report
           let outdriveInfoHtml = '';

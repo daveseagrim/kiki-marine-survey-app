@@ -481,11 +481,6 @@
       "text": "The transom was in serviceable condition."
     },
     {
-      "section": "Transom",
-      "rating": "C",
-      "text": "The transom was in serviceable condition."
-    },
-    {
       "section": "Hull exterior above the waterline",
       "rating": "B",
       "text": "The hull exterior above the waterline was generally serviceable with minor scratches and oxidation typical for age. Localized areas noted in the photos warrant cosmetic repair."
@@ -2026,11 +2021,6 @@
       "text": "The cockpit, floor, seats, and coaming were in serviceable condition."
     },
     {
-      "section": "Cockpit, floor, seats and coaming",
-      "rating": "C",
-      "text": "The cockpit, floor, seats, and coaming were in serviceable condition."
-    },
-    {
       "section": "Cockpit impact and resonance testing",
       "rating": "B - Multiple spots",
       "text": "Percussion testing of most of the cockpit floor produced a clear and even tone across most areas with no indications of delamination or voids. However, [insert number of] localized areas produced dull thuds suggestive of present or past saturation with core deterioration. The photographs show the hammer tip indicating the areas. Monitor and plan localized repair if softness develops."
@@ -2114,11 +2104,6 @@
       "section": "Cockpit lighting",
       "rating": "C",
       "text": "All cockpit lighting functioned correctly."
-    },
-    {
-      "section": "Cockpit lockers and lazarettes",
-      "rating": "C",
-      "text": "All cockpit lockers, lazarettes, and cubbies were in serviceable condition."
     },
     {
       "section": "Cockpit lockers and lazarettes",
@@ -3080,11 +3065,6 @@
       "text": "The Flybridge, floor, seats, and coaming were in serviceable condition."
     },
     {
-      "section": "Flybridge, floor, seats and coaming (spider cracks, etc.)",
-      "rating": "C",
-      "text": "The Flybridge, floor, seats, and coaming were in serviceable condition."
-    },
-    {
       "section": "Flybridge percussion testing",
       "rating": "B",
       "text": "Percussion testing produced acoustics that may indicate saturation or rot within the core. The photographs show the areas identified by the hammer tip. No distinct soft spots were noted. Although they do not currently present any safety concerns, in order to mitigate the spread, these areas should be repaired."
@@ -3188,11 +3168,6 @@
       "section": "Flybridge lighting",
       "rating": "C",
       "text": "All Flybridge lighting functioned correctly."
-    },
-    {
-      "section": "Flybridge lockers and lazarettes",
-      "rating": "C",
-      "text": "All Flybridge lockers, lazarettes, and cubbies were in serviceable condition."
     },
     {
       "section": "Flybridge lockers and lazarettes",
@@ -4109,11 +4084,6 @@
       "text": "All woodwork, doors, and framing were in serviceable condition."
     },
     {
-      "section": "Woodwork, doors and framing",
-      "rating": "C",
-      "text": "All woodwork, doors, and framing were in serviceable condition."
-    },
-    {
       "section": "Upholstery",
       "rating": "B",
       "text": "The upholstery was in fair condition with localized wear. Cleaning and selective repair are recommended."
@@ -4124,19 +4094,9 @@
       "text": "All upholstery was in serviceable condition."
     },
     {
-      "section": "Upholstery",
-      "rating": "C",
-      "text": "All upholstery was in serviceable condition."
-    },
-    {
       "section": "Table",
       "rating": "B",
       "text": "The table and support were solid and functional. Refinishing may be considered to improve appearance."
-    },
-    {
-      "section": "Table",
-      "rating": "C",
-      "text": "The table and support were solid and in serviceable condition."
     },
     {
       "section": "Table",
