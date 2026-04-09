@@ -401,7 +401,7 @@
           },
           {
             "type": "list",
-            "label": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+            "label": "Deck and coachroof/pilot house condition",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -614,7 +614,7 @@
           },
           {
             "type": "list",
-            "label": "Condition (spider cracks, etc.)",
+            "label": "Condition",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -1182,7 +1182,7 @@
           },
           {
             "type": "list",
-            "label": "Flybridge floor, seats and coaming (spider cracks, etc.)",
+            "label": "Flybridge floor, seats and coaming",
             "options": [
               "A - Critical",
               "B - Needs Attention",

@@ -4905,7 +4905,8 @@ function renderInspection(survey) {
       survey.items[item.label]?.rating || survey.items[item.label]?.excluded
     ).length;
     const categoryCompletion = Math.round((categoryCompletionCount / items.length) * 100);
-    const flaggedCount = items.filter(item => survey.items[item.label]?.flagged).length;
+    const flaggedItems = items.filter(item => survey.items[item.label]?.flagged);
+    const flaggedCount = flaggedItems.length;
     const excludedCount = items.filter(item => survey.items[item.label]?.excluded).length;
     const allExcluded = excludedCount === items.length;
     const isComplete = categoryCompletion === 100;
@@ -4921,6 +4922,7 @@ function renderInspection(survey) {
           <span class="category-progress" style="color:${progressColor};font-weight:700;">${progressText}</span>
           <span style="margin-left: 12px;">▼</span>
         </button>
+        ${flaggedCount > 0 ? `<div class="flagged-summary" style="padding:4px 12px 6px 28px;font-size:12px;color:#92400e;background:#fffbeb;border-bottom:1px solid #fcd34d;">🚩 ${flaggedItems.map(i => i.label).join(', ')}</div>` : ''}
         <div class="accordion-content" style="display: none;">
           <div style="display:flex;gap:8px;margin-bottom:12px;padding:8px;background:#f9fafb;border-radius:8px;">
             <button class="btn-secondary" style="font-size:12px;padding:6px 12px;${allExcluded ? 'background:#fee2e2;border-color:#fca5a5;' : ''}"
@@ -6971,10 +6973,28 @@ function updateCategoryHeader(survey, categoryName) {
   }
 
   // Update flagged/excluded counts in title
-  const flaggedCount = categoryItems.filter(item => survey.items[item.label]?.flagged).length;
+  const flaggedItems = categoryItems.filter(item => survey.items[item.label]?.flagged);
+  const flaggedCount = flaggedItems.length;
   const titleEl = header.querySelector('.category-title');
   if (titleEl) {
     titleEl.innerHTML = `${categoryName}${flaggedCount > 0 ? ` <span style="color:#f59e0b;font-size:12px;">🚩${flaggedCount}</span>` : ''}${excludedCount > 0 ? ` <span style="color:#9ca3af;font-size:12px;">⊘${excludedCount}</span>` : ''}`;
+  }
+
+  // Update flagged summary below header
+  let summaryEl = accordion.querySelector('.flagged-summary');
+  if (flaggedCount > 0) {
+    const summaryHtml = `🚩 ${flaggedItems.map(i => i.label).join(', ')}`;
+    if (summaryEl) {
+      summaryEl.innerHTML = summaryHtml;
+    } else {
+      summaryEl = document.createElement('div');
+      summaryEl.className = 'flagged-summary';
+      summaryEl.style.cssText = 'padding:4px 12px 6px 28px;font-size:12px;color:#92400e;background:#fffbeb;border-bottom:1px solid #fcd34d;';
+      summaryEl.innerHTML = summaryHtml;
+      header.insertAdjacentElement('afterend', summaryEl);
+    }
+  } else if (summaryEl) {
+    summaryEl.remove();
   }
 }
 
