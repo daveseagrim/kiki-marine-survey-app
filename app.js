@@ -8143,8 +8143,9 @@ async function generateReport() {
     .rating-c { color: #16a34a; font-weight: bold; }
     .rating-nt { color: #6b7280; font-weight: bold; }
     .rating-safety { color: #2563eb; font-weight: bold; }
-    .item { margin: 12px 0; padding: 8px 10px; border-left: 4px solid #1e3a5f; }
-    .standards { font-size: 9pt; color: #666; margin-top: 4px; }
+    .item { margin: 6px 0; padding: 4px 0 4px 10px; border-left: 3px solid #1e3a5f; }
+    .standards { font-size: 9pt; color: #666; margin-top: 2px; }
+    .item p { margin: 2px 0; }
     .footer { margin-top: 40px; padding: 20px; border-top: 2px solid #1e3a5f; }
     .header-bar { border-bottom: 1px solid #999; font-size: 9pt; color: #666; padding-bottom: 4px; margin-bottom: 16px; }
     .scope-text { font-size: 10pt; line-height: 1.5; }
@@ -8363,6 +8364,16 @@ ${survey.locationLat && survey.locationLon ? `
     <img src="https://staticmap.openstreetmap.de/staticmap.php?center=${survey.locationLat},${survey.locationLon}&zoom=13&size=480x280&markers=${survey.locationLat},${survey.locationLon},red-pushpin" alt="Survey Location Map" style="border: 1px solid #ddd; border-radius: 4px;" />
   </div>
 ` : ''}
+
+  <!-- ═══ RATING & VALUATION (early summary) ═══ -->
+  <div style="border:2px solid #1e3a5f;padding:12px 16px;margin:16px 0;background:#f8f9fb;">
+    <h3 style="margin:0 0 8px 0;color:#1e3a5f;border-bottom:1px solid #1e3a5f;padding-bottom:4px;font-size:12pt;">RATING &amp; VALUATION</h3>
+    <table style="border:none;margin:0;">
+      <tr><td style="width:45%;border:none;padding:3px 8px;"><strong>Vessel Overall Rating:</strong></td><td style="border:none;padding:3px 8px;font-weight:bold;font-size:11pt;">${esc(survey.overallCondition) || 'Not yet assessed'}</td></tr>
+      <tr><td style="border:none;padding:3px 8px;"><strong>Estimated Market Value:</strong></td><td style="border:none;padding:3px 8px;font-weight:bold;">$${parseInt(survey.valuationLow || 0).toLocaleString()} – $${parseInt(survey.valuationHigh || 0).toLocaleString()} USD${survey.exchangeRate ? ` / $${Math.round(parseInt(survey.valuationLow || 0) * survey.exchangeRate).toLocaleString()} – $${Math.round(parseInt(survey.valuationHigh || 0) * survey.exchangeRate).toLocaleString()} CAD` : ''} – tax not included</td></tr>
+      ${survey.replacementCost ? `<tr><td style="border:none;padding:3px 8px;"><strong>Estimated Replacement Cost:</strong></td><td style="border:none;padding:3px 8px;font-weight:bold;">$${parseInt(survey.replacementCost).toLocaleString()} USD – tax not included</td></tr>` : ''}
+    </table>
+  </div>
 
   <!-- ═══ VESSEL SPECIFICATIONS ═══ -->`;
   const isSail = (survey.vesselType || '').toLowerCase() === 'sail';
@@ -8606,8 +8617,20 @@ ${survey.vesselDescription ? `
           const code = findingCodeMap[item.label];
           const codeTag = code ? ` <strong style="color:${RATING_COLORS[ratingLabel] || '#1e3a5f'};">(Finding ${code})</strong>` : '';
 
-          // Photos are shown in the Findings & Recommendations section to avoid duplication
-          const itemPhotosHtml = '';
+          // Build inline photos for the body — large, captioned, like Norm Behring's style
+          let itemPhotosHtml = '';
+          if (itemData.photos && itemData.photos.length > 0) {
+            const imgs = itemData.photos
+              .filter(pid => itemPhotoCache[pid])
+              .map(pid => `<div style="display:inline-block;margin:6px 8px 6px 0;vertical-align:top;">
+                <img src="${itemPhotoCache[pid]}" alt="${esc(item.label)}" style="max-width:600px;max-height:450px;border:1px solid #ccc;border-radius:4px;" />
+                <div style="font-size:9pt;color:#666;margin-top:3px;font-style:italic;">${esc(item.label)}</div>
+              </div>`)
+              .join('');
+            if (imgs) {
+              itemPhotosHtml = `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">${imgs}</div>`;
+            }
+          }
 
           // Outdrive info for report
           let outdriveInfoHtml = '';
@@ -8666,14 +8689,39 @@ ${survey.vesselDescription ? `
     <p><em>When performing repairs, diagnosing, adjustments, and/or replacements of any component; always follow proper marine mechanical and/or electrical repair and safety practices. Consult and/or hire a certified marine technician, if required.</em></p>
   </div>`;
 
-  // Helper to build finding photo HTML
+  // Helper to build finding photo HTML — larger for F&R section
   function findingPhotos(f) {
     if (!f.photos || f.photos.length === 0) return '';
     const imgs = f.photos
       .filter(pid => itemPhotoCache[pid])
-      .map(pid => `<img src="${itemPhotoCache[pid]}" alt="${esc(f.label)}" style="max-width:480px;max-height:360px;border:1px solid #ccc;border-radius:4px;" />`)
+      .map(pid => `<div style="display:inline-block;margin:4px 6px 4px 0;vertical-align:top;">
+        <img src="${itemPhotoCache[pid]}" alt="${esc(f.label)}" style="max-width:560px;max-height:420px;border:1px solid #ccc;border-radius:4px;" />
+        <div style="font-size:9pt;color:#666;margin-top:2px;font-style:italic;">${esc(f.label)}</div>
+      </div>`)
       .join('');
-    return imgs ? `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:10px;">${imgs}</div>` : '';
+    return imgs ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;">${imgs}</div>` : '';
+  }
+
+  // Helper: build a specific recommendation line citing the item's standards
+  function buildRecommendation(f, severity) {
+    const stdCite = (f.standards && f.standards.length) ? ` (${f.standards.join('; ')})` : '';
+    if (severity === 'A') {
+      return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> Immediate correction required before the vessel is next underway${stdCite}. This finding represents a direct safety risk or code violation.</em></p>`;
+    } else if (severity === 'B') {
+      return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> Schedule repairs in the near future to maintain compliance with applicable codes, regulations, standards, or recommended practices${stdCite}.</em></p>`;
+    } else {
+      return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> Address in keeping with good marine maintenance practices${stdCite}.</em></p>`;
+    }
+  }
+
+  // Helper to render a single finding entry
+  function renderFinding(f, color, severity) {
+    return `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid ${color};">
+      <strong style="color:${color};">Finding ${f.code}</strong> — ${esc(f.label)}
+      ${f.text ? `<p style="margin:3px 0;">${esc(f.text)}</p>` : ''}
+      ${findingPhotos(f)}
+      ${buildRecommendation(f, severity)}
+    </div>`;
   }
 
   // Type A findings
@@ -8681,15 +8729,7 @@ ${survey.vesselDescription ? `
   if (findings.A.length === 0) {
     html += `<p>No Type A findings.</p>`;
   } else {
-    findings.A.forEach(f => {
-      html += `<div class="finding-section">
-        <strong style="color:#dc2626;">Finding ${f.code}</strong> — ${esc(f.label)}
-        ${f.text ? `<p>${esc(f.text)}</p>` : ''}
-        ${f.standards && f.standards.length ? `<p class="standards"><em>Standards: ${f.standards.join(', ')}</em></p>` : ''}
-        ${findingPhotos(f)}
-        <p style="font-style:italic;color:#555;margin-top:4px;"><strong>Recommendation:</strong> Immediate correction required before the vessel is next underway. This finding represents a direct safety risk or code violation.</p>
-      </div>`;
-    });
+    findings.A.forEach(f => { html += renderFinding(f, '#dc2626', 'A'); });
   }
 
   // Type B findings
@@ -8697,15 +8737,7 @@ ${survey.vesselDescription ? `
   if (findings.B.length === 0) {
     html += `<p>No Type B findings.</p>`;
   } else {
-    findings.B.forEach(f => {
-      html += `<div class="finding-section">
-        <strong style="color:#d97706;">Finding ${f.code}</strong> — ${esc(f.label)}
-        ${f.text ? `<p>${esc(f.text)}</p>` : ''}
-        ${f.standards && f.standards.length ? `<p class="standards"><em>Standards: ${f.standards.join(', ')}</em></p>` : ''}
-        ${findingPhotos(f)}
-        <p style="font-style:italic;color:#555;margin-top:4px;"><strong>Recommendation:</strong> Schedule repairs in the near future to maintain compliance with applicable codes, regulations, standards, or recommended practices.</p>
-      </div>`;
-    });
+    findings.B.forEach(f => { html += renderFinding(f, '#d97706', 'B'); });
   }
 
   // Type C findings
@@ -8713,26 +8745,18 @@ ${survey.vesselDescription ? `
   if (findings.C.length === 0) {
     html += `<p>No Type C findings.</p>`;
   } else {
-    findings.C.forEach(f => {
-      html += `<div class="finding-section">
-        <strong style="color:#16a34a;">Finding ${f.code}</strong> — ${esc(f.label)}
-        ${f.text ? `<p>${esc(f.text)}</p>` : ''}
-        ${f.standards && f.standards.length ? `<p class="standards"><em>Standards: ${f.standards.join(', ')}</em></p>` : ''}
-        ${findingPhotos(f)}
-        <p style="font-style:italic;color:#555;margin-top:4px;"><strong>Recommendation:</strong> Address in keeping with good marine maintenance practices or as an upgrade when convenient.</p>
-      </div>`;
-    });
+    findings.C.forEach(f => { html += renderFinding(f, '#16a34a', 'C'); });
   }
 
   // Not tested items
   if (findings.NT.length > 0) {
     html += `<h3 style="color:#6b7280;">Not Tested / Not Verified</h3>`;
     findings.NT.forEach(f => {
-      html += `<div class="finding-section">
+      html += `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid #6b7280;">
         <strong style="color:#6b7280;">Finding ${f.code}</strong> — ${esc(f.label)}
-        ${f.text ? `<p>${esc(f.text)}</p>` : ''}
+        ${f.text ? `<p style="margin:3px 0;">${esc(f.text)}</p>` : ''}
         ${findingPhotos(f)}
-        <p style="font-style:italic;color:#555;margin-top:4px;"><strong>Note:</strong> A comprehensive inspection was attempted but was not possible due to constraints imposed upon the surveyor. Further inspection is recommended when conditions permit.</p>
+        <p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Note:</strong> A comprehensive inspection was attempted but was not possible due to constraints imposed upon the surveyor. Further inspection is recommended when conditions permit.</em></p>
       </div>`;
     });
   }
@@ -8791,7 +8815,7 @@ ${survey.vesselDescription ? `
   html += `</table>
 
   <p><strong>Appraisal Methodology:</strong></p>
-  <p class="scope-text">${esc(survey.valuationRationale) || 'Based on the condition of the vessel as surveyed, comparable sales data from BUCValu, soldboats.com, yachtworld.com, and current market conditions.'}</p>
+  <p class="scope-text">${esc(survey.valuationRationale) || 'The following method of valuation was used to obtain the Fair Market Value: similarly equipped, same or similar model vessels as shown as sold on soldboats.com, buc.com, and listings on yachtworld.com (and/or other websites) in the last two years were identified, adjusted for model year, condition, equipment, and date of sale, and averaged together. The vessel\'s overall condition rating using the BUC Marine Grading System has been factored into the final valuation range.'}</p>
 
   <p class="scope-text"><strong>Summary:</strong> In accordance with the request for a Marine Survey of the "${esc(survey.vesselName)}", for the purpose of evaluating its present condition and estimating its Fair Market Value and Replacement Cost, I herewith submit my conclusion based on the preceding report. The subject vessel was personally inspected by the undersigned on <strong>${survey.surveyDate || 'N/A'}</strong>. Subject to correction of deficiencies listed in sections A and B, the vessel is considered to be reasonably suitable for its intended use. Other deficiencies listed should be attended to in keeping with good maintenance practices or as upgrades.</p>
   `;
@@ -8843,7 +8867,7 @@ ${survey.vesselDescription ? `
   </table>
 
   <div class="scope-text" style="margin-top:12px;">
-    <p><strong>Appraisal Methodology:</strong> ${esc(survey.valuationRationale) || 'Based on the condition of the vessel as surveyed, comparable sales data from BUCValu, soldboats.com, yachtworld.com, and current market conditions.'}</p>
+    <p><strong>Appraisal Methodology:</strong> ${esc(survey.valuationRationale) || 'The following method of valuation was used to obtain the Fair Market Value: similarly equipped, same or similar model vessels as shown as sold on soldboats.com, buc.com, and listings on yachtworld.com (and/or other websites) in the last two years were identified, adjusted for model year, condition, equipment, and date of sale, and averaged together. The vessel\'s overall condition rating using the BUC Marine Grading System has been factored into the final valuation range.'}</p>
     <p><strong>Condition Adjustment:</strong> The vessel's overall condition rating of "${esc(survey.overallCondition) || 'Not yet assessed'}" has been factored into the final valuation range using the BUC Marine Grading System.</p>
   </div>
   `;
