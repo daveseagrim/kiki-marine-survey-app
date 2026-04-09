@@ -597,18 +597,6 @@
           },
           {
             "type": "list",
-            "label": "Shore water hookup",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
             "label": "Grab rails",
             "options": [
               "A - Critical",
@@ -682,6 +670,18 @@
           {
             "type": "list",
             "label": "Windshield, pilot house windows, frames and seals",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Shore water hookup",
             "options": [
               "A - Critical",
               "B - Needs Attention",
