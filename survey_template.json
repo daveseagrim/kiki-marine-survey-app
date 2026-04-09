@@ -195,6 +195,7 @@
           {
             "type": "list",
             "label": "Cutlass bearing(s)",
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -207,6 +208,7 @@
           {
             "type": "list",
             "label": "Propeller shaft(s)",
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -219,6 +221,7 @@
           {
             "type": "list",
             "label": "Propeller(s)",
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -231,6 +234,7 @@
           {
             "type": "list",
             "label": "Propeller/drive anode(s)",
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -243,6 +247,7 @@
           {
             "type": "list",
             "label": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -256,6 +261,7 @@
           {
             "type": "list",
             "label": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -269,7 +275,7 @@
           {
             "type": "list",
             "label": "Stern tube(s) (external)",
-            "sternTubeItem": true,
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2090,7 +2096,7 @@
           {
             "type": "list",
             "label": "Drive coupling(s), interior propeller shaft(s), stuffing box(es)/packing gland(s)/dripless seal(s), interior stern tube(s)",
-            "sternTubeItem": true,
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",

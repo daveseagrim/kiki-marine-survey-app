@@ -4866,26 +4866,30 @@ function renderInspection(survey) {
     totalRatedItems = totalRatedItems - baseHeadItems.length + expandedItems.length;
   }
 
-  // ── Multiply stern tube items by stern tube count ─────────────────────
-  const sternTubeCount = survey.sternTubeCount || 1;
-  if (sternTubeCount > 1) {
-    // Expand stern tube items in every category that has them
+  // ── Multiply drive line items by drive line count ─────────────────────
+  const driveLineCount = survey.driveLineCount || 1;
+  if (driveLineCount > 1) {
+    // Labels: "Port" / "Starboard" for 2, numbered for 3+
+    const driveLabels = driveLineCount === 2
+      ? ['Port', 'Starboard']
+      : Array.from({ length: driveLineCount }, (_, i) => `#${i + 1}`);
+
     for (const [catName, items] of Object.entries(ratedItemsByCategory)) {
-      const stItems = items.filter(i => i.sternTubeItem);
-      if (stItems.length === 0) continue;
-      const nonStItems = items.filter(i => !i.sternTubeItem);
+      const dlItems = items.filter(i => i.driveLineItem);
+      if (dlItems.length === 0) continue;
       const expanded = [];
-      // Insert expanded stern tube items at the same position
       items.forEach(item => {
-        if (!item.sternTubeItem) {
+        if (!item.driveLineItem) {
           expanded.push(item);
         } else {
-          for (let t = 1; t <= sternTubeCount; t++) {
-            expanded.push({ ...item, label: `Stern tube ${t} — ${item.label.replace(/Stern tube\(s\)\s*/i, '')}` });
+          // Strip "(s)" and trailing plurals for cleaner labels
+          const baseLabel = item.label.replace(/\(s\)/g, '');
+          for (let t = 0; t < driveLineCount; t++) {
+            expanded.push({ ...item, label: `${driveLabels[t]} — ${baseLabel.trim()}` });
           }
         }
       });
-      totalRatedItems = totalRatedItems - stItems.length + (stItems.length * sternTubeCount);
+      totalRatedItems = totalRatedItems - dlItems.length + (dlItems.length * driveLineCount);
       ratedItemsByCategory[catName] = expanded;
     }
   }
@@ -4943,10 +4947,10 @@ function renderInspection(survey) {
     if (categoryName === 'Hull exterior, keel and propulsion') {
       html += `
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;">
-          <span style="font-size:14px;font-weight:600;color:#1e3a5f;">Number of stern tubes:</span>
-          <select id="sternTubeCountSelect" onchange="updateSternTubeCount(parseInt(this.value))"
+          <span style="font-size:14px;font-weight:600;color:#1e3a5f;">Number of drive lines:</span>
+          <select id="driveLineCountSelect" onchange="updateDriveLineCount(parseInt(this.value))"
                   style="padding:8px 12px;border:1px solid #93c5fd;border-radius:6px;font-size:15px;font-weight:600;background:white;color:#1e3a5f;min-width:60px;">
-            ${[1,2,3].map(n => `<option value="${n}" ${sternTubeCount === n ? 'selected' : ''}>${n}</option>`).join('')}
+            ${[1,2,3].map(n => `<option value="${n}" ${driveLineCount === n ? 'selected' : ''}>${n}</option>`).join('')}
           </select>
         </div>
       `;
@@ -7205,9 +7209,9 @@ function updateHeadCount(count) {
   });
 }
 
-function updateSternTubeCount(count) {
+function updateDriveLineCount(count) {
   getSurvey(currentSurveyId).then(survey => {
-    survey.sternTubeCount = count;
+    survey.driveLineCount = count;
     saveSurvey(survey).then(() => {
       renderInspection(survey);
     });
