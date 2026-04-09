@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v158';
+const APP_VERSION = 'v159';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -4960,7 +4960,8 @@ function renderInspection(survey) {
     const excludedCount = items.filter(item => survey.items[item.label]?.excluded).length;
     const allExcluded = excludedCount === items.length;
     const isComplete = categoryCompletion === 100;
-    const incompleteDot = !isComplete ? '<span class="completion-dot" style="display:inline-block;width:10px;height:10px;background:#dc2626;border-radius:50%;margin-right:6px;flex-shrink:0;"></span>' : '<span class="completion-dot" style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:50%;margin-right:6px;flex-shrink:0;"></span>';
+    const dotColor = allExcluded ? '#9ca3af' : (isComplete ? '#16a34a' : '#dc2626');
+    const incompleteDot = `<span class="completion-dot" style="display:inline-block;width:10px;height:10px;background:${dotColor};border-radius:50%;margin-right:6px;flex-shrink:0;"></span>`;
     const progressColor = allExcluded ? '#9ca3af' : (isComplete ? '#16a34a' : '#dc2626');
     const remaining = items.length - categoryCompletionCount;
     const progressText = allExcluded ? 'Skipped' : (isComplete ? 'Done' : `${remaining} left`);
@@ -7436,6 +7437,12 @@ function toggleCategoryExclude(categoryName, exclude) {
       }
       survey.items[label].excluded = exclude;
     });
+
+    // When skipping, collapse the accordion so it folds up
+    if (exclude) {
+      _openAccordionCategory = null;
+    }
+
     saveSurvey(survey).then(() => {
       renderInspection(survey);
     });
