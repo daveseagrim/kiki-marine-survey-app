@@ -4866,6 +4866,30 @@ function renderInspection(survey) {
     totalRatedItems = totalRatedItems - baseHeadItems.length + expandedItems.length;
   }
 
+  // ── Multiply stern tube items by stern tube count ─────────────────────
+  const sternTubeCount = survey.sternTubeCount || 1;
+  if (sternTubeCount > 1) {
+    // Expand stern tube items in every category that has them
+    for (const [catName, items] of Object.entries(ratedItemsByCategory)) {
+      const stItems = items.filter(i => i.sternTubeItem);
+      if (stItems.length === 0) continue;
+      const nonStItems = items.filter(i => !i.sternTubeItem);
+      const expanded = [];
+      // Insert expanded stern tube items at the same position
+      items.forEach(item => {
+        if (!item.sternTubeItem) {
+          expanded.push(item);
+        } else {
+          for (let t = 1; t <= sternTubeCount; t++) {
+            expanded.push({ ...item, label: `Stern tube ${t} — ${item.label.replace(/Stern tube\(s\)\s*/i, '')}` });
+          }
+        }
+      });
+      totalRatedItems = totalRatedItems - stItems.length + (stItems.length * sternTubeCount);
+      ratedItemsByCategory[catName] = expanded;
+    }
+  }
+
   survey.totalRatedItems = totalRatedItems;
 
   // Render categories
@@ -4910,6 +4934,19 @@ function renderInspection(survey) {
           <select id="headCountSelect" onchange="updateHeadCount(parseInt(this.value))"
                   style="padding:8px 12px;border:1px solid #93c5fd;border-radius:6px;font-size:15px;font-weight:600;background:white;color:#1e3a5f;min-width:60px;">
             ${[1,2,3,4].map(n => `<option value="${n}" ${headCount === n ? 'selected' : ''}>${n}</option>`).join('')}
+          </select>
+        </div>
+      `;
+    }
+
+    // Stern tube count selector for hull category
+    if (categoryName === 'Hull exterior, keel and propulsion') {
+      html += `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;">
+          <span style="font-size:14px;font-weight:600;color:#1e3a5f;">Number of stern tubes:</span>
+          <select id="sternTubeCountSelect" onchange="updateSternTubeCount(parseInt(this.value))"
+                  style="padding:8px 12px;border:1px solid #93c5fd;border-radius:6px;font-size:15px;font-weight:600;background:white;color:#1e3a5f;min-width:60px;">
+            ${[1,2,3].map(n => `<option value="${n}" ${sternTubeCount === n ? 'selected' : ''}>${n}</option>`).join('')}
           </select>
         </div>
       `;
@@ -7162,6 +7199,15 @@ function updateItemInPlace(survey, itemLabel) {
 function updateHeadCount(count) {
   getSurvey(currentSurveyId).then(survey => {
     survey.headCount = count;
+    saveSurvey(survey).then(() => {
+      renderInspection(survey);
+    });
+  });
+}
+
+function updateSternTubeCount(count) {
+  getSurvey(currentSurveyId).then(survey => {
+    survey.sternTubeCount = count;
     saveSurvey(survey).then(() => {
       renderInspection(survey);
     });

@@ -269,6 +269,7 @@
           {
             "type": "list",
             "label": "Stern tube(s) (external)",
+            "sternTubeItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2089,6 +2090,7 @@
           {
             "type": "list",
             "label": "Drive coupling(s), interior propeller shaft(s), stuffing box(es)/packing gland(s)/dripless seal(s), interior stern tube(s)",
+            "sternTubeItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
