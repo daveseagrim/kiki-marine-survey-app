@@ -7167,6 +7167,35 @@ function updateItemInPlace(survey, itemLabel) {
     return;
   }
 
+  // Try area photo (media item) update
+  const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
+  const areaPhotosDiv = document.getElementById(`area-photos-${sanitizedLabel}`);
+  if (areaPhotosDiv) {
+    const mediaData = survey.items[itemLabel] || { photos: [] };
+    const safeLabel = itemLabel.replace(/'/g, "\\'");
+    // Rebuild the thumbnails grid
+    areaPhotosDiv.innerHTML = (mediaData.photos || []).map(pid => `
+      <div style="position:relative;width:80px;height:80px;">
+        <img id="thumb-${pid}" src="" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
+        <button onclick="deletePhotoAndRefresh('${pid}', '${safeLabel}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;">×</button>
+      </div>
+    `).join('');
+    // Update the button text
+    const photoCount = (mediaData.photos || []).length;
+    const btn = areaPhotosDiv.parentElement.querySelector('button');
+    if (btn) btn.innerHTML = `📷 ${photoCount > 0 ? `Add More (${photoCount})` : 'Take Photos'}`;
+    // Load thumbnails
+    (mediaData.photos || []).forEach(photoId => {
+      getPhotoById(photoId).then(photo => {
+        if (photo) {
+          const img = document.getElementById(`thumb-${photoId}`);
+          if (img) img.src = photo.dataUrl;
+        }
+      });
+    });
+    return;
+  }
+
   // Fallback: old rated-item layout
   const itemDiv = document.querySelector(`.rated-item[data-item-label="${itemLabel.replace(/"/g, '\\"')}"]`);
   if (!itemDiv) {
