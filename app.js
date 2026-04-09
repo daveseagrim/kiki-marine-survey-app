@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v153';
+const APP_VERSION = 'v154';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;

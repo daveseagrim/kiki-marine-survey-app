@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v153';
+const CACHE_NAME = 'kiki-marine-v154';
 const URLS_TO_CACHE = [
   './',
   'index.html',
@@ -86,12 +86,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // JSON data files use network-first strategy so updates (new boat specs,
-  // text library entries, template changes) are picked up immediately.
-  // Falls back to cache when offline.
+  // App JS and JSON data files use network-first strategy so updates
+  // are picked up immediately. Falls back to cache when offline.
+  const isAppJS = url.pathname.endsWith('app.js') || url.search.includes('app.js');
   const isDataFile = url.pathname.endsWith('.json');
 
-  if (isDataFile) {
+  if (isDataFile || isAppJS) {
     event.respondWith(
       fetch(event.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {

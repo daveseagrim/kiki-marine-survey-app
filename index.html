@@ -655,6 +655,14 @@
         }
       });
     </script>
-    <script src="app.js"></script>
+    <script>
+    // Force SW update check on every page load
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg) reg.update();
+      });
+    }
+    </script>
+    <script src="app.js?v=154"></script>
 </body>
 </html>
