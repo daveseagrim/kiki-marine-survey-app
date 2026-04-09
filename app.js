@@ -5,6 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
+const APP_VERSION = 'v153';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -1980,7 +1981,7 @@ function renderHome() {
              onerror="this.style.display='none'">
         <div>
           <div class="header-title">Kiki Marine Survey</div>
-          <div class="header-subtitle">Marine Vessel Surveys</div>
+          <div class="header-subtitle">Marine Vessel Surveys <span style="font-size:10px;color:#9ca3af;">${APP_VERSION}</span></div>
         </div>
       </div>
       <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
@@ -5207,7 +5208,7 @@ function ensureReportButton() {
         const exportData = {
           version: 1,
           exportedAt: new Date().toISOString(),
-          appVersion: 'kiki-marine-v148',
+          appVersion: APP_VERSION,
           survey: survey,
           photos: photos
         };

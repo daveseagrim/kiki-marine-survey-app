@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v152';
+const CACHE_NAME = 'kiki-marine-v153';
 const URLS_TO_CACHE = [
   './',
   'index.html',
@@ -40,7 +40,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches and reload all clients
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -51,6 +51,11 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
+    }).then(() => {
+      // Force all open tabs/PWA instances to reload with fresh code
+      return self.clients.matchAll({ type: 'window' }).then(clients => {
+        clients.forEach(client => client.navigate(client.url));
+      });
     })
   );
   self.clients.claim();
