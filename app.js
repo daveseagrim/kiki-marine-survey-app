@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v156';
+const APP_VERSION = 'v158';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -4349,6 +4349,53 @@ async function generateVesselDescription() {
     engineDesc = `Power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING] [3/4]-blade propeller through a [SHAFT DRIVE/STERNDRIVE].`;
   }
 
+  // Pull survey data for propellers, shafts, electronics, and safety
+  const survey = vesselType === 'sail' ? (await getSurvey(currentSurveyId)) : (await getSurvey(currentSurveyId));
+  const driveLineCount = survey?.driveLineCount || 1;
+  const hasRudder = survey?.hasRudder !== false;
+
+  // Build propeller/shaft description from survey items
+  let propDesc = '';
+  if (survey?.items) {
+    const propellerItems = Object.keys(survey.items).filter(k => k.toLowerCase().includes('propeller') && survey.items[k].text);
+    const shaftItems = Object.keys(survey.items).filter(k => (k.toLowerCase().includes('shaft') || k.toLowerCase().includes('stern tube')) && survey.items[k].text);
+    const cutlassItems = Object.keys(survey.items).filter(k => k.toLowerCase().includes('cutlass') && survey.items[k].text);
+    if (propellerItems.length > 0 || shaftItems.length > 0) {
+      propDesc = '\n\n';
+      if (shaftItems.length > 0) propDesc += shaftItems.map(k => survey.items[k].text).join(' ') + ' ';
+      if (cutlassItems.length > 0) propDesc += cutlassItems.map(k => survey.items[k].text).join(' ') + ' ';
+      if (propellerItems.length > 0) propDesc += propellerItems.map(k => survey.items[k].text).join(' ');
+    }
+  }
+
+  // Build electronics description from survey items
+  let electronicsDesc = '';
+  if (survey?.items) {
+    const electronicItems = ['VHF radio', 'GPS/chartplotter', 'Depth sounder/fish finder', 'Radar', 'Autopilot', 'AIS transponder/receiver'];
+    const foundElectronics = [];
+    for (const eLabel of electronicItems) {
+      const match = Object.keys(survey.items).find(k => k.toLowerCase().includes(eLabel.toLowerCase().split('/')[0]));
+      if (match && survey.items[match].rating && survey.items[match].rating.startsWith('C')) {
+        foundElectronics.push(eLabel.split('/')[0]);
+      }
+    }
+    if (foundElectronics.length > 0) {
+      electronicsDesc = `Navigation and communication equipment includes ${foundElectronics.join(', ')}.`;
+    }
+  }
+
+  // Build safety equipment summary from TC TP 511 checklist
+  let safetyDesc = '';
+  if (survey?.safetyEquipment && survey.safetyEquipment.length > 0) {
+    const onBoard = survey.safetyEquipment.filter(e => e.checked).length;
+    const missing = survey.safetyEquipment.length - onBoard;
+    safetyDesc = `Safety equipment per Transport Canada TP 511: ${onBoard} of ${survey.safetyEquipment.length} required items verified on board.`;
+    if (missing > 0) {
+      const missingNames = survey.safetyEquipment.filter(e => !e.checked).map(e => e.name).slice(0, 5);
+      safetyDesc += ` Missing: ${missingNames.join(', ')}${missing > 5 ? ` and ${missing - 5} more` : ''}.`;
+    }
+  }
+
   const constructionStr = construction || '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
   const hullTypeStr = hullType || '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
   const keelStr = vesselType === 'sail'
@@ -4363,6 +4410,7 @@ async function generateVesselDescription() {
   desc += rigDesc;
   desc += `\n\n`;
   desc += engineDesc;
+  desc += propDesc;
   desc += `\n\n`;
   desc += `The hull is [COLOUR] with a [COLOUR] boot stripe. The deck is [COLOUR] with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
   const cabinStr = cabins || '[NUMBER]';
@@ -4374,8 +4422,9 @@ async function generateVesselDescription() {
   } else {
     desc += `The electrical system is [12V DC / 120V AC] with [XX] amp shore power service. `;
   }
-  desc += `Navigation and communication equipment includes [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
-  desc += `Safety equipment includes [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
+  desc += electronicsDesc || `Navigation and communication equipment includes [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
+  desc += '\n\n';
+  desc += safetyDesc || `Safety equipment includes [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
   desc += `\n\n`;
   desc += `The vessel is in [GOOD/FAIR/POOR] overall cosmetic condition and appears to have been [WELL/REASONABLY/POORLY] maintained. [ANY NOTABLE MODIFICATIONS, DAMAGE HISTORY, OR OBSERVATIONS].`;
 
@@ -9570,6 +9619,62 @@ async function initApp() {
       } catch (recoverErr) {
         console.warn('Camera recovery failed, showing home:', recoverErr);
       }
+    }
+
+    // One-time migration: add mechanic disclaimer to engine-related survey text
+    try {
+      const migrationKey = 'migration_mechanic_disclaimer_v1';
+      if (!localStorage.getItem(migrationKey)) {
+        const allSurveys = await getAllSurveys();
+        const textReplacements = [
+          // Anti-vibration mounts
+          { old: 'The anti-vibration mounts showed very little corrosion or cracking and appeared serviceable. However, inspection by a qualified marine mechanic is still advisable.', new: 'The anti-vibration mounts showed very little corrosion or cracking and appeared serviceable. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended.' },
+          { old: 'According to the owner, the anti-vibration mounts had been changed recently. They showed virtually no corrosion or cracking and appeared serviceable.', new: 'According to the owner, the anti-vibration mounts had been changed recently. They showed virtually no corrosion or cracking and appeared serviceable. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended.' },
+          { old: 'The anti-vibration mounts especially the [insert location] mount appeared cracked and worn. Inspection and repair or replacement by a licensed mechanic is recommended.', new: 'The anti-vibration mounts especially the [insert location] mount appeared cracked and worn. As the surveyor\'s observations are visual only and do not constitute a mechanical assessment, inspection and repair or replacement by a licensed marine mechanic is recommended.' },
+          { old: 'The engine anti-vibration mounts were degraded, cracked, or missing. Replacement is required to restore proper engine isolation and prevent structural vibration.', new: 'The engine anti-vibration mounts were degraded, cracked, or missing. As the surveyor\'s observations are visual only and do not constitute a mechanical assessment, inspection and replacement by a licensed marine mechanic is required.' },
+          // Belts and pulleys
+          { old: 'The alternator belt was worn with cracking and should be replaced.', new: 'The alternator belt was worn with cracking and should be replaced. As the surveyor\'s observations are visual only and do not constitute a mechanical assessment, inspection and replacement by a licensed marine mechanic is recommended.' },
+          { old: 'The alternator belt was not adequately tensioned and should be adjusted by a qualified marine mechanic.', new: 'The alternator belt was not adequately tensioned. As the surveyor\'s observations are visual only and do not constitute a mechanical assessment, adjustment and confirmation by a licensed marine mechanic is recommended.' },
+          { old: 'The belts were free of fraying and cracking and appeared to be at approximately the correct tension.', new: 'The belts were free of fraying and cracking and appeared to be at approximately the correct tension. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended.' },
+          { old: 'The belt was free of fraying and cracking and appeared to be at approximately the correct tension.', new: 'The belt was free of fraying and cracking and appeared to be at approximately the correct tension. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended.' },
+          { old: 'The engine belts were cracked, frayed, or missing, or the pulleys were damaged. Immediate replacement is required to restore engine auxiliary power and cooling.', new: 'The engine belts were cracked, frayed, or missing, or the pulleys were damaged. As the surveyor\'s observations are visual only and do not constitute a mechanical assessment, immediate inspection and replacement by a licensed marine mechanic is required.' },
+          // Exhaust condition
+          { old: 'The exhaust was in serviceable condition and conformed to SAE J2006. Two hose clamps were used at all connections.', new: 'The exhaust was in serviceable condition and conformed to SAE J2006. Two hose clamps were used at all connections. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended.' },
+          { old: 'Despite expected rust at the mixing elbow, the exhaust appeared serviceable. The exhaust hose conformed to SAE J2006, and two hose clamps were used at all connections.', new: 'Despite expected rust at the mixing elbow, the exhaust appeared serviceable. The exhaust hose conformed to SAE J2006, and two hose clamps were used at all connections. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended.' },
+          { old: 'Despite expected rust at the mixing elbow, the exhaust appeared serviceable. However, because the exhaust pipe was insulated, it could not be confirmed whether the hose was double-clamped or conformed to SAE J2006.', new: 'Despite expected rust at the mixing elbow, the exhaust appeared serviceable. However, because the exhaust pipe was insulated, it could not be confirmed whether the hose was double-clamped or conformed to SAE J2006. As the surveyor\'s observations are visual only and do not constitute a mechanical assessment, full inspection by a licensed marine mechanic is recommended.' },
+          { old: 'The exhaust system was functional but showed signs of corrosion or minor leaking at connection points. Service and tightening are recommended to restore optimal performance.', new: 'The exhaust system was functional but showed signs of corrosion or minor leaking at connection points. As the surveyor\'s observations are visual only and do not constitute a mechanical assessment, service and confirmation by a licensed marine mechanic is recommended.' },
+          // Manifolds and risers
+          { old: 'The manifolds and risers appeared serviceable with very little rust at the joints and no signs of corrosion tracking down from the joints.', new: 'The manifolds and risers appeared serviceable with very little rust at the joints and no signs of corrosion tracking down from the joints. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended.' },
+          { old: 'The manifolds and risers appeared serviceable. Indications of water leakage were present at the joint between the [side] riser and manifold suggesting corrosion or a failed seal. Service by a qualified marine mechanic is recommended.', new: 'The manifolds and risers appeared serviceable. Indications of water leakage were present at the joint between the [side] riser and manifold suggesting corrosion or a failed seal. As the surveyor\'s observations are visual only and do not constitute a mechanical assessment, service and confirmation by a licensed marine mechanic is recommended.' },
+          // Hoses
+          { old: 'All hoses appeared pliable, well-secured and without cracking.', new: 'All hoses appeared pliable, well-secured and without cracking. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended.' },
+          { old: 'Some engine hoses were older and may require replacement. Inspection and replacement as needed by a qualified mechanic is recommended.', new: 'Some engine hoses were older and may require replacement. As the surveyor\'s observations are visual only and do not constitute a mechanical assessment, inspection and replacement as needed by a licensed marine mechanic is recommended.' },
+          { old: 'Hoses are cracked, split, or severely deteriorated. Replacement is critical to prevent fluid leakage.', new: 'Hoses are cracked, split, or severely deteriorated. As the surveyor\'s observations are visual only and do not constitute a mechanical assessment, immediate inspection and replacement by a licensed marine mechanic is required.' },
+        ];
+        let migrated = 0;
+        for (const survey of allSurveys) {
+          if (!survey.items) continue;
+          let changed = false;
+          for (const key of Object.keys(survey.items)) {
+            const item = survey.items[key];
+            if (!item.text) continue;
+            for (const r of textReplacements) {
+              if (item.text.includes(r.old)) {
+                item.text = item.text.replace(r.old, r.new);
+                changed = true;
+              }
+            }
+          }
+          if (changed) {
+            await saveSurvey(survey);
+            migrated++;
+          }
+        }
+        localStorage.setItem(migrationKey, Date.now().toString());
+        if (migrated > 0) console.log(`Migrated mechanic disclaimer text in ${migrated} survey(s)`);
+      }
+    } catch (migErr) {
+      console.warn('Migration (mechanic disclaimer) failed:', migErr);
     }
 
     renderHome();

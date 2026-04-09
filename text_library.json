@@ -4921,13 +4921,18 @@
     },
     {
       "section": "Manifolds and risers",
+      "rating": "A",
+      "text": "The manifolds and risers exhibited significant corrosion, water tracking, or degradation at the joints. As the surveyor's observations are visual only and do not constitute a mechanical assessment, immediate inspection and replacement by a licensed marine mechanic is required."
+    },
+    {
+      "section": "Manifolds and risers",
       "rating": "B",
-      "text": "The manifolds and risers appeared serviceable. Indications of water leakage were present at the joint between the [side] riser and manifold suggesting corrosion or a failed seal. Service by a qualified marine mechanic is recommended."
+      "text": "The manifolds and risers appeared serviceable. Indications of water leakage were present at the joint between the [side] riser and manifold suggesting corrosion or a failed seal. As the surveyor's observations are visual only and do not constitute a mechanical assessment, service and confirmation by a licensed marine mechanic is recommended."
     },
     {
       "section": "Manifolds and risers",
       "rating": "C",
-      "text": "The manifolds and risers appeared serviceable with very little rust at the joints and no signs of corrosion tracking down from the joints."
+      "text": "The manifolds and risers appeared serviceable with very little rust at the joints and no signs of corrosion tracking down from the joints. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
     },
     {
       "section": "Manifolds and risers",
@@ -4937,22 +4942,22 @@
     {
       "section": "Exhaust condition",
       "rating": "A",
-      "text": "The exhaust system was generally serviceable and conformed to SAE J2006 with double hose clamps used at most connections. One hose clamp was missing at the muffler connection which does not comply with ABYC P-1.7.2.5.3 requiring two all stainless clamps on each end of every flexible wet exhaust hose. Install a second clamp at the muffler."
+      "text": "The exhaust system was generally serviceable and conformed to SAE J2006 with double hose clamps used at most connections. One hose clamp was missing at the muffler connection which does not comply with ABYC P-1.7.2.5.3 requiring two all stainless clamps on each end of every flexible wet exhaust hose. Install a second clamp at the muffler. As the surveyor's observations are visual only and do not constitute a mechanical assessment, full inspection by a licensed marine mechanic is recommended."
     },
     {
       "section": "Exhaust condition",
       "rating": "C - no rust",
-      "text": "The exhaust was in serviceable condition and conformed to SAE J2006. Two hose clamps were used at all connections."
+      "text": "The exhaust was in serviceable condition and conformed to SAE J2006. Two hose clamps were used at all connections. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
     },
     {
       "section": "Exhaust condition",
       "rating": "C - expected rust",
-      "text": "Despite expected rust at the mixing elbow, the exhaust appeared serviceable. The exhaust hose conformed to SAE J2006, and two hose clamps were used at all connections."
+      "text": "Despite expected rust at the mixing elbow, the exhaust appeared serviceable. The exhaust hose conformed to SAE J2006, and two hose clamps were used at all connections. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
     },
     {
       "section": "Exhaust condition",
       "rating": "Not tested - covered in insulation",
-      "text": "Despite expected rust at the mixing elbow, the exhaust appeared serviceable. However, because the exhaust pipe was insulated, it could not be confirmed whether the hose was double-clamped or conformed to SAE J2006."
+      "text": "Despite expected rust at the mixing elbow, the exhaust appeared serviceable. However, because the exhaust pipe was insulated, it could not be confirmed whether the hose was double-clamped or conformed to SAE J2006. As the surveyor's observations are visual only and do not constitute a mechanical assessment, full inspection by a licensed marine mechanic is recommended."
     },
     {
       "section": "Manual fuel pump(s)",
@@ -5017,22 +5022,22 @@
     {
       "section": "Belts and pulleys",
       "rating": "B",
-      "text": "The alternator belt was worn with cracking and should be replaced."
+      "text": "The alternator belt was worn with cracking and should be replaced. As the surveyor's observations are visual only and do not constitute a mechanical assessment, inspection and replacement by a licensed marine mechanic is recommended."
     },
     {
       "section": "Belts and pulleys",
       "rating": "B",
-      "text": "The alternator belt was not adequately tensioned and should be adjusted by a qualified marine mechanic."
+      "text": "The alternator belt was not adequately tensioned. As the surveyor's observations are visual only and do not constitute a mechanical assessment, adjustment and confirmation by a licensed marine mechanic is recommended."
     },
     {
       "section": "Belts and pulleys",
       "rating": "C - multiple belts",
-      "text": "The belts were free of fraying and cracking and appeared to be at approximately the correct tension."
+      "text": "The belts were free of fraying and cracking and appeared to be at approximately the correct tension. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
     },
     {
       "section": "Belts and pulleys",
       "rating": "C - single belt",
-      "text": "The belt was free of fraying and cracking and appeared to be at approximately the correct tension."
+      "text": "The belt was free of fraying and cracking and appeared to be at approximately the correct tension. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
     },
     {
       "section": "Belts and pulleys",
@@ -5042,17 +5047,17 @@
     {
       "section": "Anti-vibration mounts",
       "rating": "B",
-      "text": "The anti-vibration mounts especially the [insert location] mount appeared cracked and worn. Inspection and repair or replacement by a licensed mechanic is recommended."
+      "text": "The anti-vibration mounts especially the [insert location] mount appeared cracked and worn. As the surveyor's observations are visual only and do not constitute a mechanical assessment, inspection and repair or replacement by a licensed marine mechanic is recommended."
     },
     {
       "section": "Anti-vibration mounts",
       "rating": "C",
-      "text": "The anti-vibration mounts showed very little corrosion or cracking and appeared serviceable. However, inspection by a qualified marine mechanic is still advisable."
+      "text": "The anti-vibration mounts showed very little corrosion or cracking and appeared serviceable. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
     },
     {
       "section": "Anti-vibration mounts",
       "rating": "C - just changed",
-      "text": "According to the owner, the anti-vibration mounts had been changed recently. They showed virtually no corrosion or cracking and appeared serviceable."
+      "text": "According to the owner, the anti-vibration mounts had been changed recently. They showed virtually no corrosion or cracking and appeared serviceable. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
     },
     {
       "section": "Anti vibration mounts",
@@ -5062,12 +5067,12 @@
     {
       "section": "Hoses",
       "rating": "B",
-      "text": "Some engine hoses were older and may require replacement. Inspection and replacement as needed by a qualified mechanic is recommended."
+      "text": "Some engine hoses were older and may require replacement. As the surveyor's observations are visual only and do not constitute a mechanical assessment, inspection and replacement as needed by a licensed marine mechanic is recommended."
     },
     {
       "section": "Hoses",
       "rating": "C",
-      "text": "All hoses appeared pliable, well-secured and without cracking."
+      "text": "All hoses appeared pliable, well-secured and without cracking. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
     },
     {
       "section": "Automatic engine compartment fire extinguishing system",
@@ -5157,7 +5162,7 @@
     {
       "section": "Hoses",
       "rating": "A",
-      "text": "Hoses are cracked, split, or severely deteriorated. Replacement is critical to prevent fluid leakage."
+      "text": "Hoses are cracked, split, or severely deteriorated. As the surveyor's observations are visual only and do not constitute a mechanical assessment, immediate inspection and replacement by a licensed marine mechanic is required."
     },
     {
       "section": "Automatic engine compartment fire extinguishing system",
@@ -5257,7 +5262,7 @@
     {
       "section": "Exhaust condition",
       "rating": "B",
-      "text": "The exhaust system was functional but showed signs of corrosion or minor leaking at connection points. Service and tightening are recommended to restore optimal performance."
+      "text": "The exhaust system was functional but showed signs of corrosion or minor leaking at connection points. As the surveyor's observations are visual only and do not constitute a mechanical assessment, service and confirmation by a licensed marine mechanic is recommended."
     },
     {
       "section": "Oil level and condition",
@@ -5267,12 +5272,12 @@
     {
       "section": "Belts and pulleys",
       "rating": "A",
-      "text": "The engine belts were cracked, frayed, or missing, or the pulleys were damaged. Immediate replacement is required to restore engine auxiliary power and cooling."
+      "text": "The engine belts were cracked, frayed, or missing, or the pulleys were damaged. As the surveyor's observations are visual only and do not constitute a mechanical assessment, immediate inspection and replacement by a licensed marine mechanic is required."
     },
     {
       "section": "Anti vibration mounts",
       "rating": "A",
-      "text": "The engine anti-vibration mounts were degraded, cracked, or missing. Replacement is required to restore proper engine isolation and prevent structural vibration."
+      "text": "The engine anti-vibration mounts were degraded, cracked, or missing. As the surveyor's observations are visual only and do not constitute a mechanical assessment, inspection and replacement by a licensed marine mechanic is required."
     },
     {
       "section": "Gearbox oil",

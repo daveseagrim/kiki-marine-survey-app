@@ -1968,6 +1968,7 @@
           {
             "type": "list",
             "label": "Engine, general condition/impression",
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -1978,16 +1979,22 @@
             ]
           },
           {
-            "type": "question",
-            "label": "Fuel type"
-          },
-          {
-            "type": "textsingle",
-            "label": "Horsepower"
+            "type": "list",
+            "label": "Engine alignment",
+            "driveLineItem": true,
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
           },
           {
             "type": "list",
             "label": "Cooling water intake seacock(s) and strainer(s)",
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2004,6 +2011,7 @@
           {
             "type": "list",
             "label": "Exhaust condition",
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2016,6 +2024,7 @@
           {
             "type": "list",
             "label": "Oil level and condition",
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2028,6 +2037,7 @@
           {
             "type": "list",
             "label": "Coolant level and quality",
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2040,6 +2050,7 @@
           {
             "type": "list",
             "label": "Belts and pulleys",
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2052,6 +2063,7 @@
           {
             "type": "list",
             "label": "Anti-vibration mounts",
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2064,6 +2076,45 @@
           {
             "type": "list",
             "label": "Hoses",
+            "driveLineItem": true,
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Fuel filter(s) and water separator(s)",
+            "driveLineItem": true,
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Fuel lines and fittings",
+            "driveLineItem": true,
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Fuel tank(s) condition and installation",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2084,6 +2135,7 @@
           {
             "type": "list",
             "label": "Gearbox general condition/impressions",
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2096,6 +2148,7 @@
           {
             "type": "list",
             "label": "Gearbox oil",
+            "driveLineItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
