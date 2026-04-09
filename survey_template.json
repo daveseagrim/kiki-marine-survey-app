@@ -407,7 +407,19 @@
           },
           {
             "type": "list",
-            "label": "Swim platform and ladder - condition and conductivity readings",
+            "label": "Swim platform and ladder condition",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Swim platform conductivity readings",
             "options": [
               "A - Critical",
               "B - Needs Attention",
