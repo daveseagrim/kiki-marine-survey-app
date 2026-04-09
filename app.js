@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v169';
+const APP_VERSION = 'v170';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -6044,7 +6044,7 @@ If you cannot identify the device, still provide your best guess for the name fi
     } else if (err.name === 'SyntaxError') {
       showToast('AI response was not in expected format. Try again.');
     } else {
-      showToast('Identification failed — check your internet connection');
+      alert('Identification error: ' + err.message);
     }
   }
 }
