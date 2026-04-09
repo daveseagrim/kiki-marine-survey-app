@@ -4912,13 +4912,23 @@ function renderInspection(survey) {
     const isComplete = categoryCompletion === 100;
     const incompleteDot = !isComplete ? '<span class="completion-dot" style="display:inline-block;width:10px;height:10px;background:#dc2626;border-radius:50%;margin-right:6px;flex-shrink:0;"></span>' : '<span class="completion-dot" style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:50%;margin-right:6px;flex-shrink:0;"></span>';
     const progressColor = allExcluded ? '#9ca3af' : (isComplete ? '#16a34a' : '#dc2626');
-    const progressText = allExcluded ? 'Skipped' : `${categoryCompletion}%`;
+    const remaining = items.length - categoryCompletionCount;
+    const progressText = allExcluded ? 'Skipped' : (isComplete ? 'Done' : `${remaining} left`);
+
+    // Build subtitle badges
+    let badges = '';
+    if (flaggedCount > 0) {
+      badges += `<span style="color:#92400e;font-size:11px;background:#fef3c7;padding:1px 6px;border-radius:4px;margin-left:6px;">🚩 ${flaggedCount} flagged</span>`;
+    }
+    if (excludedCount > 0 && !allExcluded) {
+      badges += `<span style="color:#6b7280;font-size:11px;background:#f3f4f6;padding:1px 6px;border-radius:4px;margin-left:4px;">${excludedCount} skipped</span>`;
+    }
 
     html += `
       <div class="category-accordion" data-category-name="${categoryName.replace(/"/g, '&quot;')}">
         <button class="accordion-header" onclick="toggleAccordion(this)">
           ${incompleteDot}
-          <span class="category-title">${categoryName}${flaggedCount > 0 ? ` <span style="color:#f59e0b;font-size:12px;">🚩${flaggedCount}</span>` : ''}${excludedCount > 0 ? ` <span style="color:#9ca3af;font-size:12px;">⊘${excludedCount}</span>` : ''}</span>
+          <span class="category-title">${categoryName}${badges}</span>
           <span class="category-progress" style="color:${progressColor};font-weight:700;">${progressText}</span>
           <span style="margin-left: 12px;">▼</span>
         </button>
@@ -7034,19 +7044,27 @@ function updateCategoryHeader(survey, categoryName) {
     dot.style.background = isComplete ? '#16a34a' : '#dc2626';
   }
 
-  // Update the percentage text
+  // Update the progress text
+  const remaining = categoryItems.length - completionCount;
   const progressEl = header.querySelector('.category-progress');
   if (progressEl) {
-    progressEl.textContent = allExcluded ? 'Skipped' : `${completionPct}%`;
+    progressEl.textContent = allExcluded ? 'Skipped' : (isComplete ? 'Done' : `${remaining} left`);
     progressEl.style.color = progressColor;
   }
 
-  // Update flagged/excluded counts in title
+  // Update flagged/excluded badges in title
   const flaggedItems = categoryItems.filter(item => survey.items[item.label]?.flagged);
   const flaggedCount = flaggedItems.length;
+  let badges = '';
+  if (flaggedCount > 0) {
+    badges += `<span style="color:#92400e;font-size:11px;background:#fef3c7;padding:1px 6px;border-radius:4px;margin-left:6px;">🚩 ${flaggedCount} flagged</span>`;
+  }
+  if (excludedCount > 0 && !allExcluded) {
+    badges += `<span style="color:#6b7280;font-size:11px;background:#f3f4f6;padding:1px 6px;border-radius:4px;margin-left:4px;">${excludedCount} skipped</span>`;
+  }
   const titleEl = header.querySelector('.category-title');
   if (titleEl) {
-    titleEl.innerHTML = `${categoryName}${flaggedCount > 0 ? ` <span style="color:#f59e0b;font-size:12px;">🚩${flaggedCount}</span>` : ''}${excludedCount > 0 ? ` <span style="color:#9ca3af;font-size:12px;">⊘${excludedCount}</span>` : ''}`;
+    titleEl.innerHTML = `${categoryName}${badges}`;
   }
 
   // Update flagged summary below header
