@@ -4915,11 +4915,8 @@ function renderInspection(survey) {
     const remaining = items.length - categoryCompletionCount;
     const progressText = allExcluded ? 'Skipped' : (isComplete ? 'Done' : `${remaining} left`);
 
-    // Build subtitle badges
+    // Build subtitle badges (flagged info shown in yellow summary bar below header)
     let badges = '';
-    if (flaggedCount > 0) {
-      badges += `<span style="color:#92400e;font-size:11px;background:#fef3c7;padding:1px 6px;border-radius:4px;margin-left:6px;">🚩 ${flaggedCount} flagged</span>`;
-    }
     if (excludedCount > 0 && !allExcluded) {
       badges += `<span style="color:#6b7280;font-size:11px;background:#f3f4f6;padding:1px 6px;border-radius:4px;margin-left:4px;">${excludedCount} skipped</span>`;
     }
@@ -4932,7 +4929,7 @@ function renderInspection(survey) {
           <span class="category-progress" style="color:${progressColor};font-weight:700;">${progressText}</span>
           <span style="margin-left: 12px;">▼</span>
         </button>
-        ${flaggedCount > 0 ? `<div class="flagged-summary" style="padding:4px 12px 6px 28px;font-size:12px;color:#92400e;background:#fffbeb;border-bottom:1px solid #fcd34d;">🚩 ${flaggedItems.map(i => i.label).join(', ')}</div>` : ''}
+        ${flaggedCount > 0 ? `<div class="flagged-summary" style="padding:4px 12px 6px 28px;font-size:12px;color:#92400e;background:#fffbeb;border-bottom:1px solid #fcd34d;">🚩 ${flaggedCount} flagged: ${flaggedItems.map(i => i.label).join(', ')}</div>` : ''}
         <div class="accordion-content" style="display: none;">
           <div style="display:flex;gap:8px;margin-bottom:12px;padding:8px;background:#f9fafb;border-radius:8px;">
             <button class="btn-secondary" style="font-size:12px;padding:6px 12px;${allExcluded ? 'background:#fee2e2;border-color:#fca5a5;' : ''}"
@@ -7055,10 +7052,8 @@ function updateCategoryHeader(survey, categoryName) {
   // Update flagged/excluded badges in title
   const flaggedItems = categoryItems.filter(item => survey.items[item.label]?.flagged);
   const flaggedCount = flaggedItems.length;
+  // Build subtitle badges (flagged info shown in yellow summary bar below header)
   let badges = '';
-  if (flaggedCount > 0) {
-    badges += `<span style="color:#92400e;font-size:11px;background:#fef3c7;padding:1px 6px;border-radius:4px;margin-left:6px;">🚩 ${flaggedCount} flagged</span>`;
-  }
   if (excludedCount > 0 && !allExcluded) {
     badges += `<span style="color:#6b7280;font-size:11px;background:#f3f4f6;padding:1px 6px;border-radius:4px;margin-left:4px;">${excludedCount} skipped</span>`;
   }
@@ -7070,7 +7065,7 @@ function updateCategoryHeader(survey, categoryName) {
   // Update flagged summary below header
   let summaryEl = accordion.querySelector('.flagged-summary');
   if (flaggedCount > 0) {
-    const summaryHtml = `🚩 ${flaggedItems.map(i => i.label).join(', ')}`;
+    const summaryHtml = `🚩 ${flaggedCount} flagged: ${flaggedItems.map(i => i.label).join(', ')}`;
     if (summaryEl) {
       summaryEl.innerHTML = summaryHtml;
     } else {
