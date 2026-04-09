@@ -170,7 +170,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "media",

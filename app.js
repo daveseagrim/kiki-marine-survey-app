@@ -2119,6 +2119,8 @@ function renderNewSurveyForm() {
   if (existingFab) existingFab.remove();
   const reportBtnEl = document.getElementById('reportBtn');
   if (reportBtnEl) reportBtnEl.remove();
+  // Hide the floating collapse button (only relevant on inspection view)
+  updateCollapseButton(false);
 
   const app = document.getElementById('app');
 
@@ -4283,24 +4285,43 @@ async function generateVesselDescription() {
   const engMakeModel = (engineMake && engineModel) ? `${engineMake} ${engineModel}` :
                        engineMake ? `${engineMake} [MODEL]` : '[MAKE/MODEL]';
   const engFuel = fuelType || '[DIESEL/GASOLINE]';
-  const engHPStr = engineHP ? `${engineHP}` : '[XX] horsepower';
+  const engHPStr = engineHP ? `${engineHP} horsepower` : '[XX] horsepower';
   const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
                          transmissionMake ? `${transmissionMake} [MODEL]` : '[MAKE/MODEL]';
 
+  // Check for Engine 2
+  const eng2Section = document.getElementById('engine2Section');
+  const hasEngine2 = eng2Section && eng2Section.style.display !== 'none';
+  const eng2Make = document.getElementById('engine2Make')?.value || '';
+  const eng2Model = document.getElementById('engine2Model')?.value || '';
+  const eng2HP = document.getElementById('engine2HP')?.value || '';
+  const eng2Fuel = document.getElementById('fuelType2')?.value || '';
+
   let engineDesc = '';
-  if (vesselType === 'sail') {
+  if (vesselType === 'human') {
+    engineDesc = `This is a human-powered vessel with no auxiliary engine.`;
+  } else if (vesselType === 'sail') {
     const engType = engineTypeStr || '[inboard/outboard]';
     const driveType = engineTypeStr === 'inboard' ? '[shaft drive/saildrive]' : '[SHAFT DRIVE/SAILDRIVE]';
     engineDesc = `Auxiliary power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a ${driveType}.`;
+  } else if (hasEngine2) {
+    const engType = engineTypeStr || '[inboard/outboard/sterndrive]';
+    const eng2MakeModel = (eng2Make && eng2Model) ? `${eng2Make} ${eng2Model}` :
+                          eng2Make ? `${eng2Make} [MODEL]` : engMakeModel;
+    const eng2HPStr = eng2HP ? `${eng2HP} horsepower` : engHPStr;
+    const eng2FuelStr = eng2Fuel || engFuel;
+    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines rated at ${engHPStr} each, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through [SHAFT DRIVE(S)/STERNDRIVE(S)].`;
   } else {
     const engType = engineTypeStr || '[inboard/outboard/sterndrive]';
-    engineDesc = `Power is provided by [NUMBER] ${engMakeModel} ${engFuel} ${engType} engine(s) rated at ${engHPStr} each, coupled to ${transMakeModel} transmission(s), driving [FIXED/FOLDING] [3/4]-blade propeller(s) through [SHAFT DRIVE(S)/STERNDRIVE(S)].`;
+    engineDesc = `Power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING] [3/4]-blade propeller through a [SHAFT DRIVE/STERNDRIVE].`;
   }
 
   const constructionStr = construction || '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
   const hullTypeStr = hullType || '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
-  const keelStr = keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : ' with a [FIN/FULL/SHOAL/WING] keel';
-  const draftStr = draft ? ` with a maximum draft of ${draft}` : ' with a maximum draft of [X\'X"]';
+  const keelStr = vesselType === 'sail'
+    ? (keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : ' with a [FIN/FULL/SHOAL/WING] keel')
+    : '';
+  const draftStr = draft ? ` with a maximum draft of ${draft}` : (vesselType === 'sail' ? ' with a maximum draft of [X\'X"]' : '');
 
   let desc = `"${vesselName}" is a ${yearStr} ${makeStr} ${modelStr}, a ${constructionStr} ${hullTypeStr} ${typeStr}. `;
   desc += `She has an overall length of ${loa || '[XX\'XX"]'}, a beam of ${beam || '[XX\'XX"]'}${keelStr}${draftStr}`;
@@ -4730,7 +4751,7 @@ function renderInspection(survey) {
         <div class="header-title">${esc(survey.vesselName)}</div>
         <div class="header-subtitle">Inspection</div>
       </div>
-      <button onclick="editSurveyDetails('${survey.id}')" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">✏️ Edit Info</button>
+      <button onclick="editSurveyDetails('${survey.id}')" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">✏️ Edit Intro</button>
     </div>
     ${surveyTypeBanner}
     <div class="content" id="inspection-content">
@@ -7899,6 +7920,7 @@ async function saveAllInspectionData() {
 }
 
 async function backToHome() {
+  updateCollapseButton(false);
   const changed = await saveAllInspectionData();
 
   // If there are unsaved backup changes, prompt to back up first

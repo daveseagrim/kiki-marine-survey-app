@@ -267,13 +267,33 @@
     },
     {
       "section": "Skeg(s)",
-      "rating": "C - multiple",
+      "rating": "C - multiple, bronze",
       "text": "The bronze skegs were solidly mounted to the hull and serviceable."
     },
     {
       "section": "Skeg(s)",
-      "rating": "C - single",
+      "rating": "C - single, bronze",
       "text": "The inlaid bronze skeg was solidly mounted and serviceable."
+    },
+    {
+      "section": "Skeg(s)",
+      "rating": "C - single, stainless steel",
+      "text": "The stainless steel skeg was solidly mounted to the hull with no visible distortion or corrosion at the attachment point. The weld seams were intact."
+    },
+    {
+      "section": "Skeg(s)",
+      "rating": "C - multiple, stainless steel",
+      "text": "The stainless steel skegs were solidly mounted to the hull with no visible distortion or corrosion at the attachment points. Weld seams were intact."
+    },
+    {
+      "section": "Skeg(s)",
+      "rating": "B - stainless steel",
+      "text": "The stainless steel skeg was solidly mounted; however, surface corrosion and/or tea staining was noted at the weld seams. Monitor for progression and address if crevice corrosion develops."
+    },
+    {
+      "section": "Skeg(s)",
+      "rating": "A - stainless steel",
+      "text": "The stainless steel skeg exhibited significant crevice corrosion at the hull attachment point and/or visible distortion. The structural integrity of the mount is compromised. Professional inspection and repair is required before the vessel is operated."
     },
     {
       "section": "Cutlass bearing(s)",
