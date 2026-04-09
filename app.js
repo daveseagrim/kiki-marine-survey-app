@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v170';
+const APP_VERSION = 'v171';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -5953,7 +5953,7 @@ async function identifyInstrument(idx) {
     return;
   }
 
-  // Get the first photo's data URL
+  // Get the first photo's data URL and resize for API
   const photo = await getPhotoById(item.photos[0]);
   if (!photo || !photo.dataUrl) {
     showToast('Could not load photo for identification');
@@ -5963,8 +5963,28 @@ async function identifyInstrument(idx) {
   showToast('Identifying instrument...');
 
   try {
+    // Resize image to max 1024px to keep API request small
+    const resizedDataUrl = await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 1024;
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = () => resolve(photo.dataUrl);
+      img.src = photo.dataUrl;
+    });
+
     // Extract base64 data from data URL
-    const base64Match = photo.dataUrl.match(/^data:image\/(.*?);base64,(.*)$/);
+    const base64Match = resizedDataUrl.match(/^data:image\/(.*?);base64,(.*)$/);
     if (!base64Match) throw new Error('Invalid photo format');
     const mimeType = `image/${base64Match[1]}`;
     const base64Data = base64Match[2];
@@ -6072,13 +6092,43 @@ async function loadInstrumentThumbnails(idx, photoIds) {
     return;
   }
   let thumbsHtml = '';
-  for (const pid of photoIds) {
+  for (let i = 0; i < photoIds.length; i++) {
+    const pid = photoIds[i];
     const photo = await getPhotoById(pid);
     if (photo) {
-      thumbsHtml += `<img src="${photo.dataUrl}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:2px solid #7c3aed;cursor:pointer;" onclick="editSavedPhoto('${pid}', 'instrument_${idx}')" />`;
+      thumbsHtml += `<div style="position:relative;display:inline-block;">
+        <img src="${photo.dataUrl}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:2px solid #7c3aed;cursor:pointer;" onclick="viewInstrumentPhoto('${pid}')" />
+        <button onclick="deleteInstrumentPhoto(${idx}, '${pid}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;line-height:20px;text-align:center;cursor:pointer;padding:0;">✕</button>
+      </div>`;
     }
   }
   container.innerHTML = thumbsHtml;
+}
+
+// View an instrument photo full-screen
+async function viewInstrumentPhoto(photoId) {
+  const photo = await getPhotoById(photoId);
+  if (!photo) return;
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `<img src="${photo.dataUrl}" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;" />`;
+  modal.onclick = () => modal.remove();
+  document.body.appendChild(modal);
+}
+
+// Delete a single photo from an instrument entry
+async function deleteInstrumentPhoto(idx, photoId) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !survey.instrumentsElectronics || !survey.instrumentsElectronics[idx]) return;
+  const item = survey.instrumentsElectronics[idx];
+  const photoIdx = item.photos.indexOf(photoId);
+  if (photoIdx >= 0) {
+    item.photos.splice(photoIdx, 1);
+    try { await deletePhoto(photoId); } catch(e) {}
+    await saveSurvey(survey);
+    loadInstrumentThumbnails(idx, item.photos);
+    showToast('Photo deleted');
+  }
 }
 
 // Load all instrument thumbnails after rendering
