@@ -53,17 +53,17 @@
     {
       "section": "Hull and rudder(s) impact and resonance testing",
       "rating": "B",
-      "text": "Percussion testing of the hull and rudder produced and showed signs of saturation in ###### localized areas (see photos).  To mitigate spread, these areas should be repaired before the next launch."
+      "text": "Percussion testing of the hull and rudder showed signs of saturation in [insert number of] localized areas (see photos). To mitigate any spread, these areas should be repaired before the next launch."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
       "rating": "B - problematic rudder",
-      "text": "Percussion testing of the hull produced a clear and consistent tone with no signs of delamination or voids. However, the rudder showed signs of saturation in localized areas (see photos).  To mitigate spread, off-season venting or drainage may be attempted. However, foam cores often retain conductivity. Rudder removal and rebuild may be required in future if conditions persist."
+      "text": "Percussion testing of the hull produced a clear and consistent tone with no signs of delamination or voids. However, the rudder showed signs of saturation in localized areas (see photos). To mitigate spread, off-season venting or drainage may be attempted. However, foam cores often retain conductivity. Rudder removal and rebuild may be required in future if conditions persist."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
       "rating": "B - One or more problematic areas",
-      "text": "The majority of percussion tests on the hull produced a clear, consistent tone without signs of delamination or voids. However, there was a ###### area which produced a \"thud\" indicating saturation and/or rot. This area should be repaired prior to launch."
+      "text": "The majority of percussion tests on the hull produced a clear, consistent tone without signs of delamination or voids. However, there was an [insert location] area which produced a \"thud\" indicating saturation and/or rot. This area should be repaired prior to launch."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
@@ -88,27 +88,27 @@
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B - hull ok. Rudder needs help.",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of ### to ###, which are not considered abnormal for the vessel\u2019s age. Suggest monitoring the photographed areas between seasons. However, the rudder displayed numerous saturated spots, many at 999, suggesting internal conductivity accumulation. To mitigate any spread, off-season venting or drainage may be attempted. However, foam cores often retain conductivity. Rudder removal and rebuild may be required in future if conditions persist"
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [insert reading range], which are not considered abnormal for the vessel\u2019s age. Suggest monitoring the photographed areas between seasons. However, the rudder displayed numerous saturated spots, many at 999, suggesting internal conductivity accumulation. To mitigate any spread, off-season venting or drainage may be attempted. However, foam cores often retain conductivity. Rudder removal and rebuild may be required in future if conditions persist"
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B - Both elevated. No action required.",
-      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull returned elevated yet expected readings of [###\u2013###]. The rudder returned readings of [###\u2013###]. No softness or delamination was observed. Monitor the higher-reading areas seasonally for signs of osmosis or delamination."
+      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull returned elevated yet expected readings of [insert reading range]. The rudder returned readings of [insert reading range]. No softness or delamination was observed. Monitor the higher-reading areas seasonally for signs of osmosis or delamination."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C - Rudder issue not high",
-      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull presented no areas of concern. The rudder showed elevated readings of [###\u2013###] that are not unusual for the vessel\u2019s age. Recheck seasonally to confirm stability."
+      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull presented no areas of concern. The rudder showed elevated readings of [insert reading range] that are not unusual for the vessel\u2019s age. Recheck seasonally to confirm stability."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C - Hull and rudder not high",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [###\u2013###]. The rudder returned readings of [###\u2013###]. These values are not considered abnormal or concerning for a vessel of this age. Monitor the photographed areas between seasons for signs of osmosis or delamination."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [insert reading range]. The rudder returned readings of [insert reading range]. These values are not considered abnormal or concerning for a vessel of this age. Monitor the photographed areas between seasons for signs of osmosis or delamination."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of  #### to #### that are not considered abnormal for the vessel\u2019s age. Monitor the photographed areas between seasons. The rudders were bronze and not prone to conductivity uptake."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [insert reading range] that are not considered abnormal for the vessel\u2019s age. Monitor the photographed areas between seasons. The rudders were bronze and not prone to conductivity uptake."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
@@ -153,7 +153,7 @@
     {
       "section": "Keel and keel joint",
       "rating": "B",
-      "text": "A longitudinal crack was observed at the keel and hull joint. This is common and is typically repaired periodically as part of maintenance.  Retorquing the keel bolts while the vessel is in the cradle is recommended."
+      "text": "A longitudinal crack was observed at the keel and hull joint. This is common and is typically repaired periodically as part of maintenance. Retorquing the keel bolts while the vessel is in the cradle is recommended."
     },
     {
       "section": "Keel and keel joint",
@@ -168,12 +168,12 @@
     {
       "section": "Keel and keel joint",
       "rating": "C",
-      "text": "The keel was encapsulated and was in good condition."
+      "text": "The keel was encapsulated and was in serviceable condition."
     },
     {
       "section": "Keel and keel joint",
       "rating": "C - stainless steel",
-      "text": "The stainless steel keel was in good condition with no visible corrosion, cracking, or damage at the keel joint. The fairing was intact."
+      "text": "The stainless steel keel was in serviceable condition with no visible corrosion, cracking, or damage at the keel joint. The fairing was intact."
     },
     {
       "section": "Keel and keel joint",
@@ -398,11 +398,11 @@
     {
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
       "rating": "C",
-      "text": "The trim tabs, actuators, and mounts were in good condition and functioned properly during sea trial."
+      "text": "The trim tabs, actuators, and mounts were in serviceable condition and functioned properly during sea trial."
     },
     {
       "section": "Underwater lighting",
-      "rating": "A",
+      "rating": "C",
       "text": "The underwater lighting functioned properly."
     },
     {
@@ -428,7 +428,7 @@
     {
       "section": "Swim platform and ladder",
       "rating": "C - inegrated swim platform, minor conductivity",
-      "text": "The swim platform was integrated with the transom and, aside from minor localized conductivity readings ######, was generally dry and serviceable. The swim ladder was securely mounted and in serviceable condition. Continued monitoring of the areas with elevated conductivity is recommended to identify any developing softness or delamination."
+      "text": "The swim platform was integrated with the transom and, aside from minor localized conductivity readings [insert readings], was generally dry and serviceable. The swim ladder was securely mounted and in serviceable condition. Continued monitoring of the areas with elevated conductivity is recommended to identify any developing softness or delamination."
     },
     {
       "section": "Swim platform and ladder",
@@ -473,7 +473,7 @@
     {
       "section": "Transom",
       "rating": "C - minor repairs",
-      "text": "Despite some minor repairs in ######, the transom was in serviceable condition."
+      "text": "Despite some minor repairs in [insert location], the transom was in serviceable condition."
     },
     {
       "section": "Transom",
@@ -483,7 +483,7 @@
     {
       "section": "Transom",
       "rating": "C",
-      "text": "The transom was in good condition."
+      "text": "The transom was in serviceable condition."
     },
     {
       "section": "Hull exterior above the waterline",
@@ -493,7 +493,7 @@
     {
       "section": "Hull exterior above the waterline",
       "rating": "C",
-      "text": "The hull exterior above the waterline was in good condition."
+      "text": "The hull exterior above the waterline was in serviceable condition."
     },
     {
       "section": "Hull exterior above the waterline",
@@ -513,7 +513,7 @@
     {
       "section": "Hull exterior above the waterline",
       "rating": "C",
-      "text": "The hull exterior above the waterline was well buffed and waxed and was in good condition."
+      "text": "The hull exterior above the waterline was well buffed and waxed and was in serviceable condition."
     },
     {
       "section": "Ventilation grills/covers",
@@ -533,7 +533,7 @@
     {
       "section": "Ventilation grills/covers",
       "rating": "C",
-      "text": "The ventilation grills and covers were in good condition."
+      "text": "The ventilation grills and covers were in serviceable condition."
     },
     {
       "section": "Hull side windows and portholes (exterior observations)",
@@ -543,7 +543,7 @@
     {
       "section": "Hull side windows and portholes (exterior observations)",
       "rating": "C",
-      "text": "The hull-side windows were in good condition."
+      "text": "The hull-side windows were in serviceable condition."
     },
     {
       "section": "Hull side windows and portholes (exterior observations)",
@@ -573,7 +573,7 @@
     {
       "section": "Hull\u2013deck joint (exterior)",
       "rating": "C",
-      "text": "The hull and deck joint was serviceable and in good condition."
+      "text": "The hull and deck joint was serviceable and in serviceable condition."
     },
     {
       "section": "Propeller(s)",
@@ -598,12 +598,12 @@
     {
       "section": "Propeller(s)",
       "rating": "C - fixed three-blade",
-      "text": "The fixed three-blade propeller was in good condition with no significant damage, pitting, or corrosion. Blades were intact and securely attached to the shaft."
+      "text": "The fixed three-blade propeller was in serviceable condition with no significant damage, pitting, or corrosion. Blades were intact and securely attached to the shaft."
     },
     {
       "section": "Propeller(s)",
       "rating": "C - fixed two-blade",
-      "text": "The fixed two-blade propeller was in good condition with no significant damage, pitting, or corrosion. Blades were intact and securely attached to the shaft."
+      "text": "The fixed two-blade propeller was in serviceable condition with no significant damage, pitting, or corrosion. Blades were intact and securely attached to the shaft."
     },
     {
       "section": "Propeller(s)",
@@ -618,12 +618,12 @@
     {
       "section": "Propeller(s)",
       "rating": "C - twin fixed",
-      "text": "Both fixed propellers were in good condition with no significant damage, pitting, or corrosion. Blades were intact and securely attached to their respective shafts."
+      "text": "Both fixed propellers were in serviceable condition with no significant damage, pitting, or corrosion. Blades were intact and securely attached to their respective shafts."
     },
     {
       "section": "Propeller(s)",
       "rating": "C - controllable pitch",
-      "text": "The controllable pitch propeller was in good condition. The pitch mechanism operated smoothly and the blades showed no significant damage, pitting, or corrosion."
+      "text": "The controllable pitch propeller was in serviceable condition. The pitch mechanism operated smoothly and the blades showed no significant damage, pitting, or corrosion."
     },
     {
       "section": "Propeller shaft(s)",
@@ -830,7 +830,7 @@
     {
       "section": "Jib/genoa furler, furling line and tackle",
       "rating": "C",
-      "text": "The furling drum, foil, swivel, and related parts all appeared to be in serviceable condition. The furling line was fed through securely attached and working blocks to a functional ####### at the cockpit."
+      "text": "The furling drum, foil, swivel, and related parts all appeared to be in serviceable condition. The furling line was fed through securely attached and working blocks to a functional [insert control point] at the cockpit."
     },
     {
       "section": "Jib/genoa furler, furling line and tackle",
@@ -845,7 +845,7 @@
     {
       "section": "Forestay (as inspected from the deck)",
       "rating": "B",
-      "text": "As seen from the deck, the forestay did not have any visible broken strands. Also, the swages and turnbuckles were all in serviceable condition. The rig tension was approximately correct. However, ##### retaining pin(s) were missing."
+      "text": "As seen from the deck, the forestay did not have any visible broken strands. Also, the swages and turnbuckles were all in serviceable condition. The rig tension was approximately correct. However, [insert number of] retaining pin(s) were missing."
     },
     {
       "section": "Forestay (as inspected from the deck)",
@@ -968,14 +968,14 @@
       "text": "The sealant around the mast collar is cracking and allowing minor water ingress into the cabin area. Resealing is recommended to prevent moisture damage."
     },
     {
-      "section": "Boom, gooseneck, boomvang, outhaul, and reefing lines",
+      "section": "Boom, gooseneck, boom vang, outhaul, and reefing lines",
       "rating": "C",
-      "text": "The boom, gooseneck, boomvang, outhaul, and all associated tackle appeared in good working order. All lines were pliable without any concerning fraying."
+      "text": "The boom, gooseneck, boom vang, outhaul, and all associated tackle appeared in good working order. All lines were pliable without any concerning fraying."
     },
     {
-      "section": "Boom, gooseneck, boomvang, outhaul, and reefing lines",
+      "section": "Boom, gooseneck, boom vang, outhaul, and reefing lines",
       "rating": "C - mast furling",
-      "text": "Because the mainsail furled into the mast, there was neither reefing lines nor cunningham. However, the boomvang, outhaul and gooseneck all functioned properly."
+      "text": "Because the mainsail furled into the mast, there were neither reefing lines nor a cunningham. However, the boom vang, outhaul, and gooseneck all functioned properly."
     },
     {
       "section": "Winch (main mast)",
@@ -995,7 +995,7 @@
     {
       "section": "Deckline organizers, blocks, fairleads and clutches",
       "rating": "A",
-      "text": "All deckline organizers, blocks, fairleads, and clutches were securely fastened to the deck. The blocks operated smoothly. There was no concerning delamination or cracking around the unit bases. Although the majority of clutches operated smoothly and appeared to hold their lines firmly, there were #### clutches with broken handles that should be replaced to prevent any sudden release or difficulty locking."
+      "text": "All deckline organizers, blocks, fairleads, and clutches were securely fastened to the deck. The blocks operated smoothly. There was no concerning delamination or cracking around the unit bases. Although the majority of clutches operated smoothly and appeared to hold their lines firmly, there were [insert details] clutches with broken handles that should be replaced to prevent any sudden release or difficulty locking."
     },
     {
       "section": "Deckline organizers, blocks, fairleads and clutches",
@@ -1030,7 +1030,7 @@
     {
       "section": "Winch(es) and cleats (cabin-top and cockpit)",
       "rating": "Winches introduction prepurchase",
-      "text": "There were four winches installed: ########### winches on the cabin top and two ####### in the cockpit."
+      "text": "There were four winches installed: [describe cabin-top winches] on the cabin top and two [describe cockpit winches] in the cockpit."
     },
     {
       "section": "Jib/genoa tracks/cars",
@@ -1272,7 +1272,7 @@
     {
       "section": "Deck and coachroof/pilothouse condition",
       "rating": "C",
-      "text": "The deck and coachroof displayed minor spider and stress cracks typical of a vessel of this age. These were not concerning and should only be monitored."
+      "text": "Minor spider and stress cracks were noted in the deck and coachroof, typical of a vessel of this age. These were not considered concerning at the time of inspection and should be monitored."
     },
     {
       "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
@@ -1282,7 +1282,7 @@
     {
       "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
       "rating": "C - one or two minor areas",
-      "text": "Percussion testing of most of the deck and coachroof produced a clear and even tone across most areas with no indications of delamination or voids. However, ##### localized areas produced dull thuds suggestive of present or past saturation with core deterioration. The photographs show the hammer tip indicating the areas. Monitor and plan localized repair if softness develops."
+      "text": "Percussion testing of most of the deck and coachroof produced a clear and even tone across most areas with no indications of delamination or voids. However, [insert number of] localized areas produced dull thuds suggestive of present or past saturation with core deterioration. The photographs show the hammer tip indicating the areas. Monitor and plan localized repair if softness develops."
     },
     {
       "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
@@ -1292,17 +1292,17 @@
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "A",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The deck and coachroof returned readings between ### and ###. Close monitoring for softness was recommended in the area indicated as 999. Removal and replacement of decking and any saturated material should be considered."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The deck and coachroof returned readings between [insert details] and [insert details]. Close monitoring for softness was recommended in the area indicated as 999. Removal and replacement of decking and any saturated material should be considered."
     },
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "B - some significantly wet places",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The deck, and coachroof returned readings between [###] and [###]. The pictured areas should be watched closely this season for any softness. Where saturation is significant, removal and replacement of decking and wet material should be considered."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The deck, and coachroof returned readings between [insert reading] and [insert reading]. The pictured areas should be watched closely this season for any softness. Where saturation is significant, removal and replacement of decking and wet material should be considered."
     },
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "C - some small areas",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The deck and coachroof returned elevated readings between [###] and [###]. Although these levels are typical for the vessel's age, they should be monitored between seasons for signs of saturation or delamination."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The deck and coachroof returned elevated readings between [insert reading] and [insert reading]. Although these levels are typical for the vessel's age, they should be monitored between seasons for signs of saturation or delamination."
     },
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
@@ -1347,7 +1347,7 @@
     {
       "section": "Primary anchor, chain and rode",
       "rating": "B",
-      "text": "Only about [###] feet of chain was fitted. As a guide, chain length should be approximately equal to the vessel length."
+      "text": "Only about [insert chain length] feet of chain was fitted. As a guide, chain length should be approximately equal to the vessel length."
     },
     {
       "section": "Primary anchor, chain and rode",
@@ -1377,7 +1377,7 @@
     {
       "section": "Stanchions",
       "rating": "B - one stanchion",
-      "text": "One stanchion located at [describe location] was loose at the base and required re-bedding and tightening. The remaining stanchions were securely fastened and in good condition."
+      "text": "One stanchion located at [insert location] was loose at the base and required re-bedding and tightening. The remaining stanchions were securely fastened and in good condition."
     },
     {
       "section": "Stanchions",
@@ -1417,7 +1417,7 @@
     {
       "section": "Fuel and water fill ports and waste deck pump-out port",
       "rating": "B",
-      "text": "[Fuel/Water/Waste] fill caps were found without retaining chains, which violates ABYC H-27.7.1 and ABYC H-33.9.3. Fit retaining chains to prevent loss of caps and possible water ingress."
+      "text": "[specify fuel, water, or waste] fill caps were found without retaining chains, which violates ABYC H-27.7.1 and ABYC H-33.9.3. Fit retaining chains to prevent loss of caps and possible water ingress."
     },
     {
       "section": "Fuel and water fill ports and waste deck pump-out port",
@@ -1457,7 +1457,7 @@
     {
       "section": "Toerail and gunwale",
       "rating": "C - part of the deck good condition",
-      "text": "The toerail was in good condition."
+      "text": "The toerail was in serviceable condition."
     },
     {
       "section": "Toerail and gunwale",
@@ -1497,7 +1497,7 @@
     {
       "section": "Brightwork",
       "rating": "C",
-      "text": "The brightwork was generally in good condition."
+      "text": "The brightwork was generally in serviceable condition."
     },
     {
       "section": "Deck hatches, windows, and portholes \u2013 exterior observations",
@@ -1527,7 +1527,7 @@
     {
       "section": "Windshield, pilothouse windows, frames, and studs",
       "rating": "C",
-      "text": "The windshield, pilothouse windows, frames, and studs were in good condition."
+      "text": "The windshield, pilothouse windows, frames, and studs were in serviceable condition."
     },
     {
       "section": "Windshield, pilothouse windows, frames, and studs",
@@ -1536,7 +1536,7 @@
     },
     {
       "section": "Windshield, pilothouse windows, frames, and studs",
-      "rating": "A",
+      "rating": "C",
       "text": "The windshield, pilothouse windows, frames, and studs were structurally sound, solid, and serviceable."
     },
     {
@@ -1722,7 +1722,7 @@
     {
       "section": "Windshield, pilot house windows, frames and seals",
       "rating": "C",
-      "text": "The windshield and pilot house windows were serviceable with clear visibility and secure frames. Seals were intact and in good condition."
+      "text": "The windshield and pilot house windows were serviceable with clear visibility and secure frames. Seals were intact and in serviceable condition."
     }
   ],
   "Aft Deck": [
@@ -1738,12 +1738,12 @@
     },
     {
       "section": "Aft deck condition (spider cracks, etc.)",
-      "rating": "A",
-      "text": "The aft deck was in good condition and was serviceable."
+      "rating": "C",
+      "text": "The aft deck was in serviceable condition."
     },
     {
       "section": "Aft deck impact and resonance testing",
-      "rating": "A",
+      "rating": "C",
       "text": "Percussion testing of the aft deck and coachroof produced a clear and even tone with no indications of delamination or voids. Both areas were serviceable."
     },
     {
@@ -1759,17 +1759,17 @@
     {
       "section": "Aft deck conductivity testing",
       "rating": "A",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The aft deck returned readings of [### to ###]. Although elevated for the location, these values are not unusual for a vessel of this age. Monitor between seasons for signs of osmosis or delamination."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The aft deck returned readings of [insert reading range]. Although elevated for the location, these values are not unusual for a vessel of this age. Monitor between seasons for signs of osmosis or delamination."
     },
     {
       "section": "Aft deck conductivity testing",
-      "rating": "A",
+      "rating": "C",
       "text": "Conductivity testing of the aft deck produced readings consistent with a serviceable condition with no elevated conductivity detected."
     },
     {
       "section": "Aft deck conductivity testing",
       "rating": "B",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The aft deck returned elevated readings between #### and ####. Although these levels are typical for the vessel's age, they should be monitored between seasons for signs of saturation or delamination."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The aft deck returned elevated readings between [insert details] and [insert details]. Although these levels are typical for the vessel's age, they should be monitored between seasons for signs of saturation or delamination."
     },
     {
       "section": "Aft deck conductivity testing",
@@ -1804,7 +1804,7 @@
     {
       "section": "Seating",
       "rating": "C",
-      "text": "Seating is in good condition and provides safe, serviceable use."
+      "text": "Seating is in serviceable condition and provides safe, serviceable use."
     },
     {
       "section": "Storage",
@@ -1904,7 +1904,7 @@
     {
       "section": "Conductivity testing",
       "rating": "B",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The aft deck returned elevated readings between [###] and [###]. These areas should be monitored closely for developing softness or delamination."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The aft deck returned elevated readings between [[insert value]] and [[insert value]]. These areas should be monitored closely for developing softness or delamination."
     },
     {
       "section": "Conductivity testing",
@@ -1915,8 +1915,8 @@
   "Outboard": [
     {
       "section": "Outboard general condition and impression",
-      "rating": "A",
-      "text": "The outboard was in good overall condition and was serviceable. Starting, idling, throttle response, and shifting were normal during sea trial."
+      "rating": "C",
+      "text": "The outboard was in serviceable condition. Starting, idling, throttle response, and shifting were normal during sea trial."
     },
     {
       "section": "Outboard general condition and impression",
@@ -1930,7 +1930,7 @@
     },
     {
       "section": "Engine mount",
-      "rating": "A",
+      "rating": "C",
       "text": "The engine mount was securely attached and showed no abnormal movement. No fastener elongation or deformation was observed."
     },
     {
@@ -1945,7 +1945,7 @@
     },
     {
       "section": "Throttle, gearshift, choke",
-      "rating": "A",
+      "rating": "C",
       "text": "Throttle and gearshift controls operated smoothly and positively. Neutral, forward, and reverse engagement were crisp and repeatable. Choke enrichment operated properly."
     },
     {
@@ -1960,7 +1960,7 @@
     },
     {
       "section": "Outboard tilt",
-      "rating": "A",
+      "rating": "C",
       "text": "The hydraulic tilt operated properly through the full range with no hesitation or drift."
     },
     {
@@ -1975,7 +1975,7 @@
     },
     {
       "section": "Outboard anodes",
-      "rating": "A",
+      "rating": "C",
       "text": "Anodes were intact with limited consumption and were appropriate for the service environment."
     },
     {
@@ -1989,23 +1989,23 @@
       "text": "Anodes were securely mounted and consumption was within normal limits for the service environment."
     },
     {
-      "section": "Outboard anodes",
-      "rating": "A",
+      "section": "Outboard propeller",
+      "rating": "C",
       "text": "The stainless propeller was free of damage and securely fastened. Performance was smooth with no discernible vibration or cavitation during sea trial."
     },
     {
-      "section": "Outboard anodes",
+      "section": "Outboard propeller",
       "rating": "B",
       "text": "The stainless propeller showed light edge wear. No abnormal vibration was noted. Dress light nicks at next service and monitor."
     },
     {
-      "section": "Outboard anodes",
+      "section": "Outboard propeller",
       "rating": "C",
-      "text": "Aside from a couple of very minor dings, the stainless propeller was in good condition. It performed well during sea trial and no discernible vibration or cavitation was evident."
+      "text": "Aside from a couple of very minor dings, the stainless propeller was in serviceable condition. It performed well during sea trial and no discernible vibration or cavitation was evident."
     },
     {
       "section": "Outboard oil",
-      "rating": "A",
+      "rating": "C",
       "text": "Engine oil appeared clean and was at the correct level. Service interval stickers indicated current maintenance was up to date."
     },
     {
@@ -2028,17 +2028,17 @@
     {
       "section": "Cockpit, floor, seats and coaming",
       "rating": "C",
-      "text": "The cockpit, floor, seats, and coaming were in good condition."
+      "text": "The cockpit, floor, seats, and coaming were in serviceable condition."
     },
     {
       "section": "Cockpit impact and resonance testing",
       "rating": "B - Multiple spots",
-      "text": "Percussion testing of most of the cockpit floor produced a clear and even tone across most areas with no indications of delamination or voids. However, ##### localized areas produced dull thuds suggestive of present or past saturation with core deterioration. The photographs show the hammer tip indicating the areas. Monitor and plan localized repair if softness develops."
+      "text": "Percussion testing of most of the cockpit floor produced a clear and even tone across most areas with no indications of delamination or voids. However, [insert number of] localized areas produced dull thuds suggestive of present or past saturation with core deterioration. The photographs show the hammer tip indicating the areas. Monitor and plan localized repair if softness develops."
     },
     {
       "section": "Cockpit impact and resonance testing",
       "rating": "B - Singular spot",
-      "text": "Percussion testing of the cockpit floor produced a clear and even tone across most areas with no indications of delamination or voids. One localized area at [describe location] produced a dull thud suggestive of present saturation or past saturation with core deterioration. The photographs show the hammer tip indicating the area. Monitor and plan localized repair if softness develops."
+      "text": "Percussion testing of the cockpit floor produced a clear and even tone across most areas with no indications of delamination or voids. One localized area at [insert location] produced a dull thud suggestive of present saturation or past saturation with core deterioration. The photographs show the hammer tip indicating the area. Monitor and plan localized repair if softness develops."
     },
     {
       "section": "Cockpit impact and resonance testing",
@@ -2053,17 +2053,17 @@
     {
       "section": "Cockpit conductivity testing",
       "rating": "B",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The area at [describe location] exhibited elevated readings of [### to ###]. Values were high for the location and should be monitored for softness. Removal and replacement of the core in this area should be considered."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The area at [insert location] exhibited elevated readings of [insert reading range]. Values were high for the location and should be monitored for softness. Removal and replacement of the core in this area should be considered."
     },
     {
       "section": "Cockpit conductivity testing",
       "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The cockpit returned readings of [### to ###]. Although elevated for age, values were within an acceptable range. Monitor between seasons for signs of osmosis or delamination."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. A single area at [insert location] showed an elevated reading of [insert reading]. This was not immediately concerning at the time of inspection and should be monitored."
     },
     {
       "section": "Cockpit conductivity testing",
       "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. A single area at [describe location] showed an elevated reading of [###]. This was not immediately concerning and should only be monitored."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. A single area at [describe location] showed an elevated reading of [[insert value]]. This was not immediately concerning and should only be monitored."
     },
     {
       "section": "Cockpit conductivity testing",
@@ -2077,7 +2077,7 @@
     },
     {
       "section": "Cockpit drains",
-      "rating": "A",
+      "rating": "C",
       "text": "The cockpit drains were located under the engine lid, discharged to outlets in the hull, and were serviceable."
     },
     {
@@ -2088,7 +2088,7 @@
     {
       "section": "Cockpit table",
       "rating": "C",
-      "text": "The cockpit table was firmly mounted to [describe mounting point] and was in good condition."
+      "text": "The cockpit table was firmly mounted to [identify mounting point] and was in serviceable condition."
     },
     {
       "section": "Cockpit table",
@@ -2108,7 +2108,7 @@
     {
       "section": "Cockpit lighting",
       "rating": "B",
-      "text": "All cockpit lighting functioned properly except for [describe fixture]. Service the nonfunctional fixture."
+      "text": "All cockpit lighting functioned properly except for [identify fixture]. Service the non-functional fixture."
     },
     {
       "section": "Cockpit lighting",
@@ -2123,7 +2123,7 @@
     {
       "section": "Cockpit lockers and lazarettes",
       "rating": "C",
-      "text": "All cockpit lockers, lazarettes, and cubbies were in good condition."
+      "text": "All cockpit lockers, lazarettes, and cubbies were in serviceable condition."
     },
     {
       "section": "Cockpit lockers and lazarettes",
@@ -2143,22 +2143,22 @@
     {
       "section": "Engine locker lid",
       "rating": "C",
-      "text": "The engine locker lid was in good condition. The hydraulic locker lift functioned properly."
+      "text": "The engine locker lid was in serviceable condition. The hydraulic locker lift functioned properly."
     },
     {
       "section": "Engine locker lid",
       "rating": "C",
-      "text": "The engine locker lid was undamaged and free of conductivity."
+      "text": "The engine locker lid was undamaged and showed no elevated conductivity."
     },
     {
       "section": "Engine locker lid",
       "rating": "C",
-      "text": "The engine locker lid was undamaged, easily removed, and free of conductivity."
+      "text": "The engine locker lid was undamaged, easily removed, and showed no elevated conductivity."
     },
     {
       "section": "Engine locker lid",
       "rating": "B",
-      "text": "The engine locker lid was undamaged and easily removed. Areas of elevated conductivity were present. One area at [describe location] indicated near saturation. Localized repair is recommended."
+      "text": "The engine locker lid was undamaged and easily removed. Areas of elevated conductivity were present. One area at [insert location] indicated near saturation. Localized repair is recommended."
     },
     {
       "section": "Steering wheel and steering",
@@ -2213,7 +2213,7 @@
     {
       "section": "Tiller",
       "rating": "C",
-      "text": "The tiller was solidly attached to the rudder post and the extension was in good condition."
+      "text": "The tiller was solidly attached to the rudder post and the extension was in serviceable condition."
     },
     {
       "section": "Sink, faucets and drain",
@@ -2288,7 +2288,7 @@
     {
       "section": "Bimini, dodger and canvas enclosure",
       "rating": "C",
-      "text": "The bimini and dodger were in good condition. All zippers, snaps, and buttons were securely attached and working properly."
+      "text": "The bimini and dodger were in serviceable condition. All zippers, snaps, and buttons were securely attached and working properly."
     },
     {
       "section": "Bimini, dodger and canvas enclosure",
@@ -2579,7 +2579,7 @@
     },
     {
       "section": "Outdrive tilt",
-      "rating": "A",
+      "rating": "C",
       "text": "The outdrive tilt functioned properly."
     },
     {
@@ -2604,7 +2604,7 @@
     },
     {
       "section": "Bow thruster",
-      "rating": "A",
+      "rating": "C",
       "text": "The bow thruster functioned properly during sea trial."
     },
     {
@@ -3082,7 +3082,7 @@
     {
       "section": "Flybridge, floor, seats and coaming (spider cracks, etc.)",
       "rating": "C",
-      "text": "The Flybridge, floor, seats, and coaming were in good condition."
+      "text": "The Flybridge, floor, seats, and coaming were in serviceable condition."
     },
     {
       "section": "Flybridge percussion testing",
@@ -3107,17 +3107,17 @@
     {
       "section": "Flybridge conductivity testing",
       "rating": "B",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The area at [describe location] exhibited elevated readings of [### to ###]. Values were high for the location and should be monitored for softness. Removal and replacement of the core in this area should be considered."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The area at [insert location] exhibited elevated readings of [insert reading range]. Values were high for the location and should be monitored for softness. Removal and replacement of the core in this area should be considered."
     },
     {
       "section": "Flybridge conductivity testing",
       "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The Flybridge returned readings of [### to ###]. Although elevated for age, values were within an acceptable range. Monitor between seasons for signs of osmosis or delamination."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. A single area at [insert location] showed an elevated reading of [insert reading]. This was not immediately concerning and should be monitored."
     },
     {
       "section": "Flybridge conductivity testing",
       "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. A single area at [describe location] showed an elevated reading of [###]. This was not immediately concerning and should be monitored."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. A single area at [describe location] showed an elevated reading of [[insert value]]. This was not immediately concerning and should be monitored."
     },
     {
       "section": "Flybridge conductivity testing",
@@ -3162,7 +3162,7 @@
     {
       "section": "Flybridge table",
       "rating": "C",
-      "text": "The Flybridge table was firmly mounted to [describe mounting point] and was in good condition."
+      "text": "The Flybridge table was firmly mounted to [describe mounting point] and was in serviceable condition."
     },
     {
       "section": "Flybridge table",
@@ -3197,7 +3197,7 @@
     {
       "section": "Flybridge lockers and lazarettes",
       "rating": "C",
-      "text": "All Flybridge lockers, lazarettes, and cubbies were in good condition."
+      "text": "All Flybridge lockers, lazarettes, and cubbies were in serviceable condition."
     },
     {
       "section": "Flybridge lockers and lazarettes",
@@ -3292,7 +3292,7 @@
     {
       "section": "Bimini, dodger and canvas enclosure",
       "rating": "C",
-      "text": "The bimini was in good condition. All zippers, snaps, and buttons were securely attached and working properly."
+      "text": "The bimini was in serviceable condition. All zippers, snaps, and buttons were securely attached and working properly."
     },
     {
       "section": "Flybridge ladder/staircase",
@@ -3517,7 +3517,7 @@
     {
       "section": "Flybridge splash shield/windshield",
       "rating": "C",
-      "text": "The Flybridge splash shield or windshield is in good condition with no cracks or crazing."
+      "text": "The Flybridge splash shield or windshield is in serviceable condition with no cracks or crazing."
     },
     {
       "section": "Flybridge splash shield/windshield",
@@ -3683,7 +3683,7 @@
     },
     {
       "section": "Outdrive tilt",
-      "rating": "A",
+      "rating": "C",
       "text": "The outdrive tilt functioned properly."
     },
     {
@@ -3708,7 +3708,7 @@
     },
     {
       "section": "Bow thruster",
-      "rating": "A",
+      "rating": "C",
       "text": "The bow thruster functioned properly during sea trial."
     },
     {
@@ -4081,7 +4081,7 @@
     {
       "section": "Cabin lining and ceiling",
       "rating": "C",
-      "text": "The cabin lining and ceiling were in good condition throughout the vessel."
+      "text": "The cabin lining and ceiling were in serviceable condition throughout the vessel."
     },
     {
       "section": "Deck hatches, windows and portholes \u2013 interior observations",
@@ -4106,7 +4106,7 @@
     {
       "section": "Woodwork, doors and framing",
       "rating": "C",
-      "text": "All woodwork, doors, and framing were in good condition."
+      "text": "All woodwork, doors, and framing were in serviceable condition."
     },
     {
       "section": "Woodwork, doors and framing",
@@ -4126,7 +4126,7 @@
     {
       "section": "Upholstery",
       "rating": "C",
-      "text": "All upholstery was in good condition."
+      "text": "All upholstery was in serviceable condition."
     },
     {
       "section": "Table",
@@ -4136,7 +4136,7 @@
     {
       "section": "Table",
       "rating": "C",
-      "text": "The table and support were solid and in good condition."
+      "text": "The table and support were solid and in serviceable condition."
     },
     {
       "section": "Table",
@@ -4151,7 +4151,7 @@
     {
       "section": "Storage, galley cabinets, drawers and galley counter",
       "rating": "C",
-      "text": "All storage, galley cabinets, and drawers opened and closed properly and were solid. The galley counter was in good condition."
+      "text": "All storage, galley cabinets, and drawers opened and closed properly and were solid. The galley counter was in serviceable condition."
     },
     {
       "section": "Galley faucet, sink and drain",
@@ -4286,12 +4286,12 @@
     {
       "section": "Bilge, stringers and ribs \u2013 accessible from cabin",
       "rating": "A",
-      "text": "The cabin bilge was full of water and the bilge pump was non functional. This does not meet ABYC H 22 for bilge pumping systems and ABYC S 30 for bilge pump electrical systems. Pumps must be operational and able to keep the bilge reasonably dry to reduce flooding risk. Immediate correction is required."
+      "text": "The cabin bilge was full of water and the bilge pump was non-functional. This does not meet ABYC H-22 for electric bilge pump systems and ABYC E-11 for electrical systems. Pumps must be operational and able to keep the bilge reasonably dry to reduce flooding risk. Immediate correction is required."
     },
     {
       "section": "Bilge, stringers and ribs \u2013 accessible from cabin",
       "rating": "B - water in bilge. Deck stepped mast.",
-      "text": "Although the amount of water was not alarming, there was some water in the bilge. Watermarks in the bilge indicate this is a recurring condition, which is not unusual for a vessel this age. However, because the boat has a deck-stepped rig, water is likely entering the bilge from somewhere on the deck. This should be investigated further by running a hose over the deck and checking for leaks."
+      "text": "Some water was present in the bilge. Watermarks indicated this was a recurring condition, which is not unusual for a vessel of this age. Because the boat has a deck-stepped rig, water is likely entering the bilge from the deck. Further investigation is recommended by running water over the deck and checking for leaks."
     },
     {
       "section": "Bilge, stringers and ribs \u2013 accessible from cabin",
@@ -4715,27 +4715,27 @@
     {
       "section": "Fuel tank(s)",
       "rating": "B",
-      "text": "The fuel tank was installed [describe location] and appeared serviceable with correct piping. Each fuel hose was secured with only one clamp. ABYC H-33.2.2.2 requires two corrosion-resistant clamps adjacent to each barb, and H-33.2.2.3 requires clamps to be readily inspectable and serviceable. Although this vessel predates the requirement and compliance is advisory, fit a second clamp to each fuel hose for improved safety and serviceability."
+      "text": "The fuel tank was installed [insert location] and appeared serviceable with correct piping. Each fuel hose was secured with only one clamp. ABYC H-33.2.2.2 requires two corrosion-resistant clamps adjacent to each barb, and H-33.2.2.3 requires clamps to be readily inspectable and serviceable. Although this vessel predates the requirement and compliance is advisory, fit a second clamp to each fuel hose for improved safety and serviceability."
     },
     {
       "section": "Fuel tank(s)",
       "rating": "B",
-      "text": "The fuel tank was located #########. The installation lacked a readily accessible shut-off valve at the tank outlet, and hose terminations were secured with only one clamp. Although the vessel was built prior to the applicable Transport Canada and ABYC standards, current best practice calls for a shut-off valve at the tank outlet (where siphoning is possible) and double clamping consistent with ABYC H-33. Recommend installing a marine-rated quarter-turn shut-off valve operable without tools and upgrading hose terminations with two corrosion-resistant clamps on all fuel-fill and barbed connections."
+      "text": "The fuel tank was located [insert location]. The installation lacked a readily accessible shut-off valve at the tank outlet, and hose terminations were secured with only one clamp. Although the vessel was built prior to the applicable Transport Canada and ABYC standards, current best practice calls for a shut-off valve at the tank outlet (where siphoning is possible) and double clamping consistent with ABYC H-33. Recommend installing a marine-rated quarter-turn shut-off valve operable without tools and upgrading hose terminations with two corrosion-resistant clamps on all fuel-fill and barbed connections."
     },
     {
       "section": "Fuel tank(s)",
       "rating": "B",
-      "text": "The fuel tank was located [describe location]. It appeared serviceable with the correct SAE-rated hose and a fuel shut-off valve. Although this installation predates the ABYC standard, adding a second corrosion-resistant clamp to each hose connection is recommended."
+      "text": "The fuel tank was located [insert location]. It appeared serviceable with the correct SAE-rated hose and a fuel shut-off valve. Although this installation predates the ABYC standard, adding a second corrosion-resistant clamp to each hose connection is recommended."
     },
     {
       "section": "Fuel tank(s)",
       "rating": "C - multiple",
-      "text": "The fuel tanks were located ########. They appeared serviceable with the correct SAE-rated hoses, hose clamps, and fuel shut-off valves."
+      "text": "The fuel tanks were located [insert location]. They appeared serviceable with the correct SAE-rated hoses, hose clamps, and fuel shut-off valves."
     },
     {
       "section": "Fuel tank(s)",
       "rating": "C - singular",
-      "text": "The fuel tank was located #########. It appeared serviceable with the correct SAE-rated hose, hose clamps, and a fuel shut-off valve."
+      "text": "The fuel tank was located [insert location]. It appeared serviceable with the correct SAE-rated hose, hose clamps, and a fuel shut-off valve."
     },
     {
       "section": "Hot water tank(s), plumbing and electrical",
@@ -4750,12 +4750,12 @@
     {
       "section": "Black water tank(s) and plumbing",
       "rating": "C",
-      "text": "The black water tank was mounted in the [describe location]. It appeared correctly installed with ASTM D3262 hose fitted. No leakage or unusual odour was observed."
+      "text": "The black water tank was mounted in the [insert location]. It appeared correctly installed with ASTM D3262 hose fitted. No leakage or unusual odour was observed."
     },
     {
       "section": "Black water tank(s) and plumbing",
       "rating": "C - not visible but looks right",
-      "text": "The black water tank was located ######## and not visible.. However, the installation appeared proper with ASTM D3262 hose fitted. No leakage or unusual odour was observed."
+      "text": "The black water tank was located [insert location] and not visible. However, the installation appeared proper with ASTM D3262 hose fitted. No leakage or unusual odour was observed."
     },
     {
       "section": "Black water vacuum pump(s)",
@@ -4780,27 +4780,27 @@
     {
       "section": "Freshwater tank and plumbing",
       "rating": "C - multiple",
-      "text": "The freshwater tanks were located ##########. They appeared correctly installed, with securely attached plumbing using components that appeared to be FDA- or NSF-certified potable water-grade. No sign of leakage was observed."
+      "text": "The freshwater tanks were located [insert location]. They appeared correctly installed, with securely attached plumbing using components that appeared to be FDA- or NSF-certified potable water-grade. No sign of leakage was observed."
     },
     {
       "section": "Freshwater tank and plumbing",
       "rating": "C - single",
-      "text": "The freshwater tank was located ##########. It appeared correctly installed with securely attached plumbing of what appeared to be FDA or NSF-certified potable water-grade components. No sign of leakage was observed."
+      "text": "The freshwater tank was located [insert location]. It appeared correctly installed with securely attached plumbing of what appeared to be FDA or NSF-certified potable water-grade components. No sign of leakage was observed."
     },
     {
       "section": "Freshwater tank and plumbing",
       "rating": "C - single - not visible",
-      "text": "The freshwater tank was located in the ####### and was not visible. However, it appeared correctly installed with securely attached plumbing of what appeared to be FDA or NSF-certified potable water-grade components. No sign of leakage was observed."
+      "text": "The freshwater tank was located in the [insert location] and was not visible. However, it appeared correctly installed with securely attached plumbing of what appeared to be FDA or NSF-certified potable water-grade components. No sign of leakage was observed."
     },
     {
       "section": "Freshwater tank and plumbing",
       "rating": "Not tested",
-      "text": "The freshwater tank was located [describe location]. The installation appeared correct. Plumbing appeared to be the proper grade, securely attached, and serviceable. No leakage was observed."
+      "text": "The freshwater tank was located [insert location]. The installation appeared correct. Plumbing appeared to be the proper grade, securely attached, and serviceable. No leakage was observed."
     },
     {
       "section": "Freshwater tank and plumbing",
       "rating": "Not tested",
-      "text": "The freshwater tank and connections were not visible beneath a screwed down panel in the ####### . No leakage was observed."
+      "text": "The freshwater tank and connections were not visible beneath a screwed down panel in the [insert location]. No leakage was observed."
     },
     {
       "section": "Freshwater pump",
@@ -4820,7 +4820,7 @@
     {
       "section": "Deck wash pump, plumbing and electrical",
       "rating": "C",
-      "text": "The deck wash pump was securely mounted at [describe location] and was readily accessible for inspection and maintenance. Electrical connections used marine grade wiring. The pump operated properly and no leakage was observed."
+      "text": "The deck wash pump was securely mounted at [insert location] and was readily accessible for inspection and maintenance. Electrical connections used marine grade wiring. The pump operated properly and no leakage was observed."
     },
     {
       "section": "Deck wash pump, plumbing and electrical",
@@ -4955,7 +4955,7 @@
       "text": "The cooling water seacock turned easily, and the strainer appeared clean. No leakage was observed."
     },
     {
-      "section": "Cooling water intake seacock(s) and strainer(s)",
+      "section": "Anti-vibration mounts",
       "rating": "Not tested",
       "text": "Not tested."
     },
@@ -4977,7 +4977,7 @@
     {
       "section": "Exhaust condition",
       "rating": "A",
-      "text": "The exhaust system was generally serviceable and conformed to SAE J2006 with double hose clamps used at most connections. One hose clamp was missing at the muffler connection which does not comply with ABYC P 1.7.2.5.3 requiring two all stainless clamps on each end of every flexible wet exhaust hose. Install a second clamp at the muffler."
+      "text": "The exhaust system was generally serviceable and conformed to SAE J2006 with double hose clamps used at most connections. One hose clamp was missing at the muffler connection which does not comply with ABYC P-1.7.2.5.3 requiring two all stainless clamps on each end of every flexible wet exhaust hose. Install a second clamp at the muffler."
     },
     {
       "section": "Exhaust condition",
@@ -5080,19 +5080,19 @@
       "text": "Inspection was not performed because the belts and pulleys were covered by a guard."
     },
     {
-      "section": "Anti vibration mounts",
+      "section": "Anti-vibration mounts",
       "rating": "B",
-      "text": "The anti vibration mounts especially the [location] mount appeared cracked and worn. Inspection and repair or replacement by a licensed mechanic is recommended."
+      "text": "The anti-vibration mounts especially the [insert location] mount appeared cracked and worn. Inspection and repair or replacement by a licensed mechanic is recommended."
     },
     {
-      "section": "Anti vibration mounts",
+      "section": "Anti-vibration mounts",
       "rating": "C",
       "text": "The anti-vibration mounts showed very little corrosion or cracking and appeared serviceable. However, inspection by a qualified marine mechanic is still advisable."
     },
     {
-      "section": "Anti vibration mounts",
+      "section": "Anti-vibration mounts",
       "rating": "C - just changed",
-      "text": "According to the owner, the anti-vibration mounts had been changed recently.. They showed virtually no corrosion or cracking and appeared serviceable."
+      "text": "According to the owner, the anti-vibration mounts had been changed recently. They showed virtually no corrosion or cracking and appeared serviceable."
     },
     {
       "section": "Anti vibration mounts",
@@ -5416,7 +5416,7 @@
     {
       "section": "Shore power overcurrent protection",
       "rating": "C - not tested",
-      "text": "A dedicated shore power overcurrent protection circuit breaker was located on the main 110V AC panel rated at ####### amps. It switched on and off easily. However, because the boat was not plugged into shore power, it was not tested."
+      "text": "A dedicated shore power overcurrent protection circuit breaker was located on the main 110V AC panel rated at [insert amperage] amps. It switched on and off easily. However, because the boat was not plugged into shore power, it was not tested."
     },
     {
       "section": "Galvanic isolator",
@@ -5466,7 +5466,7 @@
     {
       "section": "Battery charger and grounding",
       "rating": "Not tested - older non-3 stage charger",
-      "text": "A ###### converter/charger was fitted, but could not be tested without AC power. As this is an older charger design, a future upgrade to a modern smart charger could be considered to enhance battery performance."
+      "text": "A converter/charger was fitted, but could not be tested without AC power. As this is an older charger design, a future upgrade to a modern smart charger could be considered to enhance battery performance."
     },
     {
       "section": "Battery selector switch, combiner, VSR",
@@ -5641,7 +5641,7 @@
     {
       "section": "Bundling support and wiring",
       "rating": "A",
-      "text": "Wiring at [location] was unsecured, improperly bundled, and lacked appropriate marine grade connections. Correct routing, support, and corrosion resistant terminations are recommended to reduce risk of chafe, short circuits, or failure."
+      "text": "Wiring at [insert location] was unsecured, improperly bundled, and lacked appropriate marine grade connections. Correct routing, support, and corrosion resistant terminations are recommended to reduce risk of chafe, short circuits, or failure."
     },
     {
       "section": "Bundling support and wiring",
@@ -5670,8 +5670,8 @@
     },
     {
       "section": "AC outlets",
-      "rating": "C",
-      "text": "The #####E receptacle was found to have reversed polarity. This condition may energize appliance housings or internal components even when the appliance is switched off, increasing the risk of electrical shock. It is considered a critical safety issue under ABYC E-11. The wiring should be corrected by a qualified marine electrician before the vessel is used or connected to shore power."
+      "rating": "A",
+      "text": "An AC receptacle was found to have reversed polarity. This condition may energize appliance housings or internal components even when the appliance is switched off, increasing the risk of electrical shock. It is considered a critical safety issue under ABYC E-11. The wiring should be corrected by a qualified marine electrician before the vessel is used or connected to shore power."
     },
     {
       "section": "AC outlets",
@@ -6013,7 +6013,7 @@
     {
       "section": "Lifejackets and PFDs",
       "rating": "C",
-      "text": "An adequate number of approved lifejackets in good condition were found on board."
+      "text": "An adequate number of approved lifejackets in serviceable condition were found on board."
     },
     {
       "section": "Life ring or heaving line",
@@ -6093,7 +6093,7 @@
     {
       "section": "Bilge pump, automatic float",
       "rating": "A",
-      "text": "The bilge pump was non operational. ABYC H 22 requires functional bilge pumping capacity. Repair or replace the pump, confirm proper wiring, and verify automatic float switch operation."
+      "text": "The bilge pump was non-operational. ABYC H-22 requires functional bilge pumping capacity. Repair or replace the pump, confirm proper wiring, and verify automatic float switch operation."
     },
     {
       "section": "Bilge pump, automatic float",
@@ -6203,7 +6203,7 @@
     {
       "section": "Navigation lights (port, starboard, anchor, steaming, other)",
       "rating": "A",
-      "text": "The vessel\u2019s navigation lights were non operational during inspection. This does not meet ABYC A 16 guidance and COLREGS Rules 20 and 21 for visibility. Repair or replacement is required to meet range requirements such as two nautical miles for vessels under twelve metres and to satisfy ABYC electrical practice."
+      "text": "The vessel\u2019s navigation lights were non-operational during inspection. This does not meet ABYC A-16 guidance and COLREGS Rules 20 and 21 for visibility. Repair or replacement is required to meet range requirements such as two nautical miles for vessels under twelve metres and to satisfy ABYC electrical practice."
     },
     {
       "section": "Navigation lights (port, starboard, anchor, steaming, other)",
