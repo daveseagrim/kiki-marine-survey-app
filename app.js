@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v161';
+const APP_VERSION = 'v162';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -4440,6 +4440,164 @@ async function generateVesselDescription() {
   }
 }
 
+// Regenerate vessel description from inspection view (reads from saved survey, not form)
+async function regenerateDescriptionFromInspection() {
+  if (!currentSurveyId) return;
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) { showToast('Survey not found'); return; }
+
+  const ymm = survey.yearMakeModel || '';
+  const { year, make, model } = parseYearMakeModel(ymm);
+  const vesselType = survey.vesselType || '';
+  const boatStyle = survey.boatStyle || '';
+  const hullType = survey.hullType || '';
+  const construction = survey.construction || '';
+  const loa = survey.loa || '';
+  const beam = survey.beam || '';
+  const draft = survey.maxDraft || '';
+  const displacement = survey.displacement || '';
+  const keelType = survey.keelType || '';
+  const sailArea = survey.totalSailArea || '';
+  const cabins = survey.numberCabins || '';
+  const electrical = survey.electricalSystem || '';
+  const vesselName = survey.vesselName || '[VESSEL NAME]';
+
+  const yearStr = year || '[YEAR]';
+  const makeStr = make || '[MAKE]';
+  const modelStr = model || '[MODEL]';
+  const typeStr = boatStyle || (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : '[VESSEL TYPE]');
+
+  const engineMake = survey.engineMake || '';
+  const engineModel = survey.engineModel || '';
+  const engineHP = survey.engineHP || '';
+  const fuelType = survey.fuelType || '';
+  const transmissionMake = survey.transmissionMake || '';
+  const transmissionModel = survey.transmissionModel || '';
+  const engineTypeFromDb = lookupEngineType(engineMake, engineModel);
+  const engineTypeStr = engineTypeFromDb ? engineTypeFromDb.toLowerCase() : '';
+
+  let rigDesc = '';
+  if (vesselType === 'sail') {
+    const rigType = boatStyle ? boatStyle.toLowerCase() : '[SLOOP/CUTTER/KETCH]';
+    const mastData = survey.items?.['Main mast'] || {};
+    const steppingStr = mastData.mastStepping ? mastData.mastStepping.toLowerCase() : '[deck-stepped/keel-stepped]';
+    const trackStr = mastData.mastTrackType ? ` with ${mastData.mastTrackType.toLowerCase()}` : '';
+    rigDesc = ` She is ${rigType}-rigged with a ${steppingStr} [aluminium/carbon fibre] mast${trackStr}.`;
+    if (sailArea) rigDesc += ` Total sail area is ${sailArea}.`;
+  }
+
+  const engMakeModel = (engineMake && engineModel) ? `${engineMake} ${engineModel}` :
+                       engineMake ? `${engineMake} [MODEL]` : '[MAKE/MODEL]';
+  const engFuel = fuelType || '[DIESEL/GASOLINE]';
+  const engHPStr = engineHP ? `${engineHP} horsepower` : '[XX] horsepower';
+  const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
+                         transmissionMake ? `${transmissionMake} [MODEL]` : '[MAKE/MODEL]';
+
+  const hasEngine2 = !!survey.engine2Make;
+  const eng2Make = survey.engine2Make || '';
+  const eng2Model = survey.engine2Model || '';
+  const eng2HP = survey.engine2HP || '';
+
+  let engineDesc = '';
+  if (vesselType === 'human') {
+    engineDesc = `This is a human-powered vessel with no auxiliary engine.`;
+  } else if (vesselType === 'sail') {
+    const engType = engineTypeStr || '[inboard/outboard]';
+    const driveType = engineTypeStr === 'inboard' ? '[shaft drive/saildrive]' : '[SHAFT DRIVE/SAILDRIVE]';
+    engineDesc = `Auxiliary power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a ${driveType}.`;
+  } else if (hasEngine2) {
+    const engType = engineTypeStr || '[inboard/outboard/sterndrive]';
+    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines rated at ${engHPStr} each, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through [SHAFT DRIVE(S)/STERNDRIVE(S)].`;
+  } else {
+    const engType = engineTypeStr || '[inboard/outboard/sterndrive]';
+    engineDesc = `Power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING] [3/4]-blade propeller through a [SHAFT DRIVE/STERNDRIVE].`;
+  }
+
+  // Pull propeller/shaft data from survey items
+  let propDesc = '';
+  if (survey.items) {
+    const propellerItems = Object.keys(survey.items).filter(k => k.toLowerCase().includes('propeller') && survey.items[k].text);
+    const shaftItems = Object.keys(survey.items).filter(k => (k.toLowerCase().includes('shaft') || k.toLowerCase().includes('stern tube')) && survey.items[k].text);
+    const cutlassItems = Object.keys(survey.items).filter(k => k.toLowerCase().includes('cutlass') && survey.items[k].text);
+    if (propellerItems.length > 0 || shaftItems.length > 0) {
+      propDesc = '\n\n';
+      if (shaftItems.length > 0) propDesc += shaftItems.map(k => survey.items[k].text).join(' ') + ' ';
+      if (cutlassItems.length > 0) propDesc += cutlassItems.map(k => survey.items[k].text).join(' ') + ' ';
+      if (propellerItems.length > 0) propDesc += propellerItems.map(k => survey.items[k].text).join(' ');
+    }
+  }
+
+  // Electronics from survey items
+  let electronicsDesc = '';
+  if (survey.items) {
+    const electronicItems = ['VHF radio', 'GPS/chartplotter', 'Depth sounder/fish finder', 'Radar', 'Autopilot', 'AIS transponder/receiver'];
+    const foundElectronics = [];
+    for (const eLabel of electronicItems) {
+      const match = Object.keys(survey.items).find(k => k.toLowerCase().includes(eLabel.toLowerCase().split('/')[0]));
+      if (match && survey.items[match].rating && survey.items[match].rating.startsWith('C')) {
+        foundElectronics.push(eLabel.split('/')[0]);
+      }
+    }
+    if (foundElectronics.length > 0) {
+      electronicsDesc = `Navigation and communication equipment includes ${foundElectronics.join(', ')}.`;
+    }
+  }
+
+  // Safety equipment from TC TP 511
+  let safetyDesc = '';
+  if (survey.safetyEquipment && survey.safetyEquipment.length > 0) {
+    const onBoard = survey.safetyEquipment.filter(e => e.checked).length;
+    const missing = survey.safetyEquipment.length - onBoard;
+    safetyDesc = `Safety equipment per Transport Canada TP 511: ${onBoard} of ${survey.safetyEquipment.length} required items verified on board.`;
+    if (missing > 0) {
+      const missingNames = survey.safetyEquipment.filter(e => !e.checked).map(e => e.name).slice(0, 5);
+      safetyDesc += ` Missing: ${missingNames.join(', ')}${missing > 5 ? ` and ${missing - 5} more` : ''}.`;
+    }
+  }
+
+  const constructionStr = construction || '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
+  const hullTypeStr = hullType || '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
+  const keelStr = vesselType === 'sail'
+    ? (keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : ' with a [FIN/FULL/SHOAL/WING] keel')
+    : '';
+  const draftStr = draft ? ` with a maximum draft of ${draft}` : (vesselType === 'sail' ? ' with a maximum draft of [X\'X"]' : '');
+
+  let desc = `"${vesselName}" is a ${yearStr} ${makeStr} ${modelStr}, a ${constructionStr} ${hullTypeStr} ${typeStr}. `;
+  desc += `She has an overall length of ${loa || '[XX\'XX"]'}, a beam of ${beam || '[XX\'XX"]'}${keelStr}${draftStr}`;
+  if (displacement) desc += `, and a displacement of ${displacement}`;
+  desc += `.`;
+  desc += rigDesc;
+  desc += `\n\n`;
+  desc += engineDesc;
+  desc += propDesc;
+  desc += `\n\n`;
+  desc += `The hull is [COLOUR] with a [COLOUR] boot stripe. The deck is [COLOUR] with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
+  const cabinStr = cabins || '[NUMBER]';
+  desc += `The vessel features ${cabinStr} cabin(s) with [NUMBER] berth(s), [NUMBER] head(s) with [MANUAL/ELECTRIC] marine toilet(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
+  desc += `The galley is [PORT/STARBOARD/AFT] and includes a [PROPANE/ELECTRIC/ALCOHOL] stove with [OVEN], a [12V/120V] refrigerator, and a [SINGLE/DOUBLE] stainless steel sink.`;
+  desc += `\n\n`;
+  if (electrical) {
+    desc += `The electrical system is ${electrical}. `;
+  } else {
+    desc += `The electrical system is [12V DC / 120V AC] with [XX] amp shore power service. `;
+  }
+  desc += electronicsDesc || `Navigation and communication equipment includes [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
+  desc += '\n\n';
+  desc += safetyDesc || `Safety equipment includes [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
+  desc += `\n\n`;
+  desc += `The vessel is in [GOOD/FAIR/POOR] overall cosmetic condition and appears to have been [WELL/REASONABLY/POORLY] maintained. [ANY NOTABLE MODIFICATIONS, DAMAGE HISTORY, OR OBSERVATIONS].`;
+
+  // Confirm before overwriting
+  if (survey.vesselDescription && survey.vesselDescription.trim()) {
+    const yes = await showConfirm('This will regenerate the vessel description using current survey data. The existing description will be replaced. Continue?', 'Regenerate', 'Cancel');
+    if (!yes) return;
+  }
+
+  survey.vesselDescription = desc;
+  await saveSurvey(survey);
+  showToast('Description regenerated with latest survey data');
+}
+
 // Apply the suggested valuation to the form fields
 function applyValuationSuggestion(low, high, modelName) {
   const lowEl = document.getElementById('valuationLow');
@@ -4833,6 +4991,7 @@ function renderInspection(survey) {
         <div class="header-title">${esc(survey.vesselName)}</div>
         <div class="header-subtitle">Inspection</div>
       </div>
+      <button onclick="regenerateDescriptionFromInspection()" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;font-size:11px;padding:4px 8px;border-radius:6px;cursor:pointer;">✨ Desc</button>
       <button onclick="editSurveyDetails('${survey.id}')" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">✏️ Edit Intro</button>
       <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;margin-left:6px;" title="Sync status"></div>
     </div>
@@ -6504,11 +6663,20 @@ async function confirmPhotoPreview(fieldKey, label) {
     // Store the photo ID on the survey object
     const survey = await getSurvey(currentSurveyId);
     if (survey) {
-      // Delete old photo if replacing
-      if (survey[fieldKey]) {
-        try { await deletePhoto(survey[fieldKey]); } catch(e) {}
+      if (MULTI_DOC_PHOTO_FIELDS.has(fieldKey)) {
+        // Multi-photo field — append to array
+        if (!Array.isArray(survey[fieldKey])) {
+          // Migrate old single value to array
+          survey[fieldKey] = survey[fieldKey] ? [survey[fieldKey]] : [];
+        }
+        survey[fieldKey].push(photoId);
+      } else {
+        // Single-photo field — replace (delete old)
+        if (survey[fieldKey]) {
+          try { await deletePhoto(survey[fieldKey]); } catch(e) {}
+        }
+        survey[fieldKey] = photoId;
       }
-      survey[fieldKey] = photoId;
       await saveSurvey(survey);
     }
   } else {
@@ -6530,6 +6698,18 @@ async function confirmPhotoPreview(fieldKey, label) {
 // Remove a documentation photo and restore camera button
 async function removeDocPhoto(fieldKey) {
   const survey = await getSurvey(currentSurveyId);
+  if (MULTI_DOC_PHOTO_FIELDS.has(fieldKey)) {
+    // Multi-photo: delete all photos in array
+    let ids = survey[fieldKey];
+    if (!Array.isArray(ids)) ids = ids ? [ids] : [];
+    for (const id of ids) {
+      try { await deletePhoto(id); } catch(e) {}
+    }
+    survey[fieldKey] = [];
+    await saveSurvey(survey);
+    await loadMultiDocPhotoPreview(fieldKey);
+    return;
+  }
   if (survey[fieldKey]) {
     try { await deletePhoto(survey[fieldKey]); } catch(e) {}
     delete survey[fieldKey];
@@ -6552,6 +6732,11 @@ async function removeDocPhoto(fieldKey) {
 
 // Update the preview thumbnail for a documentation photo — replaces camera button inline
 function updateDocPhotoPreview(fieldKey, dataUrl) {
+  if (MULTI_DOC_PHOTO_FIELDS.has(fieldKey)) {
+    // Multi-photo: reload the full gallery from survey data
+    loadMultiDocPhotoPreview(fieldKey);
+    return;
+  }
   const photoHtml = `
     <div style="position:relative;display:inline-block;">
       <img src="${dataUrl}" style="max-width:200px;max-height:150px;border:2px solid #16a34a;border-radius:6px;cursor:pointer;"
@@ -6632,6 +6817,12 @@ function deleteDocPhoto(fieldKey) {
   });
 }
 
+// Fields that support multiple photos (engine/transmission)
+const MULTI_DOC_PHOTO_FIELDS = new Set([
+  'enginePhoto', 'enginePlatePhoto', 'engine2Photo', 'engine2PlatePhoto',
+  'transmissionPhoto', 'transmissionPlatePhoto', 'transmission2Photo', 'transmission2PlatePhoto'
+]);
+
 // Map of fieldKey → display label for all doc photo fields
 const PHOTO_FIELD_LABELS = {
   'enginePhoto': 'Engine',
@@ -6666,12 +6857,93 @@ function getDocPhotoButtonHTML(fieldKey, label) {
 async function loadDocPhotoPreview(fieldKey) {
   if (!currentSurveyId) return;
   const survey = await getSurvey(currentSurveyId);
-  if (survey && survey[fieldKey]) {
+  if (!survey || !survey[fieldKey]) return;
+
+  if (MULTI_DOC_PHOTO_FIELDS.has(fieldKey)) {
+    await loadMultiDocPhotoPreview(fieldKey);
+  } else {
     const photo = await getPhotoById(survey[fieldKey]);
     if (photo && photo.dataUrl) {
       updateDocPhotoPreview(fieldKey, photo.dataUrl);
     }
   }
+}
+
+// Load and render a multi-photo gallery for engine/transmission fields
+async function loadMultiDocPhotoPreview(fieldKey) {
+  if (!currentSurveyId) return;
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+
+  // Normalise: old single value → array
+  let ids = survey[fieldKey];
+  if (!ids) ids = [];
+  if (!Array.isArray(ids)) ids = [ids];
+
+  const label = PHOTO_FIELD_LABELS[fieldKey] || fieldKey;
+  let galleryHtml = '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;">';
+
+  for (let i = 0; i < ids.length; i++) {
+    const photo = await getPhotoById(ids[i]);
+    if (!photo || !photo.dataUrl) continue;
+    galleryHtml += `
+      <div style="position:relative;display:inline-block;text-align:center;">
+        <img src="${photo.dataUrl}" style="max-width:120px;max-height:90px;border:2px solid #16a34a;border-radius:6px;cursor:pointer;"
+             onclick="viewMultiDocPhotoFull('${fieldKey}', ${i})" />
+        <div style="display:flex;gap:3px;justify-content:center;margin-top:3px;">
+          <button class="btn-secondary" style="font-size:10px;padding:2px 6px;color:#dc2626;border-color:#fca5a5;" onclick="deleteMultiDocPhoto('${fieldKey}', ${i})">✕</button>
+        </div>
+      </div>`;
+  }
+
+  // Always show an add-more button
+  galleryHtml += `
+    <div style="display:inline-block;text-align:center;">
+      <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:8px 12px;min-height:60px;">
+        📷 Add
+        <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('${fieldKey}', '${label}', event)" />
+      </label>
+    </div>`;
+
+  galleryHtml += '</div>';
+  if (ids.length > 0) {
+    galleryHtml += `<div style="font-size:10px;color:#16a34a;font-weight:600;margin-top:2px;">✓ ${ids.length} photo${ids.length > 1 ? 's' : ''}</div>`;
+  }
+
+  const wrapper = document.querySelector(`[data-photo-field="${fieldKey}"]`);
+  if (wrapper) wrapper.innerHTML = galleryHtml;
+}
+
+// View a full-size multi-doc photo
+function viewMultiDocPhotoFull(fieldKey, index) {
+  getSurvey(currentSurveyId).then(async survey => {
+    let ids = survey[fieldKey];
+    if (!Array.isArray(ids)) ids = [ids];
+    const photo = await getPhotoById(ids[index]);
+    if (photo && photo.dataUrl) {
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+      modal.onclick = () => modal.remove();
+      modal.innerHTML = `<img src="${photo.dataUrl}" style="max-width:95vw;max-height:90vh;border-radius:8px;" />`;
+      document.body.appendChild(modal);
+    }
+  });
+}
+
+// Delete one photo from a multi-doc photo array
+async function deleteMultiDocPhoto(fieldKey, index) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  let ids = survey[fieldKey];
+  if (!Array.isArray(ids)) ids = ids ? [ids] : [];
+  if (index < 0 || index >= ids.length) return;
+  const photoId = ids[index];
+  try { await deletePhoto(photoId); } catch(e) {}
+  ids.splice(index, 1);
+  survey[fieldKey] = ids;
+  await saveSurvey(survey);
+  await loadMultiDocPhotoPreview(fieldKey);
+  showToast('Photo deleted');
 }
 
 // Build compact card HTML for a single item (SafetyCulture-style)
@@ -8284,47 +8556,36 @@ async function generateReport() {
     const p = await getPhotoById(survey.coverPhoto);
     if (p && p.dataUrl) coverPhotoDataUrl = p.dataUrl;
   }
-  let enginePhotoDataUrl = '';
-  if (survey.enginePhoto) {
-    const p = await getPhotoById(survey.enginePhoto);
-    if (p && p.dataUrl) enginePhotoDataUrl = p.dataUrl;
-  }
-  let enginePlatePhotoDataUrl = '';
-  if (survey.enginePlatePhoto) {
-    const p = await getPhotoById(survey.enginePlatePhoto);
-    if (p && p.dataUrl) enginePlatePhotoDataUrl = p.dataUrl;
-  }
-  let transmissionPhotoDataUrl = '';
-  if (survey.transmissionPhoto) {
-    const p = await getPhotoById(survey.transmissionPhoto);
-    if (p && p.dataUrl) transmissionPhotoDataUrl = p.dataUrl;
-  }
-  let transmissionPlatePhotoDataUrl = '';
-  if (survey.transmissionPlatePhoto) {
-    const p = await getPhotoById(survey.transmissionPlatePhoto);
-    if (p && p.dataUrl) transmissionPlatePhotoDataUrl = p.dataUrl;
+  // Helper to load all photos from a multi-doc field (array or single ID)
+  async function loadDocPhotos(fieldValue) {
+    if (!fieldValue) return [];
+    const ids = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
+    const urls = [];
+    for (const id of ids) {
+      const p = await getPhotoById(id);
+      if (p && p.dataUrl) urls.push(p.dataUrl);
+    }
+    return urls;
   }
 
-  // Engine 2 photos
-  let engine2PhotoDataUrl = '';
-  if (survey.engine2Photo) {
-    const p = await getPhotoById(survey.engine2Photo);
-    if (p && p.dataUrl) engine2PhotoDataUrl = p.dataUrl;
-  }
-  let engine2PlatePhotoDataUrl = '';
-  if (survey.engine2PlatePhoto) {
-    const p = await getPhotoById(survey.engine2PlatePhoto);
-    if (p && p.dataUrl) engine2PlatePhotoDataUrl = p.dataUrl;
-  }
-  let transmission2PhotoDataUrl = '';
-  if (survey.transmission2Photo) {
-    const p = await getPhotoById(survey.transmission2Photo);
-    if (p && p.dataUrl) transmission2PhotoDataUrl = p.dataUrl;
-  }
-  let transmission2PlatePhotoDataUrl = '';
-  if (survey.transmission2PlatePhoto) {
-    const p = await getPhotoById(survey.transmission2PlatePhoto);
-    if (p && p.dataUrl) transmission2PlatePhotoDataUrl = p.dataUrl;
+  const enginePhotos = await loadDocPhotos(survey.enginePhoto);
+  const enginePlatePhotos = await loadDocPhotos(survey.enginePlatePhoto);
+  const transmissionPhotos = await loadDocPhotos(survey.transmissionPhoto);
+  const transmissionPlatePhotos = await loadDocPhotos(survey.transmissionPlatePhoto);
+  const engine2Photos = await loadDocPhotos(survey.engine2Photo);
+  const engine2PlatePhotos = await loadDocPhotos(survey.engine2PlatePhoto);
+  const transmission2Photos = await loadDocPhotos(survey.transmission2Photo);
+  const transmission2PlatePhotos = await loadDocPhotos(survey.transmission2PlatePhoto);
+
+  // Backward compat: single dataUrl variables for report template
+  const enginePhotoDataUrl = enginePhotos[0] || '';
+  const enginePlatePhotoDataUrl = enginePlatePhotos[0] || '';
+  const transmissionPhotoDataUrl = transmissionPhotos[0] || '';
+  const transmissionPlatePhotoDataUrl = transmissionPlatePhotos[0] || '';
+  const engine2PhotoDataUrl = engine2Photos[0] || '';
+  const engine2PlatePhotoDataUrl = engine2PlatePhotos[0] || '';
+  const transmission2PhotoDataUrl = transmission2Photos[0] || '';
+  const transmission2PlatePhotoDataUrl = transmission2PlatePhotos[0] || '';
   }
 
   // ── Pre-fetch all per-item photos ─────────────────────────────────────
@@ -8699,22 +8960,22 @@ ${survey.locationLat && survey.locationLon ? `
     ${survey.engineHP ? `<tr><td><strong>Power Rating</strong></td><td>${esc(survey.engineHP)}</td></tr>` : ''}
     ${survey.engineHours ? `<tr><td><strong>Engine Hours</strong></td><td>${esc(survey.engineHours)}</td></tr>` : ''}
     ${survey.fuelType ? `<tr><td><strong>Fuel Type</strong></td><td>${esc(survey.fuelType)}</td></tr>` : ''}
-    ${enginePhotoDataUrl || enginePlatePhotoDataUrl ? `<tr><td><strong>Photos</strong></td><td style="display:flex;gap:12px;flex-wrap:wrap;">${enginePhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Engine</div><img src="' + enginePhotoDataUrl + '" alt="Engine" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}${enginePlatePhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Data Plate</div><img src="' + enginePlatePhotoDataUrl + '" alt="Engine Data Plate" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}</td></tr>` : ''}
+    ${enginePhotos.length || enginePlatePhotos.length ? `<tr><td><strong>Photos</strong></td><td style="display:flex;gap:12px;flex-wrap:wrap;">${enginePhotos.map((u, i) => '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Engine' + (enginePhotos.length > 1 ? ' ' + (i+1) : '') + '</div><img src="' + u + '" alt="Engine" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>').join('')}${enginePlatePhotos.map((u, i) => '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Data Plate' + (enginePlatePhotos.length > 1 ? ' ' + (i+1) : '') + '</div><img src="' + u + '" alt="Data Plate" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>').join('')}</td></tr>` : ''}
     ${survey.engine2Make ? `<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Engine 2 (Starboard)</td></tr>` : ''}
     ${survey.engine2Make ? `<tr><td><strong>Make / Model</strong></td><td>${esc(survey.engine2Make)} ${esc(survey.engine2Model || '')}</td></tr>` : ''}
     ${survey.engine2Serial ? `<tr><td><strong>Serial No.</strong></td><td>${esc(survey.engine2Serial)}</td></tr>` : ''}
     ${survey.engine2HP ? `<tr><td><strong>Power Rating</strong></td><td>${esc(survey.engine2HP)}</td></tr>` : ''}
     ${survey.engine2Hours ? `<tr><td><strong>Engine Hours</strong></td><td>${esc(survey.engine2Hours)}</td></tr>` : ''}
     ${survey.fuelType2 ? `<tr><td><strong>Fuel Type</strong></td><td>${esc(survey.fuelType2)}</td></tr>` : ''}
-    ${engine2PhotoDataUrl || engine2PlatePhotoDataUrl ? `<tr><td><strong>Photos</strong></td><td style="display:flex;gap:12px;flex-wrap:wrap;">${engine2PhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Engine</div><img src="' + engine2PhotoDataUrl + '" alt="Engine 2" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}${engine2PlatePhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Data Plate</div><img src="' + engine2PlatePhotoDataUrl + '" alt="Engine 2 Data Plate" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}</td></tr>` : ''}
+    ${engine2Photos.length || engine2PlatePhotos.length ? `<tr><td><strong>Photos</strong></td><td style="display:flex;gap:12px;flex-wrap:wrap;">${engine2Photos.map((u, i) => '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Engine' + (engine2Photos.length > 1 ? ' ' + (i+1) : '') + '</div><img src="' + u + '" alt="Engine 2" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>').join('')}${engine2PlatePhotos.map((u, i) => '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Data Plate' + (engine2PlatePhotos.length > 1 ? ' ' + (i+1) : '') + '</div><img src="' + u + '" alt="Data Plate" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>').join('')}</td></tr>` : ''}
     ${survey.transmissionMakeModel ? `<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">${survey.transmission2MakeModel ? 'Transmission 1 (Port)' : 'Transmission'}</td></tr>` : ''}
     ${survey.transmissionMakeModel ? `<tr><td><strong>Make / Model</strong></td><td>${esc(survey.transmissionMakeModel)}</td></tr>` : ''}
     ${survey.transmissionSerial ? `<tr><td><strong>Serial No.</strong></td><td>${esc(survey.transmissionSerial)}</td></tr>` : ''}
-    ${transmissionPhotoDataUrl || transmissionPlatePhotoDataUrl ? `<tr><td><strong>Photos</strong></td><td style="display:flex;gap:12px;flex-wrap:wrap;">${transmissionPhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Transmission</div><img src="' + transmissionPhotoDataUrl + '" alt="Transmission" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}${transmissionPlatePhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Serial Plate</div><img src="' + transmissionPlatePhotoDataUrl + '" alt="Transmission Serial Plate" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}</td></tr>` : ''}
+    ${transmissionPhotos.length || transmissionPlatePhotos.length ? `<tr><td><strong>Photos</strong></td><td style="display:flex;gap:12px;flex-wrap:wrap;">${transmissionPhotos.map((u, i) => '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Transmission' + (transmissionPhotos.length > 1 ? ' ' + (i+1) : '') + '</div><img src="' + u + '" alt="Transmission" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>').join('')}${transmissionPlatePhotos.map((u, i) => '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Serial Plate' + (transmissionPlatePhotos.length > 1 ? ' ' + (i+1) : '') + '</div><img src="' + u + '" alt="Serial Plate" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>').join('')}</td></tr>` : ''}
     ${survey.transmission2MakeModel ? `<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Transmission 2 (Starboard)</td></tr>` : ''}
     ${survey.transmission2MakeModel ? `<tr><td><strong>Make / Model</strong></td><td>${esc(survey.transmission2MakeModel)}</td></tr>` : ''}
     ${survey.transmission2Serial ? `<tr><td><strong>Serial No.</strong></td><td>${esc(survey.transmission2Serial)}</td></tr>` : ''}
-    ${transmission2PhotoDataUrl || transmission2PlatePhotoDataUrl ? `<tr><td><strong>Photos</strong></td><td style="display:flex;gap:12px;flex-wrap:wrap;">${transmission2PhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Transmission</div><img src="' + transmission2PhotoDataUrl + '" alt="Transmission 2" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}${transmission2PlatePhotoDataUrl ? '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Serial Plate</div><img src="' + transmission2PlatePhotoDataUrl + '" alt="Transmission 2 Serial Plate" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>' : ''}</td></tr>` : ''}
+    ${transmission2Photos.length || transmission2PlatePhotos.length ? `<tr><td><strong>Photos</strong></td><td style="display:flex;gap:12px;flex-wrap:wrap;">${transmission2Photos.map((u, i) => '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Transmission' + (transmission2Photos.length > 1 ? ' ' + (i+1) : '') + '</div><img src="' + u + '" alt="Transmission 2" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>').join('')}${transmission2PlatePhotos.map((u, i) => '<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Serial Plate' + (transmission2PlatePhotos.length > 1 ? ' ' + (i+1) : '') + '</div><img src="' + u + '" alt="Serial Plate" style="max-width:350px;max-height:280px;border:1px solid #ccc;border-radius:4px;" /></div>').join('')}</td></tr>` : ''}
   </table>
 
   <!-- ═══ SURVEY CONDITIONS ═══ -->
@@ -9686,6 +9947,34 @@ async function initApp() {
       console.warn('Migration (mechanic disclaimer) failed:', migErr);
     }
 
+    // One-time migration: convert single engine/transmission photo IDs to arrays
+    try {
+      const migKeyPhotos = 'migration_multi_engine_photos_v1';
+      if (!localStorage.getItem(migKeyPhotos)) {
+        const allSurveys = await getAllSurveys();
+        const photoFields = ['enginePhoto', 'enginePlatePhoto', 'engine2Photo', 'engine2PlatePhoto',
+          'transmissionPhoto', 'transmissionPlatePhoto', 'transmission2Photo', 'transmission2PlatePhoto'];
+        let migrated = 0;
+        for (const survey of allSurveys) {
+          let changed = false;
+          for (const field of photoFields) {
+            if (survey[field] && !Array.isArray(survey[field])) {
+              survey[field] = [survey[field]];
+              changed = true;
+            }
+          }
+          if (changed) {
+            await saveSurvey(survey);
+            migrated++;
+          }
+        }
+        localStorage.setItem(migKeyPhotos, Date.now().toString());
+        if (migrated > 0) console.log(`Migrated engine photos to arrays in ${migrated} survey(s)`);
+      }
+    } catch (migErr) {
+      console.warn('Migration (multi engine photos) failed:', migErr);
+    }
+
     renderHome();
 
     // Initialize Firebase real-time sync (non-blocking)
@@ -9970,7 +10259,14 @@ const FirebaseSync = (() => {
      'enginePhoto', 'enginePlatePhoto', 'transmissionPhoto', 'transmissionPlatePhoto',
      'engine2Photo', 'engine2PlatePhoto', 'transmission2Photo', 'transmission2PlatePhoto',
      'fourCornerPortBow', 'fourCornerStbdBow', 'fourCornerPortStern', 'fourCornerStbdStern'
-    ].forEach(key => { if (survey[key]) photoIds.add(survey[key]); });
+    ].forEach(key => {
+      if (!survey[key]) return;
+      if (Array.isArray(survey[key])) {
+        survey[key].forEach(id => photoIds.add(id));
+      } else {
+        photoIds.add(survey[key]);
+      }
+    });
     // Item photos
     if (survey.items) {
       Object.values(survey.items).forEach(item => {
