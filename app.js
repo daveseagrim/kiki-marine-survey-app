@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v173';
+const APP_VERSION = 'v174';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -5692,7 +5692,7 @@ async function captureSafetyPhoto(idx) {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
-  input.capture = 'environment';
+  // No capture attribute — allows camera roll, files, or camera
   input.onchange = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) { window._safetyPhotoBusy = false; return; }
@@ -5734,7 +5734,7 @@ async function captureSafetyPhoto(idx) {
   setTimeout(() => { window._safetyPhotoBusy = false; }, 60000);
 }
 
-// Load thumbnails for a safety equipment item — with delete buttons
+// Load thumbnails for a safety equipment item — with view/delete buttons
 async function loadSafetyThumbnails(idx, photoIds) {
   const container = document.getElementById(`safety-thumbs-${idx}`);
   if (!container || !photoIds || photoIds.length === 0) {
@@ -5745,9 +5745,9 @@ async function loadSafetyThumbnails(idx, photoIds) {
   for (const pid of photoIds) {
     const photo = await getPhotoById(pid);
     if (photo) {
-      thumbsHtml += `<div style="position:relative;display:inline-block;">
-        <img src="${photo.dataUrl}" style="width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid #ddd;cursor:pointer;" onclick="viewSafetyPhoto('${pid}')" />
-        <button onclick="deleteSafetyPhoto(${idx}, '${pid}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;line-height:20px;text-align:center;cursor:pointer;padding:0;">✕</button>
+      thumbsHtml += `<div style="display:inline-flex;flex-direction:column;align-items:center;gap:3px;margin-right:8px;margin-bottom:6px;">
+        <img src="${photo.dataUrl}" style="width:56px;height:56px;object-fit:cover;border-radius:6px;border:2px solid #2563eb;cursor:pointer;" onclick="viewSafetyPhoto('${pid}')" />
+        <button onclick="deleteSafetyPhoto(${idx}, '${pid}')" style="background:#dc2626;color:white;border:none;border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer;font-weight:500;">Delete</button>
       </div>`;
     }
   }
@@ -5769,17 +5769,13 @@ function viewSafetyPhoto(photoId) {
 
 // Delete a single safety equipment photo
 async function deleteSafetyPhoto(idx, photoId) {
-  if (!confirm('Delete this photo?')) return;
   const survey = await getSurvey(currentSurveyId);
   if (!survey || !survey.safetyEquipment[idx]) return;
   // Remove from photos array
   survey.safetyEquipment[idx].photos = (survey.safetyEquipment[idx].photos || []).filter(p => p !== photoId);
   await saveSurvey(survey);
   // Delete photo from IndexedDB
-  try {
-    const tx = db.transaction('photos', 'readwrite');
-    tx.objectStore('photos').delete(photoId);
-  } catch(e) { /* ignore */ }
+  try { await deletePhoto(photoId); } catch(e) { /* ignore */ }
   // Refresh thumbnails
   loadSafetyThumbnails(idx, survey.safetyEquipment[idx].photos);
   showToast('Photo deleted');
@@ -5803,7 +5799,7 @@ async function addInstrumentByPhoto() {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
-  input.capture = 'environment';
+  // No capture attribute — allows camera roll, files, or camera
   input.onchange = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
@@ -5915,56 +5911,58 @@ async function updateInstrumentField(idx, field, value) {
 
 // Capture additional photo for an existing instrument
 async function captureInstrumentPhoto(idx) {
+  if (window._instrPhotoBusy) return;
+  window._instrPhotoBusy = true;
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
-  input.capture = 'environment';
-  input.multiple = true;
+  // No capture attribute — allows camera roll, files, or camera
   input.onchange = async (e) => {
     const files = Array.from(e.target.files);
-    if (files.length === 0) return;
+    if (files.length === 0) { window._instrPhotoBusy = false; return; }
 
+    showToast('Saving photo...');
     const survey = await getSurvey(currentSurveyId);
-    if (!survey || !survey.instrumentsElectronics || !survey.instrumentsElectronics[idx]) return;
+    if (!survey || !survey.instrumentsElectronics || !survey.instrumentsElectronics[idx]) { window._instrPhotoBusy = false; return; }
 
     if (!survey.instrumentsElectronics[idx].photos) {
       survey.instrumentsElectronics[idx].photos = [];
     }
 
-    for (const file of files) {
-      await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = async (re) => {
-          const stampedDataUrl = await addDateStampToPhoto(re.target.result);
-          const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-          const photo = {
-            id: photoId,
-            surveyId: currentSurveyId,
-            itemLabel: `instrument_${idx}`,
-            dataUrl: stampedDataUrl,
-            annotated: false,
-            createdAt: new Date().toISOString()
-          };
-          await savePhoto(photo);
-          survey.instrumentsElectronics[idx].photos.push(photoId);
-          resolve();
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    await saveSurvey(survey);
-    showToast(`${files.length} photo${files.length > 1 ? 's' : ''} saved`);
-    loadInstrumentThumbnails(idx, survey.instrumentsElectronics[idx].photos);
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = async (re) => {
+      const stampedDataUrl = await addDateStampToPhoto(re.target.result);
+      const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+      const photo = {
+        id: photoId,
+        surveyId: currentSurveyId,
+        itemLabel: `instrument_${idx}`,
+        dataUrl: stampedDataUrl,
+        annotated: false,
+        createdAt: new Date().toISOString()
+      };
+      await savePhoto(photo);
+      survey.instrumentsElectronics[idx].photos.push(photoId);
+      await saveSurvey(survey);
+      showToast('Photo saved');
+      loadInstrumentThumbnails(idx, survey.instrumentsElectronics[idx].photos);
+      window._instrPhotoBusy = false;
+    };
+    reader.readAsDataURL(file);
   };
   setCameraActive(true);
   input.click();
+  setTimeout(() => { window._instrPhotoBusy = false; }, 60000);
 }
 
 // AI identification using Google Gemini API
 async function identifyInstrument(idx) {
   const survey = await getSurvey(currentSurveyId);
-  if (!survey || !survey.instrumentsElectronics || !survey.instrumentsElectronics[idx]) return;
+  if (!survey || !survey.instrumentsElectronics || !survey.instrumentsElectronics[idx]) {
+    alert('DEBUG: Survey or instrument not found at index ' + idx);
+    return;
+  }
 
   const item = survey.instrumentsElectronics[idx];
   if (!item.photos || item.photos.length === 0) {
@@ -5988,53 +5986,58 @@ async function identifyInstrument(idx) {
   // Get the first photo's data URL and resize for API
   const photo = await getPhotoById(item.photos[0]);
   if (!photo || !photo.dataUrl) {
-    showToast('Could not load photo for identification');
+    alert('DEBUG: Could not load photo. ID=' + item.photos[0] + ', photo=' + (photo ? 'exists but no dataUrl' : 'null'));
     return;
   }
 
   showToast('Identifying instrument...');
+  const debugKey = apiKey.substring(0, 8) + '...';
 
   try {
     // Resize image to max 1024px to keep API request small
-    const resizedDataUrl = await new Promise((resolve) => {
+    const resizedDataUrl = await new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
-        const maxDim = 1024;
-        let w = img.width, h = img.height;
-        if (w > maxDim || h > maxDim) {
-          if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        try {
+          const maxDim = 1024;
+          let w = img.width, h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+            else { w = Math.round(w * maxDim / h); h = maxDim; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.8));
+        } catch (canvasErr) {
+          reject(new Error('Canvas resize failed: ' + canvasErr.message));
         }
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', 0.8));
       };
-      img.onerror = () => resolve(photo.dataUrl);
+      img.onerror = () => reject(new Error('Could not load image for resizing'));
       img.src = photo.dataUrl;
     });
 
     // Extract base64 data from data URL
     const base64Match = resizedDataUrl.match(/^data:image\/(.*?);base64,(.*)$/);
-    if (!base64Match) throw new Error('Invalid photo format');
+    if (!base64Match) throw new Error('Regex failed on resized image. Starts with: ' + resizedDataUrl.substring(0, 40));
     const mimeType = `image/${base64Match[1]}`;
     const base64Data = base64Match[2];
+    const payloadSizeKB = Math.round(base64Data.length / 1024);
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [
-            {
-              inlineData: {
-                mimeType: mimeType,
-                data: base64Data
-              }
-            },
-            {
-              text: `You are a marine surveyor's assistant. Identify this marine instrument or electronic device from the photo.
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+    const requestBody = {
+      contents: [{
+        parts: [
+          {
+            inlineData: {
+              mimeType: mimeType,
+              data: base64Data
+            }
+          },
+          {
+            text: `You are a marine surveyor's assistant. Identify this marine instrument or electronic device from the photo.
 
 Return ONLY valid JSON with these fields (use empty string if unknown):
 {
@@ -6046,23 +6049,35 @@ Return ONLY valid JSON with these fields (use empty string if unknown):
 }
 
 If you cannot identify the device, still provide your best guess for the name field. Do not include any text outside the JSON object.`
-            }
-          ]
-        }],
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 500
-        }
-      })
+          }
+        ]
+      }],
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 500
+      }
+    };
+
+    alert(`DEBUG: About to call Gemini API.\nKey: ${debugKey}\nImage: ${mimeType}, ${payloadSizeKB}KB base64\nOriginal photo size: ${Math.round(photo.dataUrl.length/1024)}KB`);
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(`API error ${response.status}: ${errText.substring(0, 200)}`);
+      throw new Error(`API ${response.status}: ${errText.substring(0, 500)}`);
     }
 
     const result = await response.json();
     const text = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    if (!text) {
+      alert('DEBUG: API returned OK but no text.\nFull response: ' + JSON.stringify(result).substring(0, 500));
+      return;
+    }
 
     // Parse JSON from response (handle markdown code blocks)
     let jsonStr = text;
@@ -6088,15 +6103,11 @@ If you cannot identify the device, still provide your best guess for the name fi
 
   } catch (err) {
     console.error('AI identification error:', err);
-    if (err.message.includes('API error 400')) {
-      showToast('AI could not process the image. Try a clearer photo.');
-    } else if (err.message.includes('API error 403') || err.message.includes('API error 401')) {
+    alert('IDENTIFY ERROR:\n\n' + err.message + '\n\nStack: ' + (err.stack || 'none').substring(0, 300));
+
+    if (err.message.includes('API 401') || err.message.includes('API 403')) {
       localStorage.removeItem('geminiApiKey');
-      showToast('Invalid API key — tap Identify to enter a new one');
-    } else if (err.name === 'SyntaxError') {
-      showToast('AI response was not in expected format. Try again.');
-    } else {
-      alert('Identification error: ' + err.message);
+      showToast('Invalid API key removed — tap Identify to enter a new one');
     }
   }
 }
@@ -6116,7 +6127,7 @@ function updateGeminiApiKey() {
   }
 }
 
-// Load thumbnails for an instrument item
+// Load thumbnails for an instrument item — with view/delete buttons
 async function loadInstrumentThumbnails(idx, photoIds) {
   const container = document.getElementById(`instrument-thumbs-${idx}`);
   if (!container || !photoIds || photoIds.length === 0) {
@@ -6128,9 +6139,9 @@ async function loadInstrumentThumbnails(idx, photoIds) {
     const pid = photoIds[i];
     const photo = await getPhotoById(pid);
     if (photo) {
-      thumbsHtml += `<div style="position:relative;display:inline-block;">
-        <img src="${photo.dataUrl}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:2px solid #7c3aed;cursor:pointer;" onclick="viewInstrumentPhoto('${pid}')" />
-        <button onclick="deleteInstrumentPhoto(${idx}, '${pid}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;line-height:20px;text-align:center;cursor:pointer;padding:0;">✕</button>
+      thumbsHtml += `<div style="display:inline-flex;flex-direction:column;align-items:center;gap:3px;margin-right:8px;margin-bottom:6px;">
+        <img src="${photo.dataUrl}" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:2px solid #7c3aed;cursor:pointer;" onclick="viewInstrumentPhoto('${pid}')" />
+        <button onclick="deleteInstrumentPhoto(${idx}, '${pid}')" style="background:#dc2626;color:white;border:none;border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer;font-weight:500;">Delete</button>
       </div>`;
     }
   }
@@ -6328,7 +6339,7 @@ async function capturePhoto(itemLabel, event) {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.capture = 'environment';
+    // No capture attribute — allows camera roll, files, or camera
     input.multiple = true;
     input.onchange = (e) => capturePhoto(itemLabel, e);
     // Mark camera active — persisted to sessionStorage so it survives
