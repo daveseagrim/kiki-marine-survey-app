@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v174';
+const APP_VERSION = 'v175';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -5404,13 +5404,21 @@ function renderInspection(survey) {
   });
 
   html += `
-        <div style="margin-top:12px;display:flex;gap:8px;">
-          <button onclick="addInstrumentByPhoto()" class="btn-primary" style="flex:1;padding:10px;font-size:14px;background:#7c3aed;">
-            📷 Add Instrument (Photo)
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+          <button onclick="rapidCaptureInstruments()" class="btn-primary" style="padding:12px;font-size:15px;background:#7c3aed;border-radius:8px;">
+            📷 Rapid Capture — keep snapping until done
           </button>
-          <button onclick="addInstrumentManual()" class="btn-secondary" style="padding:10px;font-size:14px;">
-            ✏️ Add Manually
-          </button>
+          ${ieItems.filter(e => e.photos && e.photos.length > 0 && !e.aiIdentified).length > 0 ? `<button onclick="identifyAllInstruments()" style="padding:10px;font-size:14px;background:#f59e0b;color:white;border:none;border-radius:8px;cursor:pointer;width:100%;">
+            🤖 Identify All Unidentified (${ieItems.filter(e => e.photos && e.photos.length > 0 && !e.aiIdentified).length})
+          </button>` : ''}
+          <div style="display:flex;gap:8px;">
+            <button onclick="addInstrumentByPhoto()" class="btn-secondary" style="flex:1;padding:10px;font-size:13px;">
+              📷 Add Single
+            </button>
+            <button onclick="addInstrumentManual()" class="btn-secondary" style="flex:1;padding:10px;font-size:13px;">
+              ✏️ Add Manually
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -5794,6 +5802,75 @@ async function loadAllSafetyThumbnails() {
 
 // ── Instruments & Electronics Functions ─────────────────────────────────
 
+// Rapid capture — camera keeps reopening until user cancels
+function rapidCaptureInstruments() {
+  let count = 0;
+
+  function takeNext() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.onchange = async (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) {
+        // User cancelled — done
+        if (count > 0) {
+          showToast(`${count} instrument${count > 1 ? 's' : ''} captured — review below`);
+          const survey = await getSurvey(currentSurveyId);
+          if (survey) renderInspection(survey);
+        }
+        return;
+      }
+
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onload = async (re) => {
+        const stampedDataUrl = await addDateStampToPhoto(re.target.result);
+        const survey = await getSurvey(currentSurveyId);
+        if (!survey) return;
+        if (!survey.instrumentsElectronics) survey.instrumentsElectronics = [];
+
+        const idx = survey.instrumentsElectronics.length;
+        const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+        const photo = {
+          id: photoId,
+          surveyId: currentSurveyId,
+          itemLabel: `instrument_${idx}`,
+          dataUrl: stampedDataUrl,
+          annotated: false,
+          createdAt: new Date().toISOString()
+        };
+        await savePhoto(photo);
+
+        survey.instrumentsElectronics.push({
+          name: '',
+          make: '',
+          model: '',
+          year: '',
+          working: null,
+          notes: '',
+          photos: [photoId],
+          aiIdentified: false,
+          aiDetails: ''
+        });
+        await saveSurvey(survey);
+        count++;
+        showToast(`Photo ${count} saved — take next or cancel to finish`);
+
+        // Immediately reopen camera for next shot
+        setTimeout(() => takeNext(), 300);
+      };
+      reader.readAsDataURL(file);
+    };
+    setCameraActive(true);
+    input.click();
+  }
+
+  showToast('Rapid capture: take photos, cancel when done');
+  takeNext();
+}
+
 // Add instrument by taking a photo first
 async function addInstrumentByPhoto() {
   const input = document.createElement('input');
@@ -6110,6 +6187,44 @@ If you cannot identify the device, still provide your best guess for the name fi
       showToast('Invalid API key removed — tap Identify to enter a new one');
     }
   }
+}
+
+// Update Gemini API key (called from settings or prompt)
+// Identify all unidentified instruments sequentially
+async function identifyAllInstruments() {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !survey.instrumentsElectronics) return;
+
+  const unidentified = [];
+  survey.instrumentsElectronics.forEach((item, idx) => {
+    if (item.photos && item.photos.length > 0 && !item.aiIdentified) {
+      unidentified.push(idx);
+    }
+  });
+
+  if (unidentified.length === 0) {
+    showToast('All instruments already identified');
+    return;
+  }
+
+  showToast(`Identifying ${unidentified.length} instrument${unidentified.length > 1 ? 's' : ''}...`);
+
+  let successCount = 0;
+  for (let i = 0; i < unidentified.length; i++) {
+    showToast(`Identifying ${i + 1} of ${unidentified.length}...`);
+    try {
+      await identifyInstrument(unidentified[i]);
+      successCount++;
+    } catch (e) {
+      console.error(`Failed to identify instrument ${unidentified[i]}:`, e);
+    }
+    // Small delay between API calls to avoid rate limiting
+    if (i < unidentified.length - 1) {
+      await new Promise(r => setTimeout(r, 1500));
+    }
+  }
+
+  showToast(`Identified ${successCount} of ${unidentified.length} instruments`);
 }
 
 // Update Gemini API key (called from settings or prompt)
