@@ -3758,7 +3758,16 @@ function findBoatSpecsAll(input) {
 
   // Strip year, normalise input into words
   const stripped = input.trim().replace(/^\d{4}\s*/, '').toLowerCase().replace(/[^a-z0-9\s]/g, '');
-  const searchWords = stripped.split(/\s+/).filter(w => w.length > 1);
+  // Merge single-letter suffixes onto preceding word: "34 c" → "34c"
+  const rawWords = stripped.split(/\s+/).filter(Boolean);
+  const searchWords = [];
+  for (let i = 0; i < rawWords.length; i++) {
+    if (rawWords[i].length === 1 && searchWords.length > 0) {
+      searchWords[searchWords.length - 1] += rawWords[i];
+    } else if (rawWords[i].length > 0) {
+      searchWords.push(rawWords[i]);
+    }
+  }
   if (searchWords.length === 0) return [];
 
   // Also extract year for year-range filtering
@@ -3797,9 +3806,13 @@ function findBoatSpecsAll(input) {
         return dp[m][n];
       };
       const wordsMatch = (a, b) => {
-        if (isNumeric(a) || isNumeric(b)) {
-          return a === b;
+        if (a === b) return true;
+        if (isNumeric(a) && isNumeric(b)) {
+          return a === b;  // Both pure numbers: exact match only (avoid "38" matching "380")
         }
+        // Allow numeric prefix matching: "34" matches "34c", "34C" etc.
+        if (isNumeric(a) && b.startsWith(a) && b.length <= a.length + 2) return true;
+        if (isNumeric(b) && a.startsWith(b) && a.length <= b.length + 2) return true;
         // Exact substring match
         if (a.includes(b) || b.includes(a)) return true;
         // Typo tolerance: allow edit distance ≤ 2 for words of 4+ chars
