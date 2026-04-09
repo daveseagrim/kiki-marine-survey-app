@@ -6959,9 +6959,13 @@ function selectRating(itemLabel, categoryName, rating) {
         survey.items[itemLabel].text = '';
         survey.items[itemLabel].variantText = '';
       }
-      // Auto-apply the single most relevant standard for A and B ratings
-      const itemStandard = getStandardForItem(itemLabel, categoryName);
-      survey.items[itemLabel].standards = itemStandard ? [itemStandard] : [];
+      // Auto-apply the single most relevant standard for A and B ratings only
+      if (rating.startsWith('A') || rating.startsWith('B')) {
+        const itemStandard = getStandardForItem(itemLabel, categoryName);
+        survey.items[itemLabel].standards = itemStandard ? [itemStandard] : [];
+      } else {
+        survey.items[itemLabel].standards = [];
+      }
     }
 
     saveSurvey(survey).then(() => {
