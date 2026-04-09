@@ -2769,10 +2769,6 @@
         "name": "Electrical",
         "items": [
           {
-            "type": "media",
-            "label": "Electrical photos"
-          },
-          {
             "type": "list",
             "label": "Shore power overcurrent protection",
             "options": [

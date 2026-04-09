@@ -2247,10 +2247,6 @@
         "name": "Electrical",
         "items": [
           {
-            "type": "media",
-            "label": "Electrical photos"
-          },
-          {
             "type": "list",
             "label": "Shore power cable(s)",
             "options": [

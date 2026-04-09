@@ -5445,8 +5445,38 @@
     },
     {
       "section": "Battery selector switch, combiner, VSR",
-      "rating": "C",
+      "rating": "C - single switch",
       "text": "The battery selector switch appeared to function properly."
+    },
+    {
+      "section": "Battery selector switch, combiner, VSR",
+      "rating": "C - two switches",
+      "text": "Two battery selector switches were fitted. Both appeared to function properly and were clearly labelled."
+    },
+    {
+      "section": "Battery selector switch, combiner, VSR",
+      "rating": "C - three switches",
+      "text": "Three battery selector switches were fitted. All appeared to function properly and were clearly labelled."
+    },
+    {
+      "section": "Battery selector switch, combiner, VSR",
+      "rating": "C - multiple switches",
+      "text": "Multiple battery selector switches were fitted. All appeared to function properly and were clearly labelled."
+    },
+    {
+      "section": "Battery selector switch, combiner, VSR",
+      "rating": "C - with combiner/VSR",
+      "text": "A battery selector switch and automatic combiner (VSR) were fitted. Both appeared to function properly."
+    },
+    {
+      "section": "Battery selector switch, combiner, VSR",
+      "rating": "B - multiple switches, one issue",
+      "text": "Multiple battery selector switches were fitted. One switch showed signs of corrosion or stiff operation. Service is recommended."
+    },
+    {
+      "section": "Battery selector switch, combiner, VSR",
+      "rating": "A - multiple switches",
+      "text": "Multiple battery selector switches were fitted. One or more switches were non-functional or posed a safety hazard. Repair or replacement is required."
     },
     {
       "section": "Battery selector switch, combiner, VSR",
@@ -5780,13 +5810,23 @@
     },
     {
       "section": "Battery selector switch, combiner, VSR",
-      "rating": "A",
+      "rating": "A - single switch",
       "text": "The switch or combiner is non-functional or poses a safety hazard. Repair or replacement is required."
     },
     {
       "section": "Battery selector switch, combiner, VSR",
-      "rating": "B",
+      "rating": "B - single switch",
       "text": "The switch or combiner shows corrosion or stiff operation. Service is recommended."
+    },
+    {
+      "section": "Battery selector switch, combiner, VSR",
+      "rating": "C - two switches",
+      "text": "Two battery selector switches were fitted. Both appeared to function properly and were clearly labelled."
+    },
+    {
+      "section": "Battery selector switch, combiner, VSR",
+      "rating": "C - multiple switches",
+      "text": "Multiple battery selector switches were fitted. All appeared to function properly and were clearly labelled."
     },
     {
       "section": "Battery ventilation",

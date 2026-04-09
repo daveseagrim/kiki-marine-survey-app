@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v162';
+const APP_VERSION = 'v163';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -1887,6 +1887,9 @@ function createNewSurvey(formData) {
 
     // Safety equipment checklist (auto-generated from TP 511)
     safetyEquipment: [],
+
+    // Instruments & Electronics inventory (photo-based with AI identification)
+    instrumentsElectronics: [],
 
     // Inspection items - will be populated as user rates items
     items: {},
@@ -5324,12 +5327,101 @@ function renderInspection(survey) {
     </div>
   `;
 
+  // ── Instruments & Electronics Section ─────────────────────────────────
+  if (!survey.instrumentsElectronics) survey.instrumentsElectronics = [];
+  const ieItems = survey.instrumentsElectronics;
+  const ieTotal = ieItems.length;
+  const ieRated = ieItems.filter(e => e.working !== null && e.working !== undefined).length;
+  const iePct = ieTotal > 0 ? Math.round((ieRated / ieTotal) * 100) : 0;
+
+  html += `
+    <div class="category-accordion">
+      <button class="accordion-header" onclick="toggleAccordion(this)" style="background: #7c3aed; color: white;">
+        <span class="category-title">📡 Instruments &amp; Electronics</span>
+        <span class="category-progress">${ieTotal > 0 ? `${iePct}% (${ieRated}/${ieTotal})` : 'No items'}</span>
+        <span style="margin-left: 12px;">▼</span>
+      </button>
+      <div class="accordion-content" style="display: none;">
+        <div style="padding: 10px 0; font-size: 13px; color: #555; border-bottom: 1px solid #e5e7eb; margin-bottom: 12px;">
+          <em>Photograph each instrument or electronic device. Mark whether it is operational, then optionally use AI to identify make, model and year.</em>
+        </div>
+  `;
+
+  ieItems.forEach((item, idx) => {
+    const statusColor = item.working === true ? '#16a34a' : item.working === false ? '#dc2626' : '#9ca3af';
+    const statusLabel = item.working === true ? '✓ Working' : item.working === false ? '✗ Not working' : '— Not tested';
+    const photoCount = (item.photos && item.photos.length) || 0;
+    const hasAI = item.make || item.model || item.year;
+    html += `
+      <div class="rated-item" style="border-left: 4px solid ${statusColor}; padding: 10px; margin-bottom: 10px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div style="flex:1;">
+            <strong style="font-size:14px;">${item.name || 'Unidentified device'}</strong>
+            ${hasAI ? `<div style="font-size:12px;color:#555;margin-top:2px;">${[item.make, item.model, item.year].filter(Boolean).join(' — ')}</div>` : ''}
+            ${item.aiDetails ? `<div style="font-size:11px;color:#7c3aed;margin-top:2px;">${item.aiDetails}</div>` : ''}
+          </div>
+          <button onclick="removeInstrument(${idx})" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:18px;padding:0 4px;" title="Remove">✕</button>
+        </div>
+
+        <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+          <select onchange="updateInstrumentWorking(${idx}, this.value)" style="padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;background:white;">
+            <option value="" ${item.working === null || item.working === undefined ? 'selected' : ''}>Not tested</option>
+            <option value="true" ${item.working === true ? 'selected' : ''}>✓ Working</option>
+            <option value="false" ${item.working === false ? 'selected' : ''}>✗ Not working</option>
+          </select>
+          <button onclick="captureInstrumentPhoto(${idx})" style="background:#7c3aed;color:white;border:none;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;">
+            📷${photoCount > 0 ? ` ${photoCount}` : ' Add photo'}
+          </button>
+          <button onclick="identifyInstrument(${idx})" style="background:#f59e0b;color:white;border:none;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;" title="Use AI to identify this device">
+            🤖 Identify
+          </button>
+        </div>
+
+        <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <input type="text" placeholder="Name" value="${(item.name || '').replace(/"/g, '&quot;')}"
+                 onchange="updateInstrumentField(${idx}, 'name', this.value)"
+                 style="padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;" />
+          <input type="text" placeholder="Make" value="${(item.make || '').replace(/"/g, '&quot;')}"
+                 onchange="updateInstrumentField(${idx}, 'make', this.value)"
+                 style="padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;" />
+          <input type="text" placeholder="Model" value="${(item.model || '').replace(/"/g, '&quot;')}"
+                 onchange="updateInstrumentField(${idx}, 'model', this.value)"
+                 style="padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;" />
+          <input type="text" placeholder="Year" value="${(item.year || '').replace(/"/g, '&quot;')}"
+                 onchange="updateInstrumentField(${idx}, 'year', this.value)"
+                 style="padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;" />
+        </div>
+
+        <input type="text" placeholder="Notes (location, serial number, condition...)"
+               value="${(item.notes || '').replace(/"/g, '&quot;')}"
+               onchange="updateInstrumentField(${idx}, 'notes', this.value)"
+               style="margin-top:6px;width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;box-sizing:border-box;" />
+
+        <div id="instrument-thumbs-${idx}" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;"></div>
+      </div>
+    `;
+  });
+
+  html += `
+        <div style="margin-top:12px;display:flex;gap:8px;">
+          <button onclick="addInstrumentByPhoto()" class="btn-primary" style="flex:1;padding:10px;font-size:14px;background:#7c3aed;">
+            📷 Add Instrument (Photo)
+          </button>
+          <button onclick="addInstrumentManual()" class="btn-secondary" style="padding:10px;font-size:14px;">
+            ✏️ Add Manually
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
   html += `</div>`;
   content.innerHTML = html;
 
   // Load and display photos
   loadAndDisplayPhotos(survey);
   loadAllSafetyThumbnails();
+  loadAllInstrumentThumbnails();
 
   // Repopulate comparable entries if they exist
   try {
@@ -5667,6 +5759,342 @@ async function loadAllSafetyThumbnails() {
   survey.safetyEquipment.forEach((eq, idx) => {
     if (eq.photos && eq.photos.length > 0) {
       loadSafetyThumbnails(idx, eq.photos);
+    }
+  });
+}
+
+// ── Instruments & Electronics Functions ─────────────────────────────────
+
+// Add instrument by taking a photo first
+async function addInstrumentByPhoto() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const survey = await getSurvey(currentSurveyId);
+    if (!survey) return;
+    if (!survey.instrumentsElectronics) survey.instrumentsElectronics = [];
+
+    const reader = new FileReader();
+    reader.onload = async (re) => {
+      const stampedDataUrl = await addDateStampToPhoto(re.target.result);
+      const idx = survey.instrumentsElectronics.length;
+      const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+      const photo = {
+        id: photoId,
+        surveyId: currentSurveyId,
+        itemLabel: `instrument_${idx}`,
+        dataUrl: stampedDataUrl,
+        annotated: false,
+        createdAt: new Date().toISOString()
+      };
+      await savePhoto(photo);
+
+      survey.instrumentsElectronics.push({
+        name: '',
+        make: '',
+        model: '',
+        year: '',
+        working: null,
+        notes: '',
+        photos: [photoId],
+        aiIdentified: false,
+        aiDetails: ''
+      });
+      await saveSurvey(survey);
+      showToast('Instrument added — tap Identify to auto-fill details');
+      renderInspection(survey);
+    };
+    reader.readAsDataURL(file);
+  };
+  setCameraActive(true);
+  input.click();
+}
+
+// Add instrument manually (no photo)
+async function addInstrumentManual() {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  if (!survey.instrumentsElectronics) survey.instrumentsElectronics = [];
+  survey.instrumentsElectronics.push({
+    name: '',
+    make: '',
+    model: '',
+    year: '',
+    working: null,
+    notes: '',
+    photos: [],
+    aiIdentified: false,
+    aiDetails: ''
+  });
+  await saveSurvey(survey);
+  renderInspection(survey);
+  showToast('Enter instrument details manually');
+}
+
+// Remove an instrument
+async function removeInstrument(idx) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !survey.instrumentsElectronics || !survey.instrumentsElectronics[idx]) return;
+  const name = survey.instrumentsElectronics[idx].name || 'Unidentified device';
+  // Delete associated photos
+  const photos = survey.instrumentsElectronics[idx].photos || [];
+  for (const pid of photos) {
+    try { await deletePhoto(pid); } catch(e) {}
+  }
+  survey.instrumentsElectronics.splice(idx, 1);
+  await saveSurvey(survey);
+  renderInspection(survey);
+  showToast('Removed: ' + name);
+}
+
+// Update working status
+async function updateInstrumentWorking(idx, value) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !survey.instrumentsElectronics || !survey.instrumentsElectronics[idx]) return;
+  if (value === 'true') survey.instrumentsElectronics[idx].working = true;
+  else if (value === 'false') survey.instrumentsElectronics[idx].working = false;
+  else survey.instrumentsElectronics[idx].working = null;
+  await saveSurvey(survey);
+  // Update border colour inline without full re-render
+  renderInspection(survey);
+}
+
+// Update a text field on an instrument
+async function updateInstrumentField(idx, field, value) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !survey.instrumentsElectronics || !survey.instrumentsElectronics[idx]) return;
+  survey.instrumentsElectronics[idx][field] = value;
+  await saveSurvey(survey);
+}
+
+// Capture additional photo for an existing instrument
+async function captureInstrumentPhoto(idx) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment';
+  input.multiple = true;
+  input.onchange = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    const survey = await getSurvey(currentSurveyId);
+    if (!survey || !survey.instrumentsElectronics || !survey.instrumentsElectronics[idx]) return;
+
+    if (!survey.instrumentsElectronics[idx].photos) {
+      survey.instrumentsElectronics[idx].photos = [];
+    }
+
+    for (const file of files) {
+      await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = async (re) => {
+          const stampedDataUrl = await addDateStampToPhoto(re.target.result);
+          const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+          const photo = {
+            id: photoId,
+            surveyId: currentSurveyId,
+            itemLabel: `instrument_${idx}`,
+            dataUrl: stampedDataUrl,
+            annotated: false,
+            createdAt: new Date().toISOString()
+          };
+          await savePhoto(photo);
+          survey.instrumentsElectronics[idx].photos.push(photoId);
+          resolve();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    await saveSurvey(survey);
+    showToast(`${files.length} photo${files.length > 1 ? 's' : ''} saved`);
+    loadInstrumentThumbnails(idx, survey.instrumentsElectronics[idx].photos);
+  };
+  setCameraActive(true);
+  input.click();
+}
+
+// AI identification using Google Gemini API
+async function identifyInstrument(idx) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !survey.instrumentsElectronics || !survey.instrumentsElectronics[idx]) return;
+
+  const item = survey.instrumentsElectronics[idx];
+  if (!item.photos || item.photos.length === 0) {
+    showToast('Take a photo first, then tap Identify');
+    return;
+  }
+
+  // Get API key from settings
+  let settings;
+  try {
+    const tx = db.transaction('settings', 'readonly');
+    const store = tx.objectStore('settings');
+    settings = await new Promise((resolve, reject) => {
+      const req = store.get('appSettings');
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  } catch(e) {}
+
+  const apiKey = settings && settings.geminiApiKey;
+  if (!apiKey) {
+    showToast('Set your Gemini API key in Settings first');
+    // Show settings prompt
+    const doSetup = confirm('AI identification requires a Google Gemini API key (free from aistudio.google.com).\\n\\nWould you like to enter your API key now?');
+    if (doSetup) {
+      const key = prompt('Paste your Gemini API key:');
+      if (key && key.trim()) {
+        await saveGeminiApiKey(key.trim());
+        showToast('API key saved — tap Identify again');
+      }
+    }
+    return;
+  }
+
+  // Get the first photo's data URL
+  const photo = await getPhotoById(item.photos[0]);
+  if (!photo || !photo.dataUrl) {
+    showToast('Could not load photo for identification');
+    return;
+  }
+
+  showToast('Identifying instrument...');
+
+  try {
+    // Extract base64 data from data URL
+    const base64Match = photo.dataUrl.match(/^data:image\/(.*?);base64,(.*)$/);
+    if (!base64Match) throw new Error('Invalid photo format');
+    const mimeType = `image/${base64Match[1]}`;
+    const base64Data = base64Match[2];
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            {
+              inlineData: {
+                mimeType: mimeType,
+                data: base64Data
+              }
+            },
+            {
+              text: `You are a marine surveyor's assistant. Identify this marine instrument or electronic device from the photo.
+
+Return ONLY valid JSON with these fields (use empty string if unknown):
+{
+  "name": "Common name of the device (e.g., Chart Plotter, VHF Radio, Depth Sounder)",
+  "make": "Manufacturer (e.g., Garmin, Raymarine, Furuno, Simrad)",
+  "model": "Model name/number",
+  "year": "Approximate year or year range of manufacture",
+  "details": "Brief useful info: key features, screen size, frequency, power output, or any visible serial/part numbers"
+}
+
+If you cannot identify the device, still provide your best guess for the name field. Do not include any text outside the JSON object.`
+            }
+          ]
+        }],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 500
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`API error ${response.status}: ${errText.substring(0, 200)}`);
+    }
+
+    const result = await response.json();
+    const text = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    // Parse JSON from response (handle markdown code blocks)
+    let jsonStr = text;
+    const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (codeBlockMatch) jsonStr = codeBlockMatch[1];
+    jsonStr = jsonStr.trim();
+
+    const identified = JSON.parse(jsonStr);
+
+    // Update the instrument with AI results
+    const freshSurvey = await getSurvey(currentSurveyId);
+    if (freshSurvey && freshSurvey.instrumentsElectronics && freshSurvey.instrumentsElectronics[idx]) {
+      if (identified.name) freshSurvey.instrumentsElectronics[idx].name = identified.name;
+      if (identified.make) freshSurvey.instrumentsElectronics[idx].make = identified.make;
+      if (identified.model) freshSurvey.instrumentsElectronics[idx].model = identified.model;
+      if (identified.year) freshSurvey.instrumentsElectronics[idx].year = identified.year;
+      if (identified.details) freshSurvey.instrumentsElectronics[idx].aiDetails = identified.details;
+      freshSurvey.instrumentsElectronics[idx].aiIdentified = true;
+      await saveSurvey(freshSurvey);
+      renderInspection(freshSurvey);
+      showToast(`Identified: ${identified.name || 'Unknown device'}`);
+    }
+
+  } catch (err) {
+    console.error('AI identification error:', err);
+    if (err.message.includes('API error 400')) {
+      showToast('AI could not process the image. Try a clearer photo.');
+    } else if (err.message.includes('API error 403') || err.message.includes('API error 401')) {
+      showToast('Invalid API key. Check your Gemini key in Settings.');
+    } else if (err.name === 'SyntaxError') {
+      showToast('AI response was not in expected format. Try again.');
+    } else {
+      showToast('Identification failed — check your internet connection');
+    }
+  }
+}
+
+// Save Gemini API key to settings
+async function saveGeminiApiKey(key) {
+  const tx = db.transaction('settings', 'readwrite');
+  const store = tx.objectStore('settings');
+  let settings;
+  try {
+    settings = await new Promise((resolve, reject) => {
+      const req = store.get('appSettings');
+      req.onsuccess = () => resolve(req.result || { id: 'appSettings' });
+      req.onerror = () => reject(req.error);
+    });
+  } catch(e) {
+    settings = { id: 'appSettings' };
+  }
+  settings.geminiApiKey = key;
+  store.put(settings);
+}
+
+// Load thumbnails for an instrument item
+async function loadInstrumentThumbnails(idx, photoIds) {
+  const container = document.getElementById(`instrument-thumbs-${idx}`);
+  if (!container || !photoIds || photoIds.length === 0) {
+    if (container) container.innerHTML = '';
+    return;
+  }
+  let thumbsHtml = '';
+  for (const pid of photoIds) {
+    const photo = await getPhotoById(pid);
+    if (photo) {
+      thumbsHtml += `<img src="${photo.dataUrl}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:2px solid #7c3aed;cursor:pointer;" onclick="editSavedPhoto('${pid}', 'instrument_${idx}')" />`;
+    }
+  }
+  container.innerHTML = thumbsHtml;
+}
+
+// Load all instrument thumbnails after rendering
+async function loadAllInstrumentThumbnails() {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !survey.instrumentsElectronics) return;
+  survey.instrumentsElectronics.forEach((item, idx) => {
+    if (item.photos && item.photos.length > 0) {
+      loadInstrumentThumbnails(idx, item.photos);
     }
   });
 }
@@ -8586,7 +9014,6 @@ async function generateReport() {
   const engine2PlatePhotoDataUrl = engine2PlatePhotos[0] || '';
   const transmission2PhotoDataUrl = transmission2Photos[0] || '';
   const transmission2PlatePhotoDataUrl = transmission2PlatePhotos[0] || '';
-  }
 
   // ── Pre-fetch all per-item photos ─────────────────────────────────────
   const itemPhotoCache = {};
@@ -8609,6 +9036,22 @@ async function generateReport() {
     for (const eq of survey.safetyEquipment) {
       if (eq.photos && eq.photos.length > 0) {
         for (const photoId of eq.photos) {
+          if (!itemPhotoCache[photoId]) {
+            const p = await getPhotoById(photoId);
+            if (p && p.dataUrl) {
+              itemPhotoCache[photoId] = p.dataUrl;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Also pre-load instruments & electronics photos
+  if (survey.instrumentsElectronics) {
+    for (const item of survey.instrumentsElectronics) {
+      if (item.photos && item.photos.length > 0) {
+        for (const photoId of item.photos) {
           if (!itemPhotoCache[photoId]) {
             const p = await getPhotoById(photoId);
             if (p && p.dataUrl) {
@@ -9134,6 +9577,69 @@ ${survey.vesselDescription ? `
       | &nbsp; Total required items: <strong>${survey.safetyEquipment.length}</strong>
     </div>
     ${missing > 0 ? '<p style="color:#dc2626;font-weight:bold;font-size:10pt;margin-top:8px;">⚠ Vessel does not carry all required safety equipment per Transport Canada regulations.</p>' : '<p style="color:#16a34a;font-weight:bold;font-size:10pt;margin-top:8px;">✓ Vessel carries all required safety equipment per Transport Canada regulations.</p>'}
+    <div class="page-break"></div>
+    `;
+  }
+
+  // ── INSTRUMENTS & ELECTRONICS INVENTORY ────────────────────────────
+  if (survey.instrumentsElectronics && survey.instrumentsElectronics.length > 0) {
+    const ieWorking = survey.instrumentsElectronics.filter(e => e.working === true).length;
+    const ieNotWorking = survey.instrumentsElectronics.filter(e => e.working === false).length;
+    const ieNotTested = survey.instrumentsElectronics.filter(e => e.working === null || e.working === undefined).length;
+
+    html += `
+  <h2 style="background:#7c3aed;">INSTRUMENTS &amp; ELECTRONICS INVENTORY</h2>
+  <table class="checklist-table">
+    <thead>
+      <tr>
+        <th style="width:5%;background:#7c3aed;">#</th>
+        <th style="width:20%;background:#7c3aed;">Instrument / Device</th>
+        <th style="width:15%;background:#7c3aed;">Make</th>
+        <th style="width:15%;background:#7c3aed;">Model</th>
+        <th style="width:8%;background:#7c3aed;">Year</th>
+        <th style="width:12%;background:#7c3aed;">Status</th>
+        <th style="width:25%;background:#7c3aed;">Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+    `;
+
+    survey.instrumentsElectronics.forEach((item, idx) => {
+      const statusColor = item.working === true ? '#16a34a' : item.working === false ? '#dc2626' : '#6b7280';
+      const statusText = item.working === true ? '✓ Working' : item.working === false ? '✗ Not working' : '— Not tested';
+
+      let iePhotoRow = '';
+      if (item.photos && item.photos.length > 0) {
+        let photoImgs = '';
+        for (const pid of item.photos) {
+          if (itemPhotoCache[pid]) {
+            photoImgs += `<img src="${itemPhotoCache[pid]}" style="width:100px;height:100px;object-fit:cover;border-radius:4px;margin:2px;" />`;
+          }
+        }
+        if (photoImgs) {
+          iePhotoRow = `<tr><td colspan="7" style="padding:4px 8px;">${photoImgs}</td></tr>`;
+        }
+      }
+
+      html += `<tr>
+        <td style="text-align:center;">${idx + 1}</td>
+        <td><strong>${esc(item.name || 'Unidentified')}</strong>${item.aiDetails ? `<br/><span style="font-size:8pt;color:#555;">${esc(item.aiDetails)}</span>` : ''}</td>
+        <td>${esc(item.make || '—')}</td>
+        <td>${esc(item.model || '—')}</td>
+        <td style="text-align:center;">${esc(item.year || '—')}</td>
+        <td style="text-align:center;font-weight:bold;color:${statusColor};">${statusText}</td>
+        <td style="font-size:9pt;">${esc(item.notes || '—')}</td>
+      </tr>${iePhotoRow}`;
+    });
+
+    html += `</tbody></table>
+    <div style="margin-top:8px;font-size:10pt;">
+      <span style="color:#16a34a;">&#9632;</span> Working: <strong>${ieWorking}</strong> &nbsp;
+      <span style="color:#dc2626;">&#9632;</span> Not working: <strong>${ieNotWorking}</strong> &nbsp;
+      <span style="color:#6b7280;">&#9632;</span> Not tested: <strong>${ieNotTested}</strong> &nbsp;
+      | &nbsp; Total instruments: <strong>${survey.instrumentsElectronics.length}</strong>
+    </div>
+    ${ieNotWorking > 0 ? `<p style="color:#dc2626;font-weight:bold;font-size:10pt;margin-top:8px;">⚠ ${ieNotWorking} instrument${ieNotWorking > 1 ? 's' : ''} found to be non-operational.</p>` : ''}
     <div class="page-break"></div>
     `;
   }
@@ -10277,6 +10783,12 @@ const FirebaseSync = (() => {
     if (survey.safetyEquipment) {
       survey.safetyEquipment.forEach(eq => {
         if (eq.photos) eq.photos.forEach(pid => photoIds.add(pid));
+      });
+    }
+    // Instruments & electronics photos
+    if (survey.instrumentsElectronics) {
+      survey.instrumentsElectronics.forEach(ie => {
+        if (ie.photos) ie.photos.forEach(pid => photoIds.add(pid));
       });
     }
 
