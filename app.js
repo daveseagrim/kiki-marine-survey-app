@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v159';
+const APP_VERSION = 'v160';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -5229,6 +5229,8 @@ function ensureReportButton() {
   backupBtn.style.cssText = 'position:fixed;bottom:calc(20px + env(safe-area-inset-bottom, 0px));left:calc(20px + env(safe-area-inset-left, 0px));background:#16a34a;color:white;border:none;border-radius:28px;padding:12px 18px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:100;cursor:pointer;';
   backupBtn.innerHTML = '💾 Backup';
   backupBtn.onclick = async () => {
+    // Suppress popstate during backup (share sheet can trigger it on iOS)
+    window._backupActive = true;
     if (window.fsDb && FirebaseSync.isEnabled()) {
       // Firebase backup — stays on page
       backupBtn.innerHTML = '💾 Saving…';
@@ -5283,16 +5285,16 @@ function ensureReportButton() {
       } finally {
         backupBtn.innerHTML = '💾 Backup';
         backupBtn.disabled = false;
+        window._backupActive = false;
       }
     } else {
       // Fallback: file export (share sheet / download)
-      const content = document.querySelector('.content');
-      const scrollPos = content ? content.scrollTop : 0;
-      await exportSurvey(currentSurveyId);
-      window._hasUnsavedBackup = false;
-      setTimeout(() => {
-        if (content) content.scrollTop = scrollPos;
-      }, 100);
+      try {
+        await exportSurvey(currentSurveyId);
+        window._hasUnsavedBackup = false;
+      } finally {
+        window._backupActive = false;
+      }
     }
   };
   document.body.appendChild(backupBtn);
@@ -9478,7 +9480,7 @@ async function initApp() {
       if (_handlingPopstate) return;
       // If camera is active, iOS may fire a spurious popstate on return.
       // Suppress it and re-push the current state so the user stays put.
-      if (window._cameraActive) {
+      if (window._cameraActive || window._backupActive) {
         const curState = { view: currentView };
         if (currentSurveyId) curState.surveyId = currentSurveyId;
         history.pushState(curState, '');

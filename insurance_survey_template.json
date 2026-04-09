@@ -1479,6 +1479,7 @@
           {
             "type": "list",
             "label": "Flybridge Wind instruments (direction, speed, etc.)",
+            "sailOnly": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -1985,6 +1986,7 @@
           {
             "type": "list",
             "label": "Wind instruments (direction, speed, etc.)",
+            "sailOnly": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",
