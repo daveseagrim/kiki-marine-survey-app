@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v164';
+const APP_VERSION = 'v165';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -5766,63 +5766,65 @@ async function loadAllSafetyThumbnails() {
 // ── Instruments & Electronics Functions ─────────────────────────────────
 
 // Add instrument by taking a photo first
-async function addInstrumentByPhoto() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-  input.capture = 'environment';
-  input.onchange = async (e) => {
-    setCameraActive(false);
-    const file = e.target.files[0];
-    if (!file) { return; }
+async function addInstrumentByPhoto(event) {
+  // If called without a file event, trigger the file input
+  if (!event || !event.target || !event.target.files) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.onchange = (e) => addInstrumentByPhoto(e);
+    setCameraActive(true);
+    input.click();
+    return;
+  }
 
-    showToast('Saving photo...');
-    try {
-      const survey = await getSurvey(currentSurveyId);
-      if (!survey) return;
-      if (!survey.instrumentsElectronics) survey.instrumentsElectronics = [];
+  const files = Array.from(event.target.files);
+  if (files.length === 0) return;
 
-      const dataUrl = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (re) => resolve(re.target.result);
-        reader.onerror = (err) => reject(err);
-        reader.readAsDataURL(file);
-      });
+  showToast('Saving photo...');
 
-      const stampedDataUrl = await addDateStampToPhoto(dataUrl);
-      const idx = survey.instrumentsElectronics.length;
-      const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-      const photo = {
-        id: photoId,
-        surveyId: currentSurveyId,
-        itemLabel: `instrument_${idx}`,
-        dataUrl: stampedDataUrl,
-        annotated: false,
-        createdAt: new Date().toISOString()
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  if (!survey.instrumentsElectronics) survey.instrumentsElectronics = [];
+
+  for (const file of files) {
+    await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const stampedDataUrl = await addDateStampToPhoto(e.target.result);
+        const idx = survey.instrumentsElectronics.length;
+        const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+        const photo = {
+          id: photoId,
+          surveyId: currentSurveyId,
+          itemLabel: `instrument_${idx}`,
+          dataUrl: stampedDataUrl,
+          annotated: false,
+          createdAt: new Date().toISOString()
+        };
+        await savePhoto(photo);
+
+        survey.instrumentsElectronics.push({
+          name: '',
+          make: '',
+          model: '',
+          year: '',
+          working: null,
+          notes: '',
+          photos: [photoId],
+          aiIdentified: false,
+          aiDetails: ''
+        });
+        resolve();
       };
-      await savePhoto(photo);
+      reader.readAsDataURL(file);
+    });
+  }
 
-      survey.instrumentsElectronics.push({
-        name: '',
-        make: '',
-        model: '',
-        year: '',
-        working: null,
-        notes: '',
-        photos: [photoId],
-        aiIdentified: false,
-        aiDetails: ''
-      });
-      await saveSurvey(survey);
-      showToast('Instrument added — tap Identify to auto-fill details');
-      renderInspection(survey);
-    } catch (err) {
-      console.error('addInstrumentByPhoto error:', err);
-      showToast('Error saving photo: ' + err.message);
-    }
-  };
-  setCameraActive(true);
-  input.click();
+  await saveSurvey(survey);
+  showToast('Instrument added — tap Identify to auto-fill details');
+  renderInspection(survey);
 }
 
 // Add instrument manually (no photo)
@@ -5883,33 +5885,34 @@ async function updateInstrumentField(idx, field, value) {
 }
 
 // Capture additional photo for an existing instrument
-async function captureInstrumentPhoto(idx) {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-  input.capture = 'environment';
-  input.multiple = true;
-  input.onchange = async (e) => {
-    setCameraActive(false);
-    const files = Array.from(e.target.files);
-    if (files.length === 0) return;
+async function captureInstrumentPhoto(idx, event) {
+  if (!event || !event.target || !event.target.files) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.multiple = true;
+    input.onchange = (e) => captureInstrumentPhoto(idx, e);
+    setCameraActive(true);
+    input.click();
+    return;
+  }
 
-    try {
-      const survey = await getSurvey(currentSurveyId);
-      if (!survey || !survey.instrumentsElectronics || !survey.instrumentsElectronics[idx]) return;
+  const files = Array.from(event.target.files);
+  if (files.length === 0) return;
 
-      if (!survey.instrumentsElectronics[idx].photos) {
-        survey.instrumentsElectronics[idx].photos = [];
-      }
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !survey.instrumentsElectronics || !survey.instrumentsElectronics[idx]) return;
 
-      for (const file of files) {
-        const dataUrl = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (re) => resolve(re.target.result);
-          reader.onerror = (err) => reject(err);
-          reader.readAsDataURL(file);
-        });
-        const stampedDataUrl = await addDateStampToPhoto(dataUrl);
+  if (!survey.instrumentsElectronics[idx].photos) {
+    survey.instrumentsElectronics[idx].photos = [];
+  }
+
+  for (const file of files) {
+    await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const stampedDataUrl = await addDateStampToPhoto(e.target.result);
         const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
         const photo = {
           id: photoId,
@@ -5921,17 +5924,16 @@ async function captureInstrumentPhoto(idx) {
         };
         await savePhoto(photo);
         survey.instrumentsElectronics[idx].photos.push(photoId);
-      }
+        resolve();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
 
-      await saveSurvey(survey);
-      showToast(`${files.length} photo${files.length > 1 ? 's' : ''} saved`);
-      loadInstrumentThumbnails(idx, survey.instrumentsElectronics[idx].photos);
-    } catch (err) {
-      console.error('captureInstrumentPhoto error:', err);
-      showToast('Error saving photo: ' + err.message);
-    }
-  };
-  setCameraActive(true);
+  await saveSurvey(survey);
+  showToast(`${files.length} photo${files.length > 1 ? 's' : ''} saved`);
+  loadInstrumentThumbnails(idx, survey.instrumentsElectronics[idx].photos);
+  setCameraActive(false);
   input.click();
 }
 
