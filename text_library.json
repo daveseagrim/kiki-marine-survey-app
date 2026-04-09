@@ -266,6 +266,11 @@
       "text": "The propeller anode was securely mounted and did not exhibit significant corrosion."
     },
     {
+      "section": "Propeller/drive anode(s)",
+      "rating": "A",
+      "text": "The propeller and/or drive anodes were completely depleted and provided no galvanic protection. The shafts and propeller are at severe risk of galvanic corrosion. Replace anodes immediately in accordance with ABYC A-28."
+    },
+    {
       "section": "Skeg(s)",
       "rating": "C - multiple, bronze",
       "text": "The bronze skegs were solidly mounted to the hull and serviceable."
@@ -349,6 +354,16 @@
       "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
       "rating": "C",
       "text": "Despite minor corrosion, the sail drive, propeller, and anode were serviceable."
+    },
+    {
+      "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
+      "rating": "A",
+      "text": "The sail drive exhibited severe corrosion or the seal was compromised, allowing water ingress. Immediate professional inspection and repair is required before the vessel is launched."
+    },
+    {
+      "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
+      "rating": "B",
+      "text": "The sail drive boot showed deterioration and minor leaking at the seal. Gasket replacement should be planned. The anode showed moderate depletion and should be replaced."
     },
     {
       "section": "Exhaust discharge position and condition",
@@ -536,6 +551,16 @@
       "text": "The hull-side windows and portholes were serviceable. Bug screens were intact where fitted."
     },
     {
+      "section": "Hull side windows and portholes (exterior observations)",
+      "rating": "A",
+      "text": "One or more hull-side windows or portholes are leaking or the frame shows significant corrosion compromising the seal. The affected units require immediate resealing or replacement to prevent water ingress."
+    },
+    {
+      "section": "Hull side windows and portholes (exterior observations)",
+      "rating": "B",
+      "text": "The seals around one or more hull-side windows or portholes are deteriorating, and minor weeping has been observed. Resealing should be planned within the next season."
+    },
+    {
       "section": "Rub rail",
       "rating": "B",
       "text": "A localized section of the rub rail on the [side] was separating from the hull and deck joint. The remaining rub rail was solidly affixed and serviceable."
@@ -693,6 +718,16 @@
       "text": "The furling drum, foil, swivel, and related parts all appeared to be in serviceable condition. The furling line was fed through securely attached and working blocks to a functional ####### at the cockpit."
     },
     {
+      "section": "Jib/genoa furler, furling line and tackle",
+      "rating": "A",
+      "text": "The furling drum is seized or the foil is bent or cracked, preventing normal furling operation. Immediate professional inspection and replacement is required."
+    },
+    {
+      "section": "Jib/genoa furler, furling line and tackle",
+      "rating": "B",
+      "text": "The furling line shows chafe at one or more locations, and the furler bearings are stiff. The line should be replaced and the furler serviced to restore smooth operation."
+    },
+    {
       "section": "Forestay (as inspected from the deck)",
       "rating": "B",
       "text": "As seen from the deck, the forestay did not have any visible broken strands. Also, the swages and turnbuckles were all in serviceable condition. The rig tension was approximately correct. However, ##### retaining pin(s) were missing."
@@ -711,6 +746,16 @@
       "section": "Spinnaker/whisker pole, uphaul and downhaul",
       "rating": "C",
       "text": "The spinnaker pole appeared to be functional, with all fittings in good working order. The uphaul and downhaul were both pliable, free of fraying, with all tackle in serviceable condition."
+    },
+    {
+      "section": "Spinnaker/whisker pole, uphaul and downhaul",
+      "rating": "A",
+      "text": "The spinnaker pole is bent or cracked, rendering it unsafe for use. The pole must be replaced before the vessel can deploy a spinnaker."
+    },
+    {
+      "section": "Spinnaker/whisker pole, uphaul and downhaul",
+      "rating": "B",
+      "text": "The end fittings on the spinnaker pole show wear, and the uphaul and/or downhaul lines are worn but still functional. Service or replacement of the fittings and lines should be planned within one season."
     },
     {
       "section": "Shrouds, swages and turnbuckles",
@@ -753,6 +798,16 @@
       "text": "The chainplates appeared solidly in place without any sign of movement, leaking at the base or deck damage. All appropriate retaining pins were in place."
     },
     {
+      "section": "Chainplates (exterior)pins and bolts",
+      "rating": "A",
+      "text": "One or more external chainplates are cracked or showing severe corrosion at the attachment points. Structural integrity is compromised and immediate replacement is required."
+    },
+    {
+      "section": "Chainplates (exterior)pins and bolts",
+      "rating": "B",
+      "text": "Surface corrosion and staining are evident on one or more chainplate attachment points. The bolts and fasteners should be inspected for crevice corrosion, and the deck sealant should be renewed."
+    },
+    {
       "section": "Spreaders/boots",
       "rating": "C",
       "text": "The spreaders were tipped with integrated spreader end fittings. Both the spreaders and the spreader end fittings appeared serviceable."
@@ -761,6 +816,16 @@
       "section": "Spreaders/boots",
       "rating": "Not tested - too high to see",
       "text": "The spreaders were tipped with integrated spreader end fittings. As seen from the deck, both the spreaders and the spreader end fittings appeared serviceable. However, a closer inspection is required to confirm integrity."
+    },
+    {
+      "section": "Spreaders/boots",
+      "rating": "A",
+      "text": "The spreaders are visibly cracked or bent, compromising the structural integrity of the mast assembly. Immediate professional inspection and replacement is required before sailing."
+    },
+    {
+      "section": "Spreaders/boots",
+      "rating": "B",
+      "text": "The spreader boots are deteriorating, cracked, or worn. Water ingress is possible. The boots should be resealed or replaced to prevent moisture migration down the mast."
     },
     {
       "section": "Main mast",
@@ -776,6 +841,16 @@
       "section": "Mast partner, mast collar, mast step",
       "rating": "C",
       "text": "There were no concerning stress cracks surrounding the mast partner. All attached hardware was correctly installed with the correct pins and rings, and appeared serviceable."
+    },
+    {
+      "section": "Mast partner, mast collar, mast step",
+      "rating": "A",
+      "text": "Significant corrosion or stress cracking is evident at the mast partner or step, indicating structural compromise. Immediate professional inspection and repair is required."
+    },
+    {
+      "section": "Mast partner, mast collar, mast step",
+      "rating": "B",
+      "text": "The sealant around the mast collar is cracking and allowing minor water ingress into the cabin area. Resealing is recommended to prevent moisture damage."
     },
     {
       "section": "Boom, gooseneck, boomvang, outhaul, and reefing lines",
@@ -818,6 +893,16 @@
       "text": "All halyards were sufficiently pliable, without fraying, and ran smoothly through serviceable tackle."
     },
     {
+      "section": "Halyards",
+      "rating": "A",
+      "text": "One or more halyards show core exposure or parted strands, which is a safety hazard. The affected halyard(s) must be replaced before the vessel sails."
+    },
+    {
+      "section": "Halyards",
+      "rating": "B",
+      "text": "Some halyards show chafe marks and UV damage but are still functional. Monitor these lines for further deterioration and plan replacement within one season."
+    },
+    {
       "section": "Winch(es) and cleats (cabin-top and cockpit)",
       "rating": "B",
       "text": "Although all winches ran without binding, they showed some stiffness, indicating they should be disassembled, cleaned, and greased."
@@ -846,6 +931,16 @@
       "section": "Main sheet",
       "rating": "C",
       "text": "The mainsheet was pliable and free of fraying, and ran smoothly through its tackle. The traveller tackle operated smoothly, and the associated cam cleats were serviceable."
+    },
+    {
+      "section": "Main sheet",
+      "rating": "A",
+      "text": "The main sheet is severely chafed or showing risk of chafe-through failure. This is a safety hazard. The affected sections must be wrapped or the line replaced immediately."
+    },
+    {
+      "section": "Main sheet",
+      "rating": "B",
+      "text": "Minor chafe has been observed on the main sheet at one or more locations along its run. Monitor these areas and plan protective wrapping or line replacement within one season."
     },
     {
       "section": "Traveller and tackle",
@@ -2193,6 +2288,16 @@
       "text": "The autopilot was not tested because the vessel was out of the water."
     },
     {
+      "section": "Autopilot",
+      "rating": "A",
+      "text": "The autopilot is non-functional and does not respond to input. Professional service is required to diagnose and repair the system."
+    },
+    {
+      "section": "Autopilot",
+      "rating": "B",
+      "text": "The autopilot engages but operates erratically and requires frequent manual correction. The system should be recalibrated by a professional technician."
+    },
+    {
       "section": "MFD or Chartplotter",
       "rating": "C",
       "text": "The chartplotter was tested during sea trial and appeared to function properly. Not all features were tested."
@@ -2211,6 +2316,16 @@
       "section": "MFD or Chartplotter",
       "rating": "Not tested",
       "text": "The MFD or chartplotter powered up."
+    },
+    {
+      "section": "MFD or Chartplotter",
+      "rating": "A",
+      "text": "The MFD or chartplotter is non-functional with a black or unresponsive screen. Professional service or replacement is required."
+    },
+    {
+      "section": "MFD or Chartplotter",
+      "rating": "B",
+      "text": "The MFD or chartplotter operates intermittently and shows software glitches. Updates or professional service should be arranged to restore reliable operation."
     },
     {
       "section": "Radar",
@@ -2490,59 +2605,59 @@
       "text": "The ladder was solidly mounted and serviceable"
     },
     {
-      "section": "flyridge, floor, seats and coaming (spider cracks, etc.)",
+      "section": "Flybridge, floor, seats and coaming (spider cracks, etc.)",
       "rating": "C",
-      "text": "The flyridge, floor, seats, and coaming were in serviceable condition."
+      "text": "The Flybridge, floor, seats, and coaming were in serviceable condition."
     },
     {
-      "section": "flyridge, floor, seats and coaming (spider cracks, etc.)",
+      "section": "Flybridge, floor, seats and coaming (spider cracks, etc.)",
       "rating": "C",
-      "text": "The flyridge, floor, seats, and coaming were in good condition."
+      "text": "The Flybridge, floor, seats, and coaming were in good condition."
     },
     {
-      "section": "flyridge percussion testing",
+      "section": "Flybridge percussion testing",
       "rating": "B",
       "text": "Percussion testing produced acoustics that may indicate saturation or rot within the core. The photographs show the areas identified by the hammer tip. No distinct soft spots were noted. Although they do not currently present any safety concerns, in order to mitigate the spread, these areas should be repaired."
     },
     {
-      "section": "flyridge percussion testing",
+      "section": "Flybridge percussion testing",
       "rating": "C",
       "text": "Percussion produced a clear and even tone with no indications of delamination or voids."
     },
     {
-      "section": "flyridge percussion testing",
+      "section": "Flybridge percussion testing",
       "rating": "C",
       "text": "Percussion testing produced a clear and even tone with no indications of delamination or voids."
     },
     {
-      "section": "flyridge percussion testing",
+      "section": "Flybridge percussion testing",
       "rating": "Not tested",
-      "text": "Percussion testing of the flyridge floor was not possible because the surface was covered with PE or EVA foam material."
+      "text": "Percussion testing of the Flybridge floor was not possible because the surface was covered with PE or EVA foam material."
     },
     {
-      "section": "flyridge conductivity testing",
+      "section": "Flybridge conductivity testing",
       "rating": "B",
       "text": "Conductivity readings were taken on a relative scale of 0 to 999. The area at [describe location] exhibited elevated readings of [### to ###]. Values were high for the location and should be monitored for softness. Removal and replacement of the core in this area should be considered."
     },
     {
-      "section": "flyridge conductivity testing",
+      "section": "Flybridge conductivity testing",
       "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The flyridge returned readings of [### to ###]. Although elevated for age, values were within an acceptable range. Monitor between seasons for signs of osmosis or delamination."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The Flybridge returned readings of [### to ###]. Although elevated for age, values were within an acceptable range. Monitor between seasons for signs of osmosis or delamination."
     },
     {
-      "section": "flyridge conductivity testing",
+      "section": "Flybridge conductivity testing",
       "rating": "C",
       "text": "Conductivity readings were taken on a relative scale of 0 to 999. A single area at [describe location] showed an elevated reading of [###]. This was not immediately concerning and should be monitored."
     },
     {
-      "section": "flyridge conductivity testing",
+      "section": "Flybridge conductivity testing",
       "rating": "C",
-      "text": "Conductivity testing of the flyridge did not detect concerning readings."
+      "text": "Conductivity testing of the Flybridge did not detect concerning readings."
     },
     {
-      "section": "flyridge conductivity testing",
+      "section": "Flybridge conductivity testing",
       "rating": "Not tested",
-      "text": "Conductivity testing of the flyridge floor was not possible because the surface was covered with PE or EVA foam material."
+      "text": "Conductivity testing of the Flybridge floor was not possible because the surface was covered with PE or EVA foam material."
     },
     {
       "section": "Flybridge ladder/staircase",
@@ -2555,59 +2670,69 @@
       "text": "The safety rail was securely mounted along the stanchions."
     },
     {
-      "section": "flyridge drains",
+      "section": "Safety rails",
       "rating": "A",
-      "text": "The flyridge drains were located under the engine lid, discharged to outlets in the hull, and were serviceable."
+      "text": "The safety rail is loose or broken at one or more points, presenting a fall hazard. Immediate repair or replacement is required."
     },
     {
-      "section": "flyridge drains",
-      "rating": "C",
-      "text": "The flyridge drains were serviceable."
-    },
-    {
-      "section": "flyridge table",
-      "rating": "C",
-      "text": "The flyridge table was firmly mounted to [describe mounting point] and was in good condition."
-    },
-    {
-      "section": "flyridge table",
-      "rating": "C",
-      "text": "The flyridge table was firmly mounted to the flyridge floor and was serviceable."
-    },
-    {
-      "section": "flyridge table",
-      "rating": "C",
-      "text": "The flyridge table was serviceable."
-    },
-    {
-      "section": "flyridge table",
-      "rating": "C",
-      "text": "The flyridge table was securely attached to the flyridge floor. The movable leaves operated smoothly and latched properly in the raised and lowered positions."
-    },
-    {
-      "section": "flyridge lighting",
+      "section": "Safety rails",
       "rating": "B",
-      "text": "All flyridge lighting functioned properly except for [describe fixture]. Service the nonfunctional fixture."
+      "text": "Some stanchion bases are loose or showing slight corrosion. Tightening and inspection are recommended to ensure safe operation."
     },
     {
-      "section": "flyridge lighting",
-      "rating": "C",
-      "text": "All flyridge lighting functioned correctly."
+      "section": "Flybridge drains",
+      "rating": "A",
+      "text": "The Flybridge drains were located under the engine lid, discharged to outlets in the hull, and were serviceable."
     },
     {
-      "section": "flyridge lockers and lazarettes",
+      "section": "Flybridge drains",
       "rating": "C",
-      "text": "All flyridge lockers, lazarettes, and cubbies were in serviceable condition."
+      "text": "The Flybridge drains were serviceable."
     },
     {
-      "section": "flyridge lockers and lazarettes",
+      "section": "Flybridge table",
       "rating": "C",
-      "text": "All flyridge lockers, lazarettes, and cubbies were in good condition."
+      "text": "The Flybridge table was firmly mounted to [describe mounting point] and was in good condition."
     },
     {
-      "section": "flyridge lockers and lazarettes",
+      "section": "Flybridge table",
       "rating": "C",
-      "text": "flyridge lockers and lazarettes were securely attached with properly functioning hinges. Compartments opened and closed normally without misalignment or mechanical issues."
+      "text": "The Flybridge table was firmly mounted to the Flybridge floor and was serviceable."
+    },
+    {
+      "section": "Flybridge table",
+      "rating": "C",
+      "text": "The Flybridge table was serviceable."
+    },
+    {
+      "section": "Flybridge table",
+      "rating": "C",
+      "text": "The Flybridge table was securely attached to the Flybridge floor. The movable leaves operated smoothly and latched properly in the raised and lowered positions."
+    },
+    {
+      "section": "Flybridge lighting",
+      "rating": "B",
+      "text": "All Flybridge lighting functioned properly except for [describe fixture]. Service the nonfunctional fixture."
+    },
+    {
+      "section": "Flybridge lighting",
+      "rating": "C",
+      "text": "All Flybridge lighting functioned correctly."
+    },
+    {
+      "section": "Flybridge lockers and lazarettes",
+      "rating": "C",
+      "text": "All Flybridge lockers, lazarettes, and cubbies were in serviceable condition."
+    },
+    {
+      "section": "Flybridge lockers and lazarettes",
+      "rating": "C",
+      "text": "All Flybridge lockers, lazarettes, and cubbies were in good condition."
+    },
+    {
+      "section": "Flybridge lockers and lazarettes",
+      "rating": "C",
+      "text": "Flybridge lockers and lazarettes were securely attached with properly functioning hinges. Compartments opened and closed normally without misalignment or mechanical issues."
     },
     {
       "section": "Remote compressor and condensing refrigeration unit",
@@ -2632,7 +2757,7 @@
     {
       "section": "Steering wheel and steering",
       "rating": "C",
-      "text": "Both flyridge helms were solidly affixed and the steering moved from block to block without binding or stiffness."
+      "text": "Both Flybridge helms were solidly affixed and the steering moved from block to block without binding or stiffness."
     },
     {
       "section": "Steering wheel and steering",
@@ -2710,42 +2835,42 @@
       "text": "The ladder shows wear or loose fasteners. Service and tightening are recommended."
     },
     {
-      "section": "flyridge, floor, seats and coaming (spider cracks, etc.)",
+      "section": "Flybridge, floor, seats and coaming (spider cracks, etc.)",
       "rating": "A",
       "text": "Major cracking or delamination compromises structural integrity. Repair is critical."
     },
     {
-      "section": "flyridge, floor, seats and coaming (spider cracks, etc.)",
+      "section": "Flybridge, floor, seats and coaming (spider cracks, etc.)",
       "rating": "B",
       "text": "Spider cracks or minor signs of elevated conductivity are visible. Monitor and seal as needed."
     },
     {
-      "section": "flyridge drains",
+      "section": "Flybridge drains",
       "rating": "B",
       "text": "Drains are partially clogged. Cleaning is recommended."
     },
     {
-      "section": "flyridge table",
+      "section": "Flybridge table",
       "rating": "A",
       "text": "The table is cracked or unstable. Repair or replacement is required."
     },
     {
-      "section": "flyridge table",
+      "section": "Flybridge table",
       "rating": "B",
       "text": "Minor damage or loose fasteners are present. Service as needed."
     },
     {
-      "section": "flyridge lighting",
+      "section": "Flybridge lighting",
       "rating": "A",
       "text": "Lighting is non-functional or poses an electrical hazard. Repair is required."
     },
     {
-      "section": "flyridge lockers and lazarettes",
+      "section": "Flybridge lockers and lazarettes",
       "rating": "A",
       "text": "Lockers are damaged or non-functional. Repair is required."
     },
     {
-      "section": "flyridge lockers and lazarettes",
+      "section": "Flybridge lockers and lazarettes",
       "rating": "B",
       "text": "Seals are degraded or latches are worn. Service is advisable."
     },
@@ -2798,6 +2923,141 @@
       "section": "Bimini, dodger and canvas enclosure",
       "rating": "A",
       "text": "Canvas is torn or compromised. Repair or replacement is required."
+    },
+    {
+      "section": "Flybridge - other features",
+      "rating": "C",
+      "text": "Other Flybridge features are in serviceable condition."
+    },
+    {
+      "section": "Flybridge - other features",
+      "rating": "B",
+      "text": "Minor issues noted with Flybridge features. These should be addressed within the next season."
+    },
+    {
+      "section": "Flybridge - other features",
+      "rating": "A",
+      "text": "Significant structural or functional issues are evident with Flybridge features. Professional inspection and repair is required."
+    },
+    {
+      "section": "Flybridge 12V or USB",
+      "rating": "C",
+      "text": "All 12V and USB outlets on the Flybridge are functional and provide adequate charging capability."
+    },
+    {
+      "section": "Flybridge 12V or USB",
+      "rating": "B",
+      "text": "Some 12V or USB outlets on the Flybridge are non-functional or provide weak charging. These should be serviced or replaced."
+    },
+    {
+      "section": "Flybridge 12V or USB",
+      "rating": "A",
+      "text": "All 12V or USB outlets are non-functional or present a short circuit risk. Immediate electrical inspection and repair is required."
+    },
+    {
+      "section": "Flybridge Arch",
+      "rating": "C",
+      "text": "The Flybridge arch is solidly mounted with no visible corrosion or structural issues."
+    },
+    {
+      "section": "Flybridge Arch",
+      "rating": "B",
+      "text": "The Flybridge arch mounting hardware shows surface corrosion. Fasteners should be inspected and treated to prevent further degradation."
+    },
+    {
+      "section": "Flybridge Arch",
+      "rating": "A",
+      "text": "The Flybridge arch shows significant corrosion or loose fasteners indicating structural compromise. Immediate professional inspection and repair is required."
+    },
+    {
+      "section": "Flybridge Helm seat",
+      "rating": "C",
+      "text": "The helm seat is solidly mounted with upholstery in serviceable condition."
+    },
+    {
+      "section": "Flybridge Helm seat",
+      "rating": "B",
+      "text": "The helm seat pedestal shows minor looseness, and upholstery is beginning to deteriorate. Tightening and reupholstering should be planned."
+    },
+    {
+      "section": "Flybridge Helm seat",
+      "rating": "A",
+      "text": "The helm seat mounting is severely compromised or the seat is cracked. Immediate replacement is required for safe operation."
+    },
+    {
+      "section": "Flybridge Radar dome",
+      "rating": "C",
+      "text": "The radar dome is securely mounted with no visible damage or wear."
+    },
+    {
+      "section": "Flybridge Radar dome",
+      "rating": "B",
+      "text": "The radar dome mount shows minor wear, and there is slight crazing or minor damage to the dome. Monitor for progression."
+    },
+    {
+      "section": "Flybridge Radar dome",
+      "rating": "A",
+      "text": "The radar dome mount is compromised or the dome is cracked, creating a water ingress risk. Immediate repair or replacement is required."
+    },
+    {
+      "section": "Flybridge Refrigerator/cooler",
+      "rating": "C",
+      "text": "The Flybridge refrigerator or cooler is functional and maintains proper temperature."
+    },
+    {
+      "section": "Flybridge Refrigerator/cooler",
+      "rating": "B",
+      "text": "The Flybridge refrigerator is cooling poorly and may require servicing or replacement within one season."
+    },
+    {
+      "section": "Flybridge Refrigerator/cooler",
+      "rating": "A",
+      "text": "The Flybridge refrigerator is non-functional and requires repair or replacement."
+    },
+    {
+      "section": "Flybridge Seating",
+      "rating": "C",
+      "text": "Flybridge seating is in serviceable condition with no structural issues."
+    },
+    {
+      "section": "Flybridge Seating",
+      "rating": "B",
+      "text": "Flybridge seating upholstery is deteriorating and should be replaced. The structure remains serviceable."
+    },
+    {
+      "section": "Flybridge Seating",
+      "rating": "A",
+      "text": "Flybridge seating shows structural compromise or severe deterioration. Immediate replacement is required."
+    },
+    {
+      "section": "Flybridge Storage locker(s)",
+      "rating": "C",
+      "text": "Flybridge storage lockers are in serviceable condition with properly functioning latches and hinges."
+    },
+    {
+      "section": "Flybridge Storage locker(s)",
+      "rating": "B",
+      "text": "Flybridge storage locker latches or hinges show wear and need servicing or replacement. The lockers remain functional."
+    },
+    {
+      "section": "Flybridge Storage locker(s)",
+      "rating": "A",
+      "text": "Flybridge storage lockers are damaged or non-functional. Repair or replacement is required."
+    },
+    {
+      "section": "Flybridge splash shield/windshield",
+      "rating": "C",
+      "text": "The Flybridge splash shield or windshield is in good condition with no cracks or crazing."
+    },
+    {
+      "section": "Flybridge splash shield/windshield",
+      "rating": "B",
+      "text": "The Flybridge windshield shows scratching or crazing but remains transparent and functional. Monitoring is recommended."
+    },
+    {
+      "section": "Flybridge splash shield/windshield",
+      "rating": "A",
+      "text": "The Flybridge windshield is cracked or severely damaged, presenting a structural concern and impairing visibility. Replacement is required."
     }
   ],
   "Flybridge gauges and instrument": [
@@ -3185,6 +3445,21 @@
       "section": "Flood lights and deck lights",
       "rating": "C",
       "text": "All lights are operational."
+    },
+    {
+      "section": "Flybridge Stereo and speakers",
+      "rating": "C",
+      "text": "The Flybridge stereo and speakers are functional and provide good audio quality throughout the Flybridge."
+    },
+    {
+      "section": "Flybridge Stereo and speakers",
+      "rating": "B",
+      "text": "The Flybridge stereo or speakers are partially non-functional or audio quality is degraded. Service or speaker replacement should be considered."
+    },
+    {
+      "section": "Flybridge Stereo and speakers",
+      "rating": "A",
+      "text": "The Flybridge stereo is non-functional. Repair or replacement is required."
     }
   ],
   "Cabin and conveniences": [
@@ -3207,6 +3482,11 @@
       "section": "Chainplates (interior)",
       "rating": "A - Critical",
       "text": "The bulkheads supporting the chainplates showed signs of degradation consistent with water ingress. This condition presented a potentially hazardous situation in which the chainplates, when placed under load, could have torn free from the bulkheads with catastrophic consequences."
+    },
+    {
+      "section": "Chainplates (interior)",
+      "rating": "B",
+      "text": "The interior chainplate sealant is cracking and allowing minor water weeping into the cabin area. Resealing is recommended to prevent moisture damage to bulkheads and structure."
     },
     {
       "section": "Chainplates (interior)",
@@ -4328,6 +4608,21 @@
       "section": "Stuffing box/packing gland/dripless seal",
       "rating": "A",
       "text": "The stuffing box or shaft seal was leaking significantly and requires immediate repair or replacement. The vessel should not be operated until the seal is addressed."
+    },
+    {
+      "section": "Generator valve and sea strainer",
+      "rating": "C",
+      "text": "The generator seacock is operable and moves smoothly. The sea strainer is clean and serviceable."
+    },
+    {
+      "section": "Generator valve and sea strainer",
+      "rating": "B",
+      "text": "The generator sea strainer is dirty and requires cleaning. The seacock is stiff and may benefit from lubrication or servicing."
+    },
+    {
+      "section": "Generator valve and sea strainer",
+      "rating": "A",
+      "text": "The generator seacock is seized and inoperable. The sea strainer is cracked or severely compromised. Immediate professional service is required."
     }
   ],
   "Steering & Hydraulics": [
@@ -4509,6 +4804,11 @@
       "text": "Not tested."
     },
     {
+      "section": "Starter battery(ies)",
+      "rating": "B",
+      "text": "The starter battery cranks the engine slowly, and light surface corrosion is evident on the terminals. The battery should be load-tested and the terminals cleaned. Replacement may be required within one season."
+    },
+    {
       "section": "House battery(ies)",
       "rating": "A",
       "text": "The house batteries lacked proper protection over the positive terminals. Fit insulating covers to reduce short circuit risk."
@@ -4522,6 +4822,11 @@
       "section": "House battery(ies)",
       "rating": "B - no restraint or protection",
       "text": "The house batteries were neither securely restrained nor fitted with proper protection over positive terminals. Restrain batteries and fit terminal protection to meet best practice."
+    },
+    {
+      "section": "House battery(ies)",
+      "rating": "B",
+      "text": "The house battery capacity has been significantly reduced, and some terminal corrosion is evident. The battery voltage is marginal and the unit should be load-tested. Replacement may be needed within one season."
     },
     {
       "section": "House battery(ies)",

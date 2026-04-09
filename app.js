@@ -340,13 +340,13 @@ const ITEM_SNIPPET_MAP = {
   'Flybridge Engine gauges (tachometer, speedometer, fuel, temperature, etc.)': 'Engine gauges',
   'Flybridge Engine gearshift and throttle': 'Engine gearshift and throttle',
   'Flybridge Engine start/stop': 'Engine start and stop',
-  'Flybridge conductivity testing': 'flyridge conductivity testing',
-  'Flybridge drain(s)': 'flyridge drains',
-  'Flybridge floor, seats and coaming (spider cracks, etc.)': 'flyridge, floor, seats and coaming (spider cracks, etc.)',
-  'Flybridge lighting': 'flyridge lighting',
-  'Flybridge percussion testing': 'flyridge percussion testing',
-  'Flybridge table': 'flyridge table',
-  'Flybridge lockers and lazarettes': 'flyridge lockers and lazarettes',
+  'Flybridge conductivity testing': 'Flybridge conductivity testing',
+  'Flybridge drain(s)': 'Flybridge drains',
+  'Flybridge floor, seats and coaming (spider cracks, etc.)': 'Flybridge, floor, seats and coaming (spider cracks, etc.)',
+  'Flybridge lighting': 'Flybridge lighting',
+  'Flybridge percussion testing': 'Flybridge percussion testing',
+  'Flybridge table': 'Flybridge table',
+  'Flybridge lockers and lazarettes': 'Flybridge lockers and lazarettes',
   'Fresh water pump': 'Freshwater pump',
   'Fresh water tank(s) and plumbing': 'Freshwater tank and plumbing',
   'Gearbox general condition/impressions': 'Gearbox general condition and impressions',
@@ -611,13 +611,31 @@ async function exportSurvey(surveyId) {
     };
 
     const json = JSON.stringify(exportData);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
     const vesselName = (survey.vesselName || 'survey').replace(/[^a-zA-Z0-9_-]/g, '_');
     const dateStr = new Date().toISOString().slice(0, 10);
     const filename = `${vesselName}_${dateStr}.json`;
 
+    // Use Web Share API on iOS/mobile (a.click() download doesn't work in Safari PWA)
+    if (navigator.share && navigator.canShare) {
+      const file = new File([json], filename, { type: 'application/json' });
+      if (navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: `Survey: ${survey.vesselName}`,
+            files: [file]
+          });
+          showToast(`Shared: ${filename}`);
+          return;
+        } catch (shareErr) {
+          if (shareErr.name === 'AbortError') return; // User cancelled
+          // Fall through to download approach
+        }
+      }
+    }
+
+    // Fallback: standard download link (works on desktop Chrome)
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = filename;
@@ -626,7 +644,6 @@ async function exportSurvey(surveyId) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    // Show brief success message
     showToast(`Exported: ${filename}`);
   } catch (err) {
     console.error('Export error:', err);
@@ -1026,15 +1043,8 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl) {
   const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
   const textarea = document.getElementById(`sheet-text-${sanitizedLabel}`);
   if (textarea) {
-    // Prevent duplicate insertion — if the snippet is already in the text, skip
-    if (textarea.value.includes(text.trim())) {
-      showToast('Already added');
-      return;
-    }
-    if (textarea.value && !textarea.value.endsWith(' ') && !textarea.value.endsWith('\n')) {
-      textarea.value += ' ';
-    }
-    textarea.value += text;
+    // Replace — tapping a new snippet replaces the previous selection
+    textarea.value = text;
   }
 
   // Highlight the selected card
@@ -6987,17 +6997,8 @@ function insertSnippet(itemLabel, categoryName, text, cardEl) {
   const safeId = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
   const textarea = document.getElementById('text-' + safeId);
   if (textarea) {
-    // Prevent duplicate insertion — if the snippet is already in the text, skip
-    if (textarea.value.includes(text.trim())) {
-      showToast('Already added');
-      return;
-    }
-    // If textarea is empty, replace. If it has content, append with a space.
-    if (textarea.value.trim()) {
-      textarea.value = textarea.value.trim() + ' ' + text;
-    } else {
-      textarea.value = text;
-    }
+    // Replace — tapping a new snippet replaces the previous selection
+    textarea.value = text;
     // Auto-resize
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight + 'px';
