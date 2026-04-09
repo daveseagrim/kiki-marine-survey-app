@@ -2212,10 +2212,6 @@
         "name": "Fuel, water and waste",
         "items": [
           {
-            "type": "media",
-            "label": "Fuel, water and waste photos"
-          },
-          {
             "type": "list",
             "label": "Fuel tank(s)",
             "options": [
