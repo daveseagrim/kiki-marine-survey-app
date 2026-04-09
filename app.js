@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v166';
+const APP_VERSION = 'v167';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -5772,13 +5772,15 @@ async function addInstrumentByPhoto() {
   input.accept = 'image/*';
   input.capture = 'environment';
   input.onchange = async (e) => {
+    try {
+    alert('DEBUG: onchange fired, files=' + (e.target.files ? e.target.files.length : 'none'));
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
     showToast('Saving photo...');
 
     const survey = await getSurvey(currentSurveyId);
-    if (!survey) return;
+    if (!survey) { alert('DEBUG: no survey found'); return; }
     if (!survey.instrumentsElectronics) survey.instrumentsElectronics = [];
 
     for (const file of files) {
@@ -5818,6 +5820,7 @@ async function addInstrumentByPhoto() {
     await saveSurvey(survey);
     showToast('Instrument added — tap Identify to auto-fill details');
     renderInspection(survey);
+    } catch (err) { alert('DEBUG ERROR: ' + err.message + '\n' + err.stack); }
   };
   setCameraActive(true);
   input.click();
