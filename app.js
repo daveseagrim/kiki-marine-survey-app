@@ -5493,9 +5493,17 @@ function forceViewportRecalc() {
   // Strategy 1: Reset scroll position
   window.scrollTo(0, 0);
 
-  // Strategy 2: Use visualViewport API to detect and fix zoom
+  // Strategy 2: Force html/body to full height (iOS PWA fix)
+  // iOS standalone mode can get stuck at a reduced innerHeight after camera
+  const html = document.documentElement;
+  const body = document.body;
+  html.style.height = '100%';
+  body.style.height = '100%';
+  body.style.minHeight = '100vh';
+  body.style.minHeight = '-webkit-fill-available';
+
+  // Strategy 3: Use visualViewport API to detect and fix zoom
   if (window.visualViewport && window.visualViewport.scale > 1.01) {
-    // Viewport is zoomed — force reset by cycling the viewport meta tag
     viewport.content = 'width=device-width, initial-scale=0.99, maximum-scale=0.99, user-scalable=no, viewport-fit=cover';
     setTimeout(() => {
       viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
@@ -5504,29 +5512,34 @@ function forceViewportRecalc() {
     return;
   }
 
-  // Strategy 3: Even if visualViewport looks OK, the layout viewport may
-  // be wrong. Force a full viewport reset cycle.
+  // Strategy 4: Cycle the viewport meta tag to force iOS to recalculate
   viewport.content = 'width=device-width, initial-scale=0.99, maximum-scale=0.99, user-scalable=no, viewport-fit=cover';
 
   requestAnimationFrame(() => {
     viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
     window.scrollTo(0, 0);
 
-    // Strategy 4: After a brief delay, check again and force a second
-    // reset if the viewport is still wrong (Android Chrome can be slow
-    // to recalculate after orientation changes)
+    // Strategy 5: Force a layout recalculation on the app container
     setTimeout(() => {
       if (window.visualViewport && window.visualViewport.scale > 1.01) {
         viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
       }
       window.scrollTo(0, 0);
-      // Force reflow on the app container
       const app = document.getElementById('app');
       if (app) {
         app.style.display = 'none';
         void app.offsetHeight;
         app.style.display = '';
       }
+
+      // Strategy 6: iOS PWA nuclear option — temporarily change body overflow
+      // to force a full re-layout of the viewport
+      body.style.overflow = 'hidden';
+      void body.offsetHeight;
+      setTimeout(() => {
+        body.style.overflow = '';
+        window.scrollTo(0, 0);
+      }, 50);
     }, 300);
   });
 }
@@ -9385,12 +9398,14 @@ async function initApp() {
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && window._cameraActive) {
         setCameraActive(false);
-        // Run recalc at multiple intervals — Android Chrome is unpredictable
-        // about when it finishes resizing after camera return
+        // Run recalc at multiple intervals — iOS PWA can be very slow
+        // to restore the correct viewport after camera return
         forceViewportRecalc();
-        setTimeout(forceViewportRecalc, 200);
+        setTimeout(forceViewportRecalc, 100);
+        setTimeout(forceViewportRecalc, 300);
         setTimeout(forceViewportRecalc, 600);
         setTimeout(forceViewportRecalc, 1200);
+        setTimeout(forceViewportRecalc, 2500);
       }
     });
 
