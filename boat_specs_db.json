@@ -4659,6 +4659,29 @@
       "construction": "Fibreglass"
     },
     {
+      "id": "silverton-34c-1988",
+      "make": "Silverton",
+      "model": "34C",
+      "aliases": [
+        "silverton 34c",
+        "silverton 34 convertible 1988",
+        "34c"
+      ],
+      "yearStart": 1986,
+      "yearEnd": 1993,
+      "type": "powerboat",
+      "loa": "37'7\"",
+      "lwl": "",
+      "beam": "13'10\"",
+      "displacement": "17,441 lbs",
+      "ballast": "",
+      "maxDraft": "3'3\"",
+      "totalSailArea": "",
+      "hullType": "Modified V",
+      "keelType": "",
+      "construction": "Fibreglass"
+    },
+    {
       "id": "silverton-34-convertible",
       "make": "Silverton",
       "model": "34 Convertible",
