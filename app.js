@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v155';
+const APP_VERSION = 'v156';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -9314,26 +9314,34 @@ function toggleProseMode() {
 </html>
   `;
 
-  // Try opening in new tab first; fall back to in-page rendering for iOS
+  // Render report
   if (!html || html.length < 100) {
     console.error('Report HTML is empty or too short:', html?.length);
     alert('Report generation failed — no content was produced.');
     return;
   }
-  const reportWindow = window.open('', '_blank');
-  if (reportWindow && reportWindow.document) {
-    try {
-      reportWindow.document.write(html);
-      reportWindow.document.close();
-    } catch (e) {
-      console.error('Report write error:', e);
-      // Fallback for iOS Chrome: render in current page
-      reportWindow.close();
+
+  // Detect PWA standalone mode (iOS adds to home screen) — window.open
+  // navigates the current page in standalone, so always use in-page rendering
+  const isStandalone = window.navigator.standalone === true
+    || window.matchMedia('(display-mode: standalone)').matches;
+
+  if (isStandalone) {
+    renderReportInPage(html);
+  } else {
+    const reportWindow = window.open('', '_blank');
+    if (reportWindow && reportWindow.document) {
+      try {
+        reportWindow.document.write(html);
+        reportWindow.document.close();
+      } catch (e) {
+        console.error('Report write error:', e);
+        reportWindow.close();
+        renderReportInPage(html);
+      }
+    } else {
       renderReportInPage(html);
     }
-  } else {
-    // Popup blocked or iOS restriction — render in current page
-    renderReportInPage(html);
   }
   } catch (err) {
     console.error('generateReport error:', err);
