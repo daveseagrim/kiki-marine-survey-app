@@ -121,7 +121,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "rudderItem": true
           },
           {
             "type": "list",
@@ -133,7 +134,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "rudderItem": true
           },
           {
             "type": "list",
@@ -175,7 +177,8 @@
           },
           {
             "type": "media",
-            "label": "Rudder photo(s)"
+            "label": "Rudder photo(s)",
+            "rudderItem": true
           },
           {
             "type": "list",

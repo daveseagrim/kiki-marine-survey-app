@@ -4809,6 +4809,7 @@ function renderInspection(survey) {
   function shouldShowItem(item) {
     if (isPowerboat && item.sailOnly) return false;
     if (isSailboat && item.powerOnly) return false;
+    if (isPowerboat && item.rudderItem && !survey.hasRudder) return false;
     if (item.conditional) {
       const thrusterRating = survey.items['Bow thruster']?.rating;
       const sternThrusterRating = survey.items['Stern thruster']?.rating;
@@ -4910,6 +4911,21 @@ function renderInspection(survey) {
                   style="padding:8px 12px;border:1px solid #93c5fd;border-radius:6px;font-size:15px;font-weight:600;background:white;color:#1e3a5f;min-width:60px;">
             ${[1,2,3,4].map(n => `<option value="${n}" ${headCount === n ? 'selected' : ''}>${n}</option>`).join('')}
           </select>
+        </div>
+      `;
+    }
+
+    // Rudder toggle for powerboats in hull category
+    if (isPowerboat && categoryName === 'Hull exterior, keel and propulsion') {
+      const hasRudder = !!survey.hasRudder;
+      html += `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:${hasRudder ? '#ecfdf5' : '#fef3c7'};border:1px solid ${hasRudder ? '#6ee7b7' : '#fcd34d'};border-radius:8px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#1e3a5f;cursor:pointer;">
+            <input type="checkbox" id="hasRudderToggle" ${hasRudder ? 'checked' : ''} onchange="toggleHasRudder(this.checked)"
+                   style="width:20px;height:20px;accent-color:#1e3a5f;">
+            This vessel has a rudder
+          </label>
+          <span style="font-size:12px;color:#6b7280;">${hasRudder ? 'Rudder items shown' : 'Rudder items skipped'}</span>
         </div>
       `;
     }
@@ -6865,6 +6881,7 @@ function updateCategoryHeader(survey, categoryName) {
   function shouldShowHeaderItem(item) {
     if (isPowerboat && item.sailOnly) return false;
     if (isSailboat && item.powerOnly) return false;
+    if (isPowerboat && item.rudderItem && !survey.hasRudder) return false;
     if (item.conditional) {
       const thrusterRating = survey.items['Bow thruster']?.rating;
       const sternThrusterRating = survey.items['Stern thruster']?.rating;
@@ -7141,6 +7158,15 @@ function updateItemInPlace(survey, itemLabel) {
 function updateHeadCount(count) {
   getSurvey(currentSurveyId).then(survey => {
     survey.headCount = count;
+    saveSurvey(survey).then(() => {
+      renderInspection(survey);
+    });
+  });
+}
+
+function toggleHasRudder(hasRudder) {
+  getSurvey(currentSurveyId).then(survey => {
+    survey.hasRudder = hasRudder;
     saveSurvey(survey).then(() => {
       renderInspection(survey);
     });
@@ -9355,6 +9381,7 @@ const FirebaseSync = (() => {
   let _syncEnabled = false;
   let _unsubscribeSurveys = null;
   let _suppressLocalWrite = false;  // Prevent echo loops
+  let _lastLocalPushTime = {};      // Track when we last pushed each survey to avoid echo
   let _syncStatus = 'disconnected'; // disconnected | syncing | synced | error
   let _lastSyncTime = null;
 
@@ -9382,6 +9409,7 @@ const FirebaseSync = (() => {
       // Remove any inline base64 that might have leaked into survey data
       delete doc._rev;
       await window.fsDb.collection('surveys').doc(survey.id).set(doc);
+      _lastLocalPushTime[survey.id] = Date.now();
       updateSyncStatusUI('synced', new Date().toLocaleTimeString());
       _lastSyncTime = Date.now();
     } catch (err) {
@@ -9411,6 +9439,10 @@ const FirebaseSync = (() => {
 
         const remoteSurvey = change.doc.data();
         remoteSurvey.id = change.doc.id;
+
+        // Skip echo from our own recent push (within 5 seconds)
+        const lastPush = _lastLocalPushTime[remoteSurvey.id] || 0;
+        if (Date.now() - lastPush < 5000) return;
 
         if (change.type === 'added' || change.type === 'modified') {
           // Check if remote is newer than local
