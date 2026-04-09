@@ -3757,6 +3757,11 @@
       "text": "The depth sounder powered up. However, the vessel was out of the water, and the system was not tested in operation."
     },
     {
+      "section": "Depth sounder",
+      "rating": "Not tested - out of water",
+      "text": "The depth sounder was not tested because the vessel was out of the water."
+    },
+    {
       "section": "Wind instruments",
       "rating": "C",
       "text": "Wind direction and speed appeared to be displayed correctly on the MFD."
