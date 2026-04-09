@@ -5171,15 +5171,71 @@ function ensureReportButton() {
   backupBtn.style.cssText = 'position:fixed;bottom:calc(20px + env(safe-area-inset-bottom, 0px));left:calc(20px + env(safe-area-inset-left, 0px));background:#16a34a;color:white;border:none;border-radius:28px;padding:12px 18px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:100;cursor:pointer;';
   backupBtn.innerHTML = '💾 Backup';
   backupBtn.onclick = async () => {
-    // Save scroll position and open accordion state before export
-    const content = document.querySelector('.content');
-    const scrollPos = content ? content.scrollTop : 0;
-    await exportSurvey(currentSurveyId);
-    window._hasUnsavedBackup = false;
-    // Restore scroll position after brief delay (export may cause reflow)
-    setTimeout(() => {
-      if (content) content.scrollTop = scrollPos;
-    }, 100);
+    if (window.fsDb && FirebaseSync.isEnabled()) {
+      // Firebase backup — stays on page
+      backupBtn.innerHTML = '💾 Saving…';
+      backupBtn.disabled = true;
+      try {
+        const survey = await getSurvey(currentSurveyId);
+        if (!survey) { showToast('Survey not found'); return; }
+
+        // Gather all photos for this survey
+        const photos = await new Promise((resolve) => {
+          const tx = db.transaction(['photos'], 'readonly');
+          const store = tx.objectStore('photos');
+          const index = store.index('surveyId');
+          const range = IDBKeyRange.only(currentSurveyId);
+          const results = [];
+          index.openCursor(range).onsuccess = (event) => {
+            const cursor = event.target.result;
+            if (cursor) {
+              results.push(cursor.value);
+              cursor.continue();
+            } else {
+              resolve(results);
+            }
+          };
+        });
+
+        const exportData = {
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          appVersion: 'kiki-marine-v148',
+          survey: survey,
+          photos: photos
+        };
+
+        const vesselName = (survey.vesselName || 'survey').replace(/[^a-zA-Z0-9_-]/g, '_');
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const timeStr = new Date().toISOString().slice(11, 19).replace(/:/g, '');
+        const docId = `${vesselName}_${dateStr}_${timeStr}`;
+
+        await window.fsDb.collection('backups').doc(docId).set({
+          surveyId: currentSurveyId,
+          vesselName: survey.vesselName || '',
+          exportedAt: new Date().toISOString(),
+          data: JSON.stringify(exportData)
+        });
+
+        window._hasUnsavedBackup = false;
+        showToast(`Backed up to cloud: ${vesselName}`);
+      } catch (err) {
+        console.error('Firebase backup error:', err);
+        showToast('Backup failed — ' + err.message);
+      } finally {
+        backupBtn.innerHTML = '💾 Backup';
+        backupBtn.disabled = false;
+      }
+    } else {
+      // Fallback: file export (share sheet / download)
+      const content = document.querySelector('.content');
+      const scrollPos = content ? content.scrollTop : 0;
+      await exportSurvey(currentSurveyId);
+      window._hasUnsavedBackup = false;
+      setTimeout(() => {
+        if (content) content.scrollTop = scrollPos;
+      }, 100);
+    }
   };
   document.body.appendChild(backupBtn);
 
