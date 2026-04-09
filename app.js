@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v172';
+const APP_VERSION = 'v173';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -5687,53 +5687,51 @@ async function removeCustomSafetyItem(idx) {
 
 // Capture photo for a safety equipment item
 async function captureSafetyPhoto(idx) {
+  if (window._safetyPhotoBusy) return;
+  window._safetyPhotoBusy = true;
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
   input.capture = 'environment';
-  input.multiple = true;
   input.onchange = async (e) => {
     const files = Array.from(e.target.files);
-    if (files.length === 0) return;
+    if (files.length === 0) { window._safetyPhotoBusy = false; return; }
 
-    if (files.length > 1) showToast(`Saving ${files.length} photos...`);
+    showToast('Saving photo...');
 
     const survey = await getSurvey(currentSurveyId);
-    if (!survey || !survey.safetyEquipment[idx]) return;
+    if (!survey || !survey.safetyEquipment[idx]) { window._safetyPhotoBusy = false; return; }
 
     if (!survey.safetyEquipment[idx].photos) {
       survey.safetyEquipment[idx].photos = [];
     }
 
-    for (const file of files) {
-      await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = async (re) => {
-          const stampedDataUrl = await addDateStampToPhoto(re.target.result);
-          const photoId = `safety_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-          const photo = {
-            id: photoId,
-            surveyId: currentSurveyId,
-            itemLabel: `safety_eq_${idx}`,
-            dataUrl: stampedDataUrl,
-            annotated: false,
-            createdAt: new Date().toISOString()
-          };
-          await savePhoto(photo);
-          survey.safetyEquipment[idx].photos.push(photoId);
-          resolve();
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    await saveSurvey(survey);
-    showToast(`${files.length} photo${files.length > 1 ? 's' : ''} saved`);
-    // Refresh thumbnails inline
-    loadSafetyThumbnails(idx, survey.safetyEquipment[idx].photos);
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = async (re) => {
+      const stampedDataUrl = await addDateStampToPhoto(re.target.result);
+      const photoId = `safety_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+      const photo = {
+        id: photoId,
+        surveyId: currentSurveyId,
+        itemLabel: `safety_eq_${idx}`,
+        dataUrl: stampedDataUrl,
+        annotated: false,
+        createdAt: new Date().toISOString()
+      };
+      await savePhoto(photo);
+      survey.safetyEquipment[idx].photos.push(photoId);
+      await saveSurvey(survey);
+      showToast('Photo saved');
+      loadSafetyThumbnails(idx, survey.safetyEquipment[idx].photos);
+      window._safetyPhotoBusy = false;
+    };
+    reader.readAsDataURL(file);
   };
   setCameraActive(true);
   input.click();
+  // Release lock if user cancels the camera
+  setTimeout(() => { window._safetyPhotoBusy = false; }, 60000);
 }
 
 // Load thumbnails for a safety equipment item — with delete buttons
