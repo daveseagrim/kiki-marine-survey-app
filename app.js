@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v171';
+const APP_VERSION = 'v172';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -5736,7 +5736,7 @@ async function captureSafetyPhoto(idx) {
   input.click();
 }
 
-// Load thumbnails for a safety equipment item
+// Load thumbnails for a safety equipment item — with delete buttons
 async function loadSafetyThumbnails(idx, photoIds) {
   const container = document.getElementById(`safety-thumbs-${idx}`);
   if (!container || !photoIds || photoIds.length === 0) {
@@ -5747,10 +5747,44 @@ async function loadSafetyThumbnails(idx, photoIds) {
   for (const pid of photoIds) {
     const photo = await getPhotoById(pid);
     if (photo) {
-      thumbsHtml += `<img src="${photo.dataUrl}" style="width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', 'safety_eq_${idx}')" />`;
+      thumbsHtml += `<div style="position:relative;display:inline-block;">
+        <img src="${photo.dataUrl}" style="width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid #ddd;cursor:pointer;" onclick="viewSafetyPhoto('${pid}')" />
+        <button onclick="deleteSafetyPhoto(${idx}, '${pid}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;line-height:20px;text-align:center;cursor:pointer;padding:0;">✕</button>
+      </div>`;
     }
   }
   container.innerHTML = thumbsHtml;
+}
+
+// View a safety photo full-screen
+function viewSafetyPhoto(photoId) {
+  getPhotoById(photoId).then(photo => {
+    if (!photo) return;
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:10000;display:flex;align-items:center;justify-content:center;';
+    modal.innerHTML = `<img src="${photo.dataUrl}" style="max-width:95%;max-height:90%;object-fit:contain;border-radius:8px;" />
+      <button style="position:absolute;top:20px;right:20px;background:white;border:none;border-radius:50%;width:36px;height:36px;font-size:20px;cursor:pointer;font-weight:bold;">✕</button>`;
+    modal.onclick = () => modal.remove();
+    document.body.appendChild(modal);
+  });
+}
+
+// Delete a single safety equipment photo
+async function deleteSafetyPhoto(idx, photoId) {
+  if (!confirm('Delete this photo?')) return;
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !survey.safetyEquipment[idx]) return;
+  // Remove from photos array
+  survey.safetyEquipment[idx].photos = (survey.safetyEquipment[idx].photos || []).filter(p => p !== photoId);
+  await saveSurvey(survey);
+  // Delete photo from IndexedDB
+  try {
+    const tx = db.transaction('photos', 'readwrite');
+    tx.objectStore('photos').delete(photoId);
+  } catch(e) { /* ignore */ }
+  // Refresh thumbnails
+  loadSafetyThumbnails(idx, survey.safetyEquipment[idx].photos);
+  showToast('Photo deleted');
 }
 
 // Load all safety thumbnails after rendering
