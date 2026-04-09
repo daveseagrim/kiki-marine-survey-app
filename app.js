@@ -2138,7 +2138,8 @@ function renderNewSurveyForm() {
   app.innerHTML = `
     <div class="header">
       <button class="header-back" onclick="confirmAbandonNewSurvey()">←</button>
-      <div class="header-title">New Survey</div>
+      <div class="header-title" style="flex:1;">New Survey</div>
+      <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
     </div>
     <div class="content">
       <h2 class="form-heading">Vessel Information</h2>
@@ -2849,6 +2850,9 @@ function renderNewSurveyForm() {
     </div>
   `;
 
+  // Refresh sync status dot for this view
+  if (typeof FirebaseSync !== 'undefined') FirebaseSync.refreshUI();
+
   // Auto-populate exchange rate
   fetchExchangeRate();
 
@@ -3283,12 +3287,16 @@ function editSurveyDetails(surveyId) {
     if (header) {
       header.innerHTML = `
         <button class="header-back" onclick="returnToInspection('${survey.id}')">←</button>
-        <div>
+        <div style="flex:1;">
           <div class="header-title">${(survey.vesselName || 'Survey').replace(/</g, '&lt;')}</div>
           <div class="header-subtitle">Edit Vessel Information</div>
         </div>
+        <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
       `;
     }
+
+    // Refresh sync status dot for this view
+    if (typeof FirebaseSync !== 'undefined') FirebaseSync.refreshUI();
 
     // Change form action buttons
     const formActions = document.querySelector('.form-actions');
@@ -4763,12 +4771,16 @@ function renderInspection(survey) {
         <div class="header-subtitle">Inspection</div>
       </div>
       <button onclick="editSurveyDetails('${survey.id}')" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">✏️ Edit Intro</button>
+      <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;margin-left:6px;" title="Sync status"></div>
     </div>
     ${surveyTypeBanner}
     <div class="content" id="inspection-content">
       <div style="text-align: center; padding: 20px;">Loading inspection items...</div>
     </div>
   `;
+
+  // Refresh sync status dot for this view
+  if (typeof FirebaseSync !== 'undefined') FirebaseSync.refreshUI();
 
   // Count and identify rated items
   const activeTemplate = getTemplateForSurvey(survey);
@@ -9336,6 +9348,7 @@ const FirebaseSync = (() => {
   // ── Status UI ──────────────────────────────────────────────────────
   function updateSyncStatusUI(status, detail) {
     _syncStatus = status;
+    _lastSyncTime = detail || null;
     const el = document.getElementById('syncStatusIndicator');
     if (!el) return;
     const colours = { disconnected: '#6b7280', syncing: '#d97706', synced: '#16a34a', error: '#dc2626' };
@@ -9348,14 +9361,14 @@ const FirebaseSync = (() => {
 
   // Upload a single survey to Firestore (without photos — photos go to Storage)
   async function pushSurvey(survey) {
-    if (!_syncEnabled || !window.db) return;
+    if (!_syncEnabled || !window.fsDb) return;
     try {
       // Clone and strip photo dataUrls from the survey object (too large for Firestore 1MB limit)
       const doc = JSON.parse(JSON.stringify(survey));
       doc.lastModified = new Date().toISOString();
       // Remove any inline base64 that might have leaked into survey data
       delete doc._rev;
-      await window.db.collection('surveys').doc(survey.id).set(doc);
+      await window.fsDb.collection('surveys').doc(survey.id).set(doc);
       updateSyncStatusUI('synced', new Date().toLocaleTimeString());
       _lastSyncTime = Date.now();
     } catch (err) {
@@ -9366,9 +9379,9 @@ const FirebaseSync = (() => {
 
   // Delete a survey from Firestore
   async function removeSurvey(surveyId) {
-    if (!_syncEnabled || !window.db) return;
+    if (!_syncEnabled || !window.fsDb) return;
     try {
-      await window.db.collection('surveys').doc(surveyId).delete();
+      await window.fsDb.collection('surveys').doc(surveyId).delete();
       // Also delete all photos for this survey from Storage
       await removeAllPhotosForSurvey(surveyId);
     } catch (err) {
@@ -9378,8 +9391,8 @@ const FirebaseSync = (() => {
 
   // Listen for real-time changes from other devices
   function startListening() {
-    if (!window.db) return;
-    _unsubscribeSurveys = window.db.collection('surveys').onSnapshot(snapshot => {
+    if (!window.fsDb) return;
+    _unsubscribeSurveys = window.fsDb.collection('surveys').onSnapshot(snapshot => {
       snapshot.docChanges().forEach(async change => {
         if (_suppressLocalWrite) return;  // Ignore our own writes
 
@@ -9434,9 +9447,9 @@ const FirebaseSync = (() => {
 
   // Upload a photo to Firebase Storage
   async function pushPhoto(photo) {
-    if (!_syncEnabled || !window.storage || !photo.dataUrl) return;
+    if (!_syncEnabled || !window.fsStorage || !photo.dataUrl) return;
     try {
-      const ref = window.storage.ref(`photos/${photo.surveyId}/${photo.id}`);
+      const ref = window.fsStorage.ref(`photos/${photo.surveyId}/${photo.id}`);
       // Upload the base64 data URL as a blob
       const response = await fetch(photo.dataUrl);
       const blob = await response.blob();
@@ -9446,7 +9459,7 @@ const FirebaseSync = (() => {
       const meta = { ...photo };
       delete meta.dataUrl;
       meta.storageRef = `photos/${photo.surveyId}/${photo.id}`;
-      await window.db.collection('photos').doc(photo.id).set(meta);
+      await window.fsDb.collection('photos').doc(photo.id).set(meta);
     } catch (err) {
       console.error('Firebase pushPhoto error:', err);
     }
@@ -9454,10 +9467,10 @@ const FirebaseSync = (() => {
 
   // Pull all photos for a survey from Firebase Storage into IndexedDB
   async function pullPhotosForSurvey(survey) {
-    if (!_syncEnabled || !window.db || !window.storage) return;
+    if (!_syncEnabled || !window.fsDb || !window.fsStorage) return;
     try {
       // Get photo metadata from Firestore
-      const snap = await window.db.collection('photos')
+      const snap = await window.fsDb.collection('photos')
         .where('surveyId', '==', survey.id)
         .get();
       for (const doc of snap.docs) {
@@ -9469,7 +9482,7 @@ const FirebaseSync = (() => {
         // Download from Storage
         if (meta.storageRef) {
           try {
-            const ref = window.storage.ref(meta.storageRef);
+            const ref = window.fsStorage.ref(meta.storageRef);
             const url = await ref.getDownloadURL();
             const response = await fetch(url);
             const blob = await response.blob();
@@ -9489,15 +9502,15 @@ const FirebaseSync = (() => {
 
   // Remove all photos for a survey from Firebase Storage
   async function removeAllPhotosForSurvey(surveyId) {
-    if (!window.db || !window.storage) return;
+    if (!window.fsDb || !window.fsStorage) return;
     try {
-      const snap = await window.db.collection('photos')
+      const snap = await window.fsDb.collection('photos')
         .where('surveyId', '==', surveyId)
         .get();
       for (const doc of snap.docs) {
         const meta = doc.data();
         if (meta.storageRef) {
-          try { await window.storage.ref(meta.storageRef).delete(); } catch (e) { /* may not exist */ }
+          try { await window.fsStorage.ref(meta.storageRef).delete(); } catch (e) { /* may not exist */ }
         }
         await doc.ref.delete();
       }
@@ -9508,11 +9521,11 @@ const FirebaseSync = (() => {
 
   // Remove a single photo from Firebase Storage
   async function removePhoto(photoId, surveyId) {
-    if (!_syncEnabled || !window.db || !window.storage) return;
+    if (!_syncEnabled || !window.fsDb || !window.fsStorage) return;
     try {
-      const ref = window.storage.ref(`photos/${surveyId}/${photoId}`);
+      const ref = window.fsStorage.ref(`photos/${surveyId}/${photoId}`);
       try { await ref.delete(); } catch (e) { /* may not exist */ }
-      await window.db.collection('photos').doc(photoId).delete();
+      await window.fsDb.collection('photos').doc(photoId).delete();
     } catch (err) {
       console.error('Firebase removePhoto error:', err);
     }
@@ -9530,11 +9543,11 @@ const FirebaseSync = (() => {
 
   // ── Initial Sync (push all local surveys to Firebase on first connect) ─
   async function initialSync() {
-    if (!_syncEnabled || !window.db) return;
+    if (!_syncEnabled || !window.fsDb) return;
     updateSyncStatusUI('syncing', 'Initial sync…');
     try {
       const localSurveys = await getAllSurveys();
-      const remoteSnap = await window.db.collection('surveys').get();
+      const remoteSnap = await window.fsDb.collection('surveys').get();
       const remoteSurveyMap = {};
       remoteSnap.docs.forEach(doc => { remoteSurveyMap[doc.id] = doc.data(); });
 
@@ -9581,7 +9594,7 @@ const FirebaseSync = (() => {
 
   // Push all photos for a given survey to Firebase Storage
   async function pushAllPhotosForSurvey(survey) {
-    if (!window.storage) return;
+    if (!window.fsStorage) return;
     // Collect all photo IDs from the survey
     const photoIds = new Set();
     // Doc photos
@@ -9613,7 +9626,7 @@ const FirebaseSync = (() => {
 
   // ── Public API ─────────────────────────────────────────────────────
   function init() {
-    if (!window.db) {
+    if (!window.fsDb) {
       console.warn('[Sync] Firebase not available — sync disabled');
       return;
     }
@@ -9622,6 +9635,11 @@ const FirebaseSync = (() => {
     startListening();
     initialSync();
     console.log('[Sync] Firebase real-time sync enabled');
+  }
+
+  // Re-apply current sync status to a freshly rendered DOM element
+  function refreshUI() {
+    updateSyncStatusUI(_syncStatus, _lastSyncTime);
   }
 
   function isEnabled() { return _syncEnabled; }
@@ -9636,7 +9654,8 @@ const FirebaseSync = (() => {
     removeSurvey,
     pushPhoto,
     removePhoto,
-    updateSyncStatusUI
+    updateSyncStatusUI,
+    refreshUI
   };
 })();
 

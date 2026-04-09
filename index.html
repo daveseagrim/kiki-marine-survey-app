@@ -642,10 +642,10 @@
         appId: "1:102939863956:web:62d73530de5eec63fdfd81"
       };
       firebase.initializeApp(firebaseConfig);
-      window.db = firebase.firestore();
-      window.storage = firebase.storage();
+      window.fsDb = firebase.firestore();
+      window.fsStorage = firebase.storage();
       // Enable offline persistence for Firestore
-      window.db.enablePersistence({ synchronizeTabs: true }).catch(err => {
+      window.fsDb.enablePersistence({ synchronizeTabs: true }).catch(err => {
         if (err.code === 'failed-precondition') {
           console.warn('Firestore persistence: multiple tabs open, only one can enable.');
         } else if (err.code === 'unimplemented') {
