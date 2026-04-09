@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v167';
+const APP_VERSION = 'v168';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -5772,15 +5772,13 @@ async function addInstrumentByPhoto() {
   input.accept = 'image/*';
   input.capture = 'environment';
   input.onchange = async (e) => {
-    try {
-    alert('DEBUG: onchange fired, files=' + (e.target.files ? e.target.files.length : 'none'));
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
     showToast('Saving photo...');
 
     const survey = await getSurvey(currentSurveyId);
-    if (!survey) { alert('DEBUG: no survey found'); return; }
+    if (!survey) return;
     if (!survey.instrumentsElectronics) survey.instrumentsElectronics = [];
 
     for (const file of files) {
@@ -5820,7 +5818,6 @@ async function addInstrumentByPhoto() {
     await saveSurvey(survey);
     showToast('Instrument added — tap Identify to auto-fill details');
     renderInspection(survey);
-    } catch (err) { alert('DEBUG ERROR: ' + err.message + '\n' + err.stack); }
   };
   setCameraActive(true);
   input.click();
@@ -5956,16 +5953,14 @@ async function identifyInstrument(idx) {
 
   const apiKey = settings && settings.geminiApiKey;
   if (!apiKey) {
-    showToast('Set your Gemini API key in Settings first');
-    // Show settings prompt
-    const doSetup = confirm('AI identification requires a Google Gemini API key (free from aistudio.google.com).\\n\\nWould you like to enter your API key now?');
-    if (doSetup) {
-      const key = prompt('Paste your Gemini API key:');
-      if (key && key.trim()) {
-        await saveGeminiApiKey(key.trim());
-        showToast('API key saved — tap Identify again');
-      }
+    const key = prompt('AI identification requires a free Google Gemini API key.\n\nGet one at aistudio.google.com, then paste it here:');
+    if (key && key.trim()) {
+      await saveGeminiApiKey(key.trim());
+      showToast('API key saved — identifying...');
+      // Continue with identification using the new key
+      return identifyInstrument(idx);
     }
+    showToast('No API key entered — fill in details manually');
     return;
   }
 

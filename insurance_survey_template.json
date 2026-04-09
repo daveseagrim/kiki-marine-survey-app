@@ -756,7 +756,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
@@ -900,7 +901,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
@@ -2099,7 +2101,8 @@
               "Powered up only",
               "Not applicable",
               "Not tested/not verified"
-            ]
+            ],
+            "sailOnly": true
           },
           {
             "type": "list",
