@@ -3190,24 +3190,24 @@
       "text": "The refrigeration unit was not tested because there was no power available to the vessel."
     },
     {
-      "section": "Steering wheel and steering",
+      "section": "Flybridge steering wheel, steering",
       "rating": "A",
-      "text": "The steering wheel was very hard to turn. A qualified mechanic should examine and service the system."
+      "text": "The flybridge steering wheel or steering mechanism was broken or non-functional. Repair or replacement is critical for safe vessel operation from the flybridge."
     },
     {
-      "section": "Steering wheel and steering",
+      "section": "Flybridge steering wheel, steering",
       "rating": "B",
-      "text": "The steering wheel was solidly affixed to the binnacle, and the steering moved from block to block without binding or stiffness. However, the steering friction control was not working."
+      "text": "The flybridge steering wheel operated but with stiffness or excessive play. Service is recommended to restore smooth and reliable operation."
     },
     {
-      "section": "Steering wheel and steering",
+      "section": "Flybridge steering wheel, steering",
       "rating": "C",
-      "text": "Both Flybridge helms were solidly affixed and the steering moved from block to block without binding or stiffness."
+      "text": "The flybridge steering wheel and mechanism operated smoothly and were properly mounted and serviceable."
     },
     {
-      "section": "Steering wheel and steering",
+      "section": "Flybridge steering wheel, steering",
       "rating": "C",
-      "text": "The steering wheel was solidly affixed to the binnacle, and the steering moved from block to block without binding or stiffness."
+      "text": "The flybridge steering wheel was solidly affixed and the steering moved from block to block without binding or stiffness."
     },
     {
       "section": "Magnetic compass",

@@ -374,7 +374,7 @@ const ITEM_SNIPPET_MAP = {
   'Swim platform and ladder - condition and conductivity readings': 'Swim platform and ladder',
   'Swim platform and ladder - condition and moisture readings': 'Swim platform and ladder',
   'Steering wheel, steering': 'Steering wheel and steering',
-  'Flybridge steering wheel, steering': 'Steering wheel and steering',
+  'Flybridge steering wheel, steering': 'Flybridge steering wheel, steering',
   'Cabin windows and hatches (interior observations)': 'Deck hatches, windows and portholes – interior observations',
   'Cabin sole': 'Floor and carpet',
   'Berths and upholstery': 'Upholstery',
@@ -7735,7 +7735,8 @@ function showToast(message) {
 let _openAccordionCategory = null;
 
 function toggleAccordion(button) {
-  const content = button.nextElementSibling;
+  // Find accordion-content (may not be nextElementSibling if flagged-summary div is in between)
+  const content = button.parentElement.querySelector('.accordion-content');
   if (!content) return;
   const isOpen = content.style.display !== 'none';
 
@@ -7743,7 +7744,8 @@ function toggleAccordion(button) {
   document.querySelectorAll('.accordion-content').forEach(el => {
     if (el !== content && el.style.display !== 'none') {
       el.style.display = 'none';
-      const otherChevron = el.previousElementSibling?.querySelector('span:last-child');
+      const otherHeader = el.parentElement.querySelector('.accordion-header');
+      const otherChevron = otherHeader?.querySelector('span:last-child');
       if (otherChevron) otherChevron.style.transform = 'rotate(0deg)';
     }
   });
@@ -8189,6 +8191,7 @@ async function backToHome() {
 
 // Report generation
 async function generateReport() {
+  try {
   const survey = await getSurvey(currentSurveyId);
   if (!survey) return;
 
@@ -9311,12 +9314,18 @@ function toggleProseMode() {
   `;
 
   // Try opening in new tab first; fall back to in-page rendering for iOS
+  if (!html || html.length < 100) {
+    console.error('Report HTML is empty or too short:', html?.length);
+    alert('Report generation failed — no content was produced.');
+    return;
+  }
   const reportWindow = window.open('', '_blank');
   if (reportWindow && reportWindow.document) {
     try {
       reportWindow.document.write(html);
       reportWindow.document.close();
     } catch (e) {
+      console.error('Report write error:', e);
       // Fallback for iOS Chrome: render in current page
       reportWindow.close();
       renderReportInPage(html);
@@ -9324,6 +9333,10 @@ function toggleProseMode() {
   } else {
     // Popup blocked or iOS restriction — render in current page
     renderReportInPage(html);
+  }
+  } catch (err) {
+    console.error('generateReport error:', err);
+    alert('Report generation failed: ' + err.message);
   }
 }
 
