@@ -1983,6 +1983,7 @@ function renderHome() {
           <div class="header-subtitle">Marine Vessel Surveys</div>
         </div>
       </div>
+      <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
     </div>
     <div class="content" id="surveys-content">
       <div style="text-align: center; padding: 20px;">
@@ -9312,11 +9313,381 @@ async function initApp() {
     }
 
     renderHome();
+
+    // Initialize Firebase real-time sync (non-blocking)
+    try { FirebaseSync.init(); } catch (syncErr) { console.warn('Sync init error:', syncErr); }
   } catch (e) {
     console.error('Init error:', e);
     document.getElementById('app').innerHTML = `<div style="padding: 20px; color: red;">Error initializing app: ${e.message}</div>`;
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FIREBASE REAL-TIME SYNC MODULE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const FirebaseSync = (() => {
+  let _syncEnabled = false;
+  let _unsubscribeSurveys = null;
+  let _suppressLocalWrite = false;  // Prevent echo loops
+  let _syncStatus = 'disconnected'; // disconnected | syncing | synced | error
+  let _lastSyncTime = null;
+
+  // ── Status UI ──────────────────────────────────────────────────────
+  function updateSyncStatusUI(status, detail) {
+    _syncStatus = status;
+    const el = document.getElementById('syncStatusIndicator');
+    if (!el) return;
+    const colours = { disconnected: '#6b7280', syncing: '#d97706', synced: '#16a34a', error: '#dc2626' };
+    const labels = { disconnected: 'Offline', syncing: 'Syncing…', synced: 'Synced', error: 'Sync error' };
+    el.style.background = colours[status] || '#6b7280';
+    el.title = (labels[status] || status) + (detail ? ' — ' + detail : '');
+  }
+
+  // ── Survey Sync (Firestore) ────────────────────────────────────────
+
+  // Upload a single survey to Firestore (without photos — photos go to Storage)
+  async function pushSurvey(survey) {
+    if (!_syncEnabled || !window.db) return;
+    try {
+      // Clone and strip photo dataUrls from the survey object (too large for Firestore 1MB limit)
+      const doc = JSON.parse(JSON.stringify(survey));
+      doc.lastModified = new Date().toISOString();
+      // Remove any inline base64 that might have leaked into survey data
+      delete doc._rev;
+      await window.db.collection('surveys').doc(survey.id).set(doc);
+      updateSyncStatusUI('synced', new Date().toLocaleTimeString());
+      _lastSyncTime = Date.now();
+    } catch (err) {
+      console.error('Firebase pushSurvey error:', err);
+      updateSyncStatusUI('error', err.message);
+    }
+  }
+
+  // Delete a survey from Firestore
+  async function removeSurvey(surveyId) {
+    if (!_syncEnabled || !window.db) return;
+    try {
+      await window.db.collection('surveys').doc(surveyId).delete();
+      // Also delete all photos for this survey from Storage
+      await removeAllPhotosForSurvey(surveyId);
+    } catch (err) {
+      console.error('Firebase removeSurvey error:', err);
+    }
+  }
+
+  // Listen for real-time changes from other devices
+  function startListening() {
+    if (!window.db) return;
+    _unsubscribeSurveys = window.db.collection('surveys').onSnapshot(snapshot => {
+      snapshot.docChanges().forEach(async change => {
+        if (_suppressLocalWrite) return;  // Ignore our own writes
+
+        const remoteSurvey = change.doc.data();
+        remoteSurvey.id = change.doc.id;
+
+        if (change.type === 'added' || change.type === 'modified') {
+          // Check if remote is newer than local
+          const localSurvey = await getSurvey(remoteSurvey.id);
+          const remoteTime = new Date(remoteSurvey.lastModified || remoteSurvey.createdAt || 0).getTime();
+          const localTime = localSurvey
+            ? new Date(localSurvey.lastModified || localSurvey.createdAt || 0).getTime()
+            : 0;
+
+          if (!localSurvey || remoteTime > localTime) {
+            // Remote is newer — save locally (skip re-syncing to Firebase)
+            _suppressLocalWrite = true;
+            await saveSurvey(remoteSurvey);
+            _suppressLocalWrite = false;
+            console.log(`[Sync] Updated local survey: ${remoteSurvey.vesselName || remoteSurvey.id}`);
+
+            // Pull any photos from Storage for this survey
+            await pullPhotosForSurvey(remoteSurvey);
+
+            // Refresh UI if we're on the home page or viewing this survey
+            if (!currentSurveyId) {
+              renderHome();
+            } else if (currentSurveyId === remoteSurvey.id) {
+              // Show a subtle toast rather than disrupting the current view
+              showToast('Survey updated from another device', 2000);
+            }
+          }
+        } else if (change.type === 'removed') {
+          const localSurvey = await getSurvey(remoteSurvey.id);
+          if (localSurvey) {
+            _suppressLocalWrite = true;
+            await deleteSurvey(remoteSurvey.id);
+            _suppressLocalWrite = false;
+            console.log(`[Sync] Deleted local survey: ${remoteSurvey.id}`);
+            if (!currentSurveyId) renderHome();
+          }
+        }
+      });
+      updateSyncStatusUI('synced', new Date().toLocaleTimeString());
+    }, err => {
+      console.error('Firestore listener error:', err);
+      updateSyncStatusUI('error', err.message);
+    });
+  }
+
+  // ── Photo Sync (Firebase Storage) ──────────────────────────────────
+
+  // Upload a photo to Firebase Storage
+  async function pushPhoto(photo) {
+    if (!_syncEnabled || !window.storage || !photo.dataUrl) return;
+    try {
+      const ref = window.storage.ref(`photos/${photo.surveyId}/${photo.id}`);
+      // Upload the base64 data URL as a blob
+      const response = await fetch(photo.dataUrl);
+      const blob = await response.blob();
+      await ref.put(blob);
+
+      // Store metadata (minus the dataUrl) in Firestore for photo discovery
+      const meta = { ...photo };
+      delete meta.dataUrl;
+      meta.storageRef = `photos/${photo.surveyId}/${photo.id}`;
+      await window.db.collection('photos').doc(photo.id).set(meta);
+    } catch (err) {
+      console.error('Firebase pushPhoto error:', err);
+    }
+  }
+
+  // Pull all photos for a survey from Firebase Storage into IndexedDB
+  async function pullPhotosForSurvey(survey) {
+    if (!_syncEnabled || !window.db || !window.storage) return;
+    try {
+      // Get photo metadata from Firestore
+      const snap = await window.db.collection('photos')
+        .where('surveyId', '==', survey.id)
+        .get();
+      for (const doc of snap.docs) {
+        const meta = doc.data();
+        // Check if we already have this photo locally
+        const local = await getPhotoById(meta.id);
+        if (local && local.dataUrl) continue;  // Already have it
+
+        // Download from Storage
+        if (meta.storageRef) {
+          try {
+            const ref = window.storage.ref(meta.storageRef);
+            const url = await ref.getDownloadURL();
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const dataUrl = await blobToDataUrl(blob);
+            const photo = { ...meta, dataUrl };
+            await savePhoto(photo);
+            console.log(`[Sync] Downloaded photo: ${meta.id}`);
+          } catch (dlErr) {
+            console.warn(`[Sync] Could not download photo ${meta.id}:`, dlErr);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Firebase pullPhotos error:', err);
+    }
+  }
+
+  // Remove all photos for a survey from Firebase Storage
+  async function removeAllPhotosForSurvey(surveyId) {
+    if (!window.db || !window.storage) return;
+    try {
+      const snap = await window.db.collection('photos')
+        .where('surveyId', '==', surveyId)
+        .get();
+      for (const doc of snap.docs) {
+        const meta = doc.data();
+        if (meta.storageRef) {
+          try { await window.storage.ref(meta.storageRef).delete(); } catch (e) { /* may not exist */ }
+        }
+        await doc.ref.delete();
+      }
+    } catch (err) {
+      console.error('Firebase removeAllPhotos error:', err);
+    }
+  }
+
+  // Remove a single photo from Firebase Storage
+  async function removePhoto(photoId, surveyId) {
+    if (!_syncEnabled || !window.db || !window.storage) return;
+    try {
+      const ref = window.storage.ref(`photos/${surveyId}/${photoId}`);
+      try { await ref.delete(); } catch (e) { /* may not exist */ }
+      await window.db.collection('photos').doc(photoId).delete();
+    } catch (err) {
+      console.error('Firebase removePhoto error:', err);
+    }
+  }
+
+  // Helper: convert Blob to data URL
+  function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  // ── Initial Sync (push all local surveys to Firebase on first connect) ─
+  async function initialSync() {
+    if (!_syncEnabled || !window.db) return;
+    updateSyncStatusUI('syncing', 'Initial sync…');
+    try {
+      const localSurveys = await getAllSurveys();
+      const remoteSnap = await window.db.collection('surveys').get();
+      const remoteSurveyMap = {};
+      remoteSnap.docs.forEach(doc => { remoteSurveyMap[doc.id] = doc.data(); });
+
+      // Push local surveys that are newer or missing from remote
+      for (const local of localSurveys) {
+        const remote = remoteSurveyMap[local.id];
+        const localTime = new Date(local.lastModified || local.createdAt || 0).getTime();
+        const remoteTime = remote ? new Date(remote.lastModified || remote.createdAt || 0).getTime() : 0;
+
+        if (!remote || localTime > remoteTime) {
+          await pushSurvey(local);
+          // Push all photos for this survey
+          await pushAllPhotosForSurvey(local);
+          console.log(`[Sync] Pushed survey to cloud: ${local.vesselName || local.id}`);
+        } else if (remoteTime > localTime) {
+          // Remote is newer — pull it
+          _suppressLocalWrite = true;
+          remote.id = local.id;
+          await saveSurvey(remote);
+          _suppressLocalWrite = false;
+          await pullPhotosForSurvey(remote);
+          console.log(`[Sync] Pulled survey from cloud: ${remote.vesselName || remote.id}`);
+        }
+        delete remoteSurveyMap[local.id];
+      }
+
+      // Pull any remote surveys that don't exist locally
+      for (const [id, remote] of Object.entries(remoteSurveyMap)) {
+        remote.id = id;
+        _suppressLocalWrite = true;
+        await saveSurvey(remote);
+        _suppressLocalWrite = false;
+        await pullPhotosForSurvey(remote);
+        console.log(`[Sync] Pulled new survey from cloud: ${remote.vesselName || id}`);
+      }
+
+      updateSyncStatusUI('synced', 'Initial sync complete');
+      renderHome();  // Refresh to show any new surveys
+    } catch (err) {
+      console.error('Initial sync error:', err);
+      updateSyncStatusUI('error', err.message);
+    }
+  }
+
+  // Push all photos for a given survey to Firebase Storage
+  async function pushAllPhotosForSurvey(survey) {
+    if (!window.storage) return;
+    // Collect all photo IDs from the survey
+    const photoIds = new Set();
+    // Doc photos
+    ['hinPhoto', 'compliancePhoto', 'licencePhoto', 'tcPaperLicencePhoto', 'coverPhoto',
+     'enginePhoto', 'enginePlatePhoto', 'transmissionPhoto', 'transmissionPlatePhoto',
+     'engine2Photo', 'engine2PlatePhoto', 'transmission2Photo', 'transmission2PlatePhoto',
+     'fourCornerPortBow', 'fourCornerStbdBow', 'fourCornerPortStern', 'fourCornerStbdStern'
+    ].forEach(key => { if (survey[key]) photoIds.add(survey[key]); });
+    // Item photos
+    if (survey.items) {
+      Object.values(survey.items).forEach(item => {
+        if (item.photos) item.photos.forEach(pid => photoIds.add(pid));
+      });
+    }
+    // Safety equipment photos
+    if (survey.safetyEquipment) {
+      survey.safetyEquipment.forEach(eq => {
+        if (eq.photos) eq.photos.forEach(pid => photoIds.add(pid));
+      });
+    }
+
+    for (const pid of photoIds) {
+      const photo = await getPhotoById(pid);
+      if (photo && photo.dataUrl) {
+        await pushPhoto(photo);
+      }
+    }
+  }
+
+  // ── Public API ─────────────────────────────────────────────────────
+  function init() {
+    if (!window.db) {
+      console.warn('[Sync] Firebase not available — sync disabled');
+      return;
+    }
+    _syncEnabled = true;
+    updateSyncStatusUI('syncing', 'Connecting…');
+    startListening();
+    initialSync();
+    console.log('[Sync] Firebase real-time sync enabled');
+  }
+
+  function isEnabled() { return _syncEnabled; }
+
+  function isSuppressed() { return _suppressLocalWrite; }
+
+  return {
+    init,
+    isEnabled,
+    isSuppressed,
+    pushSurvey,
+    removeSurvey,
+    pushPhoto,
+    removePhoto,
+    updateSyncStatusUI
+  };
+})();
+
+
+// ── Hook saveSurvey to also push to Firebase ─────────────────────────────────
+const _originalSaveSurvey = saveSurvey;
+saveSurvey = async function(survey) {
+  // Add lastModified timestamp for sync conflict resolution
+  if (!FirebaseSync.isSuppressed()) {
+    survey.lastModified = new Date().toISOString();
+  }
+  const result = await _originalSaveSurvey(survey);
+  // Push to Firebase (non-blocking)
+  if (FirebaseSync.isEnabled() && !FirebaseSync.isSuppressed()) {
+    FirebaseSync.pushSurvey(survey).catch(err => console.error('[Sync] Push failed:', err));
+  }
+  return result;
+};
+
+// ── Hook savePhoto to also push to Firebase Storage ──────────────────────────
+const _originalSavePhoto = savePhoto;
+savePhoto = async function(photo) {
+  const result = await _originalSavePhoto(photo);
+  if (FirebaseSync.isEnabled() && !FirebaseSync.isSuppressed()) {
+    FirebaseSync.pushPhoto(photo).catch(err => console.error('[Sync] Photo push failed:', err));
+  }
+  return result;
+};
+
+// ── Hook deletePhoto to also remove from Firebase ────────────────────────────
+const _originalDeletePhoto = deletePhoto;
+deletePhoto = async function(photoId) {
+  // Get the photo first to know its surveyId
+  const photo = await getPhotoById(photoId);
+  const result = await _originalDeletePhoto(photoId);
+  if (FirebaseSync.isEnabled() && photo) {
+    FirebaseSync.removePhoto(photoId, photo.surveyId).catch(err => console.error('[Sync] Photo delete failed:', err));
+  }
+  return result;
+};
+
+// ── Hook deleteSurvey to also remove from Firebase ───────────────────────────
+const _originalDeleteSurvey = deleteSurvey;
+deleteSurvey = async function(id) {
+  const result = await _originalDeleteSurvey(id);
+  if (FirebaseSync.isEnabled() && !FirebaseSync.isSuppressed()) {
+    FirebaseSync.removeSurvey(id).catch(err => console.error('[Sync] Survey delete failed:', err));
+  }
+  return result;
+};
+
 
 // Start app when DOM ready
 if (document.readyState === 'loading') {

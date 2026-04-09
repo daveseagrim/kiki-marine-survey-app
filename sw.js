@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v134';
+const CACHE_NAME = 'kiki-marine-v135';
 const URLS_TO_CACHE = [
   './',
   'index.html',
@@ -18,6 +18,9 @@ const URLS_TO_CACHE = [
   'icon-192-maskable.png',
   'icon-512-maskable.png',
   'https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png',
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js',
 ];
 
 // Install event - cache essential files (tolerates individual failures
@@ -63,8 +66,18 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   // Don't intercept external API calls (weather, location search, map tiles, etc.)
-  // Let them go straight to the network so errors propagate properly
-  if (url.origin !== self.location.origin) {
+  // Let them go straight to the network so errors propagate properly.
+  // Exception: Firebase SDK files from gstatic.com — serve from cache for offline
+  const isFirebaseSDK = url.origin === 'https://www.gstatic.com' && url.pathname.includes('firebasejs');
+  if (url.origin !== self.location.origin && !isFirebaseSDK) {
+    return;
+  }
+
+  // Firebase SDK: cache-first (they're versioned, so the cached version is always correct)
+  if (isFirebaseSDK) {
+    event.respondWith(
+      caches.match(event.request).then(cached => cached || fetch(event.request))
+    );
     return;
   }
 

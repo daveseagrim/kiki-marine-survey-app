@@ -627,6 +627,32 @@
 </head>
 <body>
     <div id="app"></div>
+    <!-- Firebase SDK (compat mode for vanilla JS — no bundler needed) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+    <script>
+      // Initialize Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyBBb3LJCWhm-SCyH9VwInFWl0Alpxaf-qE",
+        authDomain: "kiki-marine.firebaseapp.com",
+        projectId: "kiki-marine",
+        storageBucket: "kiki-marine.firebasestorage.app",
+        messagingSenderId: "102939863956",
+        appId: "1:102939863956:web:62d73530de5eec63fdfd81"
+      };
+      firebase.initializeApp(firebaseConfig);
+      window.db = firebase.firestore();
+      window.storage = firebase.storage();
+      // Enable offline persistence for Firestore
+      window.db.enablePersistence({ synchronizeTabs: true }).catch(err => {
+        if (err.code === 'failed-precondition') {
+          console.warn('Firestore persistence: multiple tabs open, only one can enable.');
+        } else if (err.code === 'unimplemented') {
+          console.warn('Firestore persistence: not supported in this browser.');
+        }
+      });
+    </script>
     <script src="app.js"></script>
 </body>
 </html>
