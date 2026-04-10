@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v186';
+const APP_VERSION = 'v187';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1781,7 +1781,6 @@ function showNotesSheet(itemLabel, categoryName) {
       builderLookupLabel = itemLabel.substring(driveLinePrefixMatch[0].length);
     }
     // Exact match first
-    console.log('[Builder] Looking up:', JSON.stringify(builderLookupLabel), 'from item:', JSON.stringify(itemLabel));
     let builderKey = COMPONENT_BUILDERS[builderLookupLabel] ? builderLookupLabel : null;
     if (!builderKey) {
       // Normalized match — strip "(s)", punctuation, and collapse whitespace so
@@ -1801,11 +1800,9 @@ function showNotesSheet(itemLabel, categoryName) {
                kLower.startsWith(itemLower.substring(0, Math.min(itemLower.length, 12)));
       });
     }
-    console.log('[Builder] Result:', builderKey ? 'FOUND -> ' + builderKey : 'NOT FOUND');
     if (builderKey) {
       const savedSelections = itemData.componentSelections || {};
       componentBuilderHtml = renderComponentBuilder(builderKey, itemLabel, savedSelections, categoryName);
-      console.log('[Builder] HTML length:', componentBuilderHtml.length);
     }
 
     const overlay = document.createElement('div');
@@ -1815,9 +1812,6 @@ function showNotesSheet(itemLabel, categoryName) {
       <div class="bottom-sheet" onclick="event.stopPropagation();">
         <div class="bottom-sheet-handle"></div>
         <div class="bottom-sheet-title">${itemLabel} — Notes</div>
-        <div style="padding:6px 20px;background:${builderKey ? '#d1fae5' : '#fee2e2'};font-size:12px;font-weight:700;color:${builderKey ? '#065f46' : '#991b1b'};">
-          DEBUG: builder=${builderKey ? 'YES → ' + builderKey : 'NO'} | lookup="${builderLookupLabel}" | htmlLen=${componentBuilderHtml.length} | keys=${Object.keys(COMPONENT_BUILDERS).length}
-        </div>
         ${mastOptionsHtml}
         ${outdriveOptionsHtml}
         ${winchOptionsHtml}
