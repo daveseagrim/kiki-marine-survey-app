@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v187';
+const APP_VERSION = 'v188';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -331,18 +331,42 @@ const COMPONENT_BUILDERS = {
         ]
       },
       {
-        name: 'Anodes',
-        key: 'anodes',
-        quantityPrompt: 'How many anodes?',
-        locationPrompt: 'Location(s)',
-        locationMultiSelect: true,
-        locationOptions: ['drive housing', 'cavitation plate', 'trim tab'],
+        name: 'Anode — drive housing',
+        key: 'anodeDriveHousing',
+        quantityPrompt: 'How many?',
         options: [
           { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'New or recently replaced', rating: 'C', fragment: 'The drive anodes appeared new or recently replaced with full material remaining.' },
-          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The drive anodes had adequate material remaining.' },
-          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: '{qty} anode(s) on the {location} were more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
-          { label: 'Severely depleted or missing', rating: 'A', fragment: 'The drive anodes were severely depleted or missing. Per ABYC E-2, sacrificial anodes must be maintained. New anodes must be installed before the vessel is placed in the water.' }
+          { label: 'Not present on this vessel', rating: null, fragment: '' },
+          { label: 'New or recently replaced', rating: 'C', fragment: 'The drive housing anode appeared new or recently replaced.' },
+          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The drive housing anode had adequate material remaining.' },
+          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: 'The drive housing anode was more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
+          { label: 'Severely depleted or missing', rating: 'A', fragment: 'The drive housing anode was severely depleted or missing. Per ABYC E-2, a new anode must be installed before the vessel is placed in the water.' }
+        ]
+      },
+      {
+        name: 'Anode — cavitation plate',
+        key: 'anodeCavitationPlate',
+        quantityPrompt: 'How many?',
+        options: [
+          { label: 'Not inspected', rating: null, fragment: '' },
+          { label: 'Not present on this vessel', rating: null, fragment: '' },
+          { label: 'New or recently replaced', rating: 'C', fragment: 'The cavitation plate anode appeared new or recently replaced.' },
+          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The cavitation plate anode had adequate material remaining.' },
+          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: 'The cavitation plate anode was more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
+          { label: 'Severely depleted or missing', rating: 'A', fragment: 'The cavitation plate anode was severely depleted or missing. Per ABYC E-2, a new anode must be installed before the vessel is placed in the water.' }
+        ]
+      },
+      {
+        name: 'Anode — trim tab',
+        key: 'anodeTrimTab',
+        quantityPrompt: 'How many?',
+        options: [
+          { label: 'Not inspected', rating: null, fragment: '' },
+          { label: 'Not present on this vessel', rating: null, fragment: '' },
+          { label: 'New or recently replaced', rating: 'C', fragment: 'The trim tab anode appeared new or recently replaced.' },
+          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The trim tab anode had adequate material remaining.' },
+          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: 'The trim tab anode was more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
+          { label: 'Severely depleted or missing', rating: 'A', fragment: 'The trim tab anode was severely depleted or missing. Per ABYC E-2, a new anode must be installed before the vessel is placed in the water.' }
         ]
       },
       {
@@ -604,18 +628,29 @@ const COMPONENT_BUILDERS = {
         ]
       },
       {
-        name: 'Anodes',
-        key: 'anodes',
-        quantityPrompt: 'How many anodes?',
-        locationMultiSelect: true,
-        locationOptions: ['pod housing', 'cavitation plate', 'multiple locations'],
-        locationPrompt: 'Location(s)',
+        name: 'Anode — pod housing',
+        key: 'anodePodHousing',
+        quantityPrompt: 'How many?',
         options: [
           { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'New or recently replaced', rating: 'C', fragment: 'The pod anodes appeared new or recently replaced.' },
-          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The pod anodes had adequate material remaining.' },
-          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: '{qty} anode(s) on the {location} were more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
-          { label: 'Severely depleted or missing', rating: 'A', fragment: 'The pod anodes were severely depleted or missing. Per ABYC E-2, sacrificial anodes must be maintained. New anodes must be installed before the vessel is placed in the water.' }
+          { label: 'Not present on this vessel', rating: null, fragment: '' },
+          { label: 'New or recently replaced', rating: 'C', fragment: 'The pod housing anode appeared new or recently replaced.' },
+          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The pod housing anode had adequate material remaining.' },
+          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: 'The pod housing anode was more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
+          { label: 'Severely depleted or missing', rating: 'A', fragment: 'The pod housing anode was severely depleted or missing. Per ABYC E-2, a new anode must be installed before the vessel is placed in the water.' }
+        ]
+      },
+      {
+        name: 'Anode — cavitation plate',
+        key: 'anodeCavitationPlate',
+        quantityPrompt: 'How many?',
+        options: [
+          { label: 'Not inspected', rating: null, fragment: '' },
+          { label: 'Not present on this vessel', rating: null, fragment: '' },
+          { label: 'New or recently replaced', rating: 'C', fragment: 'The cavitation plate anode appeared new or recently replaced.' },
+          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The cavitation plate anode had adequate material remaining.' },
+          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: 'The cavitation plate anode was more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
+          { label: 'Severely depleted or missing', rating: 'A', fragment: 'The cavitation plate anode was severely depleted or missing. Per ABYC E-2, a new anode must be installed before the vessel is placed in the water.' }
         ]
       },
       {
