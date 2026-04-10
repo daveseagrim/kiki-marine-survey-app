@@ -23,41 +23,77 @@
     padding-top: calc(20px + env(safe-area-inset-top, 0px));
   }
   .status {
-    font-size: 18px;
+    font-size: 20px;
     text-align: center;
     max-width: 320px;
+    font-weight: 600;
   }
-  .spinner {
-    width: 48px; height: 48px;
-    border: 4px solid rgba(255,255,255,0.3);
-    border-top-color: #4ade80;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 24px;
+  .icon {
+    font-size: 64px;
+    margin-bottom: 20px;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
   .step { margin: 6px 0; font-size: 14px; opacity: 0.8; }
   .step.done { opacity: 1; color: #4ade80; }
   .step.active { opacity: 1; color: #fbbf24; }
   .checkmark::before { content: '✓ '; }
   .working::before { content: '⏳ '; }
+  .btn {
+    display: block;
+    margin-top: 24px;
+    padding: 16px 40px;
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 300px;
+  }
+  .btn-reset {
+    background: #4ade80;
+    color: #1e3a5f;
+  }
+  .btn-launch {
+    background: #4ade80;
+    color: #1e3a5f;
+  }
+  .hint {
+    margin-top: 20px;
+    font-size: 13px;
+    opacity: 0.7;
+    text-align: center;
+    max-width: 300px;
+    line-height: 1.5;
+  }
 </style>
 </head>
 <body>
-  <div class="spinner" id="spinner"></div>
-  <div class="status" id="status">Resetting app...</div>
-  <div id="steps" style="margin-top: 20px;"></div>
+
+  <div id="page-initial">
+    <div style="text-align:center;">
+      <div class="icon">🔄</div>
+      <div class="status">Kiki Marine<br>App Reset</div>
+      <p style="margin-top:12px;font-size:14px;opacity:0.8;">Clears cached code and reloads fresh.<br>Your surveys and photos are safe.</p>
+      <button class="btn btn-reset" onclick="doReset()">Reset &amp; Reload</button>
+      <p class="hint">First time here? Tap Share → Add to Home Screen to save this as an icon.</p>
+    </div>
+  </div>
+
+  <div id="page-working" style="display:none;text-align:center;">
+    <div class="icon">⏳</div>
+    <div class="status" id="status">Resetting...</div>
+    <div id="steps" style="margin-top: 16px;"></div>
+  </div>
 
 <script>
-const steps = document.getElementById('steps');
-const status = document.getElementById('status');
-const spinner = document.getElementById('spinner');
+const stepsEl = document.getElementById('steps');
+const statusEl = document.getElementById('status');
 
 function addStep(text, state) {
   const div = document.createElement('div');
   div.className = 'step ' + state;
   div.innerHTML = `<span class="${state === 'done' ? 'checkmark' : 'working'}"></span>${text}`;
-  steps.appendChild(div);
+  stepsEl.appendChild(div);
   return div;
 }
 
@@ -66,7 +102,10 @@ function markDone(div, text) {
   div.innerHTML = `<span class="checkmark"></span>${text || div.textContent}`;
 }
 
-async function resetApp() {
+async function doReset() {
+  document.getElementById('page-initial').style.display = 'none';
+  document.getElementById('page-working').style.display = 'block';
+
   try {
     // Step 1: Unregister all service workers
     let step = addStep('Unregistering service worker...', 'active');
@@ -92,27 +131,25 @@ async function resetApp() {
       markDone(step, 'No cache API');
     }
 
-    // Step 3: Done — redirect
-    step = addStep('Redirecting to app...', 'active');
-    status.textContent = 'Done! Loading fresh app...';
-    spinner.style.borderTopColor = '#4ade80';
+    // Step 3: Done — show launch button
+    markDone(addStep('Ready!', 'done'));
+    statusEl.textContent = 'Reset complete!';
 
-    // Short delay so user can see the result, then redirect
-    setTimeout(() => {
-      // Navigate to main app with cache-bust param to force fresh load
+    // Add launch button
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-launch';
+    btn.textContent = 'Launch App →';
+    btn.onclick = () => {
       window.location.href = 'index.html?reset=' + Date.now();
-    }, 1200);
+    };
+    document.getElementById('page-working').appendChild(btn);
 
   } catch (err) {
-    status.textContent = 'Error: ' + err.message;
-    status.style.color = '#f87171';
-    spinner.style.display = 'none';
+    statusEl.textContent = 'Error: ' + err.message;
+    statusEl.style.color = '#f87171';
     addStep('Failed — try closing all app tabs and reopening', 'active');
   }
 }
-
-// Run immediately
-resetApp();
 </script>
 </body>
 </html>
