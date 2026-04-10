@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v182';
+const APP_VERSION = 'v183';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1894,10 +1894,11 @@ function showMediaSheet(itemLabel, categoryName) {
       photosHtml = '<div style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 20px;">';
       itemData.photos.forEach(photoId => {
         photosHtml += `
-          <div style="position:relative;width:80px;height:80px;">
+          <div style="position:relative;width:80px;">
             <img id="sheet-thumb-${photoId}" src="" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;"
                  onclick="editSavedPhoto('${photoId}', '${safeLabel}')" />
             <button onclick="deletePhotoFromSheet('${photoId}', '${safeLabel}', '${safeCat}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;">×</button>
+            <button onclick="movePhotoFromSheet('${photoId}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#1e3a5f;color:white;border:none;border-radius:4px;padding:3px 0;font-size:11px;cursor:pointer;">Move</button>
           </div>
         `;
       });
@@ -1955,6 +1956,128 @@ function deletePhotoFromSheet(photoId, itemLabel, categoryName) {
   setTimeout(() => {
     showMediaSheet(itemLabel, categoryName);
   }, 300);
+}
+
+// Move photo from one checklist item to another — shows a searchable picker
+function movePhotoFromSheet(photoId, sourceItemLabel, sourceCategoryName) {
+  // Build a flat list of all checklist items from the current inspection
+  getSurvey(currentSurveyId).then(survey => {
+    const template = surveyTemplate || [];
+    const allItems = [];
+    template.forEach(cat => {
+      if (!cat.items) return;
+      cat.items.forEach(item => {
+        const label = typeof item === 'string' ? item : item.label;
+        if (label === sourceItemLabel) return; // skip current item
+        allItems.push({ label: label, category: cat.category });
+      });
+    });
+    // Also include any items already in the survey that might not be in the template
+    for (const label in survey.items) {
+      if (label === sourceItemLabel) continue;
+      if (!allItems.find(i => i.label === label)) {
+        allItems.push({ label: label, category: '(Other)' });
+      }
+    }
+
+    showMovePhotoPicker(photoId, sourceItemLabel, sourceCategoryName, allItems, survey);
+  });
+}
+
+function showMovePhotoPicker(photoId, sourceItemLabel, sourceCategoryName, allItems, survey) {
+  // Remove existing picker if any
+  const existing = document.getElementById('movePhotoPickerOverlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'movePhotoPickerOverlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10002;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+  let listHtml = '';
+  allItems.forEach((item, idx) => {
+    listHtml += `<div class="move-photo-item" data-idx="${idx}" style="padding:10px 14px;border-bottom:1px solid #eee;cursor:pointer;font-size:14px;" onclick="executeMovePhoto('${photoId}', '${sourceItemLabel.replace(/'/g, "\\'")}', '${sourceCategoryName.replace(/'/g, "\\'")}', ${idx})">
+      <div style="font-weight:600;color:#1e3a5f;">${item.label}</div>
+      <div style="font-size:11px;color:#6b7280;">${item.category}</div>
+    </div>`;
+  });
+
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:12px;width:100%;max-width:400px;max-height:70vh;display:flex;flex-direction:column;overflow:hidden;" onclick="event.stopPropagation();">
+      <div style="padding:16px 16px 8px;font-weight:700;font-size:16px;color:#1e3a5f;">Move Photo To…</div>
+      <div style="padding:0 16px 8px;">
+        <input id="movePhotoSearch" type="text" placeholder="Search items…" style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;" oninput="filterMovePhotoList(this.value)" />
+      </div>
+      <div id="movePhotoList" style="overflow-y:auto;flex:1;">
+        ${listHtml}
+      </div>
+      <div style="padding:12px 16px;border-top:1px solid #eee;">
+        <button onclick="document.getElementById('movePhotoPickerOverlay').remove();" style="width:100%;background:#6b7280;color:white;border:none;border-radius:6px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
+      </div>
+    </div>
+  `;
+  overlay.addEventListener('click', () => overlay.remove());
+  document.body.appendChild(overlay);
+
+  // Store allItems globally so executeMovePhoto can access it
+  window._movePhotoItems = allItems;
+
+  // Focus search
+  setTimeout(() => {
+    const input = document.getElementById('movePhotoSearch');
+    if (input) input.focus();
+  }, 100);
+}
+
+function filterMovePhotoList(query) {
+  const q = query.toLowerCase().trim();
+  const items = document.querySelectorAll('#movePhotoList .move-photo-item');
+  items.forEach(el => {
+    const text = el.textContent.toLowerCase();
+    el.style.display = (!q || text.includes(q)) ? '' : 'none';
+  });
+}
+
+async function executeMovePhoto(photoId, sourceItemLabel, sourceCategoryName, targetIdx) {
+  const target = window._movePhotoItems[targetIdx];
+  if (!target) return;
+
+  const survey = await getSurvey(currentSurveyId);
+
+  // Remove photo from source item
+  if (survey.items[sourceItemLabel] && survey.items[sourceItemLabel].photos) {
+    survey.items[sourceItemLabel].photos = survey.items[sourceItemLabel].photos.filter(id => id !== photoId);
+  }
+
+  // Add photo to target item
+  if (!survey.items[target.label]) {
+    survey.items[target.label] = { rating: '', text: '', standards: [], photos: [] };
+  }
+  if (!survey.items[target.label].photos) {
+    survey.items[target.label].photos = [];
+  }
+  survey.items[target.label].photos.push(photoId);
+
+  // Update the photo record's itemLabel in IndexedDB
+  const photo = await getPhotoById(photoId);
+  if (photo) {
+    photo.itemLabel = target.label;
+    await savePhoto(photo);
+  }
+
+  await saveSurvey(survey);
+
+  // Clean up picker
+  const picker = document.getElementById('movePhotoPickerOverlay');
+  if (picker) picker.remove();
+
+  // Refresh both items in the inspection view
+  updateItemInPlace(survey, sourceItemLabel);
+  updateItemInPlace(survey, target.label);
+
+  showToast(`Photo moved to ${target.label}`);
+
+  // Refresh the media sheet showing the source item (now with one fewer photo)
+  showMediaSheet(sourceItemLabel, sourceCategoryName);
 }
 
 // ── Update a single compact item's DOM without full re-render ───────────────
