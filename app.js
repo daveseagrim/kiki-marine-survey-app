@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v194';
+const APP_VERSION = 'v195';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -764,7 +764,7 @@ const COMPONENT_BUILDERS = {
         key: 'engineSpace',
         options: [
           { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Clean, well-organized', rating: 'C', fragment: 'The engine space was clean and well-organized with adequate access for service.' },
+          { label: 'Clean, well-organised', rating: 'C', fragment: 'The engine space was clean and well-organised with adequate access for service.' },
           { label: 'Cluttered but accessible', rating: 'C', fragment: 'The engine space was somewhat cluttered but the engine remained accessible for routine service.' },
           { label: 'Dirty, oil in bilge', rating: 'B', fragment: 'The engine space was dirty with oil residue in the bilge. The bilge should be cleaned and degreased, and the source of any oil identified.' },
           { label: 'Poor access, safety concern', rating: 'A', fragment: 'Access to the engine for service was severely restricted. Adequate engine access is required for safe operation and emergency situations.' }
@@ -3828,12 +3828,12 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Fair Market Value - Low (USD)</label>
-        <input type="text" id="valuationLow" placeholder="e.g., 150000">
+        <input type="text" id="valuationLow" placeholder="e.g., 150000" inputmode="numeric" pattern="[0-9]*">
       </div>
 
       <div class="form-group">
         <label class="form-label">Fair Market Value - High (USD)</label>
-        <input type="text" id="valuationHigh" placeholder="e.g., 175000">
+        <input type="text" id="valuationHigh" placeholder="e.g., 175000" inputmode="numeric" pattern="[0-9]*">
       </div>
 
       <div class="form-group">
@@ -7218,7 +7218,8 @@ async function captureInstrumentPhoto(idx) {
 async function identifyInstrument(idx) {
   const survey = await getSurvey(currentSurveyId);
   if (!survey || !survey.instrumentsElectronics || !survey.instrumentsElectronics[idx]) {
-    alert('DEBUG: Survey or instrument not found at index ' + idx);
+    console.error('Survey or instrument not found at index', idx);
+    showToast('Instrument not found');
     return;
   }
 
@@ -7244,7 +7245,8 @@ async function identifyInstrument(idx) {
   // Get the first photo's data URL and resize for API
   const photo = await getPhotoById(item.photos[0]);
   if (!photo || !photo.dataUrl) {
-    alert('DEBUG: Could not load photo. ID=' + item.photos[0] + ', photo=' + (photo ? 'exists but no dataUrl' : 'null'));
+    console.error('Could not load photo', item.photos[0]);
+    showToast('Could not load photo');
     return;
   }
 
@@ -7333,7 +7335,8 @@ If you cannot identify the device, still provide your best guess for the name fi
     const text = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
     if (!text) {
-      alert('DEBUG: API returned OK but no text.\nFull response: ' + JSON.stringify(result).substring(0, 500));
+      console.error('API returned OK but no text', result);
+      showToast('Identification failed — try again');
       return;
     }
 
