@@ -556,6 +556,72 @@ const COMPONENT_BUILDERS = {
       }
     ]
   },
+  'IPS pod drive(s)': {
+    title: 'IPS Pod Drive Condition Builder',
+    intro: 'The IPS pod drive unit was visually inspected.',
+    components: [
+      {
+        name: 'Pod Housing / Leg',
+        key: 'housing',
+        options: [
+          { label: 'No damage or corrosion', rating: 'C', fragment: 'The pod housing was free of impact damage and corrosion.' },
+          { label: 'Minor surface corrosion', rating: 'C', fragment: 'The pod housing showed minor surface corrosion consistent with normal use.' },
+          { label: 'Moderate corrosion', rating: 'B', fragment: 'The pod housing showed moderate corrosion that should be addressed at the next service.' },
+          { label: 'Impact damage', rating: 'B', fragment: 'The pod housing showed impact damage that should be assessed and repaired by an authorised Volvo Penta dealer.' },
+          { label: 'Severe corrosion or damage', rating: 'A', fragment: 'The pod housing exhibited severe corrosion or impact damage requiring immediate attention from an authorised dealer.' }
+        ]
+      },
+      {
+        name: 'Propellers (counter-rotating pair)',
+        key: 'propellers',
+        options: [
+          { label: 'Good condition, secure', rating: 'C', fragment: 'The counter-rotating propellers were in good condition and secure.' },
+          { label: 'Minor edge erosion', rating: 'B', fragment: 'The propellers showed minor edge erosion. They should be removed and reconditioned by a propeller shop.' },
+          { label: 'Significant damage', rating: 'A', fragment: 'The propellers exhibited significant blade damage. Damaged propellers will cause vibration that can damage the drive and transmission. They must be reconditioned or replaced.' }
+        ]
+      },
+      {
+        name: 'Anodes',
+        key: 'anodes',
+        quantityPrompt: 'How many anodes?',
+        locationOptions: ['pod housing', 'cavitation plate', 'multiple locations'],
+        locationPrompt: 'Location(s)',
+        options: [
+          { label: 'New or recently replaced', rating: 'C', fragment: 'The pod anodes appeared new or recently replaced.' },
+          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The pod anodes had adequate material remaining.' },
+          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: '{qty} anode(s) on the {location} were more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
+          { label: 'Severely depleted or missing', rating: 'A', fragment: 'The pod anodes were severely depleted or missing. Per ABYC E-2, sacrificial anodes must be maintained. New anodes must be installed before the vessel is placed in the water.' }
+        ]
+      },
+      {
+        name: 'Hull Seal / Penetration',
+        key: 'hullSeal',
+        options: [
+          { label: 'Secure, no leakage', rating: 'C', fragment: 'The seal at the hull penetration was secure with no leakage.' },
+          { label: 'Minor weeping', rating: 'B', fragment: 'Minor weeping was observed at the hull seal. The seal should be inspected and monitored.' },
+          { label: 'Leaking or failed', rating: 'A', fragment: 'The hull seal was leaking or had failed. An IPS hull penetration that leaks is a direct flooding hazard. The drive must be serviced and the seal replaced by an authorised dealer before the vessel is launched.' }
+        ]
+      },
+      {
+        name: 'Steering Actuators',
+        key: 'steering',
+        options: [
+          { label: 'Smooth operation', rating: 'C', fragment: 'The pod steering actuators operated smoothly through full range.' },
+          { label: 'Stiff or binding', rating: 'B', fragment: 'The steering actuators were stiff or binding. They should be serviced by an authorised dealer.' },
+          { label: 'Inoperable', rating: 'A', fragment: 'The steering actuators were inoperable. IPS steering is integral to the drive system and must be repaired before the vessel is operated.' }
+        ]
+      },
+      {
+        name: 'Paint / Anti-fouling',
+        key: 'paint',
+        options: [
+          { label: 'Intact', rating: 'C', fragment: 'The paint on the pod was intact.' },
+          { label: 'Peeling or deteriorated', rating: 'B', fragment: 'The paint on the pod was peeling or deteriorated and should be stripped and repainted per manufacturer specifications.' },
+          { label: 'Bare metal exposed', rating: 'B', fragment: 'The paint on the pod had failed with bare metal exposed, accelerating corrosion. The pod should be stripped and repainted per Volvo Penta specifications.' }
+        ]
+      }
+    ]
+  },
   'Engine, general condition/impression': {
     title: 'Engine Condition Builder',
     intro: 'The engine and engine space were visually inspected.',
@@ -4160,7 +4226,7 @@ function saveSurveyDetails(surveyId) {
     if (survey.vesselType === 'sail') {
       survey.driveLineCount = 1;
       survey.hasRudder = true;
-      if (survey.driveType === 'outdrive') survey.driveType = '';
+      if (survey.driveType === 'outdrive' || survey.driveType === 'ips') survey.driveType = '';
     } else if (survey.vesselType === 'power') {
       if (survey.driveType === 'saildrive') survey.driveType = '';
     }
@@ -5687,6 +5753,9 @@ function renderInspection(survey) {
   const SAILDRIVE_ONLY_LABELS = [
     'Sail drive(s) - (external), corrosion, propeller(s), anode(s)'
   ];
+  const IPS_ONLY_LABELS = [
+    'IPS pod drive(s)'
+  ];
 
   // Check if conditional items should be shown
   function shouldShowItem(item) {
@@ -5696,17 +5765,21 @@ function renderInspection(survey) {
     // Drive type filtering
     if (driveType) {
       if (driveType === 'outdrive') {
-        // Hide saildrive and shaft-specific items
         if (SAILDRIVE_ONLY_LABELS.includes(item.label)) return false;
+        if (IPS_ONLY_LABELS.includes(item.label)) return false;
         if (SHAFT_ONLY_LABELS.includes(item.label)) return false;
       } else if (driveType === 'saildrive') {
-        // Hide outdrive and shaft-specific items
         if (OUTDRIVE_ONLY_LABELS.includes(item.label)) return false;
+        if (IPS_ONLY_LABELS.includes(item.label)) return false;
         if (SHAFT_ONLY_LABELS.includes(item.label)) return false;
       } else if (driveType === 'shaft') {
-        // Hide outdrive and saildrive items
         if (OUTDRIVE_ONLY_LABELS.includes(item.label)) return false;
         if (SAILDRIVE_ONLY_LABELS.includes(item.label)) return false;
+        if (IPS_ONLY_LABELS.includes(item.label)) return false;
+      } else if (driveType === 'ips') {
+        if (OUTDRIVE_ONLY_LABELS.includes(item.label)) return false;
+        if (SAILDRIVE_ONLY_LABELS.includes(item.label)) return false;
+        if (SHAFT_ONLY_LABELS.includes(item.label)) return false;
       }
     }
     if (item.conditional) {
@@ -5887,6 +5960,7 @@ function renderInspection(survey) {
            <option value="shaft" ${currentDriveType === 'shaft' ? 'selected' : ''}>Prop shaft</option>`
         : `<option value="">— Select —</option>
            <option value="outdrive" ${currentDriveType === 'outdrive' ? 'selected' : ''}>Outdrive (sterndrive)</option>
+           <option value="ips" ${currentDriveType === 'ips' ? 'selected' : ''}>IPS pod drive</option>
            <option value="shaft" ${currentDriveType === 'shaft' ? 'selected' : ''}>Prop shaft</option>`;
 
       html += `
@@ -8724,6 +8798,9 @@ function updateCategoryHeader(survey, categoryName) {
   const SAILDRIVE_ONLY_LABELS = [
     'Sail drive(s) - (external), corrosion, propeller(s), anode(s)'
   ];
+  const IPS_ONLY_LABELS = [
+    'IPS pod drive(s)'
+  ];
 
   function shouldShowHeaderItem(item) {
     if (isPowerboat && item.sailOnly) return false;
@@ -9091,8 +9168,8 @@ function setVesselTypeFromInspection(vesselType) {
       // Sailboats: always 1 drive line, always has rudder
       survey.driveLineCount = 1;
       survey.hasRudder = true;
-      // Clear outdrive drive type if switching from power
-      if (survey.driveType === 'outdrive') {
+      // Clear power-only drive types if switching to sail
+      if (survey.driveType === 'outdrive' || survey.driveType === 'ips') {
         survey.driveType = '';
       }
     } else if (vesselType === 'power') {
@@ -9129,8 +9206,8 @@ function updateDriveType(driveType) {
       survey.hasRudder = true;
     } else {
       // Powerboats: auto-set rudder based on drive type
-      if (driveType === 'outdrive') {
-        survey.hasRudder = false; // outdrives steer, no separate rudder
+      if (driveType === 'outdrive' || driveType === 'ips') {
+        survey.hasRudder = false; // outdrives and IPS pods steer, no separate rudder
       } else if (driveType === 'shaft') {
         survey.hasRudder = true; // shaft-driven boats have rudder(s)
       }

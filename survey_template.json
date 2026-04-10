@@ -274,6 +274,20 @@
           },
           {
             "type": "list",
+            "label": "IPS pod drive(s)",
+            "driveLineItem": true,
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "powerOnly": true
+          },
+          {
+            "type": "list",
             "label": "Stern tube(s) (external)",
             "driveLineItem": true,
             "options": [
