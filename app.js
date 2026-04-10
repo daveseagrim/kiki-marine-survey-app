@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v189';
+const APP_VERSION = 'v190';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -6135,8 +6135,20 @@ function renderInspection(survey) {
     totalRatedItems = totalRatedItems - baseHeadItems.length + expandedItems.length;
   }
 
-  // ── Multiply drive line items by drive line count ─────────────────────
+  // ── Singularise drive line item labels when there is only 1 drive line ──
   const driveLineCount = survey.driveLineCount || 1;
+  if (driveLineCount === 1) {
+    for (const [catName, items] of Object.entries(ratedItemsByCategory)) {
+      ratedItemsByCategory[catName] = items.map(item => {
+        if (item.driveLineItem) {
+          return { ...item, label: item.label.replace(/\(s\)/g, '') };
+        }
+        return item;
+      });
+    }
+  }
+
+  // ── Multiply drive line items by drive line count ─────────────────────
   if (driveLineCount > 1) {
     // Labels: "Port" / "Starboard" for 2, numbered for 3+
     const driveLabels = driveLineCount === 2
@@ -9140,6 +9152,15 @@ function updateCategoryHeader(survey, categoryName) {
   }
 
   if (categoryItems.length === 0) return;
+
+  // Singularise drive line item labels when there is only 1 drive line
+  const headerDriveLineCount = survey.driveLineCount || 1;
+  if (headerDriveLineCount === 1) {
+    categoryItems = categoryItems.map(item => {
+      if (item.driveLineItem) return { ...item, label: item.label.replace(/\(s\)/g, '') };
+      return item;
+    });
+  }
 
   const completionCount = categoryItems.filter(item =>
     survey.items[item.label]?.rating || survey.items[item.label]?.excluded
