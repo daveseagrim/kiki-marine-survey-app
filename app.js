@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v195';
+const APP_VERSION = 'v197';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2186,8 +2186,13 @@ async function executeMovePhoto(photoId, sourceItemLabel, sourceCategoryName, ta
 
   showToast(`Photo moved to ${target.label}`);
 
-  // Refresh the media sheet showing the source item (now with one fewer photo)
-  showMediaSheet(sourceItemLabel, sourceCategoryName);
+  // If the source was an area photo section (not a media sheet), do NOT re-open a media sheet.
+  // Otherwise, refresh the media sheet so the user sees one fewer photo.
+  if (window._moveSourceIsAreaPhoto) {
+    window._moveSourceIsAreaPhoto = false;
+  } else {
+    showMediaSheet(sourceItemLabel, sourceCategoryName);
+  }
 }
 
 // ── Update a single compact item's DOM without full re-render ───────────────
@@ -6375,23 +6380,25 @@ function renderInspection(survey) {
       const mediaData = survey.items[mediaItem.label] || { photos: [] };
       const photos = mediaData.photos || [];
       const safeLabel = mediaItem.label.replace(/'/g, "\\'");
+      const safeCat = categoryName.replace(/'/g, "\\'");
       const sanitized = mediaItem.label.replace(/[^a-zA-Z0-9]/g, '_');
       html += `
         <div id="area-photo-wrap-${sanitized}" style="margin-bottom:16px;padding:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
           <div style="font-weight:600;font-size:14px;color:#0369a1;margin-bottom:8px;">📷 ${mediaItem.label}</div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
             ${photos.map(pid => `
-              <div style="position:relative;width:80px;height:80px;">
-                <img id="thumb-${pid}" src="" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
-                <button onclick="deleteAreaPhoto('${pid}', '${safeLabel}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;line-height:22px;text-align:center;">×</button>
+              <div style="position:relative;width:84px;">
+                <img id="thumb-${pid}" src="" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
+                <button onclick="event.stopPropagation();deleteAreaPhoto('${pid}', '${safeLabel}')" aria-label="Delete photo" style="position:absolute;top:-8px;right:-8px;background:#dc2626;color:white;border:2px solid white;border-radius:50%;width:30px;height:30px;font-size:16px;font-weight:700;cursor:pointer;line-height:26px;text-align:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,0.3);">×</button>
+                <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#1e3a5f;color:white;border:none;border-radius:6px;padding:6px 0;font-size:12px;font-weight:700;cursor:pointer;">Move ↗</button>
               </div>
             `).join('')}
           </div>
-          <label style="display:inline-block;background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;">
+          <label style="display:inline-block;background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
             📷 ${photos.length > 0 ? `Add More (${photos.length})` : 'Take Photos'}
             <input type="file" accept="image/*" multiple
               onchange="handleAreaPhotoCapture('${safeLabel}', this)"
-              style="display:none;">
+              style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
           </label>
         </div>
       `;
@@ -7007,7 +7014,7 @@ function rapidCaptureInstruments() {
       const file = files[0];
       const reader = new FileReader();
       reader.onload = async (re) => {
-        const stampedDataUrl = await addDateStampToPhoto(re.target.result, 2048);
+        const stampedDataUrl = await addDateStampToPhoto(re.target.result, 3072);
         const survey = await getSurvey(currentSurveyId);
         if (!survey) return;
         if (!survey.instrumentsElectronics) survey.instrumentsElectronics = [];
@@ -7072,7 +7079,7 @@ async function addInstrumentByPhoto() {
       await new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = async (re) => {
-          const stampedDataUrl = await addDateStampToPhoto(re.target.result, 2048);
+          const stampedDataUrl = await addDateStampToPhoto(re.target.result, 3072);
           const idx = survey.instrumentsElectronics.length;
           const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
           const photo = {
@@ -7190,7 +7197,7 @@ async function captureInstrumentPhoto(idx) {
     const file = files[0];
     const reader = new FileReader();
     reader.onload = async (re) => {
-      const stampedDataUrl = await addDateStampToPhoto(re.target.result, 2048);
+      const stampedDataUrl = await addDateStampToPhoto(re.target.result, 3072);
       const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
       const photo = {
         id: photoId,
@@ -7781,22 +7788,27 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
   const mediaData = survey.items[mediaLabel] || { photos: [] };
   const photos = mediaData.photos || [];
   const safeLabel = mediaLabel.replace(/'/g, "\\'");
+  // Look up the category name from the wrapper's enclosing accordion
+  const accordion = wrapper.closest('.category-accordion');
+  const catName = accordion ? (accordion.dataset.categoryName || '') : '';
+  const safeCat = catName.replace(/'/g, "\\'");
 
   wrapper.innerHTML = `
     <div style="font-weight:600;font-size:14px;color:#0369a1;margin-bottom:8px;">📷 ${mediaLabel}</div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
       ${photos.map(pid => `
-        <div style="position:relative;width:80px;height:80px;">
-          <img id="thumb-${pid}" src="" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
-          <button onclick="deleteAreaPhoto('${pid}', '${safeLabel}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;line-height:22px;text-align:center;">×</button>
+        <div style="position:relative;width:84px;">
+          <img id="thumb-${pid}" src="" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
+          <button onclick="event.stopPropagation();deleteAreaPhoto('${pid}', '${safeLabel}')" aria-label="Delete photo" style="position:absolute;top:-8px;right:-8px;background:#dc2626;color:white;border:2px solid white;border-radius:50%;width:30px;height:30px;font-size:16px;font-weight:700;cursor:pointer;line-height:26px;text-align:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,0.3);">×</button>
+          <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#1e3a5f;color:white;border:none;border-radius:6px;padding:6px 0;font-size:12px;font-weight:700;cursor:pointer;">Move ↗</button>
         </div>
       `).join('')}
     </div>
-    <label style="display:inline-block;background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;">
+    <label style="display:inline-block;background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
       📷 ${photos.length > 0 ? `Add More (${photos.length})` : 'Take Photos'}
       <input type="file" accept="image/*" multiple
         onchange="handleAreaPhotoCapture('${safeLabel}', this)"
-        style="display:none;">
+        style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
     </label>
   `;
 
@@ -7809,6 +7821,15 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
       }
     });
   });
+}
+
+/**
+ * Move a photo from an area photo section to another item.
+ * Reuses the existing move picker, but flags the source so we don't reopen a media sheet.
+ */
+function moveAreaPhoto(photoId, sourceMediaLabel, sourceCategoryName) {
+  window._moveSourceIsAreaPhoto = true;
+  movePhotoFromSheet(photoId, sourceMediaLabel, sourceCategoryName);
 }
 
 // Open edit modal for an already-saved photo (tap thumbnail to edit)
@@ -11133,7 +11154,7 @@ ${survey.vesselDescription ? `
         let photoImgs = '';
         for (const pid of eq.photos) {
           if (itemPhotoCache[pid]) {
-            photoImgs += `<img src="${itemPhotoCache[pid]}" style="width:80px;height:80px;object-fit:cover;border-radius:4px;margin:2px;" />`;
+            photoImgs += `<img src="${itemPhotoCache[pid]}" style="width:240px;height:180px;object-fit:cover;border-radius:4px;margin:3px;border:1px solid #ccc;" />`;
           }
         }
         if (photoImgs) {
@@ -11193,7 +11214,7 @@ ${survey.vesselDescription ? `
         let photoImgs = '';
         for (const pid of item.photos) {
           if (itemPhotoCache[pid]) {
-            photoImgs += `<img src="${itemPhotoCache[pid]}" style="width:100px;height:100px;object-fit:cover;border-radius:4px;margin:2px;" />`;
+            photoImgs += `<img src="${itemPhotoCache[pid]}" style="width:240px;height:180px;object-fit:cover;border-radius:4px;margin:3px;border:1px solid #ccc;" />`;
           }
         }
         if (photoImgs) {
@@ -11269,7 +11290,7 @@ ${survey.vesselDescription ? `
             const imgs = itemData.photos
               .filter(pid => itemPhotoCache[pid])
               .map(pid => `<div style="display:inline-block;margin:6px 8px 6px 0;vertical-align:top;">
-                <img src="${itemPhotoCache[pid]}" alt="${esc(item.label)}" style="max-width:600px;max-height:450px;border:1px solid #ccc;border-radius:4px;" />
+                <img src="${itemPhotoCache[pid]}" alt="${esc(item.label)}" style="max-width:800px;max-height:600px;width:auto;height:auto;border:1px solid #ccc;border-radius:4px;" />
                 <div style="font-size:9pt;color:#666;margin-top:3px;font-style:italic;">${esc(item.label)}</div>
               </div>`)
               .join('');
@@ -11341,7 +11362,7 @@ ${survey.vesselDescription ? `
     const imgs = f.photos
       .filter(pid => itemPhotoCache[pid])
       .map(pid => `<div style="display:inline-block;margin:4px 6px 4px 0;vertical-align:top;">
-        <img src="${itemPhotoCache[pid]}" alt="${esc(f.label)}" style="max-width:560px;max-height:420px;border:1px solid #ccc;border-radius:4px;" />
+        <img src="${itemPhotoCache[pid]}" alt="${esc(f.label)}" style="max-width:760px;max-height:570px;width:auto;height:auto;border:1px solid #ccc;border-radius:4px;" />
         <div style="font-size:9pt;color:#666;margin-top:2px;font-style:italic;">${esc(f.label)}</div>
       </div>`)
       .join('');
