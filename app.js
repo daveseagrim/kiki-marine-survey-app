@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v177';
+const APP_VERSION = 'v178';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -298,6 +298,472 @@ const STANDARDS_BY_CATEGORY = {
     'Collision Regulations (COR/SOR/83-252)'
   ]
 };
+
+// ── Component Builder Definitions ─────────────────────────────────────────────
+// For multi-component items, defines sub-parts and their condition options.
+// Each option has: label (shown in dropdown), rating (C/B/A), and fragment (sentence piece).
+// The builder assembles fragments into a coherent finding and picks the worst rating.
+const COMPONENT_BUILDERS = {
+  'Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows': {
+    title: 'Outdrive Condition Builder',
+    intro: 'The outdrive unit was visually inspected.',
+    components: [
+      {
+        name: 'Housing',
+        key: 'housing',
+        options: [
+          { label: 'No damage or corrosion', rating: 'C', fragment: 'The drive housing was free of impact damage and corrosion.' },
+          { label: 'Minor surface corrosion', rating: 'C', fragment: 'The drive housing showed minor surface corrosion consistent with normal use.' },
+          { label: 'Moderate corrosion', rating: 'B', fragment: 'The drive housing showed moderate corrosion that should be addressed.' },
+          { label: 'Impact damage', rating: 'B', fragment: 'The drive housing showed impact damage that should be assessed and repaired.' },
+          { label: 'Severe corrosion or damage', rating: 'A', fragment: 'The drive housing exhibited severe corrosion or impact damage requiring immediate attention.' }
+        ]
+      },
+      {
+        name: 'Bellows',
+        key: 'bellows',
+        options: [
+          { label: 'Pliable, no cracking', rating: 'C', fragment: 'The bellows (exhaust, U-joint, and shift cable) were pliable with no cracking or deterioration.' },
+          { label: 'Beginning to harden', rating: 'B', fragment: 'The bellows were beginning to harden and should be replaced at the next service. Bellows failure is a common cause of sinking in sterndrive vessels.' },
+          { label: 'Cracked or deteriorated', rating: 'A', fragment: 'The bellows were cracked or deteriorated. Per ABYC P-6 and ABYC H-27, drive bellows must be watertight as they are below the waterline when the drive is lowered. Cracked bellows are a sinking hazard and must be replaced before the vessel is launched.' }
+        ]
+      },
+      {
+        name: 'Anodes',
+        key: 'anodes',
+        quantityPrompt: 'How many anodes?',
+        locationPrompt: 'Location(s)',
+        locationOptions: ['drive housing', 'cavitation plate', 'trim tab', 'multiple locations'],
+        options: [
+          { label: 'New or recently replaced', rating: 'C', fragment: 'The drive anodes appeared new or recently replaced with full material remaining.' },
+          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The drive anodes had adequate material remaining.' },
+          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: '{qty} anode(s) on the {location} were more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
+          { label: 'Severely depleted or missing', rating: 'A', fragment: 'The drive anodes were severely depleted or missing. Per ABYC E-2, sacrificial anodes must be maintained. New anodes must be installed before the vessel is placed in the water.' }
+        ]
+      },
+      {
+        name: 'Propeller',
+        key: 'propeller',
+        options: [
+          { label: 'Good condition, secure', rating: 'C', fragment: 'The propeller was in good condition and secure on the shaft.' },
+          { label: 'Minor surface corrosion', rating: 'C', fragment: 'The propeller showed minor surface corrosion consistent with normal use — not a concern at the current level.' },
+          { label: 'Minor blade damage or erosion', rating: 'B', fragment: 'The propeller showed minor blade damage or edge erosion. It should be removed and reconditioned by a propeller shop.' },
+          { label: 'Significant damage', rating: 'A', fragment: 'The propeller exhibited significant blade damage. A damaged propeller will cause severe vibration that can damage the shaft, bearings, and transmission. It must be reconditioned or replaced.' }
+        ]
+      },
+      {
+        name: 'Paint',
+        key: 'paint',
+        options: [
+          { label: 'Intact', rating: 'C', fragment: 'The paint on the drive housing was intact.' },
+          { label: 'Peeling or deteriorated', rating: 'B', fragment: 'The paint on the drive housing was peeling or deteriorated and should be stripped and repainted to prevent corrosion.' },
+          { label: 'Bare metal exposed', rating: 'B', fragment: 'The paint on the drive housing had failed with bare metal exposed, accelerating corrosion. The drive should be stripped and repainted.' }
+        ]
+      },
+      {
+        name: 'Oil Seals',
+        key: 'oilSeals',
+        options: [
+          { label: 'No leaks', rating: 'C', fragment: 'No oil leaks were observed.' },
+          { label: 'Minor weep', rating: 'B', fragment: 'A minor oil weep was visible at the lower seal. The seals should be inspected and serviced.' },
+          { label: 'Active leak', rating: 'A', fragment: 'Oil was actively leaking from the lower unit. The seals must be replaced before the vessel is operated.' }
+        ]
+      },
+      {
+        name: 'Tilt / Trim',
+        key: 'tiltTrim',
+        options: [
+          { label: 'Smooth operation', rating: 'C', fragment: 'The drive tilted and trimmed smoothly.' },
+          { label: 'Stiff or slow', rating: 'B', fragment: 'The tilt/trim operation was stiff or slow and should be serviced.' },
+          { label: 'Inoperable', rating: 'A', fragment: 'The tilt/trim system was inoperable. The hydraulic system must be inspected and repaired.' }
+        ]
+      },
+      {
+        name: 'Gimbal Bearing',
+        key: 'gimbalBearing',
+        options: [
+          { label: 'No issues', rating: 'C', fragment: '' },
+          { label: 'Stiff or noisy', rating: 'B', fragment: 'The gimbal bearing was stiff or noisy and should be inspected and greased or replaced.' },
+          { label: 'Frozen or seized', rating: 'A', fragment: 'The gimbal bearing was frozen. A seized gimbal bearing must be replaced before the vessel is operated.' }
+        ]
+      }
+    ]
+  },
+  'Primer, barrier coat, anti-fouling': {
+    title: 'Anti-fouling Condition Builder',
+    intro: 'The bottom paint system was inspected.',
+    components: [
+      {
+        name: 'Anti-fouling Coverage',
+        key: 'coverage',
+        options: [
+          { label: 'Recently applied, good condition', rating: 'C', fragment: 'The anti-fouling coat appeared recently applied and was in good condition with consistent coverage.' },
+          { label: 'Adequate, normal wear', rating: 'C', fragment: 'The anti-fouling paint was present and provided adequate coverage, showing normal wear consistent with use.' },
+          { label: 'Significant wear, thinning', rating: 'B', fragment: 'The anti-fouling paint showed significant wear and thinning in several areas.' },
+          { label: 'Excessive coats, chipping/flaking', rating: 'B', fragment: 'The hull had excessive coats of anti-fouling paint that were chipping and flaking. The hull should be sanded until all loose and failing anti-fouling is removed.' },
+          { label: 'Failed — bare gelcoat exposed', rating: 'A', fragment: 'The anti-fouling system had failed extensively with large areas of bare gelcoat exposed and no protective coating remaining.' }
+        ]
+      },
+      {
+        name: 'Barrier Coat',
+        key: 'barrierCoat',
+        options: [
+          { label: 'Intact', rating: 'C', fragment: 'The barrier coat was intact where visible.' },
+          { label: 'Exposed in places', rating: 'B', fragment: 'The epoxy barrier coat was exposed in several areas where the anti-fouling had separated. The barrier coat should be inspected and repaired as necessary before fresh anti-fouling is applied.' },
+          { label: 'Crazing, chalking, or peeling', rating: 'B', fragment: 'The barrier coat showed crazing, chalking, or peeling. It should be stripped, the gelcoat inspected, and a new barrier coat system applied before bottom painting.' },
+          { label: 'Failed or missing', rating: 'A', fragment: 'The barrier coat had failed or was missing in large areas. The hull must be stripped, dried, inspected for osmotic damage, and a proper epoxy barrier coat applied before launching.' }
+        ]
+      },
+      {
+        name: 'Rudder Anti-fouling',
+        key: 'rudderAF',
+        options: [
+          { label: 'Same condition as hull', rating: 'C', fragment: '' },
+          { label: 'Chipping, needs sanding', rating: 'B', fragment: 'The rudder anti-fouling was also chipping and should be sanded and repainted in the same manner as the hull.' },
+          { label: 'Barrier coat exposed on rudder', rating: 'B', fragment: 'The rudder barrier coat was exposed in places. The rudder should be sanded, the barrier coat repaired, and fresh anti-fouling applied.' },
+          { label: 'Not applicable', rating: 'C', fragment: '' }
+        ]
+      }
+    ]
+  },
+  'Sail drive(s) - (external), corrosion, propeller(s), anode(s)': {
+    title: 'Sail Drive Condition Builder',
+    intro: 'The sail drive unit was visually inspected.',
+    components: [
+      {
+        name: 'Housing',
+        key: 'housing',
+        options: [
+          { label: 'Intact, no damage', rating: 'C', fragment: 'The housing was intact with no cracking, corrosion, or impact damage.' },
+          { label: 'Minor surface corrosion', rating: 'B', fragment: 'The housing showed minor surface corrosion that should be monitored.' },
+          { label: 'Significant corrosion or cracking', rating: 'A', fragment: 'The housing exhibited significant corrosion or cracking.' }
+        ]
+      },
+      {
+        name: 'Paint',
+        key: 'paint',
+        options: [
+          { label: 'Intact', rating: 'C', fragment: 'The paint on the drive housing was intact with no peeling or deterioration.' },
+          { label: 'Peeling or deteriorated', rating: 'B', fragment: 'The paint on the drive housing was peeling or deteriorated and should be stripped and repainted.' }
+        ]
+      },
+      {
+        name: 'Hull Seal',
+        key: 'hullSeal',
+        options: [
+          { label: 'Secure, no leakage', rating: 'C', fragment: 'The seal at the hull penetration was secure with no leakage.' },
+          { label: 'Minor weeping', rating: 'B', fragment: 'Minor weeping was observed at the hull seal. The seal should be monitored. Sail drive seals typically require replacement every 5–7 years per manufacturer guidelines.' },
+          { label: 'Leaking or failed', rating: 'A', fragment: 'The hull seal was leaking or had failed. A sail drive hull penetration that leaks is a direct flooding hazard. The drive must be removed and the seal replaced before the vessel is launched.' }
+        ]
+      },
+      {
+        name: 'Anode',
+        key: 'anode',
+        options: [
+          { label: 'New or recently replaced', rating: 'C', fragment: 'The drive anode appeared new or recently replaced.' },
+          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The drive anode had adequate material remaining.' },
+          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: 'The drive anode was more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
+          { label: 'Missing', rating: 'A', fragment: 'The drive anode was missing. Per ABYC E-2, sacrificial anodes must be maintained.' }
+        ]
+      },
+      {
+        name: 'Propeller',
+        key: 'propeller',
+        options: [
+          { label: 'Good condition, secure', rating: 'C', fragment: 'The propeller was secure and in good condition.' },
+          { label: 'Minor corrosion', rating: 'C', fragment: 'The propeller showed minor surface corrosion consistent with normal use.' },
+          { label: 'Blade damage', rating: 'B', fragment: 'The propeller showed blade damage and should be reconditioned.' },
+          { label: 'Significant damage', rating: 'A', fragment: 'The propeller exhibited significant damage and must be reconditioned or replaced.' }
+        ]
+      }
+    ]
+  },
+  'Bow thruster': {
+    title: 'Bow Thruster Condition Builder',
+    intro: 'The bow thruster was inspected.',
+    components: [
+      {
+        name: 'Operation',
+        key: 'operation',
+        options: [
+          { label: 'Tested — smooth, both directions', rating: 'C', fragment: 'The unit operated smoothly in both port and starboard directions with adequate thrust.' },
+          { label: 'Tested — reduced thrust or noisy', rating: 'B', fragment: 'The unit operated but with reduced thrust or was noisy during operation. It should be serviced and tested under load during the limited trial run.' },
+          { label: 'On land — motor runs both directions', rating: 'NT', fragment: 'The motor was powered up and operated in both directions. As the vessel was on land, thrust output could not be verified. The thruster should be tested under load during the limited trial run.' },
+          { label: 'Did not operate', rating: 'A', fragment: 'The unit did not operate. Depending on the vessel\'s docking requirements, a non-functional bow thruster may constitute a safety concern in confined marina situations. The unit must be repaired or replaced.' },
+          { label: 'Not tested', rating: 'NT', fragment: 'The bow thruster was not tested as the controls were not accessible or the unit was winterized. It should be tested under load during the limited trial run.' }
+        ]
+      },
+      {
+        name: 'Tunnel & Propeller',
+        key: 'tunnel',
+        options: [
+          { label: 'Clean, undamaged', rating: 'C', fragment: 'The thruster tunnel was clean and the propeller was intact with no damage.' },
+          { label: 'Fouling or corrosion', rating: 'B', fragment: 'The thruster tunnel showed fouling or corrosion at the opening that should be cleaned.' },
+          { label: 'Cracked tunnel or seized prop', rating: 'A', fragment: 'The thruster tunnel was cracked or the propeller was seized. The unit must be repaired.' }
+        ]
+      },
+      {
+        name: 'Anode',
+        key: 'anode',
+        options: [
+          { label: 'Serviceable', rating: 'C', fragment: 'The anode was in serviceable condition.' },
+          { label: 'Depleted', rating: 'B', fragment: 'The thruster anode was depleted and should be replaced.' },
+          { label: 'Missing', rating: 'A', fragment: 'The thruster anode was missing. A new anode must be installed.' }
+        ]
+      },
+      {
+        name: 'Gear Oil',
+        key: 'gearOil',
+        options: [
+          { label: 'OK or N/A', rating: 'C', fragment: '' },
+          { label: 'Discoloured — needs changing', rating: 'B', fragment: 'The gear oil appeared discoloured and should be changed.' }
+        ]
+      }
+    ]
+  },
+  'Stern thruster': {
+    title: 'Stern Thruster Condition Builder',
+    intro: 'The stern thruster was inspected.',
+    components: [
+      {
+        name: 'Operation',
+        key: 'operation',
+        options: [
+          { label: 'Tested — smooth, both directions', rating: 'C', fragment: 'The unit operated smoothly in both port and starboard directions.' },
+          { label: 'Tested — reduced thrust or noisy', rating: 'B', fragment: 'The unit operated but with reduced thrust or was noisy. It should be serviced.' },
+          { label: 'On land — motor runs both directions', rating: 'NT', fragment: 'The motor was powered up and operated in both directions. As the vessel was on land, thrust output could not be verified. The thruster should be tested under load during the limited trial run.' },
+          { label: 'Did not operate', rating: 'A', fragment: 'The unit did not operate and must be repaired or replaced.' },
+          { label: 'Not tested', rating: 'NT', fragment: 'The stern thruster was not tested. It should be tested under load during the limited trial run.' }
+        ]
+      },
+      {
+        name: 'Tunnel & Propeller',
+        key: 'tunnel',
+        options: [
+          { label: 'Good condition', rating: 'C', fragment: 'The tunnel and propeller were in good condition.' },
+          { label: 'Fouling or corrosion', rating: 'B', fragment: 'The tunnel showed fouling or corrosion that should be cleaned.' },
+          { label: 'Cracked or seized', rating: 'A', fragment: 'The tunnel was cracked or the propeller was seized. Repairs are required.' }
+        ]
+      },
+      {
+        name: 'Anode',
+        key: 'anode',
+        options: [
+          { label: 'Serviceable', rating: 'C', fragment: 'The anode was serviceable.' },
+          { label: 'Depleted', rating: 'B', fragment: 'The anode was depleted and should be replaced.' },
+          { label: 'Missing', rating: 'A', fragment: 'The anode was missing and must be replaced.' }
+        ]
+      }
+    ]
+  }
+};
+
+// Rating priority for component builder: worst rating wins
+const RATING_PRIORITY = { 'A': 3, 'B': 2, 'NT': 1, 'C': 0 };
+const RATING_PRIORITY_REVERSE = { 3: 'A', 2: 'B', 1: 'Not Tested', 0: 'C' };
+
+// Build finding text from component builder selections
+function buildComponentFindings(builderKey, selections) {
+  const builder = COMPONENT_BUILDERS[builderKey];
+  if (!builder) return { text: '', rating: '' };
+
+  const fragments = [builder.intro];
+  let worstRating = 0;
+
+  for (const comp of builder.components) {
+    const sel = selections[comp.key];
+    if (sel === undefined || sel === null || sel === '') continue;
+
+    const option = comp.options[parseInt(sel)];
+    if (!option) continue;
+
+    let fragment = option.fragment;
+    if (!fragment) continue; // empty fragment = skip (e.g. "No issues" or "Same condition")
+
+    // Replace quantity/location placeholders if present
+    if (fragment.includes('{qty}')) {
+      const qty = selections[comp.key + '_qty'] || '?';
+      fragment = fragment.replace('{qty}', qty);
+    }
+    if (fragment.includes('{location}')) {
+      const loc = selections[comp.key + '_location'] || '?';
+      fragment = fragment.replace('{location}', loc);
+    }
+
+    fragments.push(fragment);
+
+    const ratingVal = RATING_PRIORITY[option.rating] || 0;
+    if (ratingVal > worstRating) worstRating = ratingVal;
+  }
+
+  // Map worst rating back to display label
+  const ratingLabel = RATING_PRIORITY_REVERSE[worstRating] || 'C';
+
+  return {
+    text: fragments.join(' '),
+    rating: ratingLabel
+  };
+}
+
+// Render the component builder HTML for the bottom sheet
+function renderComponentBuilder(builderKey, itemLabel, savedSelections) {
+  const builder = COMPONENT_BUILDERS[builderKey];
+  if (!builder) return '';
+
+  const safeLabel = itemLabel.replace(/'/g, "\\'");
+  const selections = savedSelections || {};
+
+  let html = `
+    <div id="component-builder-panel" style="border-bottom:2px solid #1e3a5f;margin-bottom:8px;">
+      <div style="padding:8px 20px;background:#f0f7ff;border-bottom:1px solid #d1d5db;">
+        <div style="font-size:13px;font-weight:700;color:#1e3a5f;">🔧 ${builder.title}</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:2px;">Select the condition of each sub-component. The finding text and rating will be generated automatically.</div>
+      </div>
+  `;
+
+  for (const comp of builder.components) {
+    const selVal = selections[comp.key] !== undefined ? selections[comp.key] : '';
+    html += `
+      <div style="padding:8px 20px;border-bottom:1px solid #f0f0f0;">
+        <label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">${comp.name}</label>
+        <select id="cb-${comp.key}" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;background:white;"
+                onchange="onComponentBuilderChange('${safeLabel}', '${builderKey.replace(/'/g, "\\'")}')">
+          <option value="">— Select —</option>
+    `;
+    comp.options.forEach((opt, idx) => {
+      html += `<option value="${idx}" ${selVal === String(idx) ? 'selected' : ''}>${opt.label}</option>`;
+    });
+    html += `</select>`;
+
+    // Add quantity input if this component has it
+    if (comp.quantityPrompt) {
+      const qtyVal = selections[comp.key + '_qty'] || '';
+      html += `
+        <div style="margin-top:4px;display:flex;gap:8px;align-items:center;">
+          <label style="font-size:11px;color:#6b7280;white-space:nowrap;">${comp.quantityPrompt}</label>
+          <input type="number" id="cb-${comp.key}_qty" value="${qtyVal}" min="1" max="10" style="width:60px;padding:6px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+                 onchange="onComponentBuilderChange('${safeLabel}', '${builderKey.replace(/'/g, "\\'")}')">
+        </div>
+      `;
+    }
+
+    // Add location selector if this component has it
+    if (comp.locationOptions) {
+      const locVal = selections[comp.key + '_location'] || '';
+      html += `
+        <div style="margin-top:4px;display:flex;gap:8px;align-items:center;">
+          <label style="font-size:11px;color:#6b7280;white-space:nowrap;">${comp.locationPrompt || 'Location'}</label>
+          <select id="cb-${comp.key}_location" style="flex:1;padding:6px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+                  onchange="onComponentBuilderChange('${safeLabel}', '${builderKey.replace(/'/g, "\\'")}')">
+            <option value="">Select...</option>
+      `;
+      comp.locationOptions.forEach(loc => {
+        html += `<option value="${loc}" ${locVal === loc ? 'selected' : ''}>${loc}</option>`;
+      });
+      html += `</select></div>`;
+    }
+
+    html += `</div>`;
+  }
+
+  html += `
+      <div style="padding:10px 20px;">
+        <button onclick="applyComponentBuilder('${safeLabel}', '${builderKey.replace(/'/g, "\\'")}')"
+                style="width:100%;padding:10px;background:#1e3a5f;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
+          Generate Finding Text
+        </button>
+      </div>
+    </div>
+  `;
+
+  return html;
+}
+
+// Handle dropdown change in component builder — update preview
+function onComponentBuilderChange(itemLabel, builderKey) {
+  const builder = COMPONENT_BUILDERS[builderKey];
+  if (!builder) return;
+
+  // Collect current selections from the DOM
+  const selections = {};
+  for (const comp of builder.components) {
+    const el = document.getElementById(`cb-${comp.key}`);
+    if (el) selections[comp.key] = el.value;
+    // Also collect qty and location if they exist
+    const qtyEl = document.getElementById(`cb-${comp.key}_qty`);
+    if (qtyEl) selections[comp.key + '_qty'] = qtyEl.value;
+    const locEl = document.getElementById(`cb-${comp.key}_location`);
+    if (locEl) selections[comp.key + '_location'] = locEl.value;
+  }
+
+  // Build the preview text
+  const result = buildComponentFindings(builderKey, selections);
+
+  // Update the textarea with the generated text (live preview)
+  const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
+  const textarea = document.getElementById(`sheet-text-${sanitizedLabel}`);
+  if (textarea && result.text) {
+    textarea.value = result.text;
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  }
+}
+
+// Apply the component builder: generate text, set rating, and save
+function applyComponentBuilder(itemLabel, builderKey) {
+  const builder = COMPONENT_BUILDERS[builderKey];
+  if (!builder) return;
+
+  // Collect selections
+  const selections = {};
+  for (const comp of builder.components) {
+    const el = document.getElementById(`cb-${comp.key}`);
+    if (el) selections[comp.key] = el.value;
+    const qtyEl = document.getElementById(`cb-${comp.key}_qty`);
+    if (qtyEl) selections[comp.key + '_qty'] = qtyEl.value;
+    const locEl = document.getElementById(`cb-${comp.key}_location`);
+    if (locEl) selections[comp.key + '_location'] = locEl.value;
+  }
+
+  const result = buildComponentFindings(builderKey, selections);
+  if (!result.text || result.text === builder.intro) {
+    showToast('Please select at least one component condition');
+    return;
+  }
+
+  // Set the textarea text
+  const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
+  const textarea = document.getElementById(`sheet-text-${sanitizedLabel}`);
+  if (textarea) {
+    textarea.value = result.text;
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  }
+
+  // Save the component builder selections and generated text to the survey
+  getSurvey(currentSurveyId).then(survey => {
+    if (!survey.items[itemLabel]) {
+      survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+    }
+    survey.items[itemLabel].text = result.text;
+    survey.items[itemLabel].componentSelections = selections;
+
+    // Update rating if the builder determined one
+    if (result.rating) {
+      survey.items[itemLabel].rating = result.rating;
+    }
+
+    saveSurvey(survey).then(() => {
+      showToast(`Finding generated — Rating: ${result.rating}`);
+      // Update the rating display in the bottom sheet if visible
+      // Close the sheet and refresh
+      const overlay = document.getElementById('bottomSheetOverlay');
+      if (overlay) overlay.remove();
+      // Re-render the item
+      updateCompactItem(survey, itemLabel, '');
+    });
+  });
+}
 
 // Category to text library sheet mapping
 const SHEET_MAPPING = {
@@ -1029,6 +1495,29 @@ function showNotesSheet(itemLabel, categoryName) {
       `;
     }
 
+    // Component builder — check if this item has a builder definition
+    let componentBuilderHtml = '';
+    // Exact match first, then normalized match (strip punctuation, lowercase)
+    let builderKey = COMPONENT_BUILDERS[itemLabel] ? itemLabel : null;
+    if (!builderKey) {
+      const normalize = s => s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+      const itemNorm = normalize(itemLabel);
+      builderKey = Object.keys(COMPONENT_BUILDERS).find(k => normalize(k) === itemNorm);
+    }
+    if (!builderKey) {
+      // Fallback: check if item label starts with same significant words
+      const itemLower = itemLabel.toLowerCase();
+      builderKey = Object.keys(COMPONENT_BUILDERS).find(k => {
+        const kLower = k.toLowerCase();
+        return itemLower.startsWith(kLower.substring(0, Math.min(kLower.length, 12))) ||
+               kLower.startsWith(itemLower.substring(0, Math.min(itemLower.length, 12)));
+      });
+    }
+    if (builderKey) {
+      const savedSelections = itemData.componentSelections || {};
+      componentBuilderHtml = renderComponentBuilder(builderKey, itemLabel, savedSelections);
+    }
+
     const overlay = document.createElement('div');
     overlay.id = 'bottomSheetOverlay';
     overlay.className = 'bottom-sheet-overlay';
@@ -1039,6 +1528,7 @@ function showNotesSheet(itemLabel, categoryName) {
         ${mastOptionsHtml}
         ${outdriveOptionsHtml}
         ${winchOptionsHtml}
+        ${componentBuilderHtml}
         <div style="padding:12px 20px;">
           <textarea id="sheet-text-${sanitizedLabel}" placeholder="Add inspection notes..." style="min-height:100px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;" autocapitalize="sentences">${itemData.text || ''}</textarea>
         </div>
