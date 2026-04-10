@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v198';
+const APP_VERSION = 'v199';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -7350,7 +7350,7 @@ If you cannot identify the device, still provide your best guess for the name fi
       }
     };
 
-    alert(`DEBUG: About to call Gemini API.\nKey: ${debugKey}\nImage: ${mimeType}, ${payloadSizeKB}KB base64\nOriginal photo size: ${Math.round(photo.dataUrl.length/1024)}KB`);
+    console.log(`Calling Gemini API — key ${debugKey}, ${mimeType}, ${payloadSizeKB}KB base64 (original ${Math.round(photo.dataUrl.length/1024)}KB)`);
 
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -7396,7 +7396,7 @@ If you cannot identify the device, still provide your best guess for the name fi
 
   } catch (err) {
     console.error('AI identification error:', err);
-    alert('IDENTIFY ERROR:\n\n' + err.message + '\n\nStack: ' + (err.stack || 'none').substring(0, 300));
+    showToast('Identification failed: ' + (err.message || 'unknown').substring(0, 80));
 
     if (err.message.includes('API 401') || err.message.includes('API 403')) {
       localStorage.removeItem('geminiApiKey');
