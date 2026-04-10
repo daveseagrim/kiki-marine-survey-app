@@ -5,7 +5,17 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v176';
+const APP_VERSION = 'v177';
+
+// Global error handlers — catch crashes on iOS and show a message instead of silently dying
+window.addEventListener('error', (e) => {
+  console.error('Global error:', e.error || e.message);
+  try { showToast('Error: ' + (e.message || 'Unknown error').substring(0, 100)); } catch(_) {}
+});
+window.addEventListener('unhandledrejection', (e) => {
+  console.error('Unhandled rejection:', e.reason);
+  try { showToast('Error: ' + String(e.reason).substring(0, 100)); } catch(_) {}
+});
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -5028,7 +5038,7 @@ function renderInspection(survey) {
         <div class="header-title">${esc(survey.vesselName)}</div>
         <div class="header-subtitle">Inspection</div>
       </div>
-      <button onclick="regenerateDescriptionFromInspection()" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;font-size:11px;padding:4px 8px;border-radius:6px;cursor:pointer;">✨ Desc</button>
+      <button onclick="regenerateDescriptionFromInspection()" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;font-size:11px;padding:4px 8px;border-radius:6px;cursor:pointer;margin-right:6px;">✨ Desc</button>
       <button onclick="editSurveyDetails('${survey.id}')" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">✏️ Edit Intro</button>
       <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;margin-left:6px;" title="Sync status"></div>
     </div>
@@ -5860,7 +5870,7 @@ function rapidCaptureInstruments() {
       const file = files[0];
       const reader = new FileReader();
       reader.onload = async (re) => {
-        const stampedDataUrl = await addDateStampToPhoto(re.target.result);
+        const stampedDataUrl = await addDateStampToPhoto(re.target.result, 2048);
         const survey = await getSurvey(currentSurveyId);
         if (!survey) return;
         if (!survey.instrumentsElectronics) survey.instrumentsElectronics = [];
@@ -5925,7 +5935,7 @@ async function addInstrumentByPhoto() {
       await new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = async (re) => {
-          const stampedDataUrl = await addDateStampToPhoto(re.target.result);
+          const stampedDataUrl = await addDateStampToPhoto(re.target.result, 2048);
           const idx = survey.instrumentsElectronics.length;
           const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
           const photo = {
@@ -6043,7 +6053,7 @@ async function captureInstrumentPhoto(idx) {
     const file = files[0];
     const reader = new FileReader();
     reader.onload = async (re) => {
-      const stampedDataUrl = await addDateStampToPhoto(re.target.result);
+      const stampedDataUrl = await addDateStampToPhoto(re.target.result, 2048);
       const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
       const photo = {
         id: photoId,
@@ -6591,43 +6601,59 @@ async function editSavedPhoto(photoId, itemLabel) {
 }
 
 // Capture a documentation photo (HIN plate, compliance plate, etc.)
-async function addDateStampToPhoto(dataUrl) {
-  return new Promise((resolve) => {
+async function addDateStampToPhoto(dataUrl, maxResolution) {
+  return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
+      try {
+        let w = img.width, h = img.height;
+        // Optionally cap resolution to save memory (e.g., 2048 for instruments)
+        const maxDim = maxResolution || 4096;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
 
-      // Add date stamp in bottom-right corner
-      const today = new Date();
-      const dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
-      const fontSize = Math.max(20, Math.round(canvas.width / 40));
-      const padding = 12;
+        // Add date stamp in bottom-right corner
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+        const fontSize = Math.max(20, Math.round(canvas.width / 40));
+        const padding = 12;
 
-      ctx.font = `${fontSize}px Arial, sans-serif`;
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'bottom';
+        ctx.font = `${fontSize}px Arial, sans-serif`;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'bottom';
 
-      // Background rect for date
-      const textMetrics = ctx.measureText(dateStr);
-      const rectWidth = textMetrics.width + padding * 2;
-      const rectHeight = fontSize + padding;
-      ctx.fillRect(
-        canvas.width - rectWidth,
-        canvas.height - rectHeight,
-        rectWidth,
-        rectHeight
-      );
+        // Background rect for date
+        const textMetrics = ctx.measureText(dateStr);
+        const rectWidth = textMetrics.width + padding * 2;
+        const rectHeight = fontSize + padding;
+        ctx.fillRect(
+          canvas.width - rectWidth,
+          canvas.height - rectHeight,
+          rectWidth,
+          rectHeight
+        );
 
-      // White text
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(dateStr, canvas.width - padding, canvas.height - padding);
+        // White text
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(dateStr, canvas.width - padding, canvas.height - padding);
 
-      resolve(canvas.toDataURL('image/jpeg', 0.95));
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      } catch (canvasErr) {
+        console.error('addDateStampToPhoto canvas error:', canvasErr);
+        resolve(dataUrl); // Return original if stamp fails
+      }
+    };
+    img.onerror = () => {
+      console.error('addDateStampToPhoto: image failed to load');
+      resolve(dataUrl); // Return original if load fails
     };
     img.src = dataUrl;
   });
