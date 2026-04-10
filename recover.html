@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kiki Photo Recovery</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #0b1e3a; color: #f4f6fb; margin: 0;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 60px; }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  .sub { color: #9db3d6; font-size: 14px; margin-bottom: 18px; }
+  .card {
+    background: #12284a; border: 1px solid #1f3a66; border-radius: 12px;
+    padding: 16px; margin-bottom: 14px;
+  }
+  .row { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+  .label { color: #9db3d6; font-size: 13px; }
+  .value { font-weight: 600; font-size: 16px; }
+  button {
+    width: 100%; font-size: 17px; font-weight: 600; padding: 16px;
+    border-radius: 10px; border: none; margin-top: 8px; cursor: pointer;
+    background: #2e7cf7; color: #fff;
+  }
+  button:disabled { background: #2a3e66; color: #7a8fb2; }
+  button.secondary { background: #1f3a66; }
+  button.danger { background: #8b3a3a; }
+  .batch-list { margin-top: 10px; }
+  .batch {
+    background: #0e2240; border: 1px solid #1f3a66; border-radius: 8px;
+    padding: 12px; margin-bottom: 8px;
+  }
+  .batch-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .batch a, .batch button {
+    display: inline-block; padding: 10px 14px; background: #2e7cf7; color: #fff;
+    text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;
+    width: auto; margin: 0; border: none;
+  }
+  .batch a.done { background: #1e6b3a; }
+  .batch button.rebuild { background: #7a5a1f; }
+  .batch .status { font-size: 12px; color: #9db3d6; margin-top: 4px; }
+  .log {
+    background: #05122a; padding: 10px; border-radius: 8px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+    white-space: pre-wrap; max-height: 200px; overflow: auto; color: #9db3d6;
+  }
+  select {
+    width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #1f3a66;
+    background: #0e2240; color: #f4f6fb; font-size: 15px; margin-top: 6px;
+  }
+  .bar { height: 6px; background: #0e2240; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+  .bar-fill { height: 100%; background: #2e7cf7; width: 0%; transition: width 0.2s; }
+  .warn { color: #ffb84d; font-size: 13px; margin-top: 8px; }
+  .ok { color: #5ae08a; }
+  .err { color: #ff6a6a; }
+  .thumbs {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px;
+  }
+  .thumbs img {
+    width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px;
+    border: 1px solid #1f3a66; background: #0e2240;
+  }
+  .step { color: #5ae08a; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .banner {
+    background: #1a3a1f; border: 1px solid #2d6b3a; color: #9de0b5;
+    padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kiki Photo Recovery</h1>
+  <div class="sub">Read-only extraction of photos from this device's Kiki IndexedDB. Your data is never modified.</div>
+
+  <div class="banner">
+    This page only reads. It cannot delete, overwrite, or clear anything. Safe to reload at any time.
+  </div>
+
+  <div class="card">
+    <div class="step">Step 1</div>
+    <div class="row"><span class="label">Database</span><span class="value">KikiSurveyDB</span></div>
+    <div class="row"><span class="label">Surveys found</span><span class="value" id="surveyCount">—</span></div>
+    <div class="row"><span class="label">Photos found</span><span class="value" id="photoCount">—</span></div>
+    <button id="scanBtn">Scan device storage (read-only)</button>
+  </div>
+
+  <div class="card" id="safeBackupCard" style="display:none">
+    <div class="step">Step 2 — safety backup</div>
+    <div class="sub" style="margin-bottom:8px">Saves a tiny JSON of the survey structure (ratings, notes, photo IDs) so we have a second independent backup before any heavier work.</div>
+    <a id="safeBackupLink" href="#" download="" style="display:block; text-align:center; padding:14px; background:#2e7cf7; color:#fff; border-radius:10px; text-decoration:none; font-weight:600; margin-top:6px;">Save survey JSON backup</a>
+  </div>
+
+  <div class="card" id="verifyCard" style="display:none">
+    <div class="step">Step 3 — verify (dry run)</div>
+    <div class="label">Which survey do you want to export?</div>
+    <select id="surveySelect"></select>
+    <div class="row" style="margin-top:10px"><span class="label">Photos in this survey</span><span class="value" id="selPhotoCount">—</span></div>
+    <div class="row"><span class="label">Estimated size</span><span class="value" id="selSize">—</span></div>
+    <button id="verifyBtn" class="secondary">Run dry-run verification (no ZIPs built)</button>
+    <div id="verifyResult" style="display:none">
+      <div class="row" style="margin-top:12px"><span class="label">Readable photos</span><span class="value" id="readableCount">—</span></div>
+      <div class="row"><span class="label">Unreadable</span><span class="value" id="badCount">—</span></div>
+      <div class="label" style="margin-top:10px">Sample thumbnails (first 8):</div>
+      <div class="thumbs" id="thumbs"></div>
+    </div>
+  </div>
+
+  <div class="card" id="buildCard" style="display:none">
+    <div class="step">Step 4 — build recovery ZIPs</div>
+    <div class="row"><span class="label">Batch size</span><span class="value" id="batchSize">15 photos</span></div>
+    <div class="row"><span class="label">Batches</span><span class="value" id="batchTotal">—</span></div>
+    <button id="buildBtn">Build all batches</button>
+    <div class="warn">Stay on this page. Do not close the tab until every batch says "Saved".</div>
+    <div class="bar" style="margin-top:12px"><div class="bar-fill" id="bar"></div></div>
+    <div id="status" class="sub" style="margin-top:8px"></div>
+    <div class="batch-list" id="batches"></div>
+  </div>
+
+  <div class="card">
+    <div class="label">Log</div>
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<script>
+const BATCH_SIZE = 15; // small & safe for iOS Chrome
+const DB_NAME = 'KikiSurveyDB';
+const logEl = document.getElementById('log');
+function log(msg, cls) {
+  const line = document.createElement('div');
+  if (cls) line.className = cls;
+  line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+let allSurveys = [];
+let photosBySurvey = {}; // surveyId -> [photoIds]
+let photoSizeEstimate = {}; // surveyId -> bytes
+let verifiedGood = []; // ids confirmed readable for currently selected survey
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME);
+    req.onerror = () => reject(req.error);
+    req.onsuccess = () => resolve(req.result);
+  });
+}
+
+async function readPhotoById(db, pid) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('photos', 'readonly');
+    const req = tx.objectStore('photos').get(pid);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function scan() {
+  document.getElementById('scanBtn').disabled = true;
+  log('Opening ' + DB_NAME + ' (read-only)…');
+  let db;
+  try { db = await openDB(); }
+  catch (e) { log('FAILED to open DB: ' + e.message, 'err'); document.getElementById('scanBtn').disabled = false; return; }
+  log('DB opened. Stores: ' + Array.from(db.objectStoreNames).join(', '));
+
+  const surveys = await new Promise((resolve, reject) => {
+    const tx = db.transaction('surveys', 'readonly');
+    const req = tx.objectStore('surveys').getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+  allSurveys = surveys;
+  log('Found ' + surveys.length + ' survey(s)');
+  document.getElementById('surveyCount').textContent = surveys.length;
+
+  const photoStats = await new Promise((resolve, reject) => {
+    const tx = db.transaction('photos', 'readonly');
+    const counts = {}; const sizes = {}; let total = 0;
+    const req = tx.objectStore('photos').openCursor();
+    req.onsuccess = (e) => {
+      const cursor = e.target.result;
+      if (cursor) {
+        const p = cursor.value;
+        const sid = p.surveyId || 'unknown';
+        if (!counts[sid]) { counts[sid] = []; sizes[sid] = 0; }
+        counts[sid].push(p.id);
+        if (p.dataUrl) sizes[sid] += p.dataUrl.length;
+        total++;
+        cursor.continue();
+      } else {
+        resolve({ counts, sizes, total });
+      }
+    };
+    req.onerror = () => reject(req.error);
+  });
+  photosBySurvey = photoStats.counts;
+  photoSizeEstimate = photoStats.sizes;
+  document.getElementById('photoCount').textContent = photoStats.total;
+  log('Found ' + photoStats.total + ' photo(s) across ' + Object.keys(photosBySurvey).length + ' survey bucket(s)', 'ok');
+
+  // Populate survey select
+  const sel = document.getElementById('surveySelect');
+  sel.innerHTML = '';
+  for (const s of surveys) {
+    const count = (photosBySurvey[s.id] || []).length;
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    const name = s.vesselName || '(unnamed)';
+    const date = s.surveyDate || (s.id ? new Date(parseInt(s.id, 10)).toLocaleDateString() : '');
+    opt.textContent = name + ' — ' + date + ' — ' + count + ' photos';
+    sel.appendChild(opt);
+  }
+  for (const sid of Object.keys(photosBySurvey)) {
+    if (!surveys.find(s => s.id == sid)) {
+      const opt = document.createElement('option');
+      opt.value = sid;
+      opt.textContent = '(orphan) ' + sid + ' — ' + photosBySurvey[sid].length + ' photos';
+      sel.appendChild(opt);
+    }
+  }
+  sel.onchange = updateSelected;
+  updateSelected();
+
+  // Prepare the safety backup JSON download
+  const backupBlob = new Blob(
+    [JSON.stringify({ exportedAt: new Date().toISOString(), note: 'Read-only safety backup from recover.html', surveys: surveys }, null, 2)],
+    { type: 'application/json' }
+  );
+  const backupUrl = URL.createObjectURL(backupBlob);
+  const backupLink = document.getElementById('safeBackupLink');
+  backupLink.href = backupUrl;
+  const dateStr = new Date().toISOString().slice(0, 10);
+  backupLink.download = 'kiki_safety_backup_' + dateStr + '.json';
+  backupLink.textContent = 'Save survey JSON backup (' + (backupBlob.size / 1024).toFixed(0) + ' KB)';
+  log('Safety backup ready: ' + (backupBlob.size / 1024).toFixed(0) + ' KB', 'ok');
+
+  document.getElementById('safeBackupCard').style.display = 'block';
+  document.getElementById('verifyCard').style.display = 'block';
+}
+
+function updateSelected() {
+  const sid = document.getElementById('surveySelect').value;
+  const ids = photosBySurvey[sid] || [];
+  const size = photoSizeEstimate[sid] || 0;
+  document.getElementById('selPhotoCount').textContent = ids.length;
+  const mb = (size * 0.75 / 1024 / 1024).toFixed(1);
+  document.getElementById('selSize').textContent = mb + ' MB (est.)';
+  // Reset verification for new selection
+  document.getElementById('verifyResult').style.display = 'none';
+  document.getElementById('buildCard').style.display = 'none';
+  verifiedGood = [];
+}
+
+async function verify() {
+  document.getElementById('verifyBtn').disabled = true;
+  const sid = document.getElementById('surveySelect').value;
+  const ids = photosBySurvey[sid] || [];
+  log('Dry run on ' + ids.length + ' photo IDs (read only, no ZIPs built)…');
+  const db = await openDB();
+  let good = 0; let bad = 0;
+  const thumbs = document.getElementById('thumbs');
+  thumbs.innerHTML = '';
+  verifiedGood = [];
+  for (let i = 0; i < ids.length; i++) {
+    const pid = ids[i];
+    try {
+      const p = await readPhotoById(db, pid);
+      if (p && p.dataUrl && /^data:image\//.test(p.dataUrl)) {
+        good++;
+        verifiedGood.push(pid);
+        if (good <= 8) {
+          const img = document.createElement('img');
+          img.src = p.dataUrl;
+          img.loading = 'lazy';
+          thumbs.appendChild(img);
+        }
+      } else {
+        bad++;
+        log('unreadable: ' + pid, 'warn');
+      }
+    } catch (e) {
+      bad++;
+      log('error on ' + pid + ': ' + e.message, 'err');
+    }
+    if (i % 10 === 0) {
+      document.getElementById('readableCount').textContent = good;
+      document.getElementById('badCount').textContent = bad;
+    }
+  }
+  document.getElementById('readableCount').textContent = good;
+  document.getElementById('badCount').textContent = bad;
+  document.getElementById('verifyResult').style.display = 'block';
+  log('Dry run complete: ' + good + ' readable, ' + bad + ' unreadable', bad === 0 ? 'ok' : 'warn');
+
+  if (good > 0) {
+    const total = Math.ceil(good / BATCH_SIZE);
+    document.getElementById('batchTotal').textContent = total;
+    document.getElementById('buildCard').style.display = 'block';
+  }
+  document.getElementById('verifyBtn').disabled = false;
+}
+
+async function buildOneBatch(batchIndex, ids, survey) {
+  const db = await openDB();
+  const zip = new JSZip();
+  const start = batchIndex * BATCH_SIZE;
+  const end = Math.min(start + BATCH_SIZE, ids.length);
+
+  if (batchIndex === 0 && survey) {
+    const clean = JSON.parse(JSON.stringify(survey));
+    delete clean.photos;
+    zip.file('survey.json', JSON.stringify(clean, null, 2));
+  }
+
+  const indexRows = [];
+  for (let i = start; i < end; i++) {
+    const pid = ids[i];
+    try {
+      const photo = await readPhotoById(db, pid);
+      if (!photo || !photo.dataUrl) continue;
+      const m = photo.dataUrl.match(/^data:(image\/[a-zA-Z+]+);base64,(.*)$/);
+      if (!m) continue;
+      const ext = m[1].split('/')[1].replace('jpeg', 'jpg');
+      const filename = pid + '.' + ext;
+      zip.file(filename, m[2], { base64: true });
+      indexRows.push({
+        photoId: pid, filename: filename,
+        itemLabel: photo.itemLabel || '',
+        annotated: !!photo.annotated,
+        createdAt: photo.createdAt || ''
+      });
+    } catch (e) {
+      log('error on ' + pid + ' in batch ' + (batchIndex + 1) + ': ' + e.message, 'err');
+    }
+    const pct = ((i + 1) / ids.length) * 100;
+    document.getElementById('bar').style.width = pct.toFixed(0) + '%';
+  }
+  zip.file('index.json', JSON.stringify(indexRows, null, 2));
+
+  const blob = await zip.generateAsync(
+    { type: 'blob', compression: 'STORE' },
+    (meta) => {
+      document.getElementById('status').textContent =
+        'Batch ' + (batchIndex + 1) + ' — packaging ' + meta.percent.toFixed(0) + '%';
+    }
+  );
+  return blob;
+}
+
+function renderBatchCard(batchIndex, totalBatches, blob, survey, container, rebuildFn) {
+  const sizeMB = (blob.size / 1024 / 1024).toFixed(1);
+  const name = (survey ? (survey.vesselName || 'survey').replace(/[^a-z0-9]/gi, '_') : 'survey');
+  const zipName = 'kiki_' + name + '_batch' + String(batchIndex + 1).padStart(2, '0') + '_of_' + totalBatches + '.zip';
+  const url = URL.createObjectURL(blob);
+
+  // Replace existing card if present (for rebuilds)
+  const existing = container.querySelector('[data-batch="' + batchIndex + '"]');
+  const batchEl = existing || document.createElement('div');
+  batchEl.className = 'batch';
+  batchEl.setAttribute('data-batch', batchIndex);
+  batchEl.innerHTML = '';
+
+  const row = document.createElement('div');
+  row.className = 'batch-row';
+  row.innerHTML =
+    '<div><div class="value">Batch ' + (batchIndex + 1) + ' / ' + totalBatches + '</div>' +
+    '<div class="label">' + zipName + ' — ' + sizeMB + ' MB</div></div>';
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = zipName;
+  a.textContent = 'Save';
+  a.onclick = () => { setTimeout(() => { a.classList.add('done'); a.textContent = 'Saved ✓'; }, 500); };
+  row.appendChild(a);
+  batchEl.appendChild(row);
+
+  const rebuild = document.createElement('button');
+  rebuild.className = 'rebuild';
+  rebuild.textContent = 'Rebuild this batch';
+  rebuild.style.marginTop = '8px';
+  rebuild.onclick = () => rebuildFn(batchIndex);
+  batchEl.appendChild(rebuild);
+
+  if (!existing) container.appendChild(batchEl);
+}
+
+async function buildZips() {
+  document.getElementById('buildBtn').disabled = true;
+  const sid = document.getElementById('surveySelect').value;
+  const survey = allSurveys.find(s => s.id == sid);
+  const ids = verifiedGood.length ? verifiedGood : (photosBySurvey[sid] || []);
+  log('Building ZIPs for survey ' + sid + ' (' + ids.length + ' verified photos)');
+
+  const totalBatches = Math.ceil(ids.length / BATCH_SIZE);
+  const batchesEl = document.getElementById('batches');
+  batchesEl.innerHTML = '';
+
+  async function rebuildOne(idx) {
+    log('Rebuilding batch ' + (idx + 1) + '…');
+    document.getElementById('status').textContent = 'Rebuilding batch ' + (idx + 1) + '…';
+    try {
+      const blob = await buildOneBatch(idx, ids, survey);
+      renderBatchCard(idx, totalBatches, blob, survey, batchesEl, rebuildOne);
+      log('Batch ' + (idx + 1) + ' rebuilt: ' + (blob.size / 1024 / 1024).toFixed(1) + ' MB', 'ok');
+    } catch (e) {
+      log('Batch ' + (idx + 1) + ' rebuild FAILED: ' + e.message, 'err');
+    }
+  }
+
+  for (let b = 0; b < totalBatches; b++) {
+    document.getElementById('status').textContent =
+      'Building batch ' + (b + 1) + ' of ' + totalBatches + '…';
+    try {
+      const blob = await buildOneBatch(b, ids, survey);
+      renderBatchCard(b, totalBatches, blob, survey, batchesEl, rebuildOne);
+      log('Batch ' + (b + 1) + ' ready: ' + (blob.size / 1024 / 1024).toFixed(1) + ' MB', 'ok');
+    } catch (e) {
+      log('Batch ' + (b + 1) + ' FAILED: ' + e.message + ' — tap Rebuild to retry', 'err');
+      // Still render a placeholder with rebuild button
+      const placeholder = document.createElement('div');
+      placeholder.className = 'batch';
+      placeholder.setAttribute('data-batch', b);
+      placeholder.innerHTML = '<div class="value err">Batch ' + (b + 1) + ' failed</div>' +
+                              '<div class="label">Tap rebuild to retry this batch only.</div>';
+      const rb = document.createElement('button');
+      rb.className = 'rebuild';
+      rb.textContent = 'Rebuild batch ' + (b + 1);
+      rb.style.marginTop = '8px';
+      rb.onclick = () => rebuildOne(b);
+      placeholder.appendChild(rb);
+      batchesEl.appendChild(placeholder);
+    }
+  }
+
+  document.getElementById('status').textContent = 'All ' + totalBatches + ' batches processed. Tap each Save button.';
+  document.getElementById('buildBtn').disabled = false;
+  document.getElementById('buildBtn').textContent = 'Rebuild all (if needed)';
+  log('Build phase complete. Save each batch to Files.', 'ok');
+}
+
+document.getElementById('scanBtn').onclick = scan;
+document.getElementById('verifyBtn').onclick = verify;
+document.getElementById('buildBtn').onclick = buildZips;
+
+log('Ready. Read-only mode confirmed. Tap "Scan device storage" to begin.');
+</script>
+</body>
+</html>
