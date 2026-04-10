@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v193';
+const APP_VERSION = 'v194';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -873,11 +873,23 @@ function buildComponentFindings(builderKey, selections) {
     if (ratingVal > worstRating) worstRating = ratingVal;
   }
 
+  // Deduplicate "Per ABYC X-Y, ..." clauses — keep only the first mention of each standard
+  const mentionedStandards = new Set();
+  const dedupedFragments = fragments.map(frag => {
+    return frag.replace(/Per (ABYC [A-Z]+-\d+),\s*[^.]+\./g, (match, stdCode) => {
+      if (mentionedStandards.has(stdCode)) {
+        return ''; // Strip duplicate standard reference
+      }
+      mentionedStandards.add(stdCode);
+      return match;
+    }).replace(/\s{2,}/g, ' ').trim();
+  });
+
   // Map worst rating back to display label
   const ratingLabel = RATING_PRIORITY_REVERSE[worstRating] || 'C';
 
   return {
-    text: fragments.join(' '),
+    text: dedupedFragments.join(' '),
     rating: ratingLabel
   };
 }
@@ -1908,7 +1920,7 @@ function showNotesSheet(itemLabel, categoryName) {
         ${winchOptionsHtml}
         ${componentBuilderHtml}
         <div style="padding:12px 20px;">
-          <textarea id="sheet-text-${sanitizedLabel}" placeholder="Add inspection notes..." style="min-height:100px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;" autocapitalize="sentences">${itemData.text || ''}</textarea>
+          <textarea id="sheet-text-${sanitizedLabel}" placeholder="Add inspection notes..." style="min-height:80px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;overflow:hidden;" autocapitalize="sentences" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';">${itemData.text || ''}</textarea>
         </div>
         ${snippetsHtml}
         ${standardsHtml}
@@ -1923,6 +1935,13 @@ function showNotesSheet(itemLabel, categoryName) {
       saveNotesFromSheet(itemLabel, categoryName, sanitizedLabel);
     });
     document.body.appendChild(overlay);
+
+    // Auto-expand textarea to fit existing content (no scrolling needed)
+    const ta = document.getElementById(`sheet-text-${sanitizedLabel}`);
+    if (ta && ta.value) {
+      ta.style.height = 'auto';
+      ta.style.height = ta.scrollHeight + 'px';
+    }
   });
 }
 
