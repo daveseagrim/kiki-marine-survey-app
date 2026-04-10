@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v179';
+const APP_VERSION = 'v180';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1672,23 +1672,28 @@ function showNotesSheet(itemLabel, categoryName) {
     // Component builder — check if this item has a builder definition
     let componentBuilderHtml = '';
     // Strip drive-line prefix (e.g., "Port — ", "Starboard — ", "#1 — ") for builder lookup
+    // Strip drive-line prefix (e.g., "Port — ") and re-add "(s)" stripped during expansion
     let builderLookupLabel = itemLabel;
     const driveLinePrefixMatch = itemLabel.match(/^(?:Port|Starboard|#\d+)\s*—\s*/);
     if (driveLinePrefixMatch) {
       builderLookupLabel = itemLabel.substring(driveLinePrefixMatch[0].length);
     }
-    // Exact match first, then normalized match (strip punctuation, lowercase)
+    // Exact match first
     let builderKey = COMPONENT_BUILDERS[builderLookupLabel] ? builderLookupLabel : null;
     if (!builderKey) {
-      const normalize = s => s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+      // Normalized match — strip "(s)", punctuation, and collapse whitespace so
+      // "Outdrive - (external), corrosion, anodes, propeller, boots and bellows"
+      // matches "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows"
+      const normalize = s => s.toLowerCase().replace(/\(s\)/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
       const itemNorm = normalize(builderLookupLabel);
       builderKey = Object.keys(COMPONENT_BUILDERS).find(k => normalize(k) === itemNorm);
     }
     if (!builderKey) {
-      // Fallback: check if item label starts with same significant words
-      const itemLower = builderLookupLabel.toLowerCase();
+      // Fallback: prefix-based match (first 12 chars)
+      const normalize2 = s => s.toLowerCase().replace(/\(s\)/g, '').trim();
+      const itemLower = normalize2(builderLookupLabel);
       builderKey = Object.keys(COMPONENT_BUILDERS).find(k => {
-        const kLower = k.toLowerCase();
+        const kLower = normalize2(k);
         return itemLower.startsWith(kLower.substring(0, Math.min(kLower.length, 12))) ||
                kLower.startsWith(itemLower.substring(0, Math.min(itemLower.length, 12)));
       });
