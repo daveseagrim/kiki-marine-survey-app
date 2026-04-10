@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v184';
+const APP_VERSION = 'v185';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1781,6 +1781,7 @@ function showNotesSheet(itemLabel, categoryName) {
       builderLookupLabel = itemLabel.substring(driveLinePrefixMatch[0].length);
     }
     // Exact match first
+    console.log('[Builder] Looking up:', JSON.stringify(builderLookupLabel), 'from item:', JSON.stringify(itemLabel));
     let builderKey = COMPONENT_BUILDERS[builderLookupLabel] ? builderLookupLabel : null;
     if (!builderKey) {
       // Normalized match — strip "(s)", punctuation, and collapse whitespace so
@@ -1800,9 +1801,11 @@ function showNotesSheet(itemLabel, categoryName) {
                kLower.startsWith(itemLower.substring(0, Math.min(itemLower.length, 12)));
       });
     }
+    console.log('[Builder] Result:', builderKey ? 'FOUND -> ' + builderKey : 'NOT FOUND');
     if (builderKey) {
       const savedSelections = itemData.componentSelections || {};
       componentBuilderHtml = renderComponentBuilder(builderKey, itemLabel, savedSelections, categoryName);
+      console.log('[Builder] HTML length:', componentBuilderHtml.length);
     }
 
     const overlay = document.createElement('div');
