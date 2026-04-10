@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v191';
+const APP_VERSION = 'v192';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -834,7 +834,7 @@ const COMPONENT_BUILDERS = {
 
 // Rating priority for component builder: worst rating wins
 const RATING_PRIORITY = { 'A': 3, 'B': 2, 'NT': 1, 'C': 0 };
-const RATING_PRIORITY_REVERSE = { 3: 'A', 2: 'B', 1: 'Not Tested', 0: 'C' };
+const RATING_PRIORITY_REVERSE = { 3: 'A - Critical', 2: 'B - Needs Attention', 1: 'Not tested/not verified', 0: 'C - Serviceable' };
 
 // Build finding text from component builder selections
 function buildComponentFindings(builderKey, selections) {
@@ -1094,6 +1094,30 @@ function applyComponentBuilder(itemLabel, builderKey, categoryName) {
     // Update rating if the builder determined one
     if (result.rating) {
       survey.items[itemLabel].rating = result.rating;
+    }
+
+    // Auto-check ABYC/TC standards mentioned in the generated text
+    if (finalText && categoryName) {
+      const availableStandards = getStandardsForCategory(categoryName, result.rating || 'B');
+      if (availableStandards.length > 0) {
+        const matched = availableStandards.filter(std => {
+          // Extract the standard code (e.g., "ABYC E-2", "ABYC P-6", "TP1332")
+          const codeMatch = std.match(/^(ABYC\s+\S+|TP\d+|TC\s+TP\s*\d+)/i);
+          if (codeMatch) {
+            // Normalise to handle "ABYC E-2" matching "ABYC E-2" in text
+            return finalText.includes(codeMatch[1]);
+          }
+          return false;
+        });
+        if (matched.length > 0) {
+          if (!survey.items[itemLabel].standards) survey.items[itemLabel].standards = [];
+          matched.forEach(std => {
+            if (!survey.items[itemLabel].standards.includes(std)) {
+              survey.items[itemLabel].standards.push(std);
+            }
+          });
+        }
+      }
     }
 
     saveSurvey(survey).then(() => {
@@ -1868,6 +1892,8 @@ function showNotesSheet(itemLabel, categoryName) {
     if (builderKey) {
       const savedSelections = itemData.componentSelections || {};
       componentBuilderHtml = renderComponentBuilder(builderKey, itemLabel, savedSelections, categoryName);
+      // When a builder is present, hide the quick-insert snippets — the builder replaces them
+      snippetsHtml = '';
     }
 
     const overlay = document.createElement('div');
