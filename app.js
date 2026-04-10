@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v175';
+const APP_VERSION = 'v176';
 let db = null;
 let textLibrary = null;
 let surveyTemplate = null;
@@ -17,6 +17,15 @@ let outdriveDb = null;
 let winchDb = null;
 let currentSurveyId = null;
 let currentView = 'surveys';
+
+// Persist view state to sessionStorage so reload returns to the same screen
+function persistViewState() {
+  try {
+    sessionStorage.setItem('_currentView', currentView);
+    if (currentSurveyId) sessionStorage.setItem('_currentSurveyId', currentSurveyId);
+    else sessionStorage.removeItem('_currentSurveyId');
+  } catch(e) {}
+}
 
 // Camera active flag — persisted to sessionStorage so it survives
 // iOS Chrome tab suspension when the camera app is open.
@@ -1376,155 +1385,179 @@ function getStandardForItem(itemLabel, categoryName) {
   return bestMatch;
 }
 
-// ── Transport Canada TP 511 Safety Equipment Requirements ────────────────
-// Based on Small Vessel Regulations (SOR/2010-91) and TP 511E Safe Boating Guide
-// Organized by vessel type and length bracket
+// ── Transport Canada TP 511E Safety Equipment Requirements ───────────────
+// Source: TP 511E Safe Boating Guide (2019) — pages 16–19
+// Reference: https://tc.canada.ca/sites/default/files/2024-03/tp_511e.pdf
+// Small Vessel Regulations (SOR/2010-91)
 const TC_SAFETY_EQUIPMENT = {
-  // Length brackets in metres
   brackets: [
-    { id: 'under6', label: 'Not over 6 m', maxM: 6 },
-    { id: '6to9',   label: 'Over 6 m, not over 9 m', maxM: 9 },
-    { id: '9to12',  label: 'Over 9 m, not over 12 m', maxM: 12 },
-    { id: '12to24', label: 'Over 12 m, not over 24 m', maxM: 24 },
-    { id: 'over24', label: 'Over 24 m', maxM: Infinity }
+    { id: 'under6', label: 'Not over 6 m (19\'8")', maxM: 6 },
+    { id: '6to9',   label: 'Over 6 m, not over 9 m (19\'8"–29\'6")', maxM: 9 },
+    { id: '9to12',  label: 'Over 9 m, not over 12 m (29\'6"–39\'4")', maxM: 12 },
+    { id: '12to24', label: 'Over 12 m, not over 24 m (39\'4"–78\'9")', maxM: 24 },
+    { id: 'over24', label: 'Over 24 m (78\'9")', maxM: Infinity }
   ],
-  // Equipment items — each has a name, the brackets where it applies, qty or detail,
-  // and which vessel types it applies to (power, sail, all)
   items: [
-    // ── Personal Protection Equipment ──
-    { category: 'Personal Protection Equipment',
+    // ══════════════════════════════════════════════════════════════════════
+    // PERSONAL LIFESAVING APPLIANCES  (TP 511E pp. 16–18)
+    // ══════════════════════════════════════════════════════════════════════
+    { category: 'Personal Lifesaving Appliances',
       name: 'Approved PFD or lifejacket for each person on board',
       applies: { under6: '1 per person', '6to9': '1 per person', '9to12': '1 per person', '12to24': '1 per person', over24: '1 per person' },
       types: ['power', 'sail', 'human-powered'] },
-    { category: 'Personal Protection Equipment',
-      name: 'Buoyant heaving line (min. 15 m / 49 ft)',
-      applies: { '6to9': '1', '9to12': '1', '12to24': '1', over24: '1' },
+    { category: 'Personal Lifesaving Appliances',
+      name: 'Reboarding device (Note 1: only required if freeboard > 0.5 m)',
+      applies: { under6: '1', '6to9': '1', '9to12': '1', '12to24': '1', over24: '1' },
+      types: ['power', 'sail', 'human-powered'] },
+    { category: 'Personal Lifesaving Appliances',
+      name: 'Buoyant heaving line — min. 15 m (49\'3")',
+      applies: { under6: '1', '6to9': '1', '9to12': '1', '12to24': '1', over24: '1' },
+      types: ['power', 'sail', 'human-powered'] },
+    { category: 'Personal Lifesaving Appliances',
+      name: 'Lifebuoy attached to buoyant line — min. 15 m (49\'3")',
+      applies: { '9to12': '1', '12to24': '1' },
       types: ['power', 'sail'] },
-    { category: 'Personal Protection Equipment',
-      name: 'Buoyant heaving line (min. 15 m) OR lifebuoy with line',
-      applies: { under6: '1' },
+    { category: 'Personal Lifesaving Appliances',
+      name: 'Lifebuoy with self-igniting light attached to buoyant line — min. 15 m (49\'3")',
+      applies: { '12to24': '1' },
       types: ['power', 'sail'] },
-    { category: 'Personal Protection Equipment',
-      name: 'SOLAS lifebuoy with min. 30 m buoyant line attached',
-      applies: { '12to24': '1', over24: '1' },
-      types: ['power', 'sail'] },
-    { category: 'Personal Protection Equipment',
-      name: 'SOLAS lifebuoy with self-igniting light',
+    { category: 'Personal Lifesaving Appliances',
+      name: 'Buoyant heaving line — min. 30 m (98\'5")',
       applies: { over24: '1' },
       types: ['power', 'sail'] },
-    // ── Vessel Safety Equipment ──
-    { category: 'Vessel Safety Equipment',
-      name: 'Manual propelling device (paddle or oar) OR anchor with min. 15 m cable/chain/line',
-      applies: { under6: '1' },
-      types: ['power', 'sail', 'human-powered'] },
-    { category: 'Vessel Safety Equipment',
-      name: 'Anchor with min. 15 m (49 ft) of cable, rope, or chain',
-      applies: { '6to9': '1', '9to12': '1', '12to24': '1', over24: '1' },
+    { category: 'Personal Lifesaving Appliances',
+      name: 'Two (2) SOLAS lifebuoys — one with 30 m buoyant line, one with self-igniting light',
+      applies: { over24: '2' },
       types: ['power', 'sail'] },
-    { category: 'Vessel Safety Equipment',
-      name: 'Anchor with min. 50 m (164 ft) of cable, rope, or chain',
+    { category: 'Personal Lifesaving Appliances',
+      name: 'Lifting harness with appropriate rigging',
       applies: { over24: '1' },
       types: ['power', 'sail'] },
-    { category: 'Vessel Safety Equipment',
-      name: 'Bailer OR manual bilge pump',
-      applies: { under6: '1', '6to9': '1' },
-      types: ['power', 'sail'] },
-    { category: 'Vessel Safety Equipment',
-      name: 'Manual bilge pump OR bilge-pumping arrangement',
-      applies: { '9to12': '1', '12to24': '1', over24: '1' },
-      types: ['power', 'sail'] },
-    { category: 'Vessel Safety Equipment',
-      name: 'Bailer or manual water pump',
+
+    // ══════════════════════════════════════════════════════════════════════
+    // VISUAL SIGNALS / DISTRESS EQUIPMENT  (TP 511E pp. 16–18, Note 2)
+    // ══════════════════════════════════════════════════════════════════════
+    { category: 'Visual Signals',
+      name: 'Watertight flashlight OR 3 flares (Type A, B, C, or D — only 1 may be Type D)',
       applies: { under6: '1' },
-      types: ['human-powered'] },
-    // ── Distress Equipment ──
-    { category: 'Distress Equipment',
-      name: 'Watertight flashlight OR 3 pyrotechnic distress signals (Type A, B, or C)',
-      applies: { under6: '1' },
-      types: ['power', 'sail', 'human-powered'] },
-    { category: 'Distress Equipment',
+      types: ['power', 'sail'] },
+    { category: 'Visual Signals',
       name: 'Watertight flashlight',
       applies: { '6to9': '1', '9to12': '1', '12to24': '1', over24: '1' },
       types: ['power', 'sail'] },
-    { category: 'Distress Equipment',
-      name: 'Pyrotechnic distress signals — Type A (parachute flare)',
-      applies: { '6to9': '6', '9to12': '6', '12to24': '12', over24: '12' },
+    { category: 'Visual Signals',
+      name: 'Six (6) flares — Type A, B, C, or D; only 2 may be Type D (Note 2)',
+      applies: { '6to9': '6 total' },
       types: ['power', 'sail'] },
-    { category: 'Distress Equipment',
-      name: 'Pyrotechnic distress signals — Type B (multi-star flare)',
-      applies: { '6to9': '6', '9to12': '6' },
+    { category: 'Visual Signals',
+      name: 'Twelve (12) flares — Type A, B, C, or D; only 6 may be Type D (Note 2)',
+      applies: { '9to12': '12 total', '12to24': '12 total', over24: '12 total' },
       types: ['power', 'sail'] },
-    { category: 'Distress Equipment',
-      name: 'Pyrotechnic distress signals — Type C (hand-held flare)',
-      applies: { '6to9': '6', '9to12': '6', '12to24': '6', over24: '6' },
+
+    // ══════════════════════════════════════════════════════════════════════
+    // VESSEL SAFETY EQUIPMENT  (TP 511E pp. 16–18, Note 3)
+    // ══════════════════════════════════════════════════════════════════════
+    { category: 'Vessel Safety Equipment',
+      name: 'Manual propelling device OR anchor with min. 15 m (49\'3") of cable, rope, or chain',
+      applies: { under6: '1' },
       types: ['power', 'sail'] },
-    { category: 'Distress Equipment',
-      name: 'Pyrotechnic distress signals — Type D (smoke signal)',
-      applies: { '6to9': '6', '9to12': '6', '12to24': '6', over24: '6' },
+    { category: 'Vessel Safety Equipment',
+      name: 'Manual propelling device',
+      applies: { '6to9': '1' },
       types: ['power', 'sail'] },
-    // ── Navigation Equipment ──
+    { category: 'Vessel Safety Equipment',
+      name: 'Anchor with min. 15 m (49\'3") of cable, rope, or chain',
+      applies: { '6to9': '1' },
+      types: ['power', 'sail'] },
+    { category: 'Vessel Safety Equipment',
+      name: 'Anchor with min. 30 m (98\'5") of cable, rope, or chain',
+      applies: { '9to12': '1' },
+      types: ['power', 'sail'] },
+    { category: 'Vessel Safety Equipment',
+      name: 'Anchor with min. 50 m (164\'1") of cable, rope, or chain',
+      applies: { '12to24': '1', over24: '1' },
+      types: ['power', 'sail'] },
+    { category: 'Vessel Safety Equipment',
+      name: 'Bailer or manual bilge pump (Note 3)',
+      applies: { under6: '1', '6to9': '1' },
+      types: ['power', 'sail'] },
+    { category: 'Vessel Safety Equipment',
+      name: 'Manual bilge pump OR bilge-pumping arrangements (Note 3)',
+      applies: { '9to12': '1', '12to24': '1', over24: '1' },
+      types: ['power', 'sail'] },
+    // Human-powered specific
+    { category: 'Vessel Safety Equipment',
+      name: 'Manual propelling device OR anchor with min. 15 m of cable, rope, or chain',
+      applies: { under6: '1' },
+      types: ['human-powered'] },
+    { category: 'Vessel Safety Equipment',
+      name: 'Bailer or manual water pump (Note 3)',
+      applies: { under6: '1' },
+      types: ['human-powered'] },
+
+    // ══════════════════════════════════════════════════════════════════════
+    // NAVIGATION EQUIPMENT  (TP 511E pp. 16–18, Notes 4–6)
+    // ══════════════════════════════════════════════════════════════════════
     { category: 'Navigation Equipment',
-      name: 'Navigation lights conforming to the Collision Regulations',
-      applies: { under6: 'Required if operating after sunset, before sunrise, or in restricted visibility', '6to9': '1 set', '9to12': '1 set', '12to24': '1 set', over24: '1 set' },
-      types: ['power', 'sail', 'human-powered'] },
-    { category: 'Navigation Equipment',
-      name: 'Sound signalling device (horn or whistle)',
+      name: 'Sound-signalling device or appliance',
       applies: { under6: '1', '6to9': '1', '9to12': '1', '12to24': '1', over24: '1' },
       types: ['power', 'sail', 'human-powered'] },
     { category: 'Navigation Equipment',
-      name: 'Sound signalling appliance (power-driven, audible for 0.5 nm)',
-      applies: { '12to24': '1', over24: '1' },
+      name: 'Sound-signalling appliance — power-driven, audible for 0.5 nm (two required over 24 m)',
+      applies: { over24: '2' },
       types: ['power', 'sail'] },
     { category: 'Navigation Equipment',
-      name: 'Bell (required for vessels 12 m and over)',
-      applies: { '12to24': '1', over24: '1' },
-      types: ['power', 'sail'] },
+      name: 'Navigation lights per Collision Regulations (Note 4)',
+      applies: { under6: 'If operating at night or restricted visibility', '6to9': '1 set', '9to12': '1 set', '12to24': '1 set', over24: '1 set' },
+      types: ['power', 'sail', 'human-powered'] },
     { category: 'Navigation Equipment',
-      name: 'Magnetic compass',
-      applies: { '9to12': '1', '12to24': '1', over24: '1' },
-      types: ['power', 'sail'] },
+      name: 'Magnetic compass (Note 5: not required if boat ≤ 8 m and within sight of nav marks)',
+      applies: { under6: '1', '6to9': '1', '9to12': '1', '12to24': '1', over24: '1' },
+      types: ['power', 'sail', 'human-powered'] },
     { category: 'Navigation Equipment',
-      name: 'Radar reflector (if substantially constructed of non-metallic materials)',
-      applies: { '6to9': '1', '9to12': '1', '12to24': '1', over24: '1' },
-      types: ['power', 'sail'] },
-    // ── Fire Fighting Equipment ──
+      name: 'Radar reflector (Note 6: if under 20 m and built of non-metallic materials)',
+      applies: { under6: '1', '6to9': '1', '9to12': '1', '12to24': '1', over24: '1' },
+      types: ['power', 'sail', 'human-powered'] },
+
+    // ══════════════════════════════════════════════════════════════════════
+    // FIRE FIGHTING EQUIPMENT  (TP 511E pp. 17–18)
+    // ══════════════════════════════════════════════════════════════════════
     { category: 'Fire Fighting Equipment',
-      name: 'Fire extinguisher — 5B:C (marine-rated, if equipped with motor/fuel-burning appliance)',
+      name: 'Fire extinguisher — 5BC (if equipped with inboard engine, fixed fuel tank, or fuel-burning appliance)',
       applies: { under6: '1' },
       types: ['power', 'sail'] },
     { category: 'Fire Fighting Equipment',
-      name: 'Fire extinguisher — 5B:C (marine-rated)',
-      applies: { '6to9': '1', '9to12': '1' },
+      name: 'Fire extinguisher — 5BC (if equipped with a motor)',
+      applies: { '6to9': '1' },
       types: ['power', 'sail'] },
     { category: 'Fire Fighting Equipment',
-      name: 'Fire extinguisher — 10B:C (marine-rated)',
+      name: 'Fire extinguisher — 5BC (if equipped with fuel-burning cooking, heating, or refrigerating appliance)',
+      applies: { '6to9': '1' },
+      types: ['power', 'sail'] },
+    { category: 'Fire Fighting Equipment',
+      name: 'Fire extinguisher — 10BC (if equipped with a motor)',
+      applies: { '9to12': '1' },
+      types: ['power', 'sail'] },
+    { category: 'Fire Fighting Equipment',
+      name: 'Fire extinguisher — 10BC (if equipped with fuel-burning cooking, heating, or refrigerating appliance)',
+      applies: { '9to12': '1' },
+      types: ['power', 'sail'] },
+    { category: 'Fire Fighting Equipment',
+      name: 'Fire extinguisher — 10BC at each access to fuel-burning cooking/heating/refrigerating space, entrance to accommodation, and entrance to machinery space',
+      applies: { '12to24': '1 per location', over24: '1 per location' },
+      types: ['power', 'sail'] },
+    { category: 'Fire Fighting Equipment',
+      name: 'Axe',
       applies: { '12to24': '1', over24: '2' },
       types: ['power', 'sail'] },
     { category: 'Fire Fighting Equipment',
-      name: 'Fire axe (power-driven vessel, 12 m and over)',
-      applies: { '12to24': '1', over24: '1' },
-      types: ['power'] },
+      name: 'Fire buckets — 10 L each',
+      applies: { '12to24': '2', over24: '4' },
+      types: ['power', 'sail'] },
     { category: 'Fire Fighting Equipment',
-      name: 'Fire bucket with lanyard (2 required over 24 m)',
-      applies: { over24: '2' },
-      types: ['power', 'sail'] },
-    // ── Other Required Equipment ──
-    { category: 'Other Required Equipment',
-      name: 'First aid kit (marine or equivalent)',
-      applies: { '12to24': '1', over24: '1' },
-      types: ['power', 'sail'] },
-    { category: 'Other Required Equipment',
-      name: 'Reboarding device (ladder, swim platform, etc.) if freeboard > 0.5 m',
-      applies: { under6: '1', '6to9': '1', '9to12': '1', '12to24': '1', over24: '1' },
-      types: ['power', 'sail'] },
-    { category: 'Other Required Equipment',
-      name: 'Manual propelling device (paddle or oar)',
-      applies: { under6: '1', '6to9': '1' },
-      types: ['power', 'sail'] },
-    { category: 'Other Required Equipment',
-      name: 'Sound signalling device — whistle (attached to each PFD, recommended)',
-      applies: { under6: '1 per PFD', '6to9': '1 per PFD', '9to12': '1 per PFD', '12to24': '1 per PFD', over24: '1 per PFD' },
-      types: ['power', 'sail', 'human-powered'] }
+      name: 'Power-driven fire pump located outside machinery space, with fire hose and nozzle',
+      applies: { over24: '1' },
+      types: ['power', 'sail'] }
   ]
 };
 
@@ -1972,7 +2005,7 @@ async function emergencyRecovery() {
 }
 
 function renderHome() {
-  currentView = 'surveys';
+  currentView = 'surveys'; persistViewState();
   history.replaceState({ view: 'surveys' }, '');
   const app = document.getElementById('app');
 
@@ -2128,7 +2161,7 @@ function fetchExchangeRate() {
 }
 
 function renderNewSurveyForm() {
-  currentView = 'new-survey';
+  currentView = 'new-survey'; persistViewState();
   history.pushState({ view: 'new-survey' }, '');
   const existingFab = document.querySelector('.fab');
   if (existingFab) existingFab.remove();
@@ -3283,7 +3316,7 @@ function editSurveyDetails(surveyId) {
     renderNewSurveyForm();
 
     // Set currentView AFTER renderNewSurveyForm (which sets it to 'new-survey')
-    currentView = 'edit-survey';
+    currentView = 'edit-survey'; persistViewState();
     history.pushState({ view: 'edit-survey', surveyId: survey.id }, '');
 
     // Change header
@@ -4979,6 +5012,7 @@ function renderInspection(survey) {
 
   currentView = 'inspection';
   currentSurveyId = survey.id;
+  persistViewState();
   history.pushState({ view: 'inspection', surveyId: survey.id }, '');
 
   const app = document.getElementById('app');
@@ -10377,7 +10411,7 @@ function toggleProseMode() {
 
 function renderReportInPage(html) {
   const previousView = currentView;
-  currentView = 'report';
+  currentView = 'report'; persistViewState();
   history.pushState({ view: 'report' }, '');
 
   const app = document.getElementById('app');
@@ -10682,7 +10716,32 @@ async function initApp() {
       console.warn('Migration (multi engine photos) failed:', migErr);
     }
 
-    renderHome();
+    // Restore previous view if page was reloaded (not camera recovery — that's handled above)
+    const savedView = sessionStorage.getItem('_currentView');
+    const savedSurveyId = sessionStorage.getItem('_currentSurveyId');
+    let restored = false;
+
+    if (savedView && savedView !== 'surveys' && savedSurveyId) {
+      try {
+        const survey = await getSurvey(savedSurveyId);
+        if (survey) {
+          if (savedView === 'inspection') {
+            renderInspection(survey);
+            restored = true;
+          } else if (savedView === 'edit-survey') {
+            editSurvey(savedSurveyId);
+            restored = true;
+          }
+          // For 'new-survey' or 'report', fall through to home
+        }
+      } catch (restoreErr) {
+        console.warn('View restore failed, showing home:', restoreErr);
+      }
+    }
+
+    if (!restored) {
+      renderHome();
+    }
 
     // Initialize Firebase real-time sync (non-blocking)
     try { FirebaseSync.init(); } catch (syncErr) { console.warn('Sync init error:', syncErr); }
