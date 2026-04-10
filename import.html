@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kiki Survey Import</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #0b1e3a; color: #f4f6fb; margin: 0;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 24px 18px 60px; }
+  h1 { font-size: 24px; margin: 0 0 6px; }
+  .sub { color: #9db3d6; font-size: 14px; margin-bottom: 18px; }
+  .card {
+    background: #12284a; border: 1px solid #1f3a66; border-radius: 12px;
+    padding: 16px 18px; margin-bottom: 14px;
+  }
+  .row { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin: 4px 0; }
+  .label { color: #9db3d6; font-size: 13px; }
+  .value { font-weight: 600; font-size: 16px; }
+  button {
+    width: 100%; font-size: 16px; font-weight: 600; padding: 14px;
+    border-radius: 10px; border: none; margin-top: 10px; cursor: pointer;
+    background: #2e7cf7; color: #fff;
+  }
+  button:disabled { background: #2a3e66; color: #7a8fb2; cursor: default; }
+  button.secondary { background: #1f3a66; }
+  button.go { background: #1e6b3a; }
+  input[type=file] {
+    display: block; width: 100%; padding: 14px; background: #0e2240;
+    border: 2px dashed #2e7cf7; border-radius: 10px; color: #9db3d6;
+    margin-top: 8px; cursor: pointer;
+  }
+  .log {
+    background: #05122a; padding: 10px; border-radius: 8px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+    white-space: pre-wrap; max-height: 240px; overflow: auto; color: #9db3d6;
+  }
+  .bar { height: 8px; background: #0e2240; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+  .bar-fill { height: 100%; background: #2e7cf7; width: 0%; transition: width 0.2s; }
+  .step { color: #5ae08a; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .banner {
+    background: #3a2d1a; border: 1px solid #6b5a2d; color: #f0d48a;
+    padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 12px;
+  }
+  .banner.danger { background: #3a1a1a; border-color: #6b2d2d; color: #f0a8a8; }
+  .banner.ok { background: #1a3a1f; border-color: #2d6b3a; color: #9de0b5; }
+  .survey-item {
+    background: #0e2240; padding: 12px; border-radius: 8px;
+    margin-bottom: 8px; border-left: 4px solid #2e7cf7;
+  }
+  .survey-item.new { border-left-color: #5ae08a; }
+  .survey-item.overwrite { border-left-color: #ffb84d; }
+  .survey-item .name { font-weight: 600; font-size: 16px; }
+  .survey-item .meta { font-size: 12px; color: #9db3d6; margin-top: 4px; }
+  .check { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; }
+  .check input[type=checkbox] { width: 18px; height: 18px; }
+  a.dl {
+    display: block; text-align: center; padding: 14px; background: #2e7cf7;
+    color: #fff; text-decoration: none; border-radius: 10px; font-weight: 600; margin-top: 8px;
+  }
+  .err { color: #ff6a6a; }
+  .ok { color: #5ae08a; }
+  .warn { color: #ffb84d; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kiki Survey Import</h1>
+  <div class="sub">Import recovered survey ZIPs back into this browser's Kiki IndexedDB.</div>
+
+  <div class="banner">
+    This page <strong>writes</strong> to IndexedDB. It will not delete anything, but it will overwrite records with the same ID. Back up first, then preview, then confirm.
+  </div>
+
+  <div class="card">
+    <div class="step">Step 1 — Inspect current state</div>
+    <div class="row"><span class="label">Existing surveys in this browser</span><span class="value" id="curSurveys">—</span></div>
+    <div class="row"><span class="label">Existing photos in this browser</span><span class="value" id="curPhotos">—</span></div>
+    <button id="scanBtn">Scan current IndexedDB</button>
+  </div>
+
+  <div class="card" id="backupCard" style="display:none">
+    <div class="step">Step 2 — Back up current state</div>
+    <div class="sub">Download a read-only JSON snapshot of whatever is already in this browser, just in case.</div>
+    <a id="backupLink" class="dl" href="#" download="">Save safety backup</a>
+  </div>
+
+  <div class="card" id="pickCard" style="display:none">
+    <div class="step">Step 3 — Choose recovery ZIP files</div>
+    <div class="sub">Select ALL the batch ZIP files from ALL 4 recovery folders at once. You can Cmd-click individual files, or open each recovery folder in turn.</div>
+    <input type="file" id="fileInput" multiple accept=".zip">
+    <button id="parseBtn" class="secondary" disabled>Parse selected files</button>
+  </div>
+
+  <div class="card" id="previewCard" style="display:none">
+    <div class="step">Step 4 — Preview what will be imported</div>
+    <div id="surveyList"></div>
+    <div class="row" style="margin-top:12px"><span class="label">Total photos to import</span><span class="value" id="totalPhotos">—</span></div>
+    <button id="importBtn" class="go">Confirm and import all checked</button>
+  </div>
+
+  <div class="card" id="progressCard" style="display:none">
+    <div class="step">Step 5 — Importing</div>
+    <div class="bar"><div class="bar-fill" id="bar"></div></div>
+    <div id="status" class="sub" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card" id="doneCard" style="display:none">
+    <div class="step">Done</div>
+    <div id="doneMsg" class="banner ok"></div>
+    <a href="index.html" class="dl">Open Kiki app</a>
+  </div>
+
+  <div class="card">
+    <div class="label">Log</div>
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<script>
+const DB_NAME = 'KikiSurveyDB';
+const logEl = document.getElementById('log');
+function log(msg, cls) {
+  const line = document.createElement('div');
+  if (cls) line.className = cls;
+  line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+let existingSurveyIds = new Set();
+let parsedSurveys = []; // [{survey, photos:[{id, filename, itemLabel, annotated, createdAt, dataUrl}]}]
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 2);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('surveys')) {
+        db.createObjectStore('surveys', { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains('photos')) {
+        const ps = db.createObjectStore('photos', { keyPath: 'id' });
+        ps.createIndex('surveyId', 'surveyId', { unique: false });
+      }
+    };
+    req.onerror = () => reject(req.error);
+    req.onsuccess = () => resolve(req.result);
+  });
+}
+
+async function scan() {
+  document.getElementById('scanBtn').disabled = true;
+  log('Opening ' + DB_NAME + '…');
+  let db;
+  try { db = await openDB(); }
+  catch (e) { log('Failed: ' + e.message, 'err'); document.getElementById('scanBtn').disabled = false; return; }
+  log('DB opened');
+
+  const surveys = await new Promise((resolve, reject) => {
+    const tx = db.transaction('surveys', 'readonly');
+    const req = tx.objectStore('surveys').getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+  existingSurveyIds = new Set(surveys.map(s => String(s.id)));
+  document.getElementById('curSurveys').textContent = surveys.length;
+  log('Found ' + surveys.length + ' existing survey(s)');
+
+  let photoCount = 0;
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction('photos', 'readonly');
+    const req = tx.objectStore('photos').count();
+    req.onsuccess = () => { photoCount = req.result; resolve(); };
+    req.onerror = () => reject(req.error);
+  });
+  document.getElementById('curPhotos').textContent = photoCount;
+  log('Found ' + photoCount + ' existing photo(s)', 'ok');
+
+  // Prepare backup
+  const backupBlob = new Blob(
+    [JSON.stringify({ exportedAt: new Date().toISOString(), note: 'Pre-import backup from import.html', surveys: surveys }, null, 2)],
+    { type: 'application/json' }
+  );
+  const dateStr = new Date().toISOString().slice(0, 10);
+  document.getElementById('backupLink').href = URL.createObjectURL(backupBlob);
+  document.getElementById('backupLink').download = 'kiki_desktop_preimport_backup_' + dateStr + '.json';
+  document.getElementById('backupLink').textContent = 'Save safety backup (' + (backupBlob.size / 1024).toFixed(0) + ' KB)';
+  document.getElementById('backupCard').style.display = 'block';
+  document.getElementById('pickCard').style.display = 'block';
+}
+
+async function parseFiles() {
+  const files = Array.from(document.getElementById('fileInput').files);
+  log('Parsing ' + files.length + ' file(s)…');
+  parsedSurveys = [];
+  const bySurveyId = new Map(); // surveyId -> { survey, photos: Map<photoId, photoObj> }
+
+  for (const f of files) {
+    if (!f.name.toLowerCase().endsWith('.zip')) {
+      log('skip (not a zip): ' + f.name, 'warn');
+      continue;
+    }
+    try {
+      const zip = await JSZip.loadAsync(f);
+
+      // Is this the batch01 that contains survey.json?
+      let survey = null;
+      if (zip.files['survey.json']) {
+        const sjson = await zip.files['survey.json'].async('string');
+        survey = JSON.parse(sjson);
+        const sid = String(survey.id);
+        if (!bySurveyId.has(sid)) bySurveyId.set(sid, { survey, photos: new Map() });
+        else bySurveyId.get(sid).survey = survey;
+        log('Loaded survey.json: ' + (survey.vesselName || sid) + ' from ' + f.name, 'ok');
+      }
+
+      // Read index.json to know which photo IDs this batch has
+      let indexRows = [];
+      if (zip.files['index.json']) {
+        const ijson = await zip.files['index.json'].async('string');
+        indexRows = JSON.parse(ijson);
+      }
+
+      // We need to know which survey these photos belong to.
+      // If batch01 had survey.json we just set it; otherwise infer from photo filenames (surveyId is prefix).
+      let targetSid = null;
+      for (const [sid, entry] of bySurveyId.entries()) {
+        // heuristic: if any indexRow's photoId starts with sid + "_", use it
+        if (indexRows.some(r => r.photoId && r.photoId.indexOf(sid + '_') === 0)) {
+          targetSid = sid; break;
+        }
+      }
+      if (!targetSid && indexRows.length) {
+        // Infer from photoId prefix: format "<surveyId>_<rest>"
+        const first = indexRows[0].photoId || '';
+        const m = first.match(/^(\d+)_/);
+        if (m) {
+          targetSid = m[1];
+          if (!bySurveyId.has(targetSid)) bySurveyId.set(targetSid, { survey: null, photos: new Map() });
+          log('Inferred surveyId ' + targetSid + ' from ' + f.name, 'warn');
+        }
+      }
+      if (!targetSid) {
+        log('Cannot determine surveyId for ' + f.name + ' — skipped', 'err');
+        continue;
+      }
+
+      const entry = bySurveyId.get(targetSid);
+      const indexByFilename = new Map(indexRows.map(r => [r.filename, r]));
+
+      // Read every photo file
+      for (const fname of Object.keys(zip.files)) {
+        if (fname === 'survey.json' || fname === 'index.json') continue;
+        if (!/\.(jpe?g|png)$/i.test(fname)) continue;
+        const base64 = await zip.files[fname].async('base64');
+        const ext = fname.split('.').pop().toLowerCase();
+        const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
+        const dataUrl = 'data:' + mime + ';base64,' + base64;
+        const photoId = fname.replace(/\.(jpe?g|png)$/i, '');
+        const meta = indexByFilename.get(fname) || {};
+        entry.photos.set(photoId, {
+          id: photoId,
+          surveyId: targetSid,
+          itemLabel: meta.itemLabel || '',
+          annotated: !!meta.annotated,
+          createdAt: meta.createdAt || new Date().toISOString(),
+          dataUrl
+        });
+      }
+      log(f.name + ': ' + Object.keys(zip.files).filter(n => /\.(jpe?g|png)$/i.test(n)).length + ' photos');
+    } catch (e) {
+      log('Error parsing ' + f.name + ': ' + e.message, 'err');
+    }
+  }
+
+  parsedSurveys = Array.from(bySurveyId.values()).map(e => ({
+    survey: e.survey,
+    photos: Array.from(e.photos.values())
+  }));
+
+  renderPreview();
+}
+
+function renderPreview() {
+  const list = document.getElementById('surveyList');
+  list.innerHTML = '';
+  let totalPhotos = 0;
+  for (const entry of parsedSurveys) {
+    const div = document.createElement('div');
+    div.className = 'survey-item';
+    const s = entry.survey || {};
+    const sid = String(s.id || 'unknown');
+    const isOverwrite = existingSurveyIds.has(sid);
+    div.classList.add(isOverwrite ? 'overwrite' : 'new');
+
+    const name = s.vesselName || '(no survey.json found — orphan photos)';
+    const meta = [
+      s.yearMakeModel || '',
+      s.clientName ? 'Client: ' + s.clientName : '',
+      s.surveyDate || '',
+      entry.photos.length + ' photos',
+      isOverwrite ? '⚠ OVERWRITE existing' : '✓ NEW'
+    ].filter(Boolean).join(' · ');
+
+    div.innerHTML = '<div class="name">' + name + '</div><div class="meta">' + meta + '</div>';
+
+    const check = document.createElement('label');
+    check.className = 'check';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = true;
+    cb.dataset.sid = sid;
+    check.appendChild(cb);
+    const span = document.createElement('span');
+    span.textContent = 'Import this survey';
+    check.appendChild(span);
+    div.appendChild(check);
+
+    list.appendChild(div);
+    totalPhotos += entry.photos.length;
+  }
+  document.getElementById('totalPhotos').textContent = totalPhotos;
+  document.getElementById('previewCard').style.display = 'block';
+}
+
+async function doImport() {
+  const checks = Array.from(document.querySelectorAll('#surveyList input[type=checkbox]'));
+  const selectedSids = new Set(checks.filter(c => c.checked).map(c => c.dataset.sid));
+  const toImport = parsedSurveys.filter(e => selectedSids.has(String((e.survey || {}).id || 'unknown')));
+  if (toImport.length === 0) { log('Nothing selected', 'warn'); return; }
+
+  document.getElementById('importBtn').disabled = true;
+  document.getElementById('progressCard').style.display = 'block';
+  const db = await openDB();
+
+  let totalPhotos = 0;
+  for (const e of toImport) totalPhotos += e.photos.length;
+  let done = 0;
+  let surveysWritten = 0;
+
+  for (const e of toImport) {
+    if (e.survey) {
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction('surveys', 'readwrite');
+        const req = tx.objectStore('surveys').put(e.survey);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+      surveysWritten++;
+      log('Wrote survey: ' + (e.survey.vesselName || e.survey.id), 'ok');
+    }
+
+    // Batch writes in chunks of 10 per transaction to avoid giant tx
+    for (let i = 0; i < e.photos.length; i += 10) {
+      const chunk = e.photos.slice(i, i + 10);
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction('photos', 'readwrite');
+        const store = tx.objectStore('photos');
+        chunk.forEach(p => store.put(p));
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+      done += chunk.length;
+      const pct = (done / totalPhotos) * 100;
+      document.getElementById('bar').style.width = pct.toFixed(0) + '%';
+      document.getElementById('status').textContent =
+        'Wrote ' + done + ' / ' + totalPhotos + ' photos';
+    }
+  }
+
+  document.getElementById('doneCard').style.display = 'block';
+  document.getElementById('doneMsg').textContent =
+    'Imported ' + surveysWritten + ' survey(s) and ' + done + ' photo(s). Open the Kiki app to see them.';
+  log('Import complete: ' + surveysWritten + ' surveys, ' + done + ' photos', 'ok');
+}
+
+document.getElementById('scanBtn').onclick = scan;
+document.getElementById('fileInput').onchange = () => {
+  const n = document.getElementById('fileInput').files.length;
+  document.getElementById('parseBtn').disabled = n === 0;
+  document.getElementById('parseBtn').textContent = n + ' file(s) selected — Parse';
+};
+document.getElementById('parseBtn').onclick = parseFiles;
+document.getElementById('importBtn').onclick = doImport;
+
+log('Ready. Tap "Scan current IndexedDB" to begin.');
+</script>
+</body>
+</html>
