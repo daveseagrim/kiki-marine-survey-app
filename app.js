@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v178';
+const APP_VERSION = 'v179';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -552,6 +552,114 @@ const COMPONENT_BUILDERS = {
           { label: 'Serviceable', rating: 'C', fragment: 'The anode was serviceable.' },
           { label: 'Depleted', rating: 'B', fragment: 'The anode was depleted and should be replaced.' },
           { label: 'Missing', rating: 'A', fragment: 'The anode was missing and must be replaced.' }
+        ]
+      }
+    ]
+  },
+  'Engine, general condition/impression': {
+    title: 'Engine Condition Builder',
+    intro: 'The engine and engine space were visually inspected.',
+    components: [
+      {
+        name: 'Overall Appearance',
+        key: 'appearance',
+        options: [
+          { label: 'Clean and well-maintained', rating: 'C', fragment: 'The engine appeared clean and well-maintained with no signs of neglect.' },
+          { label: 'Normal wear for age', rating: 'C', fragment: 'The engine showed normal wear consistent with age and use.' },
+          { label: 'Dirty but serviceable', rating: 'B', fragment: 'The engine was dirty with accumulated grime, indicating deferred maintenance. A thorough cleaning and service is recommended.' },
+          { label: 'Poorly maintained', rating: 'A', fragment: 'The engine showed signs of poor maintenance and neglect. A comprehensive service by a qualified marine mechanic is required.' }
+        ]
+      },
+      {
+        name: 'Fluid Leaks',
+        key: 'leaks',
+        options: [
+          { label: 'None observed', rating: 'C', fragment: 'No fluid leaks were observed.' },
+          { label: 'Minor oil weep', rating: 'B', fragment: 'A minor oil weep was observed. This should be monitored and the source identified during the next service.' },
+          { label: 'Active oil leak', rating: 'A', fragment: 'An active oil leak was observed. The source must be identified and repaired to prevent loss of lubricant and potential fire hazard per ABYC P-1.' },
+          { label: 'Coolant leak', rating: 'A', fragment: 'A coolant leak was observed. The source must be identified and repaired to prevent overheating and potential engine damage.' },
+          { label: 'Multiple leaks', rating: 'A', fragment: 'Multiple fluid leaks (oil and/or coolant) were observed. A full service and repair of all leak sources is required.' }
+        ]
+      },
+      {
+        name: 'Corrosion',
+        key: 'corrosion',
+        options: [
+          { label: 'Minimal or none', rating: 'C', fragment: '' },
+          { label: 'Surface rust on fittings', rating: 'B', fragment: 'Surface rust was noted on some fittings and fasteners. These should be treated or replaced during the next service.' },
+          { label: 'Significant corrosion', rating: 'A', fragment: 'Significant corrosion was present on the engine and surrounding fittings. The engine space environment should be assessed and all corroded components replaced.' }
+        ]
+      },
+      {
+        name: 'Wiring',
+        key: 'wiring',
+        options: [
+          { label: 'Good condition', rating: 'C', fragment: 'Engine wiring and connections appeared in good condition.' },
+          { label: 'Minor corrosion at terminals', rating: 'B', fragment: 'Minor corrosion was noted at some wiring terminals. Per ABYC E-11, all connections should be clean and tight. The terminals should be cleaned and treated with a corrosion inhibitor.' },
+          { label: 'Deteriorated or jury-rigged', rating: 'A', fragment: 'Engine wiring was deteriorated or showed signs of improper modifications. Per ABYC E-11, all wiring must be marine-grade and properly terminated. The engine wiring must be assessed and brought to standard.' }
+        ]
+      },
+      {
+        name: 'Engine Space',
+        key: 'engineSpace',
+        options: [
+          { label: 'Clean, well-organized', rating: 'C', fragment: 'The engine space was clean and well-organized with adequate access for service.' },
+          { label: 'Cluttered but accessible', rating: 'C', fragment: 'The engine space was somewhat cluttered but the engine remained accessible for routine service.' },
+          { label: 'Dirty, oil in bilge', rating: 'B', fragment: 'The engine space was dirty with oil residue in the bilge. The bilge should be cleaned and degreased, and the source of any oil identified.' },
+          { label: 'Poor access, safety concern', rating: 'A', fragment: 'Access to the engine for service was severely restricted. Adequate engine access is required for safe operation and emergency situations.' }
+        ]
+      }
+    ]
+  },
+  'Generator (if installed)': {
+    title: 'Generator Condition Builder',
+    intro: 'The generator was visually inspected.',
+    components: [
+      {
+        name: 'Overall Condition',
+        key: 'condition',
+        options: [
+          { label: 'Clean, well-maintained', rating: 'C', fragment: 'The generator appeared clean and well-maintained.' },
+          { label: 'Normal wear for age', rating: 'C', fragment: 'The generator showed normal wear consistent with age and use.' },
+          { label: 'Dirty, needs service', rating: 'B', fragment: 'The generator was dirty with accumulated grime, indicating deferred maintenance. A full service is recommended.' },
+          { label: 'Poorly maintained', rating: 'A', fragment: 'The generator showed signs of poor maintenance and neglect requiring immediate service.' }
+        ]
+      },
+      {
+        name: 'Operation',
+        key: 'operation',
+        options: [
+          { label: 'Started and ran smoothly', rating: 'C', fragment: 'The generator started promptly and ran smoothly under load.' },
+          { label: 'Ran rough or with smoke', rating: 'B', fragment: 'The generator ran rough or produced excessive smoke. It should be serviced and load-tested by a qualified technician.' },
+          { label: 'Would not start', rating: 'A', fragment: 'The generator would not start. It must be repaired and load-tested by a qualified technician.' },
+          { label: 'Not tested — winterized', rating: 'NT', fragment: 'The generator was not tested as the vessel was winterized. It should be commissioned and load-tested during spring service.' },
+          { label: 'Not tested — other reason', rating: 'NT', fragment: 'The generator was not tested at the time of survey. It should be load-tested before the vessel is used.' }
+        ]
+      },
+      {
+        name: 'Fluid Leaks',
+        key: 'leaks',
+        options: [
+          { label: 'None observed', rating: 'C', fragment: 'No fluid leaks were observed.' },
+          { label: 'Minor oil weep', rating: 'B', fragment: 'A minor oil weep was noted. The source should be identified and monitored.' },
+          { label: 'Active leak', rating: 'A', fragment: 'An active fluid leak was observed. The source must be identified and repaired.' }
+        ]
+      },
+      {
+        name: 'Exhaust System',
+        key: 'exhaust',
+        options: [
+          { label: 'Good condition', rating: 'C', fragment: 'The generator exhaust system was in good condition with no leaks.' },
+          { label: 'Rust or deterioration', rating: 'B', fragment: 'The generator exhaust showed rust or deterioration. Per ABYC P-1, the exhaust system must be gas-tight. It should be inspected and repaired.' },
+          { label: 'Leaking or failed', rating: 'A', fragment: 'The generator exhaust was leaking. Per ABYC P-1, exhaust leaks are a carbon monoxide hazard and must be repaired immediately.' }
+        ]
+      },
+      {
+        name: 'Sound Shield',
+        key: 'soundShield',
+        options: [
+          { label: 'Intact', rating: 'C', fragment: '' },
+          { label: 'Damaged or missing panels', rating: 'B', fragment: 'The generator sound shield was damaged or had missing panels. The shield should be repaired or replaced to reduce noise and contain heat.' }
         ]
       }
     ]
@@ -1497,16 +1605,22 @@ function showNotesSheet(itemLabel, categoryName) {
 
     // Component builder — check if this item has a builder definition
     let componentBuilderHtml = '';
+    // Strip drive-line prefix (e.g., "Port — ", "Starboard — ", "#1 — ") for builder lookup
+    let builderLookupLabel = itemLabel;
+    const driveLinePrefixMatch = itemLabel.match(/^(?:Port|Starboard|#\d+)\s*—\s*/);
+    if (driveLinePrefixMatch) {
+      builderLookupLabel = itemLabel.substring(driveLinePrefixMatch[0].length);
+    }
     // Exact match first, then normalized match (strip punctuation, lowercase)
-    let builderKey = COMPONENT_BUILDERS[itemLabel] ? itemLabel : null;
+    let builderKey = COMPONENT_BUILDERS[builderLookupLabel] ? builderLookupLabel : null;
     if (!builderKey) {
       const normalize = s => s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
-      const itemNorm = normalize(itemLabel);
+      const itemNorm = normalize(builderLookupLabel);
       builderKey = Object.keys(COMPONENT_BUILDERS).find(k => normalize(k) === itemNorm);
     }
     if (!builderKey) {
       // Fallback: check if item label starts with same significant words
-      const itemLower = itemLabel.toLowerCase();
+      const itemLower = builderLookupLabel.toLowerCase();
       builderKey = Object.keys(COMPONENT_BUILDERS).find(k => {
         const kLower = k.toLowerCase();
         return itemLower.startsWith(kLower.substring(0, Math.min(kLower.length, 12))) ||
@@ -4041,6 +4155,16 @@ function saveSurveyDetails(surveyId) {
 
     // Merge updates into existing survey (preserving items, photos, etc.)
     Object.assign(survey, updates);
+
+    // Clean up incompatible drive settings when vessel type changes from intro
+    if (survey.vesselType === 'sail') {
+      survey.driveLineCount = 1;
+      survey.hasRudder = true;
+      if (survey.driveType === 'outdrive') survey.driveType = '';
+    } else if (survey.vesselType === 'power') {
+      if (survey.driveType === 'saildrive') survey.driveType = '';
+    }
+
     saveSurvey(survey).then(() => {
       renderInspection(survey);
     });
@@ -5551,11 +5675,40 @@ function renderInspection(survey) {
   const isPowerboat = (survey.vesselType || '').toLowerCase() === 'power';
   const isSailboat = (survey.vesselType || '').toLowerCase() === 'sail';
 
+  // Drive type filtering — hide items that don't apply to the selected drive configuration
+  const driveType = survey.driveType || '';
+  const SHAFT_ONLY_LABELS = [
+    'Cutlass bearing(s)', 'Propeller shaft(s)', 'Propeller(s)',
+    'Propeller/drive anode(s)', 'Stern tube(s) (external)', 'Skeg(s)'
+  ];
+  const OUTDRIVE_ONLY_LABELS = [
+    'Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows'
+  ];
+  const SAILDRIVE_ONLY_LABELS = [
+    'Sail drive(s) - (external), corrosion, propeller(s), anode(s)'
+  ];
+
   // Check if conditional items should be shown
   function shouldShowItem(item) {
     if (isPowerboat && item.sailOnly) return false;
     if (isSailboat && item.powerOnly) return false;
     if (isPowerboat && item.rudderItem && !survey.hasRudder) return false;
+    // Drive type filtering
+    if (driveType) {
+      if (driveType === 'outdrive') {
+        // Hide saildrive and shaft-specific items
+        if (SAILDRIVE_ONLY_LABELS.includes(item.label)) return false;
+        if (SHAFT_ONLY_LABELS.includes(item.label)) return false;
+      } else if (driveType === 'saildrive') {
+        // Hide outdrive and shaft-specific items
+        if (OUTDRIVE_ONLY_LABELS.includes(item.label)) return false;
+        if (SHAFT_ONLY_LABELS.includes(item.label)) return false;
+      } else if (driveType === 'shaft') {
+        // Hide outdrive and saildrive items
+        if (OUTDRIVE_ONLY_LABELS.includes(item.label)) return false;
+        if (SAILDRIVE_ONLY_LABELS.includes(item.label)) return false;
+      }
+    }
     if (item.conditional) {
       const thrusterRating = survey.items['Bow thruster']?.rating;
       const sternThrusterRating = survey.items['Stern thruster']?.rating;
@@ -5646,6 +5799,29 @@ function renderInspection(survey) {
   const content = document.getElementById('inspection-content');
   let html = `<div style="margin-bottom: 140px;">`;
 
+  // Vessel type toggle — always shown so the surveyor can switch at any time
+  const currentVesselType = survey.vesselType || '';
+  html += `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:10px 12px;background:#f0f7ff;border:1px solid #93c5fd;border-radius:10px;">
+      <span style="font-size:13px;font-weight:700;color:#1e3a5f;">⛵ Vessel Type:</span>
+      <div style="display:flex;gap:0;border:2px solid #1e3a5f;border-radius:8px;overflow:hidden;">
+        <button onclick="setVesselTypeFromInspection('sail')"
+                style="padding:8px 16px;font-size:13px;font-weight:700;border:none;cursor:pointer;
+                       background:${currentVesselType === 'sail' ? '#1e3a5f' : 'white'};
+                       color:${currentVesselType === 'sail' ? 'white' : '#1e3a5f'};">
+          Sail
+        </button>
+        <button onclick="setVesselTypeFromInspection('power')"
+                style="padding:8px 16px;font-size:13px;font-weight:700;border:none;border-left:2px solid #1e3a5f;cursor:pointer;
+                       background:${currentVesselType === 'power' ? '#1e3a5f' : 'white'};
+                       color:${currentVesselType === 'power' ? 'white' : '#1e3a5f'};">
+          Power
+        </button>
+      </div>
+      ${!currentVesselType ? '<span style="font-size:12px;color:#dc2626;font-weight:600;">← Please select</span>' : ''}
+    </div>
+  `;
+
   Object.entries(ratedItemsByCategory).forEach(([categoryName, items]) => {
     const categoryCompletionCount = items.filter(item =>
       survey.items[item.label]?.rating || survey.items[item.label]?.excluded
@@ -5699,30 +5875,65 @@ function renderInspection(survey) {
       `;
     }
 
-    // Stern tube count selector for hull category
+    // Drive configuration panel for hull category
     if (categoryName === 'Hull exterior, keel and propulsion') {
-      html += `
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;">
-          <span style="font-size:14px;font-weight:600;color:#1e3a5f;">Number of drive lines:</span>
-          <select id="driveLineCountSelect" onchange="updateDriveLineCount(parseInt(this.value))"
-                  style="padding:8px 12px;border:1px solid #93c5fd;border-radius:6px;font-size:15px;font-weight:600;background:white;color:#1e3a5f;min-width:60px;">
-            ${[1,2,3].map(n => `<option value="${n}" ${driveLineCount === n ? 'selected' : ''}>${n}</option>`).join('')}
-          </select>
-        </div>
-      `;
-    }
+      const currentDriveType = survey.driveType || '';
+      const hasRudder = survey.hasRudder !== false; // default true
+      // Sailboats: saildrive or shaft only, always 1 drive line, always has rudder
+      // Powerboats: outdrive or shaft, 1-3 drive lines, rudder depends on drive type
+      const driveTypeOptions = isSailboat
+        ? `<option value="">— Select —</option>
+           <option value="saildrive" ${currentDriveType === 'saildrive' ? 'selected' : ''}>Saildrive</option>
+           <option value="shaft" ${currentDriveType === 'shaft' ? 'selected' : ''}>Prop shaft</option>`
+        : `<option value="">— Select —</option>
+           <option value="outdrive" ${currentDriveType === 'outdrive' ? 'selected' : ''}>Outdrive (sterndrive)</option>
+           <option value="shaft" ${currentDriveType === 'shaft' ? 'selected' : ''}>Prop shaft</option>`;
 
-    // Rudder toggle for powerboats in hull category
-    if (isPowerboat && categoryName === 'Hull exterior, keel and propulsion') {
-      const hasRudder = !!survey.hasRudder;
       html += `
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:${hasRudder ? '#ecfdf5' : '#fef3c7'};border:1px solid ${hasRudder ? '#6ee7b7' : '#fcd34d'};border-radius:8px;">
-          <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#1e3a5f;cursor:pointer;">
-            <input type="checkbox" id="hasRudderToggle" ${hasRudder ? 'checked' : ''} onchange="toggleHasRudder(this.checked)"
-                   style="width:20px;height:20px;accent-color:#1e3a5f;">
-            This vessel has a rudder
-          </label>
-          <span style="font-size:12px;color:#6b7280;">${hasRudder ? 'Rudder items shown' : 'Rudder items skipped'}</span>
+        <div style="margin-bottom:12px;padding:12px;background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;">
+          <div style="font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:8px;">⚙️ Drive Configuration</div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:13px;font-weight:600;color:#374151;">Drive type:</span>
+              <select id="driveTypeSelect" onchange="updateDriveType(this.value)"
+                      style="padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:14px;font-weight:600;background:white;color:#1e3a5f;">
+                ${driveTypeOptions}
+              </select>
+            </div>
+      `;
+
+      // Drive line count — only for powerboats (sailboats always 1)
+      if (!isSailboat) {
+        html += `
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:13px;font-weight:600;color:#374151;">Drive lines:</span>
+              <select id="driveLineCountSelect" onchange="updateDriveLineCount(parseInt(this.value))"
+                      style="padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:14px;font-weight:600;background:white;color:#1e3a5f;min-width:50px;">
+                ${[1,2,3].map(n => `<option value="${n}" ${driveLineCount === n ? 'selected' : ''}>${n}</option>`).join('')}
+              </select>
+            </div>
+        `;
+      }
+
+      html += `
+          </div>
+      `;
+
+      // Rudder toggle — powerboats only (sailboats always have rudder)
+      if (isPowerboat) {
+        html += `
+          <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;">
+              <input type="checkbox" id="hasRudderToggle" ${hasRudder ? 'checked' : ''} onchange="toggleHasRudder(this.checked)"
+                     style="width:18px;height:18px;accent-color:#1e3a5f;">
+              Vessel has a rudder
+            </label>
+            <span style="font-size:11px;color:#6b7280;">${hasRudder ? '(rudder items shown)' : '(rudder items hidden)'}</span>
+          </div>
+        `;
+      }
+
+      html += `
         </div>
       `;
     }
@@ -8501,10 +8712,36 @@ function updateCategoryHeader(survey, categoryName) {
   const isSailboat = (survey.vesselType || '').toLowerCase() === 'sail';
   let categoryItems = [];
 
+  // Drive type filtering arrays
+  const driveType = survey.driveType || '';
+  const SHAFT_ONLY_LABELS = [
+    'Cutlass bearing(s)', 'Propeller shaft(s)', 'Propeller(s)',
+    'Propeller/drive anode(s)', 'Stern tube(s) (external)', 'Skeg(s)'
+  ];
+  const OUTDRIVE_ONLY_LABELS = [
+    'Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows'
+  ];
+  const SAILDRIVE_ONLY_LABELS = [
+    'Sail drive(s) - (external), corrosion, propeller(s), anode(s)'
+  ];
+
   function shouldShowHeaderItem(item) {
     if (isPowerboat && item.sailOnly) return false;
     if (isSailboat && item.powerOnly) return false;
     if (isPowerboat && item.rudderItem && !survey.hasRudder) return false;
+    // Drive type filtering
+    if (driveType) {
+      if (driveType === 'outdrive') {
+        if (SAILDRIVE_ONLY_LABELS.includes(item.label)) return false;
+        if (SHAFT_ONLY_LABELS.includes(item.label)) return false;
+      } else if (driveType === 'saildrive') {
+        if (OUTDRIVE_ONLY_LABELS.includes(item.label)) return false;
+        if (SHAFT_ONLY_LABELS.includes(item.label)) return false;
+      } else if (driveType === 'shaft') {
+        if (OUTDRIVE_ONLY_LABELS.includes(item.label)) return false;
+        if (SAILDRIVE_ONLY_LABELS.includes(item.label)) return false;
+      }
+    }
     if (item.conditional) {
       const thrusterRating = survey.items['Bow thruster']?.rating;
       const sternThrusterRating = survey.items['Stern thruster']?.rating;
@@ -8844,9 +9081,60 @@ function updateHeadCount(count) {
   });
 }
 
+function setVesselTypeFromInspection(vesselType) {
+  getSurvey(currentSurveyId).then(survey => {
+    const previousType = survey.vesselType;
+    survey.vesselType = vesselType;
+
+    // Auto-configure drive settings based on vessel type
+    if (vesselType === 'sail') {
+      // Sailboats: always 1 drive line, always has rudder
+      survey.driveLineCount = 1;
+      survey.hasRudder = true;
+      // Clear outdrive drive type if switching from power
+      if (survey.driveType === 'outdrive') {
+        survey.driveType = '';
+      }
+    } else if (vesselType === 'power') {
+      // Clear saildrive drive type if switching from sail
+      if (survey.driveType === 'saildrive') {
+        survey.driveType = '';
+      }
+    }
+
+    saveSurvey(survey).then(() => {
+      renderInspection(survey);
+      showToast(`Vessel type set to ${vesselType === 'sail' ? 'Sailing vessel' : 'Power-driven'}`);
+    });
+  });
+}
+
 function updateDriveLineCount(count) {
   getSurvey(currentSurveyId).then(survey => {
     survey.driveLineCount = count;
+    saveSurvey(survey).then(() => {
+      renderInspection(survey);
+    });
+  });
+}
+
+function updateDriveType(driveType) {
+  getSurvey(currentSurveyId).then(survey => {
+    survey.driveType = driveType;
+    const isSailboat = (survey.vesselType || '').toLowerCase() === 'sail';
+    // Auto-configure based on drive type selection
+    if (isSailboat) {
+      // Sailboats: always 1 drive line, always has rudder
+      survey.driveLineCount = 1;
+      survey.hasRudder = true;
+    } else {
+      // Powerboats: auto-set rudder based on drive type
+      if (driveType === 'outdrive') {
+        survey.hasRudder = false; // outdrives steer, no separate rudder
+      } else if (driveType === 'shaft') {
+        survey.hasRudder = true; // shaft-driven boats have rudder(s)
+      }
+    }
     saveSurvey(survey).then(() => {
       renderInspection(survey);
     });
