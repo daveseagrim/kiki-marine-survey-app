@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v188';
+const APP_VERSION = 'v189';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -35,6 +35,33 @@ function persistViewState() {
     if (currentSurveyId) sessionStorage.setItem('_currentSurveyId', currentSurveyId);
     else sessionStorage.removeItem('_currentSurveyId');
   } catch(e) {}
+}
+
+// Force update — unregister service worker, clear caches, reload.
+// Works from inside the PWA's own WebKit container on iOS.
+async function forceAppUpdate() {
+  try {
+    showToast('Updating app…');
+    // Unregister all service workers
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const reg of registrations) {
+        await reg.unregister();
+      }
+    }
+    // Clear all caches
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      for (const name of cacheNames) {
+        await caches.delete(name);
+      }
+    }
+    // Reload with cache bypass
+    window.location.reload(true);
+  } catch (err) {
+    console.error('Force update error:', err);
+    window.location.reload(true);
+  }
 }
 
 // Camera active flag — persisted to sessionStorage so it survives
@@ -2964,7 +2991,10 @@ function renderHome() {
              onerror="this.style.display='none'">
         <div>
           <div class="header-title">Kiki Marine Survey</div>
-          <div class="header-subtitle">Marine Vessel Surveys — ${APP_VERSION}</div>
+          <div class="header-subtitle" style="display:flex;align-items:center;gap:8px;">
+            Marine Vessel Surveys — ${APP_VERSION}
+            <button onclick="forceAppUpdate()" style="background:none;border:1px solid rgba(255,255,255,0.4);color:rgba(255,255,255,0.8);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;">↻ Update</button>
+          </div>
         </div>
       </div>
       <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
