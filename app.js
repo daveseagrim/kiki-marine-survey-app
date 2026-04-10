@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v190';
+const APP_VERSION = 'v191';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -918,8 +918,11 @@ function renderComponentBuilder(builderKey, itemLabel, savedSelections, category
       html += `
         <div style="margin-top:4px;display:flex;gap:8px;align-items:center;">
           <label style="font-size:11px;color:#6b7280;white-space:nowrap;">${comp.quantityPrompt}</label>
-          <input type="number" id="cb-${comp.key}_qty" value="${qtyVal}" min="1" max="10" style="width:60px;padding:6px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
-                 onchange="onComponentBuilderChange('${safeLabel}', '${builderKey.replace(/'/g, "\\'")}')">
+          <select id="cb-${comp.key}_qty" style="padding:6px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;background:white;"
+                  onchange="onComponentBuilderChange('${safeLabel}', '${builderKey.replace(/'/g, "\\'")}')">
+            <option value="1" ${qtyVal === '1' || qtyVal === 1 ? 'selected' : ''}>1</option>
+            <option value="2" ${qtyVal === '2' || qtyVal === 2 ? 'selected' : ''}>2</option>
+          </select>
         </div>
       `;
     }
