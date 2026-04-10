@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v192';
+const APP_VERSION = 'v193';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -6350,25 +6350,30 @@ function renderInspection(survey) {
       `;
     }
 
-    // Render area photos at top of category
+    // Render area photos at top of category (inline file input for reliable iOS behaviour)
     const catMediaItems = mediaItemsByCategory[categoryName] || [];
     catMediaItems.forEach(mediaItem => {
       const mediaData = survey.items[mediaItem.label] || { photos: [] };
-      const photoCount = (mediaData.photos || []).length;
+      const photos = mediaData.photos || [];
+      const safeLabel = mediaItem.label.replace(/'/g, "\\'");
+      const sanitized = mediaItem.label.replace(/[^a-zA-Z0-9]/g, '_');
       html += `
-        <div style="margin-bottom:16px;padding:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
+        <div id="area-photo-wrap-${sanitized}" style="margin-bottom:16px;padding:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
           <div style="font-weight:600;font-size:14px;color:#0369a1;margin-bottom:8px;">📷 ${mediaItem.label}</div>
-          <div id="area-photos-${mediaItem.label.replace(/[^a-zA-Z0-9]/g, '_')}" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-            ${(mediaData.photos || []).map(pid => `
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+            ${photos.map(pid => `
               <div style="position:relative;width:80px;height:80px;">
-                <img id="thumb-${pid}" src="" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;" onclick="editSavedPhoto('${pid}', '${mediaItem.label.replace(/'/g, "\\'")}')">
-                <button onclick="deletePhotoAndRefresh('${pid}', '${mediaItem.label.replace(/'/g, "\\'")}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;">×</button>
+                <img id="thumb-${pid}" src="" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
+                <button onclick="deleteAreaPhoto('${pid}', '${safeLabel}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;line-height:22px;text-align:center;">×</button>
               </div>
             `).join('')}
           </div>
-          <button class="btn-secondary" style="font-size:13px;padding:6px 12px;" onclick="capturePhoto('${mediaItem.label.replace(/'/g, "\\'")}')">
-            📷 ${photoCount > 0 ? `Add More (${photoCount})` : 'Take Photos'}
-          </button>
+          <label style="display:inline-block;background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;">
+            📷 ${photos.length > 0 ? `Add More (${photos.length})` : 'Take Photos'}
+            <input type="file" accept="image/*" multiple
+              onchange="handleAreaPhotoCapture('${safeLabel}', this)"
+              style="display:none;">
+          </label>
         </div>
       `;
     });
@@ -7671,6 +7676,117 @@ async function capturePhoto(itemLabel, event) {
   const survey = await getSurvey(currentSurveyId);
   updateItemInPlace(survey, itemLabel);
   showToast(`${files.length} photo${files.length > 1 ? 's' : ''} saved`);
+}
+
+// ── Area Photo Functions (media items at top of each category) ──────────
+
+/**
+ * Handle file selection from the inline <input type="file"> in area photo sections.
+ * Called by onchange on the persistent file input — no dynamic input creation needed.
+ */
+async function handleAreaPhotoCapture(mediaLabel, inputEl) {
+  const files = Array.from(inputEl.files);
+  if (files.length === 0) return;
+
+  if (files.length > 1) showToast(`Saving ${files.length} photos...`);
+
+  for (const file of files) {
+    await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const stampedDataUrl = await addDateStampToPhoto(e.target.result);
+        const photoId = `${currentSurveyId}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+        const photo = {
+          id: photoId,
+          surveyId: currentSurveyId,
+          itemLabel: mediaLabel,
+          dataUrl: stampedDataUrl,
+          annotated: false,
+          createdAt: new Date().toISOString()
+        };
+
+        await savePhoto(photo);
+
+        const survey = await getSurvey(currentSurveyId);
+        if (!survey.items[mediaLabel]) {
+          survey.items[mediaLabel] = { rating: '', text: '', standards: [], photos: [] };
+        }
+        if (!survey.items[mediaLabel].photos) {
+          survey.items[mediaLabel].photos = [];
+        }
+        survey.items[mediaLabel].photos.push(photoId);
+        await saveSurvey(survey);
+        resolve();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Reset so the same file(s) can be re-selected
+  inputEl.value = '';
+
+  forceViewportRecalc();
+
+  // Refresh the area photo grid in place
+  const survey = await getSurvey(currentSurveyId);
+  refreshAreaPhotoGrid(survey, mediaLabel);
+  showToast(`${files.length} photo${files.length > 1 ? 's' : ''} saved`);
+}
+
+/**
+ * Delete a photo from an area photo section and refresh the grid in place.
+ */
+async function deleteAreaPhoto(photoId, mediaLabel) {
+  await deletePhoto(photoId);
+  const survey = await getSurvey(currentSurveyId);
+  if (survey.items[mediaLabel] && survey.items[mediaLabel].photos) {
+    survey.items[mediaLabel].photos = survey.items[mediaLabel].photos.filter(id => id !== photoId);
+    await saveSurvey(survey);
+  }
+  refreshAreaPhotoGrid(survey, mediaLabel);
+  showToast('Photo deleted');
+}
+
+/**
+ * Re-render the area photo grid + button for a specific media item.
+ * Finds the container by its wrapper ID and rebuilds thumbnails + file input.
+ */
+function refreshAreaPhotoGrid(survey, mediaLabel) {
+  const sanitized = mediaLabel.replace(/[^a-zA-Z0-9]/g, '_');
+  const wrapper = document.getElementById(`area-photo-wrap-${sanitized}`);
+  if (!wrapper) return;
+
+  const mediaData = survey.items[mediaLabel] || { photos: [] };
+  const photos = mediaData.photos || [];
+  const safeLabel = mediaLabel.replace(/'/g, "\\'");
+
+  wrapper.innerHTML = `
+    <div style="font-weight:600;font-size:14px;color:#0369a1;margin-bottom:8px;">📷 ${mediaLabel}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+      ${photos.map(pid => `
+        <div style="position:relative;width:80px;height:80px;">
+          <img id="thumb-${pid}" src="" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
+          <button onclick="deleteAreaPhoto('${pid}', '${safeLabel}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;line-height:22px;text-align:center;">×</button>
+        </div>
+      `).join('')}
+    </div>
+    <label style="display:inline-block;background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;">
+      📷 ${photos.length > 0 ? `Add More (${photos.length})` : 'Take Photos'}
+      <input type="file" accept="image/*" multiple
+        onchange="handleAreaPhotoCapture('${safeLabel}', this)"
+        style="display:none;">
+    </label>
+  `;
+
+  // Load thumbnails from IndexedDB
+  photos.forEach(photoId => {
+    getPhotoById(photoId).then(photo => {
+      if (photo) {
+        const img = document.getElementById(`thumb-${photoId}`);
+        if (img) img.src = photo.dataUrl;
+      }
+    });
+  });
 }
 
 // Open edit modal for an already-saved photo (tap thumbnail to edit)
@@ -9434,32 +9550,11 @@ function updateItemInPlace(survey, itemLabel) {
     return;
   }
 
-  // Try area photo (media item) update
+  // Try area photo (media item) update — delegate to refreshAreaPhotoGrid
   const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
-  const areaPhotosDiv = document.getElementById(`area-photos-${sanitizedLabel}`);
-  if (areaPhotosDiv) {
-    const mediaData = survey.items[itemLabel] || { photos: [] };
-    const safeLabel = itemLabel.replace(/'/g, "\\'");
-    // Rebuild the thumbnails grid
-    areaPhotosDiv.innerHTML = (mediaData.photos || []).map(pid => `
-      <div style="position:relative;width:80px;height:80px;">
-        <img id="thumb-${pid}" src="" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
-        <button onclick="deletePhotoAndRefresh('${pid}', '${safeLabel}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;">×</button>
-      </div>
-    `).join('');
-    // Update the button text
-    const photoCount = (mediaData.photos || []).length;
-    const btn = areaPhotosDiv.parentElement.querySelector('button');
-    if (btn) btn.innerHTML = `📷 ${photoCount > 0 ? `Add More (${photoCount})` : 'Take Photos'}`;
-    // Load thumbnails
-    (mediaData.photos || []).forEach(photoId => {
-      getPhotoById(photoId).then(photo => {
-        if (photo) {
-          const img = document.getElementById(`thumb-${photoId}`);
-          if (img) img.src = photo.dataUrl;
-        }
-      });
-    });
+  const areaWrap = document.getElementById(`area-photo-wrap-${sanitizedLabel}`);
+  if (areaWrap) {
+    refreshAreaPhotoGrid(survey, itemLabel);
     return;
   }
 
