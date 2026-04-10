@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v183';
+const APP_VERSION = 'v184';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1898,7 +1898,7 @@ function showMediaSheet(itemLabel, categoryName) {
             <img id="sheet-thumb-${photoId}" src="" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;"
                  onclick="editSavedPhoto('${photoId}', '${safeLabel}')" />
             <button onclick="deletePhotoFromSheet('${photoId}', '${safeLabel}', '${safeCat}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;">×</button>
-            <button onclick="movePhotoFromSheet('${photoId}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#1e3a5f;color:white;border:none;border-radius:4px;padding:3px 0;font-size:11px;cursor:pointer;">Move</button>
+            <button onclick="movePhotoFromSheet('${photoId}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#1e3a5f;color:white;border:none;border-radius:6px;padding:6px 0;font-size:13px;font-weight:600;cursor:pointer;">Move ↗</button>
           </div>
         `;
       });
@@ -6036,7 +6036,7 @@ function renderInspection(survey) {
 
         if (category.items) {
           const ratedItems = category.items.filter(item => item.type === 'list' && shouldShowItem(item));
-          const mediaItems = category.items.filter(item => item.type === 'media');
+          const mediaItems = category.items.filter(item => item.type === 'media' && shouldShowItem(item));
           if (ratedItems.length > 0 || mediaItems.length > 0) {
             ratedItemsByCategory[category.name] = ratedItems;
             mediaItemsByCategory[category.name] = mediaItems;
