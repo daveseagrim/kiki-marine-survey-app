@@ -248,6 +248,30 @@
       "construction": "Fibreglass"
     },
     {
+      "id": "benford-friday-harbor-34",
+      "make": "Benford",
+      "model": "Friday Harbor 34",
+      "aliases": [
+        "friday harbor 34",
+        "friday harbour 34",
+        "benford 34",
+        "friday harbor ferry 34",
+        "friday harbour ferry 34"
+      ],
+      "yearStart": 1990,
+      "yearEnd": null,
+      "type": "powerboat",
+      "loa": "34'0\"",
+      "lwl": "32'0\"",
+      "beam": "11'0\"",
+      "displacement": "14,000 lbs",
+      "maxDraft": "3'6\"",
+      "hullType": "Displacement",
+      "construction": "Fibreglass or cold-moulded wood (varies by builder)",
+      "designer": "Jay R. Benford",
+      "notes": "Traditional trawler-style design by Jay Benford. Single diesel (typically 40-75 hp). Built by various yards and home builders from Benford plans; specifications vary by builder. Verify on-site."
+    },
+    {
       "id": "beneteau-antares-7",
       "make": "Beneteau",
       "model": "Antares 7",
