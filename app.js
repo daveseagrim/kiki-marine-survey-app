@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2005';
+const APP_VERSION = 'v2006';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3123,6 +3123,19 @@ function resolveCountTokens(text, driveLineCount) {
   });
 }
 
+// Build a short, self-describing chip label from an option list.
+// Shows first 1–2 options + "…" if more, prefixed with + for multi-select.
+function buildChipLabel(opts, isMulti) {
+  if (!opts || opts.length === 0) return isMulti ? '+ Choose' : 'Choose';
+  const first = (opts[0] || '').toString();
+  const trunc = (s, n) => (s.length > n ? s.substring(0, n - 1) + '…' : s);
+  if (opts.length === 1) return (isMulti ? '+ ' : '') + trunc(first, 24);
+  if (opts.length === 2) {
+    return (isMulti ? '+ ' : '') + trunc(first, 14) + ' / ' + trunc(opts[1], 14);
+  }
+  return (isMulti ? '+ ' : '') + trunc(first, 14) + ' / ' + trunc(opts[1], 12) + ' / …';
+}
+
 // Scan resolved text (after count resolution) for remaining unresolved tokens.
 // Returns array of token descriptors in occurrence order:
 //   { kind, id (literal token string), label, options?, name? }
@@ -3139,11 +3152,12 @@ function scanUnresolvedTokens(text, entryPlaceholders) {
     const prefix = match[1] || '';
     const body = match[2] || '';
     if (prefix === 'specify:') {
+      const opts = body.split('|').map(s => s.trim()).filter(Boolean);
       tokens.push({
         kind: 'specify',
         literal: full,
-        label: 'Choose',
-        options: body.split('|').map(s => s.trim()).filter(Boolean)
+        label: buildChipLabel(opts, false),
+        options: opts
       });
     } else if (prefix === 'any:') {
       const opts = body.split('|').map(s => s.trim()).filter(Boolean).map(o => {
@@ -3153,7 +3167,7 @@ function scanUnresolvedTokens(text, entryPlaceholders) {
       tokens.push({
         kind: 'any',
         literal: full,
-        label: 'Select all that apply',
+        label: buildChipLabel(opts.map(o => o.label), true),
         options: opts
       });
     } else if (prefix === 'standards?') {
