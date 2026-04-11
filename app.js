@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2000';
+const APP_VERSION = 'v2001';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2017,15 +2017,12 @@ function showMediaSheet(itemLabel, categoryName) {
 
     let photosHtml = '';
     if (itemData.photos && itemData.photos.length > 0) {
-      photosHtml = '<div style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 20px;">';
+      photosHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 20px;">';
       itemData.photos.forEach(photoId => {
         photosHtml += `
-          <div style="position:relative;width:80px;">
-            <img id="sheet-thumb-${photoId}" src="" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;"
-                 onclick="editSavedPhoto('${photoId}', '${safeLabel}')" />
-            <button onclick="deletePhotoFromSheet('${photoId}', '${safeLabel}', '${safeCat}')" style="position:absolute;top:-6px;right:-6px;background:#dc2626;color:white;border:none;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;">×</button>
-            <button onclick="movePhotoFromSheet('${photoId}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#1e3a5f;color:white;border:none;border-radius:6px;padding:6px 0;font-size:13px;font-weight:600;cursor:pointer;">Move ↗</button>
-          </div>
+          <img id="sheet-thumb-${photoId}" src=""
+               style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;"
+               onclick="showPhotoActionOverlay('${photoId}', '${safeLabel}', '${safeCat}')" />
         `;
       });
       photosHtml += '</div>';
@@ -2067,6 +2064,59 @@ function showMediaSheet(itemLabel, categoryName) {
     }
   });
 }
+
+// Full-screen photo view with Edit / Move / Delete / Close actions.
+// Opens when the user taps a thumbnail in the media sheet grid. Replaces the
+// old inline red × and Move ↗ buttons with a clean lightbox-style overlay.
+async function showPhotoActionOverlay(photoId, itemLabel, categoryName) {
+  const photo = await getPhotoById(photoId);
+  if (!photo) return;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'photoActionOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:100000;display:flex;flex-direction:column;';
+  overlay.innerHTML = `
+    <div style="flex:0 0 auto;display:flex;justify-content:flex-end;padding:14px 18px;padding-top:calc(14px + env(safe-area-inset-top));">
+      <button id="pao-close" aria-label="Close"
+              style="background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:8px;width:44px;height:44px;font-size:22px;font-weight:700;cursor:pointer;">✕</button>
+    </div>
+    <div style="flex:1 1 auto;display:flex;align-items:center;justify-content:center;padding:0 16px;overflow:hidden;">
+      <img id="pao-img" src="" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;">
+    </div>
+    <div style="flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:16px 18px;padding-bottom:calc(16px + env(safe-area-inset-bottom));">
+      <button id="pao-edit"
+              style="background:#1e3a5f;color:#fff;border:none;border-radius:10px;padding:14px 0;font-size:15px;font-weight:700;cursor:pointer;min-height:52px;">✏️ Edit</button>
+      <button id="pao-move"
+              style="background:#0369a1;color:#fff;border:none;border-radius:10px;padding:14px 0;font-size:15px;font-weight:700;cursor:pointer;min-height:52px;">↗ Move</button>
+      <button id="pao-delete"
+              style="background:#64748b;color:#fff;border:none;border-radius:10px;padding:14px 0;font-size:15px;font-weight:700;cursor:pointer;min-height:52px;">🗑 Delete</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  document.getElementById('pao-img').src = photo.dataUrl;
+
+  const close = () => {
+    const el = document.getElementById('photoActionOverlay');
+    if (el) el.remove();
+  };
+
+  document.getElementById('pao-close').onclick = close;
+  document.getElementById('pao-edit').onclick = () => {
+    close();
+    editSavedPhoto(photoId, itemLabel);
+  };
+  document.getElementById('pao-move').onclick = () => {
+    close();
+    movePhotoFromSheet(photoId, itemLabel, categoryName);
+  };
+  document.getElementById('pao-delete').onclick = async () => {
+    if (!confirm('Delete this photo? This cannot be undone.')) return;
+    close();
+    await deletePhotoFromSheet(photoId, itemLabel, categoryName);
+  };
+}
+window.showPhotoActionOverlay = showPhotoActionOverlay;
 
 // Capture photo from media sheet, then refresh the sheet
 async function capturePhotoFromSheet(itemLabel, categoryName, event) {
@@ -12601,15 +12651,16 @@ async function openBatchCamera(itemLabel, opts) {
     <div style="flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(0,0,0,0.55);color:#fff;padding-top:calc(14px + env(safe-area-inset-top));">
       <button id="batchCamClose" style="background:none;border:none;color:#fff;font-size:28px;font-weight:700;cursor:pointer;padding:4px 10px;min-height:44px;">✕</button>
       <div id="batchCamTitle" style="font-size:15px;font-weight:600;text-align:center;flex:1;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${(itemLabel || '').replace(/</g,'&lt;')}</div>
-      <button id="batchCamDone" style="background:#16a34a;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:700;font-size:15px;cursor:pointer;min-height:44px;">Done</button>
+      <div style="width:44px;"></div>
     </div>
     <div style="flex:1 1 auto;position:relative;background:#000;overflow:hidden;">
       <video id="batchCamVideo" playsinline autoplay muted style="width:100%;height:100%;object-fit:cover;background:#000;"></video>
       <div id="batchCamCount" style="position:absolute;top:12px;left:12px;background:rgba(0,0,0,0.65);color:#fff;padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600;">0 photos</div>
     </div>
     <div id="batchCamStrip" style="flex:0 0 auto;background:#111;padding:10px 12px;display:flex;gap:8px;overflow-x:auto;min-height:76px;align-items:center;"></div>
-    <div style="flex:0 0 auto;background:#000;display:flex;align-items:center;justify-content:center;padding:18px 0;padding-bottom:calc(18px + env(safe-area-inset-bottom));">
-      <button id="batchCamShutter" aria-label="Take photo" style="width:82px;height:82px;border-radius:50%;background:#fff;border:6px solid rgba(255,255,255,0.45);box-shadow:0 0 0 3px #000 inset;cursor:pointer;"></button>
+    <div style="flex:0 0 auto;background:#000;display:flex;align-items:center;justify-content:center;gap:40px;padding:20px 0;padding-bottom:calc(20px + env(safe-area-inset-bottom));">
+      <button id="batchCamShutter" aria-label="Take photo" style="width:88px;height:88px;border-radius:50%;background:#1e3a5f;border:5px solid #f5b942;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:38px;padding:0;line-height:1;">📷</button>
+      <button id="batchCamDone" aria-label="Done" style="width:88px;height:88px;border-radius:50%;background:#f5b942;color:#1e3a5f;border:5px solid #1e3a5f;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;padding:0;line-height:1;letter-spacing:0.5px;">DONE</button>
     </div>
   `;
   document.body.appendChild(overlay);
