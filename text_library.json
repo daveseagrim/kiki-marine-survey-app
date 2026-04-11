@@ -573,10 +573,10 @@
     {
       "section": "Propeller(s)",
       "rating": "A",
-      "text": "The {count:propeller|propellers} exhibited {any:significant damage|substantial impact damage} including {any:chipped blade(s)|bent blade(s)|cracked blade(s)|missing blade(s)|deep scoring^ABYC P-6|severe pitting|severe corrosion|shaft-end galling}. The {count:propeller was|propellers were} not serviceable in {count:its|their} current condition and required immediate replacement.{standards? This condition violates STANDARDS.}",
+      "text": "The {count:propeller|propellers} exhibited {any:significant damage|substantial impact damage} including {any:chipped blade(s)|bent blade(s)|cracked blade(s)|missing blade(s)|deep scoring^ABYC P-4|severe pitting|severe corrosion|shaft-end galling}. The {count:propeller was|propellers were} not serviceable in {count:its|their} current condition and required immediate replacement.{standards? This condition violates STANDARDS.}",
       "placeholders": {
         "any:significant damage|substantial impact damage": { "multi": false },
-        "any:chipped blade(s)|bent blade(s)|cracked blade(s)|missing blade(s)|deep scoring^ABYC P-6|severe pitting|severe corrosion|shaft-end galling": { "multi": true }
+        "any:chipped blade(s)|bent blade(s)|cracked blade(s)|missing blade(s)|deep scoring^ABYC P-4|severe pitting|severe corrosion|shaft-end galling": { "multi": true }
       }
     },
     {

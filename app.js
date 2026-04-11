@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2016';
+const APP_VERSION = 'v2017';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -157,6 +157,7 @@ const STANDARDS_BY_CATEGORY = {
     'ABYC H-22 - DC Electric Bilge Pumps',
     'ABYC TH-27 - Seacocks/Through-Hull Fittings',
     'ABYC P-1 - Installation of Exhaust Systems',
+    'ABYC P-4 - Inboard Engines',
     'ABYC E-2 - Cathodic Protection',
     'ABYC E-13 - Cathodic Protection'
   ],
@@ -2015,26 +2016,29 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
   const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
   const textarea = document.getElementById(`sheet-text-${sanitizedLabel}`);
   if (textarea) {
-    // Resolve count tokens. For per-drive-line expansions (Port —, Starboard —,
-    // #1 —), the item is about ONE component regardless of how many drive
-    // lines the survey has — force singular there. Otherwise use driveLineCount.
+    // Determine the DEFAULT subject count. Per-drive-line expansions
+    // (Port —, Starboard —, #N —) are about ONE component so default to
+    // singular; otherwise use the survey's driveLineCount. The count is NOT
+    // pre-resolved — it's stored as a default and the builder renders a
+    // Subject toggle the surveyor can flip at any time.
     const survey = window._currentSurveyCache || null;
     const isPerDriveLine = /^(?:Port|Starboard|#\d+)\s*—\s*/.test(itemLabel);
     const dlc = isPerDriveLine
       ? 1
       : ((survey && survey.driveLineCount) ? survey.driveLineCount : 1);
-    const resolved = resolveCountTokens(text, dlc);
+    const defaultCount = (dlc <= 1) ? 'sg' : 'pl';
     // Replace — tapping a new snippet replaces the previous selection
-    textarea.value = resolved;
+    textarea.value = text;
     // Reset collected citations (new snippet starts fresh)
     setCollectedCitations(textarea, []);
     // Stash placeholders + template (for live builder) on the textarea
     textarea.dataset.snippetPlaceholders = placeholdersJson || '';
-    textarea.dataset.snippetTemplate = resolved;
+    textarea.dataset.snippetTemplate = text;
+    textarea.dataset.snippetCount = defaultCount;
     // Auto-expand to fit
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight + 'px';
-    // Render the inline builder form
+    // Render the inline builder form (which will resolve count based on default)
     refreshChipStrip(textarea);
   }
 
@@ -3240,6 +3244,9 @@ function scanUnresolvedTokens(text, entryPlaceholders) {
       // Named placeholder
       const name = body.trim();
       if (!name) continue;
+      // Count tokens are handled separately by the Subject toggle at the top
+      // of the strip — not as per-token rows.
+      if (/^count:/.test(name)) continue;
       const cfg = entryPlaceholders ? entryPlaceholders[name] : null;
       let options = [];
       let multi = false;
@@ -3361,8 +3368,10 @@ function refreshChipStrip(textarea) {
   // the original tokens (not the partially-filled textarea value).
   const template = textarea.dataset.snippetTemplate || '';
   const tokens = scanUnresolvedTokens(template, entryPlaceholders);
+  const hasCountTokens = /\{count:[^{}|]*\|[^{}]*\}/.test(template);
+  const currentCount = textarea.dataset.snippetCount || 'pl';
 
-  if (!template || tokens.length === 0) {
+  if (!template || (tokens.length === 0 && !hasCountTokens)) {
     strip.style.display = 'none';
     strip.innerHTML = '';
     strip._tokens = null;
@@ -3377,6 +3386,23 @@ function refreshChipStrip(textarea) {
   strip.style.padding = '10px 12px';
 
   let html = '<div style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Build the sentence</div>';
+
+  // Subject (1 / many) section — only if the template has {count:...} tokens.
+  if (hasCountTokens) {
+    const sgActive = (currentCount === 'sg');
+    html += `
+      <div style="display:flex;align-items:center;gap:10px;padding:4px 2px 10px;border-bottom:1px dashed #e5e7eb;margin-bottom:10px;">
+        <span style="font-size:11px;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;flex:1;">Subject</span>
+        <span class="subject-count-toggle" data-subject-val="${currentCount}"
+              style="display:inline-flex;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;flex-shrink:0;">
+          <button type="button" class="subject-count-btn" data-subject-pick="sg"
+                  style="padding:6px 14px;border:none;background:${sgActive ? '#1e3a5f' : '#f3f4f6'};color:${sgActive ? 'white' : '#374151'};font-size:12px;cursor:pointer;min-width:40px;">One</button>
+          <button type="button" class="subject-count-btn" data-subject-pick="pl"
+                  style="padding:6px 14px;border:none;background:${!sgActive ? '#1e3a5f' : '#f3f4f6'};color:${!sgActive ? 'white' : '#374151'};font-size:12px;cursor:pointer;min-width:50px;">Many</button>
+        </span>
+      </div>
+    `;
+  }
 
   tokens.forEach((tok, ti) => {
     const isMulti = (tok.kind === 'any' || tok.kind === 'any-named');
@@ -3435,6 +3461,25 @@ function refreshChipStrip(textarea) {
     }
   });
 
+  // Subject count toggle (One / Many) — affects all {count:...} tokens.
+  strip.querySelectorAll('.subject-count-btn').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const group = btn.parentElement;
+      if (!group) return;
+      const pick = btn.dataset.subjectPick;
+      group.dataset.subjectVal = pick;
+      textarea.dataset.snippetCount = pick;
+      group.querySelectorAll('.subject-count-btn').forEach(b => {
+        const active = (b.dataset.subjectPick === pick);
+        b.style.background = active ? '#1e3a5f' : '#f3f4f6';
+        b.style.color = active ? 'white' : '#374151';
+      });
+      applyBuilderState(strip);
+    });
+  });
+
   // Count-toggle buttons (1 / many) for countable options
   strip.querySelectorAll('.count-btn').forEach(btn => {
     btn.addEventListener('click', (ev) => {
@@ -3461,14 +3506,21 @@ function refreshChipStrip(textarea) {
       applyBuilderState(strip);
     });
   });
+
+  // Initial render: apply current state so count tokens get resolved from
+  // the default and the textarea shows clean text (not raw {count:...}).
+  applyBuilderState(strip);
 }
 
 // Recompute the textarea text from the stored template + current form state.
 function applyBuilderState(strip) {
-  if (!strip || !strip._tokens || !strip._template || !strip._textarea) return;
-  const tokens = strip._tokens;
+  if (!strip || !strip._template || !strip._textarea) return;
+  const tokens = strip._tokens || [];
   const textarea = strip._textarea;
-  let text = strip._template;
+  // Resolve {count:sg|pl} tokens first based on the Subject toggle state.
+  // This lets the surveyor flip between singular and plural after insertion.
+  const countVal = textarea.dataset.snippetCount || 'pl';
+  let text = resolveCountTokens(strip._template, countVal === 'sg' ? 1 : 2);
   const citations = [];
 
   tokens.forEach((tok, ti) => {
@@ -10372,12 +10424,13 @@ function insertSnippet(itemLabel, categoryName, text, cardEl, placeholdersJson) 
     const dlc = isPerDriveLine
       ? 1
       : ((survey && survey.driveLineCount) ? survey.driveLineCount : 1);
-    const resolved = resolveCountTokens(text, dlc);
+    const defaultCount = (dlc <= 1) ? 'sg' : 'pl';
 
     if (textarea) {
-      textarea.value = resolved;
+      textarea.value = text;
       textarea.dataset.snippetPlaceholders = placeholdersJson || '';
-      textarea.dataset.snippetTemplate = resolved;
+      textarea.dataset.snippetTemplate = text;
+      textarea.dataset.snippetCount = defaultCount;
       setCollectedCitations(textarea, []);
       // Auto-resize
       textarea.style.height = 'auto';
