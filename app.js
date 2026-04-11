@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2025';
+const APP_VERSION = 'v2026';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3653,7 +3653,119 @@ const TONE_FLAGS = [
   { pat: /\btrashed\b/i, hint: '"trashed" is informal — use "unserviceable" or "extensively damaged".' }
 ];
 
+// Curated misspellings list. Native browser spellcheck underlines typos
+// but doesn't let us read them programmatically — so we maintain an
+// explicit map of words the surveyor is likely to fat-finger on mobile.
+// Grow this list over time as new typos come up in real use.
+// Format: [/\bpattern\b/i, 'correct word']
+const SPELLING_FIXES = [
+  [/\bdanage\b/i, 'damage'],
+  [/\bdanaged\b/i, 'damaged'],
+  [/\bdamge\b/i, 'damage'],
+  [/\bdamged\b/i, 'damaged'],
+  [/\bcraking\b/i, 'cracking'],
+  [/\bcraked\b/i, 'cracked'],
+  [/\bcrack\s+ing\b/i, 'cracking'],
+  [/\bcroding\b/i, 'corroding'],
+  [/\bcorosion\b/i, 'corrosion'],
+  [/\bcorroded\b/i, 'corroded'],
+  [/\bcorrrosion\b/i, 'corrosion'],
+  [/\bcorosive\b/i, 'corrosive'],
+  [/\bfibreglas\b/i, 'fibreglass'],
+  [/\bfiberglass\b/i, 'fibreglass (Canadian spelling)'],
+  [/\bfiber\b/i, 'fibre (Canadian spelling)'],
+  [/\bcolor\b/i, 'colour (Canadian spelling)'],
+  [/\bcenter\b/i, 'centre (Canadian spelling)'],
+  [/\borganize\b/i, 'organise (Canadian spelling)'],
+  [/\binspecton\b/i, 'inspection'],
+  [/\binspctor\b/i, 'inspector'],
+  [/\bsurvery\b/i, 'survey'],
+  [/\bsurveor\b/i, 'surveyor'],
+  [/\bsurvayor\b/i, 'surveyor'],
+  [/\bvesel\b/i, 'vessel'],
+  [/\bvessle\b/i, 'vessel'],
+  [/\bproppeller\b/i, 'propeller'],
+  [/\bproppellor\b/i, 'propeller'],
+  [/\bpropellor\b/i, 'propeller'],
+  [/\brudde\b/i, 'rudder'],
+  [/\brudder\s+s\b/i, 'rudders'],
+  [/\bshft\b/i, 'shaft'],
+  [/\bbering\b/i, 'bearing'],
+  [/\bberaing\b/i, 'bearing'],
+  [/\bcutlass\b/i, 'cutless (cutless bearing)'],
+  [/\bstuffing\s+boox\b/i, 'stuffing box'],
+  [/\bstufing\b/i, 'stuffing'],
+  [/\bengne\b/i, 'engine'],
+  [/\bengien\b/i, 'engine'],
+  [/\btranny\b/i, 'transmission'],
+  [/\btrasnsmission\b/i, 'transmission'],
+  [/\balternater\b/i, 'alternator'],
+  [/\balternater\b/i, 'alternator'],
+  [/\bbatery\b/i, 'battery'],
+  [/\bbatteries\b/i, 'batteries'],
+  [/\bimpellor\b/i, 'impeller'],
+  [/\bimpeler\b/i, 'impeller'],
+  [/\bthru\s+hull\b/i, 'through-hull'],
+  [/\bthruhull\b/i, 'through-hull'],
+  [/\bthrough\s+hull\b/i, 'through-hull (hyphenated)'],
+  [/\bseacock\s+s\b/i, 'seacocks'],
+  [/\bsecock\b/i, 'seacock'],
+  [/\bgasline\b/i, 'gasoline'],
+  [/\bdeisel\b/i, 'diesel'],
+  [/\bdisel\b/i, 'diesel'],
+  [/\bgalvinized\b/i, 'galvanised'],
+  [/\bgalvanized\b/i, 'galvanised (Canadian spelling)'],
+  [/\banodized\b/i, 'anodised (Canadian spelling)'],
+  [/\bwaterline\b/i, 'waterline'],
+  [/\bwater\s+line\b/i, 'waterline (one word)'],
+  [/\bhul\b/i, 'hull'],
+  [/\bkel\b/i, 'keel'],
+  [/\bdek\b/i, 'deck'],
+  [/\bcabn\b/i, 'cabin'],
+  [/\bcocpit\b/i, 'cockpit'],
+  [/\bbildge\b/i, 'bilge'],
+  [/\bblige\b/i, 'bilge'],
+  [/\bteh\b/i, 'the'],
+  [/\band\/or\s+or\b/i, 'and/or'],
+  [/\bequipement\b/i, 'equipment'],
+  [/\bequiptment\b/i, 'equipment'],
+  [/\bservicable\b/i, 'serviceable'],
+  [/\bseviceable\b/i, 'serviceable'],
+  [/\bseverly\b/i, 'severely'],
+  [/\bsevere\s+ly\b/i, 'severely'],
+  [/\bcompletly\b/i, 'completely'],
+  [/\bimmediatly\b/i, 'immediately'],
+  [/\bseperate\b/i, 'separate'],
+  [/\bseperated\b/i, 'separated'],
+  [/\boccured\b/i, 'occurred'],
+  [/\brecomend\b/i, 'recommend'],
+  [/\brecomended\b/i, 'recommended'],
+  [/\brecomendation\b/i, 'recommendation'],
+  [/\bmantainance\b/i, 'maintenance'],
+  [/\bmaintainance\b/i, 'maintenance'],
+  [/\bmaintnance\b/i, 'maintenance']
+];
+
+// Scan text for spelling issues. Returns array of hints in the form
+// '"danage" → "damage"'.
+function collectSpellingHits(text) {
+  const combined = (text || '').trim();
+  if (!combined) return [];
+  const hits = [];
+  const seen = new Set();
+  for (const [pat, fix] of SPELLING_FIXES) {
+    const m = combined.match(pat);
+    if (m && !seen.has(m[0].toLowerCase())) {
+      seen.add(m[0].toLowerCase());
+      hits.push('"' + m[0] + '" → "' + fix + '"');
+      if (hits.length >= 4) break;
+    }
+  }
+  return hits;
+}
+
 // Scan a single piece of text against TONE_FLAGS and return up to 3 hints.
+// Also merges in spelling suggestions so one banner covers both concerns.
 function collectToneHits(text) {
   const combined = (text || '').trim();
   if (!combined) return [];
@@ -3666,6 +3778,16 @@ function collectToneHits(text) {
       if (hits.length >= 3) break;
     }
   }
+  // Append spelling hints with a distinct prefix so they render alongside
+  // tone suggestions in the same banner.
+  const spellHits = collectSpellingHits(text);
+  spellHits.forEach(h => {
+    const tagged = 'Possible typo: ' + h;
+    if (!seen.has(tagged)) {
+      seen.add(tagged);
+      hits.push(tagged);
+    }
+  });
   return hits;
 }
 
@@ -3702,8 +3824,8 @@ function renderToneBanner(banner, hits) {
     return;
   }
   banner.style.display = 'block';
-  banner.innerHTML = '<strong>Tone suggestion:</strong> ' +
-    hits.map(h => escapeHtml(h)).join('<br>');
+  banner.innerHTML = '<strong>Suggestions:</strong><br>' +
+    hits.map(h => '• ' + escapeHtml(h)).join('<br>');
 }
 
 // Scan each custom input and the freeform notes textarea separately, and
