@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2012';
+const APP_VERSION = 'v2013';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1747,12 +1747,12 @@ function showNotesSheet(itemLabel, categoryName) {
             ? escSnippet(renderSnippetPreview(variant.text))
             : (highlightedTexts[idx] || escSnippet(variant.text));
           snippetsHtml += `
-            <div class="snippet-card-sheet" data-variant-idx="${idx}" onclick="event.stopPropagation(); window._sheetCardTap('${cacheKey}', ${idx}, this);" style="padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;-webkit-tap-highlight-color:rgba(30,58,95,0.2);${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}">
-              <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;pointer-events:none;">
+            <button type="button" class="snippet-card-sheet" data-variant-idx="${idx}" onclick="event.stopPropagation(); window._sheetCardTap('${cacheKey}', ${idx}, this);" style="display:block;width:100%;text-align:left;appearance:none;-webkit-appearance:none;border:none;border-bottom:1px solid #f0f0f0;padding:10px 20px;background:${isActive ? '#d1fae5' : 'white'};${isActive ? 'border-left:4px solid #16a34a;' : ''}cursor:pointer;font:inherit;color:inherit;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;">
                 <span style="font-size:13px;color:#333;line-height:1.5;">${displayText}</span>
                 <span style="flex-shrink:0;font-size:10px;background:#e5e7eb;color:#374151;padding:2px 6px;border-radius:4px;">${ratingBadge}</span>
               </div>
-            </div>
+            </button>
           `;
         });
       }
@@ -1961,8 +1961,12 @@ function showNotesSheet(itemLabel, categoryName) {
         </div>
       </div>
     `;
-    overlay.addEventListener('click', () => {
-      // Auto-save before closing
+    overlay.addEventListener('click', (ev) => {
+      // Only close when the tap lands on the dark overlay itself, not on
+      // any descendant inside the bottom sheet. Previously this relied on
+      // the inline stopPropagation on .bottom-sheet, but iOS Safari
+      // sometimes drops inline div handlers — check target explicitly.
+      if (ev.target !== overlay) return;
       saveNotesFromSheet(itemLabel, categoryName, sanitizedLabel);
     });
     document.body.appendChild(overlay);
