@@ -6914,7 +6914,7 @@ async function captureSafetyPhoto(idx) {
           reader.onerror = () => reject(new Error('Read failed'));
           reader.readAsDataURL(file);
         });
-        const stampedDataUrl = await addDateStampToPhoto(dataUrl, 3072);
+        const stampedDataUrl = await addDateStampToPhoto(dataUrl, 2048);
         const photoId = `safety_${currentSurveyId}_${idx}_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 4)}`;
         const photo = {
           id: photoId,
@@ -7026,7 +7026,7 @@ function rapidCaptureInstruments() {
       const file = files[0];
       const reader = new FileReader();
       reader.onload = async (re) => {
-        const stampedDataUrl = await addDateStampToPhoto(re.target.result, 3072);
+        const stampedDataUrl = await addDateStampToPhoto(re.target.result, 2048);
         const survey = await getSurvey(currentSurveyId);
         if (!survey) return;
         if (!survey.instrumentsElectronics) survey.instrumentsElectronics = [];
@@ -7092,7 +7092,7 @@ async function addInstrumentByPhoto() {
       await new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = async (re) => {
-          const stampedDataUrl = await addDateStampToPhoto(re.target.result, 3072);
+          const stampedDataUrl = await addDateStampToPhoto(re.target.result, 2048);
           const idx = survey.instrumentsElectronics.length;
           const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
           const photo = {
@@ -7219,7 +7219,7 @@ async function captureInstrumentPhoto(idx) {
           reader.onerror = () => reject(new Error('Read failed'));
           reader.readAsDataURL(file);
         });
-        const stampedDataUrl = await addDateStampToPhoto(dataUrl, 3072);
+        const stampedDataUrl = await addDateStampToPhoto(dataUrl, 2048);
         const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 4)}`;
         const photo = {
           id: photoId,
@@ -7904,8 +7904,10 @@ async function addDateStampToPhoto(dataUrl, maxResolution) {
     img.onload = () => {
       try {
         let w = img.width, h = img.height;
-        // Optionally cap resolution to save memory (e.g., 2048 for instruments)
-        const maxDim = maxResolution || 4096;
+        // Cap resolution to save memory. 2048 px on the long edge is ample
+        // for report print at 200 dpi (prints ~10" wide) while keeping the
+        // in-memory canvas and resulting base64 ~45% smaller than 3072 px.
+        const maxDim = maxResolution || 2048;
         if (w > maxDim || h > maxDim) {
           if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
           else { w = Math.round(w * maxDim / h); h = maxDim; }
@@ -8208,7 +8210,7 @@ function applyCrop() {
     ctx.fillStyle = '#ffffff';
     ctx.fillText(dateStr, canvas.width - padding, canvas.height - padding);
 
-    const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+    const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
     window._pendingPhotoData.stampedDataUrl = croppedDataUrl;
     window._pendingPhotoData.originalDataUrl = croppedDataUrl;
 
@@ -8528,7 +8530,7 @@ function applyAnnotation() {
       });
     });
 
-    const annotatedDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+    const annotatedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
     window._pendingPhotoData.stampedDataUrl = annotatedDataUrl;
     window._pendingPhotoData.originalDataUrl = annotatedDataUrl;
 
@@ -8581,7 +8583,7 @@ async function bakePhotoEdits(dataUrl, brightness, contrast, rotation) {
         ctx.putImageData(imageData, 0, 0);
       }
 
-      resolve(canvas.toDataURL('image/jpeg', 0.95));
+      resolve(canvas.toDataURL('image/jpeg', 0.88));
     };
     img.src = dataUrl;
   });
