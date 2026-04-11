@@ -7829,12 +7829,11 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
         </div>
       `).join('')}
     </div>
-    <label style="display:inline-block;background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
+    <button type="button"
+      onclick="openBatchCamera('${safeLabel}', { isArea: true, categoryName: '${safeCat}' })"
+      style="display:inline-block;background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
       📷 ${photos.length > 0 ? `Add More (${photos.length})` : 'Take Photos'}
-      <input type="file" accept="image/*" multiple
-        onchange="handleAreaPhotoCapture('${safeLabel}', this)"
-        style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
-    </label>
+    </button>
   `;
 
   // Load thumbnails from IndexedDB
@@ -9251,11 +9250,11 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
 
   html += `
       </div>
-      <label class="btn-photo-upload">
-        📷 Capture Photo
-        <input type="file" accept="image/*" capture="environment" multiple style="display: none;"
-               onchange="capturePhoto('${safeLabel}', event)" />
-      </label>
+      <button type="button" class="btn-photo-upload"
+              onclick="openBatchCamera('${safeLabel}')"
+              style="cursor:pointer;">
+        📷 Capture Photos
+      </button>
     </div>
   `;
 
@@ -12535,6 +12534,310 @@ deleteSurvey = async function(id) {
   }
   return result;
 };
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Batch Camera (SafetyCulture-style click-click-click capture)
+// ─────────────────────────────────────────────────────────────────────────────
+// Usage: openBatchCamera(itemLabel, { isArea: false, categoryName: '' })
+//
+// Flow:
+//  1. Opens full-screen overlay with live <video> stream via getUserMedia
+//  2. Each shutter tap grabs a frame to a canvas → JPEG dataUrl → staging array
+//     (no IndexedDB writes yet)
+//  3. Thumbnail strip at bottom shows all staged shots. Tap a thumb to open
+//     the full-res editor (reuses showPhotoPreviewModal + bakePhotoEdits)
+//  4. "Done" button commits the whole staging array via addDateStampToPhoto
+//     + savePhoto in a single pass, then refreshes the item in place
+//  5. "X" button discards everything after confirmation
+//
+// Fallback: if getUserMedia is unavailable or blocked (not HTTPS, no permission),
+// the old capturePhoto() multi-file input flow is triggered instead so nothing
+// breaks.
+
+window._batchCam = {
+  stream: null,
+  staged: [],          // [{ id, dataUrl, width, height }]
+  itemLabel: '',
+  isArea: false,
+  categoryName: '',
+  editingIndex: -1
+};
+
+async function openBatchCamera(itemLabel, opts) {
+  opts = opts || {};
+  const bc = window._batchCam;
+  bc.staged = [];
+  bc.itemLabel = itemLabel;
+  bc.isArea = !!opts.isArea;
+  bc.categoryName = opts.categoryName || '';
+  bc.editingIndex = -1;
+
+  // Feature-detect
+  const canUseCamera = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  if (!canUseCamera) {
+    showToast('Live camera unavailable — using file picker');
+    return _batchCameraFallback(itemLabel, opts);
+  }
+
+  // Build overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'batchCamOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:#000;z-index:99999;display:flex;flex-direction:column;';
+  overlay.innerHTML = `
+    <div style="flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(0,0,0,0.55);color:#fff;padding-top:calc(14px + env(safe-area-inset-top));">
+      <button id="batchCamClose" style="background:none;border:none;color:#fff;font-size:28px;font-weight:700;cursor:pointer;padding:4px 10px;min-height:44px;">✕</button>
+      <div id="batchCamTitle" style="font-size:15px;font-weight:600;text-align:center;flex:1;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${(itemLabel || '').replace(/</g,'&lt;')}</div>
+      <button id="batchCamDone" style="background:#16a34a;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:700;font-size:15px;cursor:pointer;min-height:44px;">Done</button>
+    </div>
+    <div style="flex:1 1 auto;position:relative;background:#000;overflow:hidden;">
+      <video id="batchCamVideo" playsinline autoplay muted style="width:100%;height:100%;object-fit:cover;background:#000;"></video>
+      <div id="batchCamCount" style="position:absolute;top:12px;left:12px;background:rgba(0,0,0,0.65);color:#fff;padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600;">0 photos</div>
+    </div>
+    <div id="batchCamStrip" style="flex:0 0 auto;background:#111;padding:10px 12px;display:flex;gap:8px;overflow-x:auto;min-height:76px;align-items:center;"></div>
+    <div style="flex:0 0 auto;background:#000;display:flex;align-items:center;justify-content:center;padding:18px 0;padding-bottom:calc(18px + env(safe-area-inset-bottom));">
+      <button id="batchCamShutter" aria-label="Take photo" style="width:82px;height:82px;border-radius:50%;background:#fff;border:6px solid rgba(255,255,255,0.45);box-shadow:0 0 0 3px #000 inset;cursor:pointer;"></button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const video = document.getElementById('batchCamVideo');
+  const shutter = document.getElementById('batchCamShutter');
+  const closeBtn = document.getElementById('batchCamClose');
+  const doneBtn = document.getElementById('batchCamDone');
+
+  shutter.addEventListener('click', snapStagedPhoto);
+  closeBtn.addEventListener('click', discardStagedPhotos);
+  doneBtn.addEventListener('click', commitStagedPhotos);
+
+  // Start camera
+  try {
+    setCameraActive(true);
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+      audio: false
+    });
+    bc.stream = stream;
+    video.srcObject = stream;
+    await video.play().catch(() => {});
+  } catch (err) {
+    console.error('getUserMedia failed:', err);
+    closeBatchCameraOverlay();
+    showToast('Camera blocked — using file picker');
+    return _batchCameraFallback(itemLabel, opts);
+  }
+}
+
+function _batchCameraFallback(itemLabel, opts) {
+  // Fall back to existing multi-file picker flow
+  if (opts.isArea) {
+    // Build a hidden input and hand off to handleAreaPhotoCapture
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = true;
+    input.onchange = () => handleAreaPhotoCapture(itemLabel, input);
+    setCameraActive(true);
+    input.click();
+  } else {
+    capturePhoto(itemLabel);
+  }
+}
+
+function snapStagedPhoto() {
+  const bc = window._batchCam;
+  const video = document.getElementById('batchCamVideo');
+  if (!video || !video.videoWidth) return;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  // Keep staged copies at native-ish quality — final cap happens on commit.
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+
+  const id = 'staged_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+  bc.staged.push({ id, dataUrl, width: canvas.width, height: canvas.height });
+
+  // Haptic-ish visual feedback: flash the shutter
+  const sh = document.getElementById('batchCamShutter');
+  if (sh) {
+    sh.style.background = '#ef4444';
+    setTimeout(() => { sh.style.background = '#fff'; }, 110);
+  }
+  refreshBatchCamStrip();
+}
+
+function refreshBatchCamStrip() {
+  const bc = window._batchCam;
+  const strip = document.getElementById('batchCamStrip');
+  const count = document.getElementById('batchCamCount');
+  if (!strip || !count) return;
+
+  count.textContent = bc.staged.length + ' photo' + (bc.staged.length === 1 ? '' : 's');
+
+  if (bc.staged.length === 0) {
+    strip.innerHTML = '<div style="color:#666;font-size:13px;padding:0 8px;">Tap the shutter to capture photos</div>';
+    return;
+  }
+
+  strip.innerHTML = bc.staged.map((p, i) => `
+    <div style="position:relative;flex:0 0 auto;">
+      <img src="${p.dataUrl}" onclick="editStagedPhoto(${i})"
+           style="width:56px;height:56px;object-fit:cover;border-radius:6px;border:2px solid #333;cursor:pointer;">
+      <button onclick="event.stopPropagation();removeStagedPhoto(${i})"
+              aria-label="Remove"
+              style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#dc2626;color:#fff;border:2px solid #111;font-size:12px;font-weight:700;cursor:pointer;padding:0;line-height:18px;">×</button>
+    </div>
+  `).join('');
+  // Scroll strip to show the latest
+  strip.scrollLeft = strip.scrollWidth;
+}
+
+function removeStagedPhoto(index) {
+  const bc = window._batchCam;
+  if (index < 0 || index >= bc.staged.length) return;
+  bc.staged.splice(index, 1);
+  refreshBatchCamStrip();
+}
+
+function editStagedPhoto(index) {
+  const bc = window._batchCam;
+  if (index < 0 || index >= bc.staged.length) return;
+  bc.editingIndex = index;
+  const staged = bc.staged[index];
+
+  // Reuse the existing preview/edit modal. Use a sentinel fieldKey so the
+  // default confirm handler's "save to survey" path never runs — we intercept
+  // the confirm button after the modal renders and write back to the staged
+  // array instead.
+  const fieldKey = '_batchstaged_' + staged.id;
+  showPhotoPreviewModal(fieldKey, bc.itemLabel, staged.dataUrl, 'image/jpeg');
+
+  setTimeout(() => {
+    const modal = document.getElementById('photoPreviewModal');
+    if (!modal) return;
+    const confirmBtn = modal.querySelector('.btn-primary');
+    if (!confirmBtn) return;
+    confirmBtn.textContent = 'Apply';
+    confirmBtn.onclick = async () => {
+      const data = window._pendingPhotoData;
+      if (!data) { closePhotoPreviewModal(); return; }
+      const finalDataUrl = await bakePhotoEdits(
+        data.stampedDataUrl,
+        data.brightness || 100,
+        data.contrast || 100,
+        data.rotation || 0
+      );
+      const bc2 = window._batchCam;
+      if (bc2.editingIndex >= 0 && bc2.editingIndex < bc2.staged.length) {
+        bc2.staged[bc2.editingIndex].dataUrl = finalDataUrl;
+      }
+      bc2.editingIndex = -1;
+      window._pendingPhotoData = null;
+      closePhotoPreviewModal();
+      refreshBatchCamStrip();
+    };
+  }, 80);
+}
+
+async function commitStagedPhotos() {
+  const bc = window._batchCam;
+  if (bc.staged.length === 0) {
+    closeBatchCameraOverlay();
+    return;
+  }
+
+  const n = bc.staged.length;
+  showToast('Saving ' + n + ' photo' + (n === 1 ? '' : 's') + '...');
+
+  // Disable buttons while committing
+  const doneBtn = document.getElementById('batchCamDone');
+  const shutter = document.getElementById('batchCamShutter');
+  if (doneBtn) { doneBtn.disabled = true; doneBtn.style.opacity = '0.6'; }
+  if (shutter) { shutter.disabled = true; shutter.style.opacity = '0.5'; }
+
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) {
+    closeBatchCameraOverlay();
+    return;
+  }
+  if (!survey.items[bc.itemLabel]) {
+    survey.items[bc.itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+  }
+  if (!Array.isArray(survey.items[bc.itemLabel].photos)) {
+    survey.items[bc.itemLabel].photos = [];
+  }
+
+  // Snapshot the staged list before we start awaiting, then clear it so any
+  // late shutter taps during the commit don't sneak in.
+  const toCommit = bc.staged.slice();
+  bc.staged = [];
+
+  for (let i = 0; i < toCommit.length; i++) {
+    try {
+      const stamped = await addDateStampToPhoto(toCommit[i].dataUrl, 2048);
+      const photoId = currentSurveyId + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+      const photo = {
+        id: photoId,
+        surveyId: currentSurveyId,
+        itemLabel: bc.itemLabel,
+        dataUrl: stamped,
+        annotated: false,
+        createdAt: new Date().toISOString()
+      };
+      await savePhoto(photo);
+      survey.items[bc.itemLabel].photos.push(photoId);
+    } catch (err) {
+      console.error('Failed to commit staged photo', i, err);
+    }
+  }
+
+  await saveSurvey(survey);
+
+  closeBatchCameraOverlay();
+
+  // Refresh whichever UI this came from
+  if (bc.isArea) {
+    refreshAreaPhotoGrid(survey, bc.itemLabel);
+  } else {
+    updateItemInPlace(survey, bc.itemLabel);
+  }
+  forceViewportRecalc();
+  showToast(n + ' photo' + (n === 1 ? '' : 's') + ' saved');
+}
+
+function discardStagedPhotos() {
+  const bc = window._batchCam;
+  if (bc.staged.length > 0) {
+    const msg = 'Discard ' + bc.staged.length + ' photo' + (bc.staged.length === 1 ? '' : 's') + '?';
+    if (!confirm(msg)) return;
+  }
+  bc.staged = [];
+  closeBatchCameraOverlay();
+}
+
+function closeBatchCameraOverlay() {
+  const bc = window._batchCam;
+  try {
+    if (bc.stream) {
+      bc.stream.getTracks().forEach(t => { try { t.stop(); } catch(e){} });
+    }
+  } catch(e){}
+  bc.stream = null;
+  const overlay = document.getElementById('batchCamOverlay');
+  if (overlay) overlay.remove();
+  setCameraActive(false);
+}
+
+// Expose for inline onclick handlers
+window.openBatchCamera = openBatchCamera;
+window.snapStagedPhoto = snapStagedPhoto;
+window.editStagedPhoto = editStagedPhoto;
+window.removeStagedPhoto = removeStagedPhoto;
+window.commitStagedPhotos = commitStagedPhotos;
+window.discardStagedPhotos = discardStagedPhotos;
 
 
 // Start app when DOM ready
