@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2020';
+const APP_VERSION = 'v2021';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3426,11 +3426,25 @@ function refreshChipStrip(textarea) {
     });
 
     html += `
-      <input type="text" data-custom-idx="${ti}" placeholder="Other (type custom${isMulti ? ', separate with commas' : ''})"
+      <input type="text" data-custom-idx="${ti}" placeholder="Add another item${isMulti ? ' (comma-separated, no punctuation)' : ''}"
              style="width:100%;margin-top:4px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;box-sizing:border-box;" />
     `;
     html += '</div>';
   });
+
+  // Free-form "Additional observations" field. This is separate from the
+  // per-token custom inputs — its content is appended as its OWN sentence
+  // at the end of the resolved template (before the {standards?} block),
+  // so the surveyor can type any clause-level text and the grammar of the
+  // main template stays intact.
+  html += `
+    <div style="margin-top:14px;padding-top:10px;border-top:1px dashed #e5e7eb;">
+      <div style="font-size:11px;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Additional observations (optional)</div>
+      <textarea data-freeform-notes="1" rows="2"
+                placeholder="Type any extra details in your own words — appended as a separate sentence."
+                style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;box-sizing:border-box;resize:vertical;font-family:inherit;"></textarea>
+    </div>
+  `;
 
   strip.innerHTML = html;
   strip._tokens = tokens;
@@ -3445,6 +3459,11 @@ function refreshChipStrip(textarea) {
       inp.addEventListener('input', () => applyBuilderState(strip));
     }
   });
+  // Free-form notes textarea — live update too.
+  const freeformEl = strip.querySelector('textarea[data-freeform-notes]');
+  if (freeformEl) {
+    freeformEl.addEventListener('input', () => applyBuilderState(strip));
+  }
 
   // Per-option count badge — cycles 1 → 2 → 3 → 4 → 1 for each countable
   // defect independently. Tapping also auto-checks the parent option so
@@ -3556,6 +3575,30 @@ function applyBuilderState(strip) {
     // Unfilled token: leave the literal in place so the user can see what's
     // still missing; it will be blanked by finalizeSnippetText on save.
   });
+
+  // Inject free-form "Additional observations" as a standalone sentence
+  // between the main body and the {standards?} block (or at the end if no
+  // standards block is present). This keeps the main template's grammar
+  // intact regardless of what the surveyor types.
+  const freeform = (strip.querySelector('textarea[data-freeform-notes]')?.value || '').trim();
+  if (freeform) {
+    let sentence = freeform;
+    // Ensure final sentence ends with terminal punctuation.
+    if (!/[.!?]$/.test(sentence)) sentence += '.';
+    // Capitalize first letter for a clean sentence break.
+    sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
+    const stdIdx = text.indexOf('{standards?');
+    if (stdIdx >= 0) {
+      // Insert before the standards token (with a leading space).
+      const before = text.slice(0, stdIdx).replace(/\s*$/, '');
+      const after = text.slice(stdIdx);
+      text = before + ' ' + sentence + ' ' + after;
+    } else {
+      text = text.replace(/\s*$/, '') + ' ' + sentence;
+    }
+    // Collapse any accidental double spaces
+    text = text.replace(/ {2,}/g, ' ');
+  }
 
   textarea.value = text;
   // Auto-expand the textarea to fit
