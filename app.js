@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2001';
+const APP_VERSION = 'v2003';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1733,12 +1733,15 @@ function showNotesSheet(itemLabel, categoryName) {
         snippetsHtml = `<div class="sheet-section-title">Quick Insert (${variants.length} snippets)</div>`;
         variants.forEach((variant, idx) => {
           const escapedText = variant.text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+          const placeholdersJson = variant.placeholders
+            ? JSON.stringify(variant.placeholders).replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+            : '';
           const ratingBadge = variant.rating || baseRating;
           const isActive = itemData.text === variant.text;
           const displayText = highlightedTexts[idx] || escSnippet(variant.text);
           snippetsHtml += `
             <div class="snippet-card-sheet" style="padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}"
-                 onclick="insertSnippetFromSheet('${safeLabel}', '${safeCat}', '${escapedText}', this)">
+                 onclick="insertSnippetFromSheet('${safeLabel}', '${safeCat}', '${escapedText}', this, '${placeholdersJson}')">
               <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
                 <span style="font-size:13px;color:#333;line-height:1.5;">${displayText}</span>
                 <span style="flex-shrink:0;font-size:10px;background:#e5e7eb;color:#374151;padding:2px 6px;border-radius:4px;">${ratingBadge}</span>
@@ -1937,6 +1940,7 @@ function showNotesSheet(itemLabel, categoryName) {
         ${componentBuilderHtml}
         <div style="padding:12px 20px;">
           <textarea id="sheet-text-${sanitizedLabel}" placeholder="Add inspection notes..." style="min-height:80px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;overflow:hidden;" autocapitalize="sentences" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';">${itemData.text || ''}</textarea>
+          <div id="sheet-text-${sanitizedLabel}-chipstrip" style="display:none;flex-wrap:wrap;gap:6px;margin-top:6px;padding:8px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;"></div>
         </div>
         ${snippetsHtml}
         ${standardsHtml}
@@ -1962,12 +1966,22 @@ function showNotesSheet(itemLabel, categoryName) {
 }
 
 // Insert snippet from notes sheet into the textarea within the sheet
-function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl) {
+function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placeholdersJson) {
   const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
   const textarea = document.getElementById(`sheet-text-${sanitizedLabel}`);
   if (textarea) {
+    // Resolve count tokens against the current survey's drive line count
+    const survey = window._currentSurveyCache || null;
+    const dlc = (survey && survey.driveLineCount) ? survey.driveLineCount : 1;
+    const resolved = resolveCountTokens(text, dlc);
     // Replace — tapping a new snippet replaces the previous selection
-    textarea.value = text;
+    textarea.value = resolved;
+    // Reset collected citations (new snippet starts fresh)
+    setCollectedCitations(textarea, []);
+    // Stash placeholders config for this entry on the textarea
+    textarea.dataset.snippetPlaceholders = placeholdersJson || '';
+    // Show/refresh the chip strip
+    refreshChipStrip(textarea);
   }
 
   // Highlight the selected card
@@ -1989,7 +2003,9 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl) {
 function saveNotesFromSheet(itemLabel, categoryName, sanitizedLabel) {
   const textarea = document.getElementById(`sheet-text-${sanitizedLabel}`);
   if (!textarea) return;
-  const newText = textarea.value.trim();
+  // Expand any {standards?...} block with collected citations before saving
+  const finalized = (typeof finalizeSnippetText === 'function') ? finalizeSnippetText(textarea) : textarea.value;
+  const newText = finalized.trim();
 
   getSurvey(currentSurveyId).then(survey => {
     if (!survey.items[itemLabel]) {
@@ -2136,58 +2152,75 @@ function deletePhotoFromSheet(photoId, itemLabel, categoryName) {
 
 // Move photo from one checklist item to another — shows a searchable picker
 function movePhotoFromSheet(photoId, sourceItemLabel, sourceCategoryName) {
-  // Build a flat list of all checklist items from the current inspection
+  // Build a list of all checklist items grouped by category
   getSurvey(currentSurveyId).then(survey => {
     const template = surveyTemplate || [];
     const allItems = [];
+    const groups = []; // preserve template order
     template.forEach(cat => {
       if (!cat.items) return;
+      const group = { category: cat.category, items: [] };
       cat.items.forEach(item => {
         const label = typeof item === 'string' ? item : item.label;
         if (label === sourceItemLabel) return; // skip current item
         allItems.push({ label: label, category: cat.category });
+        group.items.push(label);
       });
+      if (group.items.length) groups.push(group);
     });
     // Also include any items already in the survey that might not be in the template
+    const otherGroup = { category: '(Other)', items: [] };
     for (const label in survey.items) {
       if (label === sourceItemLabel) continue;
       if (!allItems.find(i => i.label === label)) {
         allItems.push({ label: label, category: '(Other)' });
+        otherGroup.items.push(label);
       }
     }
+    if (otherGroup.items.length) groups.push(otherGroup);
 
-    showMovePhotoPicker(photoId, sourceItemLabel, sourceCategoryName, allItems, survey);
+    showMovePhotoPicker(photoId, sourceItemLabel, sourceCategoryName, allItems, groups, survey);
   });
 }
 
-function showMovePhotoPicker(photoId, sourceItemLabel, sourceCategoryName, allItems, survey) {
+function showMovePhotoPicker(photoId, sourceItemLabel, sourceCategoryName, allItems, groups, survey) {
   // Remove existing picker if any
   const existing = document.getElementById('movePhotoPickerOverlay');
   if (existing) existing.remove();
 
   const overlay = document.createElement('div');
   overlay.id = 'movePhotoPickerOverlay';
-  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10002;display:flex;align-items:center;justify-content:center;padding:20px;';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10002;display:flex;align-items:flex-end;justify-content:center;';
 
-  let listHtml = '';
-  allItems.forEach((item, idx) => {
-    listHtml += `<div class="move-photo-item" data-idx="${idx}" style="padding:10px 14px;border-bottom:1px solid #eee;cursor:pointer;font-size:14px;" onclick="executeMovePhoto('${photoId}', '${sourceItemLabel.replace(/'/g, "\\'")}', '${sourceCategoryName.replace(/'/g, "\\'")}', ${idx})">
-      <div style="font-weight:600;color:#1e3a5f;">${item.label}</div>
-      <div style="font-size:11px;color:#6b7280;">${item.category}</div>
-    </div>`;
+  // Escape HTML for option text
+  const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  let optgroupsHtml = '';
+  groups.forEach(g => {
+    optgroupsHtml += `<optgroup label="${esc(g.category)}">`;
+    g.items.forEach(label => {
+      // Index into flat allItems array
+      const idx = allItems.findIndex(i => i.label === label && i.category === g.category);
+      if (idx >= 0) {
+        optgroupsHtml += `<option value="${idx}">${esc(label)}</option>`;
+      }
+    });
+    optgroupsHtml += `</optgroup>`;
   });
 
   overlay.innerHTML = `
-    <div style="background:white;border-radius:12px;width:100%;max-width:400px;max-height:70vh;display:flex;flex-direction:column;overflow:hidden;" onclick="event.stopPropagation();">
-      <div style="padding:16px 16px 8px;font-weight:700;font-size:16px;color:#1e3a5f;">Move Photo To…</div>
-      <div style="padding:0 16px 8px;">
-        <input id="movePhotoSearch" type="text" placeholder="Search items…" style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;box-sizing:border-box;" oninput="filterMovePhotoList(this.value)" />
+    <div style="background:white;border-radius:16px 16px 0 0;width:100%;max-width:560px;display:flex;flex-direction:column;box-shadow:0 -6px 24px rgba(0,0,0,0.25);padding-bottom:calc(16px + env(safe-area-inset-bottom));" onclick="event.stopPropagation();">
+      <div style="padding:18px 20px 8px;font-weight:700;font-size:17px;color:#1e3a5f;">Move photo to…</div>
+      <div style="padding:4px 20px 8px;font-size:12px;color:#6b7280;">From: ${esc(sourceItemLabel)}</div>
+      <div style="padding:8px 20px 4px;">
+        <select id="movePhotoSelect" size="1" style="width:100%;padding:14px 12px;border:2px solid #1e3a5f;border-radius:10px;font-size:16px;font-weight:600;color:#1e3a5f;background:white;box-sizing:border-box;-webkit-appearance:menulist;appearance:menulist;">
+          <option value="" disabled selected>— Choose destination —</option>
+          ${optgroupsHtml}
+        </select>
       </div>
-      <div id="movePhotoList" style="overflow-y:auto;flex:1;">
-        ${listHtml}
-      </div>
-      <div style="padding:12px 16px;border-top:1px solid #eee;">
-        <button onclick="document.getElementById('movePhotoPickerOverlay').remove();" style="width:100%;background:#6b7280;color:white;border:none;border-radius:6px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 20px 6px;">
+        <button onclick="document.getElementById('movePhotoPickerOverlay').remove();" style="background:#64748b;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Cancel</button>
+        <button id="movePhotoApply" style="background:#1e3a5f;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Move</button>
       </div>
     </div>
   `;
@@ -2197,19 +2230,15 @@ function showMovePhotoPicker(photoId, sourceItemLabel, sourceCategoryName, allIt
   // Store allItems globally so executeMovePhoto can access it
   window._movePhotoItems = allItems;
 
-  // Focus search
-  setTimeout(() => {
-    const input = document.getElementById('movePhotoSearch');
-    if (input) input.focus();
-  }, 100);
-}
-
-function filterMovePhotoList(query) {
-  const q = query.toLowerCase().trim();
-  const items = document.querySelectorAll('#movePhotoList .move-photo-item');
-  items.forEach(el => {
-    const text = el.textContent.toLowerCase();
-    el.style.display = (!q || text.includes(q)) ? '' : 'none';
+  const sel = document.getElementById('movePhotoSelect');
+  const apply = document.getElementById('movePhotoApply');
+  apply.addEventListener('click', () => {
+    const idx = parseInt(sel.value, 10);
+    if (Number.isNaN(idx)) {
+      showToast('Pick a destination first');
+      return;
+    }
+    executeMovePhoto(photoId, sourceItemLabel, sourceCategoryName, idx);
   });
 }
 
@@ -2930,6 +2959,437 @@ function findTextVariants(categoryName, itemLabel, baseRating) {
 
   return matches;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SNIPPET TOKEN SYSTEM
+// ═══════════════════════════════════════════════════════════════════════════
+// Token syntax supported in text_library.json entries:
+//
+//   {count:singular|plural}
+//     Auto-resolves from survey.driveLineCount. 1 -> left side, 2+ -> right.
+//     Never requires a tap.
+//
+//   {specify:opt1|opt2|opt3}
+//     Single-select inline list. Chip in strip; tap -> popover radio list
+//     + Custom field. One option lands in the text.
+//
+//   {any:opt1|opt2^ABYC P-1.5|opt3^TC TP-1332(2)}
+//     Multi-select inline list with optional ^CITATION tags per option.
+//     Tap -> popover checkboxes + Custom field. Rendered with shared-tail
+//     collapse and Oxford comma joining.
+//
+//   {name}
+//     Named placeholder. Entry JSON must include:
+//       "placeholders": { "name": ["a", "b", "c"] }           // single
+//       "placeholders": { "name": { "multi": true,
+//                                   "options": ["a","b"] } }  // multi
+//
+//   {standards? prose that references STANDARDS.}
+//     Conditional block. Only renders if 1+ citations were collected from
+//     {any:...} selections. STANDARDS inside gets replaced with the Oxford-
+//     joined, deduplicated citation list. If no citations were collected,
+//     the entire block (including its leading space) is stripped.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Oxford-comma join: [] -> "", [a] -> "a", [a,b] -> "a and b",
+// [a,b,c] -> "a, b, and c".
+function oxfordJoin(items) {
+  const arr = items.filter(x => x != null && x !== '');
+  if (arr.length === 0) return '';
+  if (arr.length === 1) return arr[0];
+  if (arr.length === 2) return arr[0] + ' and ' + arr[1];
+  return arr.slice(0, -1).join(', ') + ', and ' + arr[arr.length - 1];
+}
+
+// Shared-tail collapse for {any:...} selections.
+// Walks selections in order. Consecutive items that share >=1 trailing word
+// are grouped; within a group the heads are Oxford-joined and the shared
+// tail is appended once. Groups are then Oxford-joined at the top level.
+//
+//   ["chipped blades","bent blades"]
+//     -> "chipped and bent blades"
+//   ["chipped blades","bent blades","missing blades"]
+//     -> "chipped, bent, and missing blades"
+//   ["chipped blades","bent blades","surface corrosion"]
+//     -> "chipped and bent blades and surface corrosion"
+//   ["cracked hull plate","delaminated hull plate"]
+//     -> "cracked and delaminated hull plate"
+function collapseSharedTail(selections) {
+  if (!selections || selections.length === 0) return '';
+  if (selections.length === 1) return selections[0];
+
+  // Find longest shared word-suffix between two phrases (as array of words).
+  const sharedSuffix = (a, b) => {
+    const aw = a.split(/\s+/);
+    const bw = b.split(/\s+/);
+    let i = 0;
+    while (i < aw.length && i < bw.length &&
+           aw[aw.length - 1 - i].toLowerCase() === bw[bw.length - 1 - i].toLowerCase()) {
+      i++;
+    }
+    if (i === 0) return [];
+    return aw.slice(aw.length - i);
+  };
+
+  // Group consecutive selections that share at least one trailing word.
+  const groups = [];
+  let current = [selections[0]];
+  for (let i = 1; i < selections.length; i++) {
+    const tail = sharedSuffix(current[current.length - 1], selections[i]);
+    if (tail.length > 0) {
+      current.push(selections[i]);
+    } else {
+      groups.push(current);
+      current = [selections[i]];
+    }
+  }
+  groups.push(current);
+
+  // Render each group: find the shared tail across ALL members, strip it
+  // from each to get heads, Oxford-join heads, append tail.
+  const rendered = groups.map(group => {
+    if (group.length === 1) return group[0];
+    // Shared tail across the whole group = shortest pairwise tail
+    let tail = group[0].split(/\s+/);
+    for (let j = 1; j < group.length; j++) {
+      const pair = sharedSuffix(group[j - 1], group[j]);
+      if (pair.length < tail.length) tail = pair;
+    }
+    const tailStr = tail.join(' ');
+    const heads = group.map(phrase => {
+      const words = phrase.split(/\s+/);
+      return words.slice(0, words.length - tail.length).join(' ');
+    });
+    return oxfordJoin(heads) + ' ' + tailStr;
+  });
+
+  return oxfordJoin(rendered);
+}
+
+// Parse a snippet text into a list of tokens. Returns:
+//   { segments: [ {type:'text', value:'...'} | {type:'token', kind, ...}, ... ],
+//     hasUnresolved: bool }
+// Token kinds: 'count', 'specify', 'any', 'named', 'standards'
+function parseSnippetTokens(text) {
+  if (!text) return { segments: [], raw: '' };
+  const segments = [];
+  const re = /\{(count:|specify:|any:|standards\?)?([^{}]*)\}/g;
+  let lastIndex = 0;
+  let match;
+  let tokenIdx = 0;
+  while ((match = re.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      segments.push({ type: 'text', value: text.substring(lastIndex, match.index) });
+    }
+    const prefix = match[1] || '';
+    const body = match[2] || '';
+    const id = 'tok' + (tokenIdx++);
+    if (prefix === 'count:') {
+      const parts = body.split('|');
+      segments.push({ type: 'token', kind: 'count', id, singular: parts[0] || '', plural: parts[1] || parts[0] || '' });
+    } else if (prefix === 'specify:') {
+      segments.push({ type: 'token', kind: 'specify', id, options: body.split('|').map(s => s.trim()).filter(Boolean) });
+    } else if (prefix === 'any:') {
+      const opts = body.split('|').map(s => s.trim()).filter(Boolean).map(o => {
+        const parts = o.split('^').map(s => s.trim());
+        return { label: parts[0], citations: parts.slice(1).filter(Boolean) };
+      });
+      segments.push({ type: 'token', kind: 'any', id, options: opts });
+    } else if (prefix === 'standards?') {
+      segments.push({ type: 'token', kind: 'standards', id, body });
+    } else {
+      // Unprefixed = named placeholder, e.g. {propType}
+      segments.push({ type: 'token', kind: 'named', id, name: body.trim() });
+    }
+    lastIndex = re.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    segments.push({ type: 'text', value: text.substring(lastIndex) });
+  }
+  return { segments, raw: text };
+}
+
+// Resolve count tokens immediately using the current survey's driveLineCount.
+// Returns the text with count tokens replaced; other tokens left intact.
+function resolveCountTokens(text, driveLineCount) {
+  const n = parseInt(driveLineCount, 10) || 1;
+  return text.replace(/\{count:([^{}|]*)\|([^{}]*)\}/g, (_, sg, pl) => {
+    return n <= 1 ? sg : pl;
+  });
+}
+
+// Scan resolved text (after count resolution) for remaining unresolved tokens.
+// Returns array of token descriptors in occurrence order:
+//   { kind, id (literal token string), label, options?, name? }
+function scanUnresolvedTokens(text, entryPlaceholders) {
+  const tokens = [];
+  if (!text) return tokens;
+  const re = /\{(specify:|any:|standards\?)?([^{}]*)\}/g;
+  let match;
+  const seen = new Set();
+  while ((match = re.exec(text)) !== null) {
+    const full = match[0];
+    if (seen.has(full)) continue;
+    seen.add(full);
+    const prefix = match[1] || '';
+    const body = match[2] || '';
+    if (prefix === 'specify:') {
+      tokens.push({
+        kind: 'specify',
+        literal: full,
+        label: 'Choose',
+        options: body.split('|').map(s => s.trim()).filter(Boolean)
+      });
+    } else if (prefix === 'any:') {
+      const opts = body.split('|').map(s => s.trim()).filter(Boolean).map(o => {
+        const parts = o.split('^').map(s => s.trim());
+        return { label: parts[0], citations: parts.slice(1).filter(Boolean) };
+      });
+      tokens.push({
+        kind: 'any',
+        literal: full,
+        label: 'Select all that apply',
+        options: opts
+      });
+    } else if (prefix === 'standards?') {
+      // Conditional block — not user-fillable; handled at render time.
+      // Skip from strip.
+      continue;
+    } else {
+      // Named placeholder
+      const name = body.trim();
+      if (!name) continue;
+      const cfg = entryPlaceholders ? entryPlaceholders[name] : null;
+      let options = [];
+      let multi = false;
+      if (Array.isArray(cfg)) {
+        options = cfg.slice();
+      } else if (cfg && typeof cfg === 'object') {
+        options = (cfg.options || []).slice();
+        multi = !!cfg.multi;
+      }
+      tokens.push({
+        kind: multi ? 'any-named' : 'specify-named',
+        literal: full,
+        label: name.charAt(0).toUpperCase() + name.slice(1),
+        name,
+        options: multi ? options.map(o => ({ label: o, citations: [] })) : options
+      });
+    }
+  }
+  return tokens;
+}
+
+// Render the standards conditional block in a text. Given the collected
+// citations (array of unique strings), replace every {standards?...STANDARDS...}
+// block with either the filled body (STANDARDS -> oxfordJoin(citations)) or
+// remove the block entirely (including one leading space) when no citations.
+function renderStandardsBlock(text, citations) {
+  const uniq = [];
+  const seen = new Set();
+  for (const c of (citations || [])) {
+    const k = c.trim();
+    if (k && !seen.has(k)) { seen.add(k); uniq.push(k); }
+  }
+  return text.replace(/\s?\{standards\?([^{}]*)\}/g, (_, body) => {
+    if (uniq.length === 0) return '';
+    const filled = body.replace(/STANDARDS/g, oxfordJoin(uniq));
+    // Preserve the single leading space that may have preceded the block
+    return ' ' + filled.replace(/^\s+/, '');
+  });
+}
+
+// Register collected citations on the item's data so renderStandardsBlock
+// can pick them up at save time. Stored on the textarea dataset.
+function getCollectedCitations(textarea) {
+  if (!textarea) return [];
+  try {
+    return JSON.parse(textarea.dataset.citations || '[]');
+  } catch (e) { return []; }
+}
+function setCollectedCitations(textarea, list) {
+  if (!textarea) return;
+  textarea.dataset.citations = JSON.stringify(list || []);
+}
+
+window._snippetTokens = {
+  parse: parseSnippetTokens,
+  resolveCount: resolveCountTokens,
+  scanUnresolved: scanUnresolvedTokens,
+  collapseSharedTail,
+  oxfordJoin,
+  renderStandardsBlock
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHIP STRIP UI — renders below a notes textarea, one chip per unresolved
+// token. Tapping a chip opens a popover with options + Custom field.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Build or refresh the chip strip for a given textarea. The textarea must
+// carry `data-snippet-placeholders` (JSON) with the entry-level placeholders
+// config, if any. The strip is placed in the element whose id is
+// textarea.id + '-chipstrip'.
+function refreshChipStrip(textarea) {
+  if (!textarea) return;
+  const stripId = textarea.id + '-chipstrip';
+  const strip = document.getElementById(stripId);
+  if (!strip) return;
+
+  let entryPlaceholders = null;
+  try { entryPlaceholders = JSON.parse(textarea.dataset.snippetPlaceholders || 'null'); }
+  catch (e) { entryPlaceholders = null; }
+
+  const tokens = scanUnresolvedTokens(textarea.value, entryPlaceholders);
+  if (tokens.length === 0) {
+    strip.style.display = 'none';
+    strip.innerHTML = '';
+    return;
+  }
+
+  strip.style.display = 'flex';
+  let html = '<span style="font-size:12px;font-weight:600;color:#6b7280;margin-right:4px;align-self:center;">Fill in:</span>';
+  tokens.forEach((tok, i) => {
+    // Stash the token in a per-strip cache
+    strip._tokens = strip._tokens || [];
+    strip._tokens[i] = tok;
+    html += `<button type="button" class="chip-btn" data-tok-idx="${i}"
+               style="background:#fff7ed;color:#c2410c;border:1.5px solid #fdba74;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">
+               ${escapeHtml(tok.label)} ▾
+             </button>`;
+  });
+  strip.innerHTML = html;
+  // Wire click handlers
+  strip.querySelectorAll('.chip-btn').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const idx = parseInt(btn.dataset.tokIdx, 10);
+      const tok = strip._tokens[idx];
+      if (tok) openChipPopover(textarea, tok, btn);
+    });
+  });
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Open the popover for a single token. Multi-select tokens ('any', 'any-named')
+// render checkboxes; single-select ('specify', 'specify-named') render radios.
+// Both have a Custom text input.
+function openChipPopover(textarea, tok, anchorEl) {
+  // Remove any existing popover
+  const existing = document.getElementById('chipPopoverOverlay');
+  if (existing) existing.remove();
+
+  const isMulti = (tok.kind === 'any' || tok.kind === 'any-named');
+  const overlay = document.createElement('div');
+  overlay.id = 'chipPopoverOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:100001;display:flex;align-items:flex-end;justify-content:center;padding:0;';
+
+  // Build option rows
+  let rowsHtml = '';
+  tok.options.forEach((opt, i) => {
+    const label = (typeof opt === 'string') ? opt : (opt.label || '');
+    const cites = (typeof opt === 'object' && opt.citations && opt.citations.length)
+      ? ` <span style="color:#6b7280;font-size:11px;">(${escapeHtml(opt.citations.join(', '))})</span>` : '';
+    rowsHtml += `
+      <label style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #f3f4f6;cursor:pointer;min-height:48px;">
+        <input type="${isMulti ? 'checkbox' : 'radio'}" name="chip-opt" value="${i}"
+               style="width:20px;height:20px;accent-color:#1e3a5f;flex-shrink:0;" />
+        <span style="font-size:15px;color:#1f2937;line-height:1.4;">${escapeHtml(label)}${cites}</span>
+      </label>
+    `;
+  });
+
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:16px 16px 0 0;width:100%;max-width:560px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 -6px 24px rgba(0,0,0,0.25);padding-bottom:calc(16px + env(safe-area-inset-bottom));" onclick="event.stopPropagation();">
+      <div style="padding:18px 20px 6px;font-weight:700;font-size:17px;color:#1e3a5f;">${escapeHtml(tok.label)}</div>
+      <div style="padding:2px 20px 10px;font-size:12px;color:#6b7280;">${isMulti ? 'Select all that apply' : 'Choose one'}</div>
+      <div style="overflow-y:auto;flex:1 1 auto;">
+        ${rowsHtml}
+        <div style="padding:14px 16px;border-top:1px solid #e5e7eb;background:#fafafa;">
+          <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Custom (optional)</label>
+          <input id="chipCustomInput" type="text" placeholder="Type a custom value${isMulti ? ' (one at a time)' : ''}…"
+                 style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 20px 6px;">
+        <button type="button" id="chipCancel"
+          style="background:#64748b;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Cancel</button>
+        <button type="button" id="chipApply"
+          style="background:#1e3a5f;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Apply</button>
+      </div>
+    </div>
+  `;
+  overlay.addEventListener('click', () => overlay.remove());
+  document.body.appendChild(overlay);
+
+  document.getElementById('chipCancel').addEventListener('click', () => overlay.remove());
+  document.getElementById('chipApply').addEventListener('click', () => {
+    const inputs = overlay.querySelectorAll('input[name="chip-opt"]');
+    const selectedIdx = [];
+    inputs.forEach(inp => { if (inp.checked) selectedIdx.push(parseInt(inp.value, 10)); });
+    const customRaw = (document.getElementById('chipCustomInput').value || '').trim();
+
+    // Build selected label list + citations list
+    const selectedLabels = [];
+    const citations = [];
+    selectedIdx.forEach(i => {
+      const opt = tok.options[i];
+      if (typeof opt === 'string') {
+        selectedLabels.push(opt);
+      } else {
+        selectedLabels.push(opt.label);
+        (opt.citations || []).forEach(c => citations.push(c));
+      }
+    });
+    if (customRaw) {
+      // Custom values are treated as plain labels with no citations
+      customRaw.split(/\s*,\s*/).filter(Boolean).forEach(lbl => selectedLabels.push(lbl));
+    }
+
+    if (selectedLabels.length === 0) {
+      showToast('Pick at least one option or type a custom value');
+      return;
+    }
+
+    // Build the replacement text
+    let replacement;
+    if (tok.kind === 'any' || tok.kind === 'any-named') {
+      replacement = collapseSharedTail(selectedLabels);
+    } else {
+      replacement = selectedLabels[0]; // single-select
+    }
+
+    // String-replace the literal token in the textarea
+    const before = textarea.value;
+    const after = before.split(tok.literal).join(replacement);
+    textarea.value = after;
+
+    // Merge + persist citations on the textarea
+    const existingCites = getCollectedCitations(textarea);
+    const merged = existingCites.slice();
+    citations.forEach(c => { if (!merged.includes(c)) merged.push(c); });
+    setCollectedCitations(textarea, merged);
+
+    overlay.remove();
+    refreshChipStrip(textarea);
+  });
+}
+
+// Finalize: expand {standards?...} block using collected citations, and
+// return the text that should be saved to the survey item.
+function finalizeSnippetText(textarea) {
+  if (!textarea) return '';
+  const cites = getCollectedCitations(textarea);
+  return renderStandardsBlock(textarea.value, cites);
+}
+
+window._chipStrip = {
+  refresh: refreshChipStrip,
+  finalize: finalizeSnippetText
+};
 
 // Create new survey
 function createNewSurvey(formData) {
@@ -9234,12 +9694,15 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
       `;
       variants.forEach((variant, idx) => {
         const escapedText = variant.text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+        const placeholdersJson = variant.placeholders
+          ? JSON.stringify(variant.placeholders).replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+          : '';
         const ratingBadge = variant.rating || baseRating;
         const isActive = itemData.text === variant.text;
         const displayText = highlightedTexts[idx] || escSnippet(variant.text);
         html += `
             <div class="snippet-card" style="padding:10px 12px;border-bottom:1px solid #e5e7eb;cursor:pointer;${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}"
-                 onclick="insertSnippet('${safeLabel}', '${safeCat}', '${escapedText}', this)">
+                 onclick="insertSnippet('${safeLabel}', '${safeCat}', '${escapedText}', this, '${placeholdersJson}')">
               <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
                 <span style="font-size:12px;color:#333;line-height:1.5;">${displayText}</span>
                 <span style="flex-shrink:0;font-size:10px;background:#e5e7eb;color:#374151;padding:2px 6px;border-radius:4px;white-space:nowrap;">${ratingBadge}</span>
@@ -9259,6 +9722,7 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
     <div class="form-group">
       <label class="form-label">Notes / Description</label>
       <textarea id="text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Add inspection notes..." style="min-height: 80px;" autocapitalize="sentences" onblur="autoSaveItemText('${safeLabel}', '${safeCat}')">${itemData.text || ''}</textarea>
+      <div id="text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}-chipstrip" style="display:none;flex-wrap:wrap;gap:6px;margin-top:6px;padding:8px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;"></div>
     </div>
   `;
 
@@ -9596,36 +10060,44 @@ function toggleSnippets(itemLabel) {
 }
 
 // Insert a snippet into the textarea and save
-function insertSnippet(itemLabel, categoryName, text, cardEl) {
+function insertSnippet(itemLabel, categoryName, text, cardEl, placeholdersJson) {
   const safeId = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
   const textarea = document.getElementById('text-' + safeId);
-  if (textarea) {
-    // Replace — tapping a new snippet replaces the previous selection
-    textarea.value = text;
-    // Auto-resize
-    textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
-  }
 
-  // Highlight the selected card
-  if (cardEl) {
-    const panel = cardEl.parentElement;
-    if (panel) {
-      panel.querySelectorAll('.snippet-card').forEach(c => {
-        c.style.background = '';
-        c.style.borderLeft = '';
-      });
-    }
-    cardEl.style.background = '#d1fae5';
-    cardEl.style.borderLeft = '4px solid #16a34a';
-  }
-
-  // Save to survey
+  // Resolve count tokens against the active survey's driveLineCount
   getSurvey(currentSurveyId).then(survey => {
+    const dlc = (survey && survey.driveLineCount) ? survey.driveLineCount : 1;
+    const resolved = resolveCountTokens(text, dlc);
+
+    if (textarea) {
+      textarea.value = resolved;
+      textarea.dataset.snippetPlaceholders = placeholdersJson || '';
+      setCollectedCitations(textarea, []);
+      // Auto-resize
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+      refreshChipStrip(textarea);
+    }
+
+    // Highlight the selected card
+    if (cardEl) {
+      const panel = cardEl.parentElement;
+      if (panel) {
+        panel.querySelectorAll('.snippet-card').forEach(c => {
+          c.style.background = '';
+          c.style.borderLeft = '';
+        });
+      }
+      cardEl.style.background = '#d1fae5';
+      cardEl.style.borderLeft = '4px solid #16a34a';
+    }
+
+    // Save the live textarea value (with unresolved tokens still in it if
+    // any remain); finalization happens on the saveItem blur path.
     if (!survey.items[itemLabel]) {
       survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
     }
-    survey.items[itemLabel].text = textarea ? textarea.value : text;
+    survey.items[itemLabel].text = textarea ? textarea.value : resolved;
     survey.items[itemLabel].variantText = text;
     saveSurvey(survey);
   });
@@ -9863,7 +10335,10 @@ function autoSaveItemText(itemLabel, categoryName) {
   getSurvey(currentSurveyId).then(survey => {
     const textareaId = `text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}`;
     const textArea = document.getElementById(textareaId);
-    const text = textArea ? textArea.value : '';
+    // Expand any {standards?...} block with collected citations before saving
+    const text = textArea
+      ? ((typeof finalizeSnippetText === 'function') ? finalizeSnippetText(textArea) : textArea.value)
+      : '';
 
     if (!survey.items[itemLabel]) {
       survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
