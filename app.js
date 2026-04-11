@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2017';
+const APP_VERSION = 'v2018';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2023,10 +2023,10 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
     // Subject toggle the surveyor can flip at any time.
     const survey = window._currentSurveyCache || null;
     const isPerDriveLine = /^(?:Port|Starboard|#\d+)\s*—\s*/.test(itemLabel);
-    const dlc = isPerDriveLine
+    const rawDlc = isPerDriveLine
       ? 1
-      : ((survey && survey.driveLineCount) ? survey.driveLineCount : 1);
-    const defaultCount = (dlc <= 1) ? 'sg' : 'pl';
+      : ((survey && survey.driveLineCount) ? parseInt(survey.driveLineCount, 10) : 1);
+    const defaultCount = Math.min(Math.max(rawDlc || 1, 1), 4);
     // Replace — tapping a new snippet replaces the previous selection
     textarea.value = text;
     // Reset collected citations (new snippet starts fresh)
@@ -2034,7 +2034,7 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
     // Stash placeholders + template (for live builder) on the textarea
     textarea.dataset.snippetPlaceholders = placeholdersJson || '';
     textarea.dataset.snippetTemplate = text;
-    textarea.dataset.snippetCount = defaultCount;
+    textarea.dataset.snippetCount = String(defaultCount);
     // Auto-expand to fit
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight + 'px';
@@ -3369,9 +3369,20 @@ function refreshChipStrip(textarea) {
   const template = textarea.dataset.snippetTemplate || '';
   const tokens = scanUnresolvedTokens(template, entryPlaceholders);
   const hasCountTokens = /\{count:[^{}|]*\|[^{}]*\}/.test(template);
-  const currentCount = textarea.dataset.snippetCount || 'pl';
+  // Subject count is stored as a digit string "1"-"4". Anything older is
+  // normalized to a digit here.
+  let currentCount = parseInt(textarea.dataset.snippetCount || '1', 10);
+  if (isNaN(currentCount) || currentCount < 1) currentCount = 1;
+  if (currentCount > 4) currentCount = 4;
+  textarea.dataset.snippetCount = String(currentCount);
+  // Also check whether any {any:...(s)} options exist — if so, the Count
+  // button is relevant even without {count:...} tokens.
+  const hasCountableAny = tokens.some(t => (t.kind === 'any' || t.kind === 'any-named')
+    && Array.isArray(t.options)
+    && t.options.some(o => o && typeof o === 'object' && o.countable));
+  const showCountButton = hasCountTokens || hasCountableAny;
 
-  if (!template || (tokens.length === 0 && !hasCountTokens)) {
+  if (!template || (tokens.length === 0 && !showCountButton)) {
     strip.style.display = 'none';
     strip.innerHTML = '';
     strip._tokens = null;
@@ -3387,19 +3398,18 @@ function refreshChipStrip(textarea) {
 
   let html = '<div style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Build the sentence</div>';
 
-  // Subject (1 / many) section — only if the template has {count:...} tokens.
-  if (hasCountTokens) {
-    const sgActive = (currentCount === 'sg');
+  // Subject count — single cycling button showing current count (1-4).
+  // Tapping cycles 1 → 2 → 3 → 4 → 1. Drives {count:sg|pl} resolution AND
+  // singular/plural form of (s)-marked defect options.
+  if (showCountButton) {
     html += `
       <div style="display:flex;align-items:center;gap:10px;padding:4px 2px 10px;border-bottom:1px dashed #e5e7eb;margin-bottom:10px;">
-        <span style="font-size:11px;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;flex:1;">Subject</span>
-        <span class="subject-count-toggle" data-subject-val="${currentCount}"
-              style="display:inline-flex;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;flex-shrink:0;">
-          <button type="button" class="subject-count-btn" data-subject-pick="sg"
-                  style="padding:6px 14px;border:none;background:${sgActive ? '#1e3a5f' : '#f3f4f6'};color:${sgActive ? 'white' : '#374151'};font-size:12px;cursor:pointer;min-width:40px;">One</button>
-          <button type="button" class="subject-count-btn" data-subject-pick="pl"
-                  style="padding:6px 14px;border:none;background:${!sgActive ? '#1e3a5f' : '#f3f4f6'};color:${!sgActive ? 'white' : '#374151'};font-size:12px;cursor:pointer;min-width:50px;">Many</button>
-        </span>
+        <span style="font-size:11px;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;flex:1;">How many?</span>
+        <button type="button" class="subject-cycle-btn"
+                style="display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid #1e3a5f;border-radius:8px;background:#1e3a5f;color:white;font-size:13px;font-weight:700;padding:8px 16px;min-width:64px;min-height:40px;cursor:pointer;">
+          <span style="font-size:16px;">${currentCount}</span>
+          <span style="opacity:0.7;font-size:11px;">tap to change</span>
+        </button>
       </div>
     `;
   }
@@ -3413,29 +3423,26 @@ function refreshChipStrip(textarea) {
 
     tok.options.forEach((opt, oi) => {
       const isObj = (typeof opt === 'object');
-      const label = isObj ? (opt.label || '') : opt;
-      const countable = !!(isObj && opt.countable);
+      // Show the singular form in the label when there's only one subject,
+      // otherwise the plural form — this way the chip text itself always
+      // reads the way it will appear in the sentence.
+      let rawLabel;
+      if (isObj) {
+        if (opt.countable && currentCount <= 1 && opt.singular) rawLabel = opt.singular;
+        else if (opt.countable && opt.plural) rawLabel = opt.plural;
+        else rawLabel = opt.label || '';
+      } else {
+        rawLabel = opt;
+      }
       const cites = (isObj && opt.citations && opt.citations.length)
         ? ` <span style="color:#6b7280;font-size:11px;">(${escapeHtml(opt.citations.join(', '))})</span>`
         : '';
-      // Per-option 1/many segmented control for countable options.
-      // data-count-val stores the current selection ("pl" default, "sg" for one).
-      const countToggle = countable ? `
-        <span class="count-toggle" data-count-token="${ti}" data-count-opt="${oi}" data-count-val="pl"
-              style="display:inline-flex;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;flex-shrink:0;margin-left:auto;">
-          <button type="button" class="count-btn" data-count-pick="sg"
-                  style="padding:4px 10px;border:none;background:#f3f4f6;color:#374151;font-size:12px;cursor:pointer;min-width:34px;">1</button>
-          <button type="button" class="count-btn" data-count-pick="pl"
-                  style="padding:4px 10px;border:none;background:#1e3a5f;color:white;font-size:12px;cursor:pointer;min-width:44px;">many</button>
-        </span>
-      ` : '';
       html += `
         <label style="display:flex;align-items:center;gap:10px;padding:7px 2px;cursor:pointer;min-height:36px;">
           <input type="${isMulti ? 'checkbox' : 'radio'}" name="snbld-${textarea.id}-${ti}"
                  data-token-idx="${ti}" data-opt-idx="${oi}"
                  style="width:20px;height:20px;accent-color:#1e3a5f;flex-shrink:0;" />
-          <span style="font-size:14px;color:#1f2937;line-height:1.4;flex:1;">${escapeHtml(label)}${cites}</span>
-          ${countToggle}
+          <span style="font-size:14px;color:#1f2937;line-height:1.4;flex:1;">${escapeHtml(rawLabel)}${cites}</span>
         </label>
       `;
     });
@@ -3461,55 +3468,65 @@ function refreshChipStrip(textarea) {
     }
   });
 
-  // Subject count toggle (One / Many) — affects all {count:...} tokens.
-  strip.querySelectorAll('.subject-count-btn').forEach(btn => {
-    btn.addEventListener('click', (ev) => {
+  // Subject cycle button — cycles 1 → 2 → 3 → 4 → 1. Drives {count:sg|pl}
+  // resolution and the singular/plural form of (s)-marked defect options.
+  const cycleBtn = strip.querySelector('.subject-cycle-btn');
+  if (cycleBtn) {
+    cycleBtn.addEventListener('click', (ev) => {
       ev.preventDefault();
       ev.stopPropagation();
-      const group = btn.parentElement;
-      if (!group) return;
-      const pick = btn.dataset.subjectPick;
-      group.dataset.subjectVal = pick;
-      textarea.dataset.snippetCount = pick;
-      group.querySelectorAll('.subject-count-btn').forEach(b => {
-        const active = (b.dataset.subjectPick === pick);
-        b.style.background = active ? '#1e3a5f' : '#f3f4f6';
-        b.style.color = active ? 'white' : '#374151';
+      let n = parseInt(textarea.dataset.snippetCount || '1', 10);
+      if (isNaN(n) || n < 1) n = 1;
+      n = (n >= 4) ? 1 : (n + 1);
+      textarea.dataset.snippetCount = String(n);
+      // Preserve the user's current selections across the DOM rebuild.
+      const selected = [];
+      strip.querySelectorAll('input[type="checkbox"],input[type="radio"]').forEach(inp => {
+        if (inp.checked && inp.dataset.tokenIdx != null && inp.dataset.optIdx != null) {
+          selected.push(inp.dataset.tokenIdx + ':' + inp.dataset.optIdx);
+        }
       });
-      applyBuilderState(strip);
-    });
-  });
-
-  // Count-toggle buttons (1 / many) for countable options
-  strip.querySelectorAll('.count-btn').forEach(btn => {
-    btn.addEventListener('click', (ev) => {
-      ev.preventDefault();
-      ev.stopPropagation();
-      const group = btn.parentElement;
-      if (!group) return;
-      const pick = btn.dataset.countPick;
-      group.dataset.countVal = pick;
-      // Update visual state of the two buttons in the group
-      group.querySelectorAll('.count-btn').forEach(b => {
-        const active = (b.dataset.countPick === pick);
-        b.style.background = active ? '#1e3a5f' : '#f3f4f6';
-        b.style.color = active ? 'white' : '#374151';
+      const customs = {};
+      strip.querySelectorAll('input[data-custom-idx]').forEach(inp => {
+        if (inp.value) customs[inp.dataset.customIdx] = inp.value;
       });
-      // Also auto-check the parent option's checkbox so picking a count
-      // implies selection.
-      const ti = group.dataset.countToken;
-      const oi = group.dataset.countOpt;
-      const optInput = strip.querySelector(`input[data-token-idx="${ti}"][data-opt-idx="${oi}"]`);
-      if (optInput && !optInput.checked) {
-        optInput.checked = true;
+      // Re-render so option labels update to the new count.
+      refreshChipStrip(textarea);
+      // Restore selections against the freshly-built DOM.
+      const newStrip = document.getElementById(textarea.id + '-chipstrip');
+      if (newStrip) {
+        selected.forEach(key => {
+          const [ti, oi] = key.split(':');
+          const inp = newStrip.querySelector(`input[data-token-idx="${ti}"][data-opt-idx="${oi}"]`);
+          if (inp) inp.checked = true;
+        });
+        Object.keys(customs).forEach(ci => {
+          const inp = newStrip.querySelector(`input[data-custom-idx="${ci}"]`);
+          if (inp) inp.value = customs[ci];
+        });
+        applyBuilderState(newStrip);
       }
-      applyBuilderState(strip);
     });
-  });
+  }
 
   // Initial render: apply current state so count tokens get resolved from
   // the default and the textarea shows clean text (not raw {count:...}).
   applyBuilderState(strip);
+}
+
+// Prepend "a " or "an " to a noun phrase, choosing the article based on the
+// first sounded letter. Handles a few common irregulars (honest, hour) and
+// avoids double-prefixing if the label already starts with "a " or "an ".
+function withArticle(label) {
+  const s = String(label || '').trim();
+  if (!s) return s;
+  if (/^(a|an)\s/i.test(s)) return s;
+  // Silent-h irregulars where "an" is correct despite consonant spelling.
+  if (/^(honest|honou?r|hour|heir)\b/i.test(s)) return 'an ' + s;
+  // "Universal/European" style words that sound like "you-" take "a".
+  if (/^(uni|use|usu|euro|ewe|one|once|uk\b)/i.test(s)) return 'a ' + s;
+  const first = s.charAt(0).toLowerCase();
+  return ('aeiou'.indexOf(first) >= 0 ? 'an ' : 'a ') + s;
 }
 
 // Recompute the textarea text from the stored template + current form state.
@@ -3517,10 +3534,12 @@ function applyBuilderState(strip) {
   if (!strip || !strip._template || !strip._textarea) return;
   const tokens = strip._tokens || [];
   const textarea = strip._textarea;
-  // Resolve {count:sg|pl} tokens first based on the Subject toggle state.
-  // This lets the surveyor flip between singular and plural after insertion.
-  const countVal = textarea.dataset.snippetCount || 'pl';
-  let text = resolveCountTokens(strip._template, countVal === 'sg' ? 1 : 2);
+  // Subject count: numeric 1-4. Drives {count:sg|pl} resolution and the
+  // singular/plural form of (s)-marked defect options.
+  let countN = parseInt(textarea.dataset.snippetCount || '1', 10);
+  if (isNaN(countN) || countN < 1) countN = 1;
+  if (countN > 4) countN = 4;
+  let text = resolveCountTokens(strip._template, countN);
   const citations = [];
 
   tokens.forEach((tok, ti) => {
@@ -3534,12 +3553,16 @@ function applyBuilderState(strip) {
         if (typeof opt === 'string') {
           selectedLabels.push(opt);
         } else {
-          // For countable options, pick the form based on the 1/many toggle
+          // For countable options, pick the form based on the global Subject
+          // count. Singular gets an "a"/"an" article prefix so the sentence
+          // reads "including a chipped blade" not "including chipped blade".
           let chosenLabel = opt.label;
           if (opt.countable) {
-            const group = strip.querySelector(`.count-toggle[data-count-token="${ti}"][data-count-opt="${oi}"]`);
-            const countVal = group ? (group.dataset.countVal || 'pl') : 'pl';
-            chosenLabel = (countVal === 'sg' && opt.singular) ? opt.singular : (opt.plural || opt.label);
+            if (countN <= 1 && opt.singular) {
+              chosenLabel = withArticle(opt.singular);
+            } else {
+              chosenLabel = opt.plural || opt.label;
+            }
           }
           selectedLabels.push(chosenLabel);
           (opt.citations || []).forEach(c => citations.push(c));
@@ -3575,29 +3598,80 @@ function applyBuilderState(strip) {
   syncStandardsFromCitations(uniq);
 }
 
-// Given the list of accumulated citations (e.g. ["ABYC P-6", "TP1332"]),
+// Given the list of accumulated citations (e.g. ["ABYC P-4", "TP1332"]),
 // check any matching checkbox in the open bottom-sheet's Applicable Standards
 // list so the surveyor sees the automatic link between defect and standard.
+//
+// Matching strategy (in order):
+//   1. Strict prefix/substring match on normalized strings
+//   2. Code-head match: compare the first "ABYC X-N" / "TPNNNN" style code
+//      on both sides
+// This handles cases where the checkbox value is "ABYC P-4 - Inboard Engines"
+// and the citation is just "ABYC P-4".
 function syncStandardsFromCitations(citations) {
   if (!citations || citations.length === 0) return;
   const overlay = document.getElementById('bottomSheetOverlay');
   if (!overlay) return;
   const cbs = overlay.querySelectorAll('input[type="checkbox"]');
-  const norm = s => (s || '').toLowerCase().replace(/[\u2012-\u2015]/g, '-').replace(/\s+/g, ' ').trim();
+  const norm = s => (s || '').toLowerCase()
+    .replace(/[\u2012-\u2015\u2212]/g, '-')
+    .replace(/\u00a0/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  // Extract the leading code identifier from a normalized standard string.
+  // Examples:
+  //   "abyc p-4 - inboard engines" -> "abyc p-4"
+  //   "tp1332 - construction standards ..." -> "tp1332"
+  //   "nfpa 302 - fire protection" -> "nfpa 302"
+  //   "canada shipping act, 2001 ..." -> "canada shipping act"
+  const codeHead = s => {
+    const m = s.match(/^([a-z]+)\s*([a-z]?-?\d+(?:-\d+)?)/);
+    if (m) return (m[1] + ' ' + m[2]).trim();
+    // Generic fallback: take up to the first " - " or ","
+    const cut = s.split(/\s[-–—]\s|,/)[0];
+    return cut.trim();
+  };
+
   citations.forEach(cit => {
     const target = norm(cit);
     if (!target) return;
+    const targetCode = codeHead(target);
+    let matched = false;
     cbs.forEach(cb => {
       const onch = cb.getAttribute('onchange') || '';
       if (!onch.includes('updateStandards')) return;
       const val = norm(cb.value);
-      if (val.startsWith(target) || val.includes(target)) {
+      const valCode = codeHead(val);
+      const hit = val.startsWith(target)
+        || val.includes(target)
+        || (targetCode && valCode === targetCode)
+        || (targetCode && val.startsWith(targetCode));
+      if (hit) {
+        matched = true;
         if (!cb.checked) {
           cb.checked = true;
           cb.dispatchEvent(new Event('change', { bubbles: true }));
         }
       }
     });
+    // Last-resort: check the label span text next to each checkbox
+    if (!matched) {
+      overlay.querySelectorAll('label').forEach(lbl => {
+        const span = lbl.querySelector('span');
+        if (!span) return;
+        const txt = norm(span.textContent || '');
+        if (!txt) return;
+        const txtCode = codeHead(txt);
+        if (txt.startsWith(target) || (targetCode && txtCode === targetCode)) {
+          const cb = lbl.querySelector('input[type="checkbox"]');
+          const onch = cb ? (cb.getAttribute('onchange') || '') : '';
+          if (cb && onch.includes('updateStandards') && !cb.checked) {
+            cb.checked = true;
+            cb.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }
+      });
+    }
   });
 }
 
@@ -10421,16 +10495,16 @@ function insertSnippet(itemLabel, categoryName, text, cardEl, placeholdersJson) 
   // force singular because each expanded item is about ONE component.
   getSurvey(currentSurveyId).then(survey => {
     const isPerDriveLine = /^(?:Port|Starboard|#\d+)\s*—\s*/.test(itemLabel);
-    const dlc = isPerDriveLine
+    const rawDlc = isPerDriveLine
       ? 1
-      : ((survey && survey.driveLineCount) ? survey.driveLineCount : 1);
-    const defaultCount = (dlc <= 1) ? 'sg' : 'pl';
+      : ((survey && survey.driveLineCount) ? parseInt(survey.driveLineCount, 10) : 1);
+    const defaultCount = Math.min(Math.max(rawDlc || 1, 1), 4);
 
     if (textarea) {
       textarea.value = text;
       textarea.dataset.snippetPlaceholders = placeholdersJson || '';
       textarea.dataset.snippetTemplate = text;
-      textarea.dataset.snippetCount = defaultCount;
+      textarea.dataset.snippetCount = String(defaultCount);
       setCollectedCitations(textarea, []);
       // Auto-resize
       textarea.style.height = 'auto';
