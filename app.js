@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2008';
+const APP_VERSION = 'v2009';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1723,29 +1723,19 @@ function showNotesSheet(itemLabel, categoryName) {
     const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
 
     let snippetsHtml = '';
+    // Cache variants on window so the click handler attached after mount can
+    // read them by index without needing to round-trip text through HTML
+    // attributes. This avoids all the escaping pitfalls of inline onclick.
+    let sheetVariants = [];
     if (itemData.rating) {
       const baseRating = itemData.rating.charAt(0);
-      const variants = findTextVariants(categoryName, itemLabel, baseRating);
-      if (variants.length > 0) {
+      sheetVariants = findTextVariants(categoryName, itemLabel, baseRating);
+      if (sheetVariants.length > 0) {
         // Pre-compute diff-highlighted display texts for bottom sheet
-        const highlightedTexts = highlightSnippetDiffs(variants);
+        const highlightedTexts = highlightSnippetDiffs(sheetVariants);
 
-        snippetsHtml = `<div class="sheet-section-title">Quick Insert (${variants.length} snippets)</div>`;
-        variants.forEach((variant, idx) => {
-          // Escape for embedding in an onclick="..." attribute between single
-          // quotes. Order matters: backslash first, then single-quote, then
-          // newline (for JS), then double-quote as &quot; for HTML.
-          const escapedText = variant.text
-            .replace(/\\/g, '\\\\')
-            .replace(/'/g, "\\'")
-            .replace(/\n/g, '\\n')
-            .replace(/"/g, '&quot;');
-          const placeholdersJson = variant.placeholders
-            ? JSON.stringify(variant.placeholders)
-                .replace(/\\/g, '\\\\')
-                .replace(/'/g, "\\'")
-                .replace(/"/g, '&quot;')
-            : '';
+        snippetsHtml = `<div class="sheet-section-title">Quick Insert (${sheetVariants.length} snippets)</div>`;
+        sheetVariants.forEach((variant, idx) => {
           const ratingBadge = variant.rating || baseRating;
           const isActive = itemData.text === variant.text;
           // If the variant uses token syntax, render a clean preview instead
@@ -1755,8 +1745,7 @@ function showNotesSheet(itemLabel, categoryName) {
             ? escSnippet(renderSnippetPreview(variant.text))
             : (highlightedTexts[idx] || escSnippet(variant.text));
           snippetsHtml += `
-            <div class="snippet-card-sheet" style="padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}"
-                 onclick="insertSnippetFromSheet('${safeLabel}', '${safeCat}', '${escapedText}', this, '${placeholdersJson}')">
+            <div class="snippet-card-sheet" data-variant-idx="${idx}" style="padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}">
               <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
                 <span style="font-size:13px;color:#333;line-height:1.5;">${displayText}</span>
                 <span style="flex-shrink:0;font-size:10px;background:#e5e7eb;color:#374151;padding:2px 6px;border-radius:4px;">${ratingBadge}</span>
@@ -1766,6 +1755,9 @@ function showNotesSheet(itemLabel, categoryName) {
         });
       }
     }
+    // Stash variants on a module global keyed by item label for the handler
+    window._sheetVariantCache = window._sheetVariantCache || {};
+    window._sheetVariantCache[itemLabel] = sheetVariants;
 
     // Standards section
     let standardsHtml = '';
@@ -1971,11 +1963,31 @@ function showNotesSheet(itemLabel, categoryName) {
     });
     document.body.appendChild(overlay);
 
+    // Attach click handlers to snippet cards — done via JS rather than inline
+    // onclick to avoid HTML attribute-escaping issues with quoted text in the
+    // variant placeholders JSON.
+    overlay.querySelectorAll('.snippet-card-sheet').forEach(card => {
+      card.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const idx = parseInt(card.dataset.variantIdx, 10);
+        const variants = (window._sheetVariantCache && window._sheetVariantCache[itemLabel]) || [];
+        const variant = variants[idx];
+        if (!variant) return;
+        const placeholdersJson = variant.placeholders ? JSON.stringify(variant.placeholders) : '';
+        insertSnippetFromSheet(itemLabel, categoryName, variant.text, card, placeholdersJson);
+      });
+    });
+
     // Auto-expand textarea to fit existing content (no scrolling needed)
     const ta = document.getElementById(`sheet-text-${sanitizedLabel}`);
     if (ta && ta.value) {
       ta.style.height = 'auto';
       ta.style.height = ta.scrollHeight + 'px';
+    }
+    // If textarea already has a template+placeholders from a prior session,
+    // render the inline builder immediately
+    if (ta && ta.dataset && ta.dataset.snippetTemplate) {
+      refreshChipStrip(ta);
     }
   });
 }
