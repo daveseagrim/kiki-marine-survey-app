@@ -5,31 +5,34 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Kiki Marine — Export DB</title>
 <style>
-  body { font-family: -apple-system, system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; color: #1e293b; }
+  body { font-family: -apple-system, system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; color: #1e293b; }
   h1 { font-size: 22px; margin-bottom: 6px; }
   p { color: #475569; line-height: 1.5; }
-  button { background: #1e3a5f; color: #fff; border: none; border-radius: 8px; padding: 14px 22px; font-size: 16px; font-weight: 700; cursor: pointer; min-height: 48px; }
+  button { background: #1e3a5f; color: #fff; border: none; border-radius: 8px; padding: 14px 22px; font-size: 16px; font-weight: 700; cursor: pointer; min-height: 48px; margin-right: 8px; margin-bottom: 8px; }
+  button.alt { background: #0369a1; }
+  button.ghost { background: #64748b; }
   button:disabled { opacity: 0.5; cursor: default; }
-  #log { margin-top: 20px; background: #0f172a; color: #e2e8f0; font-family: ui-monospace, Menlo, monospace; font-size: 13px; padding: 14px; border-radius: 8px; white-space: pre-wrap; min-height: 240px; max-height: 500px; overflow: auto; }
-  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  #log { margin-top: 20px; background: #0f172a; color: #e2e8f0; font-family: ui-monospace, Menlo, monospace; font-size: 13px; padding: 14px; border-radius: 8px; white-space: pre-wrap; min-height: 260px; max-height: 500px; overflow: auto; }
   .hint { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px; margin: 16px 0; font-size: 14px; color: #78350f; }
+  .ok { background: #dcfce7; border-color: #16a34a; color: #14532d; }
 </style>
 </head>
 <body>
 
-<h1>Kiki Marine — Streaming DB Backup</h1>
-<p>Exports every survey and photo from <code>KikiSurveyDB</code> to a single downloadable JSON file. Uses IndexedDB cursors so the whole database is never held in memory at once — safe to run even with hundreds of photos.</p>
+<h1>Kiki Marine — Streaming DB Backup (v2)</h1>
+<p>Exports every survey and photo from <code>KikiSurveyDB</code>. Uses the File System Access API to write directly to a file on your disk one record at a time, so the browser never holds the whole database in memory. Safe with any number of photos.</p>
 
-<div class="hint">
-  <strong>Important:</strong> Open this page in the <em>same browser profile</em> where you normally use the survey app. IndexedDB is scoped per origin + profile, so a different browser or Incognito window will show an empty database.
+<div class="hint ok">
+  <strong>Desktop Chrome only.</strong> Uses <code>showSaveFilePicker</code>. Won't work on iOS Safari or Firefox — but that's fine, you only need to back up from the desktop browser profile where the data lives.
 </div>
 
-<div class="row">
-  <button id="exportBtn">Export database → JSON file</button>
-  <button id="statsBtn">Just count records (no download)</button>
+<div>
+  <button id="statsBtn" class="ghost">Just count records</button>
+  <button id="exportBtn">Stream export → choose file to save</button>
+  <button id="splitBtn" class="alt">Split export → multiple smaller files</button>
 </div>
 
-<pre id="log">Ready.</pre>
+<pre id="log">Ready. Click "Just count records" first to verify you see your surveys.</pre>
 
 <script>
 const DB_NAME = 'KikiSurveyDB';
@@ -39,7 +42,7 @@ function log(msg) {
   logEl.textContent += '\n[' + ts + '] ' + msg;
   logEl.scrollTop = logEl.scrollHeight;
 }
-function clearLog() { logEl.textContent = 'Starting...'; }
+function clearLog(msg) { logEl.textContent = msg || 'Starting...'; }
 
 function openDb() {
   return new Promise((resolve, reject) => {
@@ -50,9 +53,12 @@ function openDb() {
   });
 }
 
-// Cursor-streamed store walker. Calls cb(record, index) for each record.
-// Never loads the full store into memory.
-function walkStore(db, storeName, cb) {
+// Walk a store one record at a time via cursor. cb(record, index) is called
+// per record and can await — we manually pace the cursor by calling
+// cursor.continue() only after the callback resolves. BUT — IndexedDB
+// transactions can't span across awaits in some browsers. We work around by
+// opening a fresh transaction per batch.
+function walkStoreSync(db, storeName, cb) {
   return new Promise((resolve, reject) => {
     let tx;
     try { tx = db.transaction(storeName, 'readonly'); }
@@ -72,6 +78,7 @@ function walkStore(db, storeName, cb) {
   });
 }
 
+// Count records in each store
 async function countStores(db) {
   const names = Array.from(db.objectStoreNames);
   const out = {};
@@ -86,8 +93,32 @@ async function countStores(db) {
   return out;
 }
 
+// Collect keys from a store — used to walk photos in small batches via
+// IDBKeyRange.bound between checkpoints, so we can yield to the event loop
+// and flush file writes between batches without holding a transaction open.
+async function collectKeys(db, storeName) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readonly');
+    const store = tx.objectStore(storeName);
+    const req = store.getAllKeys();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// Fetch a single record by key in its own transaction
+function getByKey(db, storeName, key) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readonly');
+    const req = tx.objectStore(storeName).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// ─────────────── STATS ───────────────
 document.getElementById('statsBtn').onclick = async () => {
-  clearLog();
+  clearLog('Counting records...');
   try {
     const db = await openDb();
     log('Opened ' + DB_NAME + ' (v' + db.version + ')');
@@ -103,75 +134,69 @@ document.getElementById('statsBtn').onclick = async () => {
   }
 };
 
+// ─────────────── STREAMING EXPORT (File System Access API) ───────────────
 document.getElementById('exportBtn').onclick = async () => {
-  clearLog();
+  if (!window.showSaveFilePicker) {
+    log('ERROR: showSaveFilePicker not available in this browser. Use "Split export" instead.');
+    return;
+  }
+  clearLog('Starting streaming export...');
   const btn = document.getElementById('exportBtn');
   btn.disabled = true;
   try {
+    // Ask the user where to save
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const handle = await window.showSaveFilePicker({
+      suggestedName: 'kiki-marine-backup-' + stamp + '.json',
+      types: [{ description: 'JSON backup', accept: { 'application/json': ['.json'] } }]
+    });
+    const writable = await handle.createWritable();
+    const enc = new TextEncoder();
+    const write = async (str) => { await writable.write(enc.encode(str)); };
+
     const db = await openDb();
     log('Opened ' + DB_NAME + ' (v' + db.version + ')');
     const storeNames = Array.from(db.objectStoreNames);
-    log('Found stores: ' + storeNames.join(', '));
+    log('Stores: ' + storeNames.join(', '));
 
-    // Build the JSON file as an array of string chunks. Blob accepts an array
-    // of strings and stores them as separate segments, so we never have to
-    // concatenate the whole file into a single giant string (which would OOM).
-    const chunks = [];
-    chunks.push('{\n');
-    chunks.push('  "exportedAt": ' + JSON.stringify(new Date().toISOString()) + ',\n');
-    chunks.push('  "dbName": ' + JSON.stringify(DB_NAME) + ',\n');
-    chunks.push('  "dbVersion": ' + db.version + ',\n');
-    chunks.push('  "stores": {\n');
+    await write('{\n');
+    await write('  "exportedAt": ' + JSON.stringify(new Date().toISOString()) + ',\n');
+    await write('  "dbName": ' + JSON.stringify(DB_NAME) + ',\n');
+    await write('  "dbVersion": ' + db.version + ',\n');
+    await write('  "stores": {\n');
 
     for (let s = 0; s < storeNames.length; s++) {
       const name = storeNames[s];
-      chunks.push('    ' + JSON.stringify(name) + ': [\n');
+      log('Exporting store: ' + name);
+
+      // Collect keys first (fast, tiny), then fetch records one at a time
+      // in fresh transactions so we can await writable.write between records.
+      const keys = await collectKeys(db, name);
+      log('  ' + keys.length + ' keys');
+
+      await write('    ' + JSON.stringify(name) + ': [');
       let first = true;
-      let bytesThisStore = 0;
-      let logEvery = 25;
-      let lastLog = 0;
-      await walkStore(db, name, (record, idx) => {
-        const jsonStr = JSON.stringify(record);
-        if (!first) chunks.push(',\n');
-        chunks.push('      ' + jsonStr);
+      let bytesWritten = 0;
+      for (let k = 0; k < keys.length; k++) {
+        const rec = await getByKey(db, name, keys[k]);
+        const jsonStr = JSON.stringify(rec);
+        const prefix = first ? '\n      ' : ',\n      ';
+        await write(prefix + jsonStr);
+        bytesWritten += jsonStr.length + prefix.length;
         first = false;
-        bytesThisStore += jsonStr.length;
-        if (idx - lastLog >= logEvery) {
-          lastLog = idx;
-          log('  ' + name + ': ' + (idx + 1) + ' records streamed (' + (bytesThisStore / 1048576).toFixed(1) + ' MB so far)');
-          // Yield to the event loop so the browser stays responsive. The
-          // cursor callback can't await, but we can schedule a microtask
-          // implicitly via the cursor.continue() between ticks. A real pause
-          // isn't possible inside an IDB transaction, so we just log.
+        if ((k + 1) % 25 === 0 || k === keys.length - 1) {
+          log('  ' + name + ': ' + (k + 1) + '/' + keys.length + ' (' + (bytesWritten / 1048576).toFixed(1) + ' MB)');
+          // Yield so the browser can repaint and GC
+          await new Promise(r => setTimeout(r, 0));
         }
-      });
-      log('  ' + name + ': DONE — ' + (first ? 0 : '(total ' + (bytesThisStore / 1048576).toFixed(2) + ' MB)'));
-      chunks.push('\n    ]');
-      if (s < storeNames.length - 1) chunks.push(',');
-      chunks.push('\n');
+      }
+      await write('\n    ]' + (s < storeNames.length - 1 ? ',' : '') + '\n');
     }
 
-    chunks.push('  }\n}\n');
+    await write('  }\n}\n');
+    await writable.close();
     db.close();
-
-    log('Assembling Blob...');
-    const blob = new Blob(chunks, { type: 'application/json' });
-    log('Blob size: ' + (blob.size / 1048576).toFixed(2) + ' MB');
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    a.href = url;
-    a.download = 'kiki-marine-backup-' + stamp + '.json';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-      a.remove();
-    }, 2000);
-
-    log('Download triggered: ' + a.download);
-    log('Done.');
+    log('✓ Done. File saved.');
   } catch (e) {
     log('ERROR: ' + (e && e.message ? e.message : e));
     console.error(e);
@@ -179,6 +204,80 @@ document.getElementById('exportBtn').onclick = async () => {
     btn.disabled = false;
   }
 };
+
+// ─────────────── SPLIT EXPORT (multiple small downloads) ───────────────
+// Fallback that doesn't need File System Access API. Downloads surveys.json
+// (small) plus photos-001.json, photos-002.json, ... in batches of 20 photos.
+// Each batch is a separate Blob that gets downloaded and freed before the
+// next batch is built — so memory usage stays bounded to ~20 photos worth
+// (~7 MB) at a time.
+document.getElementById('splitBtn').onclick = async () => {
+  clearLog('Starting split export...');
+  const btn = document.getElementById('splitBtn');
+  btn.disabled = true;
+  const BATCH = 20;
+  try {
+    const db = await openDb();
+    log('Opened ' + DB_NAME);
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+
+    // Export surveys (small) first
+    if (db.objectStoreNames.contains('surveys')) {
+      const surveyKeys = await collectKeys(db, 'surveys');
+      const surveys = [];
+      for (const k of surveyKeys) {
+        surveys.push(await getByKey(db, 'surveys', k));
+      }
+      const json = JSON.stringify({ exportedAt: new Date().toISOString(), store: 'surveys', records: surveys }, null, 2);
+      triggerDownload('kiki-marine-surveys-' + stamp + '.json', json);
+      log('✓ surveys: ' + surveys.length + ' records → downloaded');
+      await new Promise(r => setTimeout(r, 400));
+    }
+
+    // Export photos in batches
+    if (db.objectStoreNames.contains('photos')) {
+      const photoKeys = await collectKeys(db, 'photos');
+      log('photos: ' + photoKeys.length + ' keys, ' + Math.ceil(photoKeys.length / BATCH) + ' batches of ' + BATCH);
+      let batchNum = 0;
+      for (let i = 0; i < photoKeys.length; i += BATCH) {
+        batchNum++;
+        const slice = photoKeys.slice(i, i + BATCH);
+        const records = [];
+        for (const k of slice) {
+          records.push(await getByKey(db, 'photos', k));
+        }
+        const json = JSON.stringify({ exportedAt: new Date().toISOString(), store: 'photos', batch: batchNum, batchStart: i, records });
+        const fname = 'kiki-marine-photos-' + stamp + '-' + String(batchNum).padStart(3, '0') + '.json';
+        triggerDownload(fname, json);
+        log('  batch ' + batchNum + ': photos ' + (i + 1) + '-' + (i + slice.length) + ' → ' + fname);
+        // Pause to let the browser flush the download + free the blob
+        await new Promise(r => setTimeout(r, 600));
+      }
+    }
+
+    db.close();
+    log('✓ All done. Move the downloaded files to a safe folder.');
+  } catch (e) {
+    log('ERROR: ' + (e && e.message ? e.message : e));
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+};
+
+function triggerDownload(filename, textContent) {
+  const blob = new Blob([textContent], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+    a.remove();
+  }, 1500);
+}
 </script>
 
 </body>
