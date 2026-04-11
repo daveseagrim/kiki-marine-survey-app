@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2013';
+const APP_VERSION = 'v2014';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1961,14 +1961,27 @@ function showNotesSheet(itemLabel, categoryName) {
         </div>
       </div>
     `;
+    // Capture-phase diagnostic: fires BEFORE any other handler on any
+    // click or touch inside the overlay. This tells us whether iOS is
+    // dispatching events at all — and exactly which element they hit.
+    overlay.addEventListener('touchstart', (ev) => {
+      const d = document.getElementById('sheet-diag');
+      if (!d) return;
+      const t = ev.target || {};
+      const tag = (t.tagName || '?').toLowerCase();
+      const cls = (t.className || '').toString().split(' ')[0] || '?';
+      d.textContent = `diag: touchstart ${tag}.${cls}`;
+    }, true);
     overlay.addEventListener('click', (ev) => {
-      // Only close when the tap lands on the dark overlay itself, not on
-      // any descendant inside the bottom sheet. Previously this relied on
-      // the inline stopPropagation on .bottom-sheet, but iOS Safari
-      // sometimes drops inline div handlers — check target explicitly.
+      const d = document.getElementById('sheet-diag');
+      const t = ev.target || {};
+      const tag = (t.tagName || '?').toLowerCase();
+      const cls = (t.className || '').toString().split(' ')[0] || '?';
+      if (d) d.textContent = `diag: click ${tag}.${cls}`;
+      // Only close on direct overlay taps
       if (ev.target !== overlay) return;
       saveNotesFromSheet(itemLabel, categoryName, sanitizedLabel);
-    });
+    }, true);
     document.body.appendChild(overlay);
 
     // Attach click handlers to snippet cards — done via JS rather than inline
