@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kiki Photo Mover — Port ↔ Starboard</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #0b1e3a; color: #f4f6fb; margin: 0; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 16px 14px 80px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: #9db3d6; font-size: 13px; margin-bottom: 14px; }
+  .card { background: #12284a; border: 1px solid #1f3a66; border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 12px; }
+  .group-hdr { display:flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .group-hdr h2 { font-size: 15px; margin: 0; font-weight: 700; color: #f4f6fb; }
+  .group-hdr .tag { font-size: 11px; color: #9db3d6; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .col { background: #0e2240; border: 1px solid #1f3a66; border-radius: 8px; padding: 8px; min-height: 80px; }
+  .col h3 { font-size: 12px; font-weight: 700; margin: 0 0 8px; color: #9db3d6; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; }
+  .col.port h3 { color: #5ae08a; }
+  .col.stbd h3 { color: #ffb84d; }
+  .thumbs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .thumb { position: relative; width: 72px; height: 72px; border-radius: 6px; overflow: hidden; background: #05122a; cursor: pointer; border: 2px solid transparent; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb .arrow { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.65); color: #fff; font-size: 14px; font-weight: 700; border-radius: 4px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+  .thumb:hover { border-color: #2e7cf7; }
+  .empty { color: #5a6f92; font-size: 12px; text-align: center; padding: 16px 4px; }
+  button { width: 100%; font-size: 16px; font-weight: 600; padding: 12px; border-radius: 10px; border: none; margin-top: 8px; cursor: pointer; background: #2e7cf7; color: #fff; }
+  .log { background: #05122a; padding: 8px; border-radius: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 11px; white-space: pre-wrap; max-height: 160px; overflow: auto; color: #9db3d6; }
+  .banner { background: #3a2d1a; border: 1px solid #6b5a2d; color: #f0d48a; padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
+  a.back { color: #9db3d6; text-decoration: none; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Photo Mover — Port ↔ Starboard</h1>
+  <div class="sub">Tap any thumbnail to move it to the other engine side. Changes save immediately.</div>
+  <div class="banner">Run <a href="fix-sc-driveline.html" style="color:#f0d48a">fix-sc-driveline.html</a> first if engine photos are still on the generic label. Then come here to re-sort between Port and Starboard.</div>
+
+  <div class="card">
+    <button id="loadBtn">Load Riverdance drive-line photos</button>
+  </div>
+
+  <div id="groups"></div>
+
+  <div class="card"><div class="sub" style="margin:0 0 4px">Log</div><div class="log" id="log"></div></div>
+  <div style="text-align:center;margin-top:12px"><a href="index.html" class="back">← Back to Kiki app</a></div>
+</div>
+
+<script>
+const DB_NAME = 'KikiSurveyDB';
+const SURVEY_ID = '1775831269714';
+
+const DRIVE_LINE_BASES = [
+  "Cooling water intake seacock and strainer",
+  "Exhaust condition",
+  "Oil level and condition",
+  "Coolant level and quality",
+  "Belts and pulleys",
+  "Anti-vibration mounts",
+  "Hoses",
+  "Gearbox general condition/impressions",
+  "Gearbox oil",
+  "Drive coupling, interior propeller shaft, stuffing box(es)/packing gland/dripless seal, interior stern tube"
+];
+
+const logEl = document.getElementById('log');
+function log(msg, cls) {
+  const line = document.createElement('div');
+  if (cls) line.className = cls;
+  line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 2);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+let survey = null;
+let photoCache = {};  // id -> dataUrl
+
+function getPhoto(id) {
+  return new Promise((resolve, reject) => {
+    if (photoCache[id]) { resolve(photoCache[id]); return; }
+    const tx = dbRef.transaction('photos', 'readonly');
+    const req = tx.objectStore('photos').get(id);
+    req.onsuccess = () => {
+      const v = req.result;
+      if (v && v.dataUrl) { photoCache[id] = v.dataUrl; resolve(v.dataUrl); }
+      else resolve(null);
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+let dbRef = null;
+
+async function load() {
+  try {
+    dbRef = await openDB();
+    survey = await new Promise((resolve, reject) => {
+      const tx = dbRef.transaction('surveys', 'readonly');
+      const req = tx.objectStore('surveys').get(SURVEY_ID);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    if (!survey) { log('Riverdance not found', 'err'); return; }
+    log('Loaded ' + survey.vesselName, 'ok');
+    render();
+  } catch (e) { log('Load failed: ' + e.message, 'err'); }
+}
+
+function render() {
+  const container = document.getElementById('groups');
+  container.innerHTML = '';
+  for (const base of DRIVE_LINE_BASES) {
+    const portLbl = 'Port — ' + base;
+    const stbdLbl = 'Starboard — ' + base;
+    const portItem = survey.items && survey.items[portLbl];
+    const stbdItem = survey.items && survey.items[stbdLbl];
+    const portPhotos = (portItem && portItem.photos) || [];
+    const stbdPhotos = (stbdItem && stbdItem.photos) || [];
+    if (portPhotos.length === 0 && stbdPhotos.length === 0) continue;
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML =
+      '<div class="group-hdr"><h2>' + escapeHtml(base) + '</h2>' +
+      '<span class="tag">' + (portPhotos.length + stbdPhotos.length) + ' photos</span></div>' +
+      '<div class="cols">' +
+        '<div class="col port"><h3>▶ Port</h3><div class="thumbs" data-side="port" data-label="' + escapeAttr(portLbl) + '" data-other="' + escapeAttr(stbdLbl) + '"></div></div>' +
+        '<div class="col stbd"><h3>Starboard ◀</h3><div class="thumbs" data-side="stbd" data-label="' + escapeAttr(stbdLbl) + '" data-other="' + escapeAttr(portLbl) + '"></div></div>' +
+      '</div>';
+    container.appendChild(card);
+
+    const portDiv = card.querySelector('.col.port .thumbs');
+    const stbdDiv = card.querySelector('.col.stbd .thumbs');
+    fillCol(portDiv, portPhotos, 'port');
+    fillCol(stbdDiv, stbdPhotos, 'stbd');
+  }
+}
+
+function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escapeAttr(s) { return escapeHtml(s).replace(/"/g,'&quot;'); }
+
+async function fillCol(div, ids, side) {
+  if (ids.length === 0) {
+    div.innerHTML = '<div class="empty">none</div>';
+    return;
+  }
+  div.innerHTML = '';
+  for (const id of ids) {
+    const t = document.createElement('div');
+    t.className = 'thumb';
+    t.dataset.id = id;
+    const img = document.createElement('img');
+    img.alt = '';
+    const arrow = document.createElement('div');
+    arrow.className = 'arrow';
+    arrow.textContent = side === 'port' ? '→' : '←';
+    t.appendChild(img);
+    t.appendChild(arrow);
+    t.onclick = () => movePhoto(id, div.dataset.label, div.dataset.other);
+    div.appendChild(t);
+    getPhoto(id).then(url => { if (url) img.src = url; });
+  }
+}
+
+async function movePhoto(photoId, fromLbl, toLbl) {
+  try {
+    // Update survey.items in memory
+    if (survey.items[fromLbl] && Array.isArray(survey.items[fromLbl].photos)) {
+      survey.items[fromLbl].photos = survey.items[fromLbl].photos.filter(x => x !== photoId);
+    }
+    if (!survey.items[toLbl]) {
+      survey.items[toLbl] = { rating: '', text: '', standards: [], photos: [], flagged: false, excluded: false };
+    }
+    if (!Array.isArray(survey.items[toLbl].photos)) survey.items[toLbl].photos = [];
+    if (survey.items[toLbl].photos.indexOf(photoId) === -1) {
+      survey.items[toLbl].photos.push(photoId);
+    }
+
+    // Save survey
+    await new Promise((resolve, reject) => {
+      const tx = dbRef.transaction('surveys', 'readwrite');
+      const req = tx.objectStore('surveys').put(survey);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+
+    // Update photo.itemLabel
+    await new Promise((resolve, reject) => {
+      const tx = dbRef.transaction('photos', 'readwrite');
+      const store = tx.objectStore('photos');
+      const g = store.get(photoId);
+      g.onsuccess = () => {
+        const rec = g.result;
+        if (rec) {
+          rec.itemLabel = toLbl;
+          const p = store.put(rec);
+          p.onsuccess = () => resolve();
+          p.onerror = () => reject(p.error);
+        } else resolve();
+      };
+      g.onerror = () => reject(g.error);
+    });
+
+    log('Moved photo → ' + toLbl.split(' — ')[0], 'ok');
+    render();
+  } catch (e) { log('Move failed: ' + e.message, 'err'); }
+}
+
+document.getElementById('loadBtn').onclick = load;
+log('Ready. Tap Load.');
+</script>
+</body>
+</html>

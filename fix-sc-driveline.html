@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fix SC Drive-Line Photo Labels</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #0b1e3a; color: #f4f6fb; margin: 0; }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 24px 18px 60px; }
+  h1 { font-size: 24px; margin: 0 0 6px; }
+  .sub { color: #9db3d6; font-size: 14px; margin-bottom: 18px; }
+  .card { background: #12284a; border: 1px solid #1f3a66; border-radius: 12px;
+    padding: 16px 18px; margin-bottom: 14px; }
+  .row { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin: 4px 0; }
+  .label { color: #9db3d6; font-size: 13px; }
+  .value { font-weight: 600; font-size: 16px; }
+  button { width: 100%; font-size: 16px; font-weight: 600; padding: 14px;
+    border-radius: 10px; border: none; margin-top: 10px; cursor: pointer;
+    background: #2e7cf7; color: #fff; }
+  button:disabled { background: #2a3e66; color: #7a8fb2; cursor: default; }
+  button.go { background: #1e6b3a; }
+  .log { background: #05122a; padding: 10px; border-radius: 8px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+    white-space: pre-wrap; max-height: 380px; overflow: auto; color: #9db3d6; }
+  .banner { background: #3a2d1a; border: 1px solid #6b5a2d; color: #f0d48a;
+    padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
+  .banner.ok { background: #1a3a1f; border-color: #2d6b3a; color: #9de0b5; }
+  .err { color: #ff6a6a; } .ok { color: #5ae08a; } .warn { color: #ffb84d; }
+  a.dl { display: block; text-align: center; padding: 14px; background: #2e7cf7;
+    color: #fff; text-decoration: none; border-radius: 10px; font-weight: 600; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Fix SC Drive-Line Photo Labels</h1>
+  <div class="sub">Moves SafetyCulture engine-section photos from the generic single-engine label to the twin-engine "Port — X" label.</div>
+
+  <div class="banner">
+    This runs on Riverdance (id 1775831269714). For each drive-line item (Hoses, Anti-vibration mounts, etc.) it moves photos from the phantom generic key to "Port — [item]", deletes the phantom key, and updates each photo's stored itemLabel. You can manually move starboard photos later using the normal photo UI.
+  </div>
+
+  <div class="card">
+    <button id="scanBtn">Scan phantom drive-line keys</button>
+  </div>
+
+  <div class="card" id="previewCard" style="display:none">
+    <div class="row"><span class="label">Phantom keys found</span><span class="value" id="phantomCount">—</span></div>
+    <div class="row"><span class="label">Photos to move</span><span class="value" id="photoCount">—</span></div>
+    <button id="fixBtn" class="go">Move photos to Port variants</button>
+  </div>
+
+  <div class="card" id="doneCard" style="display:none">
+    <div id="doneMsg" class="banner ok"></div>
+    <a href="index.html" class="dl">Open Kiki app</a>
+  </div>
+
+  <div class="card"><div class="label">Log</div><div class="log" id="log"></div></div>
+</div>
+
+<script>
+const DB_NAME = 'KikiSurveyDB';
+const SURVEY_ID = '1775831269714';
+
+// Drive-line item labels (from survey_template.json driveLineItem: true)
+// that we mapped photos into. (s) is stripped in the UI label.
+const DRIVE_LINE_LABELS = [
+  "Cooling water intake seacock(s) and strainer(s)",
+  "Exhaust condition",
+  "Oil level and condition",
+  "Coolant level and quality",
+  "Belts and pulleys",
+  "Anti-vibration mounts",
+  "Hoses",
+  "Gearbox general condition/impressions",
+  "Gearbox oil",
+  "Drive coupling(s), interior propeller shaft(s), stuffing box(es)/packing gland(s)/dripless seal(s), interior stern tube(s)"
+];
+
+function portLabel(tmpl) {
+  // Strip "(s)" like the app does (but not "(es)"), then prefix
+  const base = tmpl.replace(/\(s\)/g, '').trim();
+  return 'Port — ' + base;
+}
+
+const logEl = document.getElementById('log');
+function log(msg, cls) {
+  const line = document.createElement('div');
+  if (cls) line.className = cls;
+  line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 2);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+let state = { survey: null, moves: [] };
+
+async function scan() {
+  try {
+    const db = await openDB();
+    const survey = await new Promise((resolve, reject) => {
+      const tx = db.transaction('surveys', 'readonly');
+      const req = tx.objectStore('surveys').get(SURVEY_ID);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    if (!survey) { log('Riverdance survey not found', 'err'); return; }
+    state.survey = survey;
+    log('Loaded survey: ' + survey.vesselName, 'ok');
+    log('driveLineCount: ' + (survey.driveLineCount || 1));
+
+    state.moves = [];
+    let totalPhotos = 0;
+    for (const tmpl of DRIVE_LINE_LABELS) {
+      const phantom = survey.items && survey.items[tmpl];
+      if (!phantom) continue;
+      const photos = Array.isArray(phantom.photos) ? phantom.photos : [];
+      if (photos.length === 0) {
+        log('phantom "' + tmpl + '" has no photos — will still be cleaned up', 'warn');
+      }
+      const target = portLabel(tmpl);
+      state.moves.push({ from: tmpl, to: target, photos });
+      log('"' + tmpl + '" → "' + target + '" (' + photos.length + ' photos)');
+      totalPhotos += photos.length;
+    }
+    document.getElementById('phantomCount').textContent = state.moves.length;
+    document.getElementById('photoCount').textContent = totalPhotos;
+    document.getElementById('previewCard').style.display = 'block';
+    if (state.moves.length === 0) log('Nothing to fix.', 'ok');
+  } catch (e) {
+    log('Scan failed: ' + e.message, 'err');
+  }
+}
+
+async function fix() {
+  try {
+    const db = await openDB();
+    const survey = state.survey;
+    if (!survey || state.moves.length === 0) { log('Nothing to do', 'warn'); return; }
+
+    // 1. Relocate photoIds in the survey object
+    let addedTotal = 0;
+    for (const m of state.moves) {
+      if (!survey.items[m.to]) {
+        survey.items[m.to] = { rating: '', text: '', standards: [], photos: [], flagged: false, excluded: false };
+      }
+      if (!Array.isArray(survey.items[m.to].photos)) survey.items[m.to].photos = [];
+      for (const pid of m.photos) {
+        if (survey.items[m.to].photos.indexOf(pid) === -1) {
+          survey.items[m.to].photos.push(pid);
+          addedTotal++;
+        }
+      }
+      delete survey.items[m.from];
+      log('moved ' + m.photos.length + ' → "' + m.to + '", deleted "' + m.from + '"');
+    }
+
+    // 2. Update each photo record's itemLabel field
+    const allIds = state.moves.flatMap(m => m.photos.map(pid => ({ pid, to: m.to })));
+    let updated = 0;
+    for (let i = 0; i < allIds.length; i += 20) {
+      const chunk = allIds.slice(i, i + 20);
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction('photos', 'readwrite');
+        const store = tx.objectStore('photos');
+        let remaining = chunk.length;
+        if (remaining === 0) { resolve(); return; }
+        chunk.forEach(({ pid, to }) => {
+          const g = store.get(pid);
+          g.onsuccess = () => {
+            const rec = g.result;
+            if (rec) {
+              rec.itemLabel = to;
+              const p = store.put(rec);
+              p.onsuccess = () => { updated++; if (--remaining === 0) resolve(); };
+              p.onerror = () => { if (--remaining === 0) resolve(); };
+            } else {
+              if (--remaining === 0) resolve();
+            }
+          };
+          g.onerror = () => { if (--remaining === 0) resolve(); };
+        });
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+    log('Updated ' + updated + ' photo itemLabel fields', 'ok');
+
+    // 3. Save survey
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction('surveys', 'readwrite');
+      const req = tx.objectStore('surveys').put(survey);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+    log('Saved survey', 'ok');
+
+    document.getElementById('doneMsg').textContent =
+      'Done. Moved ' + addedTotal + ' photos into Port variants across ' + state.moves.length + ' drive-line items. Open the Kiki app and open Riverdance → Engine(s) and drive(s) to review.';
+    document.getElementById('doneCard').style.display = 'block';
+  } catch (e) {
+    log('Fix failed: ' + e.message, 'err');
+  }
+}
+
+document.getElementById('scanBtn').onclick = scan;
+document.getElementById('fixBtn').onclick = fix;
+log('Ready. Tap Scan.');
+</script>
+</body>
+</html>
