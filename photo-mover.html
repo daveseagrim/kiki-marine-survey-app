@@ -32,8 +32,9 @@
   .zoom-overlay img { max-width: 95vw; max-height: 80vh; object-fit: contain; border-radius: 8px; }
   .zoom-overlay .actions { display: flex; gap: 10px; margin-top: 14px; }
   .zoom-overlay button { width: auto; min-width: 150px; padding: 12px 18px; }
-  .zoom-overlay .close { background: #3a1a1a; }
+  .zoom-overlay .close { background: #1f3a66; }
   .zoom-overlay .move { background: #1e6b3a; }
+  .zoom-overlay .delete { background: #8a1f1f; }
   .empty { color: #5a6f92; font-size: 12px; text-align: center; padding: 16px 4px; }
   button { width: 100%; font-size: 16px; font-weight: 600; padding: 12px; border-radius: 10px; border: none; margin-top: 8px; cursor: pointer; background: #2e7cf7; color: #fff; }
   .log { background: #05122a; padding: 8px; border-radius: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 11px; white-space: pre-wrap; max-height: 160px; overflow: auto; color: #9db3d6; }
@@ -58,6 +59,7 @@
     <div class="actions">
       <button class="close" id="zoomClose">Close</button>
       <button class="move" id="zoomMove">Move to other side</button>
+      <button class="delete" id="zoomDelete">Delete photo</button>
     </div>
   </div>
 
@@ -256,6 +258,56 @@ document.getElementById('zoomMove').onclick = async () => {
   closeZoom();
   await movePhoto(id, from, to);
 };
+document.getElementById('zoomDelete').onclick = async () => {
+  if (!zoomState.id) return;
+  if (!confirm('Delete this photo permanently?')) return;
+  const { id, from } = zoomState;
+  closeZoom();
+  await deletePhoto(id, from);
+};
+
+async function deletePhoto(photoId, fromLbl) {
+  try {
+    // Remove from survey.items[fromLbl].photos
+    if (survey.items[fromLbl] && Array.isArray(survey.items[fromLbl].photos)) {
+      survey.items[fromLbl].photos = survey.items[fromLbl].photos.filter(x => x !== photoId);
+    }
+    // Also scrub from every other item just in case
+    if (survey.items) {
+      for (const k of Object.keys(survey.items)) {
+        const it = survey.items[k];
+        if (it && Array.isArray(it.photos)) {
+          it.photos = it.photos.filter(x => x !== photoId);
+        }
+      }
+    }
+    // Scrub from safetyEquipment too
+    if (Array.isArray(survey.safetyEquipment)) {
+      for (const se of survey.safetyEquipment) {
+        if (se && Array.isArray(se.photos)) {
+          se.photos = se.photos.filter(x => x !== photoId);
+        }
+      }
+    }
+    // Save survey
+    await new Promise((resolve, reject) => {
+      const tx = dbRef.transaction('surveys', 'readwrite');
+      const req = tx.objectStore('surveys').put(survey);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+    // Delete the photo record
+    await new Promise((resolve, reject) => {
+      const tx = dbRef.transaction('photos', 'readwrite');
+      const req = tx.objectStore('photos').delete(photoId);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+    delete photoCache[photoId];
+    log('Deleted photo', 'ok');
+    render();
+  } catch (e) { log('Delete failed: ' + e.message, 'err'); }
+}
 
 document.getElementById('loadBtn').onclick = load;
 log('Ready. Tap Load.');
