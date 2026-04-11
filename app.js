@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2009';
+const APP_VERSION = 'v2010';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1966,15 +1966,30 @@ function showNotesSheet(itemLabel, categoryName) {
     // Attach click handlers to snippet cards — done via JS rather than inline
     // onclick to avoid HTML attribute-escaping issues with quoted text in the
     // variant placeholders JSON.
-    overlay.querySelectorAll('.snippet-card-sheet').forEach(card => {
+    const cards = overlay.querySelectorAll('.snippet-card-sheet');
+    try { showToast(`Wired ${cards.length} snippet cards`); } catch(_) {}
+    cards.forEach(card => {
       card.addEventListener('click', (ev) => {
         ev.stopPropagation();
+        try { showToast('Card tapped'); } catch(_) {}
         const idx = parseInt(card.dataset.variantIdx, 10);
         const variants = (window._sheetVariantCache && window._sheetVariantCache[itemLabel]) || [];
         const variant = variants[idx];
-        if (!variant) return;
+        if (!variant) {
+          try { showToast('No variant at idx ' + idx); } catch(_) {}
+          return;
+        }
         const placeholdersJson = variant.placeholders ? JSON.stringify(variant.placeholders) : '';
         insertSnippetFromSheet(itemLabel, categoryName, variant.text, card, placeholdersJson);
+        // Diagnostic: confirm template+tokens after insert
+        try {
+          const ta2 = document.getElementById(`sheet-text-${sanitizedLabel}`);
+          const tpl = ta2 && ta2.dataset ? (ta2.dataset.snippetTemplate || '') : '';
+          const toks = (typeof scanUnresolvedTokens === 'function') ? scanUnresolvedTokens(tpl, null) : [];
+          showToast(`Tokens found: ${toks.length} (tpl ${tpl.length} chars)`);
+        } catch(e) {
+          try { showToast('Diag error: ' + (e.message || e)); } catch(_) {}
+        }
       });
     });
 
