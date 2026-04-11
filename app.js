@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2011';
+const APP_VERSION = 'v2012';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1734,6 +1734,8 @@ function showNotesSheet(itemLabel, categoryName) {
         // Pre-compute diff-highlighted display texts for bottom sheet
         const highlightedTexts = highlightSnippetDiffs(sheetVariants);
 
+        // Keyed cache lookup — escape the key for use in inline onclick
+        const cacheKey = itemLabel.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         snippetsHtml = `<div class="sheet-section-title">Quick Insert (${sheetVariants.length} snippets)</div>`;
         sheetVariants.forEach((variant, idx) => {
           const ratingBadge = variant.rating || baseRating;
@@ -1745,8 +1747,8 @@ function showNotesSheet(itemLabel, categoryName) {
             ? escSnippet(renderSnippetPreview(variant.text))
             : (highlightedTexts[idx] || escSnippet(variant.text));
           snippetsHtml += `
-            <div class="snippet-card-sheet" data-variant-idx="${idx}" style="padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}">
-              <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
+            <div class="snippet-card-sheet" data-variant-idx="${idx}" onclick="event.stopPropagation(); window._sheetCardTap('${cacheKey}', ${idx}, this);" style="padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;-webkit-tap-highlight-color:rgba(30,58,95,0.2);${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}">
+              <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;pointer-events:none;">
                 <span style="font-size:13px;color:#333;line-height:1.5;">${displayText}</span>
                 <span style="flex-shrink:0;font-size:10px;background:#e5e7eb;color:#374151;padding:2px 6px;border-radius:4px;">${ratingBadge}</span>
               </div>
@@ -1755,9 +1757,10 @@ function showNotesSheet(itemLabel, categoryName) {
         });
       }
     }
-    // Stash variants on a module global keyed by item label for the handler
+    // Stash variants + category on a module global keyed by item label.
+    // The global tap handler (window._sheetCardTap) reads this.
     window._sheetVariantCache = window._sheetVariantCache || {};
-    window._sheetVariantCache[itemLabel] = sheetVariants;
+    window._sheetVariantCache[itemLabel] = { categoryName: categoryName, variants: sheetVariants };
 
     // Standards section
     let standardsHtml = '';
@@ -1968,36 +1971,8 @@ function showNotesSheet(itemLabel, categoryName) {
     // onclick to avoid HTML attribute-escaping issues with quoted text in the
     // variant placeholders JSON.
     const diagEl = document.getElementById('sheet-diag');
-    const diag = (msg) => { if (diagEl) diagEl.textContent = 'diag: ' + msg; };
     const cards = overlay.querySelectorAll('.snippet-card-sheet');
-    diag(`wired ${cards.length} cards — tap one`);
-    const handleCardTap = (card, ev) => {
-      if (ev) ev.stopPropagation();
-      diag('tap received, resolving…');
-      const idx = parseInt(card.dataset.variantIdx, 10);
-      const variants = (window._sheetVariantCache && window._sheetVariantCache[itemLabel]) || [];
-      const variant = variants[idx];
-      if (!variant) { diag('no variant at idx ' + idx); return; }
-      const placeholdersJson = variant.placeholders ? JSON.stringify(variant.placeholders) : '';
-      try {
-        insertSnippetFromSheet(itemLabel, categoryName, variant.text, card, placeholdersJson);
-      } catch(e) { diag('insert err: ' + (e.message || e)); return; }
-      try {
-        const ta2 = document.getElementById(`sheet-text-${sanitizedLabel}`);
-        const tpl = ta2 && ta2.dataset ? (ta2.dataset.snippetTemplate || '') : '';
-        const toks = (typeof scanUnresolvedTokens === 'function') ? scanUnresolvedTokens(tpl, null) : [];
-        diag(`inserted — tokens:${toks.length} tpl:${tpl.length}ch`);
-      } catch(e) { diag('scan err: ' + (e.message || e)); }
-    };
-    cards.forEach(card => {
-      card.addEventListener('click', (ev) => handleCardTap(card, ev));
-      // iOS fallback: some PWA contexts eat click — use touchend as backup
-      card.addEventListener('touchend', (ev) => {
-        ev.preventDefault();
-        ev.stopPropagation();
-        handleCardTap(card, ev);
-      });
-    });
+    if (diagEl) diagEl.textContent = `diag: wired ${cards.length} cards — tap one`;
 
     // Auto-expand textarea to fit existing content (no scrolling needed)
     const ta = document.getElementById(`sheet-text-${sanitizedLabel}`);
@@ -2012,6 +1987,32 @@ function showNotesSheet(itemLabel, categoryName) {
     }
   });
 }
+
+// Global tap handler for bottom-sheet snippet cards. Called from inline
+// onclick to bypass any addEventListener attachment issues. Reads variants
+// from the cache stashed by showNotesSheet and dispatches to insertSnippetFromSheet.
+window._sheetCardTap = function(itemLabel, idx, cardEl) {
+  const diagEl = document.getElementById('sheet-diag');
+  const diag = (msg) => { if (diagEl) diagEl.textContent = 'diag: ' + msg; };
+  diag('tap received, resolving…');
+  const entry = (window._sheetVariantCache && window._sheetVariantCache[itemLabel]) || null;
+  if (!entry) { diag('no cache for ' + itemLabel); return; }
+  const variants = entry.variants || [];
+  const categoryName = entry.categoryName || '';
+  const variant = variants[idx];
+  if (!variant) { diag('no variant at idx ' + idx); return; }
+  const placeholdersJson = variant.placeholders ? JSON.stringify(variant.placeholders) : '';
+  try {
+    insertSnippetFromSheet(itemLabel, categoryName, variant.text, cardEl, placeholdersJson);
+  } catch(e) { diag('insert err: ' + (e.message || e)); return; }
+  try {
+    const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
+    const ta2 = document.getElementById(`sheet-text-${sanitizedLabel}`);
+    const tpl = ta2 && ta2.dataset ? (ta2.dataset.snippetTemplate || '') : '';
+    const toks = (typeof scanUnresolvedTokens === 'function') ? scanUnresolvedTokens(tpl, null) : [];
+    diag(`inserted — tokens:${toks.length} tpl:${tpl.length}ch`);
+  } catch(e) { diag('scan err: ' + (e.message || e)); }
+};
 
 // Insert snippet from notes sheet into the textarea within the sheet
 function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placeholdersJson) {
