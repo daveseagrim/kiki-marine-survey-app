@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2010';
+const APP_VERSION = 'v2011';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1940,7 +1940,8 @@ function showNotesSheet(itemLabel, categoryName) {
     overlay.innerHTML = `
       <div class="bottom-sheet" onclick="event.stopPropagation();">
         <div class="bottom-sheet-handle"></div>
-        <div class="bottom-sheet-title">${itemLabel} — Notes</div>
+        <div class="bottom-sheet-title">${itemLabel} — Notes <span style="font-size:10px;color:#9ca3af;font-weight:400;">${APP_VERSION}</span></div>
+        <div id="sheet-diag" style="padding:6px 20px;font-size:11px;color:#6b7280;background:#fef3c7;border-bottom:1px solid #fde68a;">diag: booting…</div>
         ${mastOptionsHtml}
         ${outdriveOptionsHtml}
         ${winchOptionsHtml}
@@ -1966,30 +1967,35 @@ function showNotesSheet(itemLabel, categoryName) {
     // Attach click handlers to snippet cards — done via JS rather than inline
     // onclick to avoid HTML attribute-escaping issues with quoted text in the
     // variant placeholders JSON.
+    const diagEl = document.getElementById('sheet-diag');
+    const diag = (msg) => { if (diagEl) diagEl.textContent = 'diag: ' + msg; };
     const cards = overlay.querySelectorAll('.snippet-card-sheet');
-    try { showToast(`Wired ${cards.length} snippet cards`); } catch(_) {}
-    cards.forEach(card => {
-      card.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        try { showToast('Card tapped'); } catch(_) {}
-        const idx = parseInt(card.dataset.variantIdx, 10);
-        const variants = (window._sheetVariantCache && window._sheetVariantCache[itemLabel]) || [];
-        const variant = variants[idx];
-        if (!variant) {
-          try { showToast('No variant at idx ' + idx); } catch(_) {}
-          return;
-        }
-        const placeholdersJson = variant.placeholders ? JSON.stringify(variant.placeholders) : '';
+    diag(`wired ${cards.length} cards — tap one`);
+    const handleCardTap = (card, ev) => {
+      if (ev) ev.stopPropagation();
+      diag('tap received, resolving…');
+      const idx = parseInt(card.dataset.variantIdx, 10);
+      const variants = (window._sheetVariantCache && window._sheetVariantCache[itemLabel]) || [];
+      const variant = variants[idx];
+      if (!variant) { diag('no variant at idx ' + idx); return; }
+      const placeholdersJson = variant.placeholders ? JSON.stringify(variant.placeholders) : '';
+      try {
         insertSnippetFromSheet(itemLabel, categoryName, variant.text, card, placeholdersJson);
-        // Diagnostic: confirm template+tokens after insert
-        try {
-          const ta2 = document.getElementById(`sheet-text-${sanitizedLabel}`);
-          const tpl = ta2 && ta2.dataset ? (ta2.dataset.snippetTemplate || '') : '';
-          const toks = (typeof scanUnresolvedTokens === 'function') ? scanUnresolvedTokens(tpl, null) : [];
-          showToast(`Tokens found: ${toks.length} (tpl ${tpl.length} chars)`);
-        } catch(e) {
-          try { showToast('Diag error: ' + (e.message || e)); } catch(_) {}
-        }
+      } catch(e) { diag('insert err: ' + (e.message || e)); return; }
+      try {
+        const ta2 = document.getElementById(`sheet-text-${sanitizedLabel}`);
+        const tpl = ta2 && ta2.dataset ? (ta2.dataset.snippetTemplate || '') : '';
+        const toks = (typeof scanUnresolvedTokens === 'function') ? scanUnresolvedTokens(tpl, null) : [];
+        diag(`inserted — tokens:${toks.length} tpl:${tpl.length}ch`);
+      } catch(e) { diag('scan err: ' + (e.message || e)); }
+    };
+    cards.forEach(card => {
+      card.addEventListener('click', (ev) => handleCardTap(card, ev));
+      // iOS fallback: some PWA contexts eat click — use touchend as backup
+      card.addEventListener('touchend', (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        handleCardTap(card, ev);
       });
     });
 
