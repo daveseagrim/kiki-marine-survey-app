@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2021';
+const APP_VERSION = 'v2022';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3236,10 +3236,21 @@ function scanUnresolvedTokens(text, entryPlaceholders) {
         }
         return { label: rawLabel, citations };
       });
+      // Look up the matching placeholder config by the literal body key so
+      // the author can force single-select on inline {any:...} tokens via
+      // { "multi": false }. Inline any: defaults to multi-select.
+      let anyMulti = true;
+      if (entryPlaceholders) {
+        const key = 'any:' + body;
+        const cfg = entryPlaceholders[key];
+        if (cfg && typeof cfg === 'object' && cfg.multi === false) {
+          anyMulti = false;
+        }
+      }
       tokens.push({
-        kind: 'any',
+        kind: anyMulti ? 'any' : 'any-single',
         literal: full,
-        label: buildChipLabel(opts.map(o => o.label), true),
+        label: buildChipLabel(opts.map(o => o.label), anyMulti),
         options: opts
       });
     } else if (prefix === 'standards?') {
@@ -3443,6 +3454,7 @@ function refreshChipStrip(textarea) {
       <textarea data-freeform-notes="1" rows="2"
                 placeholder="Type any extra details in your own words — appended as a separate sentence."
                 style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;box-sizing:border-box;resize:vertical;font-family:inherit;"></textarea>
+      <div data-tone-warning="1" style="display:none;margin-top:8px;padding:8px 10px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;line-height:1.4;"></div>
     </div>
   `;
 
@@ -3523,6 +3535,65 @@ function formatCountedOption(opt, count) {
   return word + ' ' + plural;
 }
 
+// Informal/unprofessional words and phrases that should not appear in a
+// SAMS marine survey report. Each entry maps a case-insensitive pattern to
+// a short suggestion. Keep this list conservative — the warning is advisory
+// only, never blocks the user. Surveyors write their own conclusions; we
+// just flag obvious slang and hyperbole.
+const TONE_FLAGS = [
+  { pat: /\bsuper\s+crazy\b/i, hint: '"super crazy" is informal — try "severe" or "extensive".' },
+  { pat: /\bstupid(?:ly|ity)?\b/i, hint: '"stupid/stupidly" is informal — try "poorly" or "significantly".' },
+  { pat: /\b(?:pretty|super|really)\s+bad\b/i, hint: 'Informal intensifier — try "severely damaged" or "in poor condition".' },
+  { pat: /\bdriver\s+error\b/i, hint: '"driver error" is informal — try "operator error" or "grounding contact".' },
+  { pat: /\bawful(?:ly)?\b/i, hint: '"awful" is informal — try "unserviceable" or "severe".' },
+  { pat: /\btotally\b/i, hint: '"totally" is informal — try "entirely" or "completely".' },
+  { pat: /\bridiculous(?:ly)?\b/i, hint: 'Informal — try "excessive" or "unreasonable".' },
+  { pat: /\bgonna\b/i, hint: '"gonna" is informal — use "will" or "is going to".' },
+  { pat: /\bkinda\b|\bsorta\b/i, hint: 'Informal hedge — use "somewhat" or remove.' },
+  { pat: /\bhuge\b/i, hint: '"huge" is informal — use "significant", "extensive", or a measurement.' },
+  { pat: /\btons?\s+of\b/i, hint: '"tons of" is informal — use "numerous" or "extensive".' },
+  { pat: /\ba\s+lot\s+of\b/i, hint: '"a lot of" is informal — use "numerous" or "extensive".' },
+  { pat: /\bmessed\s+up\b/i, hint: 'Informal — use "damaged" or "compromised".' },
+  { pat: /\bshoddy\b/i, hint: 'Informal — use "substandard" or "poorly executed".' },
+  { pat: /\bjunk\b/i, hint: '"junk" is informal — use "unserviceable".' }
+];
+
+// Scan the freeform notes + any per-token custom inputs for informal
+// language. Populate the tone-warning banner with up to 3 suggestions so
+// the surveyor can fix phrasing before saving the note. This is purely
+// advisory — it never blocks the user or auto-edits their text.
+function updateToneWarning(strip) {
+  if (!strip) return;
+  const banner = strip.querySelector('[data-tone-warning]');
+  if (!banner) return;
+  const freeform = (strip.querySelector('textarea[data-freeform-notes]')?.value || '').trim();
+  const customs = Array.from(strip.querySelectorAll('input[data-custom-idx]'))
+    .map(inp => inp.value || '').join(' ');
+  const combined = (freeform + ' ' + customs).trim();
+  if (!combined) {
+    banner.style.display = 'none';
+    banner.innerHTML = '';
+    return;
+  }
+  const hits = [];
+  const seen = new Set();
+  for (const rule of TONE_FLAGS) {
+    if (rule.pat.test(combined) && !seen.has(rule.hint)) {
+      seen.add(rule.hint);
+      hits.push(rule.hint);
+      if (hits.length >= 3) break;
+    }
+  }
+  if (hits.length === 0) {
+    banner.style.display = 'none';
+    banner.innerHTML = '';
+    return;
+  }
+  banner.style.display = 'block';
+  banner.innerHTML = '<strong>Tone suggestion:</strong> ' +
+    hits.map(h => escapeHtml(h)).join('<br>');
+}
+
 // Recompute the textarea text from the stored template + current form state.
 function applyBuilderState(strip) {
   if (!strip || !strip._template || !strip._textarea) return;
@@ -3600,17 +3671,26 @@ function applyBuilderState(strip) {
     text = text.replace(/ {2,}/g, ' ');
   }
 
-  textarea.value = text;
-  // Auto-expand the textarea to fit
-  textarea.style.height = 'auto';
-  textarea.style.height = textarea.scrollHeight + 'px';
   // Persist citations
   const uniq = [];
   citations.forEach(c => { if (!uniq.includes(c)) uniq.push(c); });
   setCollectedCitations(textarea, uniq);
+  // Resolve the {standards?...STANDARDS...} block LIVE so the surveyor sees
+  // the violation sentence immediately as they tick defects (previously it
+  // only appeared after Save via finalizeSnippetText).
+  text = renderStandardsBlock(text, uniq);
+
+  textarea.value = text;
+  // Auto-expand the textarea to fit
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
   // Auto-check matching Applicable Standards checkboxes in the active sheet.
   // Only adds checks — never removes — so manually-checked items are preserved.
   syncStandardsFromCitations(uniq);
+
+  // Surface a gentle tone/professionalism warning under the builder strip
+  // if the freeform notes or custom fields contain informal language.
+  updateToneWarning(strip);
 }
 
 // Given the list of accumulated citations (e.g. ["ABYC P-4", "TP1332"]),
