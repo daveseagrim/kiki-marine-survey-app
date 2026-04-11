@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2022';
+const APP_VERSION = 'v2023';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3454,6 +3454,7 @@ function refreshChipStrip(textarea) {
       <textarea data-freeform-notes="1" rows="2"
                 placeholder="Type any extra details in your own words — appended as a separate sentence."
                 style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;box-sizing:border-box;resize:vertical;font-family:inherit;"></textarea>
+      <div style="margin-top:4px;font-size:11px;color:#6b7280;font-style:italic;">Keep notes focused on this specific item only. Observations about other components belong in their own checklist items.</div>
       <div data-tone-warning="1" style="display:none;margin-top:8px;padding:8px 10px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;line-height:1.4;"></div>
     </div>
   `;
@@ -3468,8 +3469,48 @@ function refreshChipStrip(textarea) {
   inputs.forEach(inp => {
     inp.addEventListener('change', () => applyBuilderState(strip));
     if (inp.type === 'text') {
-      inp.addEventListener('input', () => applyBuilderState(strip));
+      inp.addEventListener('input', () => {
+        // If the user types in a single-select section's custom field,
+        // deselect any radio in that same token so the custom text becomes
+        // the active selection. This prevents the custom text from being
+        // silently overridden by a pre-existing radio pick.
+        const ti = inp.dataset.customIdx;
+        if (ti != null && inp.value.trim()) {
+          const tok = tokens[parseInt(ti, 10)];
+          if (tok && tok.kind === 'any-single') {
+            strip.querySelectorAll(`input[type="radio"][data-token-idx="${ti}"]`)
+              .forEach(r => { r.checked = false; });
+          }
+        }
+        applyBuilderState(strip);
+      });
     }
+  });
+  // Radio click handler: allow deselecting by re-clicking an already-checked
+  // radio, AND clear the matching custom input when a radio is picked so the
+  // custom text doesn't linger as dead state.
+  strip.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('mousedown', (ev) => {
+      radio.dataset.wasChecked = radio.checked ? '1' : '0';
+    });
+    radio.addEventListener('touchstart', (ev) => {
+      radio.dataset.wasChecked = radio.checked ? '1' : '0';
+    }, { passive: true });
+    radio.addEventListener('click', (ev) => {
+      if (radio.dataset.wasChecked === '1') {
+        // Re-click on an already-checked radio → deselect.
+        radio.checked = false;
+        radio.dataset.wasChecked = '0';
+        applyBuilderState(strip);
+      } else {
+        // Fresh pick → clear the sibling custom input so user's typed
+        // text isn't silently shadowed by a radio choice.
+        const ti = radio.dataset.tokenIdx;
+        const customInp = strip.querySelector(`input[data-custom-idx="${ti}"]`);
+        if (customInp) customInp.value = '';
+        radio.dataset.wasChecked = '1';
+      }
+    });
   });
   // Free-form notes textarea — live update too.
   const freeformEl = strip.querySelector('textarea[data-freeform-notes]');
@@ -3541,21 +3582,30 @@ function formatCountedOption(opt, count) {
 // only, never blocks the user. Surveyors write their own conclusions; we
 // just flag obvious slang and hyperbole.
 const TONE_FLAGS = [
-  { pat: /\bsuper\s+crazy\b/i, hint: '"super crazy" is informal — try "severe" or "extensive".' },
+  { pat: /\bcrazy\b/i, hint: '"crazy" is informal — try "severe", "extensive", or "extreme".' },
+  { pat: /\bnuts\b/i, hint: '"nuts" is informal — try "extreme" or "excessive".' },
+  { pat: /\binsane(?:ly)?\b/i, hint: '"insane" is informal — try "extreme" or "severe".' },
   { pat: /\bstupid(?:ly|ity)?\b/i, hint: '"stupid/stupidly" is informal — try "poorly" or "significantly".' },
+  { pat: /\bdumb\b/i, hint: '"dumb" is informal — try "unwise" or "inadequate".' },
   { pat: /\b(?:pretty|super|really)\s+bad\b/i, hint: 'Informal intensifier — try "severely damaged" or "in poor condition".' },
   { pat: /\bdriver\s+error\b/i, hint: '"driver error" is informal — try "operator error" or "grounding contact".' },
   { pat: /\bawful(?:ly)?\b/i, hint: '"awful" is informal — try "unserviceable" or "severe".' },
+  { pat: /\bterribl(?:e|y)\b/i, hint: '"terrible" is informal — try "severely deteriorated" or "unserviceable".' },
   { pat: /\btotally\b/i, hint: '"totally" is informal — try "entirely" or "completely".' },
   { pat: /\bridiculous(?:ly)?\b/i, hint: 'Informal — try "excessive" or "unreasonable".' },
   { pat: /\bgonna\b/i, hint: '"gonna" is informal — use "will" or "is going to".' },
+  { pat: /\bwanna\b/i, hint: '"wanna" is informal — use "want to".' },
   { pat: /\bkinda\b|\bsorta\b/i, hint: 'Informal hedge — use "somewhat" or remove.' },
   { pat: /\bhuge\b/i, hint: '"huge" is informal — use "significant", "extensive", or a measurement.' },
   { pat: /\btons?\s+of\b/i, hint: '"tons of" is informal — use "numerous" or "extensive".' },
   { pat: /\ba\s+lot\s+of\b/i, hint: '"a lot of" is informal — use "numerous" or "extensive".' },
   { pat: /\bmessed\s+up\b/i, hint: 'Informal — use "damaged" or "compromised".' },
   { pat: /\bshoddy\b/i, hint: 'Informal — use "substandard" or "poorly executed".' },
-  { pat: /\bjunk\b/i, hint: '"junk" is informal — use "unserviceable".' }
+  { pat: /\bjunk\b/i, hint: '"junk" is informal — use "unserviceable".' },
+  { pat: /\bcrap(?:py)?\b/i, hint: 'Informal — use "substandard" or "poor quality".' },
+  { pat: /\bsketchy\b/i, hint: '"sketchy" is informal — use "questionable" or "unreliable".' },
+  { pat: /\bbeat[- ]up\b/i, hint: '"beat-up" is informal — use "worn" or "deteriorated".' },
+  { pat: /\btrashed\b/i, hint: '"trashed" is informal — use "unserviceable" or "extensively damaged".' }
 ];
 
 // Scan the freeform notes + any per-token custom inputs for informal
