@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2018';
+const APP_VERSION = 'v2019';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2021,20 +2021,26 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
     // singular; otherwise use the survey's driveLineCount. The count is NOT
     // pre-resolved — it's stored as a default and the builder renders a
     // Subject toggle the surveyor can flip at any time.
+    // {count:sg|pl} tokens are resolved from the survey's driveLineCount
+    // here, at insertion. The subject count (how many propellers/shafts the
+    // vessel has) is fixed earlier in the survey — it is NOT user-editable
+    // from the snippet builder. Per-drive-line expanded items (Port —,
+    // Starboard —, #N —) always force singular because each expanded item
+    // is about ONE component.
     const survey = window._currentSurveyCache || null;
     const isPerDriveLine = /^(?:Port|Starboard|#\d+)\s*—\s*/.test(itemLabel);
-    const rawDlc = isPerDriveLine
+    const dlc = isPerDriveLine
       ? 1
-      : ((survey && survey.driveLineCount) ? parseInt(survey.driveLineCount, 10) : 1);
-    const defaultCount = Math.min(Math.max(rawDlc || 1, 1), 4);
+      : ((survey && survey.driveLineCount) ? parseInt(survey.driveLineCount, 10) || 1 : 1);
+    const resolved = resolveCountTokens(text, dlc);
     // Replace — tapping a new snippet replaces the previous selection
-    textarea.value = text;
+    textarea.value = resolved;
     // Reset collected citations (new snippet starts fresh)
     setCollectedCitations(textarea, []);
     // Stash placeholders + template (for live builder) on the textarea
     textarea.dataset.snippetPlaceholders = placeholdersJson || '';
-    textarea.dataset.snippetTemplate = text;
-    textarea.dataset.snippetCount = String(defaultCount);
+    textarea.dataset.snippetTemplate = resolved;
+    delete textarea.dataset.snippetCount;
     // Auto-expand to fit
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight + 'px';
@@ -3368,21 +3374,8 @@ function refreshChipStrip(textarea) {
   // the original tokens (not the partially-filled textarea value).
   const template = textarea.dataset.snippetTemplate || '';
   const tokens = scanUnresolvedTokens(template, entryPlaceholders);
-  const hasCountTokens = /\{count:[^{}|]*\|[^{}]*\}/.test(template);
-  // Subject count is stored as a digit string "1"-"4". Anything older is
-  // normalized to a digit here.
-  let currentCount = parseInt(textarea.dataset.snippetCount || '1', 10);
-  if (isNaN(currentCount) || currentCount < 1) currentCount = 1;
-  if (currentCount > 4) currentCount = 4;
-  textarea.dataset.snippetCount = String(currentCount);
-  // Also check whether any {any:...(s)} options exist — if so, the Count
-  // button is relevant even without {count:...} tokens.
-  const hasCountableAny = tokens.some(t => (t.kind === 'any' || t.kind === 'any-named')
-    && Array.isArray(t.options)
-    && t.options.some(o => o && typeof o === 'object' && o.countable));
-  const showCountButton = hasCountTokens || hasCountableAny;
 
-  if (!template || (tokens.length === 0 && !showCountButton)) {
+  if (!template || tokens.length === 0) {
     strip.style.display = 'none';
     strip.innerHTML = '';
     strip._tokens = null;
@@ -3398,22 +3391,6 @@ function refreshChipStrip(textarea) {
 
   let html = '<div style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Build the sentence</div>';
 
-  // Subject count — single cycling button showing current count (1-4).
-  // Tapping cycles 1 → 2 → 3 → 4 → 1. Drives {count:sg|pl} resolution AND
-  // singular/plural form of (s)-marked defect options.
-  if (showCountButton) {
-    html += `
-      <div style="display:flex;align-items:center;gap:10px;padding:4px 2px 10px;border-bottom:1px dashed #e5e7eb;margin-bottom:10px;">
-        <span style="font-size:11px;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;flex:1;">How many?</span>
-        <button type="button" class="subject-cycle-btn"
-                style="display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid #1e3a5f;border-radius:8px;background:#1e3a5f;color:white;font-size:13px;font-weight:700;padding:8px 16px;min-width:64px;min-height:40px;cursor:pointer;">
-          <span style="font-size:16px;">${currentCount}</span>
-          <span style="opacity:0.7;font-size:11px;">tap to change</span>
-        </button>
-      </div>
-    `;
-  }
-
   tokens.forEach((tok, ti) => {
     const isMulti = (tok.kind === 'any' || tok.kind === 'any-named');
     // Derive a title for the section. For now use a generic label + hint.
@@ -3423,26 +3400,27 @@ function refreshChipStrip(textarea) {
 
     tok.options.forEach((opt, oi) => {
       const isObj = (typeof opt === 'object');
-      // Show the singular form in the label when there's only one subject,
-      // otherwise the plural form — this way the chip text itself always
-      // reads the way it will appear in the sentence.
-      let rawLabel;
-      if (isObj) {
-        if (opt.countable && currentCount <= 1 && opt.singular) rawLabel = opt.singular;
-        else if (opt.countable && opt.plural) rawLabel = opt.plural;
-        else rawLabel = opt.label || '';
-      } else {
-        rawLabel = opt;
-      }
+      const countable = !!(isObj && opt.countable);
+      // Label text: show the plural form by default (the text will be
+      // re-rendered in the textarea with the chosen number word anyway).
+      const rawLabel = isObj ? (opt.plural || opt.label || '') : opt;
       const cites = (isObj && opt.citations && opt.citations.length)
         ? ` <span style="color:#6b7280;font-size:11px;">(${escapeHtml(opt.citations.join(', '))})</span>`
         : '';
+      // Per-option count badge (1-4 cycling). Only shown for countable
+      // options — tapping cycles the count for THAT defect only.
+      const countBadge = countable ? `
+        <button type="button" class="opt-count-badge"
+                data-opt-token="${ti}" data-opt-opt="${oi}" data-opt-count="1"
+                style="flex-shrink:0;margin-left:auto;border:1px solid #1e3a5f;background:#1e3a5f;color:white;border-radius:6px;min-width:40px;min-height:32px;padding:4px 10px;font-size:14px;font-weight:700;cursor:pointer;line-height:1;">1</button>
+      ` : '';
       html += `
-        <label style="display:flex;align-items:center;gap:10px;padding:7px 2px;cursor:pointer;min-height:36px;">
+        <label style="display:flex;align-items:center;gap:10px;padding:7px 2px;cursor:pointer;min-height:40px;">
           <input type="${isMulti ? 'checkbox' : 'radio'}" name="snbld-${textarea.id}-${ti}"
                  data-token-idx="${ti}" data-opt-idx="${oi}"
                  style="width:20px;height:20px;accent-color:#1e3a5f;flex-shrink:0;" />
           <span style="font-size:14px;color:#1f2937;line-height:1.4;flex:1;">${escapeHtml(rawLabel)}${cites}</span>
+          ${countBadge}
         </label>
       `;
     });
@@ -3468,46 +3446,27 @@ function refreshChipStrip(textarea) {
     }
   });
 
-  // Subject cycle button — cycles 1 → 2 → 3 → 4 → 1. Drives {count:sg|pl}
-  // resolution and the singular/plural form of (s)-marked defect options.
-  const cycleBtn = strip.querySelector('.subject-cycle-btn');
-  if (cycleBtn) {
-    cycleBtn.addEventListener('click', (ev) => {
+  // Per-option count badge — cycles 1 → 2 → 3 → 4 → 1 for each countable
+  // defect independently. Tapping also auto-checks the parent option so
+  // the user can just tap the badge to both select and set the count.
+  strip.querySelectorAll('.opt-count-badge').forEach(badge => {
+    badge.addEventListener('click', (ev) => {
       ev.preventDefault();
       ev.stopPropagation();
-      let n = parseInt(textarea.dataset.snippetCount || '1', 10);
+      let n = parseInt(badge.dataset.optCount || '1', 10);
       if (isNaN(n) || n < 1) n = 1;
       n = (n >= 4) ? 1 : (n + 1);
-      textarea.dataset.snippetCount = String(n);
-      // Preserve the user's current selections across the DOM rebuild.
-      const selected = [];
-      strip.querySelectorAll('input[type="checkbox"],input[type="radio"]').forEach(inp => {
-        if (inp.checked && inp.dataset.tokenIdx != null && inp.dataset.optIdx != null) {
-          selected.push(inp.dataset.tokenIdx + ':' + inp.dataset.optIdx);
-        }
-      });
-      const customs = {};
-      strip.querySelectorAll('input[data-custom-idx]').forEach(inp => {
-        if (inp.value) customs[inp.dataset.customIdx] = inp.value;
-      });
-      // Re-render so option labels update to the new count.
-      refreshChipStrip(textarea);
-      // Restore selections against the freshly-built DOM.
-      const newStrip = document.getElementById(textarea.id + '-chipstrip');
-      if (newStrip) {
-        selected.forEach(key => {
-          const [ti, oi] = key.split(':');
-          const inp = newStrip.querySelector(`input[data-token-idx="${ti}"][data-opt-idx="${oi}"]`);
-          if (inp) inp.checked = true;
-        });
-        Object.keys(customs).forEach(ci => {
-          const inp = newStrip.querySelector(`input[data-custom-idx="${ci}"]`);
-          if (inp) inp.value = customs[ci];
-        });
-        applyBuilderState(newStrip);
-      }
+      badge.dataset.optCount = String(n);
+      badge.textContent = String(n);
+      // Auto-check the parent option — tapping the count badge implies the
+      // defect is present.
+      const ti = badge.dataset.optToken;
+      const oi = badge.dataset.optOpt;
+      const optInput = strip.querySelector(`input[data-token-idx="${ti}"][data-opt-idx="${oi}"]`);
+      if (optInput && !optInput.checked) optInput.checked = true;
+      applyBuilderState(strip);
     });
-  }
+  });
 
   // Initial render: apply current state so count tokens get resolved from
   // the default and the textarea shows clean text (not raw {count:...}).
@@ -3529,23 +3488,37 @@ function withArticle(label) {
   return ('aeiou'.indexOf(first) >= 0 ? 'an ' : 'a ') + s;
 }
 
+// Format a countable defect option with a per-option count.
+//   count = 1 -> "a chipped blade" (singular + article)
+//   count = 2 -> "two chipped blades"
+//   count = 3 -> "three chipped blades"
+//   count = 4 -> "four chipped blades"
+// Falls back gracefully if only the plural form is authored.
+function formatCountedOption(opt, count) {
+  const n = Math.min(Math.max(parseInt(count, 10) || 1, 1), 4);
+  if (n === 1) {
+    return withArticle(opt.singular || opt.label || opt.plural || '');
+  }
+  const word = ['', 'one', 'two', 'three', 'four'][n];
+  const plural = opt.plural || opt.label || opt.singular || '';
+  return word + ' ' + plural;
+}
+
 // Recompute the textarea text from the stored template + current form state.
 function applyBuilderState(strip) {
   if (!strip || !strip._template || !strip._textarea) return;
   const tokens = strip._tokens || [];
   const textarea = strip._textarea;
-  // Subject count: numeric 1-4. Drives {count:sg|pl} resolution and the
-  // singular/plural form of (s)-marked defect options.
-  let countN = parseInt(textarea.dataset.snippetCount || '1', 10);
-  if (isNaN(countN) || countN < 1) countN = 1;
-  if (countN > 4) countN = 4;
-  let text = resolveCountTokens(strip._template, countN);
+  // The template already has {count:...} tokens resolved at insertion time
+  // using the survey's driveLineCount — no further subject resolution here.
+  let text = strip._template;
   const citations = [];
 
   tokens.forEach((tok, ti) => {
     const isMulti = (tok.kind === 'any' || tok.kind === 'any-named');
     const inputs = strip.querySelectorAll(`input[data-token-idx="${ti}"]`);
     const selectedLabels = [];
+    let anyCountable = false;
     inputs.forEach(inp => {
       if (inp.checked) {
         const oi = parseInt(inp.dataset.optIdx, 10);
@@ -3553,16 +3526,15 @@ function applyBuilderState(strip) {
         if (typeof opt === 'string') {
           selectedLabels.push(opt);
         } else {
-          // For countable options, pick the form based on the global Subject
-          // count. Singular gets an "a"/"an" article prefix so the sentence
-          // reads "including a chipped blade" not "including chipped blade".
+          // For countable (s)-marked options, read the per-option count
+          // badge and format the label as "a chipped blade" / "two bent
+          // blades" / "three cracked blades" / "four missing blades".
           let chosenLabel = opt.label;
           if (opt.countable) {
-            if (countN <= 1 && opt.singular) {
-              chosenLabel = withArticle(opt.singular);
-            } else {
-              chosenLabel = opt.plural || opt.label;
-            }
+            anyCountable = true;
+            const badge = strip.querySelector(`.opt-count-badge[data-opt-token="${ti}"][data-opt-opt="${oi}"]`);
+            const n = badge ? parseInt(badge.dataset.optCount || '1', 10) : 1;
+            chosenLabel = formatCountedOption(opt, n);
           }
           selectedLabels.push(chosenLabel);
           (opt.citations || []).forEach(c => citations.push(c));
@@ -3577,7 +3549,7 @@ function applyBuilderState(strip) {
 
     if (selectedLabels.length > 0) {
       const replacement = isMulti
-        ? collapseSharedTail(selectedLabels)
+        ? (anyCountable ? oxfordJoin(selectedLabels) : collapseSharedTail(selectedLabels))
         : selectedLabels[0];
       text = text.split(tok.literal).join(replacement);
     }
@@ -10495,16 +10467,16 @@ function insertSnippet(itemLabel, categoryName, text, cardEl, placeholdersJson) 
   // force singular because each expanded item is about ONE component.
   getSurvey(currentSurveyId).then(survey => {
     const isPerDriveLine = /^(?:Port|Starboard|#\d+)\s*—\s*/.test(itemLabel);
-    const rawDlc = isPerDriveLine
+    const dlc = isPerDriveLine
       ? 1
-      : ((survey && survey.driveLineCount) ? parseInt(survey.driveLineCount, 10) : 1);
-    const defaultCount = Math.min(Math.max(rawDlc || 1, 1), 4);
+      : ((survey && survey.driveLineCount) ? parseInt(survey.driveLineCount, 10) || 1 : 1);
+    const resolved = resolveCountTokens(text, dlc);
 
     if (textarea) {
-      textarea.value = text;
+      textarea.value = resolved;
       textarea.dataset.snippetPlaceholders = placeholdersJson || '';
-      textarea.dataset.snippetTemplate = text;
-      textarea.dataset.snippetCount = String(defaultCount);
+      textarea.dataset.snippetTemplate = resolved;
+      delete textarea.dataset.snippetCount;
       setCollectedCitations(textarea, []);
       // Auto-resize
       textarea.style.height = 'auto';
