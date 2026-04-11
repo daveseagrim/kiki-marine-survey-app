@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2015';
+const APP_VERSION = 'v2016';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1747,7 +1747,7 @@ function showNotesSheet(itemLabel, categoryName) {
             ? escSnippet(renderSnippetPreview(variant.text))
             : (highlightedTexts[idx] || escSnippet(variant.text));
           snippetsHtml += `
-            <button type="button" class="snippet-card-sheet" data-variant-idx="${idx}" onclick="event.stopPropagation(); window._sheetCardTap('${cacheKey}', ${idx}, this);" style="display:block;width:100%;text-align:left;appearance:none;-webkit-appearance:none;border:none;border-bottom:1px solid #f0f0f0;padding:10px 20px;background:${isActive ? '#d1fae5' : 'white'};${isActive ? 'border-left:4px solid #16a34a;' : ''}cursor:pointer;font:inherit;color:inherit;">
+            <button type="button" class="snippet-card-sheet" data-variant-idx="${idx}" style="display:block;width:100%;text-align:left;appearance:none;-webkit-appearance:none;border:none;border-bottom:1px solid #f0f0f0;padding:10px 20px;background:${isActive ? '#d1fae5' : 'white'};${isActive ? 'border-left:4px solid #16a34a;' : ''}cursor:pointer;font:inherit;color:inherit;">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;">
                 <span style="font-size:13px;color:#333;line-height:1.5;">${displayText}</span>
                 <span style="flex-shrink:0;font-size:10px;background:#e5e7eb;color:#374151;padding:2px 6px;border-radius:4px;">${ratingBadge}</span>
@@ -1944,7 +1944,6 @@ function showNotesSheet(itemLabel, categoryName) {
       <div class="bottom-sheet" onclick="event.stopPropagation();">
         <div class="bottom-sheet-handle"></div>
         <div class="bottom-sheet-title">${itemLabel} — Notes <span style="font-size:10px;color:#9ca3af;font-weight:400;">${APP_VERSION}</span></div>
-        <div id="sheet-diag" style="padding:6px 20px;font-size:11px;color:#6b7280;background:#fef3c7;border-bottom:1px solid #fde68a;">diag: booting…</div>
         ${mastOptionsHtml}
         ${outdriveOptionsHtml}
         ${winchOptionsHtml}
@@ -1961,27 +1960,10 @@ function showNotesSheet(itemLabel, categoryName) {
         </div>
       </div>
     `;
-    // Capture-phase diagnostic: fires BEFORE any other handler on any
-    // click inside the overlay. Shows the target chain so we can see
-    // exactly which element the tap lands on.
-    const describe = (t) => {
-      if (!t) return '?';
-      const tag = (t.tagName || '?').toLowerCase();
-      const cls = (t.className || '').toString().split(' ').filter(Boolean)[0] || '-';
-      const id = t.id ? '#' + t.id : '';
-      return tag + id + '.' + cls;
-    };
+    // Capture-phase delegated click handler. Catches taps anywhere inside
+    // a snippet card and dispatches to the tap handler — avoids all iOS
+    // quirks around inline onclick delivery on non-button elements.
     overlay.addEventListener('click', (ev) => {
-      const d = document.getElementById('sheet-diag');
-      const chain = [];
-      let el = ev.target;
-      for (let i = 0; i < 5 && el && el !== overlay; i++) {
-        chain.push(describe(el));
-        el = el.parentElement;
-      }
-      if (d) d.textContent = 'diag: ' + chain.join(' ← ');
-      // If the click is inside a snippet card button, call the handler
-      // directly — this bypasses any inline onclick delivery issue.
       const btn = ev.target.closest && ev.target.closest('.snippet-card-sheet');
       if (btn) {
         const idx = parseInt(btn.dataset.variantIdx, 10);
@@ -1990,7 +1972,7 @@ function showNotesSheet(itemLabel, categoryName) {
           return;
         }
       }
-      // Only close on direct overlay taps
+      // Only close on direct overlay taps (dark-area outside the sheet)
       if (ev.target !== overlay) return;
       saveNotesFromSheet(itemLabel, categoryName, sanitizedLabel);
     }, true);
@@ -1999,9 +1981,6 @@ function showNotesSheet(itemLabel, categoryName) {
     // Attach click handlers to snippet cards — done via JS rather than inline
     // onclick to avoid HTML attribute-escaping issues with quoted text in the
     // variant placeholders JSON.
-    const diagEl = document.getElementById('sheet-diag');
-    const cards = overlay.querySelectorAll('.snippet-card-sheet');
-    if (diagEl) diagEl.textContent = `diag: wired ${cards.length} cards — tap one`;
 
     // Auto-expand textarea to fit existing content (no scrolling needed)
     const ta = document.getElementById(`sheet-text-${sanitizedLabel}`);
@@ -2017,30 +1996,18 @@ function showNotesSheet(itemLabel, categoryName) {
   });
 }
 
-// Global tap handler for bottom-sheet snippet cards. Called from inline
-// onclick to bypass any addEventListener attachment issues. Reads variants
-// from the cache stashed by showNotesSheet and dispatches to insertSnippetFromSheet.
+// Global tap handler for bottom-sheet snippet cards. Called from the
+// overlay's delegated click listener. Reads variants from the cache
+// stashed by showNotesSheet and dispatches to insertSnippetFromSheet.
 window._sheetCardTap = function(itemLabel, idx, cardEl) {
-  const diagEl = document.getElementById('sheet-diag');
-  const diag = (msg) => { if (diagEl) diagEl.textContent = 'diag: ' + msg; };
-  diag('tap received, resolving…');
   const entry = (window._sheetVariantCache && window._sheetVariantCache[itemLabel]) || null;
-  if (!entry) { diag('no cache for ' + itemLabel); return; }
+  if (!entry) return;
   const variants = entry.variants || [];
   const categoryName = entry.categoryName || '';
   const variant = variants[idx];
-  if (!variant) { diag('no variant at idx ' + idx); return; }
+  if (!variant) return;
   const placeholdersJson = variant.placeholders ? JSON.stringify(variant.placeholders) : '';
-  try {
-    insertSnippetFromSheet(itemLabel, categoryName, variant.text, cardEl, placeholdersJson);
-  } catch(e) { diag('insert err: ' + (e.message || e)); return; }
-  try {
-    const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
-    const ta2 = document.getElementById(`sheet-text-${sanitizedLabel}`);
-    const tpl = ta2 && ta2.dataset ? (ta2.dataset.snippetTemplate || '') : '';
-    const toks = (typeof scanUnresolvedTokens === 'function') ? scanUnresolvedTokens(tpl, null) : [];
-    diag(`inserted — tokens:${toks.length} tpl:${tpl.length}ch`);
-  } catch(e) { diag('scan err: ' + (e.message || e)); }
+  insertSnippetFromSheet(itemLabel, categoryName, variant.text, cardEl, placeholdersJson);
 };
 
 // Insert snippet from notes sheet into the textarea within the sheet
@@ -2048,9 +2015,14 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
   const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
   const textarea = document.getElementById(`sheet-text-${sanitizedLabel}`);
   if (textarea) {
-    // Resolve count tokens against the current survey's drive line count
+    // Resolve count tokens. For per-drive-line expansions (Port —, Starboard —,
+    // #1 —), the item is about ONE component regardless of how many drive
+    // lines the survey has — force singular there. Otherwise use driveLineCount.
     const survey = window._currentSurveyCache || null;
-    const dlc = (survey && survey.driveLineCount) ? survey.driveLineCount : 1;
+    const isPerDriveLine = /^(?:Port|Starboard|#\d+)\s*—\s*/.test(itemLabel);
+    const dlc = isPerDriveLine
+      ? 1
+      : ((survey && survey.driveLineCount) ? survey.driveLineCount : 1);
     const resolved = resolveCountTokens(text, dlc);
     // Replace — tapping a new snippet replaces the previous selection
     textarea.value = resolved;
@@ -3239,7 +3211,20 @@ function scanUnresolvedTokens(text, entryPlaceholders) {
     } else if (prefix === 'any:') {
       const opts = body.split('|').map(s => s.trim()).filter(Boolean).map(o => {
         const parts = o.split('^').map(s => s.trim());
-        return { label: parts[0], citations: parts.slice(1).filter(Boolean) };
+        const rawLabel = parts[0];
+        const citations = parts.slice(1).filter(Boolean);
+        // Support "word(s)" suffix syntax: toggleable singular/plural.
+        // Default display uses the plural form. Builder UI shows a 1/many
+        // segmented control so the surveyor can switch per-option.
+        const m = rawLabel.match(/^(.*?)\(s\)(.*)$/);
+        if (m) {
+          const head = m[1];
+          const tail = m[2] || '';
+          const singular = (head + tail).replace(/\s+/g, ' ').trim();
+          const plural = (head + 's' + tail).replace(/\s+/g, ' ').trim();
+          return { label: plural, singular, plural, citations, countable: true };
+        }
+        return { label: rawLabel, citations };
       });
       tokens.push({
         kind: 'any',
@@ -3321,9 +3306,13 @@ function renderSnippetPreview(text) {
   let out = text.replace(/\s?\{standards\?[^{}]*\}/g, '');
   // 2. count -> singular form (cleaner than "propeller|propellers")
   out = out.replace(/\{count:([^{}|]*)\|[^{}]*\}/g, '$1');
-  // 3. specify/any inline lists -> compact bracketed hint
+  // 3. specify/any inline lists -> compact bracketed hint. Strip citations
+  //    AND the (s) suffix markers so the preview reads naturally.
   out = out.replace(/\{(specify|any):([^{}]*)\}/g, (_, kind, body) => {
-    const opts = body.split('|').map(s => s.replace(/\^[^|]*$/, '').trim()).filter(Boolean);
+    const opts = body.split('|')
+      .map(s => s.replace(/\^[^|]*$/, '').trim())
+      .map(s => s.replace(/\(s\)/g, 's'))
+      .filter(Boolean);
     if (opts.length === 0) return '[…]';
     if (opts.length === 1) return '[' + opts[0] + ']';
     if (opts.length === 2) return '[' + opts[0] + ' / ' + opts[1] + ']';
@@ -3397,16 +3386,30 @@ function refreshChipStrip(textarea) {
     html += `<div style="font-size:11px;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">${sectionTitle}</div>`;
 
     tok.options.forEach((opt, oi) => {
-      const label = (typeof opt === 'string') ? opt : (opt.label || '');
-      const cites = (typeof opt === 'object' && opt.citations && opt.citations.length)
+      const isObj = (typeof opt === 'object');
+      const label = isObj ? (opt.label || '') : opt;
+      const countable = !!(isObj && opt.countable);
+      const cites = (isObj && opt.citations && opt.citations.length)
         ? ` <span style="color:#6b7280;font-size:11px;">(${escapeHtml(opt.citations.join(', '))})</span>`
         : '';
+      // Per-option 1/many segmented control for countable options.
+      // data-count-val stores the current selection ("pl" default, "sg" for one).
+      const countToggle = countable ? `
+        <span class="count-toggle" data-count-token="${ti}" data-count-opt="${oi}" data-count-val="pl"
+              style="display:inline-flex;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;flex-shrink:0;margin-left:auto;">
+          <button type="button" class="count-btn" data-count-pick="sg"
+                  style="padding:4px 10px;border:none;background:#f3f4f6;color:#374151;font-size:12px;cursor:pointer;min-width:34px;">1</button>
+          <button type="button" class="count-btn" data-count-pick="pl"
+                  style="padding:4px 10px;border:none;background:#1e3a5f;color:white;font-size:12px;cursor:pointer;min-width:44px;">many</button>
+        </span>
+      ` : '';
       html += `
         <label style="display:flex;align-items:center;gap:10px;padding:7px 2px;cursor:pointer;min-height:36px;">
           <input type="${isMulti ? 'checkbox' : 'radio'}" name="snbld-${textarea.id}-${ti}"
                  data-token-idx="${ti}" data-opt-idx="${oi}"
                  style="width:20px;height:20px;accent-color:#1e3a5f;flex-shrink:0;" />
-          <span style="font-size:14px;color:#1f2937;line-height:1.4;">${escapeHtml(label)}${cites}</span>
+          <span style="font-size:14px;color:#1f2937;line-height:1.4;flex:1;">${escapeHtml(label)}${cites}</span>
+          ${countToggle}
         </label>
       `;
     });
@@ -3431,6 +3434,33 @@ function refreshChipStrip(textarea) {
       inp.addEventListener('input', () => applyBuilderState(strip));
     }
   });
+
+  // Count-toggle buttons (1 / many) for countable options
+  strip.querySelectorAll('.count-btn').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const group = btn.parentElement;
+      if (!group) return;
+      const pick = btn.dataset.countPick;
+      group.dataset.countVal = pick;
+      // Update visual state of the two buttons in the group
+      group.querySelectorAll('.count-btn').forEach(b => {
+        const active = (b.dataset.countPick === pick);
+        b.style.background = active ? '#1e3a5f' : '#f3f4f6';
+        b.style.color = active ? 'white' : '#374151';
+      });
+      // Also auto-check the parent option's checkbox so picking a count
+      // implies selection.
+      const ti = group.dataset.countToken;
+      const oi = group.dataset.countOpt;
+      const optInput = strip.querySelector(`input[data-token-idx="${ti}"][data-opt-idx="${oi}"]`);
+      if (optInput && !optInput.checked) {
+        optInput.checked = true;
+      }
+      applyBuilderState(strip);
+    });
+  });
 }
 
 // Recompute the textarea text from the stored template + current form state.
@@ -3452,7 +3482,14 @@ function applyBuilderState(strip) {
         if (typeof opt === 'string') {
           selectedLabels.push(opt);
         } else {
-          selectedLabels.push(opt.label);
+          // For countable options, pick the form based on the 1/many toggle
+          let chosenLabel = opt.label;
+          if (opt.countable) {
+            const group = strip.querySelector(`.count-toggle[data-count-token="${ti}"][data-count-opt="${oi}"]`);
+            const countVal = group ? (group.dataset.countVal || 'pl') : 'pl';
+            chosenLabel = (countVal === 'sg' && opt.singular) ? opt.singular : (opt.plural || opt.label);
+          }
+          selectedLabels.push(chosenLabel);
           (opt.citations || []).forEach(c => citations.push(c));
         }
       }
@@ -3481,6 +3518,35 @@ function applyBuilderState(strip) {
   const uniq = [];
   citations.forEach(c => { if (!uniq.includes(c)) uniq.push(c); });
   setCollectedCitations(textarea, uniq);
+  // Auto-check matching Applicable Standards checkboxes in the active sheet.
+  // Only adds checks — never removes — so manually-checked items are preserved.
+  syncStandardsFromCitations(uniq);
+}
+
+// Given the list of accumulated citations (e.g. ["ABYC P-6", "TP1332"]),
+// check any matching checkbox in the open bottom-sheet's Applicable Standards
+// list so the surveyor sees the automatic link between defect and standard.
+function syncStandardsFromCitations(citations) {
+  if (!citations || citations.length === 0) return;
+  const overlay = document.getElementById('bottomSheetOverlay');
+  if (!overlay) return;
+  const cbs = overlay.querySelectorAll('input[type="checkbox"]');
+  const norm = s => (s || '').toLowerCase().replace(/[\u2012-\u2015]/g, '-').replace(/\s+/g, ' ').trim();
+  citations.forEach(cit => {
+    const target = norm(cit);
+    if (!target) return;
+    cbs.forEach(cb => {
+      const onch = cb.getAttribute('onchange') || '';
+      if (!onch.includes('updateStandards')) return;
+      const val = norm(cb.value);
+      if (val.startsWith(target) || val.includes(target)) {
+        if (!cb.checked) {
+          cb.checked = true;
+          cb.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+    });
+  });
 }
 
 function escapeHtml(s) {
@@ -10299,9 +10365,13 @@ function insertSnippet(itemLabel, categoryName, text, cardEl, placeholdersJson) 
   const safeId = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
   const textarea = document.getElementById('text-' + safeId);
 
-  // Resolve count tokens against the active survey's driveLineCount
+  // Resolve count tokens. Per-drive-line items (Port —, Starboard —, #N —)
+  // force singular because each expanded item is about ONE component.
   getSurvey(currentSurveyId).then(survey => {
-    const dlc = (survey && survey.driveLineCount) ? survey.driveLineCount : 1;
+    const isPerDriveLine = /^(?:Port|Starboard|#\d+)\s*—\s*/.test(itemLabel);
+    const dlc = isPerDriveLine
+      ? 1
+      : ((survey && survey.driveLineCount) ? survey.driveLineCount : 1);
     const resolved = resolveCountTokens(text, dlc);
 
     if (textarea) {

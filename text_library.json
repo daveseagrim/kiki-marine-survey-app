@@ -573,18 +573,18 @@
     {
       "section": "Propeller(s)",
       "rating": "A",
-      "text": "The {count:propeller|propellers} exhibited {any:significant damage|substantial impact damage} including {any:chipped blades|bent blades|cracked blades|missing blades|deep scoring^ABYC P-6|severe pitting|severe corrosion|shaft-end galling}. The {count:propeller was|propellers were} not serviceable in {count:its|their} current condition and required immediate replacement.{standards? This condition violates STANDARDS.}",
+      "text": "The {count:propeller|propellers} exhibited {any:significant damage|substantial impact damage} including {any:chipped blade(s)|bent blade(s)|cracked blade(s)|missing blade(s)|deep scoring^ABYC P-6|severe pitting|severe corrosion|shaft-end galling}. The {count:propeller was|propellers were} not serviceable in {count:its|their} current condition and required immediate replacement.{standards? This condition violates STANDARDS.}",
       "placeholders": {
         "any:significant damage|substantial impact damage": { "multi": false },
-        "any:chipped blades|bent blades|cracked blades|missing blades|deep scoring^ABYC P-6|severe pitting|severe corrosion|shaft-end galling": { "multi": true }
+        "any:chipped blade(s)|bent blade(s)|cracked blade(s)|missing blade(s)|deep scoring^ABYC P-6|severe pitting|severe corrosion|shaft-end galling": { "multi": true }
       }
     },
     {
       "section": "Propeller(s)",
       "rating": "B",
-      "text": "The {count:propeller|propellers} showed {any:moderate wear|minor blade damage|chipping at the blade tips|light edge burrs|light pitting|surface corrosion|minor shaft-end marks} that merited attention. The {count:propeller|propellers} should be removed, inspected, and {specify:reconditioned|reconditioned or replaced as necessary|rebalanced|touched up and rebalanced} at the next haul-out.{standards? Note: this represents a minor deviation from STANDARDS and does not require immediate repair.}",
+      "text": "The {count:propeller|propellers} showed {any:moderate wear|minor blade damage|chipped blade tip(s)|light edge burr(s)|light pitting|surface corrosion|minor shaft-end mark(s)} that merited attention. The {count:propeller|propellers} should be removed, inspected, and {specify:reconditioned|reconditioned or replaced as necessary|rebalanced|touched up and rebalanced} at the next haul-out.{standards? Note: this represents a minor deviation from STANDARDS and does not require immediate repair.}",
       "placeholders": {
-        "any:moderate wear|minor blade damage|chipping at the blade tips|light edge burrs|light pitting|surface corrosion|minor shaft-end marks": { "multi": true },
+        "any:moderate wear|minor blade damage|chipped blade tip(s)|light edge burr(s)|light pitting|surface corrosion|minor shaft-end mark(s)": { "multi": true },
         "specify:reconditioned|reconditioned or replaced as necessary|rebalanced|touched up and rebalanced": { "multi": false }
       }
     },
