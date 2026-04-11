@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v1999';
+const APP_VERSION = 'v2000';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2040,11 +2040,11 @@ function showMediaSheet(itemLabel, categoryName) {
         <div class="bottom-sheet-title">${itemLabel} — Photos (${photoCount})</div>
         ${photosHtml}
         <div style="padding:12px 20px;">
-          <label style="display:block;background:white;border:2px dashed #ddd;border-radius:8px;padding:16px;text-align:center;font-size:14px;font-weight:600;color:#1e3a5f;cursor:pointer;">
+          <button type="button"
+                  onclick="document.getElementById('bottomSheetOverlay').remove(); openBatchCamera('${safeLabel}');"
+                  style="display:block;width:100%;background:white;border:2px dashed #ddd;border-radius:8px;padding:16px;text-align:center;font-size:14px;font-weight:600;color:#1e3a5f;cursor:pointer;">
             📷 Capture Photos
-            <input type="file" accept="image/*" capture="environment" multiple style="display:none;"
-                   onchange="capturePhotoFromSheet('${safeLabel}', '${safeCat}', event)" />
-          </label>
+          </button>
         </div>
         <div class="sheet-btn-row">
           <button onclick="document.getElementById('bottomSheetOverlay').remove();" style="background:#1e3a5f;color:white;">Done</button>
