@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2006';
+const APP_VERSION = 'v2007';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1983,9 +1983,13 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
     textarea.value = resolved;
     // Reset collected citations (new snippet starts fresh)
     setCollectedCitations(textarea, []);
-    // Stash placeholders config for this entry on the textarea
+    // Stash placeholders + template (for live builder) on the textarea
     textarea.dataset.snippetPlaceholders = placeholdersJson || '';
-    // Show/refresh the chip strip
+    textarea.dataset.snippetTemplate = resolved;
+    // Auto-expand to fit
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+    // Render the inline builder form
     refreshChipStrip(textarea);
   }
 
@@ -3272,10 +3276,14 @@ window._snippetTokens = {
 // token. Tapping a chip opens a popover with options + Custom field.
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Build or refresh the chip strip for a given textarea. The textarea must
-// carry `data-snippet-placeholders` (JSON) with the entry-level placeholders
-// config, if any. The strip is placed in the element whose id is
-// textarea.id + '-chipstrip'.
+// Render an inline "snippet builder" form directly below the textarea.
+// Each {any:...} token becomes a heading + checkbox rows; each {specify:...}
+// becomes a heading + radio rows. A custom text input sits below each list.
+// When the user changes any input, the textarea updates live from the stored
+// template — so the surveyor always sees the real sentence being built.
+//
+// The container element for the form is the existing `-chipstrip` div.
+// (Name kept for backwards compatibility with the textarea wrappers.)
 function refreshChipStrip(textarea) {
   if (!textarea) return;
   const stripId = textarea.id + '-chipstrip';
@@ -3286,34 +3294,120 @@ function refreshChipStrip(textarea) {
   try { entryPlaceholders = JSON.parse(textarea.dataset.snippetPlaceholders || 'null'); }
   catch (e) { entryPlaceholders = null; }
 
-  const tokens = scanUnresolvedTokens(textarea.value, entryPlaceholders);
-  if (tokens.length === 0) {
+  // The TEMPLATE is the raw text containing tokens. We store it on the
+  // container so that re-renders from user interactions always start from
+  // the original tokens (not the partially-filled textarea value).
+  const template = textarea.dataset.snippetTemplate || '';
+  const tokens = scanUnresolvedTokens(template, entryPlaceholders);
+
+  if (!template || tokens.length === 0) {
     strip.style.display = 'none';
     strip.innerHTML = '';
+    strip._tokens = null;
     return;
   }
 
-  strip.style.display = 'flex';
-  let html = '<span style="font-size:12px;font-weight:600;color:#6b7280;margin-right:4px;align-self:center;">Fill in:</span>';
-  tokens.forEach((tok, i) => {
-    // Stash the token in a per-strip cache
-    strip._tokens = strip._tokens || [];
-    strip._tokens[i] = tok;
-    html += `<button type="button" class="chip-btn" data-tok-idx="${i}"
-               style="background:#fff7ed;color:#c2410c;border:1.5px solid #fdba74;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">
-               ${escapeHtml(tok.label)} ▾
-             </button>`;
-  });
-  strip.innerHTML = html;
-  // Wire click handlers
-  strip.querySelectorAll('.chip-btn').forEach(btn => {
-    btn.addEventListener('click', (ev) => {
-      ev.preventDefault();
-      const idx = parseInt(btn.dataset.tokIdx, 10);
-      const tok = strip._tokens[idx];
-      if (tok) openChipPopover(textarea, tok, btn);
+  strip.style.display = 'block';
+  // Drop the old orange chip look; use a cleaner panel with section rows.
+  strip.style.background = '#f9fafb';
+  strip.style.border = '1px solid #e5e7eb';
+  strip.style.borderRadius = '10px';
+  strip.style.padding = '10px 12px';
+
+  let html = '<div style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Build the sentence</div>';
+
+  tokens.forEach((tok, ti) => {
+    const isMulti = (tok.kind === 'any' || tok.kind === 'any-named');
+    // Derive a title for the section. For now use a generic label + hint.
+    const sectionTitle = isMulti ? 'Select all that apply' : 'Choose one';
+    html += `<div style="margin-top:${ti === 0 ? '0' : '12px'};padding-top:${ti === 0 ? '0' : '10px'};${ti === 0 ? '' : 'border-top:1px dashed #e5e7eb;'}">`;
+    html += `<div style="font-size:11px;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">${sectionTitle}</div>`;
+
+    tok.options.forEach((opt, oi) => {
+      const label = (typeof opt === 'string') ? opt : (opt.label || '');
+      const cites = (typeof opt === 'object' && opt.citations && opt.citations.length)
+        ? ` <span style="color:#6b7280;font-size:11px;">(${escapeHtml(opt.citations.join(', '))})</span>`
+        : '';
+      html += `
+        <label style="display:flex;align-items:center;gap:10px;padding:7px 2px;cursor:pointer;min-height:36px;">
+          <input type="${isMulti ? 'checkbox' : 'radio'}" name="snbld-${textarea.id}-${ti}"
+                 data-token-idx="${ti}" data-opt-idx="${oi}"
+                 style="width:20px;height:20px;accent-color:#1e3a5f;flex-shrink:0;" />
+          <span style="font-size:14px;color:#1f2937;line-height:1.4;">${escapeHtml(label)}${cites}</span>
+        </label>
+      `;
     });
+
+    html += `
+      <input type="text" data-custom-idx="${ti}" placeholder="Other (type custom${isMulti ? ', separate with commas' : ''})"
+             style="width:100%;margin-top:4px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;box-sizing:border-box;" />
+    `;
+    html += '</div>';
   });
+
+  strip.innerHTML = html;
+  strip._tokens = tokens;
+  strip._template = template;
+  strip._textarea = textarea;
+
+  // Live update on any change or typed input in the custom field
+  const inputs = strip.querySelectorAll('input');
+  inputs.forEach(inp => {
+    inp.addEventListener('change', () => applyBuilderState(strip));
+    if (inp.type === 'text') {
+      inp.addEventListener('input', () => applyBuilderState(strip));
+    }
+  });
+}
+
+// Recompute the textarea text from the stored template + current form state.
+function applyBuilderState(strip) {
+  if (!strip || !strip._tokens || !strip._template || !strip._textarea) return;
+  const tokens = strip._tokens;
+  const textarea = strip._textarea;
+  let text = strip._template;
+  const citations = [];
+
+  tokens.forEach((tok, ti) => {
+    const isMulti = (tok.kind === 'any' || tok.kind === 'any-named');
+    const inputs = strip.querySelectorAll(`input[data-token-idx="${ti}"]`);
+    const selectedLabels = [];
+    inputs.forEach(inp => {
+      if (inp.checked) {
+        const oi = parseInt(inp.dataset.optIdx, 10);
+        const opt = tok.options[oi];
+        if (typeof opt === 'string') {
+          selectedLabels.push(opt);
+        } else {
+          selectedLabels.push(opt.label);
+          (opt.citations || []).forEach(c => citations.push(c));
+        }
+      }
+    });
+    const customInput = strip.querySelector(`input[data-custom-idx="${ti}"]`);
+    const customRaw = customInput ? (customInput.value || '').trim() : '';
+    if (customRaw) {
+      customRaw.split(/\s*,\s*/).filter(Boolean).forEach(l => selectedLabels.push(l));
+    }
+
+    if (selectedLabels.length > 0) {
+      const replacement = isMulti
+        ? collapseSharedTail(selectedLabels)
+        : selectedLabels[0];
+      text = text.split(tok.literal).join(replacement);
+    }
+    // Unfilled token: leave the literal in place so the user can see what's
+    // still missing; it will be blanked by finalizeSnippetText on save.
+  });
+
+  textarea.value = text;
+  // Auto-expand the textarea to fit
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+  // Persist citations
+  const uniq = [];
+  citations.forEach(c => { if (!uniq.includes(c)) uniq.push(c); });
+  setCollectedCitations(textarea, uniq);
 }
 
 function escapeHtml(s) {
@@ -3424,12 +3518,21 @@ function openChipPopover(textarea, tok, anchorEl) {
   });
 }
 
-// Finalize: expand {standards?...} block using collected citations, and
-// return the text that should be saved to the survey item.
+// Finalize: expand {standards?...} block using collected citations, strip
+// any still-unresolved {any:...}/{specify:...}/{name} tokens, and return the
+// text that should be saved to the survey item.
 function finalizeSnippetText(textarea) {
   if (!textarea) return '';
   const cites = getCollectedCitations(textarea);
-  return renderStandardsBlock(textarea.value, cites);
+  let text = renderStandardsBlock(textarea.value, cites);
+  // Blank out any leftover unresolved tokens (the user left them empty).
+  // We replace them with "[…]" so the saved output is still readable and the
+  // gap is obvious in the report.
+  text = text.replace(/\{(specify:|any:)[^{}]*\}/g, '[…]');
+  text = text.replace(/\{[a-zA-Z0-9_ -]+\}/g, '[…]');
+  // Clean up double spaces introduced by stripped tokens
+  text = text.replace(/ {2,}/g, ' ').replace(/ \./g, '.').replace(/ ,/g, ',');
+  return text;
 }
 
 window._chipStrip = {
@@ -10123,6 +10226,7 @@ function insertSnippet(itemLabel, categoryName, text, cardEl, placeholdersJson) 
     if (textarea) {
       textarea.value = resolved;
       textarea.dataset.snippetPlaceholders = placeholdersJson || '';
+      textarea.dataset.snippetTemplate = resolved;
       setCollectedCitations(textarea, []);
       // Auto-resize
       textarea.style.height = 'auto';
