@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2007';
+const APP_VERSION = 'v2008';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1732,9 +1732,19 @@ function showNotesSheet(itemLabel, categoryName) {
 
         snippetsHtml = `<div class="sheet-section-title">Quick Insert (${variants.length} snippets)</div>`;
         variants.forEach((variant, idx) => {
-          const escapedText = variant.text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+          // Escape for embedding in an onclick="..." attribute between single
+          // quotes. Order matters: backslash first, then single-quote, then
+          // newline (for JS), then double-quote as &quot; for HTML.
+          const escapedText = variant.text
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/\n/g, '\\n')
+            .replace(/"/g, '&quot;');
           const placeholdersJson = variant.placeholders
-            ? JSON.stringify(variant.placeholders).replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+            ? JSON.stringify(variant.placeholders)
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '&quot;')
             : '';
           const ratingBadge = variant.rating || baseRating;
           const isActive = itemData.text === variant.text;
@@ -9842,9 +9852,17 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
           <div id="snippets-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}" style="display:none;max-height:300px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;">
       `;
       variants.forEach((variant, idx) => {
-        const escapedText = variant.text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+        // Escape for onclick="..." — single-quote escape for JS, &quot; for HTML
+        const escapedText = variant.text
+          .replace(/\\/g, '\\\\')
+          .replace(/'/g, "\\'")
+          .replace(/\n/g, '\\n')
+          .replace(/"/g, '&quot;');
         const placeholdersJson = variant.placeholders
-          ? JSON.stringify(variant.placeholders).replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+          ? JSON.stringify(variant.placeholders)
+              .replace(/\\/g, '\\\\')
+              .replace(/'/g, "\\'")
+              .replace(/"/g, '&quot;')
           : '';
         const ratingBadge = variant.rating || baseRating;
         const isActive = itemData.text === variant.text;
