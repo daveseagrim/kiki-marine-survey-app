@@ -3223,12 +3223,9 @@ function renderNewSurveyForm() {
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Tip: Enter year, make and model — specs may auto-fill from built-in database</div>
       </div>
 
-      <div style="display: flex; gap: 8px; margin: 0 0 16px;">
-        <button class="btn-secondary" style="flex: 1; font-size: 14px;" onclick="lookupSpecs()">
+      <div style="margin: 0 0 16px;">
+        <button class="btn-secondary" style="width: 100%; font-size: 14px;" onclick="lookupSpecs()">
           🔍 Auto-Fill Specs
-        </button>
-        <button class="btn-secondary" style="flex: 1; font-size: 14px;" onclick="lookupComparables()">
-          💰 Suggest Valuation
         </button>
       </div>
 
