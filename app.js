@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2023';
+const APP_VERSION = 'v2024';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2028,11 +2028,19 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
     // Starboard —, #N —) always force singular because each expanded item
     // is about ONE component.
     const survey = window._currentSurveyCache || null;
-    const isPerDriveLine = /^(?:Port|Starboard|#\d+)\s*—\s*/.test(itemLabel);
+    const sideMatch = itemLabel.match(/^(Port|Starboard|#\d+)\s*—\s*/);
+    const isPerDriveLine = !!sideMatch;
+    const sideWord = sideMatch ? sideMatch[1] : '';
     const dlc = isPerDriveLine
       ? 1
       : ((survey && survey.driveLineCount) ? parseInt(survey.driveLineCount, 10) || 1 : 1);
-    const resolved = resolveCountTokens(text, dlc);
+    let resolved = resolveCountTokens(text, dlc);
+    // For per-drive-line expanded items, inject the side qualifier into
+    // the first instance of the subject noun so the sentence reads
+    // "The port propeller..." instead of "The propeller...".
+    if (sideWord) {
+      resolved = applySidePrefix(resolved, sideWord);
+    }
     // Replace — tapping a new snippet replaces the previous selection
     textarea.value = resolved;
     // Reset collected citations (new snippet starts fresh)
@@ -3182,6 +3190,29 @@ function resolveCountTokens(text, driveLineCount) {
   });
 }
 
+// Inject a side qualifier ("port" / "starboard" / "#1") before the first
+// subject noun in a resolved snippet. Used for per-drive-line expanded
+// items (Port —, Starboard —, #N —) so sentences read "The port propeller…"
+// instead of "The propeller…".
+function applySidePrefix(text, sideWord) {
+  if (!text || !sideWord) return text;
+  const side = /^#/.test(sideWord) ? sideWord : sideWord.toLowerCase();
+  // Order matters: match multi-word nouns before single-word ones.
+  const nouns = [
+    'sail drive', 'stern tube', 'stuffing box', 'dripless seal',
+    'cutless bearing', 'shaft seal', 'shaft log',
+    'propeller', 'shaft', 'rudder', 'outdrive', 'engine', 'drive'
+  ];
+  for (const noun of nouns) {
+    const pattern = noun.replace(/\s+/g, '\\s+');
+    const re = new RegExp('\\b(' + pattern + 's?)\\b', 'i');
+    if (re.test(text)) {
+      return text.replace(re, side + ' $1');
+    }
+  }
+  return text;
+}
+
 // Build a short, self-describing chip label from an option list.
 // Shows first 1–2 options + "…" if more, prefixed with + for multi-select.
 function buildChipLabel(opts, isMulti) {
@@ -3438,7 +3469,9 @@ function refreshChipStrip(textarea) {
 
     html += `
       <input type="text" data-custom-idx="${ti}" placeholder="Add another item${isMulti ? ' (comma-separated, no punctuation)' : ''}"
+             spellcheck="true" autocorrect="on" autocapitalize="sentences"
              style="width:100%;margin-top:4px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;box-sizing:border-box;" />
+      <div data-tone-warning-for="${ti}" style="display:none;margin-top:6px;padding:7px 10px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;line-height:1.4;"></div>
     `;
     html += '</div>';
   });
@@ -3453,9 +3486,10 @@ function refreshChipStrip(textarea) {
       <div style="font-size:11px;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Additional observations (optional)</div>
       <textarea data-freeform-notes="1" rows="2"
                 placeholder="Type any extra details in your own words — appended as a separate sentence."
+                spellcheck="true" autocorrect="on" autocapitalize="sentences"
                 style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;box-sizing:border-box;resize:vertical;font-family:inherit;"></textarea>
-      <div style="margin-top:4px;font-size:11px;color:#6b7280;font-style:italic;">Keep notes focused on this specific item only. Observations about other components belong in their own checklist items.</div>
-      <div data-tone-warning="1" style="display:none;margin-top:8px;padding:8px 10px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;line-height:1.4;"></div>
+      <div data-tone-warning-freeform="1" style="display:none;margin-top:6px;padding:7px 10px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;line-height:1.4;"></div>
+      <div style="margin-top:6px;font-size:11px;color:#6b7280;font-style:italic;">Keep notes focused on this specific item only. Observations about other components belong in their own checklist items.</div>
     </div>
   `;
 
@@ -3585,9 +3619,14 @@ const TONE_FLAGS = [
   { pat: /\bcrazy\b/i, hint: '"crazy" is informal — try "severe", "extensive", or "extreme".' },
   { pat: /\bnuts\b/i, hint: '"nuts" is informal — try "extreme" or "excessive".' },
   { pat: /\binsane(?:ly)?\b/i, hint: '"insane" is informal — try "extreme" or "severe".' },
+  { pat: /\bunbelievabl(?:e|y)\b/i, hint: '"unbelievable" is informal — try "substantial", "severe", or "remarkable".' },
+  { pat: /\bincredibl(?:e|y)\b/i, hint: '"incredible" is informal — try "significant" or "notable".' },
   { pat: /\bstupid(?:ly|ity)?\b/i, hint: '"stupid/stupidly" is informal — try "poorly" or "significantly".' },
   { pat: /\bdumb\b/i, hint: '"dumb" is informal — try "unwise" or "inadequate".' },
-  { pat: /\b(?:pretty|super|really)\s+bad\b/i, hint: 'Informal intensifier — try "severely damaged" or "in poor condition".' },
+  { pat: /\b(?:pretty|super|really|way)\s+bad\b/i, hint: 'Informal intensifier — try "severely damaged" or "in poor condition".' },
+  { pat: /\bway\s+(?:not|too)\b/i, hint: '"way not / way too" is informal — try "not at all" or "excessively".' },
+  { pat: /\bnot\s+good\b/i, hint: '"not good" is informal — try "substandard", "unserviceable", or "poor".' },
+  { pat: /\bnot\s+great\b/i, hint: '"not great" is informal — try "marginal" or "substandard".' },
   { pat: /\bdriver\s+error\b/i, hint: '"driver error" is informal — try "operator error" or "grounding contact".' },
   { pat: /\bawful(?:ly)?\b/i, hint: '"awful" is informal — try "unserviceable" or "severe".' },
   { pat: /\bterribl(?:e|y)\b/i, hint: '"terrible" is informal — try "severely deteriorated" or "unserviceable".' },
@@ -3608,23 +3647,10 @@ const TONE_FLAGS = [
   { pat: /\btrashed\b/i, hint: '"trashed" is informal — use "unserviceable" or "extensively damaged".' }
 ];
 
-// Scan the freeform notes + any per-token custom inputs for informal
-// language. Populate the tone-warning banner with up to 3 suggestions so
-// the surveyor can fix phrasing before saving the note. This is purely
-// advisory — it never blocks the user or auto-edits their text.
-function updateToneWarning(strip) {
-  if (!strip) return;
-  const banner = strip.querySelector('[data-tone-warning]');
-  if (!banner) return;
-  const freeform = (strip.querySelector('textarea[data-freeform-notes]')?.value || '').trim();
-  const customs = Array.from(strip.querySelectorAll('input[data-custom-idx]'))
-    .map(inp => inp.value || '').join(' ');
-  const combined = (freeform + ' ' + customs).trim();
-  if (!combined) {
-    banner.style.display = 'none';
-    banner.innerHTML = '';
-    return;
-  }
+// Scan a single piece of text against TONE_FLAGS and return up to 3 hints.
+function collectToneHits(text) {
+  const combined = (text || '').trim();
+  if (!combined) return [];
   const hits = [];
   const seen = new Set();
   for (const rule of TONE_FLAGS) {
@@ -3634,7 +3660,13 @@ function updateToneWarning(strip) {
       if (hits.length >= 3) break;
     }
   }
-  if (hits.length === 0) {
+  return hits;
+}
+
+// Populate or hide a single tone-warning banner element based on hits.
+function renderToneBanner(banner, hits) {
+  if (!banner) return;
+  if (!hits || hits.length === 0) {
     banner.style.display = 'none';
     banner.innerHTML = '';
     return;
@@ -3642,6 +3674,26 @@ function updateToneWarning(strip) {
   banner.style.display = 'block';
   banner.innerHTML = '<strong>Tone suggestion:</strong> ' +
     hits.map(h => escapeHtml(h)).join('<br>');
+}
+
+// Scan each custom input and the freeform notes textarea separately, and
+// populate the tone-warning banner that sits immediately below THAT input.
+// This way the surveyor sees the hint next to the text that triggered it,
+// not at the bottom of the strip.
+function updateToneWarning(strip) {
+  if (!strip) return;
+  // Per-token custom input banners
+  strip.querySelectorAll('input[data-custom-idx]').forEach(inp => {
+    const ti = inp.dataset.customIdx;
+    const banner = strip.querySelector(`[data-tone-warning-for="${ti}"]`);
+    renderToneBanner(banner, collectToneHits(inp.value));
+  });
+  // Freeform notes banner
+  const freeformEl = strip.querySelector('textarea[data-freeform-notes]');
+  const freeformBanner = strip.querySelector('[data-tone-warning-freeform]');
+  if (freeformEl && freeformBanner) {
+    renderToneBanner(freeformBanner, collectToneHits(freeformEl.value));
+  }
 }
 
 // Recompute the textarea text from the stored template + current form state.
@@ -10639,11 +10691,16 @@ function insertSnippet(itemLabel, categoryName, text, cardEl, placeholdersJson) 
   // Resolve count tokens. Per-drive-line items (Port —, Starboard —, #N —)
   // force singular because each expanded item is about ONE component.
   getSurvey(currentSurveyId).then(survey => {
-    const isPerDriveLine = /^(?:Port|Starboard|#\d+)\s*—\s*/.test(itemLabel);
+    const sideMatch = itemLabel.match(/^(Port|Starboard|#\d+)\s*—\s*/);
+    const isPerDriveLine = !!sideMatch;
+    const sideWord = sideMatch ? sideMatch[1] : '';
     const dlc = isPerDriveLine
       ? 1
       : ((survey && survey.driveLineCount) ? parseInt(survey.driveLineCount, 10) || 1 : 1);
-    const resolved = resolveCountTokens(text, dlc);
+    let resolved = resolveCountTokens(text, dlc);
+    if (sideWord) {
+      resolved = applySidePrefix(resolved, sideWord);
+    }
 
     if (textarea) {
       textarea.value = resolved;
