@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2024';
+const APP_VERSION = 'v2025';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1950,7 +1950,8 @@ function showNotesSheet(itemLabel, categoryName) {
         ${winchOptionsHtml}
         ${componentBuilderHtml}
         <div style="padding:12px 20px;">
-          <textarea id="sheet-text-${sanitizedLabel}" placeholder="Add inspection notes..." style="min-height:80px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;overflow:hidden;" autocapitalize="sentences" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';">${itemData.text || ''}</textarea>
+          <textarea id="sheet-text-${sanitizedLabel}" placeholder="Add inspection notes..." style="min-height:80px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;overflow:hidden;" spellcheck="true" autocorrect="on" autocapitalize="sentences" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';window._mainSheetToneCheck && window._mainSheetToneCheck(this);window._clearSheetCardHighlight && window._clearSheetCardHighlight(this);">${itemData.text || ''}</textarea>
+          <div id="sheet-text-${sanitizedLabel}-tone" data-main-tone-warning="1" style="display:none;margin-top:6px;padding:8px 12px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;line-height:1.4;"></div>
           <div id="sheet-text-${sanitizedLabel}-chipstrip" style="display:none;flex-wrap:wrap;gap:6px;margin-top:6px;padding:8px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;"></div>
         </div>
         ${snippetsHtml}
@@ -1988,6 +1989,11 @@ function showNotesSheet(itemLabel, categoryName) {
     if (ta && ta.value) {
       ta.style.height = 'auto';
       ta.style.height = ta.scrollHeight + 'px';
+    }
+    // Seed tone-warning banner so pre-existing flagged text lights up
+    // immediately when the sheet opens — not only on next keystroke.
+    if (ta && window._mainSheetToneCheck) {
+      window._mainSheetToneCheck(ta);
     }
     // If textarea already has a template+placeholders from a prior session,
     // render the inline builder immediately
@@ -3662,6 +3668,30 @@ function collectToneHits(text) {
   }
   return hits;
 }
+
+// Global tone-check for the main sheet textarea (any item, builder or not).
+// Wired via the textarea's inline oninput handler.
+window._mainSheetToneCheck = function(textarea) {
+  if (!textarea) return;
+  const banner = textarea.parentElement && textarea.parentElement.querySelector('[data-main-tone-warning]');
+  if (!banner) return;
+  try {
+    renderToneBanner(banner, collectToneHits(textarea.value));
+  } catch (e) { /* no-op — banner just stays hidden */ }
+};
+
+// Clear the green highlight on any previously-tapped Quick Insert card
+// as soon as the user edits the textarea manually. Keeps the card list
+// from looking "locked" after one tap.
+window._clearSheetCardHighlight = function(textarea) {
+  if (!textarea) return;
+  const overlay = document.getElementById('bottomSheetOverlay');
+  if (!overlay) return;
+  overlay.querySelectorAll('.snippet-card-sheet').forEach(c => {
+    c.style.background = '';
+    c.style.borderLeft = '';
+  });
+};
 
 // Populate or hide a single tone-warning banner element based on hits.
 function renderToneBanner(banner, hits) {
@@ -11667,12 +11697,76 @@ async function duplicateSurvey(surveyId) {
   renderHome();
 }
 
-async function deleteSurveyConfirm(surveyId) {
-  const yes = await showConfirm('Delete this survey? This cannot be undone.', 'Delete', 'Cancel');
-  if (yes) {
-    await deleteSurvey(surveyId);
-    renderHome();
+// Lightweight progress estimate used by the delete guard (and later by the
+// Review Survey analyzer). Counts filled header fields + checklist items
+// that have either a rating or typed notes. Returns an integer 0-100.
+// Intentionally simple — we just need to distinguish "blank test survey"
+// from "real in-progress survey".
+function estimateSurveyProgress(survey) {
+  if (!survey) return 0;
+  let points = 0;
+  let total = 0;
+  // Header fields worth tracking
+  const headerFields = [
+    'vesselName', 'yearMakeModel', 'hinNumber', 'vesselType',
+    'surveyDate', 'location', 'purposeOfSurvey', 'clientName',
+    'onLandOrInWater', 'powerAtSurvey'
+  ];
+  headerFields.forEach(k => {
+    total += 1;
+    const v = survey[k];
+    if (v != null && String(v).trim() !== '' && String(v).toLowerCase() !== 'select') {
+      points += 1;
+    }
+  });
+  // HIN / compliance plate photos
+  total += 2;
+  if (survey.hinPhoto) points += 1;
+  if (survey.compliancePhoto) points += 1;
+  // Checklist items: an item counts as "touched" if it has a rating OR
+  // any typed text OR a photo attached.
+  if (survey.items && typeof survey.items === 'object') {
+    const itemKeys = Object.keys(survey.items);
+    // Use a fixed denominator so an empty survey scores near 0 regardless
+    // of template size — pick 50 as a reasonable "enough items to be real"
+    // baseline. Surveys with more touched items saturate but that's fine.
+    total += 50;
+    let touched = 0;
+    itemKeys.forEach(k => {
+      const it = survey.items[k] || {};
+      const hasRating = it.rating && String(it.rating).trim() !== '';
+      const hasText = it.text && String(it.text).trim() !== '';
+      const hasPhoto = Array.isArray(it.photos) && it.photos.length > 0;
+      if (hasRating || hasText || hasPhoto) touched += 1;
+    });
+    points += Math.min(touched, 50);
   }
+  if (total === 0) return 0;
+  return Math.round((points / total) * 100);
+}
+
+async function deleteSurveyConfirm(surveyId) {
+  // First confirmation — the standard one.
+  const yes = await showConfirm('Delete this survey? This cannot be undone.', 'Delete', 'Cancel');
+  if (!yes) return;
+  // Second confirmation if the survey looks like real in-progress work
+  // (>5% complete). Guards against accidentally nuking a field survey
+  // when the user meant to delete a blank test record.
+  try {
+    const survey = await getSurvey(surveyId);
+    const pct = estimateSurveyProgress(survey);
+    if (pct > 5) {
+      const vesselName = (survey && survey.vesselName) ? survey.vesselName : 'this survey';
+      const confirmMsg = `"${vesselName}" is ${pct}% complete — this does not look like a test record. Are you absolutely sure you want to delete it? This cannot be undone.`;
+      const reallyYes = await showConfirm(confirmMsg, 'Yes, delete it', 'Cancel');
+      if (!reallyYes) return;
+    }
+  } catch (e) {
+    // If the progress check errors out, fall through to the delete —
+    // we've already had one confirmation.
+  }
+  await deleteSurvey(surveyId);
+  renderHome();
 }
 
 // Save all unsaved inspection data (text areas, bilge pumps, comparables, safety items)
