@@ -1340,6 +1340,12 @@ function getTemplateForSurvey(survey) {
 
 // Database operations
 async function saveSurvey(survey) {
+  // Guard: can't put a survey without an id (keyPath='id'). This silently
+  // no-ops during the New Survey screen before the survey has been saved,
+  // rather than throwing DataError: Provided data is inadequate.
+  if (!survey || survey.id === undefined || survey.id === null || survey.id === '') {
+    return null;
+  }
   return new Promise((resolve, reject) => {
     const tx = db.transaction(['surveys'], 'readwrite');
     const store = tx.objectStore('surveys');
@@ -1362,12 +1368,22 @@ window.addEventListener('beforeunload', (e) => {
 });
 
 async function getSurvey(id) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(['surveys'], 'readonly');
-    const store = tx.objectStore('surveys');
-    const request = store.get(id);
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
+  // Guard: store.get(undefined|null) throws DataError in Safari. Return null
+  // so the 40+ call sites can safely do `const s = await getSurvey(id); if (!s) return;`
+  if (id === undefined || id === null || id === '') {
+    return null;
+  }
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(['surveys'], 'readonly');
+      const store = tx.objectStore('surveys');
+      const request = store.get(id);
+      request.onerror = () => resolve(null);
+      request.onsuccess = () => resolve(request.result || null);
+    } catch (e) {
+      console.warn('getSurvey failed for id:', id, e);
+      resolve(null);
+    }
   });
 }
 
