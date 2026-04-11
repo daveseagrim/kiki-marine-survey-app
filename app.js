@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2003';
+const APP_VERSION = 'v2004';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1738,7 +1738,12 @@ function showNotesSheet(itemLabel, categoryName) {
             : '';
           const ratingBadge = variant.rating || baseRating;
           const isActive = itemData.text === variant.text;
-          const displayText = highlightedTexts[idx] || escSnippet(variant.text);
+          // If the variant uses token syntax, render a clean preview instead
+          // of showing raw {count:...}/{any:...} braces in the card.
+          const hasTokens = /\{(count:|specify:|any:|standards\?)/.test(variant.text);
+          const displayText = hasTokens
+            ? escSnippet(renderSnippetPreview(variant.text))
+            : (highlightedTexts[idx] || escSnippet(variant.text));
           snippetsHtml += `
             <div class="snippet-card-sheet" style="padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}"
                  onclick="insertSnippetFromSheet('${safeLabel}', '${safeCat}', '${escapedText}', this, '${placeholdersJson}')">
@@ -3212,13 +3217,40 @@ function setCollectedCitations(textarea, list) {
   textarea.dataset.citations = JSON.stringify(list || []);
 }
 
+// Render a human-readable preview of a token-based snippet for display in
+// snippet cards. Tokens are replaced with compact bracketed placeholders:
+//   {count:sg|pl}              -> "sg"  (show singular form as preview)
+//   {specify:a|b|c}            -> "[a/b/c]" (truncated if long)
+//   {any:a|b|c^CITE|d}         -> "[a/b/…]"
+//   {name}                     -> "[name]"
+//   {standards?...STANDARDS...} -> removed (only shown once standards picked)
+function renderSnippetPreview(text) {
+  if (!text) return '';
+  // 1. Drop conditional standards block entirely (with leading space)
+  let out = text.replace(/\s?\{standards\?[^{}]*\}/g, '');
+  // 2. count -> singular form (cleaner than "propeller|propellers")
+  out = out.replace(/\{count:([^{}|]*)\|[^{}]*\}/g, '$1');
+  // 3. specify/any inline lists -> compact bracketed hint
+  out = out.replace(/\{(specify|any):([^{}]*)\}/g, (_, kind, body) => {
+    const opts = body.split('|').map(s => s.replace(/\^[^|]*$/, '').trim()).filter(Boolean);
+    if (opts.length === 0) return '[…]';
+    if (opts.length === 1) return '[' + opts[0] + ']';
+    if (opts.length === 2) return '[' + opts[0] + ' / ' + opts[1] + ']';
+    return '[' + opts[0] + ' / ' + opts[1] + ' / …]';
+  });
+  // 4. Named tokens
+  out = out.replace(/\{([a-zA-Z0-9_ -]+)\}/g, '[$1]');
+  return out;
+}
+
 window._snippetTokens = {
   parse: parseSnippetTokens,
   resolveCount: resolveCountTokens,
   scanUnresolved: scanUnresolvedTokens,
   collapseSharedTail,
   oxfordJoin,
-  renderStandardsBlock
+  renderStandardsBlock,
+  renderPreview: renderSnippetPreview
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -9699,7 +9731,12 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
           : '';
         const ratingBadge = variant.rating || baseRating;
         const isActive = itemData.text === variant.text;
-        const displayText = highlightedTexts[idx] || escSnippet(variant.text);
+        // If the variant uses token syntax, render a clean preview instead
+        // of showing raw {count:...}/{any:...} braces in the card.
+        const hasTokens = /\{(count:|specify:|any:|standards\?)/.test(variant.text);
+        const displayText = hasTokens
+          ? escSnippet(renderSnippetPreview(variant.text))
+          : (highlightedTexts[idx] || escSnippet(variant.text));
         html += `
             <div class="snippet-card" style="padding:10px 12px;border-bottom:1px solid #e5e7eb;cursor:pointer;${isActive ? 'background:#d1fae5;border-left:4px solid #16a34a;' : ''}"
                  onclick="insertSnippet('${safeLabel}', '${safeCat}', '${escapedText}', this, '${placeholdersJson}')">
