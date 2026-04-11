@@ -581,48 +581,20 @@
     },
     {
       "section": "Propeller(s)",
-      "rating": "A - multiple props",
-      "text": "The propellers exhibited significant damage including bent or missing blades, deep scoring, and/or severe corrosion. The propellers were not serviceable in their current condition and required immediate replacement."
-    },
-    {
-      "section": "Propeller(s)",
       "rating": "B",
-      "text": "The propeller showed moderate wear with minor blade damage, pitting, or corrosion that merited attention. The propeller should be removed, inspected, and reconditioned or replaced as necessary."
+      "text": "The {count:propeller|propellers} showed {any:moderate wear|minor blade damage|chipping at the blade tips|light edge burrs|light pitting|surface corrosion|minor shaft-end marks} that merited attention. The {count:propeller|propellers} should be removed, inspected, and {specify:reconditioned|reconditioned or replaced as necessary|rebalanced|touched up and rebalanced} at the next haul-out.{standards? Note: this represents a minor deviation from STANDARDS and does not require immediate repair.}",
+      "placeholders": {
+        "any:moderate wear|minor blade damage|chipping at the blade tips|light edge burrs|light pitting|surface corrosion|minor shaft-end marks": { "multi": true },
+        "specify:reconditioned|reconditioned or replaced as necessary|rebalanced|touched up and rebalanced": { "multi": false }
+      }
     },
     {
       "section": "Propeller(s)",
-      "rating": "B - multiple props",
-      "text": "The propellers showed moderate wear with minor blade damage, pitting, or corrosion that merited attention. The propellers should be removed, inspected, and reconditioned or replaced as necessary."
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "C - fixed three-blade",
-      "text": "The fixed three-blade propeller was in serviceable condition with no significant damage, pitting, or corrosion. Blades were intact and securely attached to the shaft."
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "C - fixed two-blade",
-      "text": "The fixed two-blade propeller was in serviceable condition with no significant damage, pitting, or corrosion. Blades were intact and securely attached to the shaft."
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "C - folding three-blade",
-      "text": "The folding three-blade propeller opened and closed smoothly. It was properly secured with no significant damage, pitting, or corrosion."
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "C - feathering",
-      "text": "The feathering propeller blades rotated smoothly through their full range. The mechanism was properly secured with no significant damage, pitting, or corrosion."
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "C - twin fixed",
-      "text": "Both fixed propellers were in serviceable condition with no significant damage, pitting, or corrosion. Blades were intact and securely attached to their respective shafts."
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "C - controllable pitch",
-      "text": "The controllable pitch propeller was in serviceable condition. The pitch mechanism operated smoothly and the blades showed no significant damage, pitting, or corrosion."
+      "rating": "C",
+      "text": "The {specify:fixed two-blade|fixed three-blade|fixed four-blade|folding two-blade|folding three-blade|feathering three-blade|controllable pitch} {count:propeller was|propellers were} in serviceable condition with no significant damage, pitting, or corrosion. Blades were intact and {count:securely attached to the shaft|securely attached to their respective shafts}.",
+      "placeholders": {
+        "specify:fixed two-blade|fixed three-blade|fixed four-blade|folding two-blade|folding three-blade|feathering three-blade|controllable pitch": { "multi": false }
+      }
     },
     {
       "section": "Propeller shaft(s)",
