@@ -130,16 +130,33 @@ async function scan() {
     document.getElementById('itemCount').textContent = itemCount;
     document.getElementById('seCount').textContent = seCount;
 
-    // Load all SC photos for this survey
+    // Load SC photo metadata via cursor (skip dataUrl to avoid OOM).
+    // Use surveyId index to narrow to Riverdance, then filter prefix.
     const scPhotos = await new Promise((resolve, reject) => {
       const tx = db.transaction('photos', 'readonly');
       const store = tx.objectStore('photos');
-      const req = store.getAll();
-      req.onsuccess = () => {
-        const all = req.result || [];
-        resolve(all.filter(p => p.id && p.id.indexOf(SC_PREFIX) === 0));
+      const out = [];
+      let src = store;
+      try {
+        if (store.indexNames && store.indexNames.contains('surveyId')) {
+          src = store.index('surveyId').openCursor(IDBKeyRange.only(SURVEY_ID));
+        } else {
+          src = store.openCursor();
+        }
+      } catch (e) {
+        src = store.openCursor();
+      }
+      src.onsuccess = (ev) => {
+        const cursor = ev.target.result;
+        if (!cursor) { resolve(out); return; }
+        const v = cursor.value;
+        if (v && v.id && v.id.indexOf(SC_PREFIX) === 0) {
+          // Only keep id + itemLabel, drop dataUrl from memory
+          out.push({ id: v.id, itemLabel: v.itemLabel || '' });
+        }
+        cursor.continue();
       };
-      req.onerror = () => reject(req.error);
+      src.onerror = () => reject(src.error);
     });
     state.scPhotos = scPhotos;
     document.getElementById('scCount').textContent = scPhotos.length;
