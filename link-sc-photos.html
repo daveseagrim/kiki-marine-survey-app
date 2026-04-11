@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Link SafetyCulture Photos to Riverdance</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #0b1e3a; color: #f4f6fb; margin: 0;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 24px 18px 60px; }
+  h1 { font-size: 24px; margin: 0 0 6px; }
+  .sub { color: #9db3d6; font-size: 14px; margin-bottom: 18px; }
+  .card {
+    background: #12284a; border: 1px solid #1f3a66; border-radius: 12px;
+    padding: 16px 18px; margin-bottom: 14px;
+  }
+  .row { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin: 4px 0; }
+  .label { color: #9db3d6; font-size: 13px; }
+  .value { font-weight: 600; font-size: 16px; }
+  button {
+    width: 100%; font-size: 16px; font-weight: 600; padding: 14px;
+    border-radius: 10px; border: none; margin-top: 10px; cursor: pointer;
+    background: #2e7cf7; color: #fff;
+  }
+  button:disabled { background: #2a3e66; color: #7a8fb2; cursor: default; }
+  button.go { background: #1e6b3a; }
+  .log {
+    background: #05122a; padding: 10px; border-radius: 8px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+    white-space: pre-wrap; max-height: 320px; overflow: auto; color: #9db3d6;
+  }
+  .banner {
+    background: #3a2d1a; border: 1px solid #6b5a2d; color: #f0d48a;
+    padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 12px;
+  }
+  .banner.ok { background: #1a3a1f; border-color: #2d6b3a; color: #9de0b5; }
+  .banner.danger { background: #3a1a1a; border-color: #6b2d2d; color: #f0a8a8; }
+  .err { color: #ff6a6a; }
+  .ok { color: #5ae08a; }
+  .warn { color: #ffb84d; }
+  a.dl {
+    display: block; text-align: center; padding: 14px; background: #2e7cf7;
+    color: #fff; text-decoration: none; border-radius: 10px; font-weight: 600; margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Link SafetyCulture Photos</h1>
+  <div class="sub">Attach imported SafetyCulture photos to the matching Riverdance checklist items and safety equipment slots.</div>
+
+  <div class="banner">
+    Run this <strong>after</strong> importing <code>Riverdance_SC_photos_batch01.zip</code> via <a href="import.html" style="color:#f0d48a">import.html</a>. It reads photos with IDs starting <code>1775831269714_sc_photo_</code> and appends their IDs to the Riverdance survey's checklist items and safety equipment slots.
+  </div>
+
+  <div class="card">
+    <div class="row"><span class="label">Target survey</span><span class="value">Riverdance (1775831269714)</span></div>
+    <div class="row"><span class="label">SC photos found in DB</span><span class="value" id="scCount">—</span></div>
+    <div class="row"><span class="label">Survey checklist items</span><span class="value" id="itemCount">—</span></div>
+    <div class="row"><span class="label">Safety equipment slots</span><span class="value" id="seCount">—</span></div>
+    <button id="scanBtn">Scan</button>
+  </div>
+
+  <div class="card" id="previewCard" style="display:none">
+    <div class="row"><span class="label">Photos that will link to checklist items</span><span class="value" id="willLinkItems">—</span></div>
+    <div class="row"><span class="label">Photos that will link to safety equipment</span><span class="value" id="willLinkSafety">—</span></div>
+    <div class="row"><span class="label">Photos with unmatched itemLabel</span><span class="value" id="willSkip">—</span></div>
+    <button id="linkBtn" class="go">Link photos to survey</button>
+  </div>
+
+  <div class="card" id="doneCard" style="display:none">
+    <div id="doneMsg" class="banner ok"></div>
+    <a href="index.html" class="dl">Open Kiki app</a>
+  </div>
+
+  <div class="card">
+    <div class="label">Log</div>
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<script>
+const DB_NAME = 'KikiSurveyDB';
+const SURVEY_ID = 1775831269714;
+const SC_PREFIX = '1775831269714_sc_photo_';
+
+const logEl = document.getElementById('log');
+function log(msg, cls) {
+  const line = document.createElement('div');
+  if (cls) line.className = cls;
+  line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 2);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+let state = { survey: null, scPhotos: [], bySafety: {}, byItem: {}, unmatched: [] };
+
+async function scan() {
+  try {
+    const db = await openDB();
+
+    // Load Riverdance survey
+    const survey = await new Promise((resolve, reject) => {
+      const tx = db.transaction('surveys', 'readonly');
+      const req = tx.objectStore('surveys').get(SURVEY_ID);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    if (!survey) {
+      log('Riverdance survey not found in this browser (id=' + SURVEY_ID + ')', 'err');
+      return;
+    }
+    state.survey = survey;
+    log('Loaded survey: ' + (survey.vesselName || survey.id), 'ok');
+
+    // Count items and safety equipment
+    const itemCount = survey.items ? Object.keys(survey.items).length : 0;
+    const seCount = Array.isArray(survey.safetyEquipment) ? survey.safetyEquipment.length : 0;
+    document.getElementById('itemCount').textContent = itemCount;
+    document.getElementById('seCount').textContent = seCount;
+
+    // Load all SC photos for this survey
+    const scPhotos = await new Promise((resolve, reject) => {
+      const tx = db.transaction('photos', 'readonly');
+      const store = tx.objectStore('photos');
+      const req = store.getAll();
+      req.onsuccess = () => {
+        const all = req.result || [];
+        resolve(all.filter(p => p.id && p.id.indexOf(SC_PREFIX) === 0));
+      };
+      req.onerror = () => reject(req.error);
+    });
+    state.scPhotos = scPhotos;
+    document.getElementById('scCount').textContent = scPhotos.length;
+    log('Found ' + scPhotos.length + ' SC photos in DB', scPhotos.length ? 'ok' : 'warn');
+
+    if (scPhotos.length === 0) {
+      log('No SC photos found. Run import.html first with Riverdance_SC_photos_batch01.zip', 'warn');
+      return;
+    }
+
+    // Bucket photos by target
+    state.bySafety = {};
+    state.byItem = {};
+    state.unmatched = [];
+    for (const p of scPhotos) {
+      const lbl = p.itemLabel || '';
+      const m = lbl.match(/^safety_eq_(\d+)$/);
+      if (m) {
+        const idx = parseInt(m[1], 10);
+        if (!state.bySafety[idx]) state.bySafety[idx] = [];
+        state.bySafety[idx].push(p.id);
+      } else if (lbl && survey.items && survey.items[lbl] !== undefined) {
+        if (!state.byItem[lbl]) state.byItem[lbl] = [];
+        state.byItem[lbl].push(p.id);
+      } else if (lbl) {
+        // Item label doesn't exist on survey yet — will create empty record
+        if (!state.byItem[lbl]) state.byItem[lbl] = [];
+        state.byItem[lbl].push(p.id);
+      } else {
+        state.unmatched.push(p.id);
+      }
+    }
+
+    // Sort each bucket by photoId so Photo 1, 2, 3... stay in order
+    for (const k of Object.keys(state.bySafety)) state.bySafety[k].sort();
+    for (const k of Object.keys(state.byItem)) state.byItem[k].sort();
+
+    const itemPhotoTotal = Object.values(state.byItem).reduce((a,b) => a + b.length, 0);
+    const safetyPhotoTotal = Object.values(state.bySafety).reduce((a,b) => a + b.length, 0);
+    document.getElementById('willLinkItems').textContent = itemPhotoTotal + ' (across ' + Object.keys(state.byItem).length + ' items)';
+    document.getElementById('willLinkSafety').textContent = safetyPhotoTotal + ' (across ' + Object.keys(state.bySafety).length + ' slots)';
+    document.getElementById('willSkip').textContent = state.unmatched.length;
+
+    log('Item buckets: ' + Object.keys(state.byItem).length, 'ok');
+    for (const k of Object.keys(state.byItem)) log('  "' + k + '" → ' + state.byItem[k].length);
+    log('Safety buckets: ' + Object.keys(state.bySafety).length, 'ok');
+    for (const k of Object.keys(state.bySafety)) log('  safety_eq_' + k + ' → ' + state.bySafety[k].length);
+    if (state.unmatched.length) log('Unmatched: ' + state.unmatched.length, 'warn');
+
+    document.getElementById('previewCard').style.display = 'block';
+  } catch (e) {
+    log('Scan failed: ' + e.message, 'err');
+  }
+}
+
+async function linkPhotos() {
+  try {
+    const db = await openDB();
+    const survey = state.survey;
+    if (!survey) { log('No survey loaded — run Scan first', 'err'); return; }
+
+    // Ensure items object exists
+    if (!survey.items) survey.items = {};
+
+    // Link to checklist items (append unique)
+    let addedItems = 0;
+    for (const [label, ids] of Object.entries(state.byItem)) {
+      if (!survey.items[label]) {
+        survey.items[label] = { rating: '', text: '', standards: [], photos: [], flagged: false, excluded: false };
+      }
+      if (!Array.isArray(survey.items[label].photos)) survey.items[label].photos = [];
+      for (const id of ids) {
+        if (survey.items[label].photos.indexOf(id) === -1) {
+          survey.items[label].photos.push(id);
+          addedItems++;
+        }
+      }
+    }
+
+    // Link to safety equipment slots (append unique)
+    let addedSafety = 0;
+    if (!Array.isArray(survey.safetyEquipment)) survey.safetyEquipment = [];
+    for (const [idxStr, ids] of Object.entries(state.bySafety)) {
+      const idx = parseInt(idxStr, 10);
+      if (!survey.safetyEquipment[idx]) {
+        log('safety_eq_' + idx + ' does not exist in survey — skipping ' + ids.length + ' photos', 'warn');
+        continue;
+      }
+      if (!Array.isArray(survey.safetyEquipment[idx].photos)) survey.safetyEquipment[idx].photos = [];
+      for (const id of ids) {
+        if (survey.safetyEquipment[idx].photos.indexOf(id) === -1) {
+          survey.safetyEquipment[idx].photos.push(id);
+          addedSafety++;
+        }
+      }
+    }
+
+    // Write survey back
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction('surveys', 'readwrite');
+      const req = tx.objectStore('surveys').put(survey);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+
+    log('Linked ' + addedItems + ' photo(s) to checklist items and ' + addedSafety + ' to safety equipment', 'ok');
+    document.getElementById('doneMsg').textContent =
+      'Done. ' + addedItems + ' photos linked to checklist items, ' + addedSafety + ' linked to safety equipment slots. Open the Kiki app to review Riverdance.';
+    document.getElementById('doneCard').style.display = 'block';
+  } catch (e) {
+    log('Link failed: ' + e.message, 'err');
+  }
+}
+
+document.getElementById('scanBtn').onclick = scan;
+document.getElementById('linkBtn').onclick = linkPhotos;
+log('Ready. Tap Scan.');
+</script>
+</body>
+</html>
