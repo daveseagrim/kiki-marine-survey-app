@@ -21,11 +21,19 @@
   .col h3 { font-size: 12px; font-weight: 700; margin: 0 0 8px; color: #9db3d6; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; }
   .col.port h3 { color: #5ae08a; }
   .col.stbd h3 { color: #ffb84d; }
-  .thumbs { display: flex; flex-wrap: wrap; gap: 6px; }
-  .thumb { position: relative; width: 72px; height: 72px; border-radius: 6px; overflow: hidden; background: #05122a; cursor: pointer; border: 2px solid transparent; }
+  .thumbs { display: flex; flex-wrap: wrap; gap: 10px; }
+  .thumb { position: relative; width: 180px; height: 180px; border-radius: 8px; overflow: hidden; background: #05122a; cursor: pointer; border: 3px solid transparent; }
   .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .thumb .arrow { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.65); color: #fff; font-size: 14px; font-weight: 700; border-radius: 4px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+  .thumb .arrow { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.75); color: #fff; font-size: 22px; font-weight: 700; border-radius: 6px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; }
   .thumb:hover { border-color: #2e7cf7; }
+  .thumb.big img { cursor: zoom-out; }
+  .zoom-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
+  .zoom-overlay.open { display: flex; }
+  .zoom-overlay img { max-width: 95vw; max-height: 80vh; object-fit: contain; border-radius: 8px; }
+  .zoom-overlay .actions { display: flex; gap: 10px; margin-top: 14px; }
+  .zoom-overlay button { width: auto; min-width: 150px; padding: 12px 18px; }
+  .zoom-overlay .close { background: #3a1a1a; }
+  .zoom-overlay .move { background: #1e6b3a; }
   .empty { color: #5a6f92; font-size: 12px; text-align: center; padding: 16px 4px; }
   button { width: 100%; font-size: 16px; font-weight: 600; padding: 12px; border-radius: 10px; border: none; margin-top: 8px; cursor: pointer; background: #2e7cf7; color: #fff; }
   .log { background: #05122a; padding: 8px; border-radius: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 11px; white-space: pre-wrap; max-height: 160px; overflow: auto; color: #9db3d6; }
@@ -44,6 +52,14 @@
   </div>
 
   <div id="groups"></div>
+
+  <div class="zoom-overlay" id="zoom">
+    <img id="zoomImg" alt="">
+    <div class="actions">
+      <button class="close" id="zoomClose">Close</button>
+      <button class="move" id="zoomMove">Move to other side</button>
+    </div>
+  </div>
 
   <div class="card"><div class="sub" style="margin:0 0 4px">Log</div><div class="log" id="log"></div></div>
   <div style="text-align:center;margin-top:12px"><a href="index.html" class="back">← Back to Kiki app</a></div>
@@ -167,7 +183,7 @@ async function fillCol(div, ids, side) {
     arrow.textContent = side === 'port' ? '→' : '←';
     t.appendChild(img);
     t.appendChild(arrow);
-    t.onclick = () => movePhoto(id, div.dataset.label, div.dataset.other);
+    t.onclick = () => openZoom(id, div.dataset.label, div.dataset.other);
     div.appendChild(t);
     getPhoto(id).then(url => { if (url) img.src = url; });
   }
@@ -216,6 +232,30 @@ async function movePhoto(photoId, fromLbl, toLbl) {
     render();
   } catch (e) { log('Move failed: ' + e.message, 'err'); }
 }
+
+let zoomState = { id: null, from: null, to: null };
+async function openZoom(id, fromLbl, toLbl) {
+  zoomState = { id, from: fromLbl, to: toLbl };
+  const url = await getPhoto(id);
+  document.getElementById('zoomImg').src = url || '';
+  const moveBtn = document.getElementById('zoomMove');
+  const otherSide = toLbl.startsWith('Port — ') ? 'Port' : 'Starboard';
+  moveBtn.textContent = 'Move to ' + otherSide;
+  document.getElementById('zoom').classList.add('open');
+}
+function closeZoom() {
+  document.getElementById('zoom').classList.remove('open');
+  document.getElementById('zoomImg').src = '';
+  zoomState = { id: null, from: null, to: null };
+}
+document.getElementById('zoomClose').onclick = closeZoom;
+document.getElementById('zoom').onclick = (ev) => { if (ev.target.id === 'zoom') closeZoom(); };
+document.getElementById('zoomMove').onclick = async () => {
+  if (!zoomState.id) return;
+  const { id, from, to } = zoomState;
+  closeZoom();
+  await movePhoto(id, from, to);
+};
 
 document.getElementById('loadBtn').onclick = load;
 log('Ready. Tap Load.');
