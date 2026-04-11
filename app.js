@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2014';
+const APP_VERSION = 'v2015';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1962,22 +1962,34 @@ function showNotesSheet(itemLabel, categoryName) {
       </div>
     `;
     // Capture-phase diagnostic: fires BEFORE any other handler on any
-    // click or touch inside the overlay. This tells us whether iOS is
-    // dispatching events at all — and exactly which element they hit.
-    overlay.addEventListener('touchstart', (ev) => {
-      const d = document.getElementById('sheet-diag');
-      if (!d) return;
-      const t = ev.target || {};
+    // click inside the overlay. Shows the target chain so we can see
+    // exactly which element the tap lands on.
+    const describe = (t) => {
+      if (!t) return '?';
       const tag = (t.tagName || '?').toLowerCase();
-      const cls = (t.className || '').toString().split(' ')[0] || '?';
-      d.textContent = `diag: touchstart ${tag}.${cls}`;
-    }, true);
+      const cls = (t.className || '').toString().split(' ').filter(Boolean)[0] || '-';
+      const id = t.id ? '#' + t.id : '';
+      return tag + id + '.' + cls;
+    };
     overlay.addEventListener('click', (ev) => {
       const d = document.getElementById('sheet-diag');
-      const t = ev.target || {};
-      const tag = (t.tagName || '?').toLowerCase();
-      const cls = (t.className || '').toString().split(' ')[0] || '?';
-      if (d) d.textContent = `diag: click ${tag}.${cls}`;
+      const chain = [];
+      let el = ev.target;
+      for (let i = 0; i < 5 && el && el !== overlay; i++) {
+        chain.push(describe(el));
+        el = el.parentElement;
+      }
+      if (d) d.textContent = 'diag: ' + chain.join(' ← ');
+      // If the click is inside a snippet card button, call the handler
+      // directly — this bypasses any inline onclick delivery issue.
+      const btn = ev.target.closest && ev.target.closest('.snippet-card-sheet');
+      if (btn) {
+        const idx = parseInt(btn.dataset.variantIdx, 10);
+        if (!isNaN(idx)) {
+          window._sheetCardTap(itemLabel, idx, btn);
+          return;
+        }
+      }
       // Only close on direct overlay taps
       if (ev.target !== overlay) return;
       saveNotesFromSheet(itemLabel, categoryName, sanitizedLabel);
