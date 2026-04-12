@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2068';
+const APP_VERSION = 'v2069';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9269,6 +9269,19 @@ async function checkSurvey() {
     return out;
   }).concat(proofreadItems);
 
+  // Assign survey-order index BEFORE sorting — issues follow survey structure
+  // (header → engine → photos → checklist in template order → valuation → safety → grammar)
+  // and proofread items follow template order. This IS the natural survey order.
+  allCheckItems.forEach((item, idx) => { item._surveyOrder = idx; });
+
+  // Build a message→surveyOrder lookup so resolved items can be sorted in survey order
+  const surveyOrderByMessage = {};
+  allCheckItems.forEach(item => {
+    if (!surveyOrderByMessage.hasOwnProperty(item.message)) {
+      surveyOrderByMessage[item.message] = item._surveyOrder;
+    }
+  });
+
   // Sort: severity order, then alphabetically within each severity
   allCheckItems.sort((a, b) => {
     const sa = sevOrder[a.severity] ?? 9;
@@ -9285,63 +9298,114 @@ async function checkSurvey() {
   // ── Load resolved and force-OK state ───────────────────────────────
   const resolvedKey = `checkSurvey_resolved_${currentSurveyId}`;
   const forceKey = `checkSurvey_forceOK_${currentSurveyId}`;
+  const prevIssuesKey = `checkSurvey_prevIssues_${currentSurveyId}`;
   let resolvedState = {};
   let forceOKState = {};
   try { resolvedState = JSON.parse(sessionStorage.getItem(resolvedKey) || '{}'); } catch(e) {}
   try { forceOKState = JSON.parse(sessionStorage.getItem(forceKey) || '{}'); } catch(e) {}
+
+  // ── Auto-detect newly resolved items ──────────────────────────────
+  // Compare current issues against the previous run's issues.
+  // Any issue that was present last time but is NOT in the current audit = fixed!
+  let prevIssueMessages = [];
+  try { prevIssueMessages = JSON.parse(sessionStorage.getItem(prevIssuesKey) || '[]'); } catch(e) {}
+
+  const currentIssueMessages = new Set(issues.map(i => i.message));
+  let resolvedChanged = false;
+  for (const prevMsg of prevIssueMessages) {
+    // If it was an issue before but isn't now, and isn't already tracked, mark as resolved
+    if (!currentIssueMessages.has(prevMsg) && !resolvedState[prevMsg] && !forceOKState[prevMsg]) {
+      resolvedState[prevMsg] = { fixedAt: Date.now(), auto: true, _surveyOrder: surveyOrderByMessage[prevMsg] ?? 9999 };
+      resolvedChanged = true;
+    }
+  }
+  if (resolvedChanged) {
+    sessionStorage.setItem(resolvedKey, JSON.stringify(resolvedState));
+  }
+
+  // Save current issues for next comparison
+  sessionStorage.setItem(prevIssuesKey, JSON.stringify([...currentIssueMessages]));
+
+  // ── Build the resolved items list for display ─────────────────────
+  // Resolved items: entries in resolvedState or forceOKState that are NOT
+  // in the current issues (because they've been fixed)
+  const resolvedItems = [];
+  for (const [msg, data] of Object.entries(resolvedState)) {
+    if (!currentIssueMessages.has(msg)) {
+      resolvedItems.push({
+        severity: 'resolved',
+        message: msg,
+        _resolvedBy: 'fixed',
+        itemLabel: data.itemLabel || null,
+        _surveyOrder: data._surveyOrder ?? surveyOrderByMessage[msg] ?? 9999,
+      });
+    }
+  }
+  for (const [msg, data] of Object.entries(forceOKState)) {
+    if (currentIssueMessages.has(msg)) {
+      // Force-OK'd but issue still exists in audit — show in resolved anyway
+      resolvedItems.push({
+        severity: 'resolved',
+        message: msg,
+        _resolvedBy: 'force',
+        itemLabel: data.itemLabel || null,
+        _surveyOrder: data._surveyOrder ?? surveyOrderByMessage[msg] ?? 9999,
+      });
+    } else if (!resolvedState[msg]) {
+      // Force-OK'd and issue is gone
+      resolvedItems.push({
+        severity: 'resolved',
+        message: msg,
+        _resolvedBy: 'force',
+        itemLabel: data.itemLabel || null,
+        _surveyOrder: data._surveyOrder ?? surveyOrderByMessage[msg] ?? 9999,
+      });
+    }
+  }
 
   // ── Assign stable IDs to each item for checkbox tracking ───────────
   allCheckItems.forEach((item, idx) => {
     item._checkId = `chk_${idx}_${(item.itemLabel || item.message || '').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 40)}`;
   });
 
-  // ── Separate resolved items from active items ─────────────────────
-  // An item is "resolved" if it was auto-detected as fixed OR force-OK'd
-  // But only if it was previously an issue (not proofread)
+  // ── Filter out force-OK'd items from active list ──────────────────
   const activeItems = [];
-  const okItems = [];
   allCheckItems.forEach(item => {
-    const isForceOK = forceOKState[item.message];
-    const isResolved = resolvedState[item.message];
-    if ((isForceOK || isResolved) && item.severity !== 'proofread') {
-      item._resolvedBy = isForceOK ? 'force' : 'fixed';
-      okItems.push(item);
-    } else {
-      activeItems.push(item);
-    }
+    if (forceOKState[item.message]) return; // force-OK'd, already in resolvedItems
+    activeItems.push(item);
   });
 
-  // Clean up stale resolved/forceOK entries that no longer appear in issues
-  // (i.e. the issue genuinely no longer exists after re-audit)
-  const allMessages = new Set(allCheckItems.map(it => it.message));
-  let cleanedResolved = false;
-  for (const msg of Object.keys(resolvedState)) {
-    if (!allMessages.has(msg)) { delete resolvedState[msg]; cleanedResolved = true; }
-  }
-  for (const msg of Object.keys(forceOKState)) {
-    if (!allMessages.has(msg)) { delete forceOKState[msg]; cleanedResolved = true; }
-  }
-  if (cleanedResolved) {
-    sessionStorage.setItem(resolvedKey, JSON.stringify(resolvedState));
-    sessionStorage.setItem(forceKey, JSON.stringify(forceOKState));
-  }
-
-  // Count reviewed items
-  const reviewedCount = activeItems.filter(it => reviewedState[it._checkId]).length;
-
   // ── Group active items by severity for section headers ─────────────
-  // Filter out proofread items that have been reviewed (they go to OK section)
+  // Items that are reviewed (checked off) move to the Resolved section
   const sections = [];
   let currentSev = null;
   activeItems.forEach(item => {
-    // Skip proofread items that are reviewed — they'll appear in OK section
-    if (item.severity === 'proofread' && reviewedState[item._checkId]) return;
+    // Skip reviewed items — they'll appear in the Resolved section
+    if (reviewedState[item._checkId]) return;
     if (item.severity !== currentSev) {
       currentSev = item.severity;
       sections.push({ severity: currentSev, items: [] });
     }
     sections[sections.length - 1].items.push(item);
   });
+
+  // Add reviewed (checked-off) items to resolvedItems so they appear in the Resolved section
+  activeItems.forEach(item => {
+    if (reviewedState[item._checkId]) {
+      const resolveLabel = item.severity === 'proofread' ? 'proofread' : 'reviewed';
+      resolvedItems.push({
+        severity: 'resolved',
+        message: item.message,
+        itemLabel: item.itemLabel || null,
+        _resolvedBy: resolveLabel,
+        _surveyOrder: item._surveyOrder ?? surveyOrderByMessage[item.message] ?? 9999,
+        rating: item.rating || '',
+      });
+    }
+  });
+
+  // Sort resolved items in survey order (the order they appear in the actual survey)
+  resolvedItems.sort((a, b) => (a._surveyOrder ?? 9999) - (b._surveyOrder ?? 9999));
 
   // ── Build HTML ─────────────────────────────────────────────────────
   let html = `
@@ -9351,7 +9415,7 @@ async function checkSurvey() {
         ${completionPct}% rated (${ratedCount}/${totalChecks}) &nbsp;|&nbsp;
         ${sevIcon.critical} ${criticalCount} &nbsp; ${sevIcon.warning} ${warningCount} &nbsp; ${sevIcon.info} ${infoCount} &nbsp; ${sevIcon.proofread} ${proofreadItems.length}
       </div>
-      <div style="font-size:12px;color:#94a3b8;margin-top:4px;">✅ ${reviewedCount + okItems.length} / ${allCheckItems.length} reviewed${okItems.length > 0 ? ` &nbsp;|&nbsp; <span style="color:#16a34a;">${okItems.length} resolved</span>` : ''}</div>
+      <div style="font-size:12px;color:#94a3b8;margin-top:4px;">✅ ${resolvedItems.length} / ${allCheckItems.length} resolved${resolvedItems.length > 0 ? ` &nbsp;|&nbsp; <span style="color:#16a34a;">${resolvedItems.length} in OK section</span>` : ''}</div>
     </div>
   `;
 
@@ -9380,7 +9444,6 @@ async function checkSurvey() {
   let globalIdx = 0;
   sections.forEach(section => {
     const sev = section.severity;
-    const secReviewed = section.items.filter(it => reviewedState[it._checkId]).length;
 
     html += `
       <div style="margin-bottom:16px;">
@@ -9388,7 +9451,7 @@ async function checkSurvey() {
           <div style="font-weight:700;font-size:15px;color:#1e293b;display:flex;align-items:center;gap:6px;">
             ${sevIcon[sev]} ${sevLabel[sev]} <span style="font-weight:400;color:#94a3b8;font-size:12px;">(${section.items.length})</span>
           </div>
-          <span style="font-size:11px;color:#94a3b8;">${secReviewed}/${section.items.length} reviewed</span>
+          <span style="font-size:11px;color:#94a3b8;">check ☑ to resolve</span>
         </div>
     `;
 
@@ -9444,39 +9507,32 @@ async function checkSurvey() {
     html += '</div>';
   });
 
-  // ── OK / RESOLVED section ────────────────────────────────────────────────
-  // Includes: auto-resolved issues, force-OK'd issues, and reviewed proofread items
-  const allOKItems = [...okItems];
-  // Add proofread items that have been checked off (reviewed)
-  activeItems.forEach(item => {
-    if (item.severity === 'proofread' && reviewedState[item._checkId]) {
-      item._resolvedBy = 'proofread';
-      allOKItems.push(item);
-    }
-  });
-
-  if (allOKItems.length > 0) {
+  // ── RESOLVED section ─────────────────────────────────────────────────────
+  // Includes: auto-resolved (fixed), force-OK'd, reviewed (checked off), and proofread items
+  // Sorted in survey order so items appear in the same sequence as the actual survey
+  if (resolvedItems.length > 0) {
     html += `
       <div style="margin-bottom:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:2px solid #86efac;margin-bottom:8px;cursor:pointer;user-select:none;"
              onclick="(function(){var l=document.getElementById('cs-ok-list');var c=document.getElementById('cs-ok-caret');if(!l||!c)return;var open=l.style.display!=='none';l.style.display=open?'none':'block';c.textContent=open?'▸':'▾';})()">
           <div style="font-weight:700;font-size:15px;color:#16a34a;display:flex;align-items:center;gap:6px;">
-            ✅ Resolved <span style="font-weight:400;color:#86efac;font-size:12px;">(${allOKItems.length})</span>
+            ✅ Resolved <span style="font-weight:400;color:#86efac;font-size:12px;">(${resolvedItems.length})</span>
           </div>
           <span id="cs-ok-caret" style="color:#86efac;font-size:16px;">▸</span>
         </div>
         <div id="cs-ok-list" style="display:none;">
     `;
-    allOKItems.forEach(item => {
-      const ratingChar = item.rating ? item.rating.charAt(0) : '';
+    resolvedItems.forEach(item => {
+      const ratingChar = item.rating ? String(item.rating).charAt(0) : '';
       const rColor = ratingColors[ratingChar] || '#6b7280';
       const ratingBadge = ratingChar
         ? `<span style="flex-shrink:0;font-size:10px;font-weight:700;color:white;background:${rColor};padding:2px 6px;border-radius:4px;">${ratingChar}</span>`
         : '';
       const resolveTag = item._resolvedBy === 'force' ? '🔓 Force OK'
         : item._resolvedBy === 'proofread' ? '📖 Proofread'
+        : item._resolvedBy === 'reviewed' ? '☑ Reviewed'
         : '✅ Fixed';
-      const displayText = (item.severity !== 'proofread' ? item.message : item.itemLabel || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const displayText = (item.message || item.itemLabel || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       html += `
         <div style="margin-bottom:3px;opacity:0.7;">
           <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:6px 10px;display:flex;align-items:center;gap:8px;">
@@ -9516,8 +9572,33 @@ async function checkSurvey() {
   window._csToggleReviewed = function(checkId, checked) {
     reviewedState[checkId] = checked;
     sessionStorage.setItem(checkStateKey, JSON.stringify(reviewedState));
-    const row = document.getElementById('row_' + checkId);
-    if (row) row.style.opacity = checked ? '0.5' : '1';
+    if (checked) {
+      // Item moves to Resolved — save scroll position and re-render
+      const scrollEl = document.getElementById('csScrollContainer');
+      const scrollPos = scrollEl ? scrollEl.scrollTop : 0;
+      const row = document.getElementById('row_' + checkId);
+      if (row) {
+        row.style.transition = 'opacity 0.3s, transform 0.3s';
+        row.style.opacity = '0';
+        row.style.transform = 'translateX(20px)';
+      }
+      setTimeout(async () => {
+        document.getElementById('checkSurveyOverlay')?.remove();
+        await checkSurvey();
+        const newScroll = document.getElementById('csScrollContainer');
+        if (newScroll) newScroll.scrollTop = Math.max(0, scrollPos - 50);
+      }, 300);
+    } else {
+      // Unchecked — item returns from Resolved to active list, re-render
+      const scrollEl = document.getElementById('csScrollContainer');
+      const scrollPos = scrollEl ? scrollEl.scrollTop : 0;
+      setTimeout(async () => {
+        document.getElementById('checkSurveyOverlay')?.remove();
+        await checkSurvey();
+        const newScroll = document.getElementById('csScrollContainer');
+        if (newScroll) newScroll.scrollTop = scrollPos;
+      }, 50);
+    }
   };
 
   // Toggle inline content expand/collapse
@@ -9550,6 +9631,7 @@ async function checkSurvey() {
       severity: workingItem ? workingItem.severity : null,
       category: workingItem ? workingItem.category : null,
       message: workingItem ? workingItem.message : null,
+      _surveyOrder: workingItem ? workingItem._surveyOrder : 9999,
     };
 
     // Remember scroll position
@@ -9704,7 +9786,7 @@ async function _csEvaluateAndReturn(scrollPos) {
     const resolvedKey = `checkSurvey_resolved_${currentSurveyId}`;
     let resolved = {};
     try { resolved = JSON.parse(sessionStorage.getItem(resolvedKey) || '{}'); } catch(e) {}
-    resolved[working.message] = { fixedAt: Date.now(), itemLabel: working.itemLabel };
+    resolved[working.message] = { fixedAt: Date.now(), itemLabel: working.itemLabel, _surveyOrder: working._surveyOrder ?? 9999 };
     sessionStorage.setItem(resolvedKey, JSON.stringify(resolved));
 
     // Show success toast
@@ -9872,7 +9954,7 @@ function _csShowEvalModal(working, reason, scrollPos) {
     const forceKey = `checkSurvey_forceOK_${currentSurveyId}`;
     let forceOK = {};
     try { forceOK = JSON.parse(sessionStorage.getItem(forceKey) || '{}'); } catch(e) {}
-    forceOK[working.message] = { forcedAt: Date.now(), itemLabel: working.itemLabel, reason: reason };
+    forceOK[working.message] = { forcedAt: Date.now(), itemLabel: working.itemLabel, reason: reason, _surveyOrder: working._surveyOrder ?? 9999 };
     sessionStorage.setItem(forceKey, JSON.stringify(forceOK));
     showToast('✓ Marked as OK: ' + (working.itemLabel || working.message));
     window._csWorkingOn = null;
