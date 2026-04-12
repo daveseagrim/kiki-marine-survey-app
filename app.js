@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2032';
+const APP_VERSION = 'v2034';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1987,6 +1987,12 @@ function showNotesSheet(itemLabel, categoryName) {
     const overlay = document.createElement('div');
     overlay.id = 'bottomSheetOverlay';
     overlay.className = 'bottom-sheet-overlay';
+    overlay.setAttribute('data-item-label', itemLabel);
+    // Push a dedicated history entry for the notes sheet. Back / swipe-back
+    // consumes this entry (caught by the popstate overlay-guard above) and
+    // closes just the sheet — without the entry, the inspection state would
+    // be popped and the surveyor dumped to the home screen.
+    try { history.pushState({ view: 'notes-sheet', surveyId: currentSurveyId, itemLabel: itemLabel }, ''); } catch (_) {}
     overlay.innerHTML = `
       <div class="bottom-sheet" onclick="event.stopPropagation();">
         <div class="bottom-sheet-handle"></div>
@@ -2130,9 +2136,18 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
 // view explicitly. Used by both Cancel and Save Notes.
 function closeNotesSheet(itemLabel) {
   const overlay = document.getElementById('bottomSheetOverlay');
-  if (overlay) overlay.remove();
-  // Defer until the overlay is fully removed so scrollIntoView measures
-  // against the newly-visible underlying page.
+  if (!overlay) return;
+  // Route close through history.back() so the popstate overlay-guard is the
+  // single source of truth for dismissal. This guarantees the surveyor lands
+  // back on the inspection view (not home) no matter what triggered the close
+  // — Cancel tap, Save Notes, background tap, or iOS swipe-back.
+  const state = history.state;
+  if (state && state.view === 'notes-sheet') {
+    try { history.back(); return; } catch (_) {}
+  }
+  // Fallback: no pushed state (shouldn't normally happen) — remove manually
+  // and restore scroll position.
+  overlay.remove();
   setTimeout(() => {
     if (!itemLabel) return;
     const row = document.querySelector(
@@ -13483,6 +13498,32 @@ async function initApp() {
     let _handlingPopstate = false;
     window.addEventListener('popstate', (e) => {
       if (_handlingPopstate) return;
+      // If a bottom-sheet overlay is open, back/swipe-back should ONLY close
+      // the sheet — never navigate away from the inspection view. This also
+      // absorbs any spurious popstate iOS fires while a sheet is active
+      // (keyboard dismiss, swipe-back gesture, etc.) so the surveyor never
+      // gets kicked to the home screen mid-edit.
+      const _openSheet = document.getElementById('bottomSheetOverlay');
+      if (_openSheet) {
+        _openSheet.remove();
+        // Re-push an inspection state so forward history stays sane
+        if (currentView === 'inspection' && currentSurveyId) {
+          history.pushState({ view: 'inspection', surveyId: currentSurveyId }, '');
+        }
+        // Scroll the previously-edited row back into view
+        const lbl = _openSheet.getAttribute('data-item-label');
+        if (lbl) {
+          setTimeout(() => {
+            const row = document.querySelector(
+              `.compact-item-wrapper[data-item-label="${String(lbl).replace(/"/g, '\\"')}"]`
+            );
+            if (row && typeof row.scrollIntoView === 'function') {
+              try { row.scrollIntoView({ block: 'center', behavior: 'auto' }); } catch (_) { row.scrollIntoView(); }
+            }
+          }, 0);
+        }
+        return;
+      }
       // If camera is active, iOS may fire a spurious popstate on return.
       // Suppress it and re-push the current state so the user stays put.
       if (window._cameraActive || window._backupActive) {
