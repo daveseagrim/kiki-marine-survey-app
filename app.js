@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2100';
+const APP_VERSION = 'v2101';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -5072,71 +5072,108 @@ function renderHome() {
         </div>
       `;
     } else {
-      let html = importBtn + '<div style="margin-bottom: 120px;">';
-      surveys.forEach(survey => {
-        const completion = getCompletionPercentage(survey);
-        const esc = (s) => (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+      const esc = (s) => (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const monthsFull = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-        // Format date as "2026, April 7" from surveyDate (YYYY-MM-DD) or createdAt
-        const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-        let cardDate = '';
+      // Group surveys by month/year, sorted newest first
+      const sorted = [...surveys].sort((a, b) => {
+        const da = a.surveyDate || new Date(a.createdAt).toISOString().split('T')[0];
+        const db = b.surveyDate || new Date(b.createdAt).toISOString().split('T')[0];
+        return db.localeCompare(da);
+      });
+
+      const groups = {};
+      sorted.forEach(survey => {
         const rawDate = survey.surveyDate || new Date(survey.createdAt).toISOString().split('T')[0];
-        if (rawDate) {
-          const parts = rawDate.split('-');
-          if (parts.length === 3) {
-            cardDate = `${parts[0]}, ${months[parseInt(parts[1], 10) - 1]} ${parseInt(parts[2], 10)}`;
-          } else {
-            cardDate = rawDate;
-          }
-        }
+        const parts = rawDate ? rawDate.split('-') : [];
+        const groupKey = parts.length >= 2 ? `${parts[0]}-${parts[1]}` : 'Unknown';
+        const groupLabel = parts.length >= 2 ? `${monthsFull[parseInt(parts[1], 10) - 1]} ${parts[0]}` : 'Other';
+        if (!groups[groupKey]) groups[groupKey] = { label: groupLabel, surveys: [] };
+        groups[groupKey].surveys.push({ survey, rawDate, parts });
+      });
 
-        // Short survey type label
-        const typeShort = survey.surveyType === 'Insurance survey' ? 'Insurance'
-          : survey.surveyType === 'Pre-purchase survey' ? 'Pre-Purchase'
-          : survey.surveyType === 'Appraisal' ? 'Appraisal'
-          : '';
+      let html = importBtn + '<div style="margin-bottom:120px;">';
 
-        // Boat name with year/make/model: "Stardust a Beneteau First 2014"
-        const boatLabel = [
-          survey.vesselName ? esc(survey.vesselName) : '',
-          survey.yearMakeModel ? 'a ' + esc(survey.yearMakeModel) : ''
-        ].filter(Boolean).join(' ') || 'Unnamed';
-
-        // Build card title: 2026, April 7, Insurance, Alf Kwinter, Stardust a Beneteau First 2014, Outer Harbour Marina
-        const titleParts = [
-          cardDate,
-          typeShort,
-          survey.clientName ? esc(survey.clientName) : '',
-          boatLabel,
-          survey.location ? esc(shortLocation(survey.location)) : ''
-        ].filter(Boolean);
-
-        // Type badge colour
-        const typeBadgeBg = survey.surveyType === 'Insurance survey' ? '#f59e0b' : '#1e3a5f';
-        const typeBadge = typeShort
-          ? `<span style="display:inline-block;background:${typeBadgeBg};color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;vertical-align:middle;">${esc(typeShort).toUpperCase()}</span>`
-          : '';
-
+      for (const groupKey of Object.keys(groups).sort().reverse()) {
+        const group = groups[groupKey];
         html += `
-          <div class="survey-card" onclick="openSurvey('${survey.id}')">
-            <p class="survey-name" style="font-size:14px;line-height:1.5;">${titleParts.join(', ')}</p>
-            <div style="margin-top:6px;">${typeBadge}</div>
-            <div class="progress-bar" style="margin-top:8px;">
-              <div class="progress-fill" style="width: ${completion}%; background-color: ${completion === 100 ? '#16a34a' : '#1e3a5f'};"></div>
+          <div style="margin-bottom:4px;">
+            <div style="padding:8px 4px 4px;font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">
+              ${esc(group.label)} <span style="font-weight:400;color:#cbd5e1;">(${group.surveys.length})</span>
             </div>
-            <div class="completion-text">${completion}% complete</div>
-            <div style="display:flex;gap:8px;margin-top:12px;">
-              <button class="btn-secondary" style="flex:1;" onclick="event.stopPropagation(); exportSurvey('${survey.id}')">📤 Export</button>
-              <div style="position:relative;flex:1;" onclick="event.stopPropagation();">
-                <button class="btn-secondary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:4px;"
-                        onclick="toggleSurveyMenu(this, '${survey.id}')">
-                  More ▾
-                </button>
+            <div style="background:white;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden;">
+        `;
+
+        group.surveys.forEach(({ survey, parts }, idx) => {
+          const completion = getCompletionPercentage(survey);
+          const dayNum = parts.length >= 3 ? parseInt(parts[2], 10) : '';
+          const monthShort = parts.length >= 2 ? months[parseInt(parts[1], 10) - 1] : '';
+
+          const typeShort = survey.surveyType === 'Insurance survey' ? 'INS'
+            : survey.surveyType === 'Pre-purchase survey' ? 'P-P'
+            : survey.surveyType === 'Appraisal' ? 'APR' : '';
+          const typeBadgeBg = survey.surveyType === 'Insurance survey' ? '#f59e0b'
+            : survey.surveyType === 'Pre-purchase survey' ? '#1e3a5f'
+            : survey.surveyType === 'Appraisal' ? '#7c3aed' : '#94a3b8';
+
+          const vesselName = survey.vesselName ? esc(survey.vesselName) : 'Unnamed';
+          const clientName = survey.clientName ? esc(survey.clientName) : '';
+          const location = survey.location ? esc(shortLocation(survey.location)) : '';
+          const ymm = survey.yearMakeModel ? esc(survey.yearMakeModel) : '';
+
+          const progressColour = completion === 100 ? '#16a34a' : completion >= 50 ? '#1e3a5f' : '#94a3b8';
+          const rowId = `sr-${survey.id}`;
+          const separator = idx > 0 ? 'border-top:1px solid #f1f5f9;' : '';
+
+          html += `
+            <div style="${separator}">
+              <div style="display:flex;align-items:center;gap:0;cursor:pointer;padding:10px 8px;user-select:none;-webkit-tap-highlight-color:transparent;"
+                   onclick="openSurvey('${survey.id}')">
+                <!-- Date column -->
+                <div style="flex:0 0 42px;text-align:center;">
+                  <div style="font-size:18px;font-weight:700;color:#1e293b;line-height:1.1;">${dayNum}</div>
+                  <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;">${monthShort}</div>
+                </div>
+                <!-- Type badge -->
+                <div style="flex:0 0 36px;text-align:center;">
+                  ${typeShort ? `<span style="display:inline-block;background:${typeBadgeBg};color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;letter-spacing:0.3px;">${typeShort}</span>` : ''}
+                </div>
+                <!-- Main info -->
+                <div style="flex:1;min-width:0;padding:0 6px;">
+                  <div style="font-size:14px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${vesselName}</div>
+                  <div style="font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${[clientName, ymm, location].filter(Boolean).join(' · ')}</div>
+                </div>
+                <!-- Progress ring + chevron -->
+                <div style="flex:0 0 auto;display:flex;align-items:center;gap:4px;">
+                  <div style="position:relative;width:28px;height:28px;">
+                    <svg width="28" height="28" viewBox="0 0 28 28">
+                      <circle cx="14" cy="14" r="11" fill="none" stroke="#e2e8f0" stroke-width="3"/>
+                      <circle cx="14" cy="14" r="11" fill="none" stroke="${progressColour}" stroke-width="3"
+                              stroke-dasharray="${(completion / 100) * 69.1} 69.1"
+                              stroke-linecap="round" transform="rotate(-90 14 14)"/>
+                    </svg>
+                    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:${progressColour};">${completion}</div>
+                  </div>
+                  <span id="${rowId}-chev" style="display:inline-flex;align-items:center;justify-content:center;min-width:32px;min-height:44px;font-size:18px;color:#94a3b8;flex-shrink:0;"
+                        onclick="event.stopPropagation();toggleSurveyRow('${survey.id}')">▸</span>
+                </div>
+              </div>
+              <!-- Expandable actions panel -->
+              <div id="${rowId}" style="display:none;padding:0 10px 10px 42px;">
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button onclick="event.stopPropagation();openSurvey('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#1e3a5f;color:white;border:none;border-radius:8px;cursor:pointer;">Open</button>
+                  <button onclick="event.stopPropagation();exportSurvey('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:8px;cursor:pointer;">📤 Export</button>
+                  <button onclick="event.stopPropagation();duplicateSurvey('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:8px;cursor:pointer;">📋 Copy</button>
+                  <button onclick="event.stopPropagation();deleteSurveyConfirm('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#fef2f2;color:#dc2626;border:none;border-radius:8px;cursor:pointer;">🗑 Delete</button>
+                </div>
               </div>
             </div>
-          </div>
-        `;
-      });
+          `;
+        });
+
+        html += '</div></div>';
+      }
       html += '</div>';
       content.innerHTML = html;
     }
@@ -8200,10 +8237,10 @@ function renderInspection(survey) {
         </div>
         <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
       </div>
-      <div style="display:flex;gap:8px;">
-        <button onclick="forceAppUpdate()" style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.9);border-radius:8px;padding:8px 0;font-size:12px;font-weight:600;cursor:pointer;">↻ Update</button>
-        <button onclick="regenerateDescriptionFromInspection()" style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);color:white;font-size:12px;font-weight:600;padding:8px 0;border-radius:8px;cursor:pointer;">✨ Desc</button>
-        <button onclick="editSurveyDetails('${survey.id}')" style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);color:white;font-size:12px;font-weight:600;padding:8px 0;border-radius:8px;cursor:pointer;">✏️ Edit Intro</button>
+      <div style="display:flex;justify-content:center;gap:8px;">
+        <button onclick="forceAppUpdate()" style="background:#475569;color:white;border:none;border-radius:22px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);">↻ Update</button>
+        <button onclick="regenerateDescriptionFromInspection()" style="background:#7c3aed;color:white;border:none;border-radius:22px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);">✨ Desc</button>
+        <button onclick="editSurveyDetails('${survey.id}')" style="background:#0369a1;color:white;border:none;border-radius:22px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);">✏️ Edit Intro</button>
       </div>
     </div>
     ${surveyTypeBanner}
@@ -14469,6 +14506,15 @@ function openSurvey(surveyId) {
     }
     renderInspection(survey);
   });
+}
+
+function toggleSurveyRow(surveyId) {
+  const panel = document.getElementById(`sr-${surveyId}`);
+  const chev = document.getElementById(`sr-${surveyId}-chev`);
+  if (!panel) return;
+  const open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  if (chev) chev.textContent = open ? '▸' : '▾';
 }
 
 function toggleSurveyMenu(btn, surveyId) {
