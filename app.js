@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2047';
+const APP_VERSION = 'v2048';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -70,7 +70,7 @@ function persistViewState() {
 // Works from inside the PWA's own WebKit container on iOS.
 async function forceAppUpdate() {
   try {
-    showToast('Updating app…');
+    showToast('Checking for updates…');
     // Unregister all service workers
     if ('serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
@@ -85,12 +85,52 @@ async function forceAppUpdate() {
         await caches.delete(name);
       }
     }
+    showToast('Update found — reloading…');
+    await new Promise(r => setTimeout(r, 500));
     // Reload with cache bypass
     window.location.reload(true);
   } catch (err) {
     console.error('Force update error:', err);
     window.location.reload(true);
   }
+}
+
+// ── Photo compression for reports ──────────────────────────────────────
+// Resizes a dataUrl image to fit within maxDim (default 1200px) and
+// re-encodes as JPEG at the given quality. This dramatically reduces
+// memory when embedding photos in report HTML (iPhone photos can be
+// 5-8 MB each as base64; after compression they're ~100-300 KB).
+function compressPhotoForReport(dataUrl, maxDim = 1200, quality = 0.7) {
+  return new Promise((resolve) => {
+    // If it's not a valid data URL, return as-is
+    if (!dataUrl || !dataUrl.startsWith('data:image')) {
+      resolve(dataUrl);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      let w = img.naturalWidth;
+      let h = img.naturalHeight;
+      // Only resize if larger than maxDim
+      if (w > maxDim || h > maxDim) {
+        if (w > h) {
+          h = Math.round(h * maxDim / w);
+          w = maxDim;
+        } else {
+          w = Math.round(w * maxDim / h);
+          h = maxDim;
+        }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(dataUrl); // fallback to original on error
+    img.src = dataUrl;
+  });
 }
 
 // Camera active flag — persisted to sessionStorage so it survives
@@ -7835,7 +7875,9 @@ function renderInspection(survey) {
       <button class="header-back" onclick="backToHome()">←</button>
       <div style="flex:1;">
         <div class="header-title">${esc(survey.vesselName)}</div>
-        <div class="header-subtitle">Inspection</div>
+        <div class="header-subtitle" style="display:flex;align-items:center;gap:8px;">Inspection — ${APP_VERSION}
+            <button onclick="forceAppUpdate()" style="background:none;border:1px solid rgba(255,255,255,0.4);color:rgba(255,255,255,0.8);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;">↻ Update</button>
+          </div>
       </div>
       <button onclick="regenerateDescriptionFromInspection()" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;font-size:11px;padding:4px 8px;border-radius:6px;cursor:pointer;margin-right:6px;">✨ Desc</button>
       <button onclick="editSurveyDetails('${survey.id}')" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">✏️ Edit Intro</button>
@@ -12994,39 +13036,27 @@ async function generateReport() {
   const reportDate = survey.reportDate || new Date().toISOString().split('T')[0];
 
   // ── Fetch documentation photos (HIN plate, compliance plate, licence) ──
-  let hinPhotoDataUrl = '';
-  let compliancePhotoDataUrl = '';
-  let licencePhotoDataUrl = '';
-  if (survey.hinPhoto) {
-    const p = await getPhotoById(survey.hinPhoto);
-    if (p && p.dataUrl) hinPhotoDataUrl = p.dataUrl;
+  // All photos are compressed for the report to prevent Chrome "Aw Snap" crashes
+  async function loadAndCompress(photoId) {
+    if (!photoId) return '';
+    const p = await getPhotoById(photoId);
+    if (p && p.dataUrl) return compressPhotoForReport(p.dataUrl);
+    return '';
   }
-  if (survey.compliancePhoto) {
-    const p = await getPhotoById(survey.compliancePhoto);
-    if (p && p.dataUrl) compliancePhotoDataUrl = p.dataUrl;
-  }
-  if (survey.licencePhoto) {
-    const p = await getPhotoById(survey.licencePhoto);
-    if (p && p.dataUrl) licencePhotoDataUrl = p.dataUrl;
-  }
-  let tcPaperLicencePhotoDataUrl = '';
-  if (survey.tcPaperLicencePhoto) {
-    const p = await getPhotoById(survey.tcPaperLicencePhoto);
-    if (p && p.dataUrl) tcPaperLicencePhotoDataUrl = p.dataUrl;
-  }
-  let coverPhotoDataUrl = '';
-  if (survey.coverPhoto) {
-    const p = await getPhotoById(survey.coverPhoto);
-    if (p && p.dataUrl) coverPhotoDataUrl = p.dataUrl;
-  }
+  let hinPhotoDataUrl = await loadAndCompress(survey.hinPhoto);
+  let compliancePhotoDataUrl = await loadAndCompress(survey.compliancePhoto);
+  let licencePhotoDataUrl = await loadAndCompress(survey.licencePhoto);
+  let tcPaperLicencePhotoDataUrl = await loadAndCompress(survey.tcPaperLicencePhoto);
+  let coverPhotoDataUrl = await loadAndCompress(survey.coverPhoto);
+
   // Helper to load all photos from a multi-doc field (array or single ID)
   async function loadDocPhotos(fieldValue) {
     if (!fieldValue) return [];
     const ids = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
     const urls = [];
     for (const id of ids) {
-      const p = await getPhotoById(id);
-      if (p && p.dataUrl) urls.push(p.dataUrl);
+      const compressed = await loadAndCompress(id);
+      if (compressed) urls.push(compressed);
     }
     return urls;
   }
@@ -13050,18 +13080,20 @@ async function generateReport() {
   const transmission2PhotoDataUrl = transmission2Photos[0] || '';
   const transmission2PlatePhotoDataUrl = transmission2PlatePhotos[0] || '';
 
-  // ── Pre-fetch all per-item photos ─────────────────────────────────────
+  // ── Pre-fetch all per-item photos (compressed for report) ────────────
   const itemPhotoCache = {};
+  async function cachePhoto(photoId) {
+    if (!photoId || itemPhotoCache[photoId]) return;
+    const p = await getPhotoById(photoId);
+    if (p && p.dataUrl) {
+      itemPhotoCache[photoId] = await compressPhotoForReport(p.dataUrl);
+    }
+  }
   for (const itemLabel of Object.keys(survey.items || {})) {
     const itemData = survey.items[itemLabel];
     if (itemData.photos && itemData.photos.length > 0) {
       for (const photoId of itemData.photos) {
-        if (!itemPhotoCache[photoId]) {
-          const p = await getPhotoById(photoId);
-          if (p && p.dataUrl) {
-            itemPhotoCache[photoId] = p.dataUrl;
-          }
-        }
+        await cachePhoto(photoId);
       }
     }
   }
@@ -13071,12 +13103,7 @@ async function generateReport() {
     for (const eq of survey.safetyEquipment) {
       if (eq.photos && eq.photos.length > 0) {
         for (const photoId of eq.photos) {
-          if (!itemPhotoCache[photoId]) {
-            const p = await getPhotoById(photoId);
-            if (p && p.dataUrl) {
-              itemPhotoCache[photoId] = p.dataUrl;
-            }
-          }
+          await cachePhoto(photoId);
         }
       }
     }
@@ -13087,12 +13114,7 @@ async function generateReport() {
     for (const item of survey.instrumentsElectronics) {
       if (item.photos && item.photos.length > 0) {
         for (const photoId of item.photos) {
-          if (!itemPhotoCache[photoId]) {
-            const p = await getPhotoById(photoId);
-            if (p && p.dataUrl) {
-              itemPhotoCache[photoId] = p.dataUrl;
-            }
-          }
+          await cachePhoto(photoId);
         }
       }
     }
@@ -14055,8 +14077,7 @@ ${survey.vesselDescription ? `
   const cornerLabels = {'fourCornerPortBow': 'Port Bow', 'fourCornerStbdBow': 'Starboard Bow', 'fourCornerPortStern': 'Port Stern', 'fourCornerStbdStern': 'Starboard Stern'};
   for (const key of cornerKeys) {
     if (survey[key]) {
-      const p = await getPhotoById(survey[key]);
-      if (p && p.dataUrl) fourCornerPhotos[key] = p.dataUrl;
+      fourCornerPhotos[key] = await loadAndCompress(survey[key]);
     }
   }
 
