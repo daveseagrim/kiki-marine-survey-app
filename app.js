@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2092';
+const APP_VERSION = 'v2093';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -8364,10 +8364,10 @@ function renderInspection(survey) {
     html += `
       <div class="category-accordion" data-category-name="${categoryName.replace(/"/g, '&quot;')}">
         <button class="accordion-header" onclick="toggleAccordion(this)">
+          <span class="accordion-chevron" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;font-size:22px;color:#64748b;flex-shrink:0;margin-left:-12px;transition:transform 0.2s;">▾</span>
           ${incompleteDot}
           <span class="category-title">${categoryName}${badges}</span>
           <span class="category-progress" style="color:${progressColor};font-weight:700;">${progressText}</span>
-          <span style="margin-left: 12px;">▼</span>
         </button>
         ${flaggedCount > 0 ? `<div class="flagged-summary" style="padding:4px 12px 6px 28px;font-size:12px;color:#92400e;background:#fffbeb;border-bottom:1px solid #fcd34d;">🚩 ${flaggedCount} flagged: ${flaggedItems.map(i => i.label).join(', ')}</div>` : ''}
         <div class="accordion-content" style="display: none;">
@@ -8537,9 +8537,9 @@ function renderInspection(survey) {
   html += `
     <div class="category-accordion">
       <button class="accordion-header" onclick="toggleAccordion(this)" style="background: #2563eb; color: white;">
+        <span class="accordion-chevron" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;font-size:22px;color:rgba(255,255,255,0.8);flex-shrink:0;margin-left:-12px;transition:transform 0.2s;">▾</span>
         <span class="category-title">🛡️ Safety Equipment (TC TP 511)</span>
         <span class="category-progress">${safetyPct}% (${safetyChecked}/${safetyTotal})</span>
-        <span style="margin-left: 12px;">▼</span>
       </button>
       <div class="accordion-content" style="display: none;">
         <div style="padding: 10px 0; font-size: 13px; color: #555; border-bottom: 1px solid #e5e7eb; margin-bottom: 12px;">
@@ -8622,9 +8622,9 @@ function renderInspection(survey) {
   html += `
     <div class="category-accordion">
       <button class="accordion-header" onclick="toggleAccordion(this)" style="background: #7c3aed; color: white;">
+        <span class="accordion-chevron" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;font-size:22px;color:rgba(255,255,255,0.8);flex-shrink:0;margin-left:-12px;transition:transform 0.2s;">▾</span>
         <span class="category-title">📡 Instruments &amp; Electronics</span>
         <span class="category-progress">${ieTotal > 0 ? `${iePct}% (${ieRated}/${ieTotal})` : 'No items'}</span>
-        <span style="margin-left: 12px;">▼</span>
       </button>
       <div class="accordion-content" style="display: none;">
         <div style="padding: 10px 0; font-size: 13px; color: #555; border-bottom: 1px solid #e5e7eb; margin-bottom: 12px;">
@@ -10200,14 +10200,14 @@ function _csExpandAccordionAndScroll(el) {
         if (ac !== content && ac.style.display !== 'none') {
           ac.style.display = 'none';
           const hdr = ac.parentElement.querySelector('.accordion-header');
-          const chev = hdr?.querySelector('span:last-child');
-          if (chev) chev.style.transform = 'rotate(0deg)';
+          const chev = hdr?.querySelector('.accordion-chevron');
+          if (chev) chev.textContent = '▸';
         }
       });
       content.style.display = 'block';
       const header = accordion.querySelector('.accordion-header');
-      const chevron = header?.querySelector('span:last-child');
-      if (chevron) chevron.style.transform = 'rotate(180deg)';
+      const chevron = header?.querySelector('.accordion-chevron');
+      if (chevron) chevron.textContent = '▾';
       const titleSpan = header?.querySelector('.category-title');
       if (titleSpan && typeof _openAccordionCategory !== 'undefined') {
         _openAccordionCategory = titleSpan.textContent.replace(/^[^\w]*/, '').trim();
@@ -13572,6 +13572,45 @@ function saveItemData(itemLabel, categoryName) {
 }
 
 // Auto-save item text on blur — no alert, just a subtle toast
+// Auto-sync engine data from checklist body items into survey header fields.
+// Called on every item text save — only acts on engine-related items.
+function _syncEngineFieldsFromBody(survey, itemLabel, text) {
+  if (!text || !text.trim()) return;
+  const raw = text.trim();
+
+  // Engine hours
+  if (itemLabel === 'Engine hours') {
+    survey.engineHours = raw;
+    return;
+  }
+
+  // Engine manufacturer, model, serial
+  if (itemLabel === 'Engine(s) manufacturer, model # and serial number (if available)') {
+    // Parse "Make Model, Serial: XXX" or "Make Model"
+    const serialMatch = raw.match(/[,;]?\s*(?:serial(?:\s*(?:#|number|no\.?)?)?[:=\s]+)(.+)/i);
+    if (serialMatch) {
+      const beforeSerial = raw.substring(0, raw.indexOf(serialMatch[0])).trim();
+      survey.engineSerial = serialMatch[1].trim();
+      const parts = beforeSerial.split(/\s+/);
+      if (parts.length >= 2) {
+        survey.engineMake = parts[0];
+        survey.engineModel = parts.slice(1).join(' ');
+      } else if (parts.length === 1) {
+        survey.engineMake = parts[0];
+      }
+    } else {
+      const parts = raw.split(/\s+/);
+      if (parts.length >= 2) {
+        survey.engineMake = parts[0];
+        survey.engineModel = parts.slice(1).join(' ');
+      } else {
+        survey.engineMake = raw;
+      }
+    }
+    return;
+  }
+}
+
 function autoSaveItemText(itemLabel, categoryName) {
   getSurvey(currentSurveyId).then(survey => {
     const textareaId = `text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}`;
@@ -13589,6 +13628,9 @@ function autoSaveItemText(itemLabel, categoryName) {
     if (survey.items[itemLabel].text === text) return;
 
     survey.items[itemLabel].text = text;
+
+    // Auto-sync engine checklist data → intro header fields
+    _syncEngineFieldsFromBody(survey, itemLabel, text);
 
     saveSurvey(survey).then(() => {
       showToast('Saved');
@@ -13910,15 +13952,15 @@ function toggleAccordion(button) {
     if (el !== content && el.style.display !== 'none') {
       el.style.display = 'none';
       const otherHeader = el.parentElement.querySelector('.accordion-header');
-      const otherChevron = otherHeader?.querySelector('span:last-child');
-      if (otherChevron) otherChevron.style.transform = 'rotate(0deg)';
+      const otherChevron = otherHeader?.querySelector('.accordion-chevron');
+      if (otherChevron) otherChevron.textContent = '▸';
     }
   });
 
   // Toggle the clicked one
   content.style.display = isOpen ? 'none' : 'block';
-  const chevron = button.querySelector('span:last-child');
-  if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+  const chevron = button.querySelector('.accordion-chevron');
+  if (chevron) chevron.textContent = isOpen ? '▸' : '▾';
 
   // Store which category is open (read from the title span)
   const titleSpan = button.querySelector('.category-title');
@@ -13955,7 +13997,7 @@ function updateCollapseButton(show) {
 function collapseCurrentSection() {
   const openContent = document.querySelector('.accordion-content[style*="display: block"], .accordion-content[style*="display:block"]');
   if (openContent) {
-    const header = openContent.previousElementSibling;
+    const header = openContent.parentElement.querySelector('.accordion-header');
     if (header) {
       // Scroll the header into the centre of the viewport FIRST,
       // then collapse. This way the long content below the header
@@ -13980,8 +14022,8 @@ function restoreAccordionState() {
         const content = header.nextElementSibling;
         if (content) {
           content.style.display = 'block';
-          const chevron = header.querySelector('span:last-child');
-          if (chevron) chevron.style.transform = 'rotate(180deg)';
+          const chevron = header.querySelector('.accordion-chevron');
+          if (chevron) chevron.textContent = '▾';
           updateCollapseButton(true);
           // Scroll back to it
           setTimeout(() => header.scrollIntoView({ behavior: 'auto', block: 'start' }), 50);
