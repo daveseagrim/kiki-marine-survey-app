@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2046';
+const APP_VERSION = 'v2047';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -13572,7 +13572,7 @@ ${survey.vesselDescription ? `
           const ratingColor = rating.startsWith('A') ? '#dc2626' : rating.startsWith('B') ? '#d97706' : rating.startsWith('C') ? '#16a34a' : '#6b7280';
           const ratingShort = rating.startsWith('A') ? 'A' : rating.startsWith('B') ? 'B' : rating.startsWith('C') ? 'C' : 'NT';
           const textSnippet = d.text ? (d.text.length > 80 ? d.text.substring(0, 77) + '...' : d.text) : '—';
-          const stdText = d.standards && d.standards.length > 0 ? d.standards.join('; ') : '—';
+          const stdText = isViolation && d.standards && d.standards.length > 0 ? d.standards.join('; ') : '—';
 
           html += `<tr>
             <td style="text-align:center;">${tableRow}</td>
@@ -13818,7 +13818,7 @@ ${survey.vesselDescription ? `
     ${winchInfoHtml}
     ${mastOptionsHtml}
     ${itemData.text ? `<p>${esc(itemData.text)}</p>` : ''}
-    ${itemData.standards && itemData.standards.length > 0 ? `<p class="standards"><strong>Applicable Standards:</strong> ${itemData.standards.join(', ')}</p>` : ''}
+    ${(ratingLabel.startsWith('A') || ratingLabel.startsWith('B')) && itemData.standards && itemData.standards.length > 0 ? `<p class="standards"><strong>Applicable Standards:</strong> ${itemData.standards.join(', ')}</p>` : ''}
     ${itemPhotosHtml}
   </div>`;
         });
@@ -13853,13 +13853,13 @@ ${survey.vesselDescription ? `
 
   // Helper: build a specific recommendation line citing the item's standards
   function buildRecommendation(f, severity) {
-    const stdCite = (f.standards && f.standards.length) ? ` (${f.standards.join('; ')})` : '';
+    const stdCite = (severity === 'A' || severity === 'B') && f.standards && f.standards.length ? ` (${f.standards.join('; ')})` : '';
     if (severity === 'A') {
       return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> Immediate correction required before the vessel is next underway${stdCite}. This finding represents a direct safety risk or code violation.</em></p>`;
     } else if (severity === 'B') {
       return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> Schedule repairs in the near future to maintain compliance with applicable codes, regulations, standards, or recommended practices${stdCite}.</em></p>`;
     } else {
-      return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> Address in keeping with good marine maintenance practices${stdCite}.</em></p>`;
+      return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> Address in keeping with good marine maintenance practices.</em></p>`;
     }
   }
 
