@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2055';
+const APP_VERSION = 'v2056';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1351,7 +1351,78 @@ const ITEM_SNIPPET_MAP = {
   'Conductivity testing': 'Aft deck conductivity testing',
   'Percussion testing': 'Aft deck impact and resonance testing',
   'Mechanical steering': 'Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)',
-  'Trim tab mechanism (interior)': 'Trim tab hydraulic pump and system'
+  'Trim tab mechanism (interior)': 'Trim tab hydraulic pump and system',
+  // ── Insurance template mappings ──────────────────────────────────────
+  'Aft deck - other features': 'Aft deck condition (spider cracks, etc.)',
+  'Anchor windlass control': 'Anchor windlass controls',
+  'Bilge, stringers, ribs and bulkheads (those accessible from engine bay': 'Bilge, stringers and ribs – accessible from engine bay',
+  'Cabin and conveniences - other features': 'Cabin lining and ceiling',
+  'Cockpit - other features': 'Cockpit, floor, seats and coaming',
+  'Cockpit - other gauges and instrumentation': 'Engine gauges',
+  'Cockpit percussion testing': 'Cockpit impact and resonance testing',
+  'Condition': 'Aft deck condition (spider cracks, etc.)',
+  'Deck and coachroof/pilot house - other features': 'Deck and coachroof/pilothouse condition',
+  'Deck and coachroof/pilot house condition': 'Deck and coachroof/pilothouse condition',
+  'Deck and coachroof/pilot percussion testing': 'Bowsprit, deck and coachroof/pilothouse impact and resonance testing',
+  'Electrical, other, additional features': 'Electrical – other features',
+  'Engines and drives - other features': 'Oil level and condition',
+  'Flybridge - other gauges and instrumentation': 'Engine gauges',
+  'Flybridge Anchor windlass control': 'Anchor windlass controls',
+  'Flybridge Autopilot': 'Autopilot',
+  'Flybridge Blower': 'Blower',
+  'Flybridge Bow thruster/stern thruster controls': 'Bow thruster',
+  'Flybridge Depth sounder': 'Depth sounder',
+  'Flybridge Flood lights/deck lights': 'Flood lights and deck lights',
+  'Flybridge Log': 'Log',
+  'Flybridge MFD/Chartplotter': 'MFD or Chartplotter',
+  'Flybridge Magnetic compass': 'Magnetic compass',
+  'Flybridge Outdrive tilt': 'Outdrive tilt',
+  'Flybridge Radar': 'Radar',
+  'Flybridge Searchlight': 'Search light',
+  'Flybridge Trim tabs': 'Trim tabs',
+  'Flybridge VHF radio and antenna': 'VHF',
+  'Flybridge Wind instruments (direction, speed, etc.)': 'Wind instruments',
+  'Flybridge floor, seats and coaming': 'Flybridge, floor, seats and coaming (spider cracks, etc.)',
+  'Fuel, water and waste - other features': 'Fuel tank(s)',
+  'Generator air filter': 'Generator',
+  'Generator anti-siphon': 'Generator',
+  'Generator battery': 'Generator',
+  'Generator exhaust': 'Generator',
+  'Generator hoses': 'Generator',
+  'Generator oil level and condition': 'Generator',
+  'Generator operation': 'Generator',
+  'Generator valve and sea strainer': 'Generator valve and sea strainer',
+  'Hull exterior and propulsion - other': 'Hull exterior above the waterline',
+  'Hydraulic steering (hoses, fittings, steering cylinder, tiller arm / tiller bolt or tie-bar, rudder post and stuffing box, etc.)': 'Hydraulic steering (hoses, fittings, steering cylinder, tiller arm or tie bar, rudder post and stuffing box, etc.)',
+  'Lighting': 'Flood lights and deck lights',
+  'Outboard engine - other features': 'Outboard general condition and impression',
+  'Pilot house - other features': 'Cockpit, floor, seats and coaming',
+  'Pilot house - other gauges and instrumentation': 'Engine gauges',
+  'Pilot house Anchor windlass control': 'Anchor windlass controls',
+  'Pilot house Autopilot': 'Autopilot',
+  'Pilot house Blower': 'Blower',
+  'Pilot house Bow thruster/stern thruster controls': 'Bow thruster',
+  'Pilot house Depth sounder': 'Depth sounder',
+  'Pilot house Flood lights/deck lights': 'Flood lights and deck lights',
+  'Pilot house Lighting': 'Flood lights and deck lights',
+  'Pilot house Log': 'Log',
+  'Pilot house MFD/Chartplotter': 'MFD or Chartplotter',
+  'Pilot house Magnetic compass': 'Magnetic compass',
+  'Pilot house Outdrive tilt': 'Outdrive tilt',
+  'Pilot house Radar': 'Radar',
+  'Pilot house Searchlight': 'Search light',
+  'Pilot house Trim tab controls': 'Trim tab controls',
+  'Pilot house VHF radio and antenna': 'VHF radio and antenna',
+  'Pilot house Windshield wiper(s) operation': 'Wiper blade operation',
+  'Pilot house steering wheel': 'Steering wheel and steering',
+  'Pilot house, floor and seat(s)': 'Cockpit, floor, seats and coaming',
+  'Sail drive oil': 'Gearbox oil',
+  'Solar panels controller': 'Generator',
+  'Solar panels wiring': 'Bundling support and wiring',
+  'Spars and rigging - other': 'Spars and rigging photos',
+  'Steering and trim mechanics - other features': 'Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)',
+  'Wind generator manufacturer and model #': 'Generator',
+  'Windshield wiper(s) operation': 'Wiper blade operation'
 };
 
 // Init IndexedDB
@@ -11279,8 +11350,8 @@ function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
     `;
   }
 
-  // Standards tags (show selected ABYC/TC standards persistently)
-  if (itemData.standards && itemData.standards.length > 0) {
+  // Standards tags (show selected ABYC/TC standards persistently) — only for A and B ratings
+  if (itemData.standards && itemData.standards.length > 0 && itemData.rating && (itemData.rating.startsWith('A') || itemData.rating.startsWith('B'))) {
     html += `<div style="padding:0 12px 4px 12px;display:flex;flex-wrap:wrap;gap:4px;">`;
     itemData.standards.forEach(std => {
       html += `<span style="font-size:10px;background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;border:1px solid #fcd34d;white-space:nowrap;">⚠️ ${std}</span>`;
