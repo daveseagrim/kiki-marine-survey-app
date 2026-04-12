@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2058';
+const APP_VERSION = 'v2059';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -8708,6 +8708,90 @@ function ensureReportButton() {
   document.body.appendChild(btn);
 }
 
+// ─── Engine Data Migration ────────────────────────────────────────────────
+// Migrates engine info from the insurance template's "Engine(s) and drive(s)"
+// checklist items into the header fields used by report generation.
+// Preserves all original checklist item data (photos, ratings, text).
+async function migrateEngineData() {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) { showAlert('No survey loaded.'); return; }
+
+  const items = survey.items || {};
+  const migrated = [];
+
+  // Engine manufacturer, model, serial → engineMake, engineModel, engineSerial
+  const mfgKey = 'Engine(s) manufacturer, model # and serial number (if available)';
+  const mfgData = items[mfgKey];
+  if (mfgData && mfgData.text && mfgData.text.trim()) {
+    const raw = mfgData.text.trim();
+    // Try to parse "Make Model, Serial: XXX" or just store as engineMake
+    // Common patterns: "Yanmar 4JH4E, Serial: E12345" or "Yanmar 4JH4E"
+    const serialMatch = raw.match(/[,;]?\s*(?:serial(?:\s*(?:#|number|no\.?)?)?[:=\s]+)(.+)/i);
+    if (serialMatch) {
+      const beforeSerial = raw.substring(0, raw.indexOf(serialMatch[0])).trim();
+      if (!survey.engineSerial) { survey.engineSerial = serialMatch[1].trim(); migrated.push('Engine serial'); }
+      // Split remaining into make and model (first word = make, rest = model)
+      const parts = beforeSerial.split(/\s+/);
+      if (parts.length >= 2) {
+        if (!survey.engineMake) { survey.engineMake = parts[0]; migrated.push('Engine make'); }
+        if (!survey.engineModel) { survey.engineModel = parts.slice(1).join(' '); migrated.push('Engine model'); }
+      } else if (parts.length === 1) {
+        if (!survey.engineMake) { survey.engineMake = parts[0]; migrated.push('Engine make'); }
+      }
+    } else {
+      // No serial found — try make/model split
+      const parts = raw.split(/\s+/);
+      if (parts.length >= 2) {
+        if (!survey.engineMake) { survey.engineMake = parts[0]; migrated.push('Engine make'); }
+        if (!survey.engineModel) { survey.engineModel = parts.slice(1).join(' '); migrated.push('Engine model'); }
+      } else {
+        if (!survey.engineMake) { survey.engineMake = raw; migrated.push('Engine make'); }
+      }
+    }
+  }
+
+  // Hours → engineHours
+  const hoursData = items['Hours'];
+  if (hoursData && hoursData.text && hoursData.text.trim()) {
+    if (!survey.engineHours) { survey.engineHours = hoursData.text.trim(); migrated.push('Engine hours'); }
+  }
+
+  // Horsepower → engineHP
+  const hpData = items['Horsepower'];
+  if (hpData && hpData.text && hpData.text.trim()) {
+    if (!survey.engineHP) { survey.engineHP = hpData.text.trim(); migrated.push('Engine HP'); }
+  }
+
+  // Fuel type → fuelType
+  const fuelData = items['Fuel type'];
+  if (fuelData && fuelData.text && fuelData.text.trim()) {
+    if (!survey.fuelType) { survey.fuelType = fuelData.text.trim(); migrated.push('Fuel type'); }
+  }
+
+  // Engine name plate photos → enginePlatePhoto (first photo)
+  const plateData = items['Engine name plate(s)'];
+  if (plateData && plateData.photos && plateData.photos.length > 0) {
+    if (!survey.enginePlatePhoto) { survey.enginePlatePhoto = plateData.photos[0]; migrated.push('Engine plate photo'); }
+  }
+
+  // Engine photos → enginePhoto (first photo from "Engine(s) and drive(s) photos")
+  const enginePhotosData = items['Engine(s) and drive(s) photos'];
+  if (enginePhotosData && enginePhotosData.photos && enginePhotosData.photos.length > 0) {
+    if (!survey.enginePhoto) { survey.enginePhoto = enginePhotosData.photos[0]; migrated.push('Engine photo'); }
+  }
+
+  if (migrated.length === 0) {
+    showAlert('No new engine data to migrate. Fields already populated or no engine data found in checklist items.');
+    return;
+  }
+
+  await saveSurvey(survey);
+  showAlert(`Migrated ${migrated.length} engine fields:\n\n${migrated.join('\n')}\n\nOriginal checklist items preserved. Review the header fields to verify.`);
+
+  // Re-render to show updated fields
+  renderInspection(survey);
+}
+
 // ─── Check Survey — Quality Audit ─────────────────────────────────────────
 async function checkSurvey() {
   const survey = await getSurvey(currentSurveyId);
@@ -8760,6 +8844,7 @@ async function checkSurvey() {
   }
 
   // ── 2. ENGINE & TRANSMISSION ────────────────────────────────────────────
+  let hasEngineMigrationData = false;
   if (survey.vesselType !== 'human-powered') {
     const engineFields = [
       ['engineMake',    'Engine make'],
@@ -8769,9 +8854,11 @@ async function checkSurvey() {
       ['engineHP',      'Engine horsepower'],
       ['fuelType',      'Fuel type'],
     ];
+    let missingEngineCount = 0;
     for (const [field, label] of engineFields) {
       if (!survey[field] || survey[field].trim() === '') {
         add('critical', 'Engine & Transmission', `Missing: ${label}`, null);
+        missingEngineCount++;
       }
     }
     const transFields = [
@@ -8782,6 +8869,17 @@ async function checkSurvey() {
     for (const [field, label] of transFields) {
       if (!survey[field] || survey[field].trim() === '') {
         add('warning', 'Engine & Transmission', `Missing: ${label}`, null);
+      }
+    }
+    // Check if engine data exists in checklist items that could be migrated
+    if (missingEngineCount > 0) {
+      const si = survey.items || {};
+      const hasMfg = si['Engine(s) manufacturer, model # and serial number (if available)']?.text?.trim();
+      const hasHrs = si['Hours']?.text?.trim();
+      const hasHP = si['Horsepower']?.text?.trim();
+      const hasFuel = si['Fuel type']?.text?.trim();
+      if (hasMfg || hasHrs || hasHP || hasFuel) {
+        hasEngineMigrationData = true;
       }
     }
   }
@@ -8909,8 +9007,12 @@ async function checkSurvey() {
 
   expandedItems.forEach(item => {
     const data = survey.items[item.label];
-    // Skip excluded items
-    if (data && data.excluded) return;
+
+    // Excluded (skipped) items — show as "Skipped" instead of hiding
+    if (data && data.excluded) {
+      add('info', 'Skipped Items', `Skipped: ${item.label}`, item.label);
+      return;
+    }
 
     // Not rated at all
     if (!data || !data.rating || data.rating === '') {
@@ -9160,6 +9262,18 @@ async function checkSurvey() {
     html += '<div style="text-align:center;padding:20px;color:#16a34a;font-weight:600;">All checks passed! Survey looks complete.</div>';
   }
 
+  // Engine migration banner
+  if (hasEngineMigrationData) {
+    html += `
+      <div style="background:#eff6ff;border:2px solid #3b82f6;border-radius:10px;padding:12px;margin-bottom:16px;text-align:center;">
+        <div style="font-size:13px;color:#1e40af;margin-bottom:8px;">Engine data found in checklist items but missing from header fields.</div>
+        <button onclick="migrateEngineData().then(()=>{document.getElementById('checkSurveyOverlay')?.remove(); checkSurvey();})"
+                style="background:#3b82f6;color:white;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;">
+          ⚙️ Migrate Engine Data to Header
+        </button>
+      </div>`;
+  }
+
   sections.forEach(section => {
     const sev = section.severity;
     const secReviewed = section.items.filter(it => reviewedState[it._checkId]).length;
@@ -9214,7 +9328,7 @@ async function checkSurvey() {
               </div>
               ${item.severity === 'proofread' && item.text ? `<div style="font-size:11px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;">${item.text.length > 70 ? item.text.substring(0, 70) + '…' : item.text}</div>` : ''}
             </div>
-            ${hasTappableItem ? `<button onclick="window._csNavigateToItem('${safeLabel}', '${item._checkId}');event.stopPropagation();" style="flex-shrink:0;background:#1e3a5f;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">Go ➜</button>` : ''}
+            ${hasTappableItem ? `<button onclick="window._csNavigateToItem(${JSON.stringify(item.itemLabel).replace(/</g,'\\x3c')}, '${item._checkId}');event.stopPropagation();" style="flex-shrink:0;background:#1e3a5f;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">Go ➜</button>` : ''}
           </div>
           ${inlineContent}
         </div>`;
@@ -9265,23 +9379,25 @@ async function checkSurvey() {
   };
 
   // Navigate to item and show floating "Back to Check" button
-  window._csNavigateToItem = function(safeLabel, checkId) {
+  window._csNavigateToItem = function(itemLabel, checkId) {
     // Remember scroll position
     const scrollEl = document.getElementById('csScrollContainer');
     const scrollPos = scrollEl ? scrollEl.scrollTop : 0;
-    const surveyId = currentSurveyId;
 
     // Close the overlay
     document.getElementById('checkSurveyOverlay')?.remove();
 
-    // Scroll to the item
+    // Scroll to the item using data-item-label attribute (how the inspection view identifies items)
     setTimeout(() => {
-      const el = document.getElementById('item_' + safeLabel);
+      const escapedLabel = itemLabel.replace(/"/g, '\\"');
+      const el = document.querySelector(`.compact-item-wrapper[data-item-label="${escapedLabel}"]`)
+              || document.querySelector(`.rated-item[data-item-label="${escapedLabel}"]`);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.style.transition = 'background 0.3s';
+        el.style.transition = 'background 0.3s, box-shadow 0.3s';
         el.style.background = '#fef3c7';
-        setTimeout(() => el.style.background = '', 2500);
+        el.style.boxShadow = '0 0 0 3px #f59e0b';
+        setTimeout(() => { el.style.background = ''; el.style.boxShadow = ''; }, 3000);
       }
     }, 100);
 
@@ -9294,7 +9410,7 @@ async function checkSurvey() {
     backBtn.style.cssText = 'position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));left:50%;transform:translateX(-50%);background:#1e3a5f;color:white;border:none;border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
     backBtn.onclick = async function() {
       backBtn.remove();
-      // Re-run check survey which will rebuild from current data
+      // Re-run check survey — re-evaluates everything, colours will update
       await checkSurvey();
       // Restore scroll position
       setTimeout(() => {
