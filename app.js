@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2073';
+const APP_VERSION = 'v2074';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9640,20 +9640,23 @@ async function checkSurvey() {
     reviewedState[checkId] = checked;
     sessionStorage.setItem(checkStateKey, JSON.stringify(reviewedState));
     if (checked) {
-      // Item moves to Resolved — save scroll position and re-render
-      const scrollEl = document.getElementById('csScrollContainer');
-      const scrollPos = scrollEl ? scrollEl.scrollTop : 0;
+      // Item moves to Resolved — find next sibling row for scroll target
       const row = document.getElementById('row_' + checkId);
+      let nextMsg = null;
       if (row) {
+        // Find the next row with data-cs-msg in the DOM (sibling or next section)
+        let sibling = row.nextElementSibling;
+        while (sibling && !sibling.getAttribute('data-cs-msg')) sibling = sibling.nextElementSibling;
+        if (sibling) nextMsg = sibling.getAttribute('data-cs-msg');
         row.style.transition = 'opacity 0.3s, transform 0.3s';
         row.style.opacity = '0';
         row.style.transform = 'translateX(20px)';
       }
+      if (nextMsg) window._csScrollTargetMsg = nextMsg;
       setTimeout(async () => {
         document.getElementById('checkSurveyOverlay')?.remove();
         await checkSurvey();
-        const newScroll = document.getElementById('csScrollContainer');
-        if (newScroll) newScroll.scrollTop = Math.max(0, scrollPos - 50);
+        // _csRestoreScroll auto-fires via the auto-restore at end of checkSurvey
       }, 300);
     } else {
       // Unchecked — item returns from Resolved to active list, re-render
@@ -9681,22 +9684,45 @@ async function checkSurvey() {
   // Store all check items so we can evaluate on return
   window._csAllCheckItems = allCheckItems;
 
-  // Smart scroll restoration: scroll to the next item in the list after a resolved one
+  // Smart scroll restoration: scroll to the next item in the list after a resolved one.
+  // Uses offsetTop calculation because scrollIntoView doesn't work reliably
+  // inside a position:fixed overlay's overflow:auto container.
   window._csRestoreScroll = function(fallbackPixelPos) {
     const container = document.getElementById('csScrollContainer');
     if (!container) return;
     const targetMsg = window._csScrollTargetMsg;
     window._csScrollTargetMsg = null;
     if (targetMsg) {
-      const targetRow = container.querySelector(`[data-cs-msg="${CSS.escape(targetMsg)}"]`);
+      // Find the row by data-cs-msg attribute — try exact match first
+      let targetRow = null;
+      const allRows = container.querySelectorAll('[data-cs-msg]');
+      for (const row of allRows) {
+        if (row.getAttribute('data-cs-msg') === targetMsg) { targetRow = row; break; }
+      }
       if (targetRow) {
-        setTimeout(() => targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
+        // Calculate offset relative to the scroll container
+        const containerRect = container.getBoundingClientRect();
+        const rowRect = targetRow.getBoundingClientRect();
+        const offsetInContainer = rowRect.top - containerRect.top + container.scrollTop;
+        // Centre the item in the visible area
+        const centred = offsetInContainer - (container.clientHeight / 2) + (rowRect.height / 2);
+        container.scrollTop = Math.max(0, centred);
+        // Brief highlight so user sees where they are
+        targetRow.style.transition = 'box-shadow 0.3s';
+        targetRow.style.boxShadow = '0 0 0 3px #3b82f6';
+        setTimeout(() => { targetRow.style.boxShadow = ''; }, 2500);
         return;
       }
     }
     // Fallback: pixel position (better than nothing)
     if (fallbackPixelPos > 0) container.scrollTop = fallbackPixelPos;
   };
+
+  // Auto-restore scroll if returning from a Go→Fix flow (whether via Back button or
+  // via the floating Check Survey button). If _csScrollTargetMsg is set, restore now.
+  if (window._csScrollTargetMsg) {
+    setTimeout(() => { if (window._csRestoreScroll) window._csRestoreScroll(0); }, 120);
+  }
 
   // Navigate to item by index — uses global _csItemLabels array
   window._csGoToItem = function(idx) {
