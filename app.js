@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2069';
+const APP_VERSION = 'v2070';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9638,9 +9638,6 @@ async function checkSurvey() {
     const scrollEl = document.getElementById('csScrollContainer');
     const scrollPos = scrollEl ? scrollEl.scrollTop : 0;
 
-    // Close the overlay
-    document.getElementById('checkSurveyOverlay')?.remove();
-
     // Helper: create and append the floating Back button
     function _csShowBackButton() {
       let backBtn = document.getElementById('csBackToCheckBtn');
@@ -9656,9 +9653,21 @@ async function checkSurvey() {
       document.body.appendChild(backBtn);
     }
 
+    // Helper: safely remove the overlay (with a brief delay to prevent iOS ghost-clicks)
+    function _csRemoveOverlay() {
+      const ov = document.getElementById('checkSurveyOverlay');
+      if (ov) {
+        ov.style.pointerEvents = 'none';
+        ov.style.opacity = '0';
+        ov.style.transition = 'opacity 0.15s';
+        setTimeout(() => ov.remove(), 200);
+      }
+    }
+
     // Determine navigation strategy
     if (itemLabel) {
       // Checklist item — lives in the inspection view (already visible underneath)
+      _csRemoveOverlay();
       _csShowBackButton();
       setTimeout(() => {
         let el = null;
@@ -9675,10 +9684,11 @@ async function checkSurvey() {
         if (el) {
           _csExpandAccordionAndScroll(el);
         }
-      }, 150);
+      }, 250);
     } else if (navId) {
       // Header/engine/valuation/photo field — lives in the Edit Intro view
-      // Switch to edit view, then use MutationObserver to detect when the field renders
+      // KEEP the overlay visible while editSurveyDetails loads (prevents iOS ghost-clicks
+      // on the inspection view's back button during the async transition)
       editSurveyDetails(currentSurveyId);
 
       // Watch the DOM for the target element to appear
@@ -9686,6 +9696,8 @@ async function checkSurvey() {
         const el = document.getElementById(navId);
         if (el) {
           obs.disconnect();
+          // NOW remove the overlay — the edit form is ready underneath
+          _csRemoveOverlay();
           // Add Back button now that the edit view has rendered
           _csShowBackButton();
 
@@ -9707,9 +9719,10 @@ async function checkSurvey() {
       });
       observer.observe(document.body, { childList: true, subtree: true });
 
-      // Safety: if element never appears after 5s, disconnect and still show Back button
+      // Safety: if element never appears after 5s, disconnect and remove overlay
       setTimeout(() => {
         observer.disconnect();
+        _csRemoveOverlay();
         if (!document.getElementById('csBackToCheckBtn')) {
           _csShowBackButton();
         }
