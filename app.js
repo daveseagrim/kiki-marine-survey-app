@@ -1979,6 +1979,7 @@ function showNotesSheet(itemLabel, categoryName) {
     if (itemData.rating) {
       const baseRating = itemData.rating.charAt(0);
       sheetVariants = findTextVariants(categoryName, itemLabel, baseRating);
+      console.log('[SNIPPETS]', {itemLabel, categoryName, baseRating, variantsFound: sheetVariants.length, textLibLoaded: !!textLibrary});
       if (sheetVariants.length > 0) {
         // Pre-compute diff-highlighted display texts for bottom sheet
         const highlightedTexts = highlightSnippetDiffs(sheetVariants);
