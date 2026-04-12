@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2054';
+const APP_VERSION = 'v2055';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1291,6 +1291,9 @@ const ITEM_SNIPPET_MAP = {
   'Hull-deck joint (exterior)': 'Hull–deck joint (exterior)',
   'Hull(s) condition (below the waterline)': 'Hull(s) condition (below the waterline)',
   'Hull condition (below the waterline)': 'Hull(s) condition (below the waterline)',
+  'Evident damage or repairs to hull and rudder below the waterline': 'Hull(s) condition (below the waterline)',
+  'Hull exterior above the waterline': 'Hull(s) condition (above the waterline)',
+  'Hull and rudder(s) (if applicable) percussion testing': 'Hull and rudder(s) impact and resonance testing',
   'Rudder(s) condition': 'Rudder(s) condition',
   'Rudder condition': 'Rudder(s) condition',
   'Hull and rudder(s) (if applicable) impact and resonance testing': 'Hull and rudder(s) impact and resonance testing',
@@ -1964,13 +1967,10 @@ function selectRatingFromSheet(itemLabel, categoryName, rating) {
 
 // ── Bottom Sheet: Notes / Snippets / Standards ──────────────────────────────
 function showNotesSheet(itemLabel, categoryName) {
-  alert('NOTES CALLED: ' + itemLabel);
-  console.log('[NOTES-ENTRY]', {itemLabel, categoryName, currentSurveyId});
   const existing = document.getElementById('bottomSheetOverlay');
   if (existing) existing.remove();
 
   getSurvey(currentSurveyId).then(survey => {
-    console.log('[NOTES-SURVEY]', {surveyFound: !!survey, itemKeys: survey ? Object.keys(survey.items || {}).slice(0, 5) : []});
     const itemData = survey.items[itemLabel] || { rating: '', text: '', standards: [], photos: [] };
     const safeLabel = itemLabel.replace(/'/g, "\\'");
     const safeCat = categoryName.replace(/'/g, "\\'");
@@ -1981,11 +1981,9 @@ function showNotesSheet(itemLabel, categoryName) {
     // read them by index without needing to round-trip text through HTML
     // attributes. This avoids all the escaping pitfalls of inline onclick.
     let sheetVariants = [];
-    console.log('[SNIPPETS-DEBUG]', {itemLabel, categoryName, rating: itemData.rating, textLibLoaded: !!textLibrary, itemKeys: Object.keys(itemData)});
     if (itemData.rating) {
       const baseRating = itemData.rating.charAt(0);
       sheetVariants = findTextVariants(categoryName, itemLabel, baseRating);
-      console.log('[SNIPPETS]', {itemLabel, categoryName, baseRating, variantsFound: sheetVariants.length});
       if (sheetVariants.length > 0) {
         // Pre-compute diff-highlighted display texts for bottom sheet
         const highlightedTexts = highlightSnippetDiffs(sheetVariants);
@@ -2250,7 +2248,6 @@ function showNotesSheet(itemLabel, categoryName) {
       <div class="bottom-sheet" onclick="event.stopPropagation();">
         <div class="bottom-sheet-handle"></div>
         <div class="bottom-sheet-title">${itemLabel} — Notes <span style="font-size:10px;color:#9ca3af;font-weight:400;">${APP_VERSION}</span></div>
-        <div style="padding:4px 20px;font-size:10px;color:#dc2626;background:#fef2f2;border:1px solid #fca5a5;margin:4px 20px;border-radius:4px;word-break:break-all;">DEBUG: rating="${itemData.rating || 'EMPTY'}" | variants=${sheetVariants.length} | ${window._snippetDebug || 'no debug'}</div>
         ${mastOptionsHtml}
         ${outdriveOptionsHtml}
         ${winchOptionsHtml}
@@ -3324,12 +3321,12 @@ function escSnippet(s) {
 
 // Find text variants from library
 function findTextVariants(categoryName, itemLabel, baseRating) {
-  if (!textLibrary) { window._snippetDebug = 'no textLibrary'; return []; }
+  if (!textLibrary) return [];
 
   const sheetName = SHEET_MAPPING[categoryName] || categoryName;
   const sheet = textLibrary[sheetName];
 
-  if (!sheet) { window._snippetDebug = `no sheet for "${sheetName}" (from cat "${categoryName}")`; return []; }
+  if (!sheet) return [];
 
   // Strip expansion prefixes for matching expanded items back to base snippets
   // Head: "Head 2 — Toilet" → "Head, Toilet"
@@ -3364,7 +3361,6 @@ function findTextVariants(categoryName, itemLabel, baseRating) {
   // If we had an explicit ITEM_SNIPPET_MAP entry, the section name is known —
   // don't fall through to fuzzy matching which pulls in wrong sections.
   // (If no entries found, it means that rating level needs entries added.)
-  window._snippetDebug = `sheet="${sheetName}"(${sheet.length} entries) | resolved="${resolvedLabel}" | matchLabel="${matchLabel}" | hadMap=${hadExplicitMap} | exactMatches=${matches.length} | sampleSections=${[...new Set(sheet.slice(0,5).map(e=>e.section))].join(',')}`;
   if (hadExplicitMap) return matches;
 
   // 2. If no exact match, try contains match — only where the FULL search label
