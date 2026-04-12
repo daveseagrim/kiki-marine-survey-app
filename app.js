@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2039';
+const APP_VERSION = 'v2040';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1332,8 +1332,8 @@ async function initDB() {
 async function fetchDataFiles() {
   try {
     const [templateRes, insuranceTemplateRes, libraryRes, specsRes, valuesRes, engineRes, outdriveRes] = await Promise.all([
-      fetch('survey_template.json'),
-      fetch('insurance_survey_template.json'),
+      fetch('survey_template.json?v=' + APP_VERSION),
+      fetch('insurance_survey_template.json?v=' + APP_VERSION),
       fetch('text_library.json?v=' + APP_VERSION),
       fetch('boat_specs_db.json'),
       fetch('boat_values_db.json'),
