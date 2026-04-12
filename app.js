@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2088';
+const APP_VERSION = 'v2089';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9662,12 +9662,12 @@ async function checkSurvey() {
   if (skippedItems.length > 0) {
     html += `
       <div style="margin-bottom:16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:2px solid #cbd5e1;margin-bottom:8px;cursor:pointer;user-select:none;"
+        <div style="display:flex;align-items:center;padding:8px 0;border-bottom:2px solid #cbd5e1;margin-bottom:8px;cursor:pointer;user-select:none;"
              onclick="(function(){var l=document.getElementById('cs-skipped-list');var c=document.getElementById('cs-skipped-caret');if(!l||!c)return;var open=l.style.display!=='none';l.style.display=open?'none':'block';c.textContent=open?'▸':'▾';})()">
-          <div style="font-weight:700;font-size:15px;color:#64748b;display:flex;align-items:center;gap:6px;">
+          <span id="cs-skipped-caret" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;font-size:22px;color:#64748b;flex-shrink:0;margin-left:-8px;">▸</span>
+          <div style="font-weight:700;font-size:15px;color:#64748b;display:flex;align-items:center;gap:6px;flex:1;">
             ⊘ Skipped <span style="font-weight:400;color:#94a3b8;font-size:12px;">(${skippedItems.length})</span>
           </div>
-          <span id="cs-skipped-caret" style="color:#94a3b8;font-size:16px;">▸</span>
         </div>
         <div id="cs-skipped-list" style="display:none;">
     `;
@@ -9694,12 +9694,12 @@ async function checkSurvey() {
   if (resolvedItems.length > 0) {
     html += `
       <div style="margin-bottom:16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:2px solid #86efac;margin-bottom:8px;cursor:pointer;user-select:none;"
+        <div style="display:flex;align-items:center;padding:8px 0;border-bottom:2px solid #86efac;margin-bottom:8px;cursor:pointer;user-select:none;"
              onclick="(function(){var l=document.getElementById('cs-ok-list');var c=document.getElementById('cs-ok-caret');if(!l||!c)return;var open=l.style.display!=='none';l.style.display=open?'none':'block';c.textContent=open?'▸':'▾';})()">
-          <div style="font-weight:700;font-size:15px;color:#16a34a;display:flex;align-items:center;gap:6px;">
+          <span id="cs-ok-caret" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;font-size:22px;color:#16a34a;flex-shrink:0;margin-left:-8px;">▸</span>
+          <div style="font-weight:700;font-size:15px;color:#16a34a;display:flex;align-items:center;gap:6px;flex:1;">
             ✅ Resolved <span style="font-weight:400;color:#86efac;font-size:12px;">(${resolvedItems.length})</span>
           </div>
-          <span id="cs-ok-caret" style="color:#86efac;font-size:16px;">▸</span>
         </div>
         <div id="cs-ok-list" style="display:none;">
     `;
