@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2066';
+const APP_VERSION = 'v2067';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -6475,13 +6475,22 @@ function saveSurveyDetails(surveyId) {
 }
 
 function returnToInspection(surveyId) {
-  getSurvey(surveyId).then(survey => {
-    if (survey) {
-      renderInspection(survey);
-    } else {
-      renderHome();
-    }
-  });
+  // Auto-save the edit form before leaving (so changes are never lost)
+  if (currentView === 'edit-survey' || currentView === 'new-survey') {
+    try { saveSurveyDetails(surveyId || currentSurveyId); } catch(e) {}
+  }
+  // Remove floating Back button if present
+  document.getElementById('csBackToCheckBtn')?.remove();
+
+  setTimeout(() => {
+    getSurvey(surveyId).then(survey => {
+      if (survey) {
+        renderInspection(survey);
+      } else {
+        renderHome();
+      }
+    });
+  }, 200); // Brief delay for save to complete
 }
 
 // ─── Location Search & Map ─────────────────────────────────────────────────
@@ -8794,6 +8803,19 @@ async function migrateEngineData() {
 
 // ─── Check Survey — Quality Audit ─────────────────────────────────────────
 async function checkSurvey() {
+  // If we're in the Edit Intro view, auto-save changes first and return to inspection
+  if (currentView === 'edit-survey' || currentView === 'new-survey') {
+    try { saveSurveyDetails(currentSurveyId); } catch(e) {}
+    await new Promise(r => setTimeout(r, 400));
+    const s = await getSurvey(currentSurveyId);
+    if (s) {
+      renderInspection(s);
+      await new Promise(r => setTimeout(r, 200));
+    }
+    // Remove the floating Back button if it exists (we're going directly to Check Survey)
+    document.getElementById('csBackToCheckBtn')?.remove();
+  }
+
   const survey = await getSurvey(currentSurveyId);
   if (!survey) { showAlert('No survey loaded.'); return; }
 
