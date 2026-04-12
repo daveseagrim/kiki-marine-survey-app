@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2050';
+const APP_VERSION = 'v2051';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1964,10 +1964,12 @@ function selectRatingFromSheet(itemLabel, categoryName, rating) {
 
 // ── Bottom Sheet: Notes / Snippets / Standards ──────────────────────────────
 function showNotesSheet(itemLabel, categoryName) {
+  console.log('[NOTES-ENTRY]', {itemLabel, categoryName, currentSurveyId});
   const existing = document.getElementById('bottomSheetOverlay');
   if (existing) existing.remove();
 
   getSurvey(currentSurveyId).then(survey => {
+    console.log('[NOTES-SURVEY]', {surveyFound: !!survey, itemKeys: survey ? Object.keys(survey.items || {}).slice(0, 5) : []});
     const itemData = survey.items[itemLabel] || { rating: '', text: '', standards: [], photos: [] };
     const safeLabel = itemLabel.replace(/'/g, "\\'");
     const safeCat = categoryName.replace(/'/g, "\\'");
