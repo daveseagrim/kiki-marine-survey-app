@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2097';
+const APP_VERSION = 'v2098';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -8105,17 +8105,20 @@ function renderInspection(survey) {
     : '';
 
   app.innerHTML = `
-    <div class="header">
-      <button class="header-back" onclick="backToHome()">←</button>
-      <div style="flex:1;">
-        <div class="header-title">${esc(survey.vesselName)}</div>
-        <div class="header-subtitle" style="display:flex;align-items:center;gap:8px;">Inspection — ${APP_VERSION}
-            <button onclick="forceAppUpdate()" style="background:none;border:1px solid rgba(255,255,255,0.5);color:rgba(255,255,255,0.9);border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;min-height:32px;">↻ Update</button>
-          </div>
+    <div class="header" style="flex-direction:column;align-items:stretch;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="header-back" onclick="backToHome()">←</button>
+        <div style="flex:1;min-width:0;">
+          <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(survey.vesselName)}</div>
+          <div class="header-subtitle">${APP_VERSION}</div>
+        </div>
+        <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
       </div>
-      <button onclick="regenerateDescriptionFromInspection()" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;font-size:11px;padding:4px 8px;border-radius:6px;cursor:pointer;margin-right:6px;">✨ Desc</button>
-      <button onclick="editSurveyDetails('${survey.id}')" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">✏️ Edit Intro</button>
-      <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;margin-left:6px;" title="Sync status"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="forceAppUpdate()" style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.9);border-radius:8px;padding:8px 0;font-size:12px;font-weight:600;cursor:pointer;">↻ Update</button>
+        <button onclick="regenerateDescriptionFromInspection()" style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);color:white;font-size:12px;font-weight:600;padding:8px 0;border-radius:8px;cursor:pointer;">✨ Desc</button>
+        <button onclick="editSurveyDetails('${survey.id}')" style="flex:1;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);color:white;font-size:12px;font-weight:600;padding:8px 0;border-radius:8px;cursor:pointer;">✏️ Edit Intro</button>
+      </div>
     </div>
     ${surveyTypeBanner}
     <div class="content" id="inspection-content">
