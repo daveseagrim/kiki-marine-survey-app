@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2095';
+const APP_VERSION = 'v2096';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -11497,8 +11497,11 @@ async function deleteAreaPhoto(photoId, mediaLabel) {
   const survey = await getSurvey(currentSurveyId);
   if (survey.items[mediaLabel] && survey.items[mediaLabel].photos) {
     survey.items[mediaLabel].photos = survey.items[mediaLabel].photos.filter(id => id !== photoId);
-    await saveSurvey(survey);
   }
+  // Re-sync engine/gearbox photos (clears intro ref if body photos are now empty,
+  // or updates to the new first photo if one was deleted from the middle)
+  _syncEnginePhotosFromBody(survey);
+  await saveSurvey(survey);
   refreshAreaPhotoGrid(survey, mediaLabel);
   showToast('Photo deleted');
 }
@@ -13637,25 +13640,28 @@ function _parseAndSyncMakeModelSerial(survey, raw, prefix) {
 }
 
 // Auto-sync engine/gearbox PHOTOS from checklist body media items to intro header fields.
-// Called after area photos are captured or after regular item photos are saved.
+// Called after area photos are captured, deleted, or after regular item photos are saved.
+// Always updates the intro to match the body — if body has no photos, clears the intro.
 function _syncEnginePhotosFromBody(survey) {
-  // Engine photos → enginePhoto (first photo from body)
-  const enginePhotos = survey.items['Engine(s) and drive(s) photos'];
-  if (enginePhotos && enginePhotos.photos && enginePhotos.photos.length > 0) {
-    survey.enginePhoto = enginePhotos.photos[0];
-  }
+  const _firstPhoto = (label) => {
+    const item = survey.items[label];
+    return (item && item.photos && item.photos.length > 0) ? item.photos[0] : null;
+  };
+
+  // Engine photos → enginePhoto (first photo from body, or null)
+  const ep = _firstPhoto('Engine(s) and drive(s) photos');
+  if (ep !== null) survey.enginePhoto = ep;
+  else if (survey.items['Engine(s) and drive(s) photos']) survey.enginePhoto = null;
 
   // Engine nameplate photos → enginePlatePhoto
-  const enginePlates = survey.items['Engine name plate(s)'];
-  if (enginePlates && enginePlates.photos && enginePlates.photos.length > 0) {
-    survey.enginePlatePhoto = enginePlates.photos[0];
-  }
+  const enp = _firstPhoto('Engine name plate(s)');
+  if (enp !== null) survey.enginePlatePhoto = enp;
+  else if (survey.items['Engine name plate(s)']) survey.enginePlatePhoto = null;
 
   // Gearbox/transmission nameplate photos → transmissionPlatePhoto
-  const gearboxPlates = survey.items['Gearbox nameplate(s)'];
-  if (gearboxPlates && gearboxPlates.photos && gearboxPlates.photos.length > 0) {
-    survey.transmissionPlatePhoto = gearboxPlates.photos[0];
-  }
+  const gp = _firstPhoto('Gearbox nameplate(s)');
+  if (gp !== null) survey.transmissionPlatePhoto = gp;
+  else if (survey.items['Gearbox nameplate(s)']) survey.transmissionPlatePhoto = null;
 }
 
 function autoSaveItemText(itemLabel, categoryName) {
@@ -14287,6 +14293,8 @@ function deletePhotoAndRefresh(photoId) {
           }
         }
       }
+      // Re-sync engine/gearbox photos after deletion
+      _syncEnginePhotosFromBody(survey);
       saveSurvey(survey).then(() => {
         if (affectedItemLabel) {
           updateItemInPlace(survey, affectedItemLabel);
