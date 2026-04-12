@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2080';
+const APP_VERSION = 'v2081';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9571,7 +9571,7 @@ async function checkSurvey() {
         ${sevIcon.critical} ${criticalCount} &nbsp; ${sevIcon.warning} ${warningCount} &nbsp; ${sevIcon.info} ${infoCount} &nbsp; ${sevIcon.proofread} ${proofreadItems.length}
       </div>
       <div style="font-size:12px;color:#94a3b8;margin-top:4px;">
-        ✅ ${resolvedItems.length} resolved${skippedItems.length > 0 ? ` &nbsp;|&nbsp; ⊘ ${skippedItems.length} skipped` : ''}
+        📷 ${allPhotoRefs.length} photos &nbsp;|&nbsp; ✅ ${resolvedItems.length} resolved${skippedItems.length > 0 ? ` &nbsp;|&nbsp; ⊘ ${skippedItems.length} skipped` : ''}
       </div>
     </div>
   `;
@@ -9688,6 +9688,7 @@ async function checkSurvey() {
 
       // Escape item label for display (prevent XSS from item labels with < or >)
       const displayLabel = (item.severity !== 'proofread' ? item.message : item.itemLabel || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const csPhotoBadge = item.photoCount ? `<span style="display:inline-flex;align-items:center;background:#e0f2fe;color:#0369a1;font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;white-space:nowrap;vertical-align:middle;">📷${item.photoCount}</span>` : '';
 
       // The row — data-cs-msg used for scroll restoration after Go→Fix→Back
       const escapedMsg = (item.message || '').replace(/"/g, '&quot;');
@@ -9700,6 +9701,7 @@ async function checkSurvey() {
             <div style="flex:1;min-width:0;">
               <div style="font-size:13px;font-weight:600;color:#1e293b;line-height:1.4;display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
                 ${displayLabel}
+                ${csPhotoBadge}
                 ${hasContent ? `<span onclick="window._csToggleContent('${item._checkId}');event.stopPropagation();" style="cursor:pointer;font-size:11px;color:#64748b;background:#e2e8f0;padding:1px 6px;border-radius:4px;user-select:none;" id="expand_${item._checkId}">▸ details</span>` : ''}
                 <span onclick="window._csSkipItem('${item._checkId}');event.stopPropagation();" style="cursor:pointer;font-size:10px;color:#64748b;background:#e2e8f0;padding:1px 6px;border-radius:4px;user-select:none;">skip</span>
               </div>
