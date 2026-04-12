@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2101';
+const APP_VERSION = 'v2102';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -991,9 +991,9 @@ function renderComponentBuilder(builderKey, itemLabel, savedSelections, category
   const selections = savedSelections || {};
 
   let html = `
-    <div id="component-builder-panel" style="border-bottom:2px solid #1e3a5f;margin-bottom:8px;">
+    <div id="component-builder-panel" style="border-bottom:2px solid #006699;margin-bottom:8px;">
       <div style="padding:8px 20px;background:#f0f7ff;border-bottom:1px solid #d1d5db;">
-        <div style="font-size:13px;font-weight:700;color:#1e3a5f;">🔧 ${builder.title}</div>
+        <div style="font-size:13px;font-weight:700;color:#006699;">🔧 ${builder.title}</div>
         <div style="font-size:11px;color:#6b7280;margin-top:2px;">Select the condition of each sub-component. The finding text and rating will be generated automatically.</div>
       </div>
   `;
@@ -1044,7 +1044,7 @@ function renderComponentBuilder(builderKey, itemLabel, savedSelections, category
               <label style="display:flex;align-items:center;gap:4px;font-size:12px;padding:4px 8px;background:${isChecked ? '#dbeafe' : '#f3f4f6'};border:1px solid ${isChecked ? '#93c5fd' : '#d1d5db'};border-radius:6px;cursor:pointer;">
                 <input type="checkbox" class="cb-loc-${comp.key}" value="${loc}" ${isChecked ? 'checked' : ''}
                        onchange="onComponentBuilderChange('${safeLabel}', '${builderKey.replace(/'/g, "\\'")}')"
-                       style="width:14px;height:14px;accent-color:#1e3a5f;">
+                       style="width:14px;height:14px;accent-color:#006699;">
                 ${loc}
               </label>
           `;
@@ -1084,7 +1084,7 @@ function renderComponentBuilder(builderKey, itemLabel, savedSelections, category
   html += `
       <div style="padding:10px 20px;">
         <button onclick="applyComponentBuilder('${safeLabel}', '${builderKey.replace(/'/g, "\\'")}', '${safeCat}')"
-                style="width:100%;padding:10px;background:#1e3a5f;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
+                style="width:100%;padding:10px;background:#006699;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
           Generate Finding Text
         </button>
       </div>
@@ -1947,7 +1947,7 @@ function showToast(message) {
   const toast = document.createElement('div');
   toast.id = 'toast-msg';
   toast.textContent = message;
-  toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1e3a5f;color:white;padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+  toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#006699;color:white;padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
 }
@@ -1964,7 +1964,7 @@ function showAlert(message) {
       <div style="background:white;border-radius:14px;padding:20px 24px;max-width:320px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,0.3);text-align:center;">
         <p style="font-size:15px;color:#333;margin:0 0 18px 0;line-height:1.4;">${message}</p>
         <button onclick="document.getElementById('customModalOverlay').remove();window._modalResolve&&window._modalResolve(true);"
-                style="width:100%;padding:12px;background:#1e3a5f;color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">OK</button>
+                style="width:100%;padding:12px;background:#006699;color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">OK</button>
       </div>`;
     window._modalResolve = resolve;
     document.body.appendChild(overlay);
@@ -2166,7 +2166,7 @@ function showNotesSheet(itemLabel, categoryName) {
             <label style="display:flex;align-items:center;gap:10px;padding:8px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;">
               <input type="checkbox" value="${standard}" ${isChecked ? 'checked' : ''}
                      onchange="updateStandards('${safeLabel}', this)"
-                     style="width:18px;height:18px;accent-color:#1e3a5f;" />
+                     style="width:18px;height:18px;accent-color:#006699;" />
               <span style="font-size:13px;">${standard}</span>
             </label>
           `;
@@ -2174,7 +2174,7 @@ function showNotesSheet(itemLabel, categoryName) {
         standardsHtml = `
           <details style="margin:6px 20px 10px 20px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;">
             <summary style="padding:8px 12px;font-size:12px;color:#6b7280;cursor:pointer;list-style:none;">
-              <strong style="color:#1e3a5f;">Auto-selected standards:</strong> ${escapeHtml(summaryText)} <span style="color:#9ca3af;">· tap to manage</span>
+              <strong style="color:#006699;">Auto-selected standards:</strong> ${escapeHtml(summaryText)} <span style="color:#9ca3af;">· tap to manage</span>
             </summary>
             <div style="border-top:1px solid #e5e7eb;">${checkboxesHtml}</div>
           </details>
@@ -2365,7 +2365,7 @@ function showNotesSheet(itemLabel, categoryName) {
         ${standardsHtml}
         <div class="sheet-btn-row">
           <button onclick="closeNotesSheet('${safeLabel}');" style="background:#e5e7eb;color:#374151;">Cancel</button>
-          <button onclick="saveNotesFromSheet('${safeLabel}', '${safeCat}', '${sanitizedLabel}');" style="background:#1e3a5f;color:white;">Save Notes</button>
+          <button onclick="saveNotesFromSheet('${safeLabel}', '${safeCat}', '${sanitizedLabel}');" style="background:#006699;color:white;">Save Notes</button>
         </div>
       </div>
     `;
@@ -2595,12 +2595,12 @@ function showMediaSheet(itemLabel, categoryName) {
         <div style="padding:12px 20px;">
           <button type="button"
                   onclick="document.getElementById('bottomSheetOverlay').remove(); openBatchCamera('${safeLabel}');"
-                  style="display:block;width:100%;background:white;border:2px dashed #ddd;border-radius:8px;padding:16px;text-align:center;font-size:14px;font-weight:600;color:#1e3a5f;cursor:pointer;">
+                  style="display:block;width:100%;background:white;border:2px dashed #ddd;border-radius:8px;padding:16px;text-align:center;font-size:14px;font-weight:600;color:#006699;cursor:pointer;">
             📷 Capture Photos
           </button>
         </div>
         <div class="sheet-btn-row">
-          <button onclick="document.getElementById('bottomSheetOverlay').remove();" style="background:#1e3a5f;color:white;">Done</button>
+          <button onclick="document.getElementById('bottomSheetOverlay').remove();" style="background:#006699;color:white;">Done</button>
         </div>
       </div>
     `;
@@ -2654,7 +2654,7 @@ async function showPhotoActionOverlay(photoId, itemLabel, categoryName) {
     </div>
     <div style="flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:16px 18px;padding-bottom:calc(16px + env(safe-area-inset-bottom));">
       <button id="pao-edit"
-              style="background:#1e3a5f;color:#fff;border:none;border-radius:10px;padding:14px 0;font-size:15px;font-weight:700;cursor:pointer;min-height:52px;">✏️ Edit</button>
+              style="background:#006699;color:#fff;border:none;border-radius:10px;padding:14px 0;font-size:15px;font-weight:700;cursor:pointer;min-height:52px;">✏️ Edit</button>
       <button id="pao-move"
               style="background:#0369a1;color:#fff;border:none;border-radius:10px;padding:14px 0;font-size:15px;font-weight:700;cursor:pointer;min-height:52px;">↗ Move</button>
       <button id="pao-delete"
@@ -2807,17 +2807,17 @@ function showMovePhotoPicker(photoId, sourceItemLabel, sourceCategoryName, allIt
 
   overlay.innerHTML = `
     <div style="background:white;border-radius:16px 16px 0 0;width:100%;max-width:560px;display:flex;flex-direction:column;box-shadow:0 -6px 24px rgba(0,0,0,0.25);padding-bottom:calc(16px + env(safe-area-inset-bottom));" onclick="event.stopPropagation();">
-      <div style="padding:18px 20px 8px;font-weight:700;font-size:17px;color:#1e3a5f;">Move photo to…</div>
+      <div style="padding:18px 20px 8px;font-weight:700;font-size:17px;color:#006699;">Move photo to…</div>
       <div style="padding:4px 20px 8px;font-size:12px;color:#6b7280;">From: ${esc(sourceItemLabel)}</div>
       <div style="padding:8px 20px 4px;">
-        <select id="movePhotoSelect" size="1" style="width:100%;padding:14px 12px;border:2px solid #1e3a5f;border-radius:10px;font-size:16px;font-weight:600;color:#1e3a5f;background:white;box-sizing:border-box;-webkit-appearance:menulist;appearance:menulist;">
+        <select id="movePhotoSelect" size="1" style="width:100%;padding:14px 12px;border:2px solid #006699;border-radius:10px;font-size:16px;font-weight:600;color:#006699;background:white;box-sizing:border-box;-webkit-appearance:menulist;appearance:menulist;">
           <option value="" disabled selected>— Choose destination —</option>
           ${optionsHtml}
         </select>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 20px 6px;">
         <button onclick="document.getElementById('movePhotoPickerOverlay').remove();" style="background:#64748b;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Cancel</button>
-        <button id="movePhotoApply" style="background:#1e3a5f;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Move</button>
+        <button id="movePhotoApply" style="background:#006699;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Move</button>
       </div>
     </div>
   `;
@@ -3985,7 +3985,7 @@ function refreshChipStrip(textarea) {
     // Derive a title for the section. For now use a generic label + hint.
     const sectionTitle = isMulti ? 'Select all that apply' : 'Choose one';
     html += `<div style="margin-top:${ti === 0 ? '0' : '12px'};padding-top:${ti === 0 ? '0' : '10px'};${ti === 0 ? '' : 'border-top:1px dashed #e5e7eb;'}">`;
-    html += `<div style="font-size:11px;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">${sectionTitle}</div>`;
+    html += `<div style="font-size:11px;font-weight:700;color:#006699;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">${sectionTitle}</div>`;
 
     tok.options.forEach((opt, oi) => {
       const isObj = (typeof opt === 'object');
@@ -4001,13 +4001,13 @@ function refreshChipStrip(textarea) {
       const countBadge = countable ? `
         <button type="button" class="opt-count-badge"
                 data-opt-token="${ti}" data-opt-opt="${oi}" data-opt-count="1"
-                style="flex-shrink:0;margin-left:auto;border:1px solid #1e3a5f;background:#1e3a5f;color:white;border-radius:6px;min-width:40px;min-height:32px;padding:4px 10px;font-size:14px;font-weight:700;cursor:pointer;line-height:1;">1</button>
+                style="flex-shrink:0;margin-left:auto;border:1px solid #006699;background:#006699;color:white;border-radius:6px;min-width:40px;min-height:32px;padding:4px 10px;font-size:14px;font-weight:700;cursor:pointer;line-height:1;">1</button>
       ` : '';
       html += `
         <label style="display:flex;align-items:center;gap:10px;padding:7px 2px;cursor:pointer;min-height:40px;">
           <input type="${isMulti ? 'checkbox' : 'radio'}" name="snbld-${textarea.id}-${ti}"
                  data-token-idx="${ti}" data-opt-idx="${oi}"
-                 style="width:20px;height:20px;accent-color:#1e3a5f;flex-shrink:0;" />
+                 style="width:20px;height:20px;accent-color:#006699;flex-shrink:0;" />
           <span style="font-size:14px;color:#1f2937;line-height:1.4;flex:1;">${escapeHtml(rawLabel)}${cites}</span>
           ${countBadge}
         </label>
@@ -4030,7 +4030,7 @@ function refreshChipStrip(textarea) {
   // main template stays intact.
   html += `
     <div style="margin-top:14px;padding-top:10px;border-top:1px dashed #e5e7eb;">
-      <div style="font-size:11px;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Additional observations (optional)</div>
+      <div style="font-size:11px;font-weight:700;color:#006699;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Additional observations (optional)</div>
       <textarea data-freeform-notes="1" rows="2"
                 placeholder="Type any extra details in your own words — appended as a separate sentence."
                 spellcheck="true" autocorrect="on" autocapitalize="sentences"
@@ -4740,7 +4740,7 @@ function openChipPopover(textarea, tok, anchorEl) {
     rowsHtml += `
       <label style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #f3f4f6;cursor:pointer;min-height:48px;">
         <input type="${isMulti ? 'checkbox' : 'radio'}" name="chip-opt" value="${i}"
-               style="width:20px;height:20px;accent-color:#1e3a5f;flex-shrink:0;" />
+               style="width:20px;height:20px;accent-color:#006699;flex-shrink:0;" />
         <span style="font-size:15px;color:#1f2937;line-height:1.4;">${escapeHtml(label)}${cites}</span>
       </label>
     `;
@@ -4748,7 +4748,7 @@ function openChipPopover(textarea, tok, anchorEl) {
 
   overlay.innerHTML = `
     <div style="background:white;border-radius:16px 16px 0 0;width:100%;max-width:560px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 -6px 24px rgba(0,0,0,0.25);padding-bottom:calc(16px + env(safe-area-inset-bottom));" onclick="event.stopPropagation();">
-      <div style="padding:18px 20px 6px;font-weight:700;font-size:17px;color:#1e3a5f;">${escapeHtml(tok.label)}</div>
+      <div style="padding:18px 20px 6px;font-weight:700;font-size:17px;color:#006699;">${escapeHtml(tok.label)}</div>
       <div style="padding:2px 20px 10px;font-size:12px;color:#6b7280;">${isMulti ? 'Select all that apply' : 'Choose one'}</div>
       <div style="overflow-y:auto;flex:1 1 auto;">
         ${rowsHtml}
@@ -4762,7 +4762,7 @@ function openChipPopover(textarea, tok, anchorEl) {
         <button type="button" id="chipCancel"
           style="background:#64748b;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Cancel</button>
         <button type="button" id="chipApply"
-          style="background:#1e3a5f;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Apply</button>
+          style="background:#006699;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Apply</button>
       </div>
     </div>
   `;
@@ -5022,13 +5022,13 @@ function renderHome() {
     <div class="header">
       <div style="display:flex; align-items:center; gap:12px;">
         <img src="https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png"
-             alt="Kiki Marine" style="height:36px; width:auto;"
+             alt="Kiki Marine" style="height:40px; width:auto;"
              onerror="this.style.display='none'">
         <div>
-          <div class="header-title">Kiki Marine Survey</div>
-          <div class="header-subtitle" style="display:flex;align-items:center;gap:8px;">
-            Marine Vessel Surveys — ${APP_VERSION}
-            <button onclick="forceAppUpdate()" style="background:none;border:1px solid rgba(255,255,255,0.5);color:rgba(255,255,255,0.9);border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;min-height:32px;">↻ Update</button>
+          <div class="header-title" style="color:#006699;font-size:20px;font-weight:800;letter-spacing:0.3px;">Kiki Marine Survey</div>
+          <div class="header-subtitle" style="display:flex;align-items:center;gap:8px;color:#3399cc;">
+            Precise Surveys — ${APP_VERSION}
+            <button onclick="forceAppUpdate()" style="background:rgba(0,102,153,0.08);border:1px solid #3399cc;color:#006699;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;min-height:32px;font-weight:600;">↻ Update</button>
           </div>
         </div>
       </div>
@@ -5114,7 +5114,7 @@ function renderHome() {
             : survey.surveyType === 'Pre-purchase survey' ? 'P-P'
             : survey.surveyType === 'Appraisal' ? 'APR' : '';
           const typeBadgeBg = survey.surveyType === 'Insurance survey' ? '#f59e0b'
-            : survey.surveyType === 'Pre-purchase survey' ? '#1e3a5f'
+            : survey.surveyType === 'Pre-purchase survey' ? '#006699'
             : survey.surveyType === 'Appraisal' ? '#7c3aed' : '#94a3b8';
 
           const vesselName = survey.vesselName ? esc(survey.vesselName) : 'Unnamed';
@@ -5122,7 +5122,7 @@ function renderHome() {
           const location = survey.location ? esc(shortLocation(survey.location)) : '';
           const ymm = survey.yearMakeModel ? esc(survey.yearMakeModel) : '';
 
-          const progressColour = completion === 100 ? '#16a34a' : completion >= 50 ? '#1e3a5f' : '#94a3b8';
+          const progressColour = completion === 100 ? '#16a34a' : completion >= 50 ? '#006699' : '#94a3b8';
           const rowId = `sr-${survey.id}`;
           const separator = idx > 0 ? 'border-top:1px solid #f1f5f9;' : '';
 
@@ -5162,7 +5162,7 @@ function renderHome() {
               <!-- Expandable actions panel -->
               <div id="${rowId}" style="display:none;padding:0 10px 10px 42px;">
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                  <button onclick="event.stopPropagation();openSurvey('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#1e3a5f;color:white;border:none;border-radius:8px;cursor:pointer;">Open</button>
+                  <button onclick="event.stopPropagation();openSurvey('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#006699;color:white;border:none;border-radius:8px;cursor:pointer;">Open</button>
                   <button onclick="event.stopPropagation();exportSurvey('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:8px;cursor:pointer;">📤 Export</button>
                   <button onclick="event.stopPropagation();duplicateSurvey('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:8px;cursor:pointer;">📋 Copy</button>
                   <button onclick="event.stopPropagation();deleteSurveyConfirm('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#fef2f2;color:#dc2626;border:none;border-radius:8px;cursor:pointer;">🗑 Delete</button>
@@ -5419,11 +5419,11 @@ function renderNewSurveyForm() {
         <textarea id="changesToPlan" placeholder="Any modifications or changes" autocapitalize="sentences"></textarea>
       </div>
 
-      <h3 style="margin-top:16px;color:#1e3a5f;">Engine & Transmission</h3>
+      <h3 style="margin-top:16px;color:#006699;">Engine & Transmission</h3>
 
       <!-- Engine 1 -->
       <div style="border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin-bottom:10px;background:#f8fafc;">
-        <div id="engine1Label" style="font-weight:700;font-size:13px;color:#1e3a5f;margin-bottom:8px;">Engine</div>
+        <div id="engine1Label" style="font-weight:700;font-size:13px;color:#006699;margin-bottom:8px;">Engine</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <div class="form-group">
             <label class="form-label" style="font-size:12px;">Engine Make</label>
@@ -5483,7 +5483,7 @@ function renderNewSurveyForm() {
             </div>
           </div>
         </div>
-        <div style="font-weight:700;font-size:13px;color:#1e3a5f;margin:12px 0 8px;">Transmission 1</div>
+        <div style="font-weight:700;font-size:13px;color:#006699;margin:12px 0 8px;">Transmission 1</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <div class="form-group">
             <label class="form-label" style="font-size:12px;">Transmission Make</label>
@@ -5527,7 +5527,7 @@ function renderNewSurveyForm() {
       <!-- Engine 2 (hidden by default) -->
       <div id="engine2Section" style="display:none;border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin-bottom:10px;background:#f8fafc;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <div style="font-weight:700;font-size:13px;color:#1e3a5f;">Engine 2 (Starboard)</div>
+          <div style="font-weight:700;font-size:13px;color:#006699;">Engine 2 (Starboard)</div>
           <button class="btn-secondary" style="font-size:11px;padding:2px 8px;color:#dc2626;" onclick="removeEngine2()">Remove</button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -5589,7 +5589,7 @@ function renderNewSurveyForm() {
             </div>
           </div>
         </div>
-        <div style="font-weight:700;font-size:13px;color:#1e3a5f;margin:12px 0 8px;">Transmission 2</div>
+        <div style="font-weight:700;font-size:13px;color:#006699;margin:12px 0 8px;">Transmission 2</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <div class="form-group">
             <label class="form-label" style="font-size:12px;">Transmission Make</label>
@@ -5740,7 +5740,7 @@ function renderNewSurveyForm() {
         </div>
       </div>
 
-      <h3 style="margin-top:16px;color:#1e3a5f;">Vessel Overview Photos (Four Corners)</h3>
+      <h3 style="margin-top:16px;color:#006699;">Vessel Overview Photos (Four Corners)</h3>
       <div style="font-size:12px;color:#6b7280;margin-bottom:10px;">SAMS requires four overview photos showing the vessel from each corner. These appear at the end of the report.</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div>
@@ -5930,7 +5930,7 @@ function renderNewSurveyForm() {
         </select>
       </div>
 
-      <h3 style="margin-top:16px;color:#1e3a5f;">Comparable Vessels</h3>
+      <h3 style="margin-top:16px;color:#006699;">Comparable Vessels</h3>
       <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Add comparable sales from BUCValu, Soldboats.com, YachtWorld, and current listings to support your valuation.</div>
       <div id="comparablesEntries"></div>
       <button class="btn-secondary" style="font-size:12px;padding:6px 12px;margin-top:8px;" onclick="addComparableEntry()">+ Add Comparable</button>
@@ -6589,7 +6589,7 @@ function editSurveyDetails(surveyId) {
 
     // 📄 Preview Report button
     const reportBtn2 = document.createElement('button');
-    reportBtn2.style.cssText = 'background:#1e3a5f;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
+    reportBtn2.style.cssText = 'background:#006699;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
     reportBtn2.innerHTML = '📄 Preview';
     reportBtn2.onclick = async () => {
       await saveEditFormSilently();
@@ -7350,7 +7350,7 @@ function suggestValuation() {
     const query = encodeURIComponent(input);
     card.innerHTML = `
       <p style="color:#1e40af;font-weight:bold;margin:0 0 8px;">No built-in value data found for this model</p>
-      <p style="color:#1e3a5f;font-size:13px;margin:0 0 12px;">Check live sources for current market pricing:</p>
+      <p style="color:#006699;font-size:13px;margin:0 0 12px;">Check live sources for current market pricing:</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn-secondary" style="font-size:13px;"
                 onclick="window.open('https://www.yachtworld.com/boats-for-sale/?keyword=${encodeURIComponent(input)}','_blank')">
@@ -7381,14 +7381,14 @@ function suggestValuation() {
 
       <div style="background:white;border:1px solid #dbeafe;border-radius:6px;padding:10px 12px;margin-bottom:10px;">
         <p style="color:#6b7280;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px;">Source: BUC Value Guide (built-in database)</p>
-        <p style="color:#1e3a5f;font-size:20px;font-weight:bold;margin:0;">${lowFmt} – ${highFmt} USD</p>
+        <p style="color:#006699;font-size:20px;font-weight:bold;margin:0;">${lowFmt} – ${highFmt} USD</p>
         <p style="color:#374151;font-size:13px;margin:4px 0 0;">${lowCAD} – ${highCAD} CAD @ ${usdcad.toFixed(2)}</p>
       </div>
 
       <p style="color:#374151;font-size:12px;margin:0 0 4px;line-height:1.5;">
         <em>BUC guide values reflect average condition. Adjust for actual condition, equipment, upgrades, and location. SAMS requires corroboration from additional sources.</em>
       </p>
-      <p style="color:#1e3a5f;font-size:13px;margin:0 0 10px;">${entry.rationale}</p>
+      <p style="color:#006699;font-size:13px;margin:0 0 10px;">${entry.rationale}</p>
 
       <p style="color:#1e40af;font-weight:600;font-size:13px;margin:0 0 6px;">Search additional sources to corroborate:</p>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
@@ -8224,7 +8224,7 @@ function renderInspection(survey) {
   const app = document.getElementById('app');
 
   const surveyTypeBanner = survey.surveyType
-    ? `<div style="background:${survey.surveyType === 'Insurance survey' ? '#f59e0b' : '#1e3a5f'};color:#fff;text-align:center;font-size:12px;font-weight:700;padding:4px 0;letter-spacing:0.5px;">${esc(survey.surveyType).toUpperCase()}</div>`
+    ? `<div style="background:${survey.surveyType === 'Insurance survey' ? '#ffcc00' : '#006699'};color:${survey.surveyType === 'Insurance survey' ? '#006699' : '#fff'};text-align:center;font-size:12px;font-weight:700;padding:4px 0;letter-spacing:0.5px;">${esc(survey.surveyType).toUpperCase()}</div>`
     : '';
 
   app.innerHTML = `
@@ -8232,15 +8232,15 @@ function renderInspection(survey) {
       <div style="display:flex;align-items:center;gap:10px;">
         <button class="header-back" onclick="backToHome()">←</button>
         <div style="flex:1;min-width:0;">
-          <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(survey.vesselName)}</div>
-          <div class="header-subtitle">${APP_VERSION}</div>
+          <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#006699;">${esc(survey.vesselName)}</div>
+          <div class="header-subtitle" style="color:#3399cc;">${APP_VERSION}</div>
         </div>
         <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
       </div>
       <div style="display:flex;justify-content:center;gap:8px;">
-        <button onclick="forceAppUpdate()" style="background:#475569;color:white;border:none;border-radius:22px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);">↻ Update</button>
-        <button onclick="regenerateDescriptionFromInspection()" style="background:#7c3aed;color:white;border:none;border-radius:22px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);">✨ Desc</button>
-        <button onclick="editSurveyDetails('${survey.id}')" style="background:#0369a1;color:white;border:none;border-radius:22px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);">✏️ Edit Intro</button>
+        <button onclick="forceAppUpdate()" style="background:rgba(0,102,153,0.08);color:#006699;border:1px solid #3399cc;border-radius:22px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">↻ Update</button>
+        <button onclick="regenerateDescriptionFromInspection()" style="background:#ffcc00;color:#006699;border:none;border-radius:22px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(255,204,0,0.3);">✨ Desc</button>
+        <button onclick="editSurveyDetails('${survey.id}')" style="background:#006699;color:white;border:none;border-radius:22px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(0,102,153,0.3);">✏️ Edit Intro</button>
       </div>
     </div>
     ${surveyTypeBanner}
@@ -8449,14 +8449,14 @@ function renderInspection(survey) {
         <button onclick="setVesselTypeFromInspection('sail')"
                 style="padding:7px 18px;font-size:13px;font-weight:600;border:none;border-radius:20px;cursor:pointer;
                        transition:background 0.15s,color 0.15s;
-                       background:${currentVesselType === 'sail' ? '#1e3a5f' : '#e2e8f0'};
+                       background:${currentVesselType === 'sail' ? '#006699' : '#e2e8f0'};
                        color:${currentVesselType === 'sail' ? 'white' : '#475569'};">
           Sail
         </button>
         <button onclick="setVesselTypeFromInspection('power')"
                 style="padding:7px 18px;font-size:13px;font-weight:600;border:none;border-radius:20px;cursor:pointer;
                        transition:background 0.15s,color 0.15s;
-                       background:${currentVesselType === 'power' ? '#1e3a5f' : '#e2e8f0'};
+                       background:${currentVesselType === 'power' ? '#006699' : '#e2e8f0'};
                        color:${currentVesselType === 'power' ? 'white' : '#475569'};">
           Power
         </button>
@@ -8509,9 +8509,9 @@ function renderInspection(survey) {
     if (categoryName === 'Head(s)') {
       html += `
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;">
-          <span style="font-size:14px;font-weight:600;color:#1e3a5f;">Number of heads:</span>
+          <span style="font-size:14px;font-weight:600;color:#006699;">Number of heads:</span>
           <select id="headCountSelect" onchange="updateHeadCount(parseInt(this.value))"
-                  style="padding:8px 12px;border:1px solid #93c5fd;border-radius:6px;font-size:15px;font-weight:600;background:white;color:#1e3a5f;min-width:60px;">
+                  style="padding:8px 12px;border:1px solid #93c5fd;border-radius:6px;font-size:15px;font-weight:600;background:white;color:#006699;min-width:60px;">
             ${[1,2,3,4].map(n => `<option value="${n}" ${headCount === n ? 'selected' : ''}>${n}</option>`).join('')}
           </select>
         </div>
@@ -8522,9 +8522,9 @@ function renderInspection(survey) {
     if (categoryName === 'Hull exterior, keel and propulsion') {
       html += `
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;">
-          <span style="font-size:13px;font-weight:600;color:#1e3a5f;">🚢 Number of hulls:</span>
+          <span style="font-size:13px;font-weight:600;color:#006699;">🚢 Number of hulls:</span>
           <select id="hullCountSelect" onchange="updateHullCount(parseInt(this.value))"
-                  style="padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:14px;font-weight:600;background:white;color:#1e3a5f;min-width:50px;">
+                  style="padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:14px;font-weight:600;background:white;color:#006699;min-width:50px;">
             <option value="1" ${hullCount === 1 ? 'selected' : ''}>1 (monohull)</option>
             <option value="2" ${hullCount === 2 ? 'selected' : ''}>2 (catamaran)</option>
             <option value="3" ${hullCount === 3 ? 'selected' : ''}>3 (trimaran)</option>
@@ -8550,12 +8550,12 @@ function renderInspection(survey) {
 
       html += `
         <div style="margin-bottom:12px;padding:12px;background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;">
-          <div style="font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:8px;">⚙️ Drive Configuration</div>
+          <div style="font-size:13px;font-weight:700;color:#006699;margin-bottom:8px;">⚙️ Drive Configuration</div>
           <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
             <div style="display:flex;align-items:center;gap:6px;">
               <span style="font-size:13px;font-weight:600;color:#374151;">Drive type:</span>
               <select id="driveTypeSelect" onchange="updateDriveType(this.value)"
-                      style="padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:14px;font-weight:600;background:white;color:#1e3a5f;">
+                      style="padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:14px;font-weight:600;background:white;color:#006699;">
                 ${driveTypeOptions}
               </select>
             </div>
@@ -8567,7 +8567,7 @@ function renderInspection(survey) {
             <div style="display:flex;align-items:center;gap:6px;">
               <span style="font-size:13px;font-weight:600;color:#374151;">Drive lines:</span>
               <select id="driveLineCountSelect" onchange="updateDriveLineCount(parseInt(this.value))"
-                      style="padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:14px;font-weight:600;background:white;color:#1e3a5f;min-width:50px;">
+                      style="padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:14px;font-weight:600;background:white;color:#006699;min-width:50px;">
                 ${[1,2,3].map(n => `<option value="${n}" ${driveLineCount === n ? 'selected' : ''}>${n}</option>`).join('')}
               </select>
             </div>
@@ -8584,7 +8584,7 @@ function renderInspection(survey) {
           <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
             <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;">
               <input type="checkbox" id="hasRudderToggle" ${hasRudder ? 'checked' : ''} onchange="toggleHasRudder(this.checked)"
-                     style="width:18px;height:18px;accent-color:#1e3a5f;">
+                     style="width:18px;height:18px;accent-color:#006699;">
               Vessel has a rudder
             </label>
             <span style="font-size:11px;color:#6b7280;">${hasRudder ? '(rudder items shown)' : '(rudder items hidden)'}</span>
@@ -8613,7 +8613,7 @@ function renderInspection(survey) {
               <div style="position:relative;width:84px;">
                 <img id="thumb-${pid}" src="" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
                 <button onclick="event.stopPropagation();deleteAreaPhoto('${pid}', '${safeLabel}')" aria-label="Delete photo" style="position:absolute;top:-8px;right:-8px;background:#dc2626;color:white;border:2px solid white;border-radius:50%;width:30px;height:30px;font-size:16px;font-weight:700;cursor:pointer;line-height:26px;text-align:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,0.3);">×</button>
-                <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#1e3a5f;color:white;border:none;border-radius:6px;padding:6px 0;font-size:12px;font-weight:700;cursor:pointer;">Move ↗</button>
+                <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#006699;color:white;border:none;border-radius:6px;padding:6px 0;font-size:12px;font-weight:700;cursor:pointer;">Move ↗</button>
               </div>
             `).join('')}
           </div>
@@ -8680,7 +8680,7 @@ function renderInspection(survey) {
   survey.safetyEquipment.forEach((eq, idx) => {
     if (eq.category !== lastCategory) {
       lastCategory = eq.category;
-      html += `<div style="font-weight:bold;margin-top:14px;margin-bottom:6px;color:#1e3a5f;font-size:13px;border-bottom:1px solid #ddd;padding-bottom:4px;">${eq.category}</div>`;
+      html += `<div style="font-weight:bold;margin-top:14px;margin-bottom:6px;color:#006699;font-size:13px;border-bottom:1px solid #ddd;padding-bottom:4px;">${eq.category}</div>`;
     }
     const checkedAttr = eq.checked ? 'checked' : '';
     const safetyPhotoCount = (eq.photos && eq.photos.length) || 0;
@@ -8717,7 +8717,7 @@ function renderInspection(survey) {
 
   html += `
         <div style="margin-top:16px;padding-top:12px;border-top:1px solid #e5e7eb;">
-          <div style="font-weight:600;font-size:13px;color:#1e3a5f;margin-bottom:6px;">Add Additional Safety Equipment</div>
+          <div style="font-weight:600;font-size:13px;color:#006699;margin-bottom:6px;">Add Additional Safety Equipment</div>
           <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Select items found on board that are not in the standard TC TP 511 list.</div>
           <div id="customSafetyOptions" style="display:flex;flex-direction:column;gap:6px;">
             ${ADDITIONAL_SAFETY_ITEMS.map(item => {
@@ -8903,7 +8903,7 @@ function ensureReportButton() {
   // Backup button
   const backupBtn = document.createElement('button');
   backupBtn.id = 'backupBtn';
-  backupBtn.style.cssText = 'background:#16a34a;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
+  backupBtn.style.cssText = 'background:#3399cc;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(51,153,204,0.3);cursor:pointer;white-space:nowrap;';
   backupBtn.innerHTML = '💾 Backup';
   backupBtn.onclick = async () => {
     // Suppress popstate during backup (share sheet can trigger it on iOS)
@@ -8974,7 +8974,7 @@ function ensureReportButton() {
   // Check Survey button (centre)
   const checkBtn = document.createElement('button');
   checkBtn.id = 'checkSurveyBtn';
-  checkBtn.style.cssText = 'background:#d97706;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
+  checkBtn.style.cssText = 'background:#ffcc00;color:#006699;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(255,204,0,0.3);cursor:pointer;white-space:nowrap;';
   checkBtn.innerHTML = '✅ Check S…';
   checkBtn.onclick = () => checkSurvey();
   bottomBar.appendChild(checkBtn);
@@ -8982,7 +8982,7 @@ function ensureReportButton() {
   // Preview Report button (right)
   btn = document.createElement('button');
   btn.id = 'reportBtn';
-  btn.style.cssText = 'background:#1e3a5f;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
+  btn.style.cssText = 'background:#006699;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,102,153,0.3);cursor:pointer;white-space:nowrap;';
   btn.innerHTML = '📄 Preview Report';
   btn.onclick = () => generateReport();
   bottomBar.appendChild(btn);
@@ -9815,7 +9815,7 @@ async function checkSurvey() {
         <div id="row_${item._checkId}" data-cs-msg="${escapedMsg}" style="margin-bottom:4px;${isReviewed ? 'opacity:0.5;' : ''}">
           <div style="background:${sevBg[item.severity]};border:1px solid ${sevBorder[item.severity]};border-radius:8px;padding:8px 10px;display:flex;align-items:flex-start;gap:8px;">
             <input type="checkbox" ${isReviewed ? 'checked' : ''} onchange="window._csToggleReviewed('${item._checkId}', this.checked)"
-                   style="flex-shrink:0;margin-top:2px;width:18px;height:18px;accent-color:#1e3a5f;cursor:pointer;" />
+                   style="flex-shrink:0;margin-top:2px;width:18px;height:18px;accent-color:#006699;cursor:pointer;" />
             ${ratingBadge}
             <div style="flex:1;min-width:0;">
               <div style="font-size:13px;font-weight:600;color:#1e293b;line-height:1.4;display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
@@ -9826,7 +9826,7 @@ async function checkSurvey() {
               </div>
               ${item.severity === 'proofread' && item.text ? `<div style="font-size:11px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;">${(item.text.length > 70 ? item.text.substring(0, 70) + '…' : item.text).replace(/</g, '&lt;')}</div>` : ''}
             </div>
-            ${hasTappableItem ? `<button onclick="window._csGoToItem(${idx});event.stopPropagation();" style="flex-shrink:0;background:#1e3a5f;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">Go ➜</button>` : ''}
+            ${hasTappableItem ? `<button onclick="window._csGoToItem(${idx});event.stopPropagation();" style="flex-shrink:0;background:#006699;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">Go ➜</button>` : ''}
           </div>
           ${inlineContent}
         </div>`;
@@ -9856,7 +9856,7 @@ async function checkSurvey() {
         <div style="margin-bottom:3px;">
           <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;display:flex;align-items:center;gap:8px;">
             <input type="checkbox" ${reviewedState[item._checkId] ? 'checked' : ''} onchange="window._csToggleReviewed('${item._checkId}', this.checked)"
-                   style="flex-shrink:0;width:16px;height:16px;accent-color:#1e3a5f;cursor:pointer;" />
+                   style="flex-shrink:0;width:16px;height:16px;accent-color:#006699;cursor:pointer;" />
             <div style="flex:1;min-width:0;font-size:12px;color:#64748b;">${displayText}</div>
             ${hasTappableItem ? `<button onclick="window._csGoToItem(${idx});event.stopPropagation();" style="flex-shrink:0;background:#94a3b8;color:white;border:none;border-radius:6px;padding:3px 7px;font-size:10px;cursor:pointer;">Go ➜</button>` : ''}
           </div>
@@ -9916,7 +9916,7 @@ async function checkSurvey() {
   overlay.id = 'checkSurveyOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:white;z-index:9999;display:flex;flex-direction:column;';
   overlay.innerHTML = `
-    <div style="flex-shrink:0;background:#1e3a5f;color:white;padding:12px 16px calc(12px + env(safe-area-inset-top, 0px)) 16px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="flex-shrink:0;background:#006699;color:white;padding:12px 16px calc(12px + env(safe-area-inset-top, 0px)) 16px;display:flex;align-items:center;justify-content:space-between;">
       <h2 style="margin:0;font-size:17px;font-weight:700;">✔ Survey Quality Check</h2>
       <button onclick="document.getElementById('checkSurveyOverlay')?.remove();" style="background:rgba(255,255,255,0.15);color:white;border:none;border-radius:8px;padding:6px 14px;font-size:14px;cursor:pointer;">✕ Close</button>
     </div>
@@ -10215,7 +10215,7 @@ async function checkSurvey() {
       backBtn = document.createElement('button');
       backBtn.id = 'csBackToCheckBtn';
       backBtn.textContent = '← Back to Check Survey';
-      backBtn.style.cssText = 'position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));left:50%;transform:translateX(-50%);background:#1e3a5f;color:white;border:none;border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+      backBtn.style.cssText = 'position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));left:50%;transform:translateX(-50%);background:#006699;color:white;border:none;border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
       backBtn.onclick = async function() {
         backBtn.remove();
         await _csEvaluateAndReturn(scrollPos);
@@ -10517,7 +10517,7 @@ function _csShowEvalModal(working, reason, scrollPos) {
         ${reason.replace(/</g, '&lt;')}
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;">
-        <button id="csEvalGoBack" style="width:100%;padding:12px;background:#1e3a5f;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">
+        <button id="csEvalGoBack" style="width:100%;padding:12px;background:#006699;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">
           ← Go back and fix
         </button>
         <button id="csEvalForceOK" style="width:100%;padding:12px;background:white;color:#64748b;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;">
@@ -11651,7 +11651,7 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
         <div style="position:relative;width:84px;">
           <img id="thumb-${pid}" src="" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
           <button onclick="event.stopPropagation();deleteAreaPhoto('${pid}', '${safeLabel}')" aria-label="Delete photo" style="position:absolute;top:-8px;right:-8px;background:#dc2626;color:white;border:2px solid white;border-radius:50%;width:30px;height:30px;font-size:16px;font-weight:700;cursor:pointer;line-height:26px;text-align:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,0.3);">×</button>
-          <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#1e3a5f;color:white;border:none;border-radius:6px;padding:6px 0;font-size:12px;font-weight:700;cursor:pointer;">Move ↗</button>
+          <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#006699;color:white;border:none;border-radius:6px;padding:6px 0;font-size:12px;font-weight:700;cursor:pointer;">Move ↗</button>
         </div>
       `).join('')}
     </div>
@@ -11812,7 +11812,7 @@ function showPhotoPreviewModal(fieldKey, label, stampedDataUrl, fileType) {
 
   modal.innerHTML = `
     <div style="background:white;border-radius:12px;max-width:95vw;width:100%;margin:10px auto;padding:14px;display:flex;flex-direction:column;align-items:center;">
-      <div style="font-weight:600;margin-bottom:8px;color:#1e3a5f;font-size:14px;">Photo Preview — ${label}</div>
+      <div style="font-weight:600;margin-bottom:8px;color:#006699;font-size:14px;">Photo Preview — ${label}</div>
       <div style="position:relative;width:100%;text-align:center;margin-bottom:8px;">
         <img id="previewImage" src="${stampedDataUrl}" style="max-width:100%;max-height:45vh;border-radius:8px;border:1px solid #ccc;">
       </div>
@@ -12079,7 +12079,7 @@ function startAnnotation() {
 
   overlay.innerHTML = `
     <div id="annoToolbar" style="display:flex;gap:6px;padding:10px 12px;background:#1e293b;align-items:center;flex-wrap:wrap;">
-      <button id="annoToolCircle" onclick="setAnnotationTool('circle')" style="padding:6px 12px;border-radius:6px;border:2px solid #3b82f6;background:#1e3a5f;color:white;font-size:13px;font-weight:600;cursor:pointer;">⭕ Circle</button>
+      <button id="annoToolCircle" onclick="setAnnotationTool('circle')" style="padding:6px 12px;border-radius:6px;border:2px solid #3b82f6;background:#006699;color:white;font-size:13px;font-weight:600;cursor:pointer;">⭕ Circle</button>
       <button id="annoToolArrow" onclick="setAnnotationTool('arrow')" style="padding:6px 12px;border-radius:6px;border:2px solid transparent;background:#374151;color:white;font-size:13px;font-weight:600;cursor:pointer;">➜ Arrow</button>
       <button id="annoToolText" onclick="setAnnotationTool('text')" style="padding:6px 12px;border-radius:6px;border:2px solid transparent;background:#374151;color:white;font-size:13px;font-weight:600;cursor:pointer;">Aa Text</button>
       <div style="flex:1;"></div>
@@ -12139,7 +12139,7 @@ function setAnnotationTool(tool) {
     const btn = document.getElementById('annoTool' + t.charAt(0).toUpperCase() + t.slice(1));
     if (btn) {
       btn.style.borderColor = (t === tool) ? '#3b82f6' : 'transparent';
-      btn.style.background = (t === tool) ? '#1e3a5f' : '#374151';
+      btn.style.background = (t === tool) ? '#006699' : '#374151';
     }
   });
 }
@@ -12854,7 +12854,7 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
   // Rating buttons
   options.forEach(option => {
     const isActive = itemData.rating === option;
-    const color = RATING_COLORS[option] || '#1e3a5f';
+    const color = RATING_COLORS[option] || '#006699';
     html += `
       <button class="rating-btn ${isActive ? 'active' : ''}"
               style="${isActive ? `background-color: ${color}; border-color: ${color};` : ''}"
@@ -14219,7 +14219,7 @@ function updateCollapseButton(show) {
     if (!btn) {
       btn = document.createElement('button');
       btn.id = 'floatingCollapseBtn';
-      btn.style.cssText = 'position:fixed;bottom:100px;right:16px;z-index:9998;background:#1e3a5f;color:white;border:none;border-radius:24px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.35);display:flex;align-items:center;gap:6px;';
+      btn.style.cssText = 'position:fixed;bottom:100px;right:16px;z-index:9998;background:#006699;color:white;border:none;border-radius:24px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.35);display:flex;align-items:center;gap:6px;';
       btn.innerHTML = '▲ Collapse';
       btn.title = 'Collapse current section';
       btn.onclick = collapseCurrentSection;
@@ -14928,9 +14928,9 @@ async function generateReport() {
       #exportToolbar { display: none !important; }
     }
     body { font-family: Arial, Helvetica, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; font-size: 11pt; }
-    h1 { text-align: center; border-bottom: 3px solid #1e3a5f; padding-bottom: 10px; margin-bottom: 6px; }
-    h2 { background: #1e3a5f; color: white; padding: 8px 12px; margin-top: 24px; font-size: 13pt; }
-    h3 { color: #1e3a5f; margin-top: 18px; font-size: 12pt; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+    h1 { text-align: center; border-bottom: 3px solid #006699; padding-bottom: 10px; margin-bottom: 6px; }
+    h2 { background: #006699; color: white; padding: 8px 12px; margin-top: 24px; font-size: 13pt; }
+    h3 { color: #006699; margin-top: 18px; font-size: 12pt; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
     table { width: 100%; border-collapse: collapse; margin: 8px 0; }
     td, th { border: 1px solid #ddd; padding: 6px 8px; text-align: left; font-size: 10pt; }
     th { background: #f0f0f0; }
@@ -14939,10 +14939,10 @@ async function generateReport() {
     .rating-c { color: #16a34a; font-weight: bold; }
     .rating-nt { color: #6b7280; font-weight: bold; }
     .rating-safety { color: #2563eb; font-weight: bold; }
-    .item { margin: 6px 0; padding: 4px 0 4px 10px; border-left: 3px solid #1e3a5f; }
+    .item { margin: 6px 0; padding: 4px 0 4px 10px; border-left: 3px solid #006699; }
     .standards { font-size: 9pt; color: #666; margin-top: 2px; }
     .item p { margin: 2px 0; }
-    .footer { margin-top: 40px; padding: 20px; border-top: 2px solid #1e3a5f; }
+    .footer { margin-top: 40px; padding: 20px; border-top: 2px solid #006699; }
     .header-bar { border-bottom: 1px solid #999; font-size: 9pt; color: #666; padding-bottom: 4px; margin-bottom: 16px; }
     .scope-text { font-size: 10pt; line-height: 1.5; }
     .bold-disclaimer { font-weight: bold; margin: 16px 0; padding: 10px; border: 1px solid #999; background: #f9f9f9; font-size: 10pt; }
@@ -14953,7 +14953,7 @@ async function generateReport() {
     .buc-grades { margin: 12px 0; }
     .buc-grades p { margin: 4px 0 4px 20px; font-size: 10pt; }
     .checklist-table { font-size: 9pt; }
-    .checklist-table th { background: #1e3a5f; color: white; padding: 5px 6px; font-size: 8.5pt; text-align: left; }
+    .checklist-table th { background: #006699; color: white; padding: 5px 6px; font-size: 8.5pt; text-align: left; }
     .checklist-table td { padding: 4px 6px; vertical-align: top; font-size: 9pt; }
     .checklist-table tr:nth-child(even) { background: #f8f9fa; }
     .checklist-table .rating-pill { display: inline-block; padding: 1px 7px; border-radius: 3px; color: white; font-weight: bold; font-size: 8pt; white-space: nowrap; }
@@ -14965,12 +14965,12 @@ async function generateReport() {
 <body>
 
   <!-- Export toolbar (hidden when printing) -->
-  <div id="exportToolbar" style="position:sticky;top:0;z-index:999;background:#1e3a5f;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:3px solid #f0c040;margin:-20px -20px 16px -20px;padding:12px 24px;">
+  <div id="exportToolbar" style="position:sticky;top:0;z-index:999;background:#006699;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:3px solid #f0c040;margin:-20px -20px 16px -20px;padding:12px 24px;">
     <span style="color:white;font-size:11pt;font-weight:bold;">Kiki Marine — Survey Report</span>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button onclick="window.close(); if(!window.closed) history.back();" style="background:#4ade80;color:#1e3a5f;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">← Back to Inspection</button>
-      <button onclick="window.print()" style="background:#fff;color:#1e3a5f;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">🖨️ Print / PDF</button>
-      <button onclick="exportToWord()" style="background:#f0c040;color:#1e3a5f;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">📥 Download as Word</button>
+      <button onclick="window.close(); if(!window.closed) history.back();" style="background:#4ade80;color:#006699;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">← Back to Inspection</button>
+      <button onclick="window.print()" style="background:#fff;color:#006699;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">🖨️ Print / PDF</button>
+      <button onclick="exportToWord()" style="background:#f0c040;color:#006699;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">📥 Download as Word</button>
       <button onclick="toggleProseMode()" id="proseModeBtn" style="background:#e5e7eb;color:#333;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">📝 Prose Mode</button>
     </div>
   </div>
@@ -14982,16 +14982,16 @@ async function generateReport() {
          onerror="this.style.display='none'">
     <h1 style="margin-top: 12px; font-size: 22pt;">KIKI MARINE</h1>
     <p style="font-size: 10pt; color: #555; margin-top: -8px;">SAMS &bull; ABYC Master Advisor</p>
-    <h1 style="font-size: 16pt; border: none; margin-top: 20px; border-bottom: 2px solid #1e3a5f; display: inline-block; padding-bottom: 6px;">${survey.surveyType === 'Insurance survey' ? 'Insurance<br/>Marine Survey' : 'Report of Condition &amp; Value<br/>Marine Survey'}</h1>
+    <h1 style="font-size: 16pt; border: none; margin-top: 20px; border-bottom: 2px solid #006699; display: inline-block; padding-bottom: 6px;">${survey.surveyType === 'Insurance survey' ? 'Insurance<br/>Marine Survey' : 'Report of Condition &amp; Value<br/>Marine Survey'}</h1>
   </div>
 
   ${coverPhotoDataUrl ? `
   <div style="text-align:center; margin: 24px auto; max-width: 700px;">
     <img src="${coverPhotoDataUrl}" alt="Vessel Photo"
-         style="width:100%; max-height:400px; object-fit:cover; border:2px solid #1e3a5f; border-radius:4px;" />
+         style="width:100%; max-height:400px; object-fit:cover; border:2px solid #006699; border-radius:4px;" />
   </div>` : ''}
 
-  <table style="margin-top: 20px; border: 2px solid #1e3a5f;">
+  <table style="margin-top: 20px; border: 2px solid #006699;">
     <tr><td style="width:40%; background:#e8edf2;"><strong>Vessel</strong></td><td>"${esc(survey.vesselName)}" — ${esc(survey.yearMakeModel)}</td></tr>
     <tr><td style="background:#e8edf2;"><strong>HIN</strong></td><td>${esc(survey.hinNumber) || 'N/A'}</td></tr>
     <tr><td style="background:#e8edf2;"><strong>Survey Conducted For</strong></td><td>${esc(survey.clientName) || 'N/A'}</td></tr>
@@ -15162,8 +15162,8 @@ ${survey.locationLat && survey.locationLon ? `
 ` : ''}
 
   <!-- ═══ RATING & VALUATION (early summary) ═══ -->
-  <div style="border:2px solid #1e3a5f;padding:12px 16px;margin:16px 0;background:#f8f9fb;">
-    <h3 style="margin:0 0 8px 0;color:#1e3a5f;border-bottom:1px solid #1e3a5f;padding-bottom:4px;font-size:12pt;">RATING &amp; VALUATION</h3>
+  <div style="border:2px solid #006699;padding:12px 16px;margin:16px 0;background:#f8f9fb;">
+    <h3 style="margin:0 0 8px 0;color:#006699;border-bottom:1px solid #006699;padding-bottom:4px;font-size:12pt;">RATING &amp; VALUATION</h3>
     <table style="border:none;margin:0;">
       <tr><td style="width:45%;border:none;padding:3px 8px;"><strong>Vessel Overall Rating:</strong></td><td style="border:none;padding:3px 8px;font-weight:bold;font-size:11pt;">${esc(survey.overallCondition) || 'Not yet assessed'}</td></tr>
       <tr><td style="border:none;padding:3px 8px;"><strong>Estimated Market Value:</strong></td><td style="border:none;padding:3px 8px;font-weight:bold;">$${parseInt(survey.valuationLow || 0).toLocaleString()} – $${parseInt(survey.valuationHigh || 0).toLocaleString()} USD${survey.exchangeRate ? ` / $${Math.round(parseInt(survey.valuationLow || 0) * survey.exchangeRate).toLocaleString()} – $${Math.round(parseInt(survey.valuationHigh || 0) * survey.exchangeRate).toLocaleString()} CAD` : ''} – tax not included</td></tr>
@@ -15271,7 +15271,7 @@ ${survey.vesselDescription ? `
         if (answeredItems.length === 0) return;
 
         // Category header row
-        html += `<tr><td colspan="7" style="background:#e8edf2;font-weight:bold;padding:5px 8px;font-size:9pt;border-top:2px solid #1e3a5f;">${esc(category.name)}</td></tr>`;
+        html += `<tr><td colspan="7" style="background:#e8edf2;font-weight:bold;padding:5px 8px;font-size:9pt;border-top:2px solid #006699;">${esc(category.name)}</td></tr>`;
 
         answeredItems.forEach(item => {
           tableRow++;
@@ -15438,7 +15438,7 @@ ${survey.vesselDescription ? `
   }
 
   // ── DETAILED SURVEY FINDINGS (body sections) ──────────────────────
-  html += `<h2 style="background:#1e3a5f;font-size:14pt;">DETAILED SURVEY FINDINGS</h2>`;
+  html += `<h2 style="background:#006699;font-size:14pt;">DETAILED SURVEY FINDINGS</h2>`;
 
   // Bilge pump detail table (if data exists)
   if (survey.bilgePumps && survey.bilgePumps.length > 0) {
@@ -15474,7 +15474,7 @@ ${survey.vesselDescription ? `
           const ratingLabel = itemData.rating || '';
           const ratingClass = ratingLabel.startsWith('A') ? 'rating-a' : ratingLabel.startsWith('B') ? 'rating-b' : ratingLabel.startsWith('C') ? 'rating-c' : 'rating-nt';
           const code = findingCodeMap[item.label];
-          const codeTag = code ? ` <strong style="color:${RATING_COLORS[ratingLabel] || '#1e3a5f'};">(Finding ${code})</strong>` : '';
+          const codeTag = code ? ` <strong style="color:${RATING_COLORS[ratingLabel] || '#006699'};">(Finding ${code})</strong>` : '';
 
           // Build inline photos for the body — large, captioned, like Norm Behring's style
           let itemPhotosHtml = '';
@@ -15522,7 +15522,7 @@ ${survey.vesselDescription ? `
           }
 
           html += `
-  <div class="item" style="border-left-color: ${RATING_COLORS[ratingLabel] || '#1e3a5f'};">
+  <div class="item" style="border-left-color: ${RATING_COLORS[ratingLabel] || '#006699'};">
     <p><strong>${esc(item.label)}</strong>${ratingLabel ? ` — <span class="${ratingClass}">${ratingLabel}</span>${codeTag}` : ''}</p>
     ${outdriveInfoHtml}
     ${winchInfoHtml}
@@ -15639,7 +15639,7 @@ ${survey.vesselDescription ? `
     </div>
 
     <p>As a result of the Survey, as shown in the REPORT OF MARINE SURVEY &amp; FINDINGS AND RECOMMENDATIONS sections of this report and by virtue of my experience, my opinion is:</p>
-    <p style="font-size:14pt;font-weight:bold;text-align:center;padding:12px;border:2px solid #1e3a5f;">Overall Vessel Rating is: "${esc(survey.overallCondition) || 'Not yet assessed'}"</p>
+    <p style="font-size:14pt;font-weight:bold;text-align:center;padding:12px;border:2px solid #006699;">Overall Vessel Rating is: "${esc(survey.overallCondition) || 'Not yet assessed'}"</p>
   </div>
   `;
 
@@ -15845,18 +15845,18 @@ async function exportToWord() {
       '  table { border-collapse: collapse; width: 100%; }' +
       '  td, th { border: 1px solid #ddd; padding: 6px 8px; font-size: 10pt; }' +
       '  th { background: #f0f0f0; }' +
-      '  h1 { text-align: center; border-bottom: 3px solid #1e3a5f; padding-bottom: 10px; margin-bottom: 6px; }' +
-      '  h2 { background: #1e3a5f; color: white; padding: 8px 12px; margin-top: 24px; font-size: 13pt; }' +
-      '  h3 { color: #1e3a5f; margin-top: 18px; font-size: 12pt; border-bottom: 1px solid #ccc; padding-bottom: 4px; }' +
+      '  h1 { text-align: center; border-bottom: 3px solid #006699; padding-bottom: 10px; margin-bottom: 6px; }' +
+      '  h2 { background: #006699; color: white; padding: 8px 12px; margin-top: 24px; font-size: 13pt; }' +
+      '  h3 { color: #006699; margin-top: 18px; font-size: 12pt; border-bottom: 1px solid #ccc; padding-bottom: 4px; }' +
       '  .page-break { page-break-after: always; }' +
       '  .rating-a { color: #dc2626; font-weight: bold; }' +
       '  .rating-b { color: #d97706; font-weight: bold; }' +
       '  .rating-c { color: #16a34a; font-weight: bold; }' +
       '  .rating-nt { color: #6b7280; font-weight: bold; }' +
       '  .rating-safety { color: #2563eb; font-weight: bold; }' +
-      '  .item { margin: 12px 0; padding: 8px 10px; border-left: 4px solid #1e3a5f; }' +
-      '  .footer { margin-top: 40px; padding: 20px; border-top: 2px solid #1e3a5f; }' +
-      '  .checklist-table th { background: #1e3a5f; color: white; padding: 5px 6px; font-size: 8.5pt; }' +
+      '  .item { margin: 12px 0; padding: 8px 10px; border-left: 4px solid #006699; }' +
+      '  .footer { margin-top: 40px; padding: 20px; border-top: 2px solid #006699; }' +
+      '  .checklist-table th { background: #006699; color: white; padding: 5px 6px; font-size: 8.5pt; }' +
       '  .checklist-table td { padding: 4px 6px; font-size: 9pt; }' +
       '  .checklist-table .rating-pill { display: inline-block; padding: 1px 7px; border-radius: 3px; color: white; font-weight: bold; font-size: 8pt; }' +
       '</style>' +
@@ -15918,7 +15918,7 @@ function toggleProseMode() {
     });
     // Compact the detailed findings
     items.forEach(item => {
-      item.style.borderLeft = '3px solid #1e3a5f';
+      item.style.borderLeft = '3px solid #006699';
       item.style.padding = '4px 8px';
       item.style.margin = '6px 0';
     });
@@ -15973,7 +15973,7 @@ function renderReportInPage(html) {
 
   const app = document.getElementById('app');
   app.innerHTML = `
-    <div style="position:fixed;top:0;left:0;right:0;z-index:100;background:#1e3a5f;padding:12px 16px;display:flex;align-items:center;gap:12px;">
+    <div style="position:fixed;top:0;left:0;right:0;z-index:100;background:#006699;padding:12px 16px;display:flex;align-items:center;gap:12px;">
       <button onclick="history.back()" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">←</button>
       <span style="color:white;font-weight:600;">Survey Report</span>
       <button onclick="window.print()" style="margin-left:auto;background:#16a34a;color:white;border:none;padding:8px 16px;border-radius:6px;font-size:14px;cursor:pointer;">🖨️ Print/PDF</button>
@@ -17005,8 +17005,8 @@ async function openBatchCamera(itemLabel, opts) {
     </div>
     <div id="batchCamStrip" style="flex:0 0 auto;background:#111;padding:10px 12px;display:flex;gap:8px;overflow-x:auto;min-height:76px;align-items:center;"></div>
     <div style="flex:0 0 auto;background:#000;display:flex;align-items:center;justify-content:center;gap:40px;padding:20px 0;padding-bottom:calc(20px + env(safe-area-inset-bottom));">
-      <button id="batchCamShutter" aria-label="Take photo" style="width:88px;height:88px;border-radius:50%;background:#1e3a5f;border:5px solid #f5b942;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:38px;padding:0;line-height:1;">📷</button>
-      <button id="batchCamDone" aria-label="Done" style="width:88px;height:88px;border-radius:50%;background:#f5b942;color:#1e3a5f;border:5px solid #1e3a5f;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;padding:0;line-height:1;letter-spacing:0.5px;">DONE</button>
+      <button id="batchCamShutter" aria-label="Take photo" style="width:88px;height:88px;border-radius:50%;background:#006699;border:5px solid #f5b942;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:38px;padding:0;line-height:1;">📷</button>
+      <button id="batchCamDone" aria-label="Done" style="width:88px;height:88px;border-radius:50%;background:#f5b942;color:#006699;border:5px solid #006699;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;padding:0;line-height:1;letter-spacing:0.5px;">DONE</button>
     </div>
   `;
   document.body.appendChild(overlay);

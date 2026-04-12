@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#1e3a5f">
+    <meta name="theme-color" content="#ffffff">
     <meta name="description" content="Marine vessel surveying app for Kiki Marine">
     <!-- iOS PWA support -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Kiki Survey">
     <meta name="format-detection" content="telephone=no">
     <link rel="manifest" href="manifest.json">
@@ -32,7 +32,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            background: #fff;
+            background: #f8fbfd;
             color: #333;
             -webkit-text-size-adjust: 100%;
             -webkit-tap-highlight-color: transparent;
@@ -49,8 +49,8 @@
         }
 
         .header {
-            background-color: #1e3a5f;
-            color: white;
+            background: #ffffff;
+            color: #006699;
             padding: 16px;
             padding-top: calc(16px + env(safe-area-inset-top, 0px));
             padding-left: calc(16px + env(safe-area-inset-left, 0px));
@@ -58,7 +58,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 8px rgba(0,102,153,0.12);
+            border-bottom: 2px solid #3399cc;
         }
 
         .header-title {
@@ -74,10 +75,10 @@
         }
 
         .header-back {
-            background-color: rgba(255,255,255,0.2);
-            color: white;
+            background-color: rgba(0,102,153,0.08);
+            color: #006699;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             padding: 8px;
             font-size: 20px;
             cursor: pointer;
@@ -110,11 +111,12 @@
         }
 
         .btn-primary {
-            background-color: #1e3a5f;
+            background: linear-gradient(135deg, #006699, #3399cc);
             color: white;
             padding: 12px 24px;
             font-weight: 600;
             width: 100%;
+            box-shadow: 0 2px 8px rgba(0,102,153,0.3);
         }
 
         .btn-primary:active {
@@ -170,7 +172,7 @@
         .survey-name {
             font-size: 16px;
             font-weight: 600;
-            color: #1e3a5f;
+            color: #006699;
             margin: 0 0 4px 0;
         }
 
@@ -208,8 +210,8 @@
         select:focus,
         textarea:focus {
             outline: none;
-            border-color: #1e3a5f;
-            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+            border-color: #3399cc;
+            box-shadow: 0 0 0 3px rgba(51,153,204,0.15);
         }
 
         textarea {
@@ -220,9 +222,9 @@
         .form-heading {
             font-size: 20px;
             font-weight: 700;
-            color: #1e3a5f;
+            color: #006699;
             margin: 24px 0 16px 0;
-            border-bottom: 2px solid #1e3a5f;
+            border-bottom: 2px solid #3399cc;
             padding-bottom: 8px;
         }
 
@@ -238,7 +240,7 @@
             width: 100%;
             padding: 16px;
             background: white;
-            color: #1e3a5f;
+            color: #006699;
             border: none;
             display: flex;
             align-items: center;
@@ -349,7 +351,7 @@
         .modal-content h2 {
             font-size: 20px;
             margin: 0 0 12px 0;
-            color: #1e3a5f;
+            color: #006699;
         }
 
         .modal-actions {
@@ -369,14 +371,15 @@
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            background-color: #1e3a5f;
-            color: white;
+            background: linear-gradient(135deg, #ffcc00, #f5b800);
+            color: #006699;
             border: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-size: 28px;
+            font-weight: 700;
+            box-shadow: 0 4px 16px rgba(255,204,0,0.4);
             z-index: 100;
             cursor: pointer;
         }
@@ -413,7 +416,7 @@
             text-align: center;
             font-size: 14px;
             font-weight: 600;
-            color: #1e3a5f;
+            color: #006699;
             cursor: pointer;
             width: 100%;
             margin-top: 12px;
@@ -523,8 +526,8 @@
             cursor: pointer;
         }
         .compact-action-btn.has-content {
-            color: #1e3a5f;
-            border-color: #1e3a5f;
+            color: #006699;
+            border-color: #006699;
             background: #eff6ff;
         }
 
@@ -597,14 +600,14 @@
             justify-content: center;
         }
         .sheet-rating-option .radio-circle.selected {
-            border-color: #1e3a5f;
+            border-color: #006699;
         }
         .sheet-rating-option .radio-circle.selected::after {
             content: '';
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #1e3a5f;
+            background: #006699;
         }
         .sheet-section-title {
             font-size: 12px;
