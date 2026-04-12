@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2027';
+const APP_VERSION = 'v2028';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3521,7 +3521,7 @@ function refreshChipStrip(textarea) {
 
     html += `
       <input type="text" data-custom-idx="${ti}" placeholder="Add another item${isMulti ? ' (comma-separated, no punctuation)' : ''}"
-             spellcheck="true" autocorrect="on" autocapitalize="sentences"
+             spellcheck="true" autocorrect="on" autocapitalize="none"
              style="width:100%;margin-top:4px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;box-sizing:border-box;" />
       <div data-tone-warning-for="${ti}" style="display:none;margin-top:6px;padding:7px 10px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;line-height:1.4;"></div>
     `;
@@ -3629,6 +3629,39 @@ function refreshChipStrip(textarea) {
   // Initial render: apply current state so count tokens get resolved from
   // the default and the textarea shows clean text (not raw {count:...}).
   applyBuilderState(strip);
+}
+
+// Downcase the first letter of a phrase that will be spliced into the
+// middle of a sentence — unless the word is a proper noun (starts with
+// capital followed by lowercase AND appears in the proper-noun allow-list)
+// or an acronym (all uppercase, length >= 2). This cleans up iOS sentence-
+// case auto-cap artifacts like "... including two chipped blades and A
+// worn collar" → "... and a worn collar".
+const PROPER_NOUN_WHITELIST = new Set([
+  'yanmar','beneteau','volvo','penta','mercruiser','mercury','evinrude',
+  'johnson','suzuki','kubota','westerbeke','perkins','cummins','caterpillar',
+  'deutz','hunter','catalina','jeanneau','bavaria','hanse','hallberg','rassy',
+  'amel','lagoon','oceanis','bruce','danforth','rocna','manson','lofrans',
+  'lewmar','harken','ronstan','spinlock','schaefer','garhauer','furuno',
+  'raymarine','garmin','simrad','lowrance','navionics','vesper','icom',
+  'airmar','honda','tohatsu','nissan','quicksilver','sikaflex','interlux',
+  'pettit','awlgrip','epifanes','cetol','racor','abyc','nfpa','tc','uscg',
+  'canada','canadian','iso','ce','sams','nmea'
+]);
+function lowercaseMidSentence(phrase) {
+  const s = String(phrase || '');
+  if (!s) return s;
+  // Extract the first "word" (letters only, up to the first non-letter).
+  const m = s.match(/^([A-Za-z]+)(.*)$/);
+  if (!m) return s;
+  const firstWord = m[1];
+  const rest = m[2];
+  // Acronym: all uppercase, length >= 2 → leave as-is.
+  if (firstWord.length >= 2 && firstWord === firstWord.toUpperCase()) return s;
+  // Whitelisted proper noun → leave as-is (preserve original casing).
+  if (PROPER_NOUN_WHITELIST.has(firstWord.toLowerCase())) return s;
+  // Otherwise downcase the first letter only.
+  return firstWord.charAt(0).toLowerCase() + firstWord.slice(1) + rest;
 }
 
 // Prepend "a " or "an " to a noun phrase, choosing the article based on the
@@ -3992,7 +4025,13 @@ function applyBuilderState(strip) {
     const customInput = strip.querySelector(`input[data-custom-idx="${ti}"]`);
     const customRaw = customInput ? (customInput.value || '').trim() : '';
     if (customRaw) {
-      customRaw.split(/\s*,\s*/).filter(Boolean).forEach(l => selectedLabels.push(l));
+      customRaw.split(/\s*,\s*/).filter(Boolean).forEach(l => {
+        // Custom text is always spliced mid-sentence, so downcase the first
+        // letter unless it's a proper noun (Yanmar), an acronym (ABYC), or
+        // the user typed it in all-caps intentionally. Mid-sentence
+        // capitalization is the #1 grammar artefact of iOS auto-cap.
+        selectedLabels.push(lowercaseMidSentence(l));
+      });
     }
 
     if (selectedLabels.length > 0) {
