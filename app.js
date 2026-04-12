@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2063';
+const APP_VERSION = 'v2064';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9504,12 +9504,11 @@ async function checkSurvey() {
     // Close the overlay
     document.getElementById('checkSurveyOverlay')?.remove();
 
-    // Find the target element and scroll to it
-    setTimeout(() => {
-      let el = null;
-
-      if (itemLabel) {
-        // Checklist item — find by data-item-label attribute
+    // Determine navigation strategy
+    if (itemLabel) {
+      // Checklist item — lives in the inspection view (already visible underneath)
+      setTimeout(() => {
+        let el = null;
         const allWrappers = document.querySelectorAll('.compact-item-wrapper');
         for (const w of allWrappers) {
           if (w.getAttribute('data-item-label') === itemLabel) { el = w; break; }
@@ -9520,55 +9519,34 @@ async function checkSurvey() {
             if (w.getAttribute('data-item-label') === itemLabel) { el = w; break; }
           }
         }
-      } else if (navId) {
-        // Form field — find by element ID
-        el = document.getElementById(navId);
-        // Also try common container patterns (label, form-group)
-        if (!el) el = document.querySelector(`[for="${navId}"]`);
-      }
-
-      if (el) {
-        // Expand the parent accordion if it's collapsed
-        const accordion = el.closest('.category-accordion');
-        if (accordion) {
-          const content = accordion.querySelector('.accordion-content');
-          if (content && content.style.display === 'none') {
-            document.querySelectorAll('.accordion-content').forEach(ac => {
-              if (ac !== content && ac.style.display !== 'none') {
-                ac.style.display = 'none';
-                const hdr = ac.parentElement.querySelector('.accordion-header');
-                const chev = hdr?.querySelector('span:last-child');
-                if (chev) chev.style.transform = 'rotate(0deg)';
-              }
-            });
-            content.style.display = 'block';
-            const header = accordion.querySelector('.accordion-header');
-            const chevron = header?.querySelector('span:last-child');
-            if (chevron) chevron.style.transform = 'rotate(180deg)';
-            const titleSpan = header?.querySelector('.category-title');
-            if (titleSpan && typeof _openAccordionCategory !== 'undefined') {
-              _openAccordionCategory = titleSpan.textContent.replace(/^[^\w]*/, '').trim();
-            }
-            if (typeof updateCollapseButton === 'function') updateCollapseButton(true);
-          }
+        if (el) {
+          _csExpandAccordionAndScroll(el);
         }
+      }, 150);
+    } else if (navId) {
+      // Header/engine/valuation/photo field — lives in the Edit Intro view
+      // Switch to edit view, then find and scroll to the field
+      editSurveyDetails(currentSurveyId);
+      // Wait for the edit form to render, then find the element
+      setTimeout(() => {
+        const el = document.getElementById(navId);
+        if (el) {
+          // Expand the parent collapsible section if needed
+          const section = el.closest('.form-section[style*="display: none"], .form-section[style*="display:none"]');
+          if (section) section.style.display = 'block';
 
-        // Scroll and highlight
-        setTimeout(() => {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          // For form fields, highlight the container or the field itself
-          const highlightEl = el.closest('.form-group') || el;
-          highlightEl.style.transition = 'background 0.3s, box-shadow 0.3s';
-          highlightEl.style.background = '#fef3c7';
-          highlightEl.style.boxShadow = '0 0 0 3px #f59e0b';
-          setTimeout(() => { highlightEl.style.background = ''; highlightEl.style.boxShadow = ''; }, 3000);
-          // Focus the field if it's an input/select/textarea
-          if (['INPUT','SELECT','TEXTAREA'].includes(el.tagName)) {
-            el.focus();
-          }
-        }, 50);
-      }
-    }, 150);
+          setTimeout(() => {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const highlightEl = el.closest('.form-group') || el;
+            highlightEl.style.transition = 'background 0.3s, box-shadow 0.3s';
+            highlightEl.style.background = '#fef3c7';
+            highlightEl.style.boxShadow = '0 0 0 3px #f59e0b';
+            setTimeout(() => { highlightEl.style.background = ''; highlightEl.style.boxShadow = ''; }, 3000);
+            if (['INPUT','SELECT','TEXTAREA'].includes(el.tagName)) el.focus();
+          }, 100);
+        }
+      }, 400);
+    }
 
     // Show floating "Back to Check Survey" button
     let backBtn = document.getElementById('csBackToCheckBtn');
@@ -9586,10 +9564,55 @@ async function checkSurvey() {
   };
 }
 
+// ─── Helper: expand accordion and scroll to element ──────────────────────
+function _csExpandAccordionAndScroll(el) {
+  const accordion = el.closest('.category-accordion');
+  if (accordion) {
+    const content = accordion.querySelector('.accordion-content');
+    if (content && content.style.display === 'none') {
+      document.querySelectorAll('.accordion-content').forEach(ac => {
+        if (ac !== content && ac.style.display !== 'none') {
+          ac.style.display = 'none';
+          const hdr = ac.parentElement.querySelector('.accordion-header');
+          const chev = hdr?.querySelector('span:last-child');
+          if (chev) chev.style.transform = 'rotate(0deg)';
+        }
+      });
+      content.style.display = 'block';
+      const header = accordion.querySelector('.accordion-header');
+      const chevron = header?.querySelector('span:last-child');
+      if (chevron) chevron.style.transform = 'rotate(180deg)';
+      const titleSpan = header?.querySelector('.category-title');
+      if (titleSpan && typeof _openAccordionCategory !== 'undefined') {
+        _openAccordionCategory = titleSpan.textContent.replace(/^[^\w]*/, '').trim();
+      }
+      if (typeof updateCollapseButton === 'function') updateCollapseButton(true);
+    }
+  }
+  setTimeout(() => {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.style.transition = 'background 0.3s, box-shadow 0.3s';
+    el.style.background = '#fef3c7';
+    el.style.boxShadow = '0 0 0 3px #f59e0b';
+    setTimeout(() => { el.style.background = ''; el.style.boxShadow = ''; }, 3000);
+  }, 50);
+}
+
 // ─── Evaluate fix and return to Check Survey ──────────────────────────────
 async function _csEvaluateAndReturn(scrollPos) {
   const working = window._csWorkingOn;
-  if (!working || !working.itemLabel) {
+
+  // If we navigated to the Edit Intro view, return to inspection first
+  if (currentView === 'edit-survey' || currentView === 'new-survey') {
+    const survey = await getSurvey(currentSurveyId);
+    if (survey) {
+      renderInspection(survey);
+      // Wait for inspection to render before proceeding
+      await new Promise(r => setTimeout(r, 300));
+    }
+  }
+
+  if (!working || (!working.itemLabel && !working.navId)) {
     // No specific issue tracked — just reopen Check Survey
     await checkSurvey();
     setTimeout(() => {
