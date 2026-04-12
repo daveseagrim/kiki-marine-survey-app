@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2091';
+const APP_VERSION = 'v2092';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -5362,7 +5362,7 @@ function renderNewSurveyForm() {
 
       <!-- Engine 1 -->
       <div style="border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin-bottom:10px;background:#f8fafc;">
-        <div style="font-weight:700;font-size:13px;color:#1e3a5f;margin-bottom:8px;">Engine 1 (Port / Single)</div>
+        <div id="engine1Label" style="font-weight:700;font-size:13px;color:#1e3a5f;margin-bottom:8px;">Engine</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <div class="form-group">
             <label class="form-label" style="font-size:12px;">Engine Make</label>
@@ -6116,6 +6116,9 @@ function showEngine2() {
   const btn = document.getElementById('addEngine2Btn');
   if (section) section.style.display = 'block';
   if (btn) btn.style.display = 'none';
+  // Update Engine 1 label to show position when twin engines
+  const e1Label = document.getElementById('engine1Label');
+  if (e1Label) e1Label.textContent = 'Engine 1 (Port)';
   populateEngine2Makes();
 
   // Auto-populate Engine 2 with Engine 1's make/model (same powerplant, different serial/hours)
@@ -6152,6 +6155,9 @@ function removeEngine2() {
   const btn = document.getElementById('addEngine2Btn');
   if (section) section.style.display = 'none';
   if (btn) btn.style.display = '';
+  // Revert Engine 1 label back to generic when single engine
+  const e1Label = document.getElementById('engine1Label');
+  if (e1Label) e1Label.textContent = 'Engine';
   // Clear Engine 2 fields
   ['engine2Make', 'engine2Model', 'engine2Serial', 'engine2Hours', 'engine2HP', 'fuelType2',
    'transmission2Make', 'transmission2Model', 'transmission2Serial'].forEach(id => {
@@ -6420,6 +6426,24 @@ function editSurveyDetails(surveyId) {
           if (boatStyleInput) boatStyleInput.value = survey.boatStyle;
           updateBoatStyleOptions();
         }
+      }
+
+      // Show Engine 2 section if survey has twin engine data
+      if (survey.engine2Make) {
+        showEngine2();
+        // Re-set Engine 2 fields after showEngine2 (which may auto-populate from Engine 1)
+        setTimeout(() => {
+          const e2Fields = {
+            engine2Make: survey.engine2Make, engine2Model: survey.engine2Model,
+            engine2Serial: survey.engine2Serial, engine2Hours: survey.engine2Hours,
+            engine2HP: survey.engine2HP, fuelType2: survey.fuelType2,
+            transmission2Make: survey.transmission2Make, transmission2Model: survey.transmission2Model,
+            transmission2Serial: survey.transmission2Serial
+          };
+          for (const [id, val] of Object.entries(e2Fields)) {
+            if (val) { const el = document.getElementById(id); if (el) el.value = val; }
+          }
+        }, 100);
       }
 
       // Store location coordinates
