@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2026';
+const APP_VERSION = 'v2027';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -18,6 +18,35 @@ window.addEventListener('unhandledrejection', (e) => {
 });
 let db = null;
 let textLibrary = null;
+// Spell-check dictionary — lazy-loaded from dictionary.json on first use.
+// ~128k English words + marine/Canadian supplement. Loaded once, cached by
+// the service worker for offline field use.
+let SPELL_DICT = null;
+let SPELL_DICT_LOADING = false;
+function loadSpellDict() {
+  if (SPELL_DICT || SPELL_DICT_LOADING) return;
+  SPELL_DICT_LOADING = true;
+  fetch('dictionary.json')
+    .then(r => r.json())
+    .then(arr => {
+      SPELL_DICT = new Set(arr);
+      SPELL_DICT_LOADING = false;
+      // Re-run tone check on any currently-open sheet textarea so the new
+      // dictionary catches words already typed.
+      try {
+        document.querySelectorAll('textarea[id^="sheet-text-"]').forEach(ta => {
+          if (window._mainSheetToneCheck) window._mainSheetToneCheck(ta);
+        });
+        document.querySelectorAll('[data-snippet-builder-strip]').forEach(strip => {
+          if (typeof updateToneWarning === 'function') updateToneWarning(strip);
+        });
+      } catch (e) { /* no-op */ }
+    })
+    .catch(err => {
+      console.warn('Spell dictionary failed to load:', err);
+      SPELL_DICT_LOADING = false;
+    });
+}
 let surveyTemplate = null;
 let insuranceSurveyTemplate = null;
 let boatSpecsDB = null;
@@ -1763,16 +1792,25 @@ function showNotesSheet(itemLabel, categoryName) {
     window._sheetVariantCache = window._sheetVariantCache || {};
     window._sheetVariantCache[itemLabel] = { categoryName: categoryName, variants: sheetVariants };
 
-    // Standards section
+    // Standards section — collapsed by default. The snippet builder's
+    // citation-auto-check already picks the correct standards from the
+    // inserted text, so the surveyor normally doesn't need to see or
+    // touch these checkboxes. We show a tiny summary line of currently-
+    // selected standards instead, and tucking the full checkbox list
+    // behind a "manage" disclosure for the rare manual-override case.
     let standardsHtml = '';
     if (itemData.rating && (itemData.rating.startsWith('A') || itemData.rating.startsWith('B'))) {
       const standards = getStandardsForCategory(categoryName, itemData.rating);
       if (standards.length > 0) {
-        standardsHtml = `<div class="sheet-section-title">Applicable Standards</div>`;
+        const selected = (itemData.standards || []).filter(s => standards.includes(s));
+        const summaryText = selected.length > 0
+          ? selected.join(', ')
+          : 'None auto-selected yet — insert a snippet to populate.';
+        let checkboxesHtml = '';
         standards.forEach(standard => {
           const isChecked = itemData.standards && itemData.standards.includes(standard);
-          standardsHtml += `
-            <label style="display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;">
+          checkboxesHtml += `
+            <label style="display:flex;align-items:center;gap:10px;padding:8px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;">
               <input type="checkbox" value="${standard}" ${isChecked ? 'checked' : ''}
                      onchange="updateStandards('${safeLabel}', this)"
                      style="width:18px;height:18px;accent-color:#1e3a5f;" />
@@ -1780,6 +1818,14 @@ function showNotesSheet(itemLabel, categoryName) {
             </label>
           `;
         });
+        standardsHtml = `
+          <details style="margin:6px 20px 10px 20px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;">
+            <summary style="padding:8px 12px;font-size:12px;color:#6b7280;cursor:pointer;list-style:none;">
+              <strong style="color:#1e3a5f;">Auto-selected standards:</strong> ${escapeHtml(summaryText)} <span style="color:#9ca3af;">· tap to manage</span>
+            </summary>
+            <div style="border-top:1px solid #e5e7eb;">${checkboxesHtml}</div>
+          </details>
+        `;
       }
     }
 
@@ -3746,20 +3792,78 @@ const SPELLING_FIXES = [
   [/\bmaintnance\b/i, 'maintenance']
 ];
 
-// Scan text for spelling issues. Returns array of hints in the form
-// '"danage" → "damage"'.
+// Scan text for spelling issues. Uses the full hunspell-expanded English
+// dictionary (SPELL_DICT, ~128k words + marine supplement). Returns a list
+// of unknown words as hints in the form '"word" — unknown'.
+//
+// Tokenization rules:
+// - Split on whitespace and punctuation
+// - Skip pure numbers and alphanumeric mixes (hull IDs, part numbers)
+// - Skip ALL-CAPS tokens of length >= 2 (acronyms: ABYC, TC, HIN, USCG…)
+// - Strip trailing possessive 's / s'
+// - Lowercase the word and check against SPELL_DICT
+// - If the dictionary hasn't loaded yet, fall back to the curated
+//   SPELLING_FIXES list so we still catch the obvious typos.
 function collectSpellingHits(text) {
   const combined = (text || '').trim();
   if (!combined) return [];
   const hits = [];
   const seen = new Set();
-  for (const [pat, fix] of SPELLING_FIXES) {
-    const m = combined.match(pat);
-    if (m && !seen.has(m[0].toLowerCase())) {
-      seen.add(m[0].toLowerCase());
-      hits.push('"' + m[0] + '" → "' + fix + '"');
-      if (hits.length >= 4) break;
+  // Fallback path when the dictionary hasn't finished loading.
+  if (!SPELL_DICT) {
+    for (const [pat, fix] of SPELLING_FIXES) {
+      const m = combined.match(pat);
+      if (m && !seen.has(m[0].toLowerCase())) {
+        seen.add(m[0].toLowerCase());
+        hits.push('"' + m[0] + '" → "' + fix + '"');
+        if (hits.length >= 4) break;
+      }
     }
+    return hits;
+  }
+  // Real dictionary path: tokenize and lookup every word.
+  // Keep hyphenated compounds as separate halves ("through-hull" → "through", "hull").
+  const tokens = combined.split(/[\s,.;:!?"'()[\]{}—–\-/\\<>]+/);
+  for (const raw of tokens) {
+    if (!raw) continue;
+    // Skip numbers, alphanumerics, unit suffixes (20v, 12vdc, 1/4")
+    if (/\d/.test(raw)) continue;
+    // Skip all-caps acronyms (length >= 2, all uppercase letters)
+    if (raw.length >= 2 && raw === raw.toUpperCase() && /^[A-Z]+$/.test(raw)) continue;
+    // Strip leading/trailing non-letters and trailing possessive "'s"
+    let word = raw.replace(/^[^A-Za-z]+|[^A-Za-z]+$/g, '');
+    word = word.replace(/'s$/i, '');
+    if (!word || word.length < 2) continue;
+    // Skip single-letter words (a, I) and items that became empty after strip
+    const lower = word.toLowerCase();
+    if (seen.has(lower)) continue;
+    if (SPELL_DICT.has(lower)) continue;
+    // Check the raw form too, in case of mixed-case proper nouns we accept
+    // as-is (very rare since dict is all lowercase, but future-proof).
+    seen.add(lower);
+    // Try common stem reductions before flagging — catches over-aggressive
+    // false positives on inflections the affix expander may have missed.
+    const stems = [
+      lower.replace(/ing$/, ''),
+      lower.replace(/ing$/, 'e'),
+      lower.replace(/ed$/, ''),
+      lower.replace(/ed$/, 'e'),
+      lower.replace(/s$/, ''),
+      lower.replace(/es$/, ''),
+      lower.replace(/ies$/, 'y'),
+      lower.replace(/ly$/, ''),
+      lower.replace(/er$/, ''),
+      lower.replace(/er$/, 'e'),
+      lower.replace(/est$/, ''),
+      lower.replace(/est$/, 'e')
+    ];
+    let recognised = false;
+    for (const s of stems) {
+      if (s && s !== lower && SPELL_DICT.has(s)) { recognised = true; break; }
+    }
+    if (recognised) continue;
+    hits.push('"' + word + '" — unknown word');
+    if (hits.length >= 4) break;
   }
   return hits;
 }
@@ -13395,6 +13499,10 @@ async function initApp() {
 
     await initDB();
     await fetchDataFiles();
+    // Kick off dictionary load in the background — no await, so startup
+    // isn't blocked by the 1.5MB file. Spell-check warnings will begin
+    // firing as soon as it finishes loading.
+    loadSpellDict();
 
     // If recovering from camera-induced page reload, go straight back
     // to the inspection instead of showing the home screen
