@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2065';
+const APP_VERSION = 'v2066';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9541,19 +9541,22 @@ async function checkSurvey() {
       }, 150);
     } else if (navId) {
       // Header/engine/valuation/photo field — lives in the Edit Intro view
-      // Switch to edit view, then find and scroll to the field
+      // Switch to edit view, then use MutationObserver to detect when the field renders
       editSurveyDetails(currentSurveyId);
-      // Wait for the edit form to render, THEN add Back button and scroll
-      setTimeout(() => {
-        // Add the Back button AFTER editSurveyDetails re-renders the DOM
-        _csShowBackButton();
 
+      // Watch the DOM for the target element to appear
+      const observer = new MutationObserver((mutations, obs) => {
         const el = document.getElementById(navId);
         if (el) {
-          // Expand the parent collapsible section if needed
-          const section = el.closest('.form-section[style*="display: none"], .form-section[style*="display:none"]');
+          obs.disconnect();
+          // Add Back button now that the edit view has rendered
+          _csShowBackButton();
+
+          // Expand any collapsed parent section
+          const section = el.closest('[style*="display: none"], [style*="display:none"]');
           if (section) section.style.display = 'block';
 
+          // Small delay for layout, then scroll and highlight
           setTimeout(() => {
             el.scrollIntoView({ behavior: 'smooth', block: 'center' });
             const highlightEl = el.closest('.form-group') || el;
@@ -9562,9 +9565,18 @@ async function checkSurvey() {
             highlightEl.style.boxShadow = '0 0 0 3px #f59e0b';
             setTimeout(() => { highlightEl.style.background = ''; highlightEl.style.boxShadow = ''; }, 4000);
             if (['INPUT','SELECT','TEXTAREA'].includes(el.tagName)) el.focus();
-          }, 100);
+          }, 150);
         }
-      }, 500);
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      // Safety: if element never appears after 5s, disconnect and still show Back button
+      setTimeout(() => {
+        observer.disconnect();
+        if (!document.getElementById('csBackToCheckBtn')) {
+          _csShowBackButton();
+        }
+      }, 5000);
     }
   };
 }
