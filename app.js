@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2074';
+const APP_VERSION = 'v2075';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9428,32 +9428,15 @@ async function checkSurvey() {
     </div>
   `;
 
-  // ── "Just resolved" confirmation banner ─────────────────────────────
-  // Shows when returning from a Go → Fix → Back flow, or when auto-detect finds fixes
+  // ── "Just resolved" floating notification ───────────────────────────
+  // Collects newly resolved items to show as a floating toast after overlay renders.
+  // Must be floating (not inline) because scroll restoration puts the user mid-list.
   const justResolved = window._csJustResolved || null;
   const allNewlyResolved = [...newlyAutoResolved];
   if (justResolved && !allNewlyResolved.includes(justResolved)) {
     allNewlyResolved.unshift(justResolved);
   }
   window._csJustResolved = null; // clear flag
-
-  if (allNewlyResolved.length > 0) {
-    const itemList = allNewlyResolved.map(m => {
-      const short = m.length > 50 ? m.substring(0, 50) + '…' : m;
-      return short.replace(/</g, '&lt;');
-    }).join('<br>');
-    html += `
-      <div id="cs-resolved-banner" style="background:#f0fdf4;border:2px solid #16a34a;border-radius:10px;padding:12px 14px;margin-bottom:14px;animation:csFadeSlide 0.4s ease;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-          <span style="font-size:20px;">✅</span>
-          <span style="font-weight:700;font-size:14px;color:#166534;">Moved to Resolved</span>
-        </div>
-        <div style="font-size:12px;color:#15803d;line-height:1.6;padding-left:28px;">${itemList}</div>
-        <div style="font-size:11px;color:#86efac;margin-top:6px;padding-left:28px;">Scroll down to the ✅ Resolved section to see it.</div>
-      </div>
-      <style>@keyframes csFadeSlide { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }</style>
-    `;
-  }
 
   if (allCheckItems.length === 0) {
     html += '<div style="text-align:center;padding:20px;color:#16a34a;font-weight:600;">All checks passed! Survey looks complete.</div>';
@@ -9633,6 +9616,47 @@ async function checkSurvey() {
     </div>
   `;
   document.body.appendChild(overlay);
+
+  // ── Show floating "Moved to Resolved" notification ──────────────────
+  // This floats at the top of the scroll area so it's visible regardless of scroll position
+  if (allNewlyResolved.length > 0) {
+    const itemList = allNewlyResolved.map(m => {
+      const short = m.length > 50 ? m.substring(0, 50) + '…' : m;
+      return short.replace(/</g, '&lt;');
+    }).join(', ');
+    const toast = document.createElement('div');
+    toast.id = 'cs-resolved-toast';
+    toast.style.cssText = 'position:absolute;top:8px;left:16px;right:16px;background:#166534;color:white;border-radius:10px;padding:10px 14px;z-index:10;box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;align-items:center;gap:10px;animation:csFadeDown 0.35s ease;';
+    toast.innerHTML = `
+      <span style="font-size:20px;flex-shrink:0;">✅</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;font-size:13px;">Moved to Resolved</div>
+        <div style="font-size:11px;opacity:0.85;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${itemList}</div>
+      </div>
+      <button onclick="this.parentElement.remove();" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;flex-shrink:0;">✕</button>
+    `;
+    const scrollContainer = document.getElementById('csScrollContainer');
+    if (scrollContainer) {
+      scrollContainer.style.position = 'relative';
+      scrollContainer.insertBefore(toast, scrollContainer.firstChild);
+    }
+    // Auto-dismiss after 4 seconds
+    setTimeout(() => {
+      if (toast.parentElement) {
+        toast.style.transition = 'opacity 0.4s, transform 0.4s';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        setTimeout(() => toast.remove(), 400);
+      }
+    }, 4000);
+    // Add the animation keyframes
+    if (!document.getElementById('cs-toast-style')) {
+      const style = document.createElement('style');
+      style.id = 'cs-toast-style';
+      style.textContent = '@keyframes csFadeDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }';
+      document.head.appendChild(style);
+    }
+  }
 
   // ── Wire up interactive handlers ────────────────────────────────────
   // Toggle reviewed checkbox
