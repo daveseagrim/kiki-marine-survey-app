@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2075';
+const APP_VERSION = 'v2076';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9626,7 +9626,7 @@ async function checkSurvey() {
     }).join(', ');
     const toast = document.createElement('div');
     toast.id = 'cs-resolved-toast';
-    toast.style.cssText = 'position:absolute;top:8px;left:16px;right:16px;background:#166534;color:white;border-radius:10px;padding:10px 14px;z-index:10;box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;align-items:center;gap:10px;animation:csFadeDown 0.35s ease;';
+    toast.style.cssText = 'position:sticky;top:0;left:0;right:0;background:#166534;color:white;border-radius:10px;padding:10px 14px;z-index:10;box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;align-items:center;gap:10px;margin-bottom:10px;animation:csFadeDown 0.35s ease;';
     toast.innerHTML = `
       <span style="font-size:20px;flex-shrink:0;">✅</span>
       <div style="flex:1;min-width:0;">
