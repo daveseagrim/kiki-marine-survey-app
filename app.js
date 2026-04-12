@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2072';
+const APP_VERSION = 'v2073';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -8949,7 +8949,7 @@ async function checkSurvey() {
   const cornerFields = ['fourCornerPortBow','fourCornerStbdBow','fourCornerPortStern','fourCornerStbdStern'];
   const cornerNames  = ['Port bow','Starboard bow','Port stern','Starboard stern'];
   cornerFields.forEach((f, i) => {
-    if (!survey[f]) add('warning', 'Documentation Photos', `Missing four-corner photo: ${cornerNames[i]}`, null);
+    if (!survey[f]) add('warning', 'Documentation Photos', `Missing four-corner photo: ${cornerNames[i]}`, null, f);
   });
 
   // Engine / transmission photos
@@ -8961,7 +8961,7 @@ async function checkSurvey() {
   ];
   if (survey.vesselType !== 'human-powered') {
     for (const [field, label] of enginePhotoFields) {
-      if (!survey[field]) add('warning', 'Documentation Photos', `Missing: ${label}`, null);
+      if (!survey[field]) add('warning', 'Documentation Photos', `Missing: ${label}`, null, field);
     }
   }
 
@@ -9161,12 +9161,12 @@ async function checkSurvey() {
 
   // ── 8. VESSEL DESCRIPTION ───────────────────────────────────────────────
   if (!survey.vesselDescription || survey.vesselDescription.trim().length < 20) {
-    add('warning', 'Vessel Description', 'Vessel description is missing or too short', null);
+    add('warning', 'Vessel Description', 'Vessel description is missing or too short', null, 'vesselDescription');
   }
 
   // ── 9. TC LICENCE ───────────────────────────────────────────────────────
-  if (!survey.tcLicense) add('info', 'Documentation', 'Missing: TC licence / registration number', null);
-  if (!survey.tcLicenseType) add('info', 'Documentation', 'Missing: TC licence type', null);
+  if (!survey.tcLicense) add('info', 'Documentation', 'Missing: TC licence / registration number', null, 'tcLicense');
+  if (!survey.tcLicenseType) add('info', 'Documentation', 'Missing: TC licence type', null, 'tcLicenseType');
 
   // ── 10. GRAMMAR / SPELLING SPOT-CHECKS ──────────────────────────────────
   // Check freeform text in items for common issues
@@ -9520,9 +9520,10 @@ async function checkSurvey() {
       // Escape item label for display (prevent XSS from item labels with < or >)
       const displayLabel = (item.severity !== 'proofread' ? item.message : item.itemLabel || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-      // The row
+      // The row — data-cs-msg used for scroll restoration after Go→Fix→Back
+      const escapedMsg = (item.message || '').replace(/"/g, '&quot;');
       html += `
-        <div id="row_${item._checkId}" style="margin-bottom:4px;${isReviewed ? 'opacity:0.5;' : ''}">
+        <div id="row_${item._checkId}" data-cs-msg="${escapedMsg}" style="margin-bottom:4px;${isReviewed ? 'opacity:0.5;' : ''}">
           <div style="background:${sevBg[item.severity]};border:1px solid ${sevBorder[item.severity]};border-radius:8px;padding:8px 10px;display:flex;align-items:flex-start;gap:8px;">
             <input type="checkbox" ${isReviewed ? 'checked' : ''} onchange="window._csToggleReviewed('${item._checkId}', this.checked)"
                    style="flex-shrink:0;margin-top:2px;width:18px;height:18px;accent-color:#1e3a5f;cursor:pointer;" />
@@ -9680,6 +9681,23 @@ async function checkSurvey() {
   // Store all check items so we can evaluate on return
   window._csAllCheckItems = allCheckItems;
 
+  // Smart scroll restoration: scroll to the next item in the list after a resolved one
+  window._csRestoreScroll = function(fallbackPixelPos) {
+    const container = document.getElementById('csScrollContainer');
+    if (!container) return;
+    const targetMsg = window._csScrollTargetMsg;
+    window._csScrollTargetMsg = null;
+    if (targetMsg) {
+      const targetRow = container.querySelector(`[data-cs-msg="${CSS.escape(targetMsg)}"]`);
+      if (targetRow) {
+        setTimeout(() => targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
+        return;
+      }
+    }
+    // Fallback: pixel position (better than nothing)
+    if (fallbackPixelPos > 0) container.scrollTop = fallbackPixelPos;
+  };
+
   // Navigate to item by index — uses global _csItemLabels array
   window._csGoToItem = function(idx) {
     const itemLabel = window._csItemLabels[idx];
@@ -9700,9 +9718,18 @@ async function checkSurvey() {
       _surveyOrder: workingItem ? workingItem._surveyOrder : 9999,
     };
 
-    // Remember scroll position
+    // Remember scroll position AND the next item's message for smart scroll restoration
     const scrollEl = document.getElementById('csScrollContainer');
     const scrollPos = scrollEl ? scrollEl.scrollTop : 0;
+    // Find the next active (non-reviewed, non-force-OK) item after this one for scroll target
+    window._csScrollTargetMsg = null;
+    const sortedActive = allCheckItems.filter(it => !forceOKState[it.message] && !reviewedState[it._checkId]);
+    const myIdx = sortedActive.findIndex(it => it === workingItem);
+    if (myIdx >= 0 && myIdx + 1 < sortedActive.length) {
+      window._csScrollTargetMsg = sortedActive[myIdx + 1].message;
+    } else if (myIdx >= 0 && myIdx - 1 >= 0) {
+      window._csScrollTargetMsg = sortedActive[myIdx - 1].message;
+    }
 
     // Helper: create and append the floating Back button
     function _csShowBackButton() {
@@ -9758,8 +9785,11 @@ async function checkSurvey() {
       editSurveyDetails(currentSurveyId);
 
       // Watch the DOM for the target element to appear
+      // Try: getElementById first, then data-photo-field attribute, then data-section attribute
       const observer = new MutationObserver((mutations, obs) => {
-        const el = document.getElementById(navId);
+        let el = document.getElementById(navId);
+        if (!el) el = document.querySelector(`[data-photo-field="${navId}"]`);
+        if (!el) el = document.querySelector(`[data-section="${navId}"]`);
         if (el) {
           obs.disconnect();
           // NOW remove the overlay — the edit form is ready underneath
@@ -9774,7 +9804,7 @@ async function checkSurvey() {
           // Small delay for layout, then scroll and highlight
           setTimeout(() => {
             el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            const highlightEl = el.closest('.form-group') || el;
+            const highlightEl = el.closest('.form-group') || el.closest('div') || el;
             highlightEl.style.transition = 'background 0.3s, box-shadow 0.3s';
             highlightEl.style.background = '#fef3c7';
             highlightEl.style.boxShadow = '0 0 0 3px #f59e0b';
@@ -9846,10 +9876,7 @@ async function _csEvaluateAndReturn(scrollPos) {
   if (!working || (!working.itemLabel && !working.navId)) {
     // No specific issue tracked — just reopen Check Survey
     await checkSurvey();
-    setTimeout(() => {
-      const el = document.getElementById('csScrollContainer');
-      if (el) el.scrollTop = scrollPos;
-    }, 50);
+    setTimeout(() => { if (window._csRestoreScroll) window._csRestoreScroll(scrollPos); }, 80);
     return;
   }
 
@@ -9872,12 +9899,9 @@ async function _csEvaluateAndReturn(scrollPos) {
     window._csJustResolved = working.itemLabel || working.message;
     window._csWorkingOn = null;
 
-    // Reopen Check Survey
+    // Reopen Check Survey and scroll to where the user was
     await checkSurvey();
-    setTimeout(() => {
-      const el = document.getElementById('csScrollContainer');
-      if (el) el.scrollTop = scrollPos;
-    }, 50);
+    setTimeout(() => { if (window._csRestoreScroll) window._csRestoreScroll(scrollPos); }, 80);
   } else {
     // Show evaluation modal with reason + options
     _csShowEvalModal(working, result.reason, scrollPos);
@@ -10034,12 +10058,10 @@ function _csShowEvalModal(working, reason, scrollPos) {
     forceOK[working.message] = { forcedAt: Date.now(), itemLabel: working.itemLabel, reason: reason, _surveyOrder: working._surveyOrder ?? 9999 };
     sessionStorage.setItem(forceKey, JSON.stringify(forceOK));
     showToast('✓ Marked as OK: ' + (working.itemLabel || working.message));
+    window._csJustResolved = working.itemLabel || working.message;
     window._csWorkingOn = null;
     await checkSurvey();
-    setTimeout(() => {
-      const el = document.getElementById('csScrollContainer');
-      if (el) el.scrollTop = scrollPos;
-    }, 50);
+    setTimeout(() => { if (window._csRestoreScroll) window._csRestoreScroll(scrollPos); }, 80);
   };
 
   // Just return to Check Survey
@@ -10047,10 +10069,7 @@ function _csShowEvalModal(working, reason, scrollPos) {
     modal.remove();
     window._csWorkingOn = null;
     await checkSurvey();
-    setTimeout(() => {
-      const el = document.getElementById('csScrollContainer');
-      if (el) el.scrollTop = scrollPos;
-    }, 50);
+    setTimeout(() => { if (window._csRestoreScroll) window._csRestoreScroll(scrollPos); }, 80);
   };
 
   // Close on backdrop tap
