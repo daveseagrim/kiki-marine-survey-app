@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2085';
+const APP_VERSION = 'v2086';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2747,9 +2747,8 @@ function movePhotoFromSheet(photoId, sourceItemLabel, sourceCategoryName) {
     }
     if (otherGroup.items.length) groups.push(otherGroup);
 
-    // Sort groups alphabetically by category, and items within each group
-    groups.sort((a, b) => a.category.localeCompare(b.category));
-    groups.forEach(g => g.items.sort((a, b) => a.localeCompare(b)));
+    // Sort all items alphabetically (flat list, no category grouping)
+    allItems.sort((a, b) => a.label.localeCompare(b.label));
 
     showMovePhotoPicker(photoId, sourceItemLabel, sourceCategoryName, allItems, groups, survey);
   });
@@ -2767,17 +2766,10 @@ function showMovePhotoPicker(photoId, sourceItemLabel, sourceCategoryName, allIt
   // Escape HTML for option text
   const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-  let optgroupsHtml = '';
-  groups.forEach(g => {
-    optgroupsHtml += `<optgroup label="${esc(g.category)}">`;
-    g.items.forEach(label => {
-      // Index into flat allItems array
-      const idx = allItems.findIndex(i => i.label === label && i.category === g.category);
-      if (idx >= 0) {
-        optgroupsHtml += `<option value="${idx}">${esc(label)}</option>`;
-      }
-    });
-    optgroupsHtml += `</optgroup>`;
+  // Flat alphabetical list (allItems already sorted)
+  let optionsHtml = '';
+  allItems.forEach((item, idx) => {
+    optionsHtml += `<option value="${idx}">${esc(item.label)}</option>`;
   });
 
   overlay.innerHTML = `
@@ -2787,7 +2779,7 @@ function showMovePhotoPicker(photoId, sourceItemLabel, sourceCategoryName, allIt
       <div style="padding:8px 20px 4px;">
         <select id="movePhotoSelect" size="1" style="width:100%;padding:14px 12px;border:2px solid #1e3a5f;border-radius:10px;font-size:16px;font-weight:600;color:#1e3a5f;background:white;box-sizing:border-box;-webkit-appearance:menulist;appearance:menulist;">
           <option value="" disabled selected>— Choose destination —</option>
-          ${optgroupsHtml}
+          ${optionsHtml}
         </select>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 20px 6px;">
