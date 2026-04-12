@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2052';
+const APP_VERSION = 'v2053';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2250,6 +2250,7 @@ function showNotesSheet(itemLabel, categoryName) {
       <div class="bottom-sheet" onclick="event.stopPropagation();">
         <div class="bottom-sheet-handle"></div>
         <div class="bottom-sheet-title">${itemLabel} — Notes <span style="font-size:10px;color:#9ca3af;font-weight:400;">${APP_VERSION}</span></div>
+        <div style="padding:4px 20px;font-size:10px;color:#dc2626;background:#fef2f2;border:1px solid #fca5a5;margin:4px 20px;border-radius:4px;">DEBUG: rating="${itemData.rating || 'EMPTY'}" | variants=${sheetVariants.length} | textLib=${!!textLibrary} | cat="${categoryName}"</div>
         ${mastOptionsHtml}
         ${outdriveOptionsHtml}
         ${winchOptionsHtml}
