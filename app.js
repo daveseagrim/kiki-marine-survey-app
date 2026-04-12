@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2099';
+const APP_VERSION = 'v2100';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1680,22 +1680,36 @@ async function exportSurvey(surveyId) {
       };
     });
 
-    const exportData = {
+    // Build JSON as Blob chunks to avoid "Invalid string length" on iOS Safari.
+    // Large base64 photos cause JSON.stringify() to exceed the JS string size limit,
+    // so we stringify each photo individually and assemble via Blob (no single huge string).
+    const blobParts = [];
+    const header = {
       version: 1,
       exportedAt: new Date().toISOString(),
-      appVersion: 'kiki-marine-v31',
-      survey: survey,
-      photos: photos
+      appVersion: APP_VERSION,
+      survey: survey
     };
+    // Write everything except photos, then manually append the photos array
+    const headerJson = JSON.stringify(header);
+    // Remove trailing } and add ,"photos":[ to start the array
+    blobParts.push(headerJson.slice(0, -1) + ',"photos":[');
 
-    const json = JSON.stringify(exportData);
+    for (let i = 0; i < photos.length; i++) {
+      if (i > 0) blobParts.push(',');
+      blobParts.push(JSON.stringify(photos[i]));
+    }
+    blobParts.push(']}');
+
+    const blob = new Blob(blobParts, { type: 'application/json' });
+
     const vesselName = (survey.vesselName || 'survey').replace(/[^a-zA-Z0-9_-]/g, '_');
     const dateStr = new Date().toISOString().slice(0, 10);
     const filename = `${vesselName}_${dateStr}.json`;
 
     // Use Web Share API on iOS/mobile (a.click() download doesn't work in Safari PWA)
     if (navigator.share && navigator.canShare) {
-      const file = new File([json], filename, { type: 'application/json' });
+      const file = new File([blob], filename, { type: 'application/json' });
       if (navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
@@ -1712,7 +1726,6 @@ async function exportSurvey(surveyId) {
     }
 
     // Fallback: standard download link (works on desktop Chrome)
-    const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -1793,22 +1806,30 @@ async function exportAllSurveys() {
           };
         });
 
-        const exportData = {
+        // Build JSON as Blob chunks (avoids "Invalid string length" on iOS)
+        const blobParts = [];
+        const header = {
           version: 1,
           exportedAt: new Date().toISOString(),
           appVersion: APP_VERSION,
-          survey: survey,
-          photos: photos
+          survey: survey
         };
+        const headerJson = JSON.stringify(header);
+        blobParts.push(headerJson.slice(0, -1) + ',"photos":[');
+        for (let p = 0; p < photos.length; p++) {
+          if (p > 0) blobParts.push(',');
+          blobParts.push(JSON.stringify(photos[p]));
+        }
+        blobParts.push(']}');
+        const blob = new Blob(blobParts, { type: 'application/json' });
 
-        const json = JSON.stringify(exportData);
         const vesselName = (survey.vesselName || 'survey').replace(/[^a-zA-Z0-9_-]/g, '_');
         const dateStr = new Date().toISOString().slice(0, 10);
         const filename = `${vesselName}_${dateStr}.json`;
 
         // Use Web Share API on iOS/mobile
         if (navigator.share && navigator.canShare) {
-          const file = new File([json], filename, { type: 'application/json' });
+          const file = new File([blob], filename, { type: 'application/json' });
           if (navigator.canShare({ files: [file] })) {
             await navigator.share({
               title: `Survey: ${name}`,
@@ -1820,7 +1841,6 @@ async function exportAllSurveys() {
         }
 
         // Fallback: auto-download (desktop Chrome)
-        const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -4925,7 +4945,7 @@ function getCompletionPercentage(survey) {
   // Count items that are rated OR excluded
   const completedOrExcluded = Object.values(survey.items || {})
     .filter(item => (item.rating && item.rating !== '') || item.excluded).length;
-  return Math.round((completedOrExcluded / survey.totalRatedItems) * 100);
+  return Math.min(100, Math.round((completedOrExcluded / survey.totalRatedItems) * 100));
 }
 
 // UI Rendering Functions
@@ -5025,8 +5045,12 @@ function renderHome() {
   getAllSurveys().then(surveys => {
     const content = document.getElementById('surveys-content');
 
-    // Import and Export All buttons at top
-    const importBtn = `<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px;">
+    // Import, Export, and Drive Backup buttons at top
+    const driveBtn = DriveBackup.isSignedIn()
+      ? `<button class="btn-secondary" style="font-size:13px;padding:8px 16px;background:#16a34a;color:white;" onclick="DriveBackup.backupAll()">☁️ Backup All to Drive</button>`
+      : `<button class="btn-secondary" style="font-size:13px;padding:8px 16px;" onclick="(async()=>{try{await DriveBackup.signIn();showToast('Signed in to Google Drive ✓');renderHome();}catch(e){if(e.code!=='auth/popup-closed-by-user')showAlert('Sign-in failed: '+e.message);}})()">☁️ Sign in to Google Drive</button>`;
+    const importBtn = `<div style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-bottom:12px;">
+        ${driveBtn}
         <button class="btn-secondary" style="font-size:13px;padding:8px 16px;" onclick="exportAllSurveys()">📦 Export All</button>
         <button class="btn-secondary" style="font-size:13px;padding:8px 16px;" onclick="importSurvey()">📥 Import</button>
       </div>`;
@@ -6482,6 +6506,62 @@ function editSurveyDetails(surveyId) {
         });
       }
     }, 100);
+
+    // Add bottom action bar to Edit Intro page (same buttons as inspection)
+    const existingBar2 = document.getElementById('inspectionBottomBar');
+    if (existingBar2) existingBar2.remove();
+    const editBar = document.createElement('div');
+    editBar.id = 'inspectionBottomBar';
+    editBar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom, 0px)) 12px;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 -2px 10px rgba(0,0,0,0.1);z-index:100;';
+
+    // ✨ Desc button
+    const descBtn2 = document.createElement('button');
+    descBtn2.style.cssText = 'background:#7c3aed;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
+    descBtn2.innerHTML = '✨ Desc';
+    descBtn2.onclick = async () => {
+      // Save current form data first, then regenerate description
+      await saveEditFormSilently();
+      await regenerateDescriptionFromInspection();
+      // Re-open edit form to show updated description
+      editSurveyDetails(survey.id);
+    };
+    editBar.appendChild(descBtn2);
+
+    // 💾 Backup button
+    const backupBtn2 = document.createElement('button');
+    backupBtn2.style.cssText = 'background:#16a34a;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
+    backupBtn2.innerHTML = '💾 Backup';
+    backupBtn2.onclick = async () => {
+      await saveEditFormSilently();
+      // Trigger the same backup logic as the inspection page
+      document.getElementById('inspectionBottomBar')?.remove();
+      renderInspection(await getSurvey(survey.id));
+      setTimeout(() => document.getElementById('backupBtn')?.click(), 200);
+    };
+    editBar.appendChild(backupBtn2);
+
+    // ✅ Check Survey button
+    const checkBtn2 = document.createElement('button');
+    checkBtn2.style.cssText = 'background:#d97706;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
+    checkBtn2.innerHTML = '✅ Check S…';
+    checkBtn2.onclick = async () => {
+      await saveEditFormSilently();
+      checkSurvey();
+    };
+    editBar.appendChild(checkBtn2);
+
+    // 📄 Preview Report button
+    const reportBtn2 = document.createElement('button');
+    reportBtn2.style.cssText = 'background:#1e3a5f;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
+    reportBtn2.innerHTML = '📄 Preview';
+    reportBtn2.onclick = async () => {
+      await saveEditFormSilently();
+      const s = await getSurvey(survey.id);
+      if (s) generateReport(s);
+    };
+    editBar.appendChild(reportBtn2);
+
+    document.body.appendChild(editBar);
   });
 }
 
@@ -8791,15 +8871,31 @@ function ensureReportButton() {
   backupBtn.onclick = async () => {
     // Suppress popstate during backup (share sheet can trigger it on iOS)
     window._backupActive = true;
-    if (window.fsDb && FirebaseSync.isEnabled()) {
-      // Firebase backup — stays on page
+    // Try Google Drive backup first, then Firebase sync, then file export
+    if (DriveBackup.isSignedIn()) {
+      backupBtn.innerHTML = '💾 Uploading…';
+      backupBtn.disabled = true;
+      try {
+        await DriveBackup.backupSurvey(currentSurveyId);
+        window._hasUnsavedBackup = false;
+      } catch (err) {
+        console.error('Drive backup error:', err);
+        showToast('Drive backup failed — ' + err.message);
+      } finally {
+        backupBtn.innerHTML = '💾 Backup';
+        backupBtn.disabled = false;
+        window._backupActive = false;
+      }
+    } else if (window.fsDb && FirebaseSync.isEnabled()) {
+      // Firebase real-time sync — just push survey + photos through the sync module
       backupBtn.innerHTML = '💾 Saving…';
       backupBtn.disabled = true;
       try {
         const survey = await getSurvey(currentSurveyId);
         if (!survey) { showToast('Survey not found'); return; }
+        await FirebaseSync.pushSurvey(survey);
 
-        // Gather all photos for this survey
+        // Also push all photos through FirebaseSync
         const photos = await new Promise((resolve) => {
           const tx = db.transaction(['photos'], 'readonly');
           const store = tx.objectStore('photos');
@@ -8808,37 +8904,16 @@ function ensureReportButton() {
           const results = [];
           index.openCursor(range).onsuccess = (event) => {
             const cursor = event.target.result;
-            if (cursor) {
-              results.push(cursor.value);
-              cursor.continue();
-            } else {
-              resolve(results);
-            }
+            if (cursor) { results.push(cursor.value); cursor.continue(); }
+            else resolve(results);
           };
         });
-
-        const exportData = {
-          version: 1,
-          exportedAt: new Date().toISOString(),
-          appVersion: APP_VERSION,
-          survey: survey,
-          photos: photos
-        };
-
-        const vesselName = (survey.vesselName || 'survey').replace(/[^a-zA-Z0-9_-]/g, '_');
-        const dateStr = new Date().toISOString().slice(0, 10);
-        const timeStr = new Date().toISOString().slice(11, 19).replace(/:/g, '');
-        const docId = `${vesselName}_${dateStr}_${timeStr}`;
-
-        await window.fsDb.collection('backups').doc(docId).set({
-          surveyId: currentSurveyId,
-          vesselName: survey.vesselName || '',
-          exportedAt: new Date().toISOString(),
-          data: JSON.stringify(exportData)
-        });
+        for (const photo of photos) {
+          await FirebaseSync.pushPhoto(photo);
+        }
 
         window._hasUnsavedBackup = false;
-        showToast(`Backed up to cloud: ${vesselName}`);
+        showToast(`Backed up: ${survey.vesselName || 'survey'}`);
       } catch (err) {
         console.error('Firebase backup error:', err);
         showToast('Backup failed — ' + err.message);
@@ -13606,41 +13681,53 @@ function _retroSyncEngineFromBody(survey) {
   let changed = false;
   const items = survey.items || {};
 
-  // Sync engine hours
-  const ehItem = items['Engine hours'];
-  if (ehItem && ehItem.text && ehItem.text.trim() && !survey.engineHours) {
-    survey.engineHours = ehItem.text.trim();
-    changed = true;
-  }
+  // Helper: sync a text field from body to intro if body has data and intro is empty/missing
+  const syncText = (itemLabel, surveyField) => {
+    const item = items[itemLabel];
+    if (item && item.text && item.text.trim() && !survey[surveyField]) {
+      survey[surveyField] = item.text.trim();
+      return true;
+    }
+    return false;
+  };
 
-  // Sync engine make/model/serial
+  // Helper: sync first photo from body item to intro field
+  const syncPhoto = (itemLabel, surveyField) => {
+    const item = items[itemLabel];
+    if (item && item.photos && item.photos.length > 0 && !survey[surveyField]) {
+      survey[surveyField] = item.photos[0];
+      return true;
+    }
+    return false;
+  };
+
+  // Sync engine hours
+  if (syncText('Engine hours', 'engineHours')) changed = true;
+
+  // Sync engine make/model/serial (uses parser)
   const emItem = items['Engine(s) manufacturer, model # and serial number (if available)'];
   if (emItem && emItem.text && emItem.text.trim() && !survey.engineMake && !survey.engineModel) {
     _parseAndSyncMakeModelSerial(survey, emItem.text.trim(), 'engine');
     changed = true;
   }
 
-  // Sync gearbox/transmission make/model/serial
+  // Sync gearbox/transmission make/model/serial (uses parser)
   const gmItem = items['Gearbox manufacturer, model # and serial # (if available)'];
   if (gmItem && gmItem.text && gmItem.text.trim() && !survey.transmissionMake && !survey.transmissionModel) {
     _parseAndSyncMakeModelSerial(survey, gmItem.text.trim(), 'transmission');
     changed = true;
   }
 
-  // Sync photos (engine, engine plate, gearbox plate)
-  const _firstPhoto = (label) => {
-    const item = items[label];
-    return (item && item.photos && item.photos.length > 0) ? item.photos[0] : null;
-  };
+  // Sync fuel type
+  if (syncText('Fuel type', 'fuelType')) changed = true;
 
-  const ep = _firstPhoto('Engine(s) and drive(s) photos');
-  if (ep !== null && !survey.enginePhoto) { survey.enginePhoto = ep; changed = true; }
+  // Sync photos — engine, engine nameplate, gearbox nameplate
+  if (syncPhoto('Engine(s) and drive(s) photos', 'enginePhoto')) changed = true;
+  if (syncPhoto('Engine name plate(s)', 'enginePlatePhoto')) changed = true;
+  if (syncPhoto('Gearbox nameplate(s)', 'transmissionPlatePhoto')) changed = true;
 
-  const enp = _firstPhoto('Engine name plate(s)');
-  if (enp !== null && !survey.enginePlatePhoto) { survey.enginePlatePhoto = enp; changed = true; }
-
-  const gp = _firstPhoto('Gearbox nameplate(s)');
-  if (gp !== null && !survey.transmissionPlatePhoto) { survey.transmissionPlatePhoto = gp; changed = true; }
+  // Also sync transmission plate photos
+  if (syncPhoto('Transmission nameplate(s)', 'transmissionPlatePhoto')) changed = true;
 
   return changed;
 }
@@ -16210,6 +16297,218 @@ async function initApp() {
 // ═══════════════════════════════════════════════════════════════════════════════
 // FIREBASE REAL-TIME SYNC MODULE
 // ═══════════════════════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GOOGLE DRIVE BACKUP MODULE
+// Uses Firebase Auth Google Sign-In with Drive scope to upload survey data
+// and photos directly to the surveyor's Google Drive.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const DriveBackup = (() => {
+  let _accessToken = null;
+  let _backupFolderId = null;  // "Kiki Marine Survey Backups" folder on Drive
+  const FOLDER_NAME = 'Kiki Marine Survey Backups';
+  const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+
+  function isSignedIn() {
+    return !!_accessToken;
+  }
+
+  // Sign in with Google via Firebase Auth, requesting Drive file scope
+  async function signIn() {
+    if (!firebase || !firebase.auth) {
+      throw new Error('Firebase Auth not loaded');
+    }
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.addScope(DRIVE_SCOPE);
+    const result = await firebase.auth().signInWithPopup(provider);
+    _accessToken = result.credential.accessToken;
+    // Persist token expiry awareness — tokens last ~1 hour
+    window._driveTokenTime = Date.now();
+    return _accessToken;
+  }
+
+  // Refresh token if expired (tokens last ~1 hour)
+  async function ensureToken() {
+    if (!_accessToken || (Date.now() - (window._driveTokenTime || 0)) > 3300000) {
+      // Re-auth silently if possible, otherwise prompt
+      const user = firebase.auth().currentUser;
+      if (user) {
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          provider.addScope(DRIVE_SCOPE);
+          const result = await user.reauthenticateWithPopup(provider);
+          _accessToken = result.credential.accessToken;
+          window._driveTokenTime = Date.now();
+        } catch (e) {
+          // Fall through to full sign-in
+          await signIn();
+        }
+      } else {
+        await signIn();
+      }
+    }
+    return _accessToken;
+  }
+
+  // Find or create the root backup folder on Drive
+  async function getOrCreateBackupFolder() {
+    if (_backupFolderId) return _backupFolderId;
+    const token = await ensureToken();
+
+    // Search for existing folder
+    const q = encodeURIComponent(`name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+    const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const searchData = await searchRes.json();
+    if (searchData.files && searchData.files.length > 0) {
+      _backupFolderId = searchData.files[0].id;
+      return _backupFolderId;
+    }
+
+    // Create the folder
+    const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: FOLDER_NAME, mimeType: 'application/vnd.google-apps.folder' })
+    });
+    const createData = await createRes.json();
+    _backupFolderId = createData.id;
+    return _backupFolderId;
+  }
+
+  // Find or create a subfolder for a specific vessel inside the backup folder
+  async function getOrCreateVesselFolder(vesselName) {
+    const token = await ensureToken();
+    const parentId = await getOrCreateBackupFolder();
+    const safeName = (vesselName || 'Unnamed').trim();
+
+    const q = encodeURIComponent(`name='${safeName.replace(/'/g, "\\'")}' and '${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+    const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const searchData = await searchRes.json();
+    if (searchData.files && searchData.files.length > 0) {
+      return searchData.files[0].id;
+    }
+
+    const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: safeName, mimeType: 'application/vnd.google-apps.folder', parents: [parentId] })
+    });
+    const createData = await createRes.json();
+    return createData.id;
+  }
+
+  // Upload a file to Drive using multipart upload
+  async function uploadFile(folderId, fileName, mimeType, content) {
+    const token = await ensureToken();
+    const metadata = { name: fileName, parents: [folderId] };
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', content instanceof Blob ? content : new Blob([content], { type: mimeType }));
+
+    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: form
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Drive upload failed (${res.status}): ${errText}`);
+    }
+    return await res.json();
+  }
+
+  // Convert a base64 data URL to a Blob
+  function dataUrlToBlob(dataUrl) {
+    const parts = dataUrl.split(',');
+    const mime = parts[0].match(/:(.*?);/)[1];
+    const raw = atob(parts[1]);
+    const arr = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  }
+
+  // Main backup function — uploads survey data + photos to Drive
+  async function backupSurvey(surveyId) {
+    const survey = await getSurvey(surveyId);
+    if (!survey) throw new Error('Survey not found');
+
+    const vesselName = survey.vesselName || 'Unnamed';
+    const folderId = await getOrCreateVesselFolder(vesselName);
+
+    // 1. Upload survey data (without photo blobs) as JSON
+    const surveyClone = JSON.parse(JSON.stringify(survey));
+    // Strip any inline base64 from items to keep the JSON small
+    if (surveyClone.items) {
+      for (const key of Object.keys(surveyClone.items)) {
+        const item = surveyClone.items[key];
+        if (item && item.photos) {
+          item.photos = item.photos.map(p => typeof p === 'string' && p.startsWith('data:') ? '(photo-in-drive)' : p);
+        }
+      }
+    }
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const surveyJson = JSON.stringify(surveyClone, null, 2);
+    await uploadFile(folderId, `${vesselName.replace(/[^a-zA-Z0-9_-]/g, '_')}_${dateStr}.json`, 'application/json', surveyJson);
+    showToast('Survey data uploaded…');
+
+    // 2. Upload photos individually
+    const photos = await new Promise((resolve) => {
+      const tx = db.transaction(['photos'], 'readonly');
+      const store = tx.objectStore('photos');
+      const index = store.index('surveyId');
+      const range = IDBKeyRange.only(surveyId);
+      const results = [];
+      index.openCursor(range).onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) { results.push(cursor.value); cursor.continue(); }
+        else resolve(results);
+      };
+    });
+
+    let uploaded = 0;
+    for (const photo of photos) {
+      if (!photo.dataUrl) continue;
+      const photoBlob = dataUrlToBlob(photo.dataUrl);
+      const ext = photo.dataUrl.startsWith('data:image/png') ? '.png' : '.jpg';
+      const photoName = (photo.label || photo.id || `photo_${uploaded}`).replace(/[^a-zA-Z0-9_-]/g, '_') + ext;
+      await uploadFile(folderId, photoName, photoBlob.type, photoBlob);
+      uploaded++;
+      if (uploaded % 3 === 0) showToast(`Uploaded ${uploaded}/${photos.length} photos…`);
+    }
+
+    showToast(`✓ Backed up to Drive: ${vesselName} (${uploaded} photos)`);
+  }
+
+  // Backup ALL surveys
+  async function backupAll() {
+    const surveys = await getAllSurveys();
+    if (surveys.length === 0) { showToast('No surveys to back up'); return; }
+
+    let done = 0;
+    let failed = 0;
+    for (const survey of surveys) {
+      try {
+        await backupSurvey(survey.id);
+        done++;
+      } catch (err) {
+        console.error(`Drive backup failed for ${survey.vesselName}:`, err);
+        failed++;
+      }
+    }
+    if (failed > 0) {
+      showAlert(`Backed up ${done} surveys. ${failed} failed.`);
+    } else {
+      showToast(`All ${done} surveys backed up to Drive ✓`);
+    }
+  }
+
+  return { isSignedIn, signIn, backupSurvey, backupAll, ensureToken };
+})();
 
 const FirebaseSync = (() => {
   let _syncEnabled = false;
