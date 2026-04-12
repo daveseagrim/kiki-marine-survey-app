@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2070';
+const APP_VERSION = 'v2071';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -8940,10 +8940,10 @@ async function checkSurvey() {
   }
 
   // ── 3. DOCUMENTATION PHOTOS ─────────────────────────────────────────────
-  if (!survey.hinPhoto) add('critical', 'Documentation Photos', 'Missing: HIN plate photo', null, 'hinPhotoBtn');
-  if (!survey.compliancePhoto) add('warning', 'Documentation Photos', 'Missing: Compliance plate photo', null, 'compliancePhotoBtn');
-  if (!survey.coverPhoto) add('warning', 'Documentation Photos', 'Missing: Cover photo', null, 'coverPhotoBtn');
-  if (!survey.licencePhoto) add('info', 'Documentation Photos', 'Missing: TC licence photo', null, 'licencePhotoBtn');
+  if (!survey.hinPhoto) add('critical', 'Documentation Photos', 'Missing: HIN plate photo', null, 'hinPhotoStatus');
+  if (!survey.compliancePhoto) add('warning', 'Documentation Photos', 'Missing: Compliance plate photo', null, 'compliancePhotoStatus');
+  if (!survey.coverPhoto) add('warning', 'Documentation Photos', 'Missing: Cover photo', null, 'coverPhotoStatus');
+  if (!survey.licencePhoto) add('info', 'Documentation Photos', 'Missing: TC licence photo', null, 'tcLicense');
 
   // Four-corner photos
   const cornerFields = ['fourCornerPortBow','fourCornerStbdBow','fourCornerPortStern','fourCornerStbdStern'];
@@ -9126,19 +9126,19 @@ async function checkSurvey() {
 
   // ── 5. VALUATION ────────────────────────────────────────────────────────
   if (!survey.valuationLow && !survey.valuationHigh) {
-    add('critical', 'Valuation', 'Missing: Fair market value (low and high)', null, 'inspValLow');
+    add('critical', 'Valuation', 'Missing: Fair market value (low and high)', null, 'valuationLow');
   } else {
-    if (!survey.valuationLow) add('warning', 'Valuation', 'Missing: Low value estimate', null, 'inspValLow');
-    if (!survey.valuationHigh) add('warning', 'Valuation', 'Missing: High value estimate', null, 'inspValHigh');
+    if (!survey.valuationLow) add('warning', 'Valuation', 'Missing: Low value estimate', null, 'valuationLow');
+    if (!survey.valuationHigh) add('warning', 'Valuation', 'Missing: High value estimate', null, 'valuationHigh');
   }
-  if (!survey.overallCondition) add('critical', 'Valuation', 'Missing: Overall condition rating (BUC grade)', null, 'inspCondition');
+  if (!survey.overallCondition) add('critical', 'Valuation', 'Missing: Overall condition rating (BUC grade)', null, 'overallCondition');
   if (!survey.valuationRationale && !survey.valuationSource) {
-    add('warning', 'Valuation', 'Missing: Valuation rationale or source', null, 'inspValRationale');
+    add('warning', 'Valuation', 'Missing: Valuation rationale or source', null, 'valuationRationale');
   }
   if ((!survey.comparables || survey.comparables.length === 0) || survey.comparables.every(c => !c.vessel)) {
-    add('warning', 'Valuation', 'No comparable vessels entered', null, 'inspValLow');
+    add('warning', 'Valuation', 'No comparable vessels entered', null, 'valuationLow');
   }
-  if (!survey.replacementCost) add('info', 'Valuation', 'Missing: Replacement cost estimate', null, 'inspReplacementCost');
+  if (!survey.replacementCost) add('info', 'Valuation', 'Missing: Replacement cost estimate', null, 'replacementCost');
 
   // ── 6. SAFETY EQUIPMENT ─────────────────────────────────────────────────
   if (!survey.safetyEquipment || survey.safetyEquipment.length === 0) {
@@ -9896,18 +9896,16 @@ function _csCheckSingleIssue(issue, data, survey) {
     if (navId && survey[navId] && String(survey[navId]).trim() !== '' && survey[navId] !== 'Select') {
       return { fixed: true };
     }
-    // Also check the inspection-view IDs (inspValLow, etc.)
-    if (navId && navId.startsWith('insp')) {
-      const fieldMap = { inspValLow: 'valuationLow', inspValHigh: 'valuationHigh', inspCondition: 'overallCondition', inspValRationale: 'valuationRationale', inspReplacementCost: 'replacementCost' };
-      const surveyField = fieldMap[navId];
-      if (surveyField && survey[surveyField] && String(survey[surveyField]).trim() !== '') return { fixed: true };
+    // Also check directly by navId as a survey field name
+    if (navId && survey[navId] && String(survey[navId]).trim() !== '' && survey[navId] !== 'Select') {
+      return { fixed: true };
     }
     return { fixed: false, reason: msg + '. Fill in this field, or Force OK if not applicable.' };
   }
 
   // Documentation Photos
   if (cat === 'Documentation Photos') {
-    const photoFieldMap = { hinPhotoBtn: 'hinPhoto', compliancePhotoBtn: 'compliancePhoto', coverPhotoBtn: 'coverPhoto', licencePhotoBtn: 'licencePhoto' };
+    const photoFieldMap = { hinPhotoStatus: 'hinPhoto', compliancePhotoStatus: 'compliancePhoto', coverPhotoStatus: 'coverPhoto', tcLicense: 'licencePhoto' };
     const navId = issue.navId;
     if (navId && photoFieldMap[navId]) {
       if (survey[photoFieldMap[navId]]) return { fixed: true };
