@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2079';
+const APP_VERSION = 'v2080';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9701,13 +9701,11 @@ async function checkSurvey() {
               <div style="font-size:13px;font-weight:600;color:#1e293b;line-height:1.4;display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
                 ${displayLabel}
                 ${hasContent ? `<span onclick="window._csToggleContent('${item._checkId}');event.stopPropagation();" style="cursor:pointer;font-size:11px;color:#64748b;background:#e2e8f0;padding:1px 6px;border-radius:4px;user-select:none;" id="expand_${item._checkId}">▸ details</span>` : ''}
+                <span onclick="window._csSkipItem('${item._checkId}');event.stopPropagation();" style="cursor:pointer;font-size:10px;color:#64748b;background:#e2e8f0;padding:1px 6px;border-radius:4px;user-select:none;">skip</span>
               </div>
               ${item.severity === 'proofread' && item.text ? `<div style="font-size:11px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;">${(item.text.length > 70 ? item.text.substring(0, 70) + '…' : item.text).replace(/</g, '&lt;')}</div>` : ''}
             </div>
-            <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
-              ${hasTappableItem ? `<button onclick="window._csGoToItem(${idx});event.stopPropagation();" style="background:#1e3a5f;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">Go ➜</button>` : ''}
-              <button onclick="window._csSkipItem('${item._checkId}');event.stopPropagation();" style="background:#94a3b8;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:10px;cursor:pointer;white-space:nowrap;">Skip</button>
-            </div>
+            ${hasTappableItem ? `<button onclick="window._csGoToItem(${idx});event.stopPropagation();" style="flex-shrink:0;background:#1e3a5f;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">Go ➜</button>` : ''}
           </div>
           ${inlineContent}
         </div>`;
@@ -9911,6 +9909,10 @@ async function checkSurvey() {
     // Find the matching item from allCheckItems
     const item = allCheckItems.find(it => it._checkId === checkId);
     if (!item) return;
+
+    // Confirmation dialog
+    const shortMsg = (item.message || '').length > 60 ? item.message.substring(0, 60) + '…' : item.message;
+    if (!confirm(`Skip this item?\n\n"${shortMsg}"\n\nIt will be moved to Resolved as skipped.`)) return;
 
     // Add to forceOKState
     forceOKState[item.message] = {
