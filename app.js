@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2029';
+const APP_VERSION = 'v2030';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1333,7 +1333,7 @@ async function fetchDataFiles() {
     const [templateRes, insuranceTemplateRes, libraryRes, specsRes, valuesRes, engineRes, outdriveRes] = await Promise.all([
       fetch('survey_template.json'),
       fetch('insurance_survey_template.json'),
-      fetch('text_library.json'),
+      fetch('text_library.json?v=' + APP_VERSION),
       fetch('boat_specs_db.json'),
       fetch('boat_values_db.json'),
       fetch('engine_db.json'),
@@ -4074,11 +4074,12 @@ function applyBuilderState(strip) {
     const customRaw = customInput ? (customInput.value || '').trim() : '';
     if (customRaw) {
       customRaw.split(/\s*,\s*/).filter(Boolean).forEach(l => {
-        // Custom text is always spliced mid-sentence, so downcase the first
-        // letter unless it's a proper noun (Yanmar), an acronym (ABYC), or
-        // the user typed it in all-caps intentionally. Mid-sentence
-        // capitalization is the #1 grammar artefact of iOS auto-cap.
-        selectedLabels.push(lowercaseMidSentence(l));
+        // Custom text is always spliced mid-sentence. Run the full mid-
+        // sentence cleaner so EVERY capitalized word (not just the first)
+        // gets downcased — iOS sentence-case often leaks in after any
+        // space, producing artefacts like "damage And more damage".
+        // Acronyms and whitelisted proper nouns are preserved.
+        selectedLabels.push(cleanMidSentenceCaps(l));
       });
     }
 

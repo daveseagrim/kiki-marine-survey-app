@@ -582,10 +582,10 @@
     {
       "section": "Propeller(s)",
       "rating": "B",
-      "text": "The {count:propeller|propellers} showed {any:moderate wear|minor blade damage|chipped blade tip(s)|light edge burr(s)|light pitting|surface corrosion|minor shaft-end mark(s)} that merited attention. The {count:propeller|propellers} should be removed, inspected, and {specify:reconditioned|reconditioned or replaced as necessary|rebalanced|touched up and rebalanced} at the next haul-out.{standards? Note: this represents a minor deviation from STANDARDS and does not require immediate repair.}",
+      "text": "The {count:propeller|propellers} showed {any:moderate wear|minor blade damage|chipped blade tip(s)|light edge burr(s)|light pitting|surface corrosion|minor shaft-end mark(s)} that merited attention. The {count:propeller|propellers} should be {specify:removed, inspected, and reconditioned at the next haul-out|removed, inspected, and reconditioned while the vessel remains on shore|removed, inspected, and reconditioned or replaced as necessary|rebalanced at the next haul-out|touched up and rebalanced at the next haul-out|monitored during future inspections and reconditioned only if the condition deteriorates}.{standards? Note: this represents a minor deviation from STANDARDS and does not require immediate repair.}",
       "placeholders": {
         "any:moderate wear|minor blade damage|chipped blade tip(s)|light edge burr(s)|light pitting|surface corrosion|minor shaft-end mark(s)": { "multi": true },
-        "specify:reconditioned|reconditioned or replaced as necessary|rebalanced|touched up and rebalanced": { "multi": false }
+        "specify:removed, inspected, and reconditioned at the next haul-out|removed, inspected, and reconditioned while the vessel remains on shore|removed, inspected, and reconditioned or replaced as necessary|rebalanced at the next haul-out|touched up and rebalanced at the next haul-out|monitored during future inspections and reconditioned only if the condition deteriorates": { "multi": false }
       }
     },
     {
