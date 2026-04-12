@@ -1,12 +1,12 @@
 {
-  "name": "Kiki Marine Survey",
-  "short_name": "Kiki Survey",
+  "name": "Marine Vessel Surveys",
+  "short_name": "Kiki Marine",
   "description": "Professional marine vessel surveying app with offline support",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
   "orientation": "any",
-  "theme_color": "#1e3a5f",
+  "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "icons": [
     {

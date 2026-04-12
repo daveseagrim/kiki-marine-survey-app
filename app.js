@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2104';
+const APP_VERSION = 'v2105';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -66,50 +66,53 @@ function persistViewState() {
   } catch(e) {}
 }
 
-// Force update — unregister service worker, clear caches, reload.
-// Works from inside the PWA's own WebKit container on iOS.
+// Force update — check for new SW, activate it, let controllerchange reload.
+// Single tap, no double-reload needed.
 async function forceAppUpdate() {
   try {
-    showToast('Updating…');
-    // 1. Force the service worker to check for a new version
+    showToast('Checking for updates…');
+
     if ('serviceWorker' in navigator) {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      for (const reg of registrations) {
-        // Tell the SW to check the server right now
-        try { await reg.update(); } catch(e) {}
-        // If a new worker is waiting, activate it immediately
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (reg) {
+        await reg.update();            // fetch sw.js from server
         if (reg.waiting) {
+          // New version already downloaded — activate it now
           reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-          await new Promise(r => setTimeout(r, 300));
+          // controllerchange listener will reload the page
+          return;
         }
-        await reg.unregister();
+        if (reg.installing) {
+          // Update is downloading — wait for it to finish
+          showToast('Downloading update…');
+          reg.installing.addEventListener('statechange', function handler() {
+            if (reg.installing && reg.installing.state === 'installed') {
+              reg.installing.removeEventListener('statechange', handler);
+              reg.waiting && reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
+          return;
+        }
       }
     }
-    // 2. Clear all caches
+
+    // Fallback: no SW or nothing new — clear caches and hard reload
     if ('caches' in window) {
-      const cacheNames = await caches.keys();
-      for (const name of cacheNames) {
-        await caches.delete(name);
-      }
+      const names = await caches.keys();
+      for (const n of names) await caches.delete(n);
     }
-    showToast('Update found — reloading…');
-    // 3. Save view state so we return to the same screen
+    showToast('Reloading…');
     persistViewState();
-    await new Promise(r => setTimeout(r, 400));
-    // 4. Hard reload — bypass browser HTTP cache entirely
-    // On iOS PWA, location.reload(true) is more reliable than href change
-    if (window.location.search) {
-      // Strip old cache-buster params first
-      const base = window.location.origin + window.location.pathname;
-      window.location.replace(base + '?_cb=' + Date.now());
-    } else {
-      window.location.replace(window.location.origin + window.location.pathname + '?_cb=' + Date.now());
-    }
+    await new Promise(r => setTimeout(r, 300));
+    window.location.replace(
+      window.location.origin + window.location.pathname + '?_cb=' + Date.now()
+    );
   } catch (err) {
     console.error('Force update error:', err);
     persistViewState();
-    const base = window.location.origin + window.location.pathname;
-    window.location.replace(base + '?_cb=' + Date.now());
+    window.location.replace(
+      window.location.origin + window.location.pathname + '?_cb=' + Date.now()
+    );
   }
 }
 
@@ -5073,11 +5076,11 @@ function renderHome() {
       const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       const monthsFull = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-      // Group surveys by month/year, sorted newest first
+      // Group surveys by date, oldest first
       const sorted = [...surveys].sort((a, b) => {
         const da = a.surveyDate || new Date(a.createdAt).toISOString().split('T')[0];
         const db = b.surveyDate || new Date(b.createdAt).toISOString().split('T')[0];
-        return db.localeCompare(da);
+        return da.localeCompare(db);
       });
 
       const groups = {};
@@ -13788,13 +13791,14 @@ function _retroSyncEngineFromBody(survey) {
   // Sync fuel type
   if (syncText('Fuel type', 'fuelType')) changed = true;
 
-  // Sync photos — engine, engine nameplate, gearbox nameplate
+  // Sync photos — engine, engine nameplate, gearbox/transmission
   if (syncPhoto('Engine(s) and drive(s) photos', 'enginePhoto')) changed = true;
   if (syncPhoto('Engine name plate(s)', 'enginePlatePhoto')) changed = true;
   if (syncPhoto('Gearbox nameplate(s)', 'transmissionPlatePhoto')) changed = true;
-
-  // Also sync transmission plate photos
   if (syncPhoto('Transmission nameplate(s)', 'transmissionPlatePhoto')) changed = true;
+  // Gearbox general condition photos → transmissionPhoto (main gearbox photo)
+  if (syncPhoto('Gearbox general condition/impressions', 'transmissionPhoto')) changed = true;
+  if (syncPhoto('Gearbox oil', 'transmissionPhoto')) changed = true;
 
   return changed;
 }
@@ -13876,6 +13880,11 @@ function _syncEnginePhotosFromBody(survey) {
   const gp = _firstPhoto('Gearbox nameplate(s)');
   if (gp !== null) survey.transmissionPlatePhoto = gp;
   else if (survey.items['Gearbox nameplate(s)']) survey.transmissionPlatePhoto = null;
+
+  // Gearbox general condition photos → transmissionPhoto
+  const gc = _firstPhoto('Gearbox general condition/impressions');
+  if (gc !== null) survey.transmissionPhoto = gc;
+  else if (survey.items['Gearbox general condition/impressions']) survey.transmissionPhoto = null;
 }
 
 function autoSaveItemText(itemLabel, categoryName) {
@@ -16032,10 +16041,40 @@ function renderReportInPage(html) {
   }, 500);
 }
 
-// Service Worker registration
+// Service Worker registration — updateViaCache:'none' ensures the browser
+// always fetches sw.js from the network, so version bumps take effect on
+// the very next navigation instead of waiting for the HTTP cache to expire.
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(err => {
-    console.log('ServiceWorker registration failed: ', err);
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+    .then(reg => {
+      // Check for updates every 60 seconds while the app is open
+      setInterval(() => { reg.update().catch(() => {}); }, 60000);
+      // If a new worker installed while we were loading, activate it now
+      if (reg.waiting) {
+        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // New version ready — show a toast so Dave knows
+            showToast('New version available — tap ↻ Update');
+          }
+        });
+      });
+    })
+    .catch(err => {
+      console.log('ServiceWorker registration failed: ', err);
+    });
+
+  // When the new SW takes over, reload the page automatically
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    persistViewState();
+    window.location.reload();
   });
 }
 
