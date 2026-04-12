@@ -101,7 +101,19 @@
           },
           {
             "type": "list",
-            "label": "Hull and rudder(s)/drive(s) condition (below the waterline)",
+            "label": "Hull(s) condition (below the waterline)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Rudder(s) condition",
             "options": [
               "A - Critical",
               "B - Needs Attention",
