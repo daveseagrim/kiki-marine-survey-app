@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2059';
+const APP_VERSION = 'v2060';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9274,6 +9274,12 @@ async function checkSurvey() {
       </div>`;
   }
 
+  // Store item labels in a global array so Go buttons can reference by index
+  // (avoids special-character issues in onclick HTML attributes)
+  window._csItemLabels = allCheckItems.map(it => it.itemLabel || null);
+  window._csCheckIds = allCheckItems.map(it => it._checkId);
+
+  let globalIdx = 0;
   sections.forEach(section => {
     const sev = section.severity;
     const secReviewed = section.items.filter(it => reviewedState[it._checkId]).length;
@@ -9289,7 +9295,7 @@ async function checkSurvey() {
     `;
 
     section.items.forEach(item => {
-      const safeLabel = item.itemLabel ? item.itemLabel.replace(/[^a-zA-Z0-9]/g, '_') : '';
+      const idx = allCheckItems.indexOf(item);
       const isReviewed = !!reviewedState[item._checkId];
       const ratingChar = item.rating ? item.rating.charAt(0) : '';
       const rColor = ratingColors[ratingChar] || '#6b7280';
@@ -9314,6 +9320,9 @@ async function checkSurvey() {
           </div>`;
       }
 
+      // Escape item label for display (prevent XSS from item labels with < or >)
+      const displayLabel = (item.severity !== 'proofread' ? item.message : item.itemLabel || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
       // The row
       html += `
         <div id="row_${item._checkId}" style="margin-bottom:4px;${isReviewed ? 'opacity:0.5;' : ''}">
@@ -9323,12 +9332,12 @@ async function checkSurvey() {
             ${ratingBadge}
             <div style="flex:1;min-width:0;">
               <div style="font-size:13px;font-weight:600;color:#1e293b;line-height:1.4;display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
-                ${item.severity !== 'proofread' ? item.message : item.itemLabel}
+                ${displayLabel}
                 ${hasContent ? `<span onclick="window._csToggleContent('${item._checkId}');event.stopPropagation();" style="cursor:pointer;font-size:11px;color:#64748b;background:#e2e8f0;padding:1px 6px;border-radius:4px;user-select:none;" id="expand_${item._checkId}">▸ details</span>` : ''}
               </div>
-              ${item.severity === 'proofread' && item.text ? `<div style="font-size:11px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;">${item.text.length > 70 ? item.text.substring(0, 70) + '…' : item.text}</div>` : ''}
+              ${item.severity === 'proofread' && item.text ? `<div style="font-size:11px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;">${(item.text.length > 70 ? item.text.substring(0, 70) + '…' : item.text).replace(/</g, '&lt;')}</div>` : ''}
             </div>
-            ${hasTappableItem ? `<button onclick="window._csNavigateToItem(${JSON.stringify(item.itemLabel).replace(/</g,'\\x3c')}, '${item._checkId}');event.stopPropagation();" style="flex-shrink:0;background:#1e3a5f;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">Go ➜</button>` : ''}
+            ${hasTappableItem ? `<button onclick="window._csGoToItem(${idx});event.stopPropagation();" style="flex-shrink:0;background:#1e3a5f;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">Go ➜</button>` : ''}
           </div>
           ${inlineContent}
         </div>`;
@@ -9378,8 +9387,12 @@ async function checkSurvey() {
     if (btn) btn.textContent = isOpen ? '▸ details' : '▾ details';
   };
 
-  // Navigate to item and show floating "Back to Check" button
-  window._csNavigateToItem = function(itemLabel, checkId) {
+  // Navigate to item by index — uses global _csItemLabels array
+  window._csGoToItem = function(idx) {
+    const itemLabel = window._csItemLabels[idx];
+    const checkId = window._csCheckIds[idx];
+    if (!itemLabel) return;
+
     // Remember scroll position
     const scrollEl = document.getElementById('csScrollContainer');
     const scrollPos = scrollEl ? scrollEl.scrollTop : 0;
@@ -9389,17 +9402,32 @@ async function checkSurvey() {
 
     // Scroll to the item using data-item-label attribute (how the inspection view identifies items)
     setTimeout(() => {
-      const escapedLabel = itemLabel.replace(/"/g, '\\"');
-      const el = document.querySelector(`.compact-item-wrapper[data-item-label="${escapedLabel}"]`)
-              || document.querySelector(`.rated-item[data-item-label="${escapedLabel}"]`);
+      // Try multiple selector approaches for maximum compatibility
+      const escapedLabel = CSS.escape ? undefined : undefined; // CSS.escape not needed, use attribute selector with quotes
+      const sel = itemLabel.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      const el = document.querySelector('.compact-item-wrapper[data-item-label="' + sel + '"]')
+              || document.querySelector('.rated-item[data-item-label="' + sel + '"]');
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         el.style.transition = 'background 0.3s, box-shadow 0.3s';
         el.style.background = '#fef3c7';
         el.style.boxShadow = '0 0 0 3px #f59e0b';
         setTimeout(() => { el.style.background = ''; el.style.boxShadow = ''; }, 3000);
+      } else {
+        // Fallback: search all compact-item-wrapper elements for matching label
+        const allWrappers = document.querySelectorAll('.compact-item-wrapper');
+        for (const w of allWrappers) {
+          if (w.getAttribute('data-item-label') === itemLabel) {
+            w.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            w.style.transition = 'background 0.3s, box-shadow 0.3s';
+            w.style.background = '#fef3c7';
+            w.style.boxShadow = '0 0 0 3px #f59e0b';
+            setTimeout(() => { w.style.background = ''; w.style.boxShadow = ''; }, 3000);
+            break;
+          }
+        }
       }
-    }, 100);
+    }, 150);
 
     // Show floating "Back to Check Survey" button
     let backBtn = document.getElementById('csBackToCheckBtn');
@@ -9410,9 +9438,9 @@ async function checkSurvey() {
     backBtn.style.cssText = 'position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));left:50%;transform:translateX(-50%);background:#1e3a5f;color:white;border:none;border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
     backBtn.onclick = async function() {
       backBtn.remove();
-      // Re-run check survey — re-evaluates everything, colours will update
+      // Re-run check survey — re-evaluates everything so colours update
       await checkSurvey();
-      // Restore scroll position
+      // Restore scroll position to approximately where they were
       setTimeout(() => {
         const newScrollEl = document.getElementById('csScrollContainer');
         if (newScrollEl) newScrollEl.scrollTop = scrollPos;
