@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2102';
+const APP_VERSION = 'v2103';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -6489,6 +6489,24 @@ function editSurveyDetails(surveyId) {
         }
       }
 
+      // Trigger cascading engine/transmission dropdowns
+      // Setting .value programmatically doesn't fire onchange, so we call manually
+      if (survey.engineMake) {
+        onEngineMakeChange();  // Populates model dropdown from make
+        // Re-set model after options are populated
+        if (survey.engineModel) {
+          const modelEl = document.getElementById('engineModel');
+          if (modelEl) modelEl.value = survey.engineModel;
+        }
+      }
+      if (survey.transmissionMake) {
+        onTransmissionMakeChange();  // Populates transmission model dropdown
+        if (survey.transmissionModel) {
+          const tModelEl = document.getElementById('transmissionModel');
+          if (tModelEl) tModelEl.value = survey.transmissionModel;
+        }
+      }
+
       // Show Engine 2 section if survey has twin engine data
       if (survey.engine2Make) {
         showEngine2();
@@ -6503,6 +6521,21 @@ function editSurveyDetails(surveyId) {
           };
           for (const [id, val] of Object.entries(e2Fields)) {
             if (val) { const el = document.getElementById(id); if (el) el.value = val; }
+          }
+          // Trigger cascading dropdowns for Engine 2
+          if (survey.engine2Make && typeof onEngine2MakeChange === 'function') {
+            onEngine2MakeChange();
+            if (survey.engine2Model) {
+              const m2 = document.getElementById('engine2Model');
+              if (m2) m2.value = survey.engine2Model;
+            }
+          }
+          if (survey.transmission2Make && typeof onTransmission2MakeChange === 'function') {
+            onTransmission2MakeChange();
+            if (survey.transmission2Model) {
+              const t2 = document.getElementById('transmission2Model');
+              if (t2) t2.value = survey.transmission2Model;
+            }
           }
         }, 100);
       }
