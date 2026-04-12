@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2060';
+const APP_VERSION = 'v2061';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9400,32 +9400,65 @@ async function checkSurvey() {
     // Close the overlay
     document.getElementById('checkSurveyOverlay')?.remove();
 
-    // Scroll to the item using data-item-label attribute (how the inspection view identifies items)
+    // Find the item element and expand its parent accordion, then scroll to it
     setTimeout(() => {
-      // Try multiple selector approaches for maximum compatibility
-      const escapedLabel = CSS.escape ? undefined : undefined; // CSS.escape not needed, use attribute selector with quotes
-      const sel = itemLabel.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-      const el = document.querySelector('.compact-item-wrapper[data-item-label="' + sel + '"]')
-              || document.querySelector('.rated-item[data-item-label="' + sel + '"]');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.style.transition = 'background 0.3s, box-shadow 0.3s';
-        el.style.background = '#fef3c7';
-        el.style.boxShadow = '0 0 0 3px #f59e0b';
-        setTimeout(() => { el.style.background = ''; el.style.boxShadow = ''; }, 3000);
-      } else {
-        // Fallback: search all compact-item-wrapper elements for matching label
-        const allWrappers = document.querySelectorAll('.compact-item-wrapper');
-        for (const w of allWrappers) {
+      // Find the element — try querySelector first, fall back to manual loop
+      let el = null;
+      const allWrappers = document.querySelectorAll('.compact-item-wrapper');
+      for (const w of allWrappers) {
+        if (w.getAttribute('data-item-label') === itemLabel) {
+          el = w;
+          break;
+        }
+      }
+      if (!el) {
+        // Also check rated-item wrappers
+        const ratedItems = document.querySelectorAll('.rated-item');
+        for (const w of ratedItems) {
           if (w.getAttribute('data-item-label') === itemLabel) {
-            w.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            w.style.transition = 'background 0.3s, box-shadow 0.3s';
-            w.style.background = '#fef3c7';
-            w.style.boxShadow = '0 0 0 3px #f59e0b';
-            setTimeout(() => { w.style.background = ''; w.style.boxShadow = ''; }, 3000);
+            el = w;
             break;
           }
         }
+      }
+
+      if (el) {
+        // Expand the parent accordion if it's collapsed
+        const accordion = el.closest('.category-accordion');
+        if (accordion) {
+          const content = accordion.querySelector('.accordion-content');
+          if (content && content.style.display === 'none') {
+            // Close any other open accordions first
+            document.querySelectorAll('.accordion-content').forEach(ac => {
+              if (ac !== content && ac.style.display !== 'none') {
+                ac.style.display = 'none';
+                const hdr = ac.parentElement.querySelector('.accordion-header');
+                const chev = hdr?.querySelector('span:last-child');
+                if (chev) chev.style.transform = 'rotate(0deg)';
+              }
+            });
+            // Open this one
+            content.style.display = 'block';
+            const header = accordion.querySelector('.accordion-header');
+            const chevron = header?.querySelector('span:last-child');
+            if (chevron) chevron.style.transform = 'rotate(180deg)';
+            // Update tracked open category
+            const titleSpan = header?.querySelector('.category-title');
+            if (titleSpan && typeof _openAccordionCategory !== 'undefined') {
+              _openAccordionCategory = titleSpan.textContent.replace(/^[^\w]*/, '').trim();
+            }
+            if (typeof updateCollapseButton === 'function') updateCollapseButton(true);
+          }
+        }
+
+        // Scroll to the item after a brief delay to let the accordion render
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.style.transition = 'background 0.3s, box-shadow 0.3s';
+          el.style.background = '#fef3c7';
+          el.style.boxShadow = '0 0 0 3px #f59e0b';
+          setTimeout(() => { el.style.background = ''; el.style.boxShadow = ''; }, 3000);
+        }, 50);
       }
     }, 150);
 
