@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2086';
+const APP_VERSION = 'v2087';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9643,17 +9643,24 @@ async function checkSurvey() {
   window._csCheckIds = allCheckItems.map(it => it._checkId);
 
   let globalIdx = 0;
+  let sectionIdx = 0;
   sections.forEach(section => {
     const sev = section.severity;
+    const secId = `cs-section-${sectionIdx++}`;
 
     html += `
       <div style="margin-bottom:16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:2px solid ${sevBorder[sev]};margin-bottom:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:2px solid ${sevBorder[sev]};margin-bottom:8px;cursor:pointer;user-select:none;"
+             onclick="(function(){var l=document.getElementById('${secId}');var c=document.getElementById('${secId}-caret');if(!l||!c)return;var open=l.style.display!=='none';l.style.display=open?'none':'block';c.textContent=open?'▸':'▾';})()">
           <div style="font-weight:700;font-size:15px;color:#1e293b;display:flex;align-items:center;gap:6px;">
             ${sevIcon[sev]} ${sevLabel[sev]} <span style="font-weight:400;color:#94a3b8;font-size:12px;">(${section.items.length})</span>
           </div>
-          <span style="font-size:11px;color:#94a3b8;">check ☑ to resolve</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;color:#94a3b8;">check ☑ to resolve</span>
+            <span id="${secId}-caret" style="color:#94a3b8;font-size:16px;">▾</span>
+          </div>
         </div>
+        <div id="${secId}">
     `;
 
     section.items.forEach(item => {
@@ -9709,7 +9716,7 @@ async function checkSurvey() {
         </div>`;
     });
 
-    html += '</div>';
+    html += '</div></div>';
   });
 
   // ── SKIPPED section (collapsible, like Resolved) ────────────────────────
