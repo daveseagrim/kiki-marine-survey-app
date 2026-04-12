@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2096';
+const APP_VERSION = 'v2097';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -13528,7 +13528,12 @@ function toggleHasRudder(hasRudder) {
   });
 }
 
-function toggleCategoryExclude(categoryName, exclude) {
+async function toggleCategoryExclude(categoryName, exclude) {
+  // Confirm before skipping an entire category (easy to tap by accident)
+  if (exclude) {
+    const yes = await showConfirm(`Skip entire "${categoryName}" category?\n\nAll items will be excluded from the report.`, 'Skip Category', 'Cancel');
+    if (!yes) return;
+  }
   getSurvey(currentSurveyId).then(survey => {
     // Find the category items from the active template
     const activeTemplate = getTemplateForSurvey(survey);
