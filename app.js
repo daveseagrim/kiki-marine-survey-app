@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2089';
+const APP_VERSION = 'v2090';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -70,15 +70,22 @@ function persistViewState() {
 // Works from inside the PWA's own WebKit container on iOS.
 async function forceAppUpdate() {
   try {
-    showToast('Checking for updates…');
-    // Unregister all service workers
+    showToast('Updating…');
+    // 1. Force the service worker to check for a new version
     if ('serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
       for (const reg of registrations) {
+        // Tell the SW to check the server right now
+        try { await reg.update(); } catch(e) {}
+        // If a new worker is waiting, activate it immediately
+        if (reg.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          await new Promise(r => setTimeout(r, 300));
+        }
         await reg.unregister();
       }
     }
-    // Clear all caches
+    // 2. Clear all caches
     if ('caches' in window) {
       const cacheNames = await caches.keys();
       for (const name of cacheNames) {
@@ -86,17 +93,23 @@ async function forceAppUpdate() {
       }
     }
     showToast('Update found — reloading…');
-    // Ensure current view state is saved so we return to the same screen
+    // 3. Save view state so we return to the same screen
     persistViewState();
-    await new Promise(r => setTimeout(r, 500));
-    // Reload with cache-busting query param to bypass CDN and browser HTTP cache
-    const base = window.location.origin + window.location.pathname;
-    window.location.href = base + '?_cb=' + Date.now();
+    await new Promise(r => setTimeout(r, 400));
+    // 4. Hard reload — bypass browser HTTP cache entirely
+    // On iOS PWA, location.reload(true) is more reliable than href change
+    if (window.location.search) {
+      // Strip old cache-buster params first
+      const base = window.location.origin + window.location.pathname;
+      window.location.replace(base + '?_cb=' + Date.now());
+    } else {
+      window.location.replace(window.location.origin + window.location.pathname + '?_cb=' + Date.now());
+    }
   } catch (err) {
     console.error('Force update error:', err);
     persistViewState();
     const base = window.location.origin + window.location.pathname;
-    window.location.href = base + '?_cb=' + Date.now();
+    window.location.replace(base + '?_cb=' + Date.now());
   }
 }
 
@@ -4992,7 +5005,7 @@ function renderHome() {
           <div class="header-title">Kiki Marine Survey</div>
           <div class="header-subtitle" style="display:flex;align-items:center;gap:8px;">
             Marine Vessel Surveys — ${APP_VERSION}
-            <button onclick="forceAppUpdate()" style="background:none;border:1px solid rgba(255,255,255,0.4);color:rgba(255,255,255,0.8);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;">↻ Update</button>
+            <button onclick="forceAppUpdate()" style="background:none;border:1px solid rgba(255,255,255,0.5);color:rgba(255,255,255,0.9);border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;min-height:32px;">↻ Update</button>
           </div>
         </div>
       </div>
@@ -5101,9 +5114,11 @@ function renderHome() {
       content.innerHTML = html;
     }
 
-    // Add floating action button for new survey (remove any existing fab first, e.g. report button)
+    // Add floating action button for new survey (remove any existing fab/bar first)
     const existingFab = document.querySelector('.fab');
     if (existingFab) existingFab.remove();
+    const bottomBarEl = document.getElementById('inspectionBottomBar');
+    if (bottomBarEl) bottomBarEl.remove();
     const reportBtnEl = document.getElementById('reportBtn');
     if (reportBtnEl) reportBtnEl.remove();
 
@@ -5142,6 +5157,8 @@ function renderNewSurveyForm() {
   history.pushState({ view: 'new-survey' }, '');
   const existingFab = document.querySelector('.fab');
   if (existingFab) existingFab.remove();
+  const bottomBarEl2 = document.getElementById('inspectionBottomBar');
+  if (bottomBarEl2) bottomBarEl2.remove();
   const reportBtnEl = document.getElementById('reportBtn');
   if (reportBtnEl) reportBtnEl.remove();
   // Hide the floating collapse button (only relevant on inspection view)
@@ -6283,6 +6300,8 @@ function editSurveyDetails(surveyId) {
 
     const existingFab = document.querySelector('.fab');
     if (existingFab) existingFab.remove();
+    const bottomBarEl3 = document.getElementById('inspectionBottomBar');
+    if (bottomBarEl3) bottomBarEl3.remove();
     const reportBtnEl = document.getElementById('reportBtn');
     if (reportBtnEl) reportBtnEl.remove();
 
@@ -8034,9 +8053,11 @@ function collectComparables() {
 }
 
 function renderInspection(survey) {
-  // Remove any existing fab buttons from home or other views
+  // Remove any existing fab/bottom bar from home or other views
   const existingFab = document.querySelector('.fab');
   if (existingFab) existingFab.remove();
+  const existingBottomBar = document.getElementById('inspectionBottomBar');
+  if (existingBottomBar) existingBottomBar.remove();
 
   // Migrate old item labels to current template (runs once per survey)
   if (migrateSurveyLabels(survey)) {
@@ -8062,7 +8083,7 @@ function renderInspection(survey) {
       <div style="flex:1;">
         <div class="header-title">${esc(survey.vesselName)}</div>
         <div class="header-subtitle" style="display:flex;align-items:center;gap:8px;">Inspection — ${APP_VERSION}
-            <button onclick="forceAppUpdate()" style="background:none;border:1px solid rgba(255,255,255,0.4);color:rgba(255,255,255,0.8);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;">↻ Update</button>
+            <button onclick="forceAppUpdate()" style="background:none;border:1px solid rgba(255,255,255,0.5);color:rgba(255,255,255,0.9);border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;min-height:32px;">↻ Update</button>
           </div>
       </div>
       <button onclick="regenerateDescriptionFromInspection()" style="background:none;border:1px solid rgba(255,255,255,0.4);color:white;font-size:11px;padding:4px 8px;border-radius:6px;cursor:pointer;margin-right:6px;">✨ Desc</button>
@@ -8269,19 +8290,21 @@ function renderInspection(survey) {
   // Vessel type toggle — always shown so the surveyor can switch at any time
   const currentVesselType = survey.vesselType || '';
   html += `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:10px 12px;background:#f0f7ff;border:1px solid #93c5fd;border-radius:10px;">
-      <span style="font-size:13px;font-weight:700;color:#1e3a5f;">⛵ Vessel Type:</span>
-      <div style="display:flex;gap:0;border:2px solid #1e3a5f;border-radius:8px;overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:8px 12px;">
+      <span style="font-size:13px;font-weight:600;color:#475569;">⛵ Vessel Type:</span>
+      <div style="display:flex;gap:6px;">
         <button onclick="setVesselTypeFromInspection('sail')"
-                style="padding:8px 16px;font-size:13px;font-weight:700;border:none;cursor:pointer;
-                       background:${currentVesselType === 'sail' ? '#1e3a5f' : 'white'};
-                       color:${currentVesselType === 'sail' ? 'white' : '#1e3a5f'};">
+                style="padding:7px 18px;font-size:13px;font-weight:600;border:none;border-radius:20px;cursor:pointer;
+                       transition:background 0.15s,color 0.15s;
+                       background:${currentVesselType === 'sail' ? '#1e3a5f' : '#e2e8f0'};
+                       color:${currentVesselType === 'sail' ? 'white' : '#475569'};">
           Sail
         </button>
         <button onclick="setVesselTypeFromInspection('power')"
-                style="padding:8px 16px;font-size:13px;font-weight:700;border:none;border-left:2px solid #1e3a5f;cursor:pointer;
-                       background:${currentVesselType === 'power' ? '#1e3a5f' : 'white'};
-                       color:${currentVesselType === 'power' ? 'white' : '#1e3a5f'};">
+                style="padding:7px 18px;font-size:13px;font-weight:600;border:none;border-radius:20px;cursor:pointer;
+                       transition:background 0.15s,color 0.15s;
+                       background:${currentVesselType === 'power' ? '#1e3a5f' : '#e2e8f0'};
+                       color:${currentVesselType === 'power' ? 'white' : '#475569'};">
           Power
         </button>
       </div>
@@ -8718,10 +8741,16 @@ function ensureReportButton() {
   const fab = document.querySelector('.fab');
   if (fab) fab.remove();
 
-  // Backup button (left side)
+  // Bottom action bar container
+  const bottomBar = document.createElement('div');
+  bottomBar.id = 'inspectionBottomBar';
+  bottomBar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom, 0px)) 12px;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 -2px 10px rgba(0,0,0,0.1);z-index:100;';
+  document.body.appendChild(bottomBar);
+
+  // Backup button
   const backupBtn = document.createElement('button');
   backupBtn.id = 'backupBtn';
-  backupBtn.style.cssText = 'position:fixed;bottom:calc(20px + env(safe-area-inset-bottom, 0px));left:calc(20px + env(safe-area-inset-left, 0px));background:#16a34a;color:white;border:none;border-radius:28px;padding:12px 18px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:100;cursor:pointer;';
+  backupBtn.style.cssText = 'background:#16a34a;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
   backupBtn.innerHTML = '💾 Backup';
   backupBtn.onclick = async () => {
     // Suppress popstate during backup (share sheet can trigger it on iOS)
@@ -8792,23 +8821,23 @@ function ensureReportButton() {
       }
     }
   };
-  document.body.appendChild(backupBtn);
+  bottomBar.appendChild(backupBtn);
 
-  // Report button (right side)
   // Check Survey button (centre)
   const checkBtn = document.createElement('button');
   checkBtn.id = 'checkSurveyBtn';
-  checkBtn.style.cssText = 'position:fixed;bottom:calc(20px + env(safe-area-inset-bottom, 0px));left:50%;transform:translateX(-50%);background:#d97706;color:white;border:none;border-radius:28px;padding:12px 18px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:100;cursor:pointer;';
-  checkBtn.innerHTML = '✅ Check Survey';
+  checkBtn.style.cssText = 'background:#d97706;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
+  checkBtn.innerHTML = '✅ Check S…';
   checkBtn.onclick = () => checkSurvey();
-  document.body.appendChild(checkBtn);
+  bottomBar.appendChild(checkBtn);
 
+  // Preview Report button (right)
   btn = document.createElement('button');
   btn.id = 'reportBtn';
-  btn.style.cssText = 'position:fixed;bottom:calc(20px + env(safe-area-inset-bottom, 0px));right:calc(20px + env(safe-area-inset-right, 0px));background:#1e3a5f;color:white;border:none;border-radius:28px;padding:12px 18px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:100;cursor:pointer;';
+  btn.style.cssText = 'background:#1e3a5f;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
   btn.innerHTML = '📄 Preview Report';
   btn.onclick = () => generateReport();
-  document.body.appendChild(btn);
+  bottomBar.appendChild(btn);
 }
 
 // ─── Engine Data Migration ────────────────────────────────────────────────
@@ -14353,7 +14382,9 @@ async function backToHome() {
     : 'Return to home screen?';
   const yes = await showConfirm(msg, 'Go Home', 'Stay');
   if (yes) {
-    // Remove report and backup buttons when leaving inspection
+    // Remove bottom action bar when leaving inspection
+    const bottomBar = document.getElementById('inspectionBottomBar');
+    if (bottomBar) bottomBar.remove();
     const reportBtn = document.getElementById('reportBtn');
     if (reportBtn) reportBtn.remove();
     const backupBtn = document.getElementById('backupBtn');
@@ -15737,6 +15768,8 @@ async function initApp() {
       } else if (currentView === 'inspection') {
         // Save data silently and go home (no confirm on back — data is auto-saved)
         saveAllInspectionData().then(() => {
+          const bottomBar = document.getElementById('inspectionBottomBar');
+          if (bottomBar) bottomBar.remove();
           const reportBtn = document.getElementById('reportBtn');
           if (reportBtn) reportBtn.remove();
           const backupBtn = document.getElementById('backupBtn');

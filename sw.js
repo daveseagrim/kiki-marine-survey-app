@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v2089';
+const CACHE_NAME = 'kiki-marine-v2090';
 const URLS_TO_CACHE = [
   './',
   'index.html',
@@ -23,6 +23,13 @@ const URLS_TO_CACHE = [
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js',
 ];
+
+// Listen for SKIP_WAITING message from the app (force-update flow)
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
 
 // Install event - cache essential files (tolerates individual failures
 // so one missing file cannot prevent the service worker from installing)
