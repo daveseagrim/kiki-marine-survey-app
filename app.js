@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2045';
+const APP_VERSION = 'v2046';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1400,6 +1400,40 @@ window.addEventListener('beforeunload', (e) => {
   }
 });
 
+// ── Item label migration map ────────────────────────────────────────────
+// When template labels change (e.g., items get split or renamed), old
+// survey data is stored under the old key.  This map moves data forward
+// so the surveyor doesn't have to re-enter anything.
+// Format: { 'old label': 'new label' }  — or  { 'old label': ['new1', 'new2'] } for splits.
+const ITEM_LABEL_MIGRATIONS = {
+  'Hull and rudder(s)/drive(s) condition (below the waterline)': 'Hull(s) condition (below the waterline)',
+  'Evident damage or repairs to hull and rudder below the waterline': 'Hull(s) condition (below the waterline)',
+  'Hull and rudder(s) (if applicable) percussion testing': 'Hull and rudder(s) (if applicable) impact and resonance testing',
+  'Hull and rudder(s) (if applicable) moisture testing': 'Hull and rudder(s) (if applicable) conductivity testing',
+  'Swim platform and ladder - condition and moisture readings': 'Swim platform and ladder - condition and conductivity readings',
+  'IPS pod drive(s)': 'IPS pod drive(s)',
+};
+
+// Migrate old item labels to current template labels.
+// Runs once per survey open; sets a version flag so it doesn't re-run.
+function migrateSurveyLabels(survey) {
+  if (!survey || !survey.items) return false;
+  const currentVersion = 2045;
+  if (survey._labelVersion >= currentVersion) return false;
+
+  let changed = false;
+  for (const [oldLabel, newLabel] of Object.entries(ITEM_LABEL_MIGRATIONS)) {
+    if (survey.items[oldLabel] && !survey.items[newLabel]) {
+      survey.items[newLabel] = survey.items[oldLabel];
+      delete survey.items[oldLabel];
+      changed = true;
+      console.log(`Migrated item: "${oldLabel}" → "${newLabel}"`);
+    }
+  }
+  survey._labelVersion = currentVersion;
+  return changed;
+}
+
 async function getSurvey(id) {
   // Guard: store.get(undefined|null) throws DataError in Safari. Return null
   // so the 40+ call sites can safely do `const s = await getSurvey(id); if (!s) return;`
@@ -1560,6 +1594,145 @@ async function exportSurvey(surveyId) {
   } catch (err) {
     console.error('Export error:', err);
     showAlert('Export failed: ' + err.message);
+  }
+}
+
+// Export ALL surveys (one at a time) with photos included
+async function exportAllSurveys() {
+  try {
+    const surveys = await getAllSurveys();
+    if (surveys.length === 0) {
+      showAlert('No surveys to export.');
+      return;
+    }
+
+    // Show progress overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'exportAllOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-family:system-ui;';
+    overlay.innerHTML = `
+      <div style="background:#1e293b;border-radius:16px;padding:32px;max-width:90%;width:400px;text-align:center;">
+        <h2 style="margin:0 0 8px;">📦 Exporting Surveys</h2>
+        <p style="color:#94a3b8;margin:0 0 20px;font-size:14px;">Each survey will open the Share sheet so you can save it. Photos are included.</p>
+        <div id="exportAllProgress" style="font-size:18px;font-weight:700;margin-bottom:16px;">0 / ${surveys.length}</div>
+        <div id="exportAllCurrent" style="font-size:14px;color:#60a5fa;margin-bottom:20px;min-height:20px;"></div>
+        <div style="background:#334155;border-radius:8px;height:8px;overflow:hidden;margin-bottom:20px;">
+          <div id="exportAllBar" style="height:100%;background:#3b82f6;width:0%;transition:width 0.3s;"></div>
+        </div>
+        <button id="exportAllCancel" onclick="document.getElementById('exportAllOverlay')?.remove(); window._exportAllCancelled=true;" style="background:#dc2626;color:white;border:none;border-radius:8px;padding:10px 24px;font-size:14px;cursor:pointer;">Cancel</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    window._exportAllCancelled = false;
+
+    let exported = 0;
+    let failed = 0;
+    const failedNames = [];
+
+    for (let i = 0; i < surveys.length; i++) {
+      if (window._exportAllCancelled) break;
+      const survey = surveys[i];
+      const name = survey.vesselName || 'Survey ' + (i + 1);
+
+      // Update progress UI
+      const progressEl = document.getElementById('exportAllProgress');
+      const currentEl = document.getElementById('exportAllCurrent');
+      const barEl = document.getElementById('exportAllBar');
+      if (progressEl) progressEl.textContent = `${i} / ${surveys.length}`;
+      if (currentEl) currentEl.textContent = `Exporting: ${name}...`;
+      if (barEl) barEl.style.width = `${((i) / surveys.length) * 100}%`;
+
+      try {
+        // Gather photos for this survey
+        const photos = await new Promise((resolve) => {
+          const tx = db.transaction(['photos'], 'readonly');
+          const store = tx.objectStore('photos');
+          const index = store.index('surveyId');
+          const range = IDBKeyRange.only(survey.id);
+          const results = [];
+          index.openCursor(range).onsuccess = (event) => {
+            const cursor = event.target.result;
+            if (cursor) {
+              results.push(cursor.value);
+              cursor.continue();
+            } else {
+              resolve(results);
+            }
+          };
+        });
+
+        const exportData = {
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          appVersion: APP_VERSION,
+          survey: survey,
+          photos: photos
+        };
+
+        const json = JSON.stringify(exportData);
+        const vesselName = (survey.vesselName || 'survey').replace(/[^a-zA-Z0-9_-]/g, '_');
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const filename = `${vesselName}_${dateStr}.json`;
+
+        // Use Web Share API on iOS/mobile
+        if (navigator.share && navigator.canShare) {
+          const file = new File([json], filename, { type: 'application/json' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: `Survey: ${name}`,
+              files: [file]
+            });
+            exported++;
+            continue;
+          }
+        }
+
+        // Fallback: auto-download (desktop Chrome)
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        exported++;
+
+        // Small delay between downloads to avoid browser throttling
+        await new Promise(r => setTimeout(r, 500));
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          // User cancelled share sheet — skip this one, keep going
+          continue;
+        }
+        console.error(`Export failed for ${name}:`, err);
+        failed++;
+        failedNames.push(name);
+      }
+    }
+
+    // Final progress update
+    const progressEl = document.getElementById('exportAllProgress');
+    const barEl = document.getElementById('exportAllBar');
+    if (progressEl) progressEl.textContent = `${exported} / ${surveys.length}`;
+    if (barEl) barEl.style.width = '100%';
+
+    // Remove overlay
+    document.getElementById('exportAllOverlay')?.remove();
+
+    // Summary
+    if (window._exportAllCancelled) {
+      showToast(`Export cancelled. ${exported} of ${surveys.length} surveys saved.`);
+    } else if (failed > 0) {
+      showAlert(`Exported ${exported} surveys. ${failed} failed: ${failedNames.join(', ')}`);
+    } else {
+      showToast(`All ${exported} surveys exported with photos! ✓`);
+    }
+  } catch (err) {
+    document.getElementById('exportAllOverlay')?.remove();
+    console.error('Export all error:', err);
+    showAlert('Export all failed: ' + err.message);
   }
 }
 
@@ -4656,9 +4829,10 @@ function renderHome() {
   getAllSurveys().then(surveys => {
     const content = document.getElementById('surveys-content');
 
-    // Import button always visible at top
-    const importBtn = `<div style="text-align:right;margin-bottom:12px;">
-        <button class="btn-secondary" style="font-size:13px;padding:8px 16px;" onclick="importSurvey()">📥 Import Survey</button>
+    // Import and Export All buttons at top
+    const importBtn = `<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px;">
+        <button class="btn-secondary" style="font-size:13px;padding:8px 16px;" onclick="exportAllSurveys()">📦 Export All</button>
+        <button class="btn-secondary" style="font-size:13px;padding:8px 16px;" onclick="importSurvey()">📥 Import</button>
       </div>`;
 
     if (surveys.length === 0) {
@@ -7638,6 +7812,11 @@ function renderInspection(survey) {
   const existingFab = document.querySelector('.fab');
   if (existingFab) existingFab.remove();
 
+  // Migrate old item labels to current template (runs once per survey)
+  if (migrateSurveyLabels(survey)) {
+    saveSurvey(survey);
+  }
+
   const esc = (s) => (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
 
   currentView = 'inspection';
@@ -8388,12 +8567,447 @@ function ensureReportButton() {
   document.body.appendChild(backupBtn);
 
   // Report button (right side)
+  // Check Survey button (centre)
+  const checkBtn = document.createElement('button');
+  checkBtn.id = 'checkSurveyBtn';
+  checkBtn.style.cssText = 'position:fixed;bottom:calc(20px + env(safe-area-inset-bottom, 0px));left:50%;transform:translateX(-50%);background:#d97706;color:white;border:none;border-radius:28px;padding:12px 18px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:100;cursor:pointer;';
+  checkBtn.innerHTML = '✅ Check Survey';
+  checkBtn.onclick = () => checkSurvey();
+  document.body.appendChild(checkBtn);
+
   btn = document.createElement('button');
   btn.id = 'reportBtn';
   btn.style.cssText = 'position:fixed;bottom:calc(20px + env(safe-area-inset-bottom, 0px));right:calc(20px + env(safe-area-inset-right, 0px));background:#1e3a5f;color:white;border:none;border-radius:28px;padding:12px 18px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:100;cursor:pointer;';
   btn.innerHTML = '📄 Preview Report';
   btn.onclick = () => generateReport();
   document.body.appendChild(btn);
+}
+
+// ─── Check Survey — Quality Audit ─────────────────────────────────────────
+async function checkSurvey() {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) { showAlert('No survey loaded.'); return; }
+
+  const issues = [];   // { severity: 'critical'|'warning'|'info', category: string, message: string, itemLabel?: string }
+
+  // Helper: add issue
+  const add = (severity, category, message, itemLabel) => {
+    issues.push({ severity, category, message, itemLabel: itemLabel || null });
+  };
+
+  // ── 1. HEADER FIELDS ────────────────────────────────────────────────────
+  const requiredHeader = [
+    ['vesselName',        'Vessel name'],
+    ['yearMakeModel',     'Year / Make / Model'],
+    ['clientName',        'Client name'],
+    ['surveyDate',        'Survey date'],
+    ['location',          'Survey location'],
+    ['surveyType',        'Survey type'],
+    ['vesselType',        'Vessel type'],
+    ['hinNumber',         'HIN (Hull Identification Number)'],
+    ['reportDate',        'Report date'],
+    ['onLandOrWater',     'On land or in water'],
+    ['powerAtTime',       'Power at time of survey'],
+    ['personsInAttendance', 'Persons in attendance'],
+    ['construction',      'Construction material'],
+    ['electricalSystem',  'Electrical system'],
+  ];
+  const importantHeader = [
+    ['loa',               'LOA (length overall)'],
+    ['beam',              'Beam'],
+    ['maxDraft',          'Maximum draft'],
+    ['displacement',      'Displacement'],
+    ['weather',           'Weather at time of survey'],
+    ['seaTrial',          'Sea trial (yes/no)'],
+    ['numberCabins',      'Number of cabins'],
+    ['boatStyle',         'Boat style'],
+  ];
+
+  for (const [field, label] of requiredHeader) {
+    if (!survey[field] || survey[field].trim() === '' || survey[field] === 'Select') {
+      add('critical', 'Header Fields', `Missing: ${label}`, null);
+    }
+  }
+  for (const [field, label] of importantHeader) {
+    if (!survey[field] || survey[field].trim() === '') {
+      add('warning', 'Header Fields', `Missing: ${label}`, null);
+    }
+  }
+
+  // ── 2. ENGINE & TRANSMISSION ────────────────────────────────────────────
+  if (survey.vesselType !== 'human-powered') {
+    const engineFields = [
+      ['engineMake',    'Engine make'],
+      ['engineModel',   'Engine model'],
+      ['engineSerial',  'Engine serial number'],
+      ['engineHours',   'Engine hours'],
+      ['engineHP',      'Engine horsepower'],
+      ['fuelType',      'Fuel type'],
+    ];
+    for (const [field, label] of engineFields) {
+      if (!survey[field] || survey[field].trim() === '') {
+        add('critical', 'Engine & Transmission', `Missing: ${label}`, null);
+      }
+    }
+    const transFields = [
+      ['transmissionMake',   'Transmission make'],
+      ['transmissionModel',  'Transmission model'],
+      ['transmissionSerial', 'Transmission serial number'],
+    ];
+    for (const [field, label] of transFields) {
+      if (!survey[field] || survey[field].trim() === '') {
+        add('warning', 'Engine & Transmission', `Missing: ${label}`, null);
+      }
+    }
+  }
+
+  // ── 3. DOCUMENTATION PHOTOS ─────────────────────────────────────────────
+  if (!survey.hinPhoto) add('critical', 'Documentation Photos', 'Missing: HIN plate photo', null);
+  if (!survey.compliancePhoto) add('warning', 'Documentation Photos', 'Missing: Compliance plate photo', null);
+  if (!survey.coverPhoto) add('warning', 'Documentation Photos', 'Missing: Cover photo', null);
+  if (!survey.licencePhoto) add('info', 'Documentation Photos', 'Missing: TC licence photo', null);
+
+  // Four-corner photos
+  const cornerFields = ['fourCornerPortBow','fourCornerStbdBow','fourCornerPortStern','fourCornerStbdStern'];
+  const cornerNames  = ['Port bow','Starboard bow','Port stern','Starboard stern'];
+  cornerFields.forEach((f, i) => {
+    if (!survey[f]) add('warning', 'Documentation Photos', `Missing four-corner photo: ${cornerNames[i]}`, null);
+  });
+
+  // Engine / transmission photos
+  const enginePhotoFields = [
+    ['enginePhoto',         'Engine photo'],
+    ['enginePlatePhoto',    'Engine plate photo'],
+    ['transmissionPhoto',   'Transmission photo'],
+    ['transmissionPlatePhoto','Transmission plate photo'],
+  ];
+  if (survey.vesselType !== 'human-powered') {
+    for (const [field, label] of enginePhotoFields) {
+      if (!survey[field]) add('warning', 'Documentation Photos', `Missing: ${label}`, null);
+    }
+  }
+
+  // ── 4. CHECKLIST COMPLETION ─────────────────────────────────────────────
+  const activeTemplate = getTemplateForSurvey(survey);
+  const sailOnlyCategories = ['Spars and rigging', 'Sails'];
+  const isPowerboat = (survey.vesselType || '').toLowerCase() === 'power';
+  const driveType = survey.driveType || '';
+
+  // Same filtering logic as renderInspection
+  const SHAFT_ONLY = ['Cutlass bearing(s)','Propeller shaft(s)','Propeller(s)','Propeller/drive anode(s)','Stern tube(s) (external)','Skeg(s)'];
+  const OUTDRIVE_ONLY = ['Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows'];
+  const SAILDRIVE_ONLY = ['Sail drive(s) - (external), corrosion, propeller(s), anode(s)'];
+  const IPS_ONLY = ['IPS pod drive(s)'];
+
+  function itemApplies(item) {
+    if (isPowerboat && item.sailOnly) return false;
+    if ((survey.vesselType || '').toLowerCase() === 'sail' && item.powerOnly) return false;
+    if (isPowerboat && item.rudderItem && !survey.hasRudder) return false;
+    if (driveType) {
+      if (driveType === 'outdrive' && (SAILDRIVE_ONLY.includes(item.label) || IPS_ONLY.includes(item.label) || SHAFT_ONLY.includes(item.label))) return false;
+      if (driveType === 'saildrive' && (OUTDRIVE_ONLY.includes(item.label) || IPS_ONLY.includes(item.label) || SHAFT_ONLY.includes(item.label))) return false;
+      if (driveType === 'shaft' && (OUTDRIVE_ONLY.includes(item.label) || SAILDRIVE_ONLY.includes(item.label) || IPS_ONLY.includes(item.label))) return false;
+      if (driveType === 'ips' && (OUTDRIVE_ONLY.includes(item.label) || SAILDRIVE_ONLY.includes(item.label) || SHAFT_ONLY.includes(item.label))) return false;
+    }
+    if (item.conditional) {
+      const thruster = survey.items['Bow thruster']?.rating;
+      const sternThr = survey.items['Stern thruster']?.rating;
+      const propane = survey.items['Propane valve, regulator, gauge, storage compartment and vent']?.rating;
+      if (item.conditional === 'bowThruster' && (!thruster || thruster === 'Not applicable')) return false;
+      if (item.conditional === 'sternThruster' && (!sternThr || sternThr === 'Not applicable')) return false;
+      if (item.conditional === 'propane' && (!propane || propane === 'Not applicable')) return false;
+    }
+    return true;
+  }
+
+  // Build full list of applicable rated items (including head/hull/drive expansion)
+  const allRatedItems = [];  // { label, categoryName }
+  activeTemplate.forEach(section => {
+    if (section.name !== 'Kiki Marine Survey' || !section.categories) return;
+    section.categories.forEach(category => {
+      if (isPowerboat && sailOnlyCategories.includes(category.name)) return;
+      if (!category.items) return;
+      const rated = category.items.filter(item => item.type === 'list' && itemApplies(item));
+      rated.forEach(item => {
+        allRatedItems.push({ label: item.label, categoryName: category.name, hullItem: item.hullItem, driveLineItem: item.driveLineItem });
+      });
+    });
+  });
+
+  // Expand heads, hulls, drive lines (mirror renderInspection logic)
+  const expandedItems = [];
+  const headCount = survey.headCount || 1;
+  const hullCount = typeof inferHullCount === 'function' ? inferHullCount(survey) : 1;
+  const driveLineCount = survey.driveLineCount || 1;
+
+  allRatedItems.forEach(item => {
+    // Head expansion
+    if (item.categoryName === 'Head(s)' && headCount > 1) {
+      const shortLabel = item.label.replace(/^Head,\s*/, '');
+      for (let h = 1; h <= headCount; h++) {
+        expandedItems.push({ label: `Head ${h} — ${shortLabel}`, categoryName: item.categoryName });
+      }
+      return;
+    }
+    // Hull expansion
+    if (item.hullItem && hullCount > 1) {
+      const hullLabels = hullCount === 2
+        ? ['Port hull', 'Starboard hull']
+        : ['Port hull', 'Centre hull', 'Starboard hull'];
+      const singularLabel = item.label.replace(/\(s\)/g, '');
+      hullLabels.forEach(prefix => {
+        expandedItems.push({ label: `${prefix} — ${singularLabel}`, categoryName: item.categoryName });
+      });
+      return;
+    }
+    // Drive line expansion
+    if (item.driveLineItem && driveLineCount > 1) {
+      const driveLabels = driveLineCount === 2
+        ? ['Port', 'Starboard']
+        : Array.from({ length: driveLineCount }, (_, i) => `#${i + 1}`);
+      driveLabels.forEach(prefix => {
+        expandedItems.push({ label: `${prefix} — ${item.label}`, categoryName: item.categoryName });
+      });
+      return;
+    }
+    // Singularise hull items for single hull
+    if (item.hullItem && hullCount === 1) {
+      expandedItems.push({ label: item.label.replace(/\(s\)/g, ''), categoryName: item.categoryName });
+      return;
+    }
+    expandedItems.push(item);
+  });
+
+  // Check each expanded item
+  let unratedCount = 0;
+  let missingTextAB = 0;
+
+  expandedItems.forEach(item => {
+    const data = survey.items[item.label];
+    // Skip excluded items
+    if (data && data.excluded) return;
+
+    // Not rated at all
+    if (!data || !data.rating || data.rating === '') {
+      unratedCount++;
+      if (unratedCount <= 20) {  // Cap individual listings
+        add('warning', 'Checklist Completion', `Unrated: ${item.label}`, item.label);
+      }
+      return;
+    }
+
+    const baseRating = data.rating.charAt(0);
+
+    // A or B rating without explanatory text
+    if ((baseRating === 'A' || baseRating === 'B') && (!data.text || data.text.trim() === '')) {
+      missingTextAB++;
+      add('critical', 'Missing Notes', `${data.rating} rated but no notes: ${item.label}`, item.label);
+    }
+
+    // Check for unreplaced [describe area(s)] placeholder
+    if (data.text && data.text.includes('[describe area(s)]')) {
+      add('critical', 'Unreplaced Placeholders', `Contains [describe area(s)]: ${item.label}`, item.label);
+    }
+
+    // Check for other common placeholder patterns
+    if (data.text) {
+      const placeholderPatterns = [
+        /\{specify:[^}]*\}/,
+        /\{any:[^}]*\}/,
+        /\[describe[^\]]*\]/i,
+        /\[specify[^\]]*\]/i,
+        /\[insert[^\]]*\]/i,
+      ];
+      for (const pat of placeholderPatterns) {
+        if (pat.test(data.text)) {
+          add('warning', 'Unreplaced Placeholders', `Contains unfilled placeholder in: ${item.label}`, item.label);
+          break;
+        }
+      }
+    }
+
+    // B-rated items should ideally have a recommendation
+    if (baseRating === 'B' && data.text && !(/recommend|should|advise|suggest|replace|repair|service|address|correct|attention/i.test(data.text))) {
+      add('info', 'Thoroughness', `B-rated but no clear recommendation: ${item.label}`, item.label);
+    }
+
+    // A-rated (safety) items should reference a standard
+    if (baseRating === 'A' && (!data.standards || data.standards.length === 0)) {
+      add('info', 'Thoroughness', `Safety item without a standard reference: ${item.label}`, item.label);
+    }
+  });
+
+  // Summary for large unrated counts
+  if (unratedCount > 20) {
+    add('warning', 'Checklist Completion', `...and ${unratedCount - 20} more unrated items (${unratedCount} total)`, null);
+  }
+
+  // ── 5. VALUATION ────────────────────────────────────────────────────────
+  if (!survey.valuationLow && !survey.valuationHigh) {
+    add('critical', 'Valuation', 'Missing: Fair market value (low and high)', null);
+  } else {
+    if (!survey.valuationLow) add('warning', 'Valuation', 'Missing: Low value estimate', null);
+    if (!survey.valuationHigh) add('warning', 'Valuation', 'Missing: High value estimate', null);
+  }
+  if (!survey.overallCondition) add('critical', 'Valuation', 'Missing: Overall condition rating (BUC grade)', null);
+  if (!survey.valuationRationale && !survey.valuationSource) {
+    add('warning', 'Valuation', 'Missing: Valuation rationale or source', null);
+  }
+  if ((!survey.comparables || survey.comparables.length === 0) || survey.comparables.every(c => !c.vessel)) {
+    add('warning', 'Valuation', 'No comparable vessels entered', null);
+  }
+  if (!survey.replacementCost) add('info', 'Valuation', 'Missing: Replacement cost estimate', null);
+
+  // ── 6. SAFETY EQUIPMENT ─────────────────────────────────────────────────
+  if (!survey.safetyEquipment || survey.safetyEquipment.length === 0) {
+    add('critical', 'Safety Equipment', 'TC TP 511 safety equipment checklist not configured', null);
+  } else {
+    const checked = survey.safetyEquipment.filter(e => e.checked).length;
+    const total = survey.safetyEquipment.length;
+    if (checked === 0) {
+      add('critical', 'Safety Equipment', `No safety equipment verified (0 of ${total})`, null);
+    } else if (checked < total) {
+      const missing = survey.safetyEquipment.filter(e => !e.checked).map(e => e.name);
+      add('warning', 'Safety Equipment', `${checked} of ${total} verified. Missing: ${missing.slice(0, 3).join(', ')}${missing.length > 3 ? ` (+${missing.length - 3} more)` : ''}`, null);
+    }
+  }
+
+  // ── 7. INSTRUMENTS & ELECTRONICS ────────────────────────────────────────
+  if (!survey.instrumentsElectronics || survey.instrumentsElectronics.length === 0) {
+    add('warning', 'Instruments & Electronics', 'No instruments or electronics listed', null);
+  }
+
+  // ── 8. VESSEL DESCRIPTION ───────────────────────────────────────────────
+  if (!survey.vesselDescription || survey.vesselDescription.trim().length < 20) {
+    add('warning', 'Vessel Description', 'Vessel description is missing or too short', null);
+  }
+
+  // ── 9. TC LICENCE ───────────────────────────────────────────────────────
+  if (!survey.tcLicense) add('info', 'Documentation', 'Missing: TC licence / registration number', null);
+  if (!survey.tcLicenseType) add('info', 'Documentation', 'Missing: TC licence type', null);
+
+  // ── 10. GRAMMAR / SPELLING SPOT-CHECKS ──────────────────────────────────
+  // Check freeform text in items for common issues
+  const textIssues = [];
+  for (const [label, data] of Object.entries(survey.items || {})) {
+    if (!data || !data.text || data.text.trim() === '') continue;
+    const t = data.text;
+
+    // Double spaces
+    if (/  +/.test(t)) textIssues.push({ label, issue: 'Double spaces' });
+
+    // Missing period at end of sentence (if text is >20 chars and doesn't end with punctuation)
+    if (t.length > 20 && !/[.!?:;]$/.test(t.trim())) textIssues.push({ label, issue: 'Does not end with punctuation' });
+
+    // American spelling (common catches)
+    const americanisms = [
+      [/\bfiberglass\b/i, 'fiberglass → fibreglass'],
+      [/\bcolor\b/i, 'color → colour'],
+      [/\bcenter\b/i, 'center → centre'],
+      [/\banalyze\b/i, 'analyze → analyse'],
+      [/\bgalvanize\b/i, 'galvanize → galvanise'],
+      [/\bmold\b/i, 'mold → mould'],
+      [/\bgray\b/i, 'gray → grey'],
+      [/\blicense\b/i, 'license → licence (noun)'],
+    ];
+    for (const [pat, fix] of americanisms) {
+      if (pat.test(t)) textIssues.push({ label, issue: `Canadian spelling: ${fix}` });
+    }
+
+    // Sentence starting with lowercase after period
+    if (/\.\s+[a-z]/.test(t)) textIssues.push({ label, issue: 'Sentence starts with lowercase' });
+  }
+
+  textIssues.forEach(ti => {
+    add('info', 'Grammar & Spelling', `${ti.issue}: ${ti.label}`, ti.label);
+  });
+
+  // ── BUILD RESULTS UI ────────────────────────────────────────────────────
+  const criticalCount = issues.filter(i => i.severity === 'critical').length;
+  const warningCount = issues.filter(i => i.severity === 'warning').length;
+  const infoCount = issues.filter(i => i.severity === 'info').length;
+
+  // Group by category
+  const grouped = {};
+  issues.forEach(issue => {
+    if (!grouped[issue.category]) grouped[issue.category] = [];
+    grouped[issue.category].push(issue);
+  });
+
+  // Severity colours and icons
+  const sevIcon = { critical: '🔴', warning: '🟡', info: '🔵' };
+  const sevBg = { critical: '#fef2f2', warning: '#fffbeb', info: '#eff6ff' };
+  const sevBorder = { critical: '#fca5a5', warning: '#fcd34d', info: '#93c5fd' };
+
+  // Score calculation
+  const totalChecks = expandedItems.filter(i => { const d = survey.items[i.label]; return !d?.excluded; }).length;
+  const ratedCount = expandedItems.filter(i => { const d = survey.items[i.label]; return d && !d.excluded && d.rating; }).length;
+  const completionPct = totalChecks > 0 ? Math.round((ratedCount / totalChecks) * 100) : 0;
+
+  // Overall readiness
+  let readiness, readinessBg;
+  if (criticalCount === 0 && warningCount <= 3) {
+    readiness = 'Ready for Report'; readinessBg = '#16a34a';
+  } else if (criticalCount <= 3) {
+    readiness = 'Nearly Ready'; readinessBg = '#d97706';
+  } else {
+    readiness = 'Needs Work'; readinessBg = '#dc2626';
+  }
+
+  let html = `
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="display:inline-block;background:${readinessBg};color:white;padding:8px 20px;border-radius:20px;font-weight:700;font-size:16px;margin-bottom:8px;">${readiness}</div>
+      <div style="font-size:13px;color:#64748b;">
+        ${completionPct}% rated (${ratedCount}/${totalChecks}) &nbsp;|&nbsp;
+        ${sevIcon.critical} ${criticalCount} &nbsp; ${sevIcon.warning} ${warningCount} &nbsp; ${sevIcon.info} ${infoCount}
+      </div>
+    </div>
+  `;
+
+  if (issues.length === 0) {
+    html += '<div style="text-align:center;padding:20px;color:#16a34a;font-weight:600;">All checks passed! Survey looks complete.</div>';
+  } else {
+    for (const [category, catIssues] of Object.entries(grouped)) {
+      const worstSev = catIssues.find(i => i.severity === 'critical') ? 'critical'
+        : catIssues.find(i => i.severity === 'warning') ? 'warning' : 'info';
+      html += `
+        <div style="margin-bottom:12px;">
+          <div style="font-weight:700;font-size:14px;color:#1e293b;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+            ${sevIcon[worstSev]} ${category} <span style="font-weight:400;color:#94a3b8;font-size:12px;">(${catIssues.length})</span>
+          </div>
+      `;
+      catIssues.forEach(issue => {
+        const safeLabel = issue.itemLabel ? issue.itemLabel.replace(/[^a-zA-Z0-9]/g, '_') : '';
+        const tapAction = issue.itemLabel
+          ? `onclick="document.getElementById('checkSurveyOverlay')?.remove(); setTimeout(() => { const el = document.getElementById('item_${safeLabel}'); if(el) { el.scrollIntoView({behavior:'smooth',block:'center'}); el.style.transition='background 0.3s'; el.style.background='#fef3c7'; setTimeout(()=>el.style.background='',2000); } }, 100);"`
+          : '';
+        html += `
+          <div ${tapAction} style="background:${sevBg[issue.severity]};border:1px solid ${sevBorder[issue.severity]};border-radius:8px;padding:8px 10px;margin-bottom:4px;font-size:13px;line-height:1.4;${issue.itemLabel ? 'cursor:pointer;' : ''}">
+            ${issue.message}
+          </div>
+        `;
+      });
+      html += '</div>';
+    }
+  }
+
+  // ── DISPLAY OVERLAY ─────────────────────────────────────────────────────
+  const existing = document.getElementById('checkSurveyOverlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'checkSurveyOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;flex-direction:column;justify-content:flex-end;';
+  overlay.innerHTML = `
+    <div onclick="event.stopPropagation();" style="background:white;border-radius:16px 16px 0 0;max-height:80vh;overflow-y:auto;padding:20px 16px calc(20px + env(safe-area-inset-bottom, 0px)) 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.2);">
+      <div style="width:40px;height:4px;background:#d1d5db;border-radius:2px;margin:0 auto 12px;"></div>
+      <h2 style="margin:0 0 12px;font-size:18px;text-align:center;">Survey Quality Check</h2>
+      ${html}
+      <button onclick="document.getElementById('checkSurveyOverlay')?.remove();" style="width:100%;padding:14px;background:#1e3a5f;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin-top:12px;">Close</button>
+    </div>
+  `;
+  overlay.addEventListener('click', () => overlay.remove());
+  document.body.appendChild(overlay);
 }
 
 // Save comparables from the inspection view
@@ -12371,6 +12985,9 @@ async function generateReport() {
   try {
   const survey = await getSurvey(currentSurveyId);
   if (!survey) return;
+
+  // Migrate old item labels before generating report
+  if (migrateSurveyLabels(survey)) await saveSurvey(survey);
 
   const activeTemplate = getTemplateForSurvey(survey);
   const esc = (s) => (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
