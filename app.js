@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2028';
+const APP_VERSION = 'v2029';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3664,6 +3664,54 @@ function lowercaseMidSentence(phrase) {
   return firstWord.charAt(0).toLowerCase() + firstWord.slice(1) + rest;
 }
 
+// Walk through a sentence and downcase any word that is capitalized mid-
+// sentence (i.e. not the very first word and not immediately following
+// terminal punctuation). Preserves acronyms (ALL-CAPS, length >= 2) and
+// whitelisted proper nouns. Fixes iOS auto-cap artifacts like
+// "And that is That." → "And that is that." and
+// "the port propeller had Damage." → "the port propeller had damage."
+function cleanMidSentenceCaps(text) {
+  const s = String(text || '');
+  if (!s) return s;
+  // Flag whether we are currently at the "start of a sentence" position.
+  // Starts true so the first word is allowed to be capitalized.
+  let atSentenceStart = true;
+  let out = '';
+  let i = 0;
+  while (i < s.length) {
+    const ch = s[i];
+    // Word run
+    if (/[A-Za-z]/.test(ch)) {
+      let j = i;
+      while (j < s.length && /[A-Za-z']/.test(s[j])) j++;
+      const word = s.slice(i, j);
+      // Only consider downcasing if the first char is uppercase and word
+      // contains at least one lowercase letter (i.e. Titlecase — not an
+      // ALL-CAPS acronym).
+      const isTitle = /^[A-Z][a-z]/.test(word);
+      if (isTitle && !atSentenceStart && !PROPER_NOUN_WHITELIST.has(word.toLowerCase())) {
+        out += word.charAt(0).toLowerCase() + word.slice(1);
+      } else {
+        out += word;
+      }
+      atSentenceStart = false;
+      i = j;
+      continue;
+    }
+    // Terminal punctuation resets sentence-start flag.
+    if (ch === '.' || ch === '!' || ch === '?') {
+      out += ch;
+      atSentenceStart = true;
+      i++;
+      continue;
+    }
+    // Whitespace and other punctuation: keep the current state.
+    out += ch;
+    i++;
+  }
+  return out;
+}
+
 // Prepend "a " or "an " to a noun phrase, choosing the article based on the
 // first sounded letter. Handles a few common irregulars (honest, hour) and
 // avoids double-prefixing if the label already starts with "a " or "an ".
@@ -4055,6 +4103,9 @@ function applyBuilderState(strip) {
     if (!/[.!?]$/.test(sentence)) sentence += '.';
     // Capitalize first letter for a clean sentence break.
     sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
+    // Strip iOS mid-sentence auto-capitalization artifacts (e.g. "...is
+    // That." → "...is that.") while preserving acronyms and proper nouns.
+    sentence = cleanMidSentenceCaps(sentence);
     const stdIdx = text.indexOf('{standards?');
     if (stdIdx >= 0) {
       // Insert before the standards token (with a leading space).
