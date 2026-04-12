@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2071';
+const APP_VERSION = 'v2072';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9216,7 +9216,8 @@ async function checkSurvey() {
 
   const criticalCount = issues.filter(i => i.severity === 'critical').length;
   const warningCount = issues.filter(i => i.severity === 'warning').length;
-  const infoCount = issues.filter(i => i.severity === 'info').length;
+  const skippedCount = issues.filter(i => i.category === 'Skipped Items').length;
+  const infoCount = issues.filter(i => i.severity === 'info').length - skippedCount;
 
   // Score calculation
   const totalChecks = expandedItems.filter(i => { const d = survey.items[i.label]; return !d?.excluded; }).length;
@@ -9312,11 +9313,13 @@ async function checkSurvey() {
 
   const currentIssueMessages = new Set(issues.map(i => i.message));
   let resolvedChanged = false;
+  const newlyAutoResolved = [];
   for (const prevMsg of prevIssueMessages) {
     // If it was an issue before but isn't now, and isn't already tracked, mark as resolved
     if (!currentIssueMessages.has(prevMsg) && !resolvedState[prevMsg] && !forceOKState[prevMsg]) {
       resolvedState[prevMsg] = { fixedAt: Date.now(), auto: true, _surveyOrder: surveyOrderByMessage[prevMsg] ?? 9999 };
       resolvedChanged = true;
+      newlyAutoResolved.push(prevMsg);
     }
   }
   if (resolvedChanged) {
@@ -9377,11 +9380,15 @@ async function checkSurvey() {
 
   // ── Group active items by severity for section headers ─────────────
   // Items that are reviewed (checked off) move to the Resolved section
+  // Skipped items get their own collapsible section
   const sections = [];
+  const skippedItems = [];
   let currentSev = null;
   activeItems.forEach(item => {
     // Skip reviewed items — they'll appear in the Resolved section
     if (reviewedState[item._checkId]) return;
+    // Separate skipped items into their own section
+    if (item.category === 'Skipped Items') { skippedItems.push(item); return; }
     if (item.severity !== currentSev) {
       currentSev = item.severity;
       sections.push({ severity: currentSev, items: [] });
@@ -9415,9 +9422,38 @@ async function checkSurvey() {
         ${completionPct}% rated (${ratedCount}/${totalChecks}) &nbsp;|&nbsp;
         ${sevIcon.critical} ${criticalCount} &nbsp; ${sevIcon.warning} ${warningCount} &nbsp; ${sevIcon.info} ${infoCount} &nbsp; ${sevIcon.proofread} ${proofreadItems.length}
       </div>
-      <div style="font-size:12px;color:#94a3b8;margin-top:4px;">✅ ${resolvedItems.length} / ${allCheckItems.length} resolved${resolvedItems.length > 0 ? ` &nbsp;|&nbsp; <span style="color:#16a34a;">${resolvedItems.length} in OK section</span>` : ''}</div>
+      <div style="font-size:12px;color:#94a3b8;margin-top:4px;">
+        ✅ ${resolvedItems.length} resolved${skippedItems.length > 0 ? ` &nbsp;|&nbsp; ⊘ ${skippedItems.length} skipped` : ''}
+      </div>
     </div>
   `;
+
+  // ── "Just resolved" confirmation banner ─────────────────────────────
+  // Shows when returning from a Go → Fix → Back flow, or when auto-detect finds fixes
+  const justResolved = window._csJustResolved || null;
+  const allNewlyResolved = [...newlyAutoResolved];
+  if (justResolved && !allNewlyResolved.includes(justResolved)) {
+    allNewlyResolved.unshift(justResolved);
+  }
+  window._csJustResolved = null; // clear flag
+
+  if (allNewlyResolved.length > 0) {
+    const itemList = allNewlyResolved.map(m => {
+      const short = m.length > 50 ? m.substring(0, 50) + '…' : m;
+      return short.replace(/</g, '&lt;');
+    }).join('<br>');
+    html += `
+      <div id="cs-resolved-banner" style="background:#f0fdf4;border:2px solid #16a34a;border-radius:10px;padding:12px 14px;margin-bottom:14px;animation:csFadeSlide 0.4s ease;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:20px;">✅</span>
+          <span style="font-weight:700;font-size:14px;color:#166534;">Moved to Resolved</span>
+        </div>
+        <div style="font-size:12px;color:#15803d;line-height:1.6;padding-left:28px;">${itemList}</div>
+        <div style="font-size:11px;color:#86efac;margin-top:6px;padding-left:28px;">Scroll down to the ✅ Resolved section to see it.</div>
+      </div>
+      <style>@keyframes csFadeSlide { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }</style>
+    `;
+  }
 
   if (allCheckItems.length === 0) {
     html += '<div style="text-align:center;padding:20px;color:#16a34a;font-weight:600;">All checks passed! Survey looks complete.</div>';
@@ -9506,6 +9542,36 @@ async function checkSurvey() {
 
     html += '</div>';
   });
+
+  // ── SKIPPED section (collapsible, like Resolved) ────────────────────────
+  if (skippedItems.length > 0) {
+    html += `
+      <div style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:2px solid #cbd5e1;margin-bottom:8px;cursor:pointer;user-select:none;"
+             onclick="(function(){var l=document.getElementById('cs-skipped-list');var c=document.getElementById('cs-skipped-caret');if(!l||!c)return;var open=l.style.display!=='none';l.style.display=open?'none':'block';c.textContent=open?'▸':'▾';})()">
+          <div style="font-weight:700;font-size:15px;color:#64748b;display:flex;align-items:center;gap:6px;">
+            ⊘ Skipped <span style="font-weight:400;color:#94a3b8;font-size:12px;">(${skippedItems.length})</span>
+          </div>
+          <span id="cs-skipped-caret" style="color:#94a3b8;font-size:16px;">▸</span>
+        </div>
+        <div id="cs-skipped-list" style="display:none;">
+    `;
+    skippedItems.forEach(item => {
+      const idx = allCheckItems.indexOf(item);
+      const hasTappableItem = !!(item.itemLabel || item.navId);
+      const displayText = (item.itemLabel || item.message || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      html += `
+        <div style="margin-bottom:3px;">
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" ${reviewedState[item._checkId] ? 'checked' : ''} onchange="window._csToggleReviewed('${item._checkId}', this.checked)"
+                   style="flex-shrink:0;width:16px;height:16px;accent-color:#1e3a5f;cursor:pointer;" />
+            <div style="flex:1;min-width:0;font-size:12px;color:#64748b;">${displayText}</div>
+            ${hasTappableItem ? `<button onclick="window._csGoToItem(${idx});event.stopPropagation();" style="flex-shrink:0;background:#94a3b8;color:white;border:none;border-radius:6px;padding:3px 7px;font-size:10px;cursor:pointer;">Go ➜</button>` : ''}
+          </div>
+        </div>`;
+    });
+    html += '</div></div>';
+  }
 
   // ── RESOLVED section ─────────────────────────────────────────────────────
   // Includes: auto-resolved (fixed), force-OK'd, reviewed (checked off), and proofread items
@@ -9802,8 +9868,8 @@ async function _csEvaluateAndReturn(scrollPos) {
     resolved[working.message] = { fixedAt: Date.now(), itemLabel: working.itemLabel, _surveyOrder: working._surveyOrder ?? 9999 };
     sessionStorage.setItem(resolvedKey, JSON.stringify(resolved));
 
-    // Show success toast
-    showToast('✅ Fixed: ' + (working.itemLabel || working.message));
+    // Store the resolved item name so the UI can show a confirmation banner
+    window._csJustResolved = working.itemLabel || working.message;
     window._csWorkingOn = null;
 
     // Reopen Check Survey
