@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2057';
+const APP_VERSION = 'v2058';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9047,22 +9047,19 @@ async function checkSurvey() {
     add('info', 'Grammar & Spelling', `${ti.issue}: ${ti.label}`, ti.label);
   });
 
-  // ── BUILD RESULTS UI ────────────────────────────────────────────────────
+  // ── BUILD RESULTS UI — Severity-ordered with checkboxes & inline content ──
+
+  // Severity config
+  const sevOrder = { critical: 0, warning: 1, info: 2, proofread: 3 };
+  const sevIcon = { critical: '🔴', warning: '🟡', info: '🔵', proofread: '📖' };
+  const sevBg = { critical: '#fef2f2', warning: '#fffbeb', info: '#eff6ff', proofread: '#f8fafc' };
+  const sevBorder = { critical: '#fca5a5', warning: '#fcd34d', info: '#93c5fd', proofread: '#e2e8f0' };
+  const sevLabel = { critical: 'Critical', warning: 'Warning', info: 'Info', proofread: 'Proofread' };
+  const ratingColors = { A: '#dc2626', B: '#d97706', C: '#16a34a', N: '#6b7280', S: '#dc2626' };
+
   const criticalCount = issues.filter(i => i.severity === 'critical').length;
   const warningCount = issues.filter(i => i.severity === 'warning').length;
   const infoCount = issues.filter(i => i.severity === 'info').length;
-
-  // Group by category
-  const grouped = {};
-  issues.forEach(issue => {
-    if (!grouped[issue.category]) grouped[issue.category] = [];
-    grouped[issue.category].push(issue);
-  });
-
-  // Severity colours and icons
-  const sevIcon = { critical: '🔴', warning: '🟡', info: '🔵' };
-  const sevBg = { critical: '#fef2f2', warning: '#fffbeb', info: '#eff6ff' };
-  const sevBorder = { critical: '#fca5a5', warning: '#fcd34d', info: '#93c5fd' };
 
   // Score calculation
   const totalChecks = expandedItems.filter(i => { const d = survey.items[i.label]; return !d?.excluded; }).length;
@@ -9079,119 +9076,234 @@ async function checkSurvey() {
     readiness = 'Needs Work'; readinessBg = '#dc2626';
   }
 
+  // ── Build proofread items (rated items without issues) ──────────────
+  const proofreadItems = [];
+  expandedItems.forEach(item => {
+    const data = survey.items[item.label];
+    if (!data || data.excluded || !data.rating) return;
+    const hasIssue = issues.some(i => i.itemLabel === item.label);
+    if (!hasIssue) {
+      proofreadItems.push({
+        severity: 'proofread',
+        category: item.categoryName,
+        message: item.label,
+        itemLabel: item.label,
+        rating: data.rating,
+        text: (data.text || '').trim(),
+        photoCount: (data.photos || []).length,
+        standards: data.standards || [],
+      });
+    }
+  });
+
+  // ── Merge all items into a single flat list sorted by severity ──────
+  // Add inline data to issues that reference checklist items
+  const allCheckItems = issues.map(issue => {
+    const out = { ...issue };
+    if (issue.itemLabel) {
+      const data = survey.items[issue.itemLabel];
+      if (data) {
+        out.rating = data.rating || '';
+        out.text = (data.text || '').trim();
+        out.photoCount = (data.photos || []).length;
+        out.standards = data.standards || [];
+      }
+    }
+    return out;
+  }).concat(proofreadItems);
+
+  // Sort: severity order, then alphabetically within each severity
+  allCheckItems.sort((a, b) => {
+    const sa = sevOrder[a.severity] ?? 9;
+    const sb = sevOrder[b.severity] ?? 9;
+    if (sa !== sb) return sa - sb;
+    return (a.message || '').localeCompare(b.message || '');
+  });
+
+  // ── Load/initialize reviewed-checkbox state from sessionStorage ─────
+  const checkStateKey = `checkSurvey_reviewed_${currentSurveyId}`;
+  let reviewedState = {};
+  try { reviewedState = JSON.parse(sessionStorage.getItem(checkStateKey) || '{}'); } catch(e) {}
+
+  // ── Assign stable IDs to each item for checkbox tracking ───────────
+  allCheckItems.forEach((item, idx) => {
+    item._checkId = `chk_${idx}_${(item.itemLabel || item.message || '').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 40)}`;
+  });
+
+  // Count reviewed items
+  const reviewedCount = allCheckItems.filter(it => reviewedState[it._checkId]).length;
+
+  // ── Group by severity for section headers ──────────────────────────
+  const sections = [];
+  let currentSev = null;
+  allCheckItems.forEach(item => {
+    if (item.severity !== currentSev) {
+      currentSev = item.severity;
+      sections.push({ severity: currentSev, items: [] });
+    }
+    sections[sections.length - 1].items.push(item);
+  });
+
+  // ── Build HTML ─────────────────────────────────────────────────────
   let html = `
     <div style="text-align:center;margin-bottom:16px;">
       <div style="display:inline-block;background:${readinessBg};color:white;padding:8px 20px;border-radius:20px;font-weight:700;font-size:16px;margin-bottom:8px;">${readiness}</div>
       <div style="font-size:13px;color:#64748b;">
         ${completionPct}% rated (${ratedCount}/${totalChecks}) &nbsp;|&nbsp;
-        ${sevIcon.critical} ${criticalCount} &nbsp; ${sevIcon.warning} ${warningCount} &nbsp; ${sevIcon.info} ${infoCount}
+        ${sevIcon.critical} ${criticalCount} &nbsp; ${sevIcon.warning} ${warningCount} &nbsp; ${sevIcon.info} ${infoCount} &nbsp; ${sevIcon.proofread} ${proofreadItems.length}
       </div>
+      <div style="font-size:12px;color:#94a3b8;margin-top:4px;">✅ ${reviewedCount} / ${allCheckItems.length} reviewed</div>
     </div>
   `;
 
-  // ── Helper: build a tappable issue row ─────────────────────────────
-  function issueRow(issue) {
-    const safeLabel = issue.itemLabel ? issue.itemLabel.replace(/[^a-zA-Z0-9]/g, '_') : '';
-    const tapAction = issue.itemLabel
-      ? `onclick="document.getElementById('checkSurveyOverlay')?.remove(); setTimeout(() => { const el = document.getElementById('item_${safeLabel}'); if(el) { el.scrollIntoView({behavior:'smooth',block:'center'}); el.style.transition='background 0.3s'; el.style.background='#fef3c7'; setTimeout(()=>el.style.background='',2000); } }, 100);"`
-      : '';
-    return `<div ${tapAction} style="background:${sevBg[issue.severity]};border:1px solid ${sevBorder[issue.severity]};border-radius:8px;padding:8px 10px;margin-bottom:4px;font-size:13px;line-height:1.4;${issue.itemLabel ? 'cursor:pointer;' : ''}">${issue.message}</div>`;
-  }
-
-  if (issues.length === 0) {
+  if (allCheckItems.length === 0) {
     html += '<div style="text-align:center;padding:20px;color:#16a34a;font-weight:600;">All checks passed! Survey looks complete.</div>';
-  } else {
-    for (const [category, catIssues] of Object.entries(grouped)) {
-      const worstSev = catIssues.find(i => i.severity === 'critical') ? 'critical'
-        : catIssues.find(i => i.severity === 'warning') ? 'warning' : 'info';
-      html += `
-        <div style="margin-bottom:12px;">
-          <div style="font-weight:700;font-size:14px;color:#1e293b;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
-            ${sevIcon[worstSev]} ${category} <span style="font-weight:400;color:#94a3b8;font-size:12px;">(${catIssues.length})</span>
-          </div>
-      `;
-      catIssues.forEach(issue => { html += issueRow(issue); });
-      html += '</div>';
-    }
   }
 
-  // ── 11. PROOFREAD — every rated item for manual review ──────────────
-  // Build a tappable list of all rated items grouped by category so Dave
-  // can walk through each one, verify the text, and confirm it reads well.
-  const proofreadByCategory = {};
-  expandedItems.forEach(item => {
-    const data = survey.items[item.label];
-    if (!data || data.excluded || !data.rating) return;
-    if (!proofreadByCategory[item.categoryName]) proofreadByCategory[item.categoryName] = [];
-    // Check if this item has any issues already flagged
-    const itemIssues = issues.filter(i => i.itemLabel === item.label);
-    proofreadByCategory[item.categoryName].push({
-      label: item.label,
-      rating: data.rating,
-      text: (data.text || '').trim(),
-      hasIssues: itemIssues.length > 0,
-      worstSeverity: itemIssues.find(i => i.severity === 'critical') ? 'critical'
-        : itemIssues.find(i => i.severity === 'warning') ? 'warning'
-        : itemIssues.length > 0 ? 'info' : null,
-    });
-  });
+  sections.forEach(section => {
+    const sev = section.severity;
+    const secReviewed = section.items.filter(it => reviewedState[it._checkId]).length;
 
-  html += `
-    <div style="margin-top:16px;border-top:2px solid #e5e7eb;padding-top:12px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer;user-select:none;" onclick="(function(){var l=document.getElementById('proofread-list');var c=document.getElementById('proofread-caret');if(!l||!c)return;var open=l.style.display!=='none';l.style.display=open?'none':'block';c.textContent=open?'▸':'▾';})()">
-        <div style="font-weight:700;font-size:16px;color:#1e293b;display:flex;align-items:center;gap:6px;">
-          📖 Proofread All Items <span style="font-weight:400;color:#94a3b8;font-size:12px;">(${Object.values(proofreadByCategory).flat().length} items)</span>
-        </div>
-        <span id="proofread-caret" style="color:#9ca3af;font-size:16px;">▸</span>
-      </div>
-      <div style="font-size:12px;color:#64748b;margin-bottom:8px;">Tap any item to jump to it and review. Items with issues are highlighted.</div>
-      <div id="proofread-list" style="display:none;">
-  `;
-
-  const ratingColors = { A: '#dc2626', B: '#d97706', C: '#16a34a', N: '#6b7280', S: '#dc2626' };
-
-  for (const [catName, items] of Object.entries(proofreadByCategory)) {
-    html += `<div style="margin-bottom:10px;">
-      <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:4px;padding:4px 0;border-bottom:1px solid #f1f5f9;">${catName}</div>`;
-    items.forEach(item => {
-      const safeLabel = item.label.replace(/[^a-zA-Z0-9]/g, '_');
-      const ratingChar = item.rating.charAt(0);
-      const rColor = ratingColors[ratingChar] || '#6b7280';
-      const bgColor = item.hasIssues ? (sevBg[item.worstSeverity] || '#fff') : '#fff';
-      const borderColor = item.hasIssues ? (sevBorder[item.worstSeverity] || '#e5e7eb') : '#e5e7eb';
-      const issueIcon = item.hasIssues ? sevIcon[item.worstSeverity] + ' ' : '';
-      const preview = item.text ? (item.text.length > 60 ? item.text.substring(0, 60) + '…' : item.text) : '<em style="color:#9ca3af;">no notes</em>';
-      html += `
-        <div onclick="document.getElementById('checkSurveyOverlay')?.remove(); setTimeout(() => { const el = document.getElementById('item_${safeLabel}'); if(el) { el.scrollIntoView({behavior:'smooth',block:'center'}); el.style.transition='background 0.3s'; el.style.background='#fef3c7'; setTimeout(()=>el.style.background='',2000); } }, 100);"
-             style="background:${bgColor};border:1px solid ${borderColor};border-radius:6px;padding:6px 10px;margin-bottom:3px;cursor:pointer;display:flex;align-items:flex-start;gap:8px;">
-          <span style="flex-shrink:0;font-size:10px;font-weight:700;color:white;background:${rColor};padding:2px 6px;border-radius:4px;margin-top:1px;">${ratingChar}</span>
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:12px;font-weight:600;color:#1e293b;">${issueIcon}${item.label}</div>
-            <div style="font-size:11px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${preview}</div>
+    html += `
+      <div style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:2px solid ${sevBorder[sev]};margin-bottom:8px;">
+          <div style="font-weight:700;font-size:15px;color:#1e293b;display:flex;align-items:center;gap:6px;">
+            ${sevIcon[sev]} ${sevLabel[sev]} <span style="font-weight:400;color:#94a3b8;font-size:12px;">(${section.items.length})</span>
           </div>
+          <span style="font-size:11px;color:#94a3b8;">${secReviewed}/${section.items.length} reviewed</span>
+        </div>
+    `;
+
+    section.items.forEach(item => {
+      const safeLabel = item.itemLabel ? item.itemLabel.replace(/[^a-zA-Z0-9]/g, '_') : '';
+      const isReviewed = !!reviewedState[item._checkId];
+      const ratingChar = item.rating ? item.rating.charAt(0) : '';
+      const rColor = ratingColors[ratingChar] || '#6b7280';
+      const hasTappableItem = !!item.itemLabel;
+      const hasContent = !!(item.text || item.rating);
+
+      // Rating badge
+      const ratingBadge = ratingChar
+        ? `<span style="flex-shrink:0;font-size:10px;font-weight:700;color:white;background:${rColor};padding:2px 6px;border-radius:4px;">${ratingChar}</span>`
+        : '';
+
+      // Inline content (expandable)
+      let inlineContent = '';
+      if (hasContent) {
+        const textPreview = item.text || '<em style="color:#9ca3af;">no notes</em>';
+        const photoInfo = item.photoCount ? `<span style="color:#3b82f6;">📷 ${item.photoCount}</span>` : '';
+        const stdInfo = (item.standards && item.standards.length > 0) ? `<span style="color:#8b5cf6;">📋 ${item.standards.join(', ')}</span>` : '';
+        inlineContent = `
+          <div id="content_${item._checkId}" style="display:none;margin:6px 0 4px 28px;padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;line-height:1.5;color:#475569;">
+            <div>${textPreview}</div>
+            ${(photoInfo || stdInfo) ? `<div style="margin-top:4px;display:flex;gap:10px;font-size:11px;">${photoInfo}${stdInfo}</div>` : ''}
+          </div>`;
+      }
+
+      // The row
+      html += `
+        <div id="row_${item._checkId}" style="margin-bottom:4px;${isReviewed ? 'opacity:0.5;' : ''}">
+          <div style="background:${sevBg[item.severity]};border:1px solid ${sevBorder[item.severity]};border-radius:8px;padding:8px 10px;display:flex;align-items:flex-start;gap:8px;">
+            <input type="checkbox" ${isReviewed ? 'checked' : ''} onchange="window._csToggleReviewed('${item._checkId}', this.checked)"
+                   style="flex-shrink:0;margin-top:2px;width:18px;height:18px;accent-color:#1e3a5f;cursor:pointer;" />
+            ${ratingBadge}
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:600;color:#1e293b;line-height:1.4;display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                ${item.severity !== 'proofread' ? item.message : item.itemLabel}
+                ${hasContent ? `<span onclick="window._csToggleContent('${item._checkId}');event.stopPropagation();" style="cursor:pointer;font-size:11px;color:#64748b;background:#e2e8f0;padding:1px 6px;border-radius:4px;user-select:none;" id="expand_${item._checkId}">▸ details</span>` : ''}
+              </div>
+              ${item.severity === 'proofread' && item.text ? `<div style="font-size:11px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;">${item.text.length > 70 ? item.text.substring(0, 70) + '…' : item.text}</div>` : ''}
+            </div>
+            ${hasTappableItem ? `<button onclick="window._csNavigateToItem('${safeLabel}', '${item._checkId}');event.stopPropagation();" style="flex-shrink:0;background:#1e3a5f;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">Go ➜</button>` : ''}
+          </div>
+          ${inlineContent}
         </div>`;
     });
-    html += '</div>';
-  }
-  html += '</div></div>';
 
-  // ── DISPLAY OVERLAY ─────────────────────────────────────────────────────
+    html += '</div>';
+  });
+
+  // ── DISPLAY FULL-SCREEN OVERLAY ─────────────────────────────────────────
   const existing = document.getElementById('checkSurveyOverlay');
   if (existing) existing.remove();
 
+  // Remove any lingering back button
+  const existingBack = document.getElementById('csBackToCheckBtn');
+  if (existingBack) existingBack.remove();
+
   const overlay = document.createElement('div');
   overlay.id = 'checkSurveyOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;flex-direction:column;justify-content:flex-end;';
+  overlay.style.cssText = 'position:fixed;inset:0;background:white;z-index:9999;display:flex;flex-direction:column;';
   overlay.innerHTML = `
-    <div onclick="event.stopPropagation();" style="background:white;border-radius:16px 16px 0 0;max-height:80vh;overflow-y:auto;padding:20px 16px calc(20px + env(safe-area-inset-bottom, 0px)) 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.2);">
-      <div style="width:40px;height:4px;background:#d1d5db;border-radius:2px;margin:0 auto 12px;"></div>
-      <h2 style="margin:0 0 12px;font-size:18px;text-align:center;">Survey Quality Check</h2>
+    <div style="flex-shrink:0;background:#1e3a5f;color:white;padding:12px 16px calc(12px + env(safe-area-inset-top, 0px)) 16px;display:flex;align-items:center;justify-content:space-between;">
+      <h2 style="margin:0;font-size:17px;font-weight:700;">✔ Survey Quality Check</h2>
+      <button onclick="document.getElementById('checkSurveyOverlay')?.remove();" style="background:rgba(255,255,255,0.15);color:white;border:none;border-radius:8px;padding:6px 14px;font-size:14px;cursor:pointer;">✕ Close</button>
+    </div>
+    <div id="csScrollContainer" style="flex:1;overflow-y:auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom, 0px)) 16px;">
       ${html}
-      <button onclick="document.getElementById('checkSurveyOverlay')?.remove();" style="width:100%;padding:14px;background:#1e3a5f;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin-top:12px;">Close</button>
     </div>
   `;
-  overlay.addEventListener('click', () => overlay.remove());
   document.body.appendChild(overlay);
+
+  // ── Wire up interactive handlers ────────────────────────────────────
+  // Toggle reviewed checkbox
+  window._csToggleReviewed = function(checkId, checked) {
+    reviewedState[checkId] = checked;
+    sessionStorage.setItem(checkStateKey, JSON.stringify(reviewedState));
+    const row = document.getElementById('row_' + checkId);
+    if (row) row.style.opacity = checked ? '0.5' : '1';
+  };
+
+  // Toggle inline content expand/collapse
+  window._csToggleContent = function(checkId) {
+    const content = document.getElementById('content_' + checkId);
+    const btn = document.getElementById('expand_' + checkId);
+    if (!content) return;
+    const isOpen = content.style.display !== 'none';
+    content.style.display = isOpen ? 'none' : 'block';
+    if (btn) btn.textContent = isOpen ? '▸ details' : '▾ details';
+  };
+
+  // Navigate to item and show floating "Back to Check" button
+  window._csNavigateToItem = function(safeLabel, checkId) {
+    // Remember scroll position
+    const scrollEl = document.getElementById('csScrollContainer');
+    const scrollPos = scrollEl ? scrollEl.scrollTop : 0;
+    const surveyId = currentSurveyId;
+
+    // Close the overlay
+    document.getElementById('checkSurveyOverlay')?.remove();
+
+    // Scroll to the item
+    setTimeout(() => {
+      const el = document.getElementById('item_' + safeLabel);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.style.transition = 'background 0.3s';
+        el.style.background = '#fef3c7';
+        setTimeout(() => el.style.background = '', 2500);
+      }
+    }, 100);
+
+    // Show floating "Back to Check Survey" button
+    let backBtn = document.getElementById('csBackToCheckBtn');
+    if (backBtn) backBtn.remove();
+    backBtn = document.createElement('button');
+    backBtn.id = 'csBackToCheckBtn';
+    backBtn.textContent = '← Back to Check Survey';
+    backBtn.style.cssText = 'position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));left:50%;transform:translateX(-50%);background:#1e3a5f;color:white;border:none;border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+    backBtn.onclick = async function() {
+      backBtn.remove();
+      // Re-run check survey which will rebuild from current data
+      await checkSurvey();
+      // Restore scroll position
+      setTimeout(() => {
+        const newScrollEl = document.getElementById('csScrollContainer');
+        if (newScrollEl) newScrollEl.scrollTop = scrollPos;
+      }, 50);
+    };
+    document.body.appendChild(backBtn);
+  };
 }
 
 // Save comparables from the inspection view
