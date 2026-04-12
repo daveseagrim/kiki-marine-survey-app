@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2078';
+const APP_VERSION = 'v2079';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9492,21 +9492,22 @@ async function checkSurvey() {
     }
   }
   for (const [msg, data] of Object.entries(forceOKState)) {
+    const resolveLabel = data.skipped ? 'skipped' : 'force';
     if (currentIssueMessages.has(msg)) {
-      // Force-OK'd but issue still exists in audit — show in resolved anyway
+      // Force-OK'd/skipped but issue still exists in audit — show in resolved anyway
       resolvedItems.push({
         severity: 'resolved',
         message: msg,
-        _resolvedBy: 'force',
+        _resolvedBy: resolveLabel,
         itemLabel: data.itemLabel || null,
         _surveyOrder: data._surveyOrder ?? surveyOrderByMessage[msg] ?? 9999,
       });
     } else if (!resolvedState[msg]) {
-      // Force-OK'd and issue is gone
+      // Force-OK'd/skipped and issue is gone
       resolvedItems.push({
         severity: 'resolved',
         message: msg,
-        _resolvedBy: 'force',
+        _resolvedBy: resolveLabel,
         itemLabel: data.itemLabel || null,
         _surveyOrder: data._surveyOrder ?? surveyOrderByMessage[msg] ?? 9999,
       });
@@ -9703,7 +9704,10 @@ async function checkSurvey() {
               </div>
               ${item.severity === 'proofread' && item.text ? `<div style="font-size:11px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;">${(item.text.length > 70 ? item.text.substring(0, 70) + '…' : item.text).replace(/</g, '&lt;')}</div>` : ''}
             </div>
-            ${hasTappableItem ? `<button onclick="window._csGoToItem(${idx});event.stopPropagation();" style="flex-shrink:0;background:#1e3a5f;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">Go ➜</button>` : ''}
+            <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
+              ${hasTappableItem ? `<button onclick="window._csGoToItem(${idx});event.stopPropagation();" style="background:#1e3a5f;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">Go ➜</button>` : ''}
+              <button onclick="window._csSkipItem('${item._checkId}');event.stopPropagation();" style="background:#94a3b8;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:10px;cursor:pointer;white-space:nowrap;">Skip</button>
+            </div>
           </div>
           ${inlineContent}
         </div>`;
@@ -9763,7 +9767,8 @@ async function checkSurvey() {
       const ratingBadge = ratingChar
         ? `<span style="flex-shrink:0;font-size:10px;font-weight:700;color:white;background:${rColor};padding:2px 6px;border-radius:4px;">${ratingChar}</span>`
         : '';
-      const resolveTag = item._resolvedBy === 'force' ? '🔓 Force OK'
+      const resolveTag = item._resolvedBy === 'skipped' ? '⊘ Skipped'
+        : item._resolvedBy === 'force' ? '🔓 Force OK'
         : item._resolvedBy === 'proofread' ? '📖 Proofread'
         : item._resolvedBy === 'reviewed' ? '☑ Reviewed'
         : '✅ Fixed';
@@ -9899,6 +9904,58 @@ async function checkSurvey() {
         if (newScroll) newScroll.scrollTop = scrollPos;
       }, 50);
     }
+  };
+
+  // Skip item — adds to forceOKState with "skipped" flag, same animation as checkbox
+  window._csSkipItem = function(checkId) {
+    // Find the matching item from allCheckItems
+    const item = allCheckItems.find(it => it._checkId === checkId);
+    if (!item) return;
+
+    // Add to forceOKState
+    forceOKState[item.message] = {
+      forcedAt: Date.now(),
+      itemLabel: item.itemLabel || null,
+      reason: 'Skipped by surveyor',
+      _surveyOrder: item._surveyOrder ?? 9999,
+      skipped: true,
+    };
+    sessionStorage.setItem(forceKey, JSON.stringify(forceOKState));
+
+    // Animate the row (same green flash + fade as checkbox)
+    const row = document.getElementById('row_' + checkId);
+    let nextMsg = null;
+    if (row) {
+      let sibling = row.nextElementSibling;
+      while (sibling && !sibling.getAttribute('data-cs-msg')) sibling = sibling.nextElementSibling;
+      if (sibling) nextMsg = sibling.getAttribute('data-cs-msg');
+
+      row.style.transition = 'background 0.3s, border-color 0.3s';
+      row.style.background = '#dcfce7';
+      row.style.borderRadius = '8px';
+      const inner = row.querySelector('div');
+      if (inner) {
+        inner.style.transition = 'background 0.3s, border-color 0.3s';
+        inner.style.background = '#dcfce7';
+        inner.style.borderColor = '#16a34a';
+      }
+      const tag = document.createElement('div');
+      tag.style.cssText = 'text-align:center;font-size:12px;font-weight:700;color:#16a34a;padding:4px 0;';
+      tag.textContent = '→ Skipping — Moving to Resolved';
+      row.appendChild(tag);
+      setTimeout(() => {
+        row.style.transition = 'opacity 0.5s, transform 0.5s';
+        row.style.opacity = '0';
+        row.style.transform = 'translateX(30px)';
+      }, 600);
+    }
+    if (nextMsg) window._csScrollTargetMsg = nextMsg;
+    const itemMsg = row ? row.getAttribute('data-cs-msg') : null;
+    if (itemMsg) window._csJustResolved = itemMsg;
+    setTimeout(async () => {
+      document.getElementById('checkSurveyOverlay')?.remove();
+      await checkSurvey();
+    }, 1200);
   };
 
   // Toggle inline content expand/collapse
