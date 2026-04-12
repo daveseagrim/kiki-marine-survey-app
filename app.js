@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2084';
+const APP_VERSION = 'v2085';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2746,6 +2746,10 @@ function movePhotoFromSheet(photoId, sourceItemLabel, sourceCategoryName) {
       }
     }
     if (otherGroup.items.length) groups.push(otherGroup);
+
+    // Sort groups alphabetically by category, and items within each group
+    groups.sort((a, b) => a.category.localeCompare(b.category));
+    groups.forEach(g => g.items.sort((a, b) => a.localeCompare(b)));
 
     showMovePhotoPicker(photoId, sourceItemLabel, sourceCategoryName, allItems, groups, survey);
   });
