@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2081';
+const APP_VERSION = 'v2082';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -10122,15 +10122,22 @@ async function checkSurvey() {
       _csShowBackButton();
       setTimeout(() => {
         let el = null;
+        // 1. Try compact-item-wrapper (regular checklist items)
         const allWrappers = document.querySelectorAll('.compact-item-wrapper');
         for (const w of allWrappers) {
           if (w.getAttribute('data-item-label') === itemLabel) { el = w; break; }
         }
+        // 2. Try rated-item elements
         if (!el) {
           const ratedItems = document.querySelectorAll('.rated-item');
           for (const w of ratedItems) {
             if (w.getAttribute('data-item-label') === itemLabel) { el = w; break; }
           }
+        }
+        // 3. Try area photo sections (media items like "Cabin and conveniences photos")
+        if (!el) {
+          const sanitized = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
+          el = document.getElementById('area-photo-wrap-' + sanitized);
         }
         if (el) {
           _csExpandAccordionAndScroll(el);
@@ -10366,6 +10373,13 @@ function _csCheckSingleIssue(issue, data, survey) {
       return { fixed: false, reason: 'Photo not yet captured. Tap the camera button to add it.' };
     }
     return { fixed: false, reason: msg };
+  }
+
+  // Photo Orientation — can't re-check synchronously (needs async photo load)
+  // so always show as not-yet-resolved with a helpful message.
+  // The auto-detect will catch it on the next full Check Survey run.
+  if (cat === 'Photo Orientation') {
+    return { fixed: false, reason: 'Rotate the photo using Edit → ↻ Rotate, then come back. Or skip/Force OK if the orientation is intentional.' };
   }
 
   // Default — can't determine; let user decide
