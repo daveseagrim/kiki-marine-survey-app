@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2094';
+const APP_VERSION = 'v2095';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -11424,6 +11424,9 @@ async function capturePhoto(itemLabel, event) {
 
   // Refresh the item to show all new thumbnails
   const survey = await getSurvey(currentSurveyId);
+  // Auto-sync engine/gearbox photos to intro header fields
+  _syncEnginePhotosFromBody(survey);
+  await saveSurvey(survey);
   updateItemInPlace(survey, itemLabel);
   showToast(`${files.length} photo${files.length > 1 ? 's' : ''} saved`);
 }
@@ -11479,6 +11482,9 @@ async function handleAreaPhotoCapture(mediaLabel, inputEl) {
 
   // Refresh the area photo grid in place
   const survey = await getSurvey(currentSurveyId);
+  // Auto-sync engine/gearbox photos to intro header fields
+  _syncEnginePhotosFromBody(survey);
+  await saveSurvey(survey);
   refreshAreaPhotoGrid(survey, mediaLabel);
   showToast(`${files.length} photo${files.length > 1 ? 's' : ''} saved`);
 }
@@ -13577,8 +13583,8 @@ function saveItemData(itemLabel, categoryName) {
 }
 
 // Auto-save item text on blur — no alert, just a subtle toast
-// Auto-sync engine data from checklist body items into survey header fields.
-// Called on every item text save — only acts on engine-related items.
+// Auto-sync engine/gearbox data from checklist body items into survey header fields.
+// Called on every item text save — only acts on engine/gearbox-related items.
 function _syncEngineFieldsFromBody(survey, itemLabel, text) {
   if (!text || !text.trim()) return;
   const raw = text.trim();
@@ -13591,28 +13597,64 @@ function _syncEngineFieldsFromBody(survey, itemLabel, text) {
 
   // Engine manufacturer, model, serial
   if (itemLabel === 'Engine(s) manufacturer, model # and serial number (if available)') {
-    // Parse "Make Model, Serial: XXX" or "Make Model"
-    const serialMatch = raw.match(/[,;]?\s*(?:serial(?:\s*(?:#|number|no\.?)?)?[:=\s]+)(.+)/i);
-    if (serialMatch) {
-      const beforeSerial = raw.substring(0, raw.indexOf(serialMatch[0])).trim();
-      survey.engineSerial = serialMatch[1].trim();
-      const parts = beforeSerial.split(/\s+/);
-      if (parts.length >= 2) {
-        survey.engineMake = parts[0];
-        survey.engineModel = parts.slice(1).join(' ');
-      } else if (parts.length === 1) {
-        survey.engineMake = parts[0];
-      }
-    } else {
-      const parts = raw.split(/\s+/);
-      if (parts.length >= 2) {
-        survey.engineMake = parts[0];
-        survey.engineModel = parts.slice(1).join(' ');
-      } else {
-        survey.engineMake = raw;
-      }
-    }
+    _parseAndSyncMakeModelSerial(survey, raw, 'engine');
     return;
+  }
+
+  // Gearbox/transmission manufacturer, model, serial
+  if (itemLabel === 'Gearbox manufacturer, model # and serial # (if available)') {
+    _parseAndSyncMakeModelSerial(survey, raw, 'transmission');
+    return;
+  }
+}
+
+// Parse "Make Model, Serial: XXX" and sync to survey header fields
+function _parseAndSyncMakeModelSerial(survey, raw, prefix) {
+  const makeKey = prefix + 'Make';
+  const modelKey = prefix + 'Model';
+  const serialKey = prefix + 'Serial';
+
+  const serialMatch = raw.match(/[,;]?\s*(?:serial(?:\s*(?:#|number|no\.?)?)?[:=\s]+)(.+)/i);
+  if (serialMatch) {
+    const beforeSerial = raw.substring(0, raw.indexOf(serialMatch[0])).trim();
+    survey[serialKey] = serialMatch[1].trim();
+    const parts = beforeSerial.split(/\s+/);
+    if (parts.length >= 2) {
+      survey[makeKey] = parts[0];
+      survey[modelKey] = parts.slice(1).join(' ');
+    } else if (parts.length === 1) {
+      survey[makeKey] = parts[0];
+    }
+  } else {
+    const parts = raw.split(/\s+/);
+    if (parts.length >= 2) {
+      survey[makeKey] = parts[0];
+      survey[modelKey] = parts.slice(1).join(' ');
+    } else {
+      survey[makeKey] = raw;
+    }
+  }
+}
+
+// Auto-sync engine/gearbox PHOTOS from checklist body media items to intro header fields.
+// Called after area photos are captured or after regular item photos are saved.
+function _syncEnginePhotosFromBody(survey) {
+  // Engine photos → enginePhoto (first photo from body)
+  const enginePhotos = survey.items['Engine(s) and drive(s) photos'];
+  if (enginePhotos && enginePhotos.photos && enginePhotos.photos.length > 0) {
+    survey.enginePhoto = enginePhotos.photos[0];
+  }
+
+  // Engine nameplate photos → enginePlatePhoto
+  const enginePlates = survey.items['Engine name plate(s)'];
+  if (enginePlates && enginePlates.photos && enginePlates.photos.length > 0) {
+    survey.enginePlatePhoto = enginePlates.photos[0];
+  }
+
+  // Gearbox/transmission nameplate photos → transmissionPlatePhoto
+  const gearboxPlates = survey.items['Gearbox nameplate(s)'];
+  if (gearboxPlates && gearboxPlates.photos && gearboxPlates.photos.length > 0) {
+    survey.transmissionPlatePhoto = gearboxPlates.photos[0];
   }
 }
 
