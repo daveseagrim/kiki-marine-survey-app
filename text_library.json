@@ -3,42 +3,47 @@
     {
       "section": "Hull and rudder(s) condition (below the waterline)",
       "rating": "A",
-      "text": "Below the waterline, the hull exhibited significant structural damage including deep gouging, delamination, or blistering that compromises hull integrity. Immediate haul-out and professional repair is required."
-    },
-    {
-      "section": "Hull and rudder(s) condition (below the waterline)",
-      "rating": "A - rudder",
-      "text": "Below the waterline, the hull showed severe damage. The rudder was found to be structurally compromised with cracking and delamination. Immediate professional repair is critical before the vessel can be launched."
+      "text": "Below the waterline, the hull and {specify:rudder|rudders|outdrive|outdrives|sail drive|sail drives|IPS pod|IPS pods} exhibited {any:deep gouging^TP1332|significant delamination^TP1332|structural cracking^TP1332|extensive osmotic blistering^TP1332|visible impact damage^TP1332|exposed laminate^TP1332|wet core^TP1332|a compromised keel joint^TP1332|severe corrosion on metal surfaces^TP1332} that compromised structural integrity. Immediate professional repair is required before the vessel is relaunched.{standards? This condition violates STANDARDS.}",
+      "placeholders": {
+        "specify:rudder|rudders|outdrive|outdrives|sail drive|sail drives|IPS pod|IPS pods": {
+          "multi": false
+        },
+        "any:deep gouging^TP1332|significant delamination^TP1332|structural cracking^TP1332|extensive osmotic blistering^TP1332|visible impact damage^TP1332|exposed laminate^TP1332|wet core^TP1332|a compromised keel joint^TP1332|severe corrosion on metal surfaces^TP1332": {
+          "multi": true
+        }
+      }
     },
     {
       "section": "Hull and rudder(s) condition (below the waterline)",
       "rating": "B",
-      "text": "The barrier coat appeared intact. Multiple areas of the hull and rudder showed oxidation, cracking, and flaking of the anti-fouling. Sand to a sound surface and reapply anti-fouling to restore protection."
+      "text": "Below the waterline, the hull and {specify:rudder|rudders|outdrive|outdrives|sail drive|sail drives|IPS pod|IPS pods} were serviceable overall. {any:Minor surface cracking|Light oxidation of the anti-fouling|Flaking anti-fouling|Localized blister(s)|Small area(s) of exposed gelcoat|Minor scrapes and dings|Hairline stress crack(s) near the keel joint|Light gouging|Cosmetic scoring} were noted. The affected area(s) should be {specify:lightly sanded and coated with anti-fouling before the vessel is relaunched|sanded to the gelcoat and recoated with anti-fouling before the vessel is relaunched|sanded to the barrier coat, recoated with gelcoat and anti-fouling before the vessel is relaunched|sanded to the fibreglass, recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|filled with fairing compound, faired, and recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|repaired with fibreglass, faired with fairing compound, and recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|monitored during future inspections and addressed if the condition deteriorates}.",
+      "placeholders": {
+        "specify:rudder|rudders|outdrive|outdrives|sail drive|sail drives|IPS pod|IPS pods": {
+          "multi": false
+        },
+        "any:Minor surface cracking|Light oxidation of the anti-fouling|Flaking anti-fouling|Localized blister(s)|Small area(s) of exposed gelcoat|Minor scrapes and dings|Hairline stress crack(s) near the keel joint|Light gouging|Cosmetic scoring": {
+          "multi": true
+        },
+        "specify:lightly sanded and coated with anti-fouling before the vessel is relaunched|sanded to the gelcoat and recoated with anti-fouling before the vessel is relaunched|sanded to the barrier coat, recoated with gelcoat and anti-fouling before the vessel is relaunched|sanded to the fibreglass, recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|filled with fairing compound, faired, and recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|repaired with fibreglass, faired with fairing compound, and recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|monitored during future inspections and addressed if the condition deteriorates": {
+          "multi": false
+        }
+      }
     },
     {
       "section": "Hull and rudder(s) condition (below the waterline)",
-      "rating": "B",
-      "text": "Below the waterline, the hull and rudders were serviceable overall. Minor hull damage noted in the photos should be repaired to prevent water ingress."
-    },
-    {
-      "section": "Hull and rudder(s) condition (below the waterline)",
-      "rating": "C - rudders",
-      "text": "Below the waterline, the hull and rudders were serviceable with no visible damage."
-    },
-    {
-      "section": "Hull and rudder(s) condition (below the waterline)",
-      "rating": "C - rudder",
-      "text": "Below the waterline, the hull and rudder were serviceable with no visible damage."
-    },
-    {
-      "section": "Hull and rudder(s) condition (below the waterline)",
-      "rating": "C - outdrives",
-      "text": "Below the waterline, the hull and outdrives were serviceable with no visible damage."
-    },
-    {
-      "section": "Hull and rudder(s) condition (below the waterline)",
-      "rating": "C - outdrive",
-      "text": "Below the waterline, the hull and outdrive were serviceable with no visible damage."
+      "rating": "C",
+      "text": "Below the waterline, the hull and {specify:rudder|rudders|outdrive|outdrives|sail drive|sail drives|IPS pod|IPS pods} were {specify:serviceable with no visible damage|in good overall condition with only cosmetic wear|in serviceable condition for normal use}. The anti-fouling was {specify:in good condition|showing normal seasonal wear|recently reapplied and intact}.",
+      "placeholders": {
+        "specify:rudder|rudders|outdrive|outdrives|sail drive|sail drives|IPS pod|IPS pods": {
+          "multi": false
+        },
+        "specify:serviceable with no visible damage|in good overall condition with only cosmetic wear|in serviceable condition for normal use": {
+          "multi": false
+        },
+        "specify:in good condition|showing normal seasonal wear|recently reapplied and intact": {
+          "multi": false
+        }
+      }
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
@@ -88,7 +93,7 @@
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B - hull ok. Rudder needs help.",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [insert reading range], which are not considered abnormal for the vessel\u2019s age. Suggest monitoring the photographed areas between seasons. However, the rudder displayed numerous saturated spots, many at 999, suggesting internal conductivity accumulation. To mitigate any spread, off-season venting or drainage may be attempted. However, foam cores often retain conductivity. Rudder removal and rebuild may be required in future if conditions persist"
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [insert reading range], which are not considered abnormal for the vessel’s age. Suggest monitoring the photographed areas between seasons. However, the rudder displayed numerous saturated spots, many at 999, suggesting internal conductivity accumulation. To mitigate any spread, off-season venting or drainage may be attempted. However, foam cores often retain conductivity. Rudder removal and rebuild may be required in future if conditions persist"
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
@@ -98,7 +103,7 @@
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C - Rudder issue not high",
-      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull presented no areas of concern. The rudder showed elevated readings of [insert reading range] that are not unusual for the vessel\u2019s age. Recheck seasonally to confirm stability."
+      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull presented no areas of concern. The rudder showed elevated readings of [insert reading range] that are not unusual for the vessel’s age. Recheck seasonally to confirm stability."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
@@ -108,7 +113,7 @@
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [insert reading range] that are not considered abnormal for the vessel\u2019s age. Monitor the photographed areas between seasons. The rudders were bronze and not prone to conductivity uptake."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [insert reading range] that are not considered abnormal for the vessel’s age. Monitor the photographed areas between seasons. The rudders were bronze and not prone to conductivity uptake."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
@@ -566,7 +571,7 @@
       "text": "The rub rail was solidly affixed to the hull and deck joint and was serviceable."
     },
     {
-      "section": "Hull\u2013deck joint (exterior)",
+      "section": "Hull–deck joint (exterior)",
       "rating": "C",
       "text": "The hull and deck joint was intact and in serviceable condition."
     },
@@ -575,8 +580,12 @@
       "rating": "A",
       "text": "The {count:propeller|propellers} exhibited {any:significant damage|substantial impact damage} including {any:chipped blade(s)^ABYC P-4|bent blade(s)^ABYC P-4|cracked blade(s)^ABYC P-4|missing blade(s)^ABYC P-4|deep scoring^ABYC P-4|severe pitting^ABYC P-4|severe corrosion^ABYC P-4|shaft-end galling^ABYC P-4|a loose retaining nut^ABYC P-4|a missing retaining nut^ABYC P-4|a missing retaining pin^ABYC P-4}. The {count:propeller was|propellers were} not serviceable in {count:its|their} current condition and required immediate replacement.{standards? This condition violates STANDARDS.}",
       "placeholders": {
-        "any:significant damage|substantial impact damage": { "multi": false },
-        "any:chipped blade(s)^ABYC P-4|bent blade(s)^ABYC P-4|cracked blade(s)^ABYC P-4|missing blade(s)^ABYC P-4|deep scoring^ABYC P-4|severe pitting^ABYC P-4|severe corrosion^ABYC P-4|shaft-end galling^ABYC P-4|a loose retaining nut^ABYC P-4|a missing retaining nut^ABYC P-4|a missing retaining pin^ABYC P-4": { "multi": true }
+        "any:significant damage|substantial impact damage": {
+          "multi": false
+        },
+        "any:chipped blade(s)^ABYC P-4|bent blade(s)^ABYC P-4|cracked blade(s)^ABYC P-4|missing blade(s)^ABYC P-4|deep scoring^ABYC P-4|severe pitting^ABYC P-4|severe corrosion^ABYC P-4|shaft-end galling^ABYC P-4|a loose retaining nut^ABYC P-4|a missing retaining nut^ABYC P-4|a missing retaining pin^ABYC P-4": {
+          "multi": true
+        }
       }
     },
     {
@@ -584,8 +593,12 @@
       "rating": "B",
       "text": "The {count:propeller|propellers} showed {any:moderate wear|minor blade damage|chipped blade tip(s)|light edge burr(s)|light pitting|surface corrosion|minor shaft-end mark(s)} that merited attention. The {count:propeller|propellers} should be {specify:removed, inspected, and reconditioned before the vessel is relaunched|removed, inspected, and reconditioned or replaced as necessary before the vessel is relaunched|rebalanced before the vessel is relaunched|touched up and rebalanced before the vessel is relaunched|monitored during future inspections and reconditioned only if the condition deteriorates|re-evaluated at the next haul-out and reconditioned if the condition has worsened}.{standards? Note: this represents a minor deviation from STANDARDS and does not require immediate repair.}",
       "placeholders": {
-        "any:moderate wear|minor blade damage|chipped blade tip(s)|light edge burr(s)|light pitting|surface corrosion|minor shaft-end mark(s)": { "multi": true },
-        "specify:removed, inspected, and reconditioned before the vessel is relaunched|removed, inspected, and reconditioned or replaced as necessary before the vessel is relaunched|rebalanced before the vessel is relaunched|touched up and rebalanced before the vessel is relaunched|monitored during future inspections and reconditioned only if the condition deteriorates|re-evaluated at the next haul-out and reconditioned if the condition has worsened": { "multi": false }
+        "any:moderate wear|minor blade damage|chipped blade tip(s)|light edge burr(s)|light pitting|surface corrosion|minor shaft-end mark(s)": {
+          "multi": true
+        },
+        "specify:removed, inspected, and reconditioned before the vessel is relaunched|removed, inspected, and reconditioned or replaced as necessary before the vessel is relaunched|rebalanced before the vessel is relaunched|touched up and rebalanced before the vessel is relaunched|monitored during future inspections and reconditioned only if the condition deteriorates|re-evaluated at the next haul-out and reconditioned if the condition has worsened": {
+          "multi": false
+        }
       }
     },
     {
@@ -593,7 +606,9 @@
       "rating": "C",
       "text": "The {specify:fixed two-blade|fixed three-blade|fixed four-blade|folding two-blade|folding three-blade|feathering three-blade|controllable pitch} {count:propeller was|propellers were} in serviceable condition with no significant damage, pitting, or corrosion. Blades were intact and {count:securely attached to the shaft|securely attached to their respective shafts}.",
       "placeholders": {
-        "specify:fixed two-blade|fixed three-blade|fixed four-blade|folding two-blade|folding three-blade|feathering three-blade|controllable pitch": { "multi": false }
+        "specify:fixed two-blade|fixed three-blade|fixed four-blade|folding two-blade|folding three-blade|feathering three-blade|controllable pitch": {
+          "multi": false
+        }
       }
     },
     {
@@ -637,12 +652,12 @@
       "text": "The platform or ladder shows wear and loose fittings. Service and tighten hardware to ensure safe use."
     },
     {
-      "section": "Hull\u2013deck joint (exterior)",
+      "section": "Hull–deck joint (exterior)",
       "rating": "A",
-      "text": "The hull\u2013deck joint is cracked or delaminated, allowing water ingress. This requires immediate structural repair."
+      "text": "The hull–deck joint is cracked or delaminated, allowing water ingress. This requires immediate structural repair."
     },
     {
-      "section": "Hull\u2013deck joint (exterior)",
+      "section": "Hull–deck joint (exterior)",
       "rating": "B",
       "text": "The joint shows minor cracking or sealant deterioration. Re-caulk or re-seal to prevent water ingress."
     },
@@ -1471,22 +1486,22 @@
       "text": "The brightwork was generally in serviceable condition."
     },
     {
-      "section": "Deck hatches, windows, and portholes \u2013 exterior observations",
+      "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "B - sealant issue",
       "text": "Sealant around several windows was lifting. Renew sealant to prevent water ingress."
     },
     {
-      "section": "Deck hatches, windows, and portholes \u2013 exterior observations",
+      "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "C",
       "text": "The single deck hatch appeared serviceable from the exterior."
     },
     {
-      "section": "Deck hatches, windows, and portholes \u2013 exterior observations",
+      "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "C",
       "text": "All deck hatches, windows, and portholes appeared serviceable from the exterior."
     },
     {
-      "section": "Deck hatches, windows, and portholes \u2013 exterior observations",
+      "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "C",
       "text": "Despite age-typical crazing, all deck hatches, windows, and portholes appeared serviceable from the exterior."
     },
@@ -1511,12 +1526,12 @@
       "text": "The windshield, pilothouse windows, frames, and studs were structurally sound, solid, and serviceable."
     },
     {
-      "section": "Arch \u2013 external condition and equipment",
+      "section": "Arch – external condition and equipment",
       "rating": "B",
       "text": "The arch was solidly attached and was serviceable. Cracking was present along the top at the bases of mounted instruments."
     },
     {
-      "section": "Arch \u2013 external condition and equipment",
+      "section": "Arch – external condition and equipment",
       "rating": "C",
       "text": "The arch was solidly attached and was serviceable."
     },
@@ -1611,12 +1626,12 @@
       "text": "Brightwork is severely deteriorated or rotted, compromising structural integrity. Replacement is required."
     },
     {
-      "section": "Deck hatches, windows, and portholes \u2013 exterior observations",
+      "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "A",
       "text": "Hatches or portholes are cracked, leaking, or non-functional. Immediate repair or replacement is required."
     },
     {
-      "section": "Arch \u2013 external condition and equipment",
+      "section": "Arch – external condition and equipment",
       "rating": "A",
       "text": "The arch is structurally compromised, bent, or showing signs of failure. Repair or replacement is required."
     },
@@ -4045,12 +4060,12 @@
       "text": "The cabin lining and ceiling were in serviceable condition throughout the vessel."
     },
     {
-      "section": "Deck hatches, windows and portholes \u2013 interior observations",
+      "section": "Deck hatches, windows and portholes – interior observations",
       "rating": "C - min crazing",
       "text": "All deck hatches and portholes opened and closed properly. Hatches, portholes, and windows were serviceable with minimal crazing."
     },
     {
-      "section": "Deck hatches, windows and portholes \u2013 interior observations",
+      "section": "Deck hatches, windows and portholes – interior observations",
       "rating": "C - expected crazing",
       "text": "All deck hatches and portholes opened and closed properly. Hatches, portholes, and windows were serviceable with age expected crazing."
     },
@@ -4230,22 +4245,22 @@
       "text": "A protective sheet covered the floor and its condition was not verified. Exposed carpet areas were in good condition."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from cabin",
+      "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "A",
       "text": "The cabin bilge was full of water and the bilge pump was non-functional. This does not meet ABYC H-22 for electric bilge pump systems and ABYC E-11 for electrical systems. Pumps must be operational and able to keep the bilge reasonably dry to reduce flooding risk. Immediate correction is required."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from cabin",
+      "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "B - water in bilge. Deck stepped mast.",
       "text": "Some water was present in the bilge. Watermarks indicated this was a recurring condition, which is not unusual for a vessel of this age. Because the boat has a deck-stepped rig, water is likely entering the bilge from the deck. Further investigation is recommended by running water over the deck and checking for leaks."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from cabin",
+      "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "C",
       "text": "Some water was present in the bilge, typical of a keel-stepped mast on a vessel of this age. From the cabin view, ribs and stringers appeared solid and serviceable with no apparent damage consistent with a hard grounding."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from cabin",
+      "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "C",
       "text": "Stringers and ribs that were visible from the cabin bilge appeared to be in serviceable condition."
     },
@@ -4320,12 +4335,12 @@
       "text": "Minor stains or loose panels are visible. Repair or re-gluing is advisable."
     },
     {
-      "section": "Deck hatches, windows and portholes \u2013 interior observations",
+      "section": "Deck hatches, windows and portholes – interior observations",
       "rating": "A",
       "text": "Visible leaking or significant water damage around hatches or portholes. Repair is critical."
     },
     {
-      "section": "Deck hatches, windows and portholes \u2013 interior observations",
+      "section": "Deck hatches, windows and portholes – interior observations",
       "rating": "B",
       "text": "Minor water stains or loose frames are visible. Service seals and fasteners."
     },
@@ -4574,7 +4589,7 @@
     {
       "section": "Head, toilet and seacock",
       "rating": "A",
-      "text": "The toilet was not tested as the vessel was out of the water. No leakage was observed, and the intake seacock was securely attached and operated smoothly. However, a disused seacock\u2014likely part of the waste discharge system\u2014was found uncapped. Under ABYC H-27 (Seacocks and Through-Hull Fittings), any hull penetration below the maximum heeled waterline must have a means of positive shut-off and the unused seacock must be securely capped or removed, and the opening faired to prevent the risk of water ingress."
+      "text": "The toilet was not tested as the vessel was out of the water. No leakage was observed, and the intake seacock was securely attached and operated smoothly. However, a disused seacock—likely part of the waste discharge system—was found uncapped. Under ABYC H-27 (Seacocks and Through-Hull Fittings), any hull penetration below the maximum heeled waterline must have a means of positive shut-off and the unused seacock must be securely capped or removed, and the opening faired to prevent the risk of water ingress."
     },
     {
       "section": "Head, toilet and seacock",
@@ -4656,7 +4671,7 @@
     {
       "section": "Fuel tank(s)",
       "rating": "A",
-      "text": "The vessel\u2019s fuel system lacked a shut-off valve at the tank outlet; the supply line was connected directly to the tank. Install a readily accessible shut-off valve at the tank outlet in compliance with Transport Canada Small Vessel Regulations and ABYC H-33, using a metallic or approved composite valve securely mounted and operable without tools."
+      "text": "The vessel’s fuel system lacked a shut-off valve at the tank outlet; the supply line was connected directly to the tank. Install a readily accessible shut-off valve at the tank outlet in compliance with Transport Canada Small Vessel Regulations and ABYC H-33, using a metallic or approved composite valve securely mounted and operable without tools."
     },
     {
       "section": "Fuel tank(s)",
@@ -5121,7 +5136,7 @@
       "text": "Because the boat was on shore, the drive coupling, propeller shaft, and stuffing box were not tested. However, all appeared serviceable. Recommend testing when the boat is launched to ensure the stuffing box does not leak when the boat is stationary and drips approximately two to three drops per minute while the boat is underway."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from engine bay",
+      "section": "Bilge, stringers and ribs – accessible from engine bay",
       "rating": "C",
       "text": "Visible areas of the engine bay appeared serviceable and free of apparent damage. The compartment was noted to be clean."
     },
@@ -5176,12 +5191,12 @@
       "text": "The gearbox shows signs of wear or minor fluid leaks. Service is recommended."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from engine bay",
+      "section": "Bilge, stringers and ribs – accessible from engine bay",
       "rating": "A",
       "text": "Significant water, oil, or debris is present. Clean the bilge and investigate for leaks."
     },
     {
-      "section": "Bilge, stringers and ribs \u2013 accessible from engine bay",
+      "section": "Bilge, stringers and ribs – accessible from engine bay",
       "rating": "B",
       "text": "Minor water or debris is visible. Cleaning is recommended."
     },
@@ -5382,7 +5397,7 @@
     {
       "section": "Inverter and grounding",
       "rating": "A",
-      "text": "The inverter\u2019s metallic case was not bonded to the vessel\u2019s grounding and bonding system. Bond the case per best practice to improve corrosion protection and safety."
+      "text": "The inverter’s metallic case was not bonded to the vessel’s grounding and bonding system. Bond the case per best practice to improve corrosion protection and safety."
     },
     {
       "section": "Inverter and grounding",
@@ -5397,7 +5412,7 @@
     {
       "section": "Inverter/charger and grounding",
       "rating": "C",
-      "text": "An inverter/charger was installed in (location here). The unit was tested under shore power and operated as expected, charging the vessel\u2019s batteries and switching cleanly between inverter and charger modes. No abnormal sounds, overheating, or wiring issues were observed, and the system appeared serviceable."
+      "text": "An inverter/charger was installed in (location here). The unit was tested under shore power and operated as expected, charging the vessel’s batteries and switching cleanly between inverter and charger modes. No abnormal sounds, overheating, or wiring issues were observed, and the system appeared serviceable."
     },
     {
       "section": "Inverter/charger and grounding",
@@ -5482,7 +5497,7 @@
     {
       "section": "Starter battery(ies)",
       "rating": "C - singular, box",
-      "text": "The vessel\u2019s starter battery was secured in a plastic battery box with an appropriate tie down strap. Terminal connections were clean and tight."
+      "text": "The vessel’s starter battery was secured in a plastic battery box with an appropriate tie down strap. Terminal connections were clean and tight."
     },
     {
       "section": "Starter battery(ies)",
@@ -5542,7 +5557,7 @@
     {
       "section": "House battery(ies)",
       "rating": "pre-purchase battery survey",
-      "text": "A Deep Cycle flooded lead-acid house battery (Model No. 31DC130) was installed, rated at 230 minutes reserve capacity and 1000 MCA, with a 20-hour rate of 130 Ah. The manufacturer\u2019s date code on the label indicated D19, corresponding to April 2019. The battery was fitted in a dedicated battery box and appeared properly secured. No corrosion was noted on the terminals. No leakage was observed at the time of inspection, and the unit otherwise appeared serviceable. The onboard electrics were run during the survey. However, the battery indicated very low voltage. Suggest attaching a trickle charger (solar or otherwise) to maintain battery health. It should be noted that typical lead-acid batteries last approximately four to six years. Replacement of this battery may be required in the short term."
+      "text": "A Deep Cycle flooded lead-acid house battery (Model No. 31DC130) was installed, rated at 230 minutes reserve capacity and 1000 MCA, with a 20-hour rate of 130 Ah. The manufacturer’s date code on the label indicated D19, corresponding to April 2019. The battery was fitted in a dedicated battery box and appeared properly secured. No corrosion was noted on the terminals. No leakage was observed at the time of inspection, and the unit otherwise appeared serviceable. The onboard electrics were run during the survey. However, the battery indicated very low voltage. Suggest attaching a trickle charger (solar or otherwise) to maintain battery health. It should be noted that typical lead-acid batteries last approximately four to six years. Replacement of this battery may be required in the short term."
     },
     {
       "section": "Battery hydrometer test",
@@ -5665,7 +5680,7 @@
       "text": "AC outlets were not tested because the vessel was not connected to AC power."
     },
     {
-      "section": "Electrical \u2013 other features",
+      "section": "Electrical – other features",
       "rating": "Not tested",
       "text": "Not tested."
     },
@@ -5895,17 +5910,17 @@
       "text": "The system is operational and effective."
     },
     {
-      "section": "Electrical \u2013 other features",
+      "section": "Electrical – other features",
       "rating": "A",
       "text": "Critical electrical features are non-functional. Repair or replacement is required."
     },
     {
-      "section": "Electrical \u2013 other features",
+      "section": "Electrical – other features",
       "rating": "B",
       "text": "Some electrical features show signs of wear or intermittent function. Service is recommended."
     },
     {
-      "section": "Electrical \u2013 other features",
+      "section": "Electrical – other features",
       "rating": "C",
       "text": "Electrical features are operational."
     },
@@ -6194,7 +6209,7 @@
     {
       "section": "Navigation lights (port, starboard, anchor, steaming, other)",
       "rating": "A",
-      "text": "The vessel\u2019s navigation lights were non-operational during inspection. This does not meet ABYC A-16 guidance and COLREGS Rules 20 and 21 for visibility. Repair or replacement is required to meet range requirements such as two nautical miles for vessels under twelve metres and to satisfy ABYC electrical practice."
+      "text": "The vessel’s navigation lights were non-operational during inspection. This does not meet ABYC A-16 guidance and COLREGS Rules 20 and 21 for visibility. Repair or replacement is required to meet range requirements such as two nautical miles for vessels under twelve metres and to satisfy ABYC electrical practice."
     },
     {
       "section": "Navigation lights (port, starboard, anchor, steaming, other)",
