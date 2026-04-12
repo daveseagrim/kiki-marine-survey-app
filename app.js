@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2053';
+const APP_VERSION = 'v2054';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2250,7 +2250,7 @@ function showNotesSheet(itemLabel, categoryName) {
       <div class="bottom-sheet" onclick="event.stopPropagation();">
         <div class="bottom-sheet-handle"></div>
         <div class="bottom-sheet-title">${itemLabel} — Notes <span style="font-size:10px;color:#9ca3af;font-weight:400;">${APP_VERSION}</span></div>
-        <div style="padding:4px 20px;font-size:10px;color:#dc2626;background:#fef2f2;border:1px solid #fca5a5;margin:4px 20px;border-radius:4px;">DEBUG: rating="${itemData.rating || 'EMPTY'}" | variants=${sheetVariants.length} | textLib=${!!textLibrary} | cat="${categoryName}"</div>
+        <div style="padding:4px 20px;font-size:10px;color:#dc2626;background:#fef2f2;border:1px solid #fca5a5;margin:4px 20px;border-radius:4px;word-break:break-all;">DEBUG: rating="${itemData.rating || 'EMPTY'}" | variants=${sheetVariants.length} | ${window._snippetDebug || 'no debug'}</div>
         ${mastOptionsHtml}
         ${outdriveOptionsHtml}
         ${winchOptionsHtml}
@@ -3324,12 +3324,12 @@ function escSnippet(s) {
 
 // Find text variants from library
 function findTextVariants(categoryName, itemLabel, baseRating) {
-  if (!textLibrary) return [];
+  if (!textLibrary) { window._snippetDebug = 'no textLibrary'; return []; }
 
   const sheetName = SHEET_MAPPING[categoryName] || categoryName;
   const sheet = textLibrary[sheetName];
 
-  if (!sheet) return [];
+  if (!sheet) { window._snippetDebug = `no sheet for "${sheetName}" (from cat "${categoryName}")`; return []; }
 
   // Strip expansion prefixes for matching expanded items back to base snippets
   // Head: "Head 2 — Toilet" → "Head, Toilet"
@@ -3364,6 +3364,7 @@ function findTextVariants(categoryName, itemLabel, baseRating) {
   // If we had an explicit ITEM_SNIPPET_MAP entry, the section name is known —
   // don't fall through to fuzzy matching which pulls in wrong sections.
   // (If no entries found, it means that rating level needs entries added.)
+  window._snippetDebug = `sheet="${sheetName}"(${sheet.length} entries) | resolved="${resolvedLabel}" | matchLabel="${matchLabel}" | hadMap=${hadExplicitMap} | exactMatches=${matches.length} | sampleSections=${[...new Set(sheet.slice(0,5).map(e=>e.section))].join(',')}`;
   if (hadExplicitMap) return matches;
 
   // 2. If no exact match, try contains match — only where the FULL search label
