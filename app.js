@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2093';
+const APP_VERSION = 'v2094';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -10484,7 +10484,12 @@ async function toggleSafetyItem(idx, checked) {
   if (!survey || !survey.safetyEquipment[idx]) return;
   survey.safetyEquipment[idx].checked = checked;
   await saveSurvey(survey);
+  // Remember scroll position and which accordion was open
+  const scrollY = window.scrollY;
+  _openAccordionCategory = '🛡️ Safety Equipment (TC TP 511)';
   renderInspection(survey);
+  // Restore scroll position after re-render
+  requestAnimationFrame(() => { window.scrollTo(0, scrollY); });
 }
 
 async function updateSafetyNote(idx, note) {
