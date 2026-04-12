@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2103';
+const APP_VERSION = 'v2104';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -5020,16 +5020,13 @@ function renderHome() {
 
   app.innerHTML = `
     <div class="header">
-      <div style="display:flex; align-items:center; gap:12px;">
+      <div style="display:flex; align-items:flex-end; gap:12px;">
         <img src="https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png"
              alt="Kiki Marine" style="height:40px; width:auto;"
              onerror="this.style.display='none'">
-        <div>
-          <div class="header-title" style="color:#006699;font-size:20px;font-weight:800;letter-spacing:0.3px;">Kiki Marine Survey</div>
-          <div class="header-subtitle" style="display:flex;align-items:center;gap:8px;color:#3399cc;">
-            Precise Surveys — ${APP_VERSION}
-            <button onclick="forceAppUpdate()" style="background:rgba(0,102,153,0.08);border:1px solid #3399cc;color:#006699;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;min-height:32px;font-weight:600;">↻ Update</button>
-          </div>
+        <div style="display:flex;align-items:center;gap:8px;padding-bottom:2px;">
+          <span style="color:#3399cc;font-size:13px;">Marine Vessel Surveys — ${APP_VERSION}</span>
+          <button onclick="forceAppUpdate()" style="background:rgba(0,102,153,0.08);border:1px solid #3399cc;color:#006699;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;min-height:32px;font-weight:600;">↻ Update</button>
         </div>
       </div>
       <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
