@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2076';
+const APP_VERSION = 'v2077';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9640,15 +9640,15 @@ async function checkSurvey() {
       scrollContainer.style.position = 'relative';
       scrollContainer.insertBefore(toast, scrollContainer.firstChild);
     }
-    // Auto-dismiss after 4 seconds
+    // Auto-dismiss after 8 seconds (long enough to read)
     setTimeout(() => {
       if (toast.parentElement) {
-        toast.style.transition = 'opacity 0.4s, transform 0.4s';
+        toast.style.transition = 'opacity 0.8s, transform 0.8s';
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(-20px)';
-        setTimeout(() => toast.remove(), 400);
+        setTimeout(() => toast.remove(), 800);
       }
-    }, 4000);
+    }, 8000);
     // Add the animation keyframes
     if (!document.getElementById('cs-toast-style')) {
       const style = document.createElement('style');
@@ -9664,24 +9664,45 @@ async function checkSurvey() {
     reviewedState[checkId] = checked;
     sessionStorage.setItem(checkStateKey, JSON.stringify(reviewedState));
     if (checked) {
-      // Item moves to Resolved — find next sibling row for scroll target
+      // Item moves to Resolved — show a brief "moving to resolved" flash, then re-render
       const row = document.getElementById('row_' + checkId);
       let nextMsg = null;
       if (row) {
-        // Find the next row with data-cs-msg in the DOM (sibling or next section)
+        // Find the next row for scroll target
         let sibling = row.nextElementSibling;
         while (sibling && !sibling.getAttribute('data-cs-msg')) sibling = sibling.nextElementSibling;
         if (sibling) nextMsg = sibling.getAttribute('data-cs-msg');
-        row.style.transition = 'opacity 0.3s, transform 0.3s';
-        row.style.opacity = '0';
-        row.style.transform = 'translateX(20px)';
+        // Flash green with "→ Resolved" label so user sees what's happening
+        row.style.transition = 'background 0.3s, border-color 0.3s';
+        row.style.background = '#dcfce7';
+        row.style.borderRadius = '8px';
+        const inner = row.querySelector('div');
+        if (inner) {
+          inner.style.transition = 'background 0.3s, border-color 0.3s';
+          inner.style.background = '#dcfce7';
+          inner.style.borderColor = '#16a34a';
+        }
+        // Add a brief "→ Resolved" indicator
+        const tag = document.createElement('div');
+        tag.style.cssText = 'text-align:center;font-size:12px;font-weight:700;color:#16a34a;padding:4px 0;';
+        tag.textContent = '→ Moving to Resolved';
+        row.appendChild(tag);
+        // Then fade out
+        setTimeout(() => {
+          row.style.transition = 'opacity 0.5s, transform 0.5s';
+          row.style.opacity = '0';
+          row.style.transform = 'translateX(30px)';
+        }, 600);
       }
       if (nextMsg) window._csScrollTargetMsg = nextMsg;
+      // Set the resolved item name for the sticky toast
+      // Find the item's display message from its data-cs-msg attribute
+      const itemMsg = row ? row.getAttribute('data-cs-msg') : null;
+      if (itemMsg) window._csJustResolved = itemMsg;
       setTimeout(async () => {
         document.getElementById('checkSurveyOverlay')?.remove();
         await checkSurvey();
-        // _csRestoreScroll auto-fires via the auto-restore at end of checkSurvey
-      }, 300);
+      }, 1200);
     } else {
       // Unchecked — item returns from Resolved to active list, re-render
       const scrollEl = document.getElementById('csScrollContainer');
