@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2031';
+const APP_VERSION = 'v2032';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2003,7 +2003,7 @@ function showNotesSheet(itemLabel, categoryName) {
         ${snippetsHtml}
         ${standardsHtml}
         <div class="sheet-btn-row">
-          <button onclick="document.getElementById('bottomSheetOverlay').remove();" style="background:#e5e7eb;color:#374151;">Cancel</button>
+          <button onclick="closeNotesSheet('${safeLabel}');" style="background:#e5e7eb;color:#374151;">Cancel</button>
           <button onclick="saveNotesFromSheet('${safeLabel}', '${safeCat}', '${sanitizedLabel}');" style="background:#1e3a5f;color:white;">Save Notes</button>
         </div>
       </div>
@@ -2123,6 +2123,32 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
   }
 }
 
+// Close the notes bottom sheet and return the surveyor to the specific
+// checklist row they were editing — not the top of the inspection view.
+// iOS occasionally loses the scroll position of the underlying page while
+// the sheet is overlaid, so we scroll the compact-item-wrapper back into
+// view explicitly. Used by both Cancel and Save Notes.
+function closeNotesSheet(itemLabel) {
+  const overlay = document.getElementById('bottomSheetOverlay');
+  if (overlay) overlay.remove();
+  // Defer until the overlay is fully removed so scrollIntoView measures
+  // against the newly-visible underlying page.
+  setTimeout(() => {
+    if (!itemLabel) return;
+    const row = document.querySelector(
+      `.compact-item-wrapper[data-item-label="${String(itemLabel).replace(/"/g, '\\"')}"]`
+    );
+    if (row && typeof row.scrollIntoView === 'function') {
+      try {
+        row.scrollIntoView({ block: 'center', behavior: 'auto' });
+      } catch (e) {
+        row.scrollIntoView();
+      }
+    }
+  }, 0);
+}
+window.closeNotesSheet = closeNotesSheet;
+
 // Save notes from the notes sheet and close
 function saveNotesFromSheet(itemLabel, categoryName, sanitizedLabel) {
   const textarea = document.getElementById(`sheet-text-${sanitizedLabel}`);
@@ -2137,9 +2163,10 @@ function saveNotesFromSheet(itemLabel, categoryName, sanitizedLabel) {
     }
     survey.items[itemLabel].text = newText;
     saveSurvey(survey).then(() => {
-      const overlay = document.getElementById('bottomSheetOverlay');
-      if (overlay) overlay.remove();
       updateCompactItem(survey, itemLabel, categoryName);
+      // Dismiss overlay AFTER the compact item is re-rendered so scroll
+      // position can find the row that was just updated.
+      closeNotesSheet(itemLabel);
     });
   });
 }
