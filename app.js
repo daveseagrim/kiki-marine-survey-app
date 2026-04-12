@@ -86,11 +86,14 @@ async function forceAppUpdate() {
       }
     }
     showToast('Update found — reloading…');
+    // Ensure current view state is saved so we return to the same screen
+    persistViewState();
     await new Promise(r => setTimeout(r, 500));
     // Reload with cache bypass
     window.location.reload(true);
   } catch (err) {
     console.error('Force update error:', err);
+    persistViewState();
     window.location.reload(true);
   }
 }
@@ -1987,7 +1990,11 @@ function showNotesSheet(itemLabel, categoryName) {
         // just duplicates what's in the textarea + chip strip. The surveyor
         // only needs the cards when first choosing a template. We expose
         // a "Change template ▸" disclosure so they can still switch.
-        const hasExistingText = !!(itemData.text && itemData.text.trim());
+        // Don't collapse if text is trivial (e.g. "none", "n/a", "-") — these are
+        // placeholders, not real template content, so the surveyor still needs snippets
+        const trimmed = (itemData.text || '').trim().toLowerCase();
+        const isTrivialText = ['', 'none', 'n/a', 'na', '-', '--', 'tbd'].includes(trimmed);
+        const hasExistingText = !!(itemData.text && itemData.text.trim()) && !isTrivialText;
         const startCollapsed = hasExistingText;
         const toggleLabel = sheetVariants.length === 1
           ? 'Change template'
