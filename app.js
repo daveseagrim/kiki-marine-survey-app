@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2098';
+const APP_VERSION = 'v2099';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -8091,6 +8091,12 @@ function renderInspection(survey) {
     saveSurvey(survey);
   }
 
+  // Retroactive engine sync — populate intro from body if body has data and intro is empty
+  if (_retroSyncEngineFromBody(survey)) {
+    saveSurvey(survey);
+    showToast('Engine info synced to intro');
+  }
+
   const esc = (s) => (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
 
   currentView = 'inspection';
@@ -13591,6 +13597,52 @@ function updateStandards(itemLabel, checkbox) {
 
 function saveItemData(itemLabel, categoryName) {
   autoSaveItemText(itemLabel, categoryName);
+}
+
+// Retroactive engine sync — runs once when a survey is opened for inspection.
+// If body checklist items have engine/gearbox data but the intro header fields are empty,
+// copies the body data into the intro so both places are populated.
+function _retroSyncEngineFromBody(survey) {
+  let changed = false;
+  const items = survey.items || {};
+
+  // Sync engine hours
+  const ehItem = items['Engine hours'];
+  if (ehItem && ehItem.text && ehItem.text.trim() && !survey.engineHours) {
+    survey.engineHours = ehItem.text.trim();
+    changed = true;
+  }
+
+  // Sync engine make/model/serial
+  const emItem = items['Engine(s) manufacturer, model # and serial number (if available)'];
+  if (emItem && emItem.text && emItem.text.trim() && !survey.engineMake && !survey.engineModel) {
+    _parseAndSyncMakeModelSerial(survey, emItem.text.trim(), 'engine');
+    changed = true;
+  }
+
+  // Sync gearbox/transmission make/model/serial
+  const gmItem = items['Gearbox manufacturer, model # and serial # (if available)'];
+  if (gmItem && gmItem.text && gmItem.text.trim() && !survey.transmissionMake && !survey.transmissionModel) {
+    _parseAndSyncMakeModelSerial(survey, gmItem.text.trim(), 'transmission');
+    changed = true;
+  }
+
+  // Sync photos (engine, engine plate, gearbox plate)
+  const _firstPhoto = (label) => {
+    const item = items[label];
+    return (item && item.photos && item.photos.length > 0) ? item.photos[0] : null;
+  };
+
+  const ep = _firstPhoto('Engine(s) and drive(s) photos');
+  if (ep !== null && !survey.enginePhoto) { survey.enginePhoto = ep; changed = true; }
+
+  const enp = _firstPhoto('Engine name plate(s)');
+  if (enp !== null && !survey.enginePlatePhoto) { survey.enginePlatePhoto = enp; changed = true; }
+
+  const gp = _firstPhoto('Gearbox nameplate(s)');
+  if (gp !== null && !survey.transmissionPlatePhoto) { survey.transmissionPlatePhoto = gp; changed = true; }
+
+  return changed;
 }
 
 // Auto-save item text on blur — no alert, just a subtle toast
