@@ -3,11 +3,8 @@
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "A",
-      "text": "Below the waterline, the {any:hull|port hull|starboard hull|centre hull} exhibited {any:deep gouging^TP1332|significant delamination^TP1332|structural cracking^TP1332|extensive osmotic blistering^TP1332|visible impact damage^TP1332|exposed laminate^TP1332|wet core^TP1332|severe corrosion on metal surfaces^TP1332} that compromised structural integrity. Immediate professional repair is required before the vessel is relaunched.{standards? This condition violates STANDARDS.}",
+      "text": "Below the waterline, the hull exhibited {any:deep gouging^TP1332|significant delamination^TP1332|structural cracking^TP1332|extensive osmotic blistering^TP1332|visible impact damage^TP1332|exposed laminate^TP1332|wet core^TP1332|severe corrosion on metal surfaces^TP1332} that compromised structural integrity. Immediate professional repair is required before the vessel is relaunched.{standards? This condition violates STANDARDS.}",
       "placeholders": {
-        "any:hull|port hull|starboard hull|centre hull": {
-          "multi": true
-        },
         "any:deep gouging^TP1332|significant delamination^TP1332|structural cracking^TP1332|extensive osmotic blistering^TP1332|visible impact damage^TP1332|exposed laminate^TP1332|wet core^TP1332|severe corrosion on metal surfaces^TP1332": {
           "multi": true
         }
@@ -16,11 +13,8 @@
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
-      "text": "Below the waterline, the {any:hull|port hull|starboard hull|centre hull} were serviceable overall. {any:The anti-fouling has worn thin in places and should be lightly sanded and recoated with anti-fouling before the vessel is relaunched|The anti-fouling is worn off in places, exposing the gelcoat, and these areas should be sanded and recoated with anti-fouling before the vessel is relaunched|Minor surface cracking was observed and the affected area(s) should be sanded to the gelcoat and recoated with anti-fouling before the vessel is relaunched|Localized blister(s) were noted and should be sanded to the barrier coat, recoated with gelcoat and anti-fouling before the vessel is relaunched|A gouge was noted and the affected area should be filled with fairing compound, faired, and recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|Minor scrapes and dings were noted and the affected area(s) should be touched up with gelcoat and anti-fouling before the vessel is relaunched|Cosmetic scoring was noted and should be lightly sanded and recoated with anti-fouling before the vessel is relaunched|An area of exposed fibreglass was noted and should be recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched}.",
+      "text": "Below the waterline, the hull was serviceable overall. {any:The anti-fouling has worn thin in places and should be lightly sanded and recoated with anti-fouling before the vessel is relaunched|The anti-fouling is worn off in places, exposing the gelcoat, and these areas should be sanded and recoated with anti-fouling before the vessel is relaunched|Minor surface cracking was observed and the affected area(s) should be sanded to the gelcoat and recoated with anti-fouling before the vessel is relaunched|Localized blister(s) were noted and should be sanded to the barrier coat, recoated with gelcoat and anti-fouling before the vessel is relaunched|A gouge was noted and the affected area should be filled with fairing compound, faired, and recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|Minor scrapes and dings were noted and the affected area(s) should be touched up with gelcoat and anti-fouling before the vessel is relaunched|Cosmetic scoring was noted and should be lightly sanded and recoated with anti-fouling before the vessel is relaunched|An area of exposed fibreglass was noted and should be recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched}.",
       "placeholders": {
-        "any:hull|port hull|starboard hull|centre hull": {
-          "multi": true
-        },
         "any:The anti-fouling has worn thin in places and should be lightly sanded and recoated with anti-fouling before the vessel is relaunched|The anti-fouling is worn off in places, exposing the gelcoat, and these areas should be sanded and recoated with anti-fouling before the vessel is relaunched|Minor surface cracking was observed and the affected area(s) should be sanded to the gelcoat and recoated with anti-fouling before the vessel is relaunched|Localized blister(s) were noted and should be sanded to the barrier coat, recoated with gelcoat and anti-fouling before the vessel is relaunched|A gouge was noted and the affected area should be filled with fairing compound, faired, and recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|Minor scrapes and dings were noted and the affected area(s) should be touched up with gelcoat and anti-fouling before the vessel is relaunched|Cosmetic scoring was noted and should be lightly sanded and recoated with anti-fouling before the vessel is relaunched|An area of exposed fibreglass was noted and should be recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched": {
           "multi": true
         }
@@ -29,11 +23,8 @@
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "C",
-      "text": "Below the waterline, the {any:hull|port hull|starboard hull|centre hull} were {specify:serviceable with no visible damage|in good overall condition with only cosmetic wear|in serviceable condition for normal use}. The anti-fouling was {specify:in good condition|showing normal seasonal wear|recently reapplied and intact}.",
+      "text": "Below the waterline, the hull was {specify:serviceable with no visible damage|in good overall condition with only cosmetic wear|in serviceable condition for normal use}. The anti-fouling was {specify:in good condition|showing normal seasonal wear|recently reapplied and intact}.",
       "placeholders": {
-        "any:hull|port hull|starboard hull|centre hull": {
-          "multi": true
-        },
         "specify:serviceable with no visible damage|in good overall condition with only cosmetic wear|in serviceable condition for normal use": {
           "multi": false
         },

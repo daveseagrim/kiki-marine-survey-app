@@ -102,6 +102,7 @@
           {
             "type": "list",
             "label": "Hull(s) condition (below the waterline)",
+            "hullItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",

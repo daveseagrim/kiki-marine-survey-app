@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2042';
+const APP_VERSION = 'v2043';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1245,7 +1245,9 @@ const ITEM_SNIPPET_MAP = {
   'Gearbox general condition/impressions': 'Gearbox general condition and impressions',
   'Hull-deck joint (exterior)': 'Hull–deck joint (exterior)',
   'Hull(s) condition (below the waterline)': 'Hull(s) condition (below the waterline)',
+  'Hull condition (below the waterline)': 'Hull(s) condition (below the waterline)',
   'Rudder(s) condition': 'Rudder(s) condition',
+  'Rudder condition': 'Rudder(s) condition',
   'Hull and rudder(s) (if applicable) impact and resonance testing': 'Hull and rudder(s) impact and resonance testing',
   'Hull and rudder(s) (if applicable) conductivity testing': 'Hull and rudder(s) conductivity testing',
   'Hydraulic steering': 'Hydraulic steering (hoses, fittings, steering cylinder, tiller arm or tie bar, rudder post and stuffing box, etc.)',
@@ -1972,11 +1974,13 @@ function showNotesSheet(itemLabel, categoryName) {
 
     // Component builder — check if this item has a builder definition
     let componentBuilderHtml = '';
-    // Strip drive-line prefix (e.g., "Port — ", "Starboard — ", "#1 — ") for builder lookup
-    // Strip drive-line prefix (e.g., "Port — ") and re-add "(s)" stripped during expansion
+    // Strip expansion prefixes (drive-line or hull) for builder lookup
     let builderLookupLabel = itemLabel;
+    const hullPrefixMatch = itemLabel.match(/^(?:Port hull|Starboard hull|Centre hull)\s*—\s*/);
     const driveLinePrefixMatch = itemLabel.match(/^(?:Port|Starboard|#\d+)\s*—\s*/);
-    if (driveLinePrefixMatch) {
+    if (hullPrefixMatch) {
+      builderLookupLabel = itemLabel.substring(hullPrefixMatch[0].length);
+    } else if (driveLinePrefixMatch) {
       builderLookupLabel = itemLabel.substring(driveLinePrefixMatch[0].length);
     }
     // Exact match first
@@ -2108,9 +2112,11 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
     // Starboard —, #N —) always force singular because each expanded item
     // is about ONE component.
     const survey = window._currentSurveyCache || null;
-    const sideMatch = itemLabel.match(/^(Port|Starboard|#\d+)\s*—\s*/);
-    const isPerDriveLine = !!sideMatch;
-    const sideWord = sideMatch ? sideMatch[1] : '';
+    // Match drive-line prefixes (Port —, Starboard —) but NOT hull prefixes (Port hull —)
+    const sideMatch = itemLabel.match(/^(Port|Starboard|#\d+)\s*—\s*/) && !itemLabel.match(/^(?:Port|Starboard|Centre) hull\s*—/);
+    const driveMatch = sideMatch ? itemLabel.match(/^(Port|Starboard|#\d+)\s*—\s*/) : null;
+    const isPerDriveLine = !!driveMatch;
+    const sideWord = driveMatch ? driveMatch[1] : '';
     const dlc = isPerDriveLine
       ? 1
       : ((survey && survey.driveLineCount) ? parseInt(survey.driveLineCount, 10) || 1 : 1);
@@ -2929,6 +2935,15 @@ function inferHullType(boatStyle) {
   return '';
 }
 
+// Derive hull count from boat style / hull type (1=mono, 2=cat, 3=tri)
+function inferHullCount(survey) {
+  if (survey.hullCount) return parseInt(survey.hullCount, 10) || 1;
+  const s = ((survey.boatStyle || '') + ' ' + (survey.hullType || '')).toLowerCase();
+  if (s.includes('trimaran')) return 3;
+  if (s.includes('catamaran') || s.includes('pontoon')) return 2;
+  return 1;
+}
+
 // Get vessel type from boatStyle string
 function getVesselType(boatStyle) {
   if (!boatStyle) return 'power';
@@ -3088,8 +3103,21 @@ function findTextVariants(categoryName, itemLabel, baseRating) {
 
   if (!sheet) return [];
 
-  // Strip "Head N — " prefix for matching expanded head items back to base snippets
-  let resolvedLabel = itemLabel.replace(/^Head \d+ — /, 'Head, ');
+  // Strip expansion prefixes for matching expanded items back to base snippets
+  // Head: "Head 2 — Toilet" → "Head, Toilet"
+  // Drive line: "Port — Propeller" → "Propeller(s)"
+  // Hull: "Port hull — Hull condition (below the waterline)" → "Hull(s) condition (below the waterline)"
+  let resolvedLabel = itemLabel
+    .replace(/^Head \d+ — /, 'Head, ')
+    .replace(/^(?:Port hull|Starboard hull|Centre hull)\s*—\s*/, match => {
+      // Restore "(s)" so it matches the text_library section name
+      return '';
+    })
+    .replace(/^(?:Port|Starboard|#\d+)\s*—\s*/, '');
+  // Restore "(s)" for hull items that had it stripped during expansion
+  if (/^Hull condition/.test(resolvedLabel)) {
+    resolvedLabel = resolvedLabel.replace(/^Hull /, 'Hull(s) ');
+  }
 
   // Use explicit mapping if available, otherwise keep the resolved label
   const hadExplicitMap = !!ITEM_SNIPPET_MAP[resolvedLabel];
@@ -7790,6 +7818,41 @@ function renderInspection(survey) {
     }
   }
 
+  // ── Expand hull items by hull count (catamaran / trimaran) ──────────
+  const hullCount = inferHullCount(survey);
+  if (hullCount === 1) {
+    // Singularise hull item labels: "Hull(s) condition" → "Hull condition"
+    for (const [catName, items] of Object.entries(ratedItemsByCategory)) {
+      ratedItemsByCategory[catName] = items.map(item => {
+        if (item.hullItem) return { ...item, label: item.label.replace(/\(s\)/g, '') };
+        return item;
+      });
+    }
+  }
+  if (hullCount > 1) {
+    const hullLabels = hullCount === 2
+      ? ['Port hull', 'Starboard hull']
+      : ['Port hull', 'Centre hull', 'Starboard hull'];
+
+    for (const [catName, items] of Object.entries(ratedItemsByCategory)) {
+      const hItems = items.filter(i => i.hullItem);
+      if (hItems.length === 0) continue;
+      const expanded = [];
+      items.forEach(item => {
+        if (!item.hullItem) {
+          expanded.push(item);
+        } else {
+          const baseLabel = item.label.replace(/\(s\)/g, '').replace(/^Hull\s+/, 'Hull ');
+          for (let h = 0; h < hullCount; h++) {
+            expanded.push({ ...item, label: `${hullLabels[h]} — ${baseLabel.trim()}` });
+          }
+        }
+      });
+      totalRatedItems = totalRatedItems - hItems.length + (hItems.length * hullCount);
+      ratedItemsByCategory[catName] = expanded;
+    }
+  }
+
   survey.totalRatedItems = totalRatedItems;
 
   // Render categories
@@ -7867,6 +7930,21 @@ function renderInspection(survey) {
           <select id="headCountSelect" onchange="updateHeadCount(parseInt(this.value))"
                   style="padding:8px 12px;border:1px solid #93c5fd;border-radius:6px;font-size:15px;font-weight:600;background:white;color:#1e3a5f;min-width:60px;">
             ${[1,2,3,4].map(n => `<option value="${n}" ${headCount === n ? 'selected' : ''}>${n}</option>`).join('')}
+          </select>
+        </div>
+      `;
+    }
+
+    // Hull count selector — for catamarans and trimarans
+    if (categoryName === 'Hull exterior, keel and propulsion') {
+      html += `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;">
+          <span style="font-size:13px;font-weight:600;color:#1e3a5f;">🚢 Number of hulls:</span>
+          <select id="hullCountSelect" onchange="updateHullCount(parseInt(this.value))"
+                  style="padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:14px;font-weight:600;background:white;color:#1e3a5f;min-width:50px;">
+            <option value="1" ${hullCount === 1 ? 'selected' : ''}>1 (monohull)</option>
+            <option value="2" ${hullCount === 2 ? 'selected' : ''}>2 (catamaran)</option>
+            <option value="3" ${hullCount === 3 ? 'selected' : ''}>3 (trimaran)</option>
           </select>
         </div>
       `;
@@ -10946,13 +11024,52 @@ function updateCategoryHeader(survey, categoryName) {
 
   if (categoryItems.length === 0) return;
 
-  // Singularise drive line item labels when there is only 1 drive line
+  // Expand / singularise drive line items for header progress tracking
   const headerDriveLineCount = survey.driveLineCount || 1;
   if (headerDriveLineCount === 1) {
     categoryItems = categoryItems.map(item => {
       if (item.driveLineItem) return { ...item, label: item.label.replace(/\(s\)/g, '') };
       return item;
     });
+  } else {
+    const dlLabels = headerDriveLineCount === 2
+      ? ['Port', 'Starboard']
+      : Array.from({ length: headerDriveLineCount }, (_, i) => `#${i + 1}`);
+    const expanded = [];
+    categoryItems.forEach(item => {
+      if (!item.driveLineItem) { expanded.push(item); }
+      else {
+        const base = item.label.replace(/\(s\)/g, '');
+        for (let t = 0; t < headerDriveLineCount; t++) {
+          expanded.push({ ...item, label: `${dlLabels[t]} — ${base.trim()}` });
+        }
+      }
+    });
+    categoryItems = expanded;
+  }
+
+  // Expand / singularise hull items for header progress tracking
+  const headerHullCount = inferHullCount(survey);
+  if (headerHullCount === 1) {
+    categoryItems = categoryItems.map(item => {
+      if (item.hullItem) return { ...item, label: item.label.replace(/\(s\)/g, '') };
+      return item;
+    });
+  } else {
+    const hullLabels = headerHullCount === 2
+      ? ['Port hull', 'Starboard hull']
+      : ['Port hull', 'Centre hull', 'Starboard hull'];
+    const expanded = [];
+    categoryItems.forEach(item => {
+      if (!item.hullItem) { expanded.push(item); }
+      else {
+        const base = item.label.replace(/\(s\)/g, '').replace(/^Hull\s+/, 'Hull ');
+        for (let h = 0; h < headerHullCount; h++) {
+          expanded.push({ ...item, label: `${hullLabels[h]} — ${base.trim()}` });
+        }
+      }
+    });
+    categoryItems = expanded;
   }
 
   const completionCount = categoryItems.filter(item =>
@@ -11261,6 +11378,15 @@ function updateItemInPlace(survey, itemLabel) {
 function updateHeadCount(count) {
   getSurvey(currentSurveyId).then(survey => {
     survey.headCount = count;
+    saveSurvey(survey).then(() => {
+      renderInspection(survey);
+    });
+  });
+}
+
+function updateHullCount(count) {
+  getSurvey(currentSurveyId).then(survey => {
+    survey.hullCount = count;
     saveSurvey(survey).then(() => {
       renderInspection(survey);
     });
@@ -12355,6 +12481,54 @@ async function generateReport() {
     }
   }
 
+  // ── Report expansion helper ───────────────────────────────────────────
+  // Expand drive-line and hull items so the report picks up data saved
+  // under expanded labels like "Port — Propeller" or "Port hull — Hull condition".
+  const reportDriveLineCount = survey.driveLineCount || 1;
+  const reportHullCount = inferHullCount(survey);
+  function expandReportItems(items) {
+    let result = items;
+    // Drive line expansion / singularisation
+    if (reportDriveLineCount === 1) {
+      result = result.map(item => item.driveLineItem ? { ...item, label: item.label.replace(/\(s\)/g, '') } : item);
+    } else {
+      const dlLabels = reportDriveLineCount === 2
+        ? ['Port', 'Starboard']
+        : Array.from({ length: reportDriveLineCount }, (_, i) => `#${i + 1}`);
+      const expanded = [];
+      result.forEach(item => {
+        if (!item.driveLineItem) { expanded.push(item); }
+        else {
+          const base = item.label.replace(/\(s\)/g, '');
+          for (let t = 0; t < reportDriveLineCount; t++) {
+            expanded.push({ ...item, label: `${dlLabels[t]} — ${base.trim()}` });
+          }
+        }
+      });
+      result = expanded;
+    }
+    // Hull expansion / singularisation
+    if (reportHullCount === 1) {
+      result = result.map(item => item.hullItem ? { ...item, label: item.label.replace(/\(s\)/g, '') } : item);
+    } else {
+      const hullLabels = reportHullCount === 2
+        ? ['Port hull', 'Starboard hull']
+        : ['Port hull', 'Centre hull', 'Starboard hull'];
+      const expanded = [];
+      result.forEach(item => {
+        if (!item.hullItem) { expanded.push(item); }
+        else {
+          const base = item.label.replace(/\(s\)/g, '').replace(/^Hull\s+/, 'Hull ');
+          for (let h = 0; h < reportHullCount; h++) {
+            expanded.push({ ...item, label: `${hullLabels[h]} — ${base.trim()}` });
+          }
+        }
+      });
+      result = expanded;
+    }
+    return result;
+  }
+
   // ── Pass 1: collect all findings ──────────────────────────────────────
   let findingCount = { A: 0, B: 0, C: 0, NT: 0 };
   let findings = { A: [], B: [], C: [], NT: [] };
@@ -12363,7 +12537,7 @@ async function generateReport() {
     if (section.name === 'Kiki Marine Survey' && section.categories) {
       section.categories.forEach(category => {
         if (!category.items || category.name === 'Survey Specifications' || category.name === 'Vessel Specifications') return;
-        category.items.filter(i => i.type === 'list').forEach(item => {
+        expandReportItems(category.items.filter(i => i.type === 'list')).forEach(item => {
           const d = survey.items[item.label];
           if (!d || !d.rating || d.excluded) return;
           const r = d.rating;
@@ -12954,7 +13128,7 @@ ${survey.vesselDescription ? `
       section.categories.forEach(category => {
         if (!category.items || category.name === 'Survey Specifications' || category.name === 'Vessel Specifications') return;
 
-        const ratedItems = category.items.filter(item => item.type === 'list');
+        const ratedItems = expandReportItems(category.items.filter(item => item.type === 'list'));
         // Include items that have: a rating OR text/notes OR photos (and are not excluded)
         const completedItems = ratedItems.filter(item => {
           const itemData = survey.items[item.label];
