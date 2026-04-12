@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2062';
+const APP_VERSION = 'v2063';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -8797,11 +8797,11 @@ async function checkSurvey() {
   const survey = await getSurvey(currentSurveyId);
   if (!survey) { showAlert('No survey loaded.'); return; }
 
-  const issues = [];   // { severity: 'critical'|'warning'|'info', category: string, message: string, itemLabel?: string }
+  const issues = [];   // { severity, category, message, itemLabel?, navId? }
 
-  // Helper: add issue
-  const add = (severity, category, message, itemLabel) => {
-    issues.push({ severity, category, message, itemLabel: itemLabel || null });
+  // Helper: add issue — navId is optional DOM element ID for non-checklist items
+  const add = (severity, category, message, itemLabel, navId) => {
+    issues.push({ severity, category, message, itemLabel: itemLabel || null, navId: navId || null });
   };
 
   // ── 1. HEADER FIELDS ────────────────────────────────────────────────────
@@ -8834,12 +8834,12 @@ async function checkSurvey() {
 
   for (const [field, label] of requiredHeader) {
     if (!survey[field] || survey[field].trim() === '' || survey[field] === 'Select') {
-      add('critical', 'Header Fields', `Missing: ${label}`, null);
+      add('critical', 'Header Fields', `Missing: ${label}`, null, field);
     }
   }
   for (const [field, label] of importantHeader) {
     if (!survey[field] || survey[field].trim() === '') {
-      add('warning', 'Header Fields', `Missing: ${label}`, null);
+      add('warning', 'Header Fields', `Missing: ${label}`, null, field);
     }
   }
 
@@ -8857,7 +8857,7 @@ async function checkSurvey() {
     let missingEngineCount = 0;
     for (const [field, label] of engineFields) {
       if (!survey[field] || survey[field].trim() === '') {
-        add('critical', 'Engine & Transmission', `Missing: ${label}`, null);
+        add('critical', 'Engine & Transmission', `Missing: ${label}`, null, field);
         missingEngineCount++;
       }
     }
@@ -8868,7 +8868,7 @@ async function checkSurvey() {
     ];
     for (const [field, label] of transFields) {
       if (!survey[field] || survey[field].trim() === '') {
-        add('warning', 'Engine & Transmission', `Missing: ${label}`, null);
+        add('warning', 'Engine & Transmission', `Missing: ${label}`, null, field);
       }
     }
     // Check if engine data exists in checklist items that could be migrated
@@ -8885,10 +8885,10 @@ async function checkSurvey() {
   }
 
   // ── 3. DOCUMENTATION PHOTOS ─────────────────────────────────────────────
-  if (!survey.hinPhoto) add('critical', 'Documentation Photos', 'Missing: HIN plate photo', null);
-  if (!survey.compliancePhoto) add('warning', 'Documentation Photos', 'Missing: Compliance plate photo', null);
-  if (!survey.coverPhoto) add('warning', 'Documentation Photos', 'Missing: Cover photo', null);
-  if (!survey.licencePhoto) add('info', 'Documentation Photos', 'Missing: TC licence photo', null);
+  if (!survey.hinPhoto) add('critical', 'Documentation Photos', 'Missing: HIN plate photo', null, 'hinPhotoBtn');
+  if (!survey.compliancePhoto) add('warning', 'Documentation Photos', 'Missing: Compliance plate photo', null, 'compliancePhotoBtn');
+  if (!survey.coverPhoto) add('warning', 'Documentation Photos', 'Missing: Cover photo', null, 'coverPhotoBtn');
+  if (!survey.licencePhoto) add('info', 'Documentation Photos', 'Missing: TC licence photo', null, 'licencePhotoBtn');
 
   // Four-corner photos
   const cornerFields = ['fourCornerPortBow','fourCornerStbdBow','fourCornerPortStern','fourCornerStbdStern'];
@@ -9071,19 +9071,19 @@ async function checkSurvey() {
 
   // ── 5. VALUATION ────────────────────────────────────────────────────────
   if (!survey.valuationLow && !survey.valuationHigh) {
-    add('critical', 'Valuation', 'Missing: Fair market value (low and high)', null);
+    add('critical', 'Valuation', 'Missing: Fair market value (low and high)', null, 'inspValLow');
   } else {
-    if (!survey.valuationLow) add('warning', 'Valuation', 'Missing: Low value estimate', null);
-    if (!survey.valuationHigh) add('warning', 'Valuation', 'Missing: High value estimate', null);
+    if (!survey.valuationLow) add('warning', 'Valuation', 'Missing: Low value estimate', null, 'inspValLow');
+    if (!survey.valuationHigh) add('warning', 'Valuation', 'Missing: High value estimate', null, 'inspValHigh');
   }
-  if (!survey.overallCondition) add('critical', 'Valuation', 'Missing: Overall condition rating (BUC grade)', null);
+  if (!survey.overallCondition) add('critical', 'Valuation', 'Missing: Overall condition rating (BUC grade)', null, 'inspCondition');
   if (!survey.valuationRationale && !survey.valuationSource) {
-    add('warning', 'Valuation', 'Missing: Valuation rationale or source', null);
+    add('warning', 'Valuation', 'Missing: Valuation rationale or source', null, 'inspValRationale');
   }
   if ((!survey.comparables || survey.comparables.length === 0) || survey.comparables.every(c => !c.vessel)) {
-    add('warning', 'Valuation', 'No comparable vessels entered', null);
+    add('warning', 'Valuation', 'No comparable vessels entered', null, 'inspValLow');
   }
-  if (!survey.replacementCost) add('info', 'Valuation', 'Missing: Replacement cost estimate', null);
+  if (!survey.replacementCost) add('info', 'Valuation', 'Missing: Replacement cost estimate', null, 'inspReplacementCost');
 
   // ── 6. SAFETY EQUIPMENT ─────────────────────────────────────────────────
   if (!survey.safetyEquipment || survey.safetyEquipment.length === 0) {
@@ -9316,9 +9316,10 @@ async function checkSurvey() {
       </div>`;
   }
 
-  // Store item labels in a global array so Go buttons can reference by index
+  // Store item data in global arrays so Go buttons can reference by index
   // (avoids special-character issues in onclick HTML attributes)
   window._csItemLabels = allCheckItems.map(it => it.itemLabel || null);
+  window._csItemNavIds = allCheckItems.map(it => it.navId || null);
   window._csCheckIds = allCheckItems.map(it => it._checkId);
 
   let globalIdx = 0;
@@ -9341,7 +9342,7 @@ async function checkSurvey() {
       const isReviewed = !!reviewedState[item._checkId];
       const ratingChar = item.rating ? item.rating.charAt(0) : '';
       const rColor = ratingColors[ratingChar] || '#6b7280';
-      const hasTappableItem = !!item.itemLabel;
+      const hasTappableItem = !!(item.itemLabel || item.navId);
       const hasContent = !!(item.text || item.rating);
 
       // Rating badge
@@ -9480,14 +9481,16 @@ async function checkSurvey() {
   // Navigate to item by index — uses global _csItemLabels array
   window._csGoToItem = function(idx) {
     const itemLabel = window._csItemLabels[idx];
+    const navId = window._csItemNavIds[idx];
     const checkId = window._csCheckIds[idx];
-    if (!itemLabel) return;
+    if (!itemLabel && !navId) return;
 
     // Store the issue we're working on so we can evaluate when returning
     const workingItem = allCheckItems[idx];
     window._csWorkingOn = {
       idx: idx,
       itemLabel: itemLabel,
+      navId: navId,
       checkId: checkId,
       severity: workingItem ? workingItem.severity : null,
       category: workingItem ? workingItem.category : null,
@@ -9501,26 +9504,27 @@ async function checkSurvey() {
     // Close the overlay
     document.getElementById('checkSurveyOverlay')?.remove();
 
-    // Find the item element and expand its parent accordion, then scroll to it
+    // Find the target element and scroll to it
     setTimeout(() => {
-      // Find the element — try querySelector first, fall back to manual loop
       let el = null;
-      const allWrappers = document.querySelectorAll('.compact-item-wrapper');
-      for (const w of allWrappers) {
-        if (w.getAttribute('data-item-label') === itemLabel) {
-          el = w;
-          break;
+
+      if (itemLabel) {
+        // Checklist item — find by data-item-label attribute
+        const allWrappers = document.querySelectorAll('.compact-item-wrapper');
+        for (const w of allWrappers) {
+          if (w.getAttribute('data-item-label') === itemLabel) { el = w; break; }
         }
-      }
-      if (!el) {
-        // Also check rated-item wrappers
-        const ratedItems = document.querySelectorAll('.rated-item');
-        for (const w of ratedItems) {
-          if (w.getAttribute('data-item-label') === itemLabel) {
-            el = w;
-            break;
+        if (!el) {
+          const ratedItems = document.querySelectorAll('.rated-item');
+          for (const w of ratedItems) {
+            if (w.getAttribute('data-item-label') === itemLabel) { el = w; break; }
           }
         }
+      } else if (navId) {
+        // Form field — find by element ID
+        el = document.getElementById(navId);
+        // Also try common container patterns (label, form-group)
+        if (!el) el = document.querySelector(`[for="${navId}"]`);
       }
 
       if (el) {
@@ -9529,7 +9533,6 @@ async function checkSurvey() {
         if (accordion) {
           const content = accordion.querySelector('.accordion-content');
           if (content && content.style.display === 'none') {
-            // Close any other open accordions first
             document.querySelectorAll('.accordion-content').forEach(ac => {
               if (ac !== content && ac.style.display !== 'none') {
                 ac.style.display = 'none';
@@ -9538,12 +9541,10 @@ async function checkSurvey() {
                 if (chev) chev.style.transform = 'rotate(0deg)';
               }
             });
-            // Open this one
             content.style.display = 'block';
             const header = accordion.querySelector('.accordion-header');
             const chevron = header?.querySelector('span:last-child');
             if (chevron) chevron.style.transform = 'rotate(180deg)';
-            // Update tracked open category
             const titleSpan = header?.querySelector('.category-title');
             if (titleSpan && typeof _openAccordionCategory !== 'undefined') {
               _openAccordionCategory = titleSpan.textContent.replace(/^[^\w]*/, '').trim();
@@ -9552,13 +9553,19 @@ async function checkSurvey() {
           }
         }
 
-        // Scroll to the item after a brief delay to let the accordion render
+        // Scroll and highlight
         setTimeout(() => {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          el.style.transition = 'background 0.3s, box-shadow 0.3s';
-          el.style.background = '#fef3c7';
-          el.style.boxShadow = '0 0 0 3px #f59e0b';
-          setTimeout(() => { el.style.background = ''; el.style.boxShadow = ''; }, 3000);
+          // For form fields, highlight the container or the field itself
+          const highlightEl = el.closest('.form-group') || el;
+          highlightEl.style.transition = 'background 0.3s, box-shadow 0.3s';
+          highlightEl.style.background = '#fef3c7';
+          highlightEl.style.boxShadow = '0 0 0 3px #f59e0b';
+          setTimeout(() => { highlightEl.style.background = ''; highlightEl.style.boxShadow = ''; }, 3000);
+          // Focus the field if it's an input/select/textarea
+          if (['INPUT','SELECT','TEXTAREA'].includes(el.tagName)) {
+            el.focus();
+          }
         }, 50);
       }
     }, 150);
@@ -9695,11 +9702,30 @@ function _csCheckSingleIssue(issue, data, survey) {
     return { fixed: true };
   }
 
-  // Header field issues (engineMake, etc.) — check survey-level fields
+  // Header field issues (engineMake, etc.) — check survey-level fields by navId
   if (cat === 'Header Fields' || cat === 'Engine & Transmission' || cat === 'Valuation' || cat === 'Documentation') {
-    // These don't have an itemLabel that maps to survey.items
-    // Just return not-fixed with the original message; user can Force OK
-    return { fixed: false, reason: msg + '. Fill in this field in the survey header, or Force OK.' };
+    const navId = issue.navId;
+    if (navId && survey[navId] && String(survey[navId]).trim() !== '' && survey[navId] !== 'Select') {
+      return { fixed: true };
+    }
+    // Also check the inspection-view IDs (inspValLow, etc.)
+    if (navId && navId.startsWith('insp')) {
+      const fieldMap = { inspValLow: 'valuationLow', inspValHigh: 'valuationHigh', inspCondition: 'overallCondition', inspValRationale: 'valuationRationale', inspReplacementCost: 'replacementCost' };
+      const surveyField = fieldMap[navId];
+      if (surveyField && survey[surveyField] && String(survey[surveyField]).trim() !== '') return { fixed: true };
+    }
+    return { fixed: false, reason: msg + '. Fill in this field, or Force OK if not applicable.' };
+  }
+
+  // Documentation Photos
+  if (cat === 'Documentation Photos') {
+    const photoFieldMap = { hinPhotoBtn: 'hinPhoto', compliancePhotoBtn: 'compliancePhoto', coverPhotoBtn: 'coverPhoto', licencePhotoBtn: 'licencePhoto' };
+    const navId = issue.navId;
+    if (navId && photoFieldMap[navId]) {
+      if (survey[photoFieldMap[navId]]) return { fixed: true };
+      return { fixed: false, reason: 'Photo not yet captured. Tap the camera button to add it.' };
+    }
+    return { fixed: false, reason: msg };
   }
 
   // Default — can't determine; let user decide
