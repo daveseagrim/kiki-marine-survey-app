@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2087';
+const APP_VERSION = 'v2088';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9049,65 +9049,6 @@ async function checkSurvey() {
     }
   }
 
-  // Helper: extract image dimensions from data URL header bytes (fast, no Image element)
-  function _csGetImageDims(dataUrl) {
-    try {
-      if (!dataUrl || typeof dataUrl !== 'string') return null;
-      const base64 = dataUrl.split(',')[1];
-      if (!base64) return null;
-      // Only decode first ~64KB — the dimension markers are always near the start
-      const partial = atob(base64.substring(0, 87380));
-      const c = (i) => partial.charCodeAt(i);
-
-      // JPEG: find SOF marker (0xFFC0, 0xFFC1, or 0xFFC2)
-      if (c(0) === 0xFF && c(1) === 0xD8) {
-        let off = 2;
-        while (off < partial.length - 8) {
-          if (c(off) !== 0xFF) break;
-          const marker = c(off + 1);
-          if (marker >= 0xC0 && marker <= 0xC2) {
-            return { w: (c(off + 7) << 8) | c(off + 8), h: (c(off + 5) << 8) | c(off + 6) };
-          }
-          const sz = (c(off + 2) << 8) | c(off + 3);
-          if (sz < 2) break;
-          off += 2 + sz;
-        }
-      }
-      // PNG: width/height at bytes 16-23
-      if (c(0) === 0x89 && c(1) === 0x50) {
-        return {
-          w: (c(16) << 24) | (c(17) << 16) | (c(18) << 8) | c(19),
-          h: (c(20) << 24) | (c(21) << 16) | (c(22) << 8) | c(23),
-        };
-      }
-      return null;
-    } catch(e) { return null; }
-  }
-
-  // Check photos in batches of 5 to limit memory usage
-  for (let i = 0; i < allPhotoRefs.length; i += 5) {
-    const batch = allPhotoRefs.slice(i, i + 5);
-    const results = await Promise.all(batch.map(async (ref) => {
-      try {
-        const photo = await getPhotoById(ref.id);
-        if (!photo) return null;
-        const dataUrl = photo.stampedDataUrl || photo.dataUrl;
-        if (!dataUrl) return null;
-        const dims = _csGetImageDims(dataUrl);
-        if (dims && dims.h > dims.w * 1.3) {
-          return ref; // portrait-oriented — flag it
-        }
-        return null;
-      } catch(e) { return null; }
-    }));
-    for (const ref of results) {
-      if (ref) {
-        const navTarget = ref.isDoc ? ref.navId : null;
-        add('info', 'Photo Orientation', `Portrait photo: "${ref.label}" — may need rotation`, ref.isDoc ? null : ref.label, navTarget);
-      }
-    }
-  }
-
   // ── 4. CHECKLIST COMPLETION ─────────────────────────────────────────────
   const activeTemplate = getTemplateForSurvey(survey);
   const sailOnlyCategories = ['Spars and rigging', 'Sails'];
@@ -9650,15 +9591,13 @@ async function checkSurvey() {
 
     html += `
       <div style="margin-bottom:16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:2px solid ${sevBorder[sev]};margin-bottom:8px;cursor:pointer;user-select:none;"
+        <div style="display:flex;align-items:center;padding:8px 0;border-bottom:2px solid ${sevBorder[sev]};margin-bottom:8px;cursor:pointer;user-select:none;"
              onclick="(function(){var l=document.getElementById('${secId}');var c=document.getElementById('${secId}-caret');if(!l||!c)return;var open=l.style.display!=='none';l.style.display=open?'none':'block';c.textContent=open?'▸':'▾';})()">
-          <div style="font-weight:700;font-size:15px;color:#1e293b;display:flex;align-items:center;gap:6px;">
+          <span id="${secId}-caret" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;font-size:22px;color:#64748b;flex-shrink:0;margin-left:-8px;">▾</span>
+          <div style="font-weight:700;font-size:15px;color:#1e293b;display:flex;align-items:center;gap:6px;flex:1;">
             ${sevIcon[sev]} ${sevLabel[sev]} <span style="font-weight:400;color:#94a3b8;font-size:12px;">(${section.items.length})</span>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:11px;color:#94a3b8;">check ☑ to resolve</span>
-            <span id="${secId}-caret" style="color:#94a3b8;font-size:16px;">▾</span>
-          </div>
+          <span style="font-size:11px;color:#94a3b8;flex-shrink:0;">☑ to resolve</span>
         </div>
         <div id="${secId}">
     `;
@@ -10376,13 +10315,6 @@ function _csCheckSingleIssue(issue, data, survey) {
       return { fixed: false, reason: 'Photo not yet captured. Tap the camera button to add it.' };
     }
     return { fixed: false, reason: msg };
-  }
-
-  // Photo Orientation — can't re-check synchronously (needs async photo load)
-  // so always show as not-yet-resolved with a helpful message.
-  // The auto-detect will catch it on the next full Check Survey run.
-  if (cat === 'Photo Orientation') {
-    return { fixed: false, reason: 'Rotate the photo using Edit → ↻ Rotate, then come back. Or skip/Force OK if the orientation is intentional.' };
   }
 
   // Default — can't determine; let user decide
