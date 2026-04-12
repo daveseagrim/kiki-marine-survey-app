@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2034';
+const APP_VERSION = 'v2035';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1766,7 +1766,27 @@ function showNotesSheet(itemLabel, categoryName) {
 
         // Keyed cache lookup — escape the key for use in inline onclick
         const cacheKey = itemLabel.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-        snippetsHtml = `<div class="sheet-section-title">Quick Insert (${sheetVariants.length} snippets)</div>`;
+        // Collapse the card list when notes already exist for the item.
+        // Rationale: once a template is in use, the green-highlighted card
+        // just duplicates what's in the textarea + chip strip. The surveyor
+        // only needs the cards when first choosing a template. We expose
+        // a "Change template ▸" disclosure so they can still switch.
+        const hasExistingText = !!(itemData.text && itemData.text.trim());
+        const startCollapsed = hasExistingText;
+        const toggleLabel = sheetVariants.length === 1
+          ? 'Change template'
+          : `Change template — ${sheetVariants.length} options`;
+        const headerText = startCollapsed
+          ? `<span style="color:#6b7280;font-weight:500;">${toggleLabel}</span> <span id="sheet-snippet-caret" style="color:#9ca3af;">▸</span>`
+          : `Quick Insert (${sheetVariants.length} snippet${sheetVariants.length === 1 ? '' : 's'}) <span id="sheet-snippet-caret" style="color:#9ca3af;">▾</span>`;
+        snippetsHtml = `
+          <div class="sheet-section-title" id="sheet-snippets-header"
+               style="cursor:pointer;user-select:none;"
+               onclick="(function(){var l=document.getElementById('sheet-snippets-list');var c=document.getElementById('sheet-snippet-caret');if(!l||!c)return;var open=l.style.display!=='none';l.style.display=open?'none':'block';c.textContent=open?'▸':'▾';})()">
+            ${headerText}
+          </div>
+          <div id="sheet-snippets-list" style="display:${startCollapsed ? 'none' : 'block'};">
+        `;
         sheetVariants.forEach((variant, idx) => {
           const ratingBadge = variant.rating || baseRating;
           const isActive = itemData.text === variant.text;
@@ -1785,6 +1805,7 @@ function showNotesSheet(itemLabel, categoryName) {
             </button>
           `;
         });
+        snippetsHtml += `</div>`;
       }
     }
     // Stash variants + category on a module global keyed by item label.
@@ -2126,6 +2147,23 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
     }
     cardEl.style.background = '#d1fae5';
     cardEl.style.borderLeft = '4px solid #16a34a';
+  }
+  // Auto-collapse the Quick Insert list now that a template has been chosen —
+  // the chip strip + textarea are the surveyor's tools from here on, the
+  // full paragraph card is just visual noise.
+  const _list = document.getElementById('sheet-snippets-list');
+  const _caret = document.getElementById('sheet-snippet-caret');
+  const _header = document.getElementById('sheet-snippets-header');
+  if (_list) _list.style.display = 'none';
+  if (_caret) _caret.textContent = '▸';
+  if (_header) {
+    // Swap the header label to "Change template …" to match the collapsed
+    // state the sheet uses on re-open.
+    const variants = (window._sheetVariantCache && window._sheetVariantCache[itemLabel] && window._sheetVariantCache[itemLabel].variants) || [];
+    const toggleLabel = variants.length === 1
+      ? 'Change template'
+      : `Change template — ${variants.length} options`;
+    _header.innerHTML = `<span style="color:#6b7280;font-weight:500;">${toggleLabel}</span> <span id="sheet-snippet-caret" style="color:#9ca3af;">▸</span>`;
   }
 }
 
