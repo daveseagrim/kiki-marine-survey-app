@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2049';
+const APP_VERSION = 'v2050';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -89,12 +89,14 @@ async function forceAppUpdate() {
     // Ensure current view state is saved so we return to the same screen
     persistViewState();
     await new Promise(r => setTimeout(r, 500));
-    // Reload with cache bypass
-    window.location.reload(true);
+    // Reload with cache-busting query param to bypass CDN and browser HTTP cache
+    const base = window.location.origin + window.location.pathname;
+    window.location.href = base + '?_cb=' + Date.now();
   } catch (err) {
     console.error('Force update error:', err);
     persistViewState();
-    window.location.reload(true);
+    const base = window.location.origin + window.location.pathname;
+    window.location.href = base + '?_cb=' + Date.now();
   }
 }
 
@@ -1976,10 +1978,11 @@ function showNotesSheet(itemLabel, categoryName) {
     // read them by index without needing to round-trip text through HTML
     // attributes. This avoids all the escaping pitfalls of inline onclick.
     let sheetVariants = [];
+    console.log('[SNIPPETS-DEBUG]', {itemLabel, categoryName, rating: itemData.rating, textLibLoaded: !!textLibrary, itemKeys: Object.keys(itemData)});
     if (itemData.rating) {
       const baseRating = itemData.rating.charAt(0);
       sheetVariants = findTextVariants(categoryName, itemLabel, baseRating);
-      console.log('[SNIPPETS]', {itemLabel, categoryName, baseRating, variantsFound: sheetVariants.length, textLibLoaded: !!textLibrary});
+      console.log('[SNIPPETS]', {itemLabel, categoryName, baseRating, variantsFound: sheetVariants.length});
       if (sheetVariants.length > 0) {
         // Pre-compute diff-highlighted display texts for bottom sheet
         const highlightedTexts = highlightSnippetDiffs(sheetVariants);
