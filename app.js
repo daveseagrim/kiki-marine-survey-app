@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2090';
+const APP_VERSION = 'v2091';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -4991,6 +4991,9 @@ async function emergencyRecovery() {
 function renderHome() {
   currentView = 'surveys'; persistViewState();
   history.replaceState({ view: 'surveys' }, '');
+  // Remove inspection bottom bar (Backup / Check Survey / Preview Report)
+  const bottomBar = document.getElementById('inspectionBottomBar');
+  if (bottomBar) bottomBar.remove();
   // Hide the floating collapse button (only relevant on inspection view)
   updateCollapseButton(false);
   const app = document.getElementById('app');
