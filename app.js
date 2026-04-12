@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2061';
+const APP_VERSION = 'v2062';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9227,18 +9227,60 @@ async function checkSurvey() {
   let reviewedState = {};
   try { reviewedState = JSON.parse(sessionStorage.getItem(checkStateKey) || '{}'); } catch(e) {}
 
+  // ── Load resolved and force-OK state ───────────────────────────────
+  const resolvedKey = `checkSurvey_resolved_${currentSurveyId}`;
+  const forceKey = `checkSurvey_forceOK_${currentSurveyId}`;
+  let resolvedState = {};
+  let forceOKState = {};
+  try { resolvedState = JSON.parse(sessionStorage.getItem(resolvedKey) || '{}'); } catch(e) {}
+  try { forceOKState = JSON.parse(sessionStorage.getItem(forceKey) || '{}'); } catch(e) {}
+
   // ── Assign stable IDs to each item for checkbox tracking ───────────
   allCheckItems.forEach((item, idx) => {
     item._checkId = `chk_${idx}_${(item.itemLabel || item.message || '').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 40)}`;
   });
 
-  // Count reviewed items
-  const reviewedCount = allCheckItems.filter(it => reviewedState[it._checkId]).length;
+  // ── Separate resolved items from active items ─────────────────────
+  // An item is "resolved" if it was auto-detected as fixed OR force-OK'd
+  // But only if it was previously an issue (not proofread)
+  const activeItems = [];
+  const okItems = [];
+  allCheckItems.forEach(item => {
+    const isForceOK = forceOKState[item.message];
+    const isResolved = resolvedState[item.message];
+    if ((isForceOK || isResolved) && item.severity !== 'proofread') {
+      item._resolvedBy = isForceOK ? 'force' : 'fixed';
+      okItems.push(item);
+    } else {
+      activeItems.push(item);
+    }
+  });
 
-  // ── Group by severity for section headers ──────────────────────────
+  // Clean up stale resolved/forceOK entries that no longer appear in issues
+  // (i.e. the issue genuinely no longer exists after re-audit)
+  const allMessages = new Set(allCheckItems.map(it => it.message));
+  let cleanedResolved = false;
+  for (const msg of Object.keys(resolvedState)) {
+    if (!allMessages.has(msg)) { delete resolvedState[msg]; cleanedResolved = true; }
+  }
+  for (const msg of Object.keys(forceOKState)) {
+    if (!allMessages.has(msg)) { delete forceOKState[msg]; cleanedResolved = true; }
+  }
+  if (cleanedResolved) {
+    sessionStorage.setItem(resolvedKey, JSON.stringify(resolvedState));
+    sessionStorage.setItem(forceKey, JSON.stringify(forceOKState));
+  }
+
+  // Count reviewed items
+  const reviewedCount = activeItems.filter(it => reviewedState[it._checkId]).length;
+
+  // ── Group active items by severity for section headers ─────────────
+  // Filter out proofread items that have been reviewed (they go to OK section)
   const sections = [];
   let currentSev = null;
-  allCheckItems.forEach(item => {
+  activeItems.forEach(item => {
+    // Skip proofread items that are reviewed — they'll appear in OK section
+    if (item.severity === 'proofread' && reviewedState[item._checkId]) return;
     if (item.severity !== currentSev) {
       currentSev = item.severity;
       sections.push({ severity: currentSev, items: [] });
@@ -9254,7 +9296,7 @@ async function checkSurvey() {
         ${completionPct}% rated (${ratedCount}/${totalChecks}) &nbsp;|&nbsp;
         ${sevIcon.critical} ${criticalCount} &nbsp; ${sevIcon.warning} ${warningCount} &nbsp; ${sevIcon.info} ${infoCount} &nbsp; ${sevIcon.proofread} ${proofreadItems.length}
       </div>
-      <div style="font-size:12px;color:#94a3b8;margin-top:4px;">✅ ${reviewedCount} / ${allCheckItems.length} reviewed</div>
+      <div style="font-size:12px;color:#94a3b8;margin-top:4px;">✅ ${reviewedCount + okItems.length} / ${allCheckItems.length} reviewed${okItems.length > 0 ? ` &nbsp;|&nbsp; <span style="color:#16a34a;">${okItems.length} resolved</span>` : ''}</div>
     </div>
   `;
 
@@ -9346,6 +9388,51 @@ async function checkSurvey() {
     html += '</div>';
   });
 
+  // ── OK / RESOLVED section ────────────────────────────────────────────────
+  // Includes: auto-resolved issues, force-OK'd issues, and reviewed proofread items
+  const allOKItems = [...okItems];
+  // Add proofread items that have been checked off (reviewed)
+  activeItems.forEach(item => {
+    if (item.severity === 'proofread' && reviewedState[item._checkId]) {
+      item._resolvedBy = 'proofread';
+      allOKItems.push(item);
+    }
+  });
+
+  if (allOKItems.length > 0) {
+    html += `
+      <div style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:2px solid #86efac;margin-bottom:8px;cursor:pointer;user-select:none;"
+             onclick="(function(){var l=document.getElementById('cs-ok-list');var c=document.getElementById('cs-ok-caret');if(!l||!c)return;var open=l.style.display!=='none';l.style.display=open?'none':'block';c.textContent=open?'▸':'▾';})()">
+          <div style="font-weight:700;font-size:15px;color:#16a34a;display:flex;align-items:center;gap:6px;">
+            ✅ Resolved <span style="font-weight:400;color:#86efac;font-size:12px;">(${allOKItems.length})</span>
+          </div>
+          <span id="cs-ok-caret" style="color:#86efac;font-size:16px;">▸</span>
+        </div>
+        <div id="cs-ok-list" style="display:none;">
+    `;
+    allOKItems.forEach(item => {
+      const ratingChar = item.rating ? item.rating.charAt(0) : '';
+      const rColor = ratingColors[ratingChar] || '#6b7280';
+      const ratingBadge = ratingChar
+        ? `<span style="flex-shrink:0;font-size:10px;font-weight:700;color:white;background:${rColor};padding:2px 6px;border-radius:4px;">${ratingChar}</span>`
+        : '';
+      const resolveTag = item._resolvedBy === 'force' ? '🔓 Force OK'
+        : item._resolvedBy === 'proofread' ? '📖 Proofread'
+        : '✅ Fixed';
+      const displayText = (item.severity !== 'proofread' ? item.message : item.itemLabel || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      html += `
+        <div style="margin-bottom:3px;opacity:0.7;">
+          <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:6px 10px;display:flex;align-items:center;gap:8px;">
+            ${ratingBadge}
+            <div style="flex:1;min-width:0;font-size:12px;color:#166534;">${displayText}</div>
+            <span style="flex-shrink:0;font-size:10px;color:#16a34a;background:#dcfce7;padding:2px 6px;border-radius:4px;">${resolveTag}</span>
+          </div>
+        </div>`;
+    });
+    html += '</div></div>';
+  }
+
   // ── DISPLAY FULL-SCREEN OVERLAY ─────────────────────────────────────────
   const existing = document.getElementById('checkSurveyOverlay');
   if (existing) existing.remove();
@@ -9387,11 +9474,25 @@ async function checkSurvey() {
     if (btn) btn.textContent = isOpen ? '▸ details' : '▾ details';
   };
 
+  // Store all check items so we can evaluate on return
+  window._csAllCheckItems = allCheckItems;
+
   // Navigate to item by index — uses global _csItemLabels array
   window._csGoToItem = function(idx) {
     const itemLabel = window._csItemLabels[idx];
     const checkId = window._csCheckIds[idx];
     if (!itemLabel) return;
+
+    // Store the issue we're working on so we can evaluate when returning
+    const workingItem = allCheckItems[idx];
+    window._csWorkingOn = {
+      idx: idx,
+      itemLabel: itemLabel,
+      checkId: checkId,
+      severity: workingItem ? workingItem.severity : null,
+      category: workingItem ? workingItem.category : null,
+      message: workingItem ? workingItem.message : null,
+    };
 
     // Remember scroll position
     const scrollEl = document.getElementById('csScrollContainer');
@@ -9471,15 +9572,212 @@ async function checkSurvey() {
     backBtn.style.cssText = 'position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));left:50%;transform:translateX(-50%);background:#1e3a5f;color:white;border:none;border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
     backBtn.onclick = async function() {
       backBtn.remove();
-      // Re-run check survey — re-evaluates everything so colours update
-      await checkSurvey();
-      // Restore scroll position to approximately where they were
-      setTimeout(() => {
-        const newScrollEl = document.getElementById('csScrollContainer');
-        if (newScrollEl) newScrollEl.scrollTop = scrollPos;
-      }, 50);
+      // Evaluate whether the issue was fixed, then reopen Check Survey
+      await _csEvaluateAndReturn(scrollPos);
     };
     document.body.appendChild(backBtn);
+  };
+}
+
+// ─── Evaluate fix and return to Check Survey ──────────────────────────────
+async function _csEvaluateAndReturn(scrollPos) {
+  const working = window._csWorkingOn;
+  if (!working || !working.itemLabel) {
+    // No specific issue tracked — just reopen Check Survey
+    await checkSurvey();
+    setTimeout(() => {
+      const el = document.getElementById('csScrollContainer');
+      if (el) el.scrollTop = scrollPos;
+    }, 50);
+    return;
+  }
+
+  // Re-read the survey to get current state
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) { await checkSurvey(); return; }
+
+  const data = survey.items ? survey.items[working.itemLabel] : null;
+  const result = _csCheckSingleIssue(working, data, survey);
+
+  if (result.fixed) {
+    // Mark as resolved
+    const resolvedKey = `checkSurvey_resolved_${currentSurveyId}`;
+    let resolved = {};
+    try { resolved = JSON.parse(sessionStorage.getItem(resolvedKey) || '{}'); } catch(e) {}
+    resolved[working.message] = { fixedAt: Date.now(), itemLabel: working.itemLabel };
+    sessionStorage.setItem(resolvedKey, JSON.stringify(resolved));
+
+    // Show success toast
+    showToast('✅ Fixed: ' + (working.itemLabel || working.message));
+    window._csWorkingOn = null;
+
+    // Reopen Check Survey
+    await checkSurvey();
+    setTimeout(() => {
+      const el = document.getElementById('csScrollContainer');
+      if (el) el.scrollTop = scrollPos;
+    }, 50);
+  } else {
+    // Show evaluation modal with reason + options
+    _csShowEvalModal(working, result.reason, scrollPos);
+  }
+}
+
+// ─── Check whether a single issue is resolved ────────────────────────────
+function _csCheckSingleIssue(issue, data, survey) {
+  const cat = issue.category;
+  const msg = issue.message || '';
+
+  // Checklist Completion — item was unrated
+  if (cat === 'Checklist Completion' || msg.startsWith('Unrated:')) {
+    if (data && data.rating && data.rating !== '') return { fixed: true };
+    return { fixed: false, reason: 'No rating selected yet. Tap a rating (A/B/C/NT/NA) to resolve.' };
+  }
+
+  // Missing Notes — A or B rated without text
+  if (cat === 'Missing Notes') {
+    if (data && data.text && data.text.trim() !== '') return { fixed: true };
+    return { fixed: false, reason: 'Item is rated but still has no notes. Tap "Add note" and enter inspection findings.' };
+  }
+
+  // Unreplaced Placeholders
+  if (cat === 'Unreplaced Placeholders') {
+    if (!data || !data.text) return { fixed: true };
+    const patterns = [/\[describe[^\]]*\]/i, /\[specify[^\]]*\]/i, /\[insert[^\]]*\]/i, /\{specify:[^}]*\}/, /\{any:[^}]*\}/];
+    for (const p of patterns) {
+      const m = data.text.match(p);
+      if (m) return { fixed: false, reason: `Text still contains placeholder: "${m[0]}". Replace it with actual details.` };
+    }
+    return { fixed: true };
+  }
+
+  // Thoroughness — B-rated no recommendation
+  if (cat === 'Thoroughness' && msg.includes('no clear recommendation')) {
+    if (data && data.text && /recommend|should|advise|suggest|replace|repair|service|address|correct|attention/i.test(data.text))
+      return { fixed: true };
+    return { fixed: false, reason: 'B-rated item still lacks a recommendation. Add words like "recommend", "should", "replace", or "repair" to the notes.' };
+  }
+
+  // Thoroughness — Safety item without standard
+  if (cat === 'Thoroughness' && msg.includes('without a standard')) {
+    if (data && data.standards && data.standards.length > 0) return { fixed: true };
+    return { fixed: false, reason: 'Safety item still has no standard reference. Check an ABYC or TC standard checkbox.' };
+  }
+
+  // Skipped Items
+  if (cat === 'Skipped Items') {
+    if (!data || !data.excluded) return { fixed: true };
+    return { fixed: false, reason: 'Item is still excluded. Tap "⊘ Skip" again to un-skip it, or Force OK if intentional.' };
+  }
+
+  // Grammar & Spelling
+  if (cat === 'Grammar & Spelling') {
+    if (!data || !data.text) return { fixed: true };
+    const t = data.text;
+    if (msg.includes('Double spaces') && !/  +/.test(t)) return { fixed: true };
+    if (msg.includes('punctuation') && /[.!?:;]$/.test(t.trim())) return { fixed: true };
+    if (msg.includes('Canadian spelling')) {
+      const americanisms = [
+        [/\bfiberglass\b/i, 'fiberglass'], [/\bcolor\b/i, 'color'], [/\bcenter\b/i, 'center'],
+        [/\banalyze\b/i, 'analyze'], [/\bgalvanize\b/i, 'galvanize'], [/\bmold\b/i, 'mold'],
+        [/\bgray\b/i, 'gray'], [/\blicense\b/i, 'license'],
+      ];
+      const offender = americanisms.find(([pat]) => pat.test(t));
+      if (!offender) return { fixed: true };
+      return { fixed: false, reason: `Text still contains "${offender[1]}". Use Canadian spelling.` };
+    }
+    if (msg.includes('lowercase') && !/\.\s+[a-z]/.test(t)) return { fixed: true };
+    return { fixed: false, reason: 'Grammar/spelling issue may still be present. Review the text.' };
+  }
+
+  // Proofread — always "fixed" once reviewed (it's just a review prompt)
+  if (issue.severity === 'proofread') {
+    return { fixed: true };
+  }
+
+  // Header field issues (engineMake, etc.) — check survey-level fields
+  if (cat === 'Header Fields' || cat === 'Engine & Transmission' || cat === 'Valuation' || cat === 'Documentation') {
+    // These don't have an itemLabel that maps to survey.items
+    // Just return not-fixed with the original message; user can Force OK
+    return { fixed: false, reason: msg + '. Fill in this field in the survey header, or Force OK.' };
+  }
+
+  // Default — can't determine; let user decide
+  return { fixed: false, reason: msg };
+}
+
+// ─── Show evaluation result modal ─────────────────────────────────────────
+function _csShowEvalModal(working, reason, scrollPos) {
+  // Remove any existing modal
+  document.getElementById('csEvalModal')?.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'csEvalModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div onclick="event.stopPropagation();" style="background:white;border-radius:16px;max-width:400px;width:100%;padding:24px;box-shadow:0 8px 30px rgba(0,0,0,0.3);">
+      <div style="text-align:center;margin-bottom:16px;">
+        <div style="font-size:40px;margin-bottom:8px;">⚠️</div>
+        <h3 style="margin:0 0 4px;font-size:17px;color:#1e293b;">Not yet resolved</h3>
+        <div style="font-size:13px;font-weight:600;color:#475569;margin-bottom:8px;">${(working.itemLabel || '').replace(/</g, '&lt;')}</div>
+      </div>
+      <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:12px;margin-bottom:20px;font-size:13px;color:#991b1b;line-height:1.5;">
+        ${reason.replace(/</g, '&lt;')}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button id="csEvalGoBack" style="width:100%;padding:12px;background:#1e3a5f;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">
+          ← Go back and fix
+        </button>
+        <button id="csEvalForceOK" style="width:100%;padding:12px;background:white;color:#64748b;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;">
+          ✓ Force OK — mark as acceptable
+        </button>
+        <button id="csEvalCancel" style="width:100%;padding:10px;background:none;color:#94a3b8;border:none;font-size:13px;cursor:pointer;">
+          Return to Check Survey without resolving
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Go back to the item
+  document.getElementById('csEvalGoBack').onclick = function() {
+    modal.remove();
+    // Re-navigate to the same item
+    window._csGoToItem(working.idx);
+  };
+
+  // Force OK
+  document.getElementById('csEvalForceOK').onclick = async function() {
+    modal.remove();
+    const forceKey = `checkSurvey_forceOK_${currentSurveyId}`;
+    let forceOK = {};
+    try { forceOK = JSON.parse(sessionStorage.getItem(forceKey) || '{}'); } catch(e) {}
+    forceOK[working.message] = { forcedAt: Date.now(), itemLabel: working.itemLabel, reason: reason };
+    sessionStorage.setItem(forceKey, JSON.stringify(forceOK));
+    showToast('✓ Marked as OK: ' + (working.itemLabel || working.message));
+    window._csWorkingOn = null;
+    await checkSurvey();
+    setTimeout(() => {
+      const el = document.getElementById('csScrollContainer');
+      if (el) el.scrollTop = scrollPos;
+    }, 50);
+  };
+
+  // Just return to Check Survey
+  document.getElementById('csEvalCancel').onclick = async function() {
+    modal.remove();
+    window._csWorkingOn = null;
+    await checkSurvey();
+    setTimeout(() => {
+      const el = document.getElementById('csScrollContainer');
+      if (el) el.scrollTop = scrollPos;
+    }, 50);
+  };
+
+  // Close on backdrop tap
+  modal.onclick = function() {
+    // Don't auto-close — user must pick an option
   };
 }
 
