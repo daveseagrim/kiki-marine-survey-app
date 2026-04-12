@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2077';
+const APP_VERSION = 'v2078';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2588,23 +2588,36 @@ function showMediaSheet(itemLabel, categoryName) {
   });
 }
 
-// Full-screen photo view with Edit / Move / Delete / Close actions.
+// Full-screen photo view with Edit / Move / Delete / Close actions + prev/next navigation.
 // Opens when the user taps a thumbnail in the media sheet grid. Replaces the
 // old inline red × and Move ↗ buttons with a clean lightbox-style overlay.
 async function showPhotoActionOverlay(photoId, itemLabel, categoryName) {
   const photo = await getPhotoById(photoId);
   if (!photo) return;
 
+  // Get all photos for this item so we can add prev/next navigation
+  const survey = await getSurvey(currentSurveyId);
+  const itemData = survey && survey.items ? survey.items[itemLabel] : null;
+  const allPhotoIds = (itemData && itemData.photos) ? itemData.photos : [photoId];
+  let currentIdx = allPhotoIds.indexOf(photoId);
+  if (currentIdx < 0) currentIdx = 0;
+  const totalPhotos = allPhotoIds.length;
+
   const overlay = document.createElement('div');
   overlay.id = 'photoActionOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:100000;display:flex;flex-direction:column;';
   overlay.innerHTML = `
-    <div style="flex:0 0 auto;display:flex;justify-content:flex-end;padding:14px 18px;padding-top:calc(14px + env(safe-area-inset-top));">
+    <div style="flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;padding-top:calc(14px + env(safe-area-inset-top));">
+      <div id="pao-counter" style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;">${totalPhotos > 1 ? `${currentIdx + 1} of ${totalPhotos}` : ''}</div>
       <button id="pao-close" aria-label="Close"
               style="background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:8px;width:44px;height:44px;font-size:22px;font-weight:700;cursor:pointer;">✕</button>
     </div>
-    <div style="flex:1 1 auto;display:flex;align-items:center;justify-content:center;padding:0 16px;overflow:hidden;">
-      <img id="pao-img" src="" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;">
+    <div style="flex:1 1 auto;display:flex;align-items:center;justify-content:center;padding:0 4px;overflow:hidden;position:relative;">
+      ${totalPhotos > 1 ? `<button id="pao-prev" aria-label="Previous photo"
+              style="position:absolute;left:4px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.2);color:#fff;border:none;border-radius:50%;width:44px;height:44px;font-size:22px;font-weight:700;cursor:pointer;z-index:2;backdrop-filter:blur(4px);${currentIdx === 0 ? 'opacity:0.3;pointer-events:none;' : ''}">‹</button>` : ''}
+      <img id="pao-img" src="" style="max-width:calc(100% - ${totalPhotos > 1 ? '80px' : '0px'});max-height:100%;object-fit:contain;border-radius:8px;transition:opacity 0.2s;">
+      ${totalPhotos > 1 ? `<button id="pao-next" aria-label="Next photo"
+              style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.2);color:#fff;border:none;border-radius:50%;width:44px;height:44px;font-size:22px;font-weight:700;cursor:pointer;z-index:2;backdrop-filter:blur(4px);${currentIdx >= totalPhotos - 1 ? 'opacity:0.3;pointer-events:none;' : ''}">›</button>` : ''}
     </div>
     <div style="flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:16px 18px;padding-bottom:calc(16px + env(safe-area-inset-bottom));">
       <button id="pao-edit"
@@ -2619,6 +2632,51 @@ async function showPhotoActionOverlay(photoId, itemLabel, categoryName) {
 
   document.getElementById('pao-img').src = photo.dataUrl;
 
+  // Navigation state
+  let _paoCurrentIdx = currentIdx;
+  let _paoCurrentPhotoId = photoId;
+
+  // Navigate to a photo by index
+  async function _paoGoTo(idx) {
+    if (idx < 0 || idx >= totalPhotos) return;
+    _paoCurrentIdx = idx;
+    _paoCurrentPhotoId = allPhotoIds[idx];
+    const p = await getPhotoById(_paoCurrentPhotoId);
+    const img = document.getElementById('pao-img');
+    if (img && p) {
+      img.style.opacity = '0.3';
+      setTimeout(() => { img.src = p.dataUrl; img.style.opacity = '1'; }, 100);
+    }
+    // Update counter
+    const counter = document.getElementById('pao-counter');
+    if (counter) counter.textContent = `${idx + 1} of ${totalPhotos}`;
+    // Update arrow states
+    const prev = document.getElementById('pao-prev');
+    const next = document.getElementById('pao-next');
+    if (prev) { prev.style.opacity = idx === 0 ? '0.3' : '1'; prev.style.pointerEvents = idx === 0 ? 'none' : 'auto'; }
+    if (next) { next.style.opacity = idx >= totalPhotos - 1 ? '0.3' : '1'; next.style.pointerEvents = idx >= totalPhotos - 1 ? 'none' : 'auto'; }
+  }
+
+  // Wire up prev/next buttons
+  const prevBtn = document.getElementById('pao-prev');
+  const nextBtn = document.getElementById('pao-next');
+  if (prevBtn) prevBtn.onclick = () => _paoGoTo(_paoCurrentIdx - 1);
+  if (nextBtn) nextBtn.onclick = () => _paoGoTo(_paoCurrentIdx + 1);
+
+  // Swipe support for mobile
+  let _paoTouchStartX = 0;
+  const imgArea = document.getElementById('pao-img');
+  if (imgArea && totalPhotos > 1) {
+    imgArea.parentElement.addEventListener('touchstart', (e) => { _paoTouchStartX = e.touches[0].clientX; }, { passive: true });
+    imgArea.parentElement.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - _paoTouchStartX;
+      if (Math.abs(dx) > 60) { // minimum swipe distance
+        if (dx < 0) _paoGoTo(_paoCurrentIdx + 1); // swipe left = next
+        else _paoGoTo(_paoCurrentIdx - 1); // swipe right = prev
+      }
+    }, { passive: true });
+  }
+
   const close = () => {
     const el = document.getElementById('photoActionOverlay');
     if (el) el.remove();
@@ -2626,17 +2684,20 @@ async function showPhotoActionOverlay(photoId, itemLabel, categoryName) {
 
   document.getElementById('pao-close').onclick = close;
   document.getElementById('pao-edit').onclick = () => {
+    const pid = _paoCurrentPhotoId;
     close();
-    editSavedPhoto(photoId, itemLabel);
+    editSavedPhoto(pid, itemLabel);
   };
   document.getElementById('pao-move').onclick = () => {
+    const pid = _paoCurrentPhotoId;
     close();
-    movePhotoFromSheet(photoId, itemLabel, categoryName);
+    movePhotoFromSheet(pid, itemLabel, categoryName);
   };
   document.getElementById('pao-delete').onclick = async () => {
     if (!confirm('Delete this photo? This cannot be undone.')) return;
+    const pid = _paoCurrentPhotoId;
     close();
-    await deletePhotoFromSheet(photoId, itemLabel, categoryName);
+    await deletePhotoFromSheet(pid, itemLabel, categoryName);
   };
 }
 window.showPhotoActionOverlay = showPhotoActionOverlay;
@@ -8965,6 +9026,92 @@ async function checkSurvey() {
     }
   }
 
+  // ── 3b. PHOTO ORIENTATION CHECK ──────────────────────────────────────────
+  // Collect all photo IDs, load each, and check dimensions.
+  // Portrait-oriented photos (height > width × 1.3) are flagged since most
+  // boat survey photos should be landscape.
+  const allPhotoRefs = [];
+  // Documentation photos
+  const docPhotoKeys = ['hinPhoto','compliancePhoto','coverPhoto','licencePhoto','tcPaperLicencePhoto',
+    'fourCornerPortBow','fourCornerStbdBow','fourCornerPortStern','fourCornerStbdStern',
+    'enginePhoto','enginePlatePhoto','transmissionPhoto','transmissionPlatePhoto'];
+  const docPhotoLabels = {
+    hinPhoto: 'HIN plate', compliancePhoto: 'Compliance plate', coverPhoto: 'Cover photo',
+    licencePhoto: 'TC licence', tcPaperLicencePhoto: 'TC paper licence',
+    fourCornerPortBow: 'Port bow', fourCornerStbdBow: 'Starboard bow',
+    fourCornerPortStern: 'Port stern', fourCornerStbdStern: 'Starboard stern',
+    enginePhoto: 'Engine', enginePlatePhoto: 'Engine plate',
+    transmissionPhoto: 'Transmission', transmissionPlatePhoto: 'Transmission plate',
+  };
+  for (const key of docPhotoKeys) {
+    if (survey[key]) allPhotoRefs.push({ id: survey[key], label: docPhotoLabels[key] || key, isDoc: true, navId: key });
+  }
+  // Checklist item photos
+  for (const [label, data] of Object.entries(survey.items || {})) {
+    if (data.photos && data.photos.length > 0) {
+      data.photos.forEach(pid => allPhotoRefs.push({ id: pid, label: label, isDoc: false }));
+    }
+  }
+
+  // Helper: extract image dimensions from data URL header bytes (fast, no Image element)
+  function _csGetImageDims(dataUrl) {
+    try {
+      if (!dataUrl || typeof dataUrl !== 'string') return null;
+      const base64 = dataUrl.split(',')[1];
+      if (!base64) return null;
+      // Only decode first ~64KB — the dimension markers are always near the start
+      const partial = atob(base64.substring(0, 87380));
+      const c = (i) => partial.charCodeAt(i);
+
+      // JPEG: find SOF marker (0xFFC0, 0xFFC1, or 0xFFC2)
+      if (c(0) === 0xFF && c(1) === 0xD8) {
+        let off = 2;
+        while (off < partial.length - 8) {
+          if (c(off) !== 0xFF) break;
+          const marker = c(off + 1);
+          if (marker >= 0xC0 && marker <= 0xC2) {
+            return { w: (c(off + 7) << 8) | c(off + 8), h: (c(off + 5) << 8) | c(off + 6) };
+          }
+          const sz = (c(off + 2) << 8) | c(off + 3);
+          if (sz < 2) break;
+          off += 2 + sz;
+        }
+      }
+      // PNG: width/height at bytes 16-23
+      if (c(0) === 0x89 && c(1) === 0x50) {
+        return {
+          w: (c(16) << 24) | (c(17) << 16) | (c(18) << 8) | c(19),
+          h: (c(20) << 24) | (c(21) << 16) | (c(22) << 8) | c(23),
+        };
+      }
+      return null;
+    } catch(e) { return null; }
+  }
+
+  // Check photos in batches of 5 to limit memory usage
+  for (let i = 0; i < allPhotoRefs.length; i += 5) {
+    const batch = allPhotoRefs.slice(i, i + 5);
+    const results = await Promise.all(batch.map(async (ref) => {
+      try {
+        const photo = await getPhotoById(ref.id);
+        if (!photo) return null;
+        const dataUrl = photo.stampedDataUrl || photo.dataUrl;
+        if (!dataUrl) return null;
+        const dims = _csGetImageDims(dataUrl);
+        if (dims && dims.h > dims.w * 1.3) {
+          return ref; // portrait-oriented — flag it
+        }
+        return null;
+      } catch(e) { return null; }
+    }));
+    for (const ref of results) {
+      if (ref) {
+        const navTarget = ref.isDoc ? ref.navId : null;
+        add('info', 'Photo Orientation', `Portrait photo: "${ref.label}" — may need rotation`, ref.isDoc ? null : ref.label, navTarget);
+      }
+    }
+  }
+
   // ── 4. CHECKLIST COMPLETION ─────────────────────────────────────────────
   const activeTemplate = getTemplateForSurvey(survey);
   const sailOnlyCategories = ['Spars and rigging', 'Sails'];
@@ -9438,6 +9585,26 @@ async function checkSurvey() {
   }
   window._csJustResolved = null; // clear flag
 
+  // If animating a just-fixed item, suppress the toast and pull it from resolvedItems
+  // so it's shown as a green "Fixed!" card first, then moves to Resolved after 2s
+  const animateResolve = window._csAnimateResolve || null;
+  window._csAnimateResolve = null;
+  if (animateResolve) {
+    // Suppress toast — it'll show after the animation re-render
+    for (let i = allNewlyResolved.length - 1; i >= 0; i--) {
+      if (allNewlyResolved[i] === animateResolve.message || allNewlyResolved[i] === animateResolve.itemLabel) {
+        allNewlyResolved.splice(i, 1);
+      }
+    }
+    // Remove from resolvedItems — will be shown as a transitioning card instead
+    for (let i = resolvedItems.length - 1; i >= 0; i--) {
+      if (resolvedItems[i].message === animateResolve.message) {
+        resolvedItems.splice(i, 1);
+        break;
+      }
+    }
+  }
+
   if (allCheckItems.length === 0) {
     html += '<div style="text-align:center;padding:20px;color:#16a34a;font-weight:600;">All checks passed! Survey looks complete.</div>';
   }
@@ -9451,6 +9618,24 @@ async function checkSurvey() {
                 style="background:#3b82f6;color:white;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;">
           ⚙️ Migrate Engine Data to Header
         </button>
+      </div>`;
+  }
+
+  // ── "Just Fixed" transitioning card (before it moves to Resolved) ───
+  // Shows the fixed item highlighted green so the user can see which item was addressed
+  if (animateResolve) {
+    const escMsg = (animateResolve.message || '').replace(/"/g, '&quot;');
+    const escLabel = (animateResolve.itemLabel || animateResolve.message || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    html += `
+      <div id="cs-transitioning-item" data-cs-msg="${escMsg}" style="margin-bottom:12px;transition:opacity 0.6s ease,transform 0.6s ease;">
+        <div style="background:#dcfce7;border:2px solid #16a34a;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;flex-shrink:0;">✅</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;color:#15803d;font-size:14px;">Fixed!</div>
+            <div style="font-size:12px;color:#166534;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escLabel}</div>
+          </div>
+          <div style="font-size:11px;color:#16a34a;font-weight:600;white-space:nowrap;">→ Moving to Resolved</div>
+        </div>
       </div>`;
   }
 
@@ -9759,7 +9944,26 @@ async function checkSurvey() {
         return;
       }
     }
-    // Fallback: pixel position (better than nothing)
+    // Fallback: try the next item's message (if current item was resolved and no longer visible)
+    const nextMsg = window._csNextScrollMsg;
+    window._csNextScrollMsg = null;
+    if (nextMsg) {
+      const allRows = container.querySelectorAll('[data-cs-msg]');
+      for (const row of allRows) {
+        if (row.getAttribute('data-cs-msg') === nextMsg) {
+          const containerRect = container.getBoundingClientRect();
+          const rowRect = row.getBoundingClientRect();
+          const offsetInContainer = rowRect.top - containerRect.top + container.scrollTop;
+          const centred = offsetInContainer - (container.clientHeight / 2) + (rowRect.height / 2);
+          container.scrollTop = Math.max(0, centred);
+          row.style.transition = 'box-shadow 0.3s';
+          row.style.boxShadow = '0 0 0 3px #3b82f6';
+          setTimeout(() => { row.style.boxShadow = ''; }, 2500);
+          return;
+        }
+      }
+    }
+    // Last resort: pixel position
     if (fallbackPixelPos > 0) container.scrollTop = fallbackPixelPos;
   };
 
@@ -9767,6 +9971,26 @@ async function checkSurvey() {
   // via the floating Check Survey button). If _csScrollTargetMsg is set, restore now.
   if (window._csScrollTargetMsg) {
     setTimeout(() => { if (window._csRestoreScroll) window._csRestoreScroll(0); }, 120);
+  }
+
+  // If showing a "Just Fixed" transitioning card, animate it away after 2s
+  // then re-render with the item properly in Resolved + sticky toast
+  if (animateResolve) {
+    setTimeout(() => {
+      const transItem = document.getElementById('cs-transitioning-item');
+      if (transItem) {
+        transItem.style.opacity = '0';
+        transItem.style.transform = 'translateX(30px)';
+      }
+      // After the fade-out animation, re-render with toast and scroll to next item
+      setTimeout(async () => {
+        window._csJustResolved = animateResolve.itemLabel || animateResolve.message;
+        window._csScrollTargetMsg = window._csNextScrollMsg || null;
+        window._csNextScrollMsg = null;
+        document.getElementById('checkSurveyOverlay')?.remove();
+        await checkSurvey();
+      }, 700);
+    }, 2000);
   }
 
   // Navigate to item by index — uses global _csItemLabels array
@@ -9792,14 +10016,16 @@ async function checkSurvey() {
     // Remember scroll position AND the next item's message for smart scroll restoration
     const scrollEl = document.getElementById('csScrollContainer');
     const scrollPos = scrollEl ? scrollEl.scrollTop : 0;
-    // Find the next active (non-reviewed, non-force-OK) item after this one for scroll target
-    window._csScrollTargetMsg = null;
+    // Scroll to the CURRENT item first (so the user sees it highlighted as "Fixed!")
+    // then after the animation, scroll to the NEXT item
+    window._csScrollTargetMsg = workingItem ? workingItem.message : null;
+    window._csNextScrollMsg = null;
     const sortedActive = allCheckItems.filter(it => !forceOKState[it.message] && !reviewedState[it._checkId]);
     const myIdx = sortedActive.findIndex(it => it === workingItem);
     if (myIdx >= 0 && myIdx + 1 < sortedActive.length) {
-      window._csScrollTargetMsg = sortedActive[myIdx + 1].message;
+      window._csNextScrollMsg = sortedActive[myIdx + 1].message;
     } else if (myIdx >= 0 && myIdx - 1 >= 0) {
-      window._csScrollTargetMsg = sortedActive[myIdx - 1].message;
+      window._csNextScrollMsg = sortedActive[myIdx - 1].message;
     }
 
     // Helper: create and append the floating Back button
@@ -9959,20 +10185,26 @@ async function _csEvaluateAndReturn(scrollPos) {
   const result = _csCheckSingleIssue(working, data, survey);
 
   if (result.fixed) {
-    // Mark as resolved
+    // Mark as resolved in sessionStorage
     const resolvedKey = `checkSurvey_resolved_${currentSurveyId}`;
     let resolved = {};
     try { resolved = JSON.parse(sessionStorage.getItem(resolvedKey) || '{}'); } catch(e) {}
     resolved[working.message] = { fixedAt: Date.now(), itemLabel: working.itemLabel, _surveyOrder: working._surveyOrder ?? 9999 };
     sessionStorage.setItem(resolvedKey, JSON.stringify(resolved));
 
-    // Store the resolved item name so the UI can show a confirmation banner
-    window._csJustResolved = working.itemLabel || working.message;
+    // Set animation flag — checkSurvey will show a green "Fixed!" card on the item
+    // before moving it to the Resolved section
+    window._csAnimateResolve = {
+      message: working.message,
+      itemLabel: working.itemLabel || working.message,
+    };
+    // Scroll target is the fixed item itself (already stored by _csGoToItem)
+    if (!window._csScrollTargetMsg) window._csScrollTargetMsg = working.message;
     window._csWorkingOn = null;
 
-    // Reopen Check Survey and scroll to where the user was
+    // Reopen Check Survey — the animation flag shows "Fixed!" card first
     await checkSurvey();
-    setTimeout(() => { if (window._csRestoreScroll) window._csRestoreScroll(scrollPos); }, 80);
+    setTimeout(() => { if (window._csRestoreScroll) window._csRestoreScroll(scrollPos); }, 120);
   } else {
     // Show evaluation modal with reason + options
     _csShowEvalModal(working, result.reason, scrollPos);
@@ -12340,11 +12572,12 @@ function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
   // Notes preview (truncated)
   const notePreview = hasNotes ? (itemData.text.trim().length > 80 ? itemData.text.trim().substring(0, 80) + '…' : itemData.text.trim()) : '';
 
-  // Compact card row: label + rating badge
+  // Compact card row: label + photo count badge + rating badge
+  const photoBadge = photoCount > 0 ? `<span style="display:inline-flex;align-items:center;gap:2px;background:#e0f2fe;color:#0369a1;font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;white-space:nowrap;vertical-align:middle;margin-left:4px;">📷${photoCount}</span>` : '';
   let html = `
     <div class="compact-item ${isExcluded ? 'excluded' : ''} ${isFlagged ? 'flagged' : ''}">
       <div class="compact-item-label ${isExcluded ? 'struck' : ''}">
-        ${isFlagged ? '🚩 ' : ''}${isExcluded ? '⊘ ' : ''}${itemLabel}
+        ${isFlagged ? '🚩 ' : ''}${isExcluded ? '⊘ ' : ''}${itemLabel}${photoBadge}
       </div>
       <button class="compact-rating-badge ${itemData.rating ? '' : 'unrated'}"
               style="${itemData.rating ? `background:${ratingColor};` : ''}"
