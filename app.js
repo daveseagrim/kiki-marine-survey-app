@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2064';
+const APP_VERSION = 'v2065';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9504,9 +9504,25 @@ async function checkSurvey() {
     // Close the overlay
     document.getElementById('checkSurveyOverlay')?.remove();
 
+    // Helper: create and append the floating Back button
+    function _csShowBackButton() {
+      let backBtn = document.getElementById('csBackToCheckBtn');
+      if (backBtn) backBtn.remove();
+      backBtn = document.createElement('button');
+      backBtn.id = 'csBackToCheckBtn';
+      backBtn.textContent = '← Back to Check Survey';
+      backBtn.style.cssText = 'position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));left:50%;transform:translateX(-50%);background:#1e3a5f;color:white;border:none;border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+      backBtn.onclick = async function() {
+        backBtn.remove();
+        await _csEvaluateAndReturn(scrollPos);
+      };
+      document.body.appendChild(backBtn);
+    }
+
     // Determine navigation strategy
     if (itemLabel) {
       // Checklist item — lives in the inspection view (already visible underneath)
+      _csShowBackButton();
       setTimeout(() => {
         let el = null;
         const allWrappers = document.querySelectorAll('.compact-item-wrapper');
@@ -9527,8 +9543,11 @@ async function checkSurvey() {
       // Header/engine/valuation/photo field — lives in the Edit Intro view
       // Switch to edit view, then find and scroll to the field
       editSurveyDetails(currentSurveyId);
-      // Wait for the edit form to render, then find the element
+      // Wait for the edit form to render, THEN add Back button and scroll
       setTimeout(() => {
+        // Add the Back button AFTER editSurveyDetails re-renders the DOM
+        _csShowBackButton();
+
         const el = document.getElementById(navId);
         if (el) {
           // Expand the parent collapsible section if needed
@@ -9541,26 +9560,12 @@ async function checkSurvey() {
             highlightEl.style.transition = 'background 0.3s, box-shadow 0.3s';
             highlightEl.style.background = '#fef3c7';
             highlightEl.style.boxShadow = '0 0 0 3px #f59e0b';
-            setTimeout(() => { highlightEl.style.background = ''; highlightEl.style.boxShadow = ''; }, 3000);
+            setTimeout(() => { highlightEl.style.background = ''; highlightEl.style.boxShadow = ''; }, 4000);
             if (['INPUT','SELECT','TEXTAREA'].includes(el.tagName)) el.focus();
           }, 100);
         }
-      }, 400);
+      }, 500);
     }
-
-    // Show floating "Back to Check Survey" button
-    let backBtn = document.getElementById('csBackToCheckBtn');
-    if (backBtn) backBtn.remove();
-    backBtn = document.createElement('button');
-    backBtn.id = 'csBackToCheckBtn';
-    backBtn.textContent = '← Back to Check Survey';
-    backBtn.style.cssText = 'position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));left:50%;transform:translateX(-50%);background:#1e3a5f;color:white;border:none;border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
-    backBtn.onclick = async function() {
-      backBtn.remove();
-      // Evaluate whether the issue was fixed, then reopen Check Survey
-      await _csEvaluateAndReturn(scrollPos);
-    };
-    document.body.appendChild(backBtn);
   };
 }
 
@@ -9602,8 +9607,12 @@ function _csExpandAccordionAndScroll(el) {
 async function _csEvaluateAndReturn(scrollPos) {
   const working = window._csWorkingOn;
 
-  // If we navigated to the Edit Intro view, return to inspection first
+  // If we navigated to the Edit Intro view, auto-save and return to inspection
   if (currentView === 'edit-survey' || currentView === 'new-survey') {
+    // Auto-save the edit form so any changes the user made are preserved
+    try { saveSurveyDetails(currentSurveyId); } catch(e) {}
+    // Wait for save to complete
+    await new Promise(r => setTimeout(r, 400));
     const survey = await getSurvey(currentSurveyId);
     if (survey) {
       renderInspection(survey);
