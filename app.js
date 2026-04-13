@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2118';
+const APP_VERSION = 'v2119';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9158,6 +9158,94 @@ function ensureReportButton() {
   };
   bottomBar.appendChild(backupBtn);
 
+  // Recover Photos from Firebase button
+  const recoverBtn = document.createElement('button');
+  recoverBtn.id = 'recoverPhotosBtn';
+  recoverBtn.style.cssText = pillStyle + 'background:#dc2626;color:white;font-weight:700;box-shadow:0 2px 8px rgba(220,38,38,0.3);';
+  recoverBtn.innerHTML = '🔄 Recover Photos';
+  recoverBtn.onclick = async () => {
+    if (!window.fsDb || !FirebaseSync.isEnabled()) {
+      showAlert('Firebase sync is not active. Cannot recover photos.');
+      return;
+    }
+    const survey = await getSurvey(currentSurveyId);
+    if (!survey) { showAlert('Survey not found'); return; }
+
+    recoverBtn.innerHTML = '🔄 Checking Firebase…';
+    recoverBtn.disabled = true;
+    try {
+      // Count photo metadata in Firestore
+      const snap = await window.fsDb.collection('photos')
+        .where('surveyId', '==', survey.id)
+        .get();
+      const total = snap.docs.length;
+
+      if (total === 0) {
+        showAlert('No photos found in Firebase for this survey. Firebase may not have had the photos uploaded.');
+        return;
+      }
+
+      const doRecover = await new Promise(resolve => {
+        showAlert(`Found ${total} photos in Firebase cloud storage. Download them all now?`,
+          'Download', () => resolve(true), 'Cancel', () => resolve(false));
+      });
+      if (!doRecover) return;
+
+      recoverBtn.innerHTML = `🔄 0 / ${total}`;
+      let recovered = 0;
+      let skipped = 0;
+      let failed = 0;
+
+      for (const doc of snap.docs) {
+        const meta = doc.data();
+        // Check if already local
+        const local = await getPhotoById(meta.id);
+        if (local && local.dataUrl) { skipped++; recovered++; recoverBtn.innerHTML = `🔄 ${recovered} / ${total}`; continue; }
+
+        if (meta.storageRef) {
+          try {
+            const ref = window.fsStorage.ref(meta.storageRef);
+            const url = await ref.getDownloadURL();
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const dataUrl = await new Promise((res) => {
+              const reader = new FileReader();
+              reader.onloadend = () => res(reader.result);
+              reader.readAsDataURL(blob);
+            });
+            const photo = { ...meta, dataUrl };
+            await savePhoto(photo);
+            recovered++;
+          } catch (dlErr) {
+            console.warn(`[Recovery] Failed photo ${meta.id}:`, dlErr);
+            failed++;
+            recovered++;
+          }
+        } else {
+          failed++;
+          recovered++;
+        }
+        recoverBtn.innerHTML = `🔄 ${recovered} / ${total}`;
+      }
+
+      const msg = `Photo recovery complete!\n\nDownloaded: ${recovered - skipped - failed}\nAlready local: ${skipped}\nFailed: ${failed}`;
+      showAlert(msg);
+
+      // Reload the inspection view to show recovered photos
+      if (currentSurveyId) {
+        const s = await getSurvey(currentSurveyId);
+        if (s) showInspection(s);
+      }
+    } catch (err) {
+      console.error('Photo recovery error:', err);
+      showAlert('Recovery failed: ' + err.message);
+    } finally {
+      recoverBtn.innerHTML = '🔄 Recover Photos';
+      recoverBtn.disabled = false;
+    }
+  };
+  bottomBar.appendChild(recoverBtn);
+
   // Check Survey button
   const checkBtn = document.createElement('button');
   checkBtn.id = 'checkSurveyBtn';
@@ -17162,6 +17250,7 @@ const FirebaseSync = (() => {
     removeSurvey,
     pushPhoto,
     removePhoto,
+    pullPhotosForSurvey,
     updateSyncStatusUI,
     refreshUI
   };
