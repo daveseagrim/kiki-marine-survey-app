@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2105';
+const APP_VERSION = 'v2106';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -5047,12 +5047,12 @@ function renderHome() {
 
     // Import, Export, and Drive Backup buttons at top
     const driveBtn = DriveBackup.isSignedIn()
-      ? `<button class="btn-secondary" style="font-size:13px;padding:8px 16px;background:#16a34a;color:white;" onclick="DriveBackup.backupAll()">☁️ Backup All to Drive</button>`
-      : `<button class="btn-secondary" style="font-size:13px;padding:8px 16px;" onclick="(async()=>{try{await DriveBackup.signIn();showToast('Signed in to Google Drive ✓');renderHome();}catch(e){if(e.code!=='auth/popup-closed-by-user')showAlert('Sign-in failed: '+e.message);}})()">☁️ Sign in to Google Drive</button>`;
-    const importBtn = `<div style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-bottom:12px;">
+      ? `<button class="btn-secondary" style="flex:1;font-size:12px;padding:8px 0;background:#16a34a;color:white;" onclick="DriveBackup.backupAll()">☁️ Backup to Drive</button>`
+      : `<button class="btn-secondary" style="flex:1;font-size:12px;padding:8px 0;" onclick="(async()=>{try{await DriveBackup.signIn();showToast('Signed in to Google Drive ✓');renderHome();}catch(e){if(e.code!=='auth/popup-closed-by-user')showAlert('Sign-in failed: '+e.message);}})()">☁️ Google Drive</button>`;
+    const importBtn = `<div style="display:flex;gap:8px;margin-bottom:12px;">
         ${driveBtn}
-        <button class="btn-secondary" style="font-size:13px;padding:8px 16px;" onclick="exportAllSurveys()">📦 Export All</button>
-        <button class="btn-secondary" style="font-size:13px;padding:8px 16px;" onclick="importSurvey()">📥 Import</button>
+        <button class="btn-secondary" style="flex:1;font-size:12px;padding:8px 0;" onclick="exportAllSurveys()">📦 Export</button>
+        <button class="btn-secondary" style="flex:1;font-size:12px;padding:8px 0;" onclick="importSurvey()">📥 Import</button>
       </div>`;
 
     if (surveys.length === 0) {
@@ -6586,8 +6586,8 @@ function editSurveyDetails(surveyId) {
 
     // ✨ Desc button
     const descBtn2 = document.createElement('button');
-    descBtn2.style.cssText = 'background:#7c3aed;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
-    descBtn2.innerHTML = '✨ Desc';
+    descBtn2.style.cssText = 'background:#ffcc00;color:#006699;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
+    descBtn2.innerHTML = '📝 Desc';
     descBtn2.onclick = async () => {
       // Save current form data first, then regenerate description
       await saveEditFormSilently();
@@ -8261,19 +8261,19 @@ function renderInspection(survey) {
     : '';
 
   app.innerHTML = `
-    <div class="header" style="flex-direction:column;align-items:stretch;gap:8px;">
+    <div class="header" style="flex-direction:column;align-items:stretch;gap:4px;padding-bottom:6px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <button class="header-back" onclick="backToHome()">←</button>
         <div style="flex:1;min-width:0;">
           <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#006699;">${esc(survey.vesselName)}</div>
-          <div class="header-subtitle" style="color:#3399cc;">${APP_VERSION}</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
+            <span class="header-subtitle" style="color:#3399cc;">${APP_VERSION}</span>
+            <button onclick="forceAppUpdate()" style="background:rgba(0,102,153,0.08);color:#006699;border:1px solid #3399cc;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;">↻ Update</button>
+            <button onclick="regenerateDescriptionFromInspection()" style="background:#ffcc00;color:#006699;border:none;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">📝 Desc</button>
+            <button onclick="editSurveyDetails('${survey.id}')" style="background:#006699;color:white;border:none;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;">✏️ Intro</button>
+          </div>
         </div>
         <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
-      </div>
-      <div style="display:flex;justify-content:center;gap:8px;">
-        <button onclick="forceAppUpdate()" style="background:rgba(0,102,153,0.08);color:#006699;border:1px solid #3399cc;border-radius:22px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">↻ Update</button>
-        <button onclick="regenerateDescriptionFromInspection()" style="background:#ffcc00;color:#006699;border:none;border-radius:22px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(255,204,0,0.3);">✨ Desc</button>
-        <button onclick="editSurveyDetails('${survey.id}')" style="background:#006699;color:white;border:none;border-radius:22px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(0,102,153,0.3);">✏️ Edit Intro</button>
       </div>
     </div>
     ${surveyTypeBanner}
