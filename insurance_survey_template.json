@@ -1939,7 +1939,7 @@
           },
           {
             "type": "list",
-            "label": "Lighting",
+            "label": "Lighting (cabin)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2829,7 +2829,7 @@
           },
           {
             "type": "list",
-            "label": "Battery ventillation",
+            "label": "Battery ventilation",
             "options": [
               "A - Critical",
               "B - Needs Attention",

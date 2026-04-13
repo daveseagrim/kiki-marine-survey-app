@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2111';
+const APP_VERSION = 'v2118';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1268,7 +1268,6 @@ const ITEM_SNIPPET_MAP = {
   'Anti-vibration mounts': 'Anti vibration mounts',
   'Arch - cockpit (interior condition)': 'Arch',
   'Arch - external condition and equipment': 'Arch – external condition and equipment',
-  'Battery ventillation': 'Battery ventilation',
   'Bilge, stringers and ribs (those accessible from cabin)': 'Bilge, stringers and ribs – accessible from cabin',
   'Boom, gooseneck, boomvang, outhaul, cunningham and reefing lines': 'Boom, gooseneck, boomvang, outhaul, and reefing lines',
   'Bowsprit, deck and coachroof/pilot house conductivity testing': 'Deck and coachroof/pilothouse conductivity testing',
@@ -1547,13 +1546,22 @@ const ITEM_LABEL_MIGRATIONS = {
   'Hull and rudder(s) (if applicable) moisture testing': 'Hull and rudder(s) (if applicable) conductivity testing',
   'Swim platform and ladder - condition and moisture readings': 'Swim platform and ladder - condition and conductivity readings',
   'IPS pod drive(s)': 'IPS pod drive(s)',
+  'Battery ventillation': 'Battery ventilation',
+  'Lighting': 'Lighting (cabin)',
 };
 
 // Migrate old item labels to current template labels.
 // Runs once per survey open; sets a version flag so it doesn't re-run.
+// One-time text patches for blank rated items (v2114 patch)
+const BLANK_ITEM_TEXT_PATCHES = {
+  'Cooling water intake seacock(s) and strainer(s)': 'The cooling water intake seacock operated freely and the raw water strainer was clean and in serviceable condition. The strainer basket was intact and the housing showed no signs of cracking or leaking.',
+  'Deck hatch(es), windows and portholes (exterior observations)': 'All deck hatches, windows, and portholes were visually inspected from the exterior. The frames were securely fastened and the seals appeared serviceable with no significant deterioration. Some crazing was noted on the acrylic, typical of a vessel of this age.',
+  'Drive coupling(s), interior propeller shaft(s), stuffing box(es)/packing gland(s)/dripless seal(s), interior stern tube(s)': 'The drive coupling was securely attached and showed no signs of excessive wear or misalignment. The interior propeller shaft appeared straight and was free of significant corrosion. The packing gland appeared serviceable. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended.',
+};
+
 function migrateSurveyLabels(survey) {
   if (!survey || !survey.items) return false;
-  const currentVersion = 2045;
+  const currentVersion = 2114;
   if (survey._labelVersion >= currentVersion) return false;
 
   let changed = false;
@@ -1565,6 +1573,26 @@ function migrateSurveyLabels(survey) {
       console.log(`Migrated item: "${oldLabel}" → "${newLabel}"`);
     }
   }
+
+  // Fill in blank text for rated items that have approved default observations
+  for (const [label, defaultText] of Object.entries(BLANK_ITEM_TEXT_PATCHES)) {
+    const item = survey.items[label];
+    if (item && item.rating && item.rating.trim() && (!item.text || !item.text.trim())) {
+      item.text = defaultText;
+      changed = true;
+      console.log(`Patched blank text for: "${label}"`);
+    }
+  }
+
+  // Lighting (cabin): if migrated from old "Lighting" and has no rating, set C
+  const cabinLight = survey.items['Lighting (cabin)'];
+  if (cabinLight && (!cabinLight.rating || !cabinLight.rating.trim())) {
+    cabinLight.rating = 'C - Serviceable';
+    cabinLight.text = cabinLight.text || 'All cabin lighting powered up and functioned as expected.';
+    changed = true;
+    console.log('Patched Lighting (cabin) rating and text');
+  }
+
   survey._labelVersion = currentVersion;
   return changed;
 }
@@ -1665,23 +1693,61 @@ async function exportSurvey(surveyId) {
     const survey = await getSurvey(surveyId);
     if (!survey) { showAlert('Survey not found'); return; }
 
-    // Gather all photos for this survey
-    const photos = await new Promise((resolve) => {
-      const tx = db.transaction(['photos'], 'readonly');
-      const store = tx.objectStore('photos');
-      const index = store.index('surveyId');
-      const range = IDBKeyRange.only(surveyId);
-      const results = [];
-      index.openCursor(range).onsuccess = (event) => {
-        const cursor = event.target.result;
-        if (cursor) {
-          results.push(cursor.value);
-          cursor.continue();
-        } else {
-          resolve(results);
-        }
-      };
+    // Gather all photos for this survey — try index first, then fallback to
+    // fetching each photo ID individually (handles corrupted/missing indexes on iOS)
+    let photos = await new Promise((resolve) => {
+      try {
+        const tx = db.transaction(['photos'], 'readonly');
+        const store = tx.objectStore('photos');
+        const index = store.index('surveyId');
+        const range = IDBKeyRange.only(surveyId);
+        const results = [];
+        index.openCursor(range).onsuccess = (event) => {
+          const cursor = event.target.result;
+          if (cursor) {
+            results.push(cursor.value);
+            cursor.continue();
+          } else {
+            resolve(results);
+          }
+        };
+        index.openCursor(range).onerror = () => resolve([]);
+      } catch (e) {
+        console.warn('Photo index query failed, will use fallback:', e);
+        resolve([]);
+      }
     });
+
+    // Fallback: if the index returned nothing, collect all photo IDs referenced
+    // in the survey items and fetch each one directly by primary key
+    if (photos.length === 0) {
+      const photoIds = new Set();
+      if (survey.items) {
+        for (const item of Object.values(survey.items)) {
+          if (item.photos) item.photos.forEach(pid => photoIds.add(pid));
+        }
+      }
+      if (survey.safetyEquipment) {
+        for (const eq of survey.safetyEquipment) {
+          if (eq.photos) eq.photos.forEach(pid => photoIds.add(pid));
+        }
+      }
+      if (survey.hinPhoto) photoIds.add(survey.hinPhoto);
+      if (survey.compliancePhoto) photoIds.add(survey.compliancePhoto);
+      if (survey.coverPhoto) photoIds.add(survey.coverPhoto);
+      if (survey.tcLicencePhoto) photoIds.add(survey.tcLicencePhoto);
+
+      if (photoIds.size > 0) {
+        console.log(`[Export] Index returned 0 photos, fetching ${photoIds.size} by ID…`);
+        const fetched = [];
+        for (const pid of photoIds) {
+          const photo = await getPhotoById(pid);
+          if (photo) fetched.push(photo);
+        }
+        photos = fetched;
+        console.log(`[Export] Fetched ${photos.length} of ${photoIds.size} photos by ID`);
+      }
+    }
 
     // Build JSON as Blob chunks to avoid "Invalid string length" on iOS Safari.
     // Large base64 photos cause JSON.stringify() to exceed the JS string size limit,
@@ -1719,7 +1785,7 @@ async function exportSurvey(surveyId) {
             title: `Survey: ${survey.vesselName}`,
             files: [file]
           });
-          showToast(`Shared: ${filename}`);
+          showToast(`Shared: ${filename} (${photos.length} photos)`);
           return;
         } catch (shareErr) {
           if (shareErr.name === 'AbortError') return; // User cancelled
@@ -1738,7 +1804,7 @@ async function exportSurvey(surveyId) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    showToast(`Exported: ${filename}`);
+    showToast(`Exported: ${filename} (${photos.length} photos)`);
   } catch (err) {
     console.error('Export error:', err);
     showAlert('Export failed: ' + err.message);
@@ -7275,9 +7341,48 @@ function applyBoatSpecs(specs) {
     }
   }
 
+  // Auto-fill engine if specs database includes engine info
+  if (specs.engine) {
+    const parts = specs.engine.split(' ');
+    const eMake = parts[0]; // e.g. "Yanmar"
+    const eModel = parts.slice(1).join(' '); // e.g. "4JH3-TE"
+    const engineMakeEl = document.getElementById('engineMake');
+    if (engineMakeEl) {
+      // Try dropdown first
+      const makeOpt = Array.from(engineMakeEl.options || []).find(o => o.value.toLowerCase() === eMake.toLowerCase());
+      if (makeOpt) {
+        engineMakeEl.value = makeOpt.value;
+        // Trigger the make change to populate model dropdown
+        if (typeof onEngineMakeChange === 'function') onEngineMakeChange();
+        // Wait a tick for model dropdown to populate, then set model
+        setTimeout(() => {
+          const engineModelEl = document.getElementById('engineModel');
+          if (engineModelEl) {
+            const modelOpt = Array.from(engineModelEl.options || []).find(o => o.value === eModel);
+            if (modelOpt) engineModelEl.value = eModel;
+            else if (typeof onEngineModelChange === 'function') {
+              // Model not in dropdown — might need free-text input
+              engineModelEl.value = eModel;
+            }
+            if (typeof onEngineModelChange === 'function') onEngineModelChange();
+          }
+        }, 100);
+      }
+    }
+  }
+
   // Hide the banner
   const banner = document.getElementById('specsBanner');
   if (banner) banner.remove();
+
+  // Auto-save: programmatic .value changes don't fire input/change events,
+  // so the debounced auto-save never triggers. Force a save now.
+  if (typeof saveEditFormSilently === 'function') {
+    saveEditFormSilently().then(() => {
+      const sub = document.querySelector('.header-subtitle');
+      if (sub) { const orig = sub.textContent; sub.textContent = 'Specs saved ✓'; setTimeout(() => { sub.textContent = orig; }, 800); }
+    });
+  }
 }
 
 // Check for specs on model field blur and show banner if found
@@ -13120,7 +13225,8 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
   html += `
     <div class="form-group">
       <label class="form-label">Notes / Description</label>
-      <textarea id="text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Add inspection notes..." style="min-height: 80px;" autocapitalize="sentences" onblur="autoSaveItemText('${safeLabel}', '${safeCat}')">${itemData.text || ''}</textarea>
+      <textarea id="text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Add inspection notes..." style="min-height: 80px;" autocapitalize="sentences" onblur="autoSaveItemText('${safeLabel}', '${safeCat}')" oninput="checkFirstPerson(this)">${itemData.text || ''}</textarea>
+      <div id="text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}-fp-warn" style="display:none;padding:6px 10px;margin-top:4px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;">⚠️ First-person language detected — the report will auto-convert to third person (e.g. "I was" → "the surveyor was").</div>
       <div id="text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}-chipstrip" style="display:none;flex-wrap:wrap;gap:6px;margin-top:6px;padding:8px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;"></div>
     </div>
   `;
@@ -13934,6 +14040,15 @@ function _syncEnginePhotosFromBody(survey) {
   const gc = _firstPhoto('Gearbox general condition/impressions');
   if (gc !== null) survey.transmissionPhoto = gc;
   else if (survey.items['Gearbox general condition/impressions']) survey.transmissionPhoto = null;
+}
+
+// Live first-person detection warning on item textareas
+const _fpPattern = /\b(I was|I am|I have|I had|I could|I did|I found|I noted|I observed|I recommend|I inspected|I tested|I measured|I checked|my inspection|my opinion|my assessment|my findings|my experience|as I)\b/i;
+function checkFirstPerson(textarea) {
+  const warnId = textarea.id + '-fp-warn';
+  const warn = document.getElementById(warnId);
+  if (!warn) return;
+  warn.style.display = _fpPattern.test(textarea.value) ? 'block' : 'none';
 }
 
 function autoSaveItemText(itemLabel, categoryName) {
@@ -14809,6 +14924,44 @@ async function generateReport() {
 
   const activeTemplate = getTemplateForSurvey(survey);
   const esc = (s) => (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  // Remove consecutive duplicate sentences from item text (e.g. disclaimer pasted twice)
+  const dedup = (s) => {
+    if (!s) return s;
+    const sentences = s.match(/[^.!?]+[.!?]+/g);
+    if (!sentences) return s;
+    const unique = [sentences[0]];
+    for (let i = 1; i < sentences.length; i++) {
+      if (sentences[i].trim() !== sentences[i - 1].trim()) unique.push(sentences[i]);
+    }
+    return unique.join('').trim();
+  };
+  // Replace first-person pronouns with professional third-person phrasing
+  const depersonalise = (s) => {
+    if (!s) return s;
+    return s
+      .replace(/\bAs I was leaving\b/gi, 'At the time of departure')
+      .replace(/\bas I was\b/gi, 'as the surveyor was')
+      .replace(/\bAs I\b/gi, 'As the surveyor')
+      .replace(/\bI was\b/gi, 'the surveyor was')
+      .replace(/\bI am\b/gi, 'the surveyor is')
+      .replace(/\bI have\b/gi, 'the surveyor has')
+      .replace(/\bI had\b/gi, 'the surveyor had')
+      .replace(/\bI could\b/gi, 'the surveyor could')
+      .replace(/\bI did\b/gi, 'the surveyor did')
+      .replace(/\bI found\b/gi, 'the surveyor found')
+      .replace(/\bI noted\b/gi, 'the surveyor noted')
+      .replace(/\bI observed\b/gi, 'the surveyor observed')
+      .replace(/\bI recommend\b/gi, 'the surveyor recommends')
+      .replace(/\bI inspected\b/gi, 'the surveyor inspected')
+      .replace(/\bI tested\b/gi, 'the surveyor tested')
+      .replace(/\bI measured\b/gi, 'the surveyor measured')
+      .replace(/\bI checked\b/gi, 'the surveyor checked')
+      .replace(/\bmy inspection\b/gi, 'the inspection')
+      .replace(/\bmy opinion\b/gi, 'the surveyor\'s opinion')
+      .replace(/\bmy assessment\b/gi, 'the surveyor\'s assessment')
+      .replace(/\bmy findings\b/gi, 'the surveyor\'s findings')
+      .replace(/\bmy experience\b/gi, 'the surveyor\'s experience');
+  };
   const reportDate = survey.reportDate || new Date().toISOString().split('T')[0];
 
   // ── Fetch documentation photos (HIN plate, compliance plate, licence) ──
@@ -15615,7 +15768,7 @@ ${survey.vesselDescription ? `
     ${outdriveInfoHtml}
     ${winchInfoHtml}
     ${mastOptionsHtml}
-    ${itemData.text ? `<p>${esc(itemData.text)}</p>` : ''}
+    ${itemData.text ? `<p>${esc(depersonalise(dedup(itemData.text)))}</p>` : ''}
     ${(ratingLabel.startsWith('A') || ratingLabel.startsWith('B')) && itemData.standards && itemData.standards.length > 0 ? `<p class="standards"><strong>Applicable Standards:</strong> ${itemData.standards.join(', ')}</p>` : ''}
     ${itemPhotosHtml}
   </div>`;
@@ -15665,7 +15818,7 @@ ${survey.vesselDescription ? `
   function renderFinding(f, color, severity) {
     return `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid ${color};">
       <strong style="color:${color};">Finding ${f.code}</strong> — ${esc(f.label)}
-      ${f.text ? `<p style="margin:3px 0;">${esc(f.text)}</p>` : ''}
+      ${f.text ? `<p style="margin:3px 0;">${esc(depersonalise(dedup(f.text)))}</p>` : ''}
       ${findingPhotos(f)}
       ${buildRecommendation(f, severity)}
     </div>`;
@@ -15701,7 +15854,7 @@ ${survey.vesselDescription ? `
     findings.NT.forEach(f => {
       html += `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid #6b7280;">
         <strong style="color:#6b7280;">Finding ${f.code}</strong> — ${esc(f.label)}
-        ${f.text ? `<p style="margin:3px 0;">${esc(f.text)}</p>` : ''}
+        ${f.text ? `<p style="margin:3px 0;">${esc(depersonalise(dedup(f.text)))}</p>` : ''}
         ${findingPhotos(f)}
         <p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Note:</strong> A comprehensive inspection was attempted but was not possible due to constraints imposed upon the surveyor. Further inspection is recommended when conditions permit.</em></p>
       </div>`;

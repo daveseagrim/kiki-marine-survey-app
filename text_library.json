@@ -1726,6 +1726,21 @@
       "section": "Windshield, pilot house windows, frames and seals",
       "rating": "C",
       "text": "The windshield and pilot house windows were in proper working condition with clear visibility and secure frames. Seals were intact and in in good order condition."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "C",
+      "text": "All deck hatches, windows, and portholes were visually inspected from the exterior. The frames were securely fastened and the seals appeared serviceable with no significant deterioration. No cracking or crazing was noted in the acrylic or glass."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "C - with crazing",
+      "text": "All deck hatches, windows, and portholes were visually inspected from the exterior. The frames were securely fastened and the seals appeared serviceable with no significant deterioration. Some crazing was noted on the acrylic, typical of a vessel of this age."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "text": "Deck hatches, windows, and portholes were visually inspected from the exterior. {any:One or more seals showed deterioration and should be replaced|Crazing on one or more hatch lenses was significant and replacement is recommended|A hatch frame was loose and should be re-bedded|Corrosion was noted around one or more porthole frames}."
     }
   ],
   "Aft Deck": [
@@ -4933,6 +4948,11 @@
       "text": "The cooling water seacock turned easily, and the strainer appeared clean. No leakage was observed."
     },
     {
+      "section": "Cooling water intake seacock(s) and strainer(s)",
+      "rating": "C - detailed",
+      "text": "The cooling water intake seacock operated freely and the raw water strainer was clean and in serviceable condition. The strainer basket was intact and the housing showed no signs of cracking or leaking."
+    },
+    {
       "section": "Anti-vibration mounts",
       "rating": "Not tested",
       "text": "Not tested."
@@ -5221,6 +5241,11 @@
       "section": "Drive coupling",
       "rating": "C",
       "text": "The drive coupling was securely fastened with no visible wear or misalignment. All fasteners were tight and the coupling showed no signs of corrosion or deterioration."
+    },
+    {
+      "section": "Drive coupling",
+      "rating": "C - with shaft and packing",
+      "text": "The drive coupling was securely attached and showed no signs of excessive wear or misalignment. The interior propeller shaft appeared straight and was free of significant corrosion. The packing gland appeared serviceable. As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
     },
     {
       "section": "Drive coupling",
@@ -6015,6 +6040,31 @@
       "section": "Bundling support and wiring",
       "rating": "B",
       "text": "Electrical wiring was serviceable but some cable supports were loose or corroded. Tightening and inspection are recommended to prevent chafe and ensure proper routing."
+    },
+    {
+      "section": "Navigation lights",
+      "rating": "A",
+      "text": "The navigation lights could not be made to function at the time of the survey. This is a safety concern that should be addressed before the vessel is next underway."
+    },
+    {
+      "section": "Navigation lights",
+      "rating": "B",
+      "text": "The navigation lights were functional but showed signs of deterioration including {any:discolouration of lenses|corrosion at the base fittings|loose mounting hardware|cracked housing}. Replacement is recommended in the near future to maintain compliance with the Collision Regulations."
+    },
+    {
+      "section": "Navigation lights",
+      "rating": "C",
+      "text": "All navigation lights were tested and functioned correctly. The lenses were clear and the fixtures were securely mounted with no signs of corrosion or deterioration."
+    },
+    {
+      "section": "Lighting (cabin)",
+      "rating": "C",
+      "text": "All cabin lighting powered up and functioned as expected."
+    },
+    {
+      "section": "Lighting (cabin)",
+      "rating": "B",
+      "text": "Cabin lighting was generally functional. However, {any:one or more fixtures did not illuminate|several bulbs were burned out|wiring to one or more fixtures appeared deteriorated|a fixture was loose or improperly mounted}. Repairs are recommended."
     }
   ],
   "Safety & Nav Equipment": [

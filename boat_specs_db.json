@@ -2050,6 +2050,10 @@
       "hullType": "Fin keel",
       "keelType": "Fin",
       "construction": "Fibreglass",
+      "engine": "Yanmar 4JH3-TE",
+      "engineHp": "75 HP",
+      "fuelCapacity": "84 US gal",
+      "waterCapacity": "214 US gal",
       "draftVariants": [
         {
           "label": "Fin keel",

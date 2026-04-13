@@ -813,7 +813,7 @@
           },
           {
             "type": "list",
-            "label": "Lighting",
+            "label": "Lighting (cabin)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2424,7 +2424,7 @@
               "Not applicable",
               "Not tested/not verified"
             ]
-          }
+          },
         ]
       },
       {
