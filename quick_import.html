@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Photo Import</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+    h1 { color: #006699; }
+    button { background: #16a34a; color: white; border: none; border-radius: 8px; padding: 16px 32px; font-size: 18px; font-weight: 700; cursor: pointer; width: 100%; margin: 12px 0; }
+    button:disabled { background: #9ca3af; }
+    #status { margin: 16px 0; padding: 12px; border-radius: 8px; font-size: 14px; display: none; }
+    #progress { width: 100%; height: 24px; background: #e5e7eb; border-radius: 12px; overflow: hidden; margin: 12px 0; display: none; }
+    #bar { height: 100%; background: #16a34a; transition: width 0.1s; width: 0%; }
+    #count { text-align: center; font-size: 16px; font-weight: 600; color: #374151; }
+    code { background: #f1f5f9; padding: 8px 12px; border-radius: 6px; display: block; margin: 8px 0; font-size: 13px; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <h1>Quick Photo Import</h1>
+  <p>Start the photo server in Terminal first:</p>
+  <code>python3 ~/Documents/Kiki\ Marine\ App/photo_server.py ~/Documents/Kiki\ Marine\ App/extasea-all-photos</code>
+  <p style="font-size:13px;color:#666;">For Riverdance, replace <em>extasea-all-photos</em> with <em>riverdance-all-photos</em></p>
+
+  <button id="importBtn" onclick="startImport()">Import from Local Server</button>
+
+  <div id="progress"><div id="bar"></div></div>
+  <div id="count"></div>
+  <div id="status"></div>
+
+  <script>
+    let db;
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('KikiSurveyDB', 2);
+        req.onupgradeneeded = (e) => {
+          const d = e.target.result;
+          if (!d.objectStoreNames.contains('surveys')) d.createObjectStore('surveys', { keyPath: 'id' });
+          if (!d.objectStoreNames.contains('photos')) {
+            const ps = d.createObjectStore('photos', { keyPath: 'id' });
+            ps.createIndex('surveyId', 'surveyId', { unique: false });
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function savePhoto(photo) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(['photos'], 'readwrite');
+        tx.objectStore('photos').put(photo);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+
+    function getAllSurveys() {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(['surveys'], 'readonly');
+        const req = tx.objectStore('surveys').getAll();
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function setStatus(msg, color) {
+      const el = document.getElementById('status');
+      el.style.display = 'block';
+      el.style.background = color === 'error' ? '#fee2e2' : color === 'success' ? '#dcfce7' : '#e0f2fe';
+      el.style.color = color === 'error' ? '#991b1b' : color === 'success' ? '#166534' : '#1e40af';
+      el.textContent = msg;
+    }
+
+    async function startImport() {
+      const btn = document.getElementById('importBtn');
+      btn.disabled = true;
+      btn.textContent = 'Connecting...';
+
+      try {
+        // Open DB
+        db = await openDB();
+
+        // Build label map
+        const surveys = await getAllSurveys();
+        const labelMap = {};
+        for (const s of surveys) {
+          if (s.items) {
+            for (const [label, item] of Object.entries(s.items)) {
+              if (item && item.photos) {
+                for (const pid of item.photos) labelMap[pid] = label;
+              }
+            }
+          }
+        }
+
+        // Fetch manifest
+        let manifest;
+        try {
+          const res = await fetch('http://localhost:8765/manifest');
+          manifest = await res.json();
+        } catch (e) {
+          setStatus('Cannot connect to server. Is python3 photo_server.py running in Terminal?', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Import from Local Server';
+          return;
+        }
+
+        const total = manifest.total;
+        setStatus(`Found ${total} photos. Importing...`, 'info');
+
+        const progressEl = document.getElementById('progress');
+        const barEl = document.getElementById('bar');
+        const countEl = document.getElementById('count');
+        progressEl.style.display = 'block';
+
+        let imported = 0;
+        let errors = 0;
+
+        for (let i = 0; i < total; i++) {
+          try {
+            const res = await fetch(`http://localhost:8765/photo/${i}`);
+            const p = await res.json();
+
+            await savePhoto({
+              id: p.id,
+              surveyId: p.surveyId,
+              itemLabel: labelMap[p.id] || 'Recovered',
+              dataUrl: p.dataUrl,
+              annotated: false,
+              createdAt: p.createdAt || ''
+            });
+            imported++;
+          } catch (e) {
+            errors++;
+          }
+
+          barEl.style.width = (((i + 1) / total) * 100) + '%';
+          countEl.textContent = `${imported} of ${total}${errors > 0 ? ` (${errors} errors)` : ''}`;
+
+          // Let browser breathe
+          if (i % 5 === 4) await new Promise(r => setTimeout(r, 30));
+        }
+
+        setStatus(`Done! Imported ${imported} photos.${errors > 0 ? ` ${errors} errors.` : ''}`, 'success');
+        btn.textContent = 'Done — import another folder?';
+        btn.disabled = false;
+      } catch (e) {
+        setStatus('Error: ' + e.message, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Import from Local Server';
+      }
+    }
+  </script>
+</body>
+</html>
