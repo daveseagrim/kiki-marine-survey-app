@@ -392,7 +392,7 @@
           <label for="import-photos-file" class="file-input-label">
             Choose Photos JSON File
           </label>
-          <input type="file" id="import-photos-file" accept=".json">
+          <input type="file" id="import-photos-file" accept=".json" multiple>
         </div>
         <div id="import-photos-status" class="status"></div>
       </div>
@@ -825,38 +825,40 @@
       reader.readAsText(file);
     });
 
-    // Import photo batch file
+    // Import photo batch file(s) — supports multiple files selected at once
     document.getElementById('import-photos-file').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
 
-      const reader = new FileReader();
-      reader.onload = async (event) => {
+      const progressContainer = document.getElementById('progress-container');
+      progressContainer.classList.remove('hidden');
+      let totalImported = 0;
+      let totalFiles = files.length;
+      let errors = 0;
+
+      for (let f = 0; f < files.length; f++) {
+        showStatus('info', `Processing file ${f + 1} of ${totalFiles}: ${files[f].name}...`, 'import-photos-status');
         try {
-          const data = JSON.parse(event.target.result);
+          const text = await files[f].text();
+          const data = JSON.parse(text);
           const photos = data.photos || [];
-
-          if (!Array.isArray(photos)) {
-            throw new Error('Expected {photos: [...]} format');
-          }
-
-          const progressContainer = document.getElementById('progress-container');
-          progressContainer.classList.remove('hidden');
+          if (!Array.isArray(photos)) throw new Error('Expected {photos: [...]}');
 
           for (let i = 0; i < photos.length; i++) {
             await savePhoto(photos[i]);
-            document.getElementById('progress-text').textContent = `${i + 1} / ${photos.length}`;
-            document.getElementById('progress-bar-fill').style.width = (((i + 1) / photos.length) * 100) + '%';
+            totalImported++;
+            document.getElementById('progress-text').textContent = `File ${f + 1}/${totalFiles} — ${totalImported} photos imported`;
           }
-
-          progressContainer.classList.add('hidden');
-          showStatus('success', `Imported ${photos.length} photo(s)!`, 'import-photos-status');
-          await refreshDiagnostic();
         } catch (err) {
-          showStatus('error', 'Import failed: ' + err.message, 'import-photos-status');
+          console.error('Error importing ' + files[f].name, err);
+          errors++;
         }
-      };
-      reader.readAsText(file);
+      }
+
+      progressContainer.classList.add('hidden');
+      const msg = `Imported ${totalImported} photo(s) from ${totalFiles - errors} file(s)${errors > 0 ? ` (${errors} failed)` : ''}`;
+      showStatus(errors > 0 ? 'warning' : 'success', msg, 'import-photos-status');
+      await refreshDiagnostic();
     });
 
     // Initialize on page load
