@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2110';
+const APP_VERSION = 'v2111';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -5045,14 +5045,15 @@ function renderHome() {
   getAllSurveys().then(surveys => {
     const content = document.getElementById('surveys-content');
 
-    // Import, Export, and Drive Backup buttons at top
+    // Import, Export, and Drive Backup buttons at top — branded pill style
+    const pillBase = 'flex:1;border:none;border-radius:22px;padding:8px 0;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;';
     const driveBtn = DriveBackup.isSignedIn()
-      ? `<button class="btn-secondary" style="flex:1;font-size:12px;padding:8px 0;background:#16a34a;color:white;" onclick="DriveBackup.backupAll()">☁️ Backup to Drive</button>`
-      : `<button class="btn-secondary" style="flex:1;font-size:12px;padding:8px 0;" onclick="(async()=>{try{await DriveBackup.signIn();showToast('Signed in to Google Drive ✓');renderHome();}catch(e){if(e.code!=='auth/popup-closed-by-user')showAlert('Sign-in failed: '+e.message);}})()">☁️ Google Drive</button>`;
+      ? `<button style="${pillBase}background:#3399cc;color:white;" onclick="DriveBackup.backupAll()">☁️ Backup to Drive</button>`
+      : `<button style="${pillBase}background:rgba(0,102,153,0.08);color:#006699;border:1px solid #3399cc;" onclick="(async()=>{try{await DriveBackup.signIn();showToast('Signed in to Google Drive ✓');renderHome();}catch(e){if(e.code!=='auth/popup-closed-by-user')showAlert('Sign-in failed: '+e.message);}})()">☁️ Google Drive</button>`;
     const importBtn = `<div style="display:flex;gap:8px;margin-bottom:12px;">
         ${driveBtn}
-        <button class="btn-secondary" style="flex:1;font-size:12px;padding:8px 0;" onclick="exportAllSurveys()">📦 Export</button>
-        <button class="btn-secondary" style="flex:1;font-size:12px;padding:8px 0;" onclick="importSurvey()">📥 Import</button>
+        <button style="${pillBase}background:#ffcc00;color:#006699;font-weight:700;" onclick="exportAllSurveys()">📦 Export</button>
+        <button style="${pillBase}background:#006699;color:white;" onclick="importSurvey()">📥 Import</button>
       </div>`;
 
     if (surveys.length === 0) {
@@ -6616,14 +6617,17 @@ function editSurveyDetails(surveyId) {
     updateBtn2.onclick = () => forceAppUpdate();
     editBar.appendChild(updateBtn2);
 
-    // 📝 Desc button
+    // 📝 Desc button — regenerate and update textarea in-place (no page re-render)
     const descBtn2 = document.createElement('button');
     descBtn2.style.cssText = ps + 'background:#ffcc00;color:#006699;font-weight:700;';
     descBtn2.innerHTML = '📝 Desc';
     descBtn2.onclick = async () => {
       await saveEditFormSilently();
       await regenerateDescriptionFromInspection();
-      editSurveyDetails(survey.id);
+      // Update the textarea in-place instead of re-rendering
+      const updated = await getSurvey(survey.id);
+      const descEl = document.getElementById('vesselDescription');
+      if (updated && descEl) descEl.value = updated.vesselDescription || '';
     };
     editBar.appendChild(descBtn2);
 
