@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2121';
+const APP_VERSION = 'v2122';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1657,8 +1657,9 @@ async function deleteSurvey(id) {
   });
 }
 
-// ─── Photo session counter for backup reminders ────────────────────────────
+// ─── Photo backup tracking ─────────────────────────────────────────────────
 let _photosSinceLastBackup = 0;
+let _backupStats = { firebase: 0, firebaseFail: 0, cameraRoll: 0, cameraRollFail: 0, session: 0 };
 
 async function savePhoto(photo) {
   const id = await new Promise((resolve, reject) => {
@@ -1669,28 +1670,105 @@ async function savePhoto(photo) {
     request.onsuccess = () => resolve(photo.id);
   });
 
-  // ── Auto-push to Firebase on EVERY photo save ──
+  _backupStats.session++;
+
+  // ── BACKUP 1: Firebase Storage (with retry — up to 3 attempts) ──
   if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled() && photo.dataUrl) {
-    FirebaseSync.pushPhoto(photo).catch(err => {
-      console.warn('[Auto-backup] Firebase push failed:', err.message);
-    });
+    let pushed = false;
+    for (let attempt = 1; attempt <= 3 && !pushed; attempt++) {
+      try {
+        await FirebaseSync.pushPhoto(photo);
+        pushed = true;
+        _backupStats.firebase++;
+      } catch (err) {
+        console.warn(`[Backup] Firebase attempt ${attempt}/3 failed:`, err.message);
+        if (attempt < 3) await new Promise(r => setTimeout(r, 1000 * attempt));
+      }
+    }
+    if (!pushed) {
+      _backupStats.firebaseFail++;
+      _showBackupWarning('Firebase', photo.itemLabel || photo.id);
+    }
+  } else if (photo.dataUrl && photo.itemLabel && photo.itemLabel !== 'Recovered') {
+    // Firebase not available — warn immediately
+    _backupStats.firebaseFail++;
+    _showBackupWarning('Firebase (not connected)', photo.itemLabel || photo.id);
   }
 
-  // ── Auto-push to Google Drive every 5 photos ──
+  // ── BACKUP 2: Google Drive every 3 photos (was 5, now more frequent) ──
   _photosSinceLastBackup++;
-  if (_photosSinceLastBackup >= 5 && typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn() && currentSurveyId) {
+  if (_photosSinceLastBackup >= 3 && typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn() && currentSurveyId) {
     _photosSinceLastBackup = 0;
-    DriveBackup.backupSurvey(currentSurveyId).catch(err => {
-      console.warn('[Auto-backup] Drive backup failed:', err.message);
-    });
+    try {
+      await DriveBackup.backupSurvey(currentSurveyId);
+      _backupStats.drive = (_backupStats.drive || 0) + 1;
+    } catch (err) {
+      console.warn('[Backup] Drive backup failed:', err.message);
+      _showBackupWarning('Google Drive', 'survey backup');
+    }
   }
 
-  // ── Local backup reminder after 10 unsaved photos ──
-  if (_photosSinceLastBackup >= 10) {
+  // ── Reminder if neither cloud backup is connected ──
+  const firebaseOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled();
+  const driveOk = typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn();
+  if (!firebaseOk && !driveOk && _photosSinceLastBackup >= 3) {
     showBackupReminder();
   }
 
+  // ── Update backup status indicator ──
+  _updateBackupStatusUI();
+
   return id;
+}
+
+// Update the backup status badge in the bottom bar
+function _updateBackupStatusUI() {
+  const badge = document.getElementById('backupStatusBadge');
+  if (!badge) return;
+
+  const firebaseOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled();
+  const driveOk = typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn();
+  const total = _backupStats.session;
+  const backed = _backupStats.firebase;
+  const failed = _backupStats.firebaseFail;
+
+  if (total === 0) {
+    badge.style.display = 'none';
+    return;
+  }
+
+  badge.style.display = 'inline-flex';
+
+  // Colour: green if all backed up, yellow if some failed, red if none backed up
+  if (failed === 0 && firebaseOk) {
+    badge.style.background = '#16a34a';
+    badge.textContent = `☁️ ${backed}/${total}`;
+    badge.title = `${backed} of ${total} photos backed up to Firebase${driveOk ? ' + Drive' : ''}`;
+  } else if (backed > 0) {
+    badge.style.background = '#d97706';
+    badge.textContent = `⚠️ ${backed}/${total}`;
+    badge.title = `${backed} of ${total} backed up, ${failed} failed — check connection`;
+  } else {
+    badge.style.background = '#dc2626';
+    badge.textContent = `🚨 0/${total}`;
+    badge.title = 'No photos backed up! Connect Firebase or Drive.';
+  }
+}
+
+// Show a visible warning when Firebase backup fails — NOT just a console message
+function _showBackupWarning(service, photoLabel) {
+  const existing = document.getElementById('backup-warning-bar');
+  if (existing) existing.remove();
+
+  const bar = document.createElement('div');
+  bar.id = 'backup-warning-bar';
+  bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#dc2626;color:white;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
+  bar.innerHTML = `⚠️ ${service} backup failed for "${photoLabel}" — photos may not be backed up. Check your connection.
+    <button onclick="this.parentElement.remove()" style="margin-left:12px;background:white;color:#dc2626;border:none;border-radius:4px;padding:4px 10px;font-weight:700;cursor:pointer;">Dismiss</button>`;
+  document.body.appendChild(bar);
+
+  // Auto-dismiss after 10 seconds
+  setTimeout(() => { if (bar.parentElement) bar.remove(); }, 10000);
 }
 
 async function getPhotoById(photoId) {
@@ -9187,6 +9265,13 @@ function ensureReportButton() {
   introBtn.innerHTML = '✏️ Intro';
   introBtn.onclick = () => editSurveyDetails(currentSurveyId);
   bottomBar.appendChild(introBtn);
+
+  // Backup status badge — shows live backup count
+  const backupBadge = document.createElement('span');
+  backupBadge.id = 'backupStatusBadge';
+  backupBadge.style.cssText = 'display:none;align-items:center;gap:3px;padding:6px 10px;border-radius:20px;font-size:11px;font-weight:700;color:white;background:#16a34a;white-space:nowrap;cursor:help;';
+  backupBadge.title = 'Backup status';
+  bottomBar.appendChild(backupBadge);
 
   // Backup button
   const backupBtn = document.createElement('button');
@@ -16797,6 +16882,21 @@ async function initApp() {
 
     // Run photo integrity check in background (non-blocking)
     validatePhotoIntegrity().catch(err => console.warn('Photo integrity check failed:', err));
+
+    // Check backup readiness after a short delay (let Firebase init settle)
+    setTimeout(() => {
+      const firebaseOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled();
+      const driveOk = typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn();
+      if (!firebaseOk && !driveOk) {
+        _showBackupWarning('No cloud backup connected', 'Sign in to Firebase or Google Drive to protect your photos');
+      } else if (!firebaseOk) {
+        console.warn('[Backup] Firebase not connected — Drive only');
+      } else if (!driveOk) {
+        console.warn('[Backup] Google Drive not connected — Firebase only');
+      } else {
+        console.log('[Backup] Both Firebase and Google Drive connected ✓');
+      }
+    }, 3000);
   } catch (e) {
     console.error('Init error:', e);
     document.getElementById('app').innerHTML = `<div style="padding: 20px; color: red;">Error initializing app: ${e.message}</div>`;
