@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Kiki Marine — Photo Recovery Import</title>
+<style>
+body { font-family: -apple-system, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #f8fafc; }
+h1 { color: #006699; }
+.status { padding: 12px 16px; border-radius: 8px; margin: 8px 0; font-size: 14px; }
+.success { background: #d1fae5; color: #065f46; }
+.error { background: #fee2e2; color: #991b1b; }
+.info { background: #dbeafe; color: #1e40af; }
+.pending { background: #f3f4f6; color: #6b7280; }
+button { padding: 14px 28px; background: #006699; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin: 8px 4px; }
+button:disabled { background: #9ca3af; cursor: not-allowed; }
+#progress { margin: 20px 0; }
+.counter { font-size: 32px; font-weight: 700; color: #006699; margin: 16px 0; }
+</style>
+</head>
+<body>
+<h1>🔄 Photo Recovery Import</h1>
+<p>This page imports recovered photos directly into IndexedDB for the Grace O'Malley survey.</p>
+
+<div id="dbStatus" class="status pending">Connecting to IndexedDB…</div>
+
+<div id="controls" style="display:none;">
+  <p><strong>Step 1:</strong> Click to import the survey data first (if not already on this device).</p>
+  <button onclick="importSurveyData()">Import Survey Data</button>
+
+  <p><strong>Step 2:</strong> Select ALL batch photo files (batch_01 through batch_15) at once.</p>
+  <button onclick="importPhotoBatches()">Import Photo Batches</button>
+</div>
+
+<div id="progress"></div>
+<div id="log"></div>
+
+<script>
+let db = null;
+const SURVEY_ID = '1775663612596';
+
+// Open IndexedDB
+const request = indexedDB.open('KikiMarineSurveys', 5);
+request.onerror = () => {
+  document.getElementById('dbStatus').className = 'status error';
+  document.getElementById('dbStatus').textContent = 'Failed to open IndexedDB: ' + request.error;
+};
+
+request.onupgradeneeded = (event) => {
+  const db = event.target.result;
+  if (!db.objectStoreNames.contains('surveys')) {
+    db.createObjectStore('surveys', { keyPath: 'id' });
+  }
+  if (!db.objectStoreNames.contains('photos')) {
+    const photoStore = db.createObjectStore('photos', { keyPath: 'id' });
+    photoStore.createIndex('surveyId', 'surveyId', { unique: false });
+  }
+};
+
+request.onsuccess = () => {
+  db = request.result;
+
+  // Count existing photos for this survey
+  const tx = db.transaction(['photos'], 'readonly');
+  const store = tx.objectStore('photos');
+  const index = store.index('surveyId');
+  const range = IDBKeyRange.only(SURVEY_ID);
+  let count = 0;
+  index.openCursor(range).onsuccess = (e) => {
+    const cursor = e.target.result;
+    if (cursor) { count++; cursor.continue(); }
+    else {
+      document.getElementById('dbStatus').className = 'status success';
+      document.getElementById('dbStatus').textContent = `Connected to IndexedDB. Currently ${count} photos stored for this survey.`;
+      document.getElementById('controls').style.display = 'block';
+    }
+  };
+};
+
+function log(msg, cls) {
+  const div = document.createElement('div');
+  div.className = 'status ' + (cls || 'info');
+  div.textContent = msg;
+  document.getElementById('log').appendChild(div);
+}
+
+function savePhoto(photo) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(['photos'], 'readwrite');
+    const store = tx.objectStore('photos');
+    store.put(photo);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function importSurveyData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (!data.survey) { log('Not a valid survey file', 'error'); return; }
+
+      const tx = db.transaction(['surveys'], 'readwrite');
+      tx.objectStore('surveys').put(data.survey);
+      tx.oncomplete = () => log(`Survey "${data.survey.vesselName}" saved to IndexedDB`, 'success');
+      tx.onerror = () => log('Failed to save survey: ' + tx.error, 'error');
+    } catch (err) {
+      log('Error: ' + err.message, 'error');
+    }
+  };
+  input.click();
+}
+
+async function importPhotoBatches() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.multiple = true;
+  input.onchange = async (e) => {
+    const files = Array.from(e.target.files).sort((a, b) => a.name.localeCompare(b.name));
+    if (files.length === 0) return;
+
+    log(`Selected ${files.length} batch files. Starting import…`, 'info');
+
+    let totalPhotos = 0;
+    let totalSaved = 0;
+    let totalFailed = 0;
+
+    for (let f = 0; f < files.length; f++) {
+      const file = files[f];
+      try {
+        log(`Reading ${file.name}… (${(file.size/1024/1024).toFixed(1)} MB)`, 'info');
+        const text = await file.text();
+        const data = JSON.parse(text);
+        const photos = data.photos || [];
+        totalPhotos += photos.length;
+
+        for (let i = 0; i < photos.length; i++) {
+          try {
+            await savePhoto(photos[i]);
+            totalSaved++;
+          } catch (err) {
+            totalFailed++;
+            log(`  Failed photo ${photos[i].id}: ${err.message}`, 'error');
+          }
+        }
+
+        document.getElementById('progress').innerHTML =
+          `<div class="counter">${totalSaved} / ${totalPhotos} photos saved</div>` +
+          `<div class="status info">Completed batch ${f+1} of ${files.length}</div>`;
+
+      } catch (err) {
+        log(`Error processing ${file.name}: ${err.message}`, 'error');
+      }
+    }
+
+    const msg = totalFailed === 0
+      ? `✅ All ${totalSaved} photos imported successfully!`
+      : `⚠️ ${totalSaved} imported, ${totalFailed} failed.`;
+
+    log(msg, totalFailed === 0 ? 'success' : 'error');
+    document.getElementById('progress').innerHTML = `<div class="counter">${totalSaved} photos restored</div>`;
+  };
+  input.click();
+}
+</script>
+</body>
+</html>
