@@ -11,8 +11,10 @@ h1 { color: #006699; }
 .error { background: #fee2e2; color: #991b1b; }
 .info { background: #dbeafe; color: #1e40af; }
 .pending { background: #f3f4f6; color: #6b7280; }
+.warn { background: #fef3c7; color: #92400e; }
 button { padding: 14px 28px; background: #006699; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin: 8px 4px; }
 button:disabled { background: #9ca3af; cursor: not-allowed; }
+button.danger { background: #dc2626; }
 #progress { margin: 20px 0; }
 .counter { font-size: 32px; font-weight: 700; color: #006699; margin: 16px 0; }
 </style>
@@ -22,13 +24,20 @@ button:disabled { background: #9ca3af; cursor: not-allowed; }
 <p>This page imports recovered photos directly into IndexedDB for the Grace O'Malley survey.</p>
 
 <div id="dbStatus" class="status pending">Connecting to IndexedDB…</div>
+<div id="diagnostic"></div>
 
 <div id="controls" style="display:none;">
-  <p><strong>Step 1:</strong> Click to import the survey data first (if not already on this device).</p>
+  <p><strong>Step 0:</strong> Run diagnostic to see what's currently in the database.</p>
+  <button onclick="runDiagnostic()">Run Diagnostic</button>
+
+  <p><strong>Step 1:</strong> Import the survey data (if not already on this device).</p>
   <button onclick="importSurveyData()">Import Survey Data</button>
 
-  <p><strong>Step 2:</strong> Select ALL batch photo files (batch_01 through batch_15) at once.</p>
-  <button onclick="importPhotoBatches()">Import Photo Batches</button>
+  <p><strong>Step 2:</strong> Import photo batch files one at a time (batch_01 through batch_15).</p>
+  <button onclick="importPhotoBatches()">Import Photo Batch</button>
+
+  <p><strong>Step 3:</strong> After all batches are imported, verify the count.</p>
+  <button onclick="runDiagnostic()">Verify Photo Count</button>
 </div>
 
 <div id="progress"></div>
@@ -36,9 +45,9 @@ button:disabled { background: #9ca3af; cursor: not-allowed; }
 
 <script>
 let db = null;
-const SURVEY_ID = '1775663612596';
+const GRACE_SURVEY_ID = '1775663612596';
 
-// Open IndexedDB
+// Open IndexedDB — match the app exactly
 const request = indexedDB.open('KikiSurveyDB', 2);
 request.onerror = () => {
   document.getElementById('dbStatus').className = 'status error';
@@ -58,22 +67,10 @@ request.onupgradeneeded = (event) => {
 
 request.onsuccess = () => {
   db = request.result;
-
-  // Count existing photos for this survey
-  const tx = db.transaction(['photos'], 'readonly');
-  const store = tx.objectStore('photos');
-  const index = store.index('surveyId');
-  const range = IDBKeyRange.only(SURVEY_ID);
-  let count = 0;
-  index.openCursor(range).onsuccess = (e) => {
-    const cursor = e.target.result;
-    if (cursor) { count++; cursor.continue(); }
-    else {
-      document.getElementById('dbStatus').className = 'status success';
-      document.getElementById('dbStatus').textContent = `Connected to IndexedDB. Currently ${count} photos stored for this survey.`;
-      document.getElementById('controls').style.display = 'block';
-    }
-  };
+  document.getElementById('dbStatus').className = 'status success';
+  document.getElementById('dbStatus').textContent = 'Connected to IndexedDB (KikiSurveyDB v2)';
+  document.getElementById('controls').style.display = 'block';
+  runDiagnostic();
 };
 
 function log(msg, cls) {
@@ -81,6 +78,68 @@ function log(msg, cls) {
   div.className = 'status ' + (cls || 'info');
   div.textContent = msg;
   document.getElementById('log').appendChild(div);
+  div.scrollIntoView();
+}
+
+async function runDiagnostic() {
+  const diagEl = document.getElementById('diagnostic');
+  diagEl.innerHTML = '<div class="status pending">Running diagnostic…</div>';
+
+  // Count ALL surveys
+  const surveys = await new Promise((resolve) => {
+    const tx = db.transaction(['surveys'], 'readonly');
+    const store = tx.objectStore('surveys');
+    const results = [];
+    store.openCursor().onsuccess = (e) => {
+      const cursor = e.target.result;
+      if (cursor) { results.push(cursor.value); cursor.continue(); }
+      else resolve(results);
+    };
+  });
+
+  // Count ALL photos
+  const totalPhotos = await new Promise((resolve) => {
+    const tx = db.transaction(['photos'], 'readonly');
+    const store = tx.objectStore('photos');
+    const countReq = store.count();
+    countReq.onsuccess = () => resolve(countReq.result);
+  });
+
+  // Count photos per survey using index
+  const photosBySurvey = {};
+  await new Promise((resolve) => {
+    const tx = db.transaction(['photos'], 'readonly');
+    const store = tx.objectStore('photos');
+    store.openCursor().onsuccess = (e) => {
+      const cursor = e.target.result;
+      if (cursor) {
+        const sid = cursor.value.surveyId || 'unknown';
+        photosBySurvey[sid] = (photosBySurvey[sid] || 0) + 1;
+        cursor.continue();
+      } else {
+        resolve();
+      }
+    };
+  });
+
+  let html = '<h3>Database Diagnostic</h3>';
+  html += `<div class="status info">Total surveys: ${surveys.length} | Total photos in DB: ${totalPhotos}</div>`;
+
+  for (const s of surveys) {
+    const pCount = photosBySurvey[s.id] || 0;
+    const cls = pCount > 0 ? 'success' : 'warn';
+    html += `<div class="status ${cls}">📋 "${s.vesselName || 'Unnamed'}" (ID: ${s.id}) — ${pCount} photos</div>`;
+  }
+
+  // Check for orphan photos (surveyId not matching any survey)
+  const surveyIds = new Set(surveys.map(s => s.id));
+  for (const [sid, count] of Object.entries(photosBySurvey)) {
+    if (!surveyIds.has(sid)) {
+      html += `<div class="status warn">⚠️ ${count} orphaned photos for unknown survey ID: ${sid}</div>`;
+    }
+  }
+
+  diagEl.innerHTML = html;
 }
 
 function savePhoto(photo) {
@@ -107,7 +166,10 @@ async function importSurveyData() {
 
       const tx = db.transaction(['surveys'], 'readwrite');
       tx.objectStore('surveys').put(data.survey);
-      tx.oncomplete = () => log(`Survey "${data.survey.vesselName}" saved to IndexedDB`, 'success');
+      tx.oncomplete = () => {
+        log(`Survey "${data.survey.vesselName}" saved to IndexedDB ✓`, 'success');
+        runDiagnostic();
+      };
       tx.onerror = () => log('Failed to save survey: ' + tx.error, 'error');
     } catch (err) {
       log('Error: ' + err.message, 'error');
@@ -120,51 +182,46 @@ async function importPhotoBatches() {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.json';
-  input.multiple = true;
   input.onchange = async (e) => {
-    const files = Array.from(e.target.files).sort((a, b) => a.name.localeCompare(b.name));
-    if (files.length === 0) return;
+    const file = e.target.files[0];
+    if (!file) return;
 
-    log(`Selected ${files.length} batch files. Starting import…`, 'info');
+    try {
+      log(`Reading ${file.name}… (${(file.size/1024/1024).toFixed(1)} MB)`, 'info');
+      const text = await file.text();
+      const data = JSON.parse(text);
+      const photos = data.photos || [];
 
-    let totalPhotos = 0;
-    let totalSaved = 0;
-    let totalFailed = 0;
-
-    for (let f = 0; f < files.length; f++) {
-      const file = files[f];
-      try {
-        log(`Reading ${file.name}… (${(file.size/1024/1024).toFixed(1)} MB)`, 'info');
-        const text = await file.text();
-        const data = JSON.parse(text);
-        const photos = data.photos || [];
-        totalPhotos += photos.length;
-
-        for (let i = 0; i < photos.length; i++) {
-          try {
-            await savePhoto(photos[i]);
-            totalSaved++;
-          } catch (err) {
-            totalFailed++;
-            log(`  Failed photo ${photos[i].id}: ${err.message}`, 'error');
-          }
-        }
-
-        document.getElementById('progress').innerHTML =
-          `<div class="counter">${totalSaved} / ${totalPhotos} photos saved</div>` +
-          `<div class="status info">Completed batch ${f+1} of ${files.length}</div>`;
-
-      } catch (err) {
-        log(`Error processing ${file.name}: ${err.message}`, 'error');
+      if (photos.length === 0) {
+        log('No photos found in this file.', 'warn');
+        return;
       }
+
+      let saved = 0;
+      let failed = 0;
+
+      for (let i = 0; i < photos.length; i++) {
+        try {
+          await savePhoto(photos[i]);
+          saved++;
+        } catch (err) {
+          failed++;
+          log(`  Failed photo ${photos[i].id}: ${err.message}`, 'error');
+        }
+        document.getElementById('progress').innerHTML =
+          `<div class="counter">${saved} photos saved from ${file.name}</div>`;
+      }
+
+      if (failed === 0) {
+        log(`✅ ${file.name}: all ${saved} photos imported`, 'success');
+      } else {
+        log(`⚠️ ${file.name}: ${saved} imported, ${failed} failed`, 'error');
+      }
+
+      runDiagnostic();
+    } catch (err) {
+      log(`Error: ${err.message}`, 'error');
     }
-
-    const msg = totalFailed === 0
-      ? `✅ All ${totalSaved} photos imported successfully!`
-      : `⚠️ ${totalSaved} imported, ${totalFailed} failed.`;
-
-    log(msg, totalFailed === 0 ? 'success' : 'error');
-    document.getElementById('progress').innerHTML = `<div class="counter">${totalSaved} photos restored</div>`;
   };
   input.click();
 }
