@@ -1,230 +1,874 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Kiki Marine — Photo Recovery Import</title>
-<style>
-body { font-family: -apple-system, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #f8fafc; }
-h1 { color: #006699; }
-.status { padding: 12px 16px; border-radius: 8px; margin: 8px 0; font-size: 14px; }
-.success { background: #d1fae5; color: #065f46; }
-.error { background: #fee2e2; color: #991b1b; }
-.info { background: #dbeafe; color: #1e40af; }
-.pending { background: #f3f4f6; color: #6b7280; }
-.warn { background: #fef3c7; color: #92400e; }
-button { padding: 14px 28px; background: #006699; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin: 8px 4px; }
-button:disabled { background: #9ca3af; cursor: not-allowed; }
-button.danger { background: #dc2626; }
-#progress { margin: 20px 0; }
-.counter { font-size: 32px; font-weight: 700; color: #006699; margin: 16px 0; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kiki Marine - Photo Recovery & Import</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #333;
+    }
+
+    body {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #006699 0%, #004d73 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .section {
+      margin-bottom: 40px;
+      padding: 20px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border-left: 4px solid #006699;
+    }
+
+    .section h2 {
+      font-size: 18px;
+      margin-bottom: 12px;
+      color: #006699;
+    }
+
+    .section p {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 0;
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: #006699;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #004d73;
+      box-shadow: 0 4px 12px rgba(0, 102, 153, 0.3);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+
+    .btn-success {
+      background: #16a34a;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #15803d;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .diagnostic {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .diagnostic-title {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 12px;
+    }
+
+    .diagnostic-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 13px;
+    }
+
+    .diagnostic-item:last-child {
+      border-bottom: none;
+    }
+
+    .diagnostic-item strong {
+      color: #374151;
+    }
+
+    .diagnostic-item span {
+      color: #6b7280;
+      text-align: right;
+    }
+
+    .status {
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-top: 12px;
+      font-size: 13px;
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .status.show {
+      display: block;
+    }
+
+    .status.success {
+      background: #dcfce7;
+      color: #166534;
+      border-left: 4px solid #16a34a;
+    }
+
+    .status.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border-left: 4px solid #dc2626;
+    }
+
+    .status.info {
+      background: #dbeafe;
+      color: #1e40af;
+      border-left: 4px solid #3b82f6;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: #e5e7eb;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #3b82f6;
+      transition: width 0.2s ease;
+    }
+
+    .input-group {
+      margin-top: 12px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-input-label {
+      display: inline-block;
+      padding: 10px 16px;
+      background: #f3f4f6;
+      border: 2px dashed #d1d5db;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.3s ease;
+    }
+
+    .file-input-label:hover {
+      border-color: #006699;
+      background: #f0f9ff;
+    }
+
+    .survey-list {
+      max-height: 300px;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    .survey-item {
+      padding: 10px;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .survey-item:last-child {
+      border-bottom: none;
+    }
+
+    .survey-name {
+      font-weight: 500;
+      color: #1f2937;
+    }
+
+    .survey-stats {
+      color: #6b7280;
+      font-size: 12px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid #e5e7eb;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      body {
+        padding: 0;
+        align-items: flex-start;
+      }
+
+      .header {
+        padding: 20px;
+      }
+
+      .header h1 {
+        font-size: 22px;
+      }
+
+      .content {
+        padding: 20px;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
 </head>
 <body>
-<h1>🔄 Photo Recovery Import</h1>
-<p>This page imports recovered photos directly into IndexedDB for the Grace O'Malley survey.</p>
+  <div class="container">
+    <div class="header">
+      <h1>Photo Recovery & Import</h1>
+      <p>Restore and import your Kiki Marine survey photos</p>
+    </div>
 
-<div id="dbStatus" class="status pending">Connecting to IndexedDB…</div>
-<div id="diagnostic"></div>
+    <div class="content">
 
-<div id="controls" style="display:none;">
-  <p><strong>Step 0:</strong> Run diagnostic to see what's currently in the database.</p>
-  <button onclick="runDiagnostic()">Run Diagnostic</button>
+      <!-- Diagnostic Section -->
+      <div class="section">
+        <h2>Database Diagnostic</h2>
+        <p>Current status of your local database and photo storage.</p>
+        <div class="diagnostic">
+          <div class="diagnostic-title">Survey & Photo Summary</div>
+          <div class="diagnostic-item">
+            <strong>Total Surveys:</strong>
+            <span id="stat-surveys">0</span>
+          </div>
+          <div class="diagnostic-item">
+            <strong>Total Photos:</strong>
+            <span id="stat-photos">0</span>
+          </div>
+          <div class="diagnostic-item">
+            <strong>Database Size:</strong>
+            <span id="stat-size">Calculating...</span>
+          </div>
+          <div class="diagnostic-item">
+            <strong>Last Refreshed:</strong>
+            <span id="stat-time">-</span>
+          </div>
+        </div>
+        <div class="diagnostic" id="survey-breakdown" style="margin-top: 16px; display: none;">
+          <div class="diagnostic-title">Photo Count by Survey</div>
+          <div class="survey-list" id="survey-list-detail"></div>
+        </div>
+        <button class="btn-secondary" onclick="refreshDiagnostic()">
+          <span id="refresh-spinner" class="hidden loading"></span>
+          Refresh Diagnostic
+        </button>
+      </div>
 
-  <p><strong>Step 1:</strong> Import the survey data (if not already on this device).</p>
-  <button onclick="importSurveyData()">Import Survey Data</button>
+      <!-- Import Section -->
+      <div class="section">
+        <h2>Import Survey Data</h2>
+        <p>Import a JSON file containing complete survey data with photos. Supports formats from single survey export or multi-survey backups.</p>
+        <div class="input-group">
+          <label for="import-survey-file" class="file-input-label">
+            Choose Survey JSON File
+          </label>
+          <input type="file" id="import-survey-file" accept=".json">
+        </div>
+        <div id="import-survey-status" class="status"></div>
+      </div>
 
-  <p><strong>Step 2:</strong> Import photo batch files one at a time (batch_01 through batch_15).</p>
-  <button onclick="importPhotoBatches()">Import Photo Batch</button>
+      <!-- Import Photo Batch -->
+      <div class="section">
+        <h2>Import Photo Batch</h2>
+        <p>Import a JSON file with a collection of photos in format: {photos: [{id, surveyId, label, dataUrl, timestamp}, ...]}</p>
+        <div class="input-group">
+          <label for="import-photos-file" class="file-input-label">
+            Choose Photos JSON File
+          </label>
+          <input type="file" id="import-photos-file" accept=".json">
+        </div>
+        <div id="import-photos-status" class="status"></div>
+      </div>
 
-  <p><strong>Step 3:</strong> After all batches are imported, verify the count.</p>
-  <button onclick="runDiagnostic()">Verify Photo Count</button>
-</div>
+      <!-- Firebase Recovery Section -->
+      <div class="section">
+        <h2>Firebase Photo Recovery</h2>
+        <p>Recover photos from Firebase Storage. The app will connect to Firebase and download all photos associated with each survey.</p>
+        <div class="button-group">
+          <button class="btn-primary" onclick="recoverPhotosInteractive()">
+            <span id="recover-single-spinner" class="hidden loading"></span>
+            Recover Photos for Specific Survey
+          </button>
+          <button class="btn-success" onclick="recoverAllPhotosFromFirebase()">
+            <span id="recover-all-spinner" class="hidden loading"></span>
+            Recover ALL Photos from Firebase
+          </button>
+        </div>
+        <div id="recover-firebase-status" class="status"></div>
+        <div id="progress-container" class="hidden" style="margin-top: 16px;">
+          <div style="font-size: 12px; margin-bottom: 8px;">
+            <span id="progress-text">0 / 0</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-bar-fill" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
 
-<div id="progress"></div>
-<div id="log"></div>
+    </div>
+  </div>
 
-<script>
-let db = null;
-const GRACE_SURVEY_ID = '1775663612596';
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
-// Open IndexedDB — match the app exactly
-const request = indexedDB.open('KikiSurveyDB', 2);
-request.onerror = () => {
-  document.getElementById('dbStatus').className = 'status error';
-  document.getElementById('dbStatus').textContent = 'Failed to open IndexedDB: ' + request.error;
-};
+  <script>
+    let db = null;
+    let firebaseApp = null;
+    let firebaseDb = null;
+    let firebaseStorage = null;
 
-request.onupgradeneeded = (event) => {
-  const db = event.target.result;
-  if (!db.objectStoreNames.contains('surveys')) {
-    db.createObjectStore('surveys', { keyPath: 'id' });
-  }
-  if (!db.objectStoreNames.contains('photos')) {
-    const photoStore = db.createObjectStore('photos', { keyPath: 'id' });
-    photoStore.createIndex('surveyId', 'surveyId', { unique: false });
-  }
-};
+    // Initialize IndexedDB on page load
+    async function initDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open('KikiSurveyDB', 2);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          db = request.result;
+          resolve(db);
+        };
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains('surveys')) {
+            db.createObjectStore('surveys', { keyPath: 'id' });
+          }
+          if (!db.objectStoreNames.contains('photos')) {
+            const photoStore = db.createObjectStore('photos', { keyPath: 'id' });
+            photoStore.createIndex('surveyId', 'surveyId', { unique: false });
+          }
+        };
+      });
+    }
 
-request.onsuccess = () => {
-  db = request.result;
-  document.getElementById('dbStatus').className = 'status success';
-  document.getElementById('dbStatus').textContent = 'Connected to IndexedDB (KikiSurveyDB v2)';
-  document.getElementById('controls').style.display = 'block';
-  runDiagnostic();
-};
+    // Get all surveys from IndexedDB
+    async function getAllSurveys() {
+      return new Promise((resolve) => {
+        const tx = db.transaction(['surveys'], 'readonly');
+        const store = tx.objectStore('surveys');
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+      });
+    }
 
-function log(msg, cls) {
-  const div = document.createElement('div');
-  div.className = 'status ' + (cls || 'info');
-  div.textContent = msg;
-  document.getElementById('log').appendChild(div);
-  div.scrollIntoView();
-}
+    // Get all photos from IndexedDB
+    async function getAllPhotos() {
+      return new Promise((resolve) => {
+        const tx = db.transaction(['photos'], 'readonly');
+        const store = tx.objectStore('photos');
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+      });
+    }
 
-async function runDiagnostic() {
-  const diagEl = document.getElementById('diagnostic');
-  diagEl.innerHTML = '<div class="status pending">Running diagnostic…</div>';
+    // Get photos for specific survey
+    async function getPhotosForSurvey(surveyId) {
+      return new Promise((resolve) => {
+        const tx = db.transaction(['photos'], 'readonly');
+        const store = tx.objectStore('photos');
+        const index = store.index('surveyId');
+        const range = IDBKeyRange.only(surveyId);
+        const results = [];
+        index.openCursor(range).onsuccess = (event) => {
+          const cursor = event.target.result;
+          if (cursor) {
+            results.push(cursor.value);
+            cursor.continue();
+          } else {
+            resolve(results);
+          }
+        };
+      });
+    }
 
-  // Count ALL surveys
-  const surveys = await new Promise((resolve) => {
-    const tx = db.transaction(['surveys'], 'readonly');
-    const store = tx.objectStore('surveys');
-    const results = [];
-    store.openCursor().onsuccess = (e) => {
-      const cursor = e.target.result;
-      if (cursor) { results.push(cursor.value); cursor.continue(); }
-      else resolve(results);
-    };
-  });
+    // Save photo to IndexedDB
+    async function savePhoto(photo) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(['photos'], 'readwrite');
+        const store = tx.objectStore('photos');
+        const request = store.put(photo);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(photo.id);
+      });
+    }
 
-  // Count ALL photos
-  const totalPhotos = await new Promise((resolve) => {
-    const tx = db.transaction(['photos'], 'readonly');
-    const store = tx.objectStore('photos');
-    const countReq = store.count();
-    countReq.onsuccess = () => resolve(countReq.result);
-  });
+    // Save survey to IndexedDB
+    async function saveSurvey(survey) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(['surveys'], 'readwrite');
+        const store = tx.objectStore('surveys');
+        const request = store.put(survey);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(survey.id);
+      });
+    }
 
-  // Count photos per survey using index
-  const photosBySurvey = {};
-  await new Promise((resolve) => {
-    const tx = db.transaction(['photos'], 'readonly');
-    const store = tx.objectStore('photos');
-    store.openCursor().onsuccess = (e) => {
-      const cursor = e.target.result;
-      if (cursor) {
-        const sid = cursor.value.surveyId || 'unknown';
-        photosBySurvey[sid] = (photosBySurvey[sid] || 0) + 1;
-        cursor.continue();
-      } else {
-        resolve();
+    // Refresh diagnostic display
+    async function refreshDiagnostic() {
+      const spinner = document.getElementById('refresh-spinner');
+      spinner.classList.remove('hidden');
+
+      try {
+        const surveys = await getAllSurveys();
+        const photos = await getAllPhotos();
+
+        document.getElementById('stat-surveys').textContent = surveys.length;
+        document.getElementById('stat-photos').textContent = photos.length;
+        document.getElementById('stat-time').textContent = new Date().toLocaleTimeString();
+
+        // Estimate size
+        let totalSize = 0;
+        for (const photo of photos) {
+          if (photo.dataUrl) {
+            totalSize += photo.dataUrl.length;
+          }
+        }
+        const sizeMB = (totalSize / 1024 / 1024).toFixed(2);
+        document.getElementById('stat-size').textContent = sizeMB + ' MB';
+
+        // Show photo breakdown by survey
+        if (surveys.length > 0) {
+          const breakdown = document.getElementById('survey-breakdown');
+          const list = document.getElementById('survey-list-detail');
+          list.innerHTML = '';
+
+          for (const survey of surveys) {
+            const surveyPhotos = photos.filter(p => p.surveyId === survey.id);
+            const item = document.createElement('div');
+            item.className = 'survey-item';
+            item.innerHTML = `
+              <div class="survey-name">${survey.vesselName || survey.id}</div>
+              <div class="survey-stats">${surveyPhotos.length} photo${surveyPhotos.length !== 1 ? 's' : ''}</div>
+            `;
+            list.appendChild(item);
+          }
+          breakdown.style.display = 'block';
+        }
+      } catch (err) {
+        console.error('Diagnostic error:', err);
+        showStatus('error', 'Diagnostic failed: ' + err.message, 'import-survey-status');
+      } finally {
+        spinner.classList.add('hidden');
       }
-    };
-  });
-
-  let html = '<h3>Database Diagnostic</h3>';
-  html += `<div class="status info">Total surveys: ${surveys.length} | Total photos in DB: ${totalPhotos}</div>`;
-
-  for (const s of surveys) {
-    const pCount = photosBySurvey[s.id] || 0;
-    const cls = pCount > 0 ? 'success' : 'warn';
-    html += `<div class="status ${cls}">📋 "${s.vesselName || 'Unnamed'}" (ID: ${s.id}) — ${pCount} photos</div>`;
-  }
-
-  // Check for orphan photos (surveyId not matching any survey)
-  const surveyIds = new Set(surveys.map(s => s.id));
-  for (const [sid, count] of Object.entries(photosBySurvey)) {
-    if (!surveyIds.has(sid)) {
-      html += `<div class="status warn">⚠️ ${count} orphaned photos for unknown survey ID: ${sid}</div>`;
     }
-  }
 
-  diagEl.innerHTML = html;
-}
+    // Status message display
+    function showStatus(type, message, elementId) {
+      const el = document.getElementById(elementId);
+      el.className = `status show ${type}`;
+      el.textContent = message;
+    }
 
-function savePhoto(photo) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(['photos'], 'readwrite');
-    const store = tx.objectStore('photos');
-    store.put(photo);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
+    // Initialize Firebase
+    async function initFirebase() {
+      if (firebaseApp) return;
 
-async function importSurveyData() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  input.onchange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      if (!data.survey) { log('Not a valid survey file', 'error'); return; }
-
-      const tx = db.transaction(['surveys'], 'readwrite');
-      tx.objectStore('surveys').put(data.survey);
-      tx.oncomplete = () => {
-        log(`Survey "${data.survey.vesselName}" saved to IndexedDB ✓`, 'success');
-        runDiagnostic();
+      const config = {
+        apiKey: 'AIzaSyBBb3LJCWhm-SCyH9VwInFWl0Alpxaf-qE',
+        authDomain: 'kiki-marine.firebaseapp.com',
+        projectId: 'kiki-marine',
+        storageBucket: 'kiki-marine.firebasestorage.app',
+        messagingSenderId: '102939863956',
+        appId: '1:102939863956:web:62d73530de5eec63fdfd81'
       };
-      tx.onerror = () => log('Failed to save survey: ' + tx.error, 'error');
-    } catch (err) {
-      log('Error: ' + err.message, 'error');
+
+      try {
+        firebaseApp = firebase.initializeApp(config);
+        firebaseDb = firebase.firestore();
+        firebaseStorage = firebase.storage();
+        return true;
+      } catch (err) {
+        console.error('Firebase init error:', err);
+        showStatus('error', 'Firebase initialization failed: ' + err.message, 'recover-firebase-status');
+        return false;
+      }
     }
-  };
-  input.click();
-}
 
-async function importPhotoBatches() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  input.onchange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      log(`Reading ${file.name}… (${(file.size/1024/1024).toFixed(1)} MB)`, 'info');
-      const text = await file.text();
-      const data = JSON.parse(text);
-      const photos = data.photos || [];
-
-      if (photos.length === 0) {
-        log('No photos found in this file.', 'warn');
+    // Recover photos for a specific survey from Firebase
+    async function recoverPhotosInteractive() {
+      const surveys = await getAllSurveys();
+      if (surveys.length === 0) {
+        showStatus('error', 'No surveys found in database', 'recover-firebase-status');
         return;
       }
 
-      let saved = 0;
-      let failed = 0;
+      const surveyId = prompt('Enter survey ID to recover photos for:\n\n' +
+        surveys.map(s => s.id).join('\n'));
+      if (!surveyId) return;
 
-      for (let i = 0; i < photos.length; i++) {
-        try {
-          await savePhoto(photos[i]);
-          saved++;
-        } catch (err) {
-          failed++;
-          log(`  Failed photo ${photos[i].id}: ${err.message}`, 'error');
-        }
-        document.getElementById('progress').innerHTML =
-          `<div class="counter">${saved} photos saved from ${file.name}</div>`;
+      const survey = surveys.find(s => s.id === surveyId);
+      if (!survey) {
+        showStatus('error', 'Survey not found: ' + surveyId, 'recover-firebase-status');
+        return;
       }
 
-      if (failed === 0) {
-        log(`✅ ${file.name}: all ${saved} photos imported`, 'success');
-      } else {
-        log(`⚠️ ${file.name}: ${saved} imported, ${failed} failed`, 'error');
-      }
-
-      runDiagnostic();
-    } catch (err) {
-      log(`Error: ${err.message}`, 'error');
+      await recoverPhotosForSurvey(survey);
     }
-  };
-  input.click();
-}
-</script>
+
+    // Recover photos for specific survey from Firebase
+    async function recoverPhotosForSurvey(survey) {
+      const spinner = document.getElementById('recover-single-spinner');
+      spinner.classList.remove('hidden');
+
+      try {
+        if (!await initFirebase()) return;
+
+        showStatus('info', 'Querying Firebase for photos...', 'recover-firebase-status');
+
+        // Query Firestore for photos
+        const snap = await firebaseDb.collection('photos')
+          .where('surveyId', '==', survey.id)
+          .get();
+
+        const photoDocs = snap.docs;
+        if (photoDocs.length === 0) {
+          showStatus('info', 'No photos found in Firebase for this survey', 'recover-firebase-status');
+          spinner.classList.add('hidden');
+          return;
+        }
+
+        showStatus('info', `Found ${photoDocs.length} photo(s). Downloading...`, 'recover-firebase-status');
+
+        const progressContainer = document.getElementById('progress-container');
+        progressContainer.classList.remove('hidden');
+
+        let downloaded = 0;
+        for (const doc of photoDocs) {
+          const meta = doc.data();
+          if (meta.storageRef) {
+            try {
+              const fileRef = firebaseStorage.ref(meta.storageRef);
+              const url = await fileRef.getDownloadURL();
+              const response = await fetch(url);
+              const blob = await response.blob();
+              const reader = new FileReader();
+
+              await new Promise((resolve) => {
+                reader.onload = async (e) => {
+                  const photo = {
+                    id: meta.id,
+                    surveyId: meta.surveyId,
+                    itemLabel: meta.itemLabel || 'Recovered',
+                    dataUrl: e.target.result,
+                    annotated: meta.annotated || false,
+                    createdAt: meta.createdAt || new Date().toISOString()
+                  };
+                  await savePhoto(photo);
+                  downloaded++;
+                  document.getElementById('progress-text').textContent = `${downloaded} / ${photoDocs.length}`;
+                  document.getElementById('progress-bar-fill').style.width = ((downloaded / photoDocs.length) * 100) + '%';
+                  resolve();
+                };
+                reader.readAsDataURL(blob);
+              });
+            } catch (err) {
+              console.error('Failed to download photo:', meta.id, err);
+            }
+          }
+        }
+
+        progressContainer.classList.add('hidden');
+        showStatus('success', `Successfully recovered ${downloaded} photo(s)!`, 'recover-firebase-status');
+        await refreshDiagnostic();
+      } catch (err) {
+        console.error('Recovery error:', err);
+        showStatus('error', 'Recovery failed: ' + err.message, 'recover-firebase-status');
+      } finally {
+        spinner.classList.add('hidden');
+      }
+    }
+
+    // Recover ALL photos from Firebase
+    async function recoverAllPhotosFromFirebase() {
+      const spinner = document.getElementById('recover-all-spinner');
+      spinner.classList.remove('hidden');
+
+      try {
+        if (!await initFirebase()) return;
+
+        const surveys = await getAllSurveys();
+        if (surveys.length === 0) {
+          showStatus('error', 'No surveys found in database', 'recover-firebase-status');
+          spinner.classList.add('hidden');
+          return;
+        }
+
+        const progressContainer = document.getElementById('progress-container');
+        progressContainer.classList.remove('hidden');
+
+        let totalDownloaded = 0;
+        for (let i = 0; i < surveys.length; i++) {
+          const survey = surveys[i];
+          showStatus('info', `Processing survey ${i + 1}/${surveys.length}: ${survey.vesselName || survey.id}...`, 'recover-firebase-status');
+
+          try {
+            const snap = await firebaseDb.collection('photos')
+              .where('surveyId', '==', survey.id)
+              .get();
+
+            for (const doc of snap.docs) {
+              const meta = doc.data();
+              if (meta.storageRef) {
+                try {
+                  const fileRef = firebaseStorage.ref(meta.storageRef);
+                  const url = await fileRef.getDownloadURL();
+                  const response = await fetch(url);
+                  const blob = await response.blob();
+                  const reader = new FileReader();
+
+                  await new Promise((resolve) => {
+                    reader.onload = async (e) => {
+                      const photo = {
+                        id: meta.id,
+                        surveyId: meta.surveyId,
+                        itemLabel: meta.itemLabel || 'Recovered',
+                        dataUrl: e.target.result,
+                        annotated: meta.annotated || false,
+                        createdAt: meta.createdAt || new Date().toISOString()
+                      };
+                      await savePhoto(photo);
+                      totalDownloaded++;
+                      document.getElementById('progress-text').textContent = `${totalDownloaded} total`;
+                      resolve();
+                    };
+                    reader.readAsDataURL(blob);
+                  });
+                } catch (err) {
+                  console.error('Failed to download photo:', meta.id, err);
+                }
+              }
+            }
+          } catch (err) {
+            console.error('Error processing survey:', survey.id, err);
+          }
+        }
+
+        progressContainer.classList.add('hidden');
+        showStatus('success', `Successfully recovered ${totalDownloaded} photo(s) from all surveys!`, 'recover-firebase-status');
+        await refreshDiagnostic();
+      } catch (err) {
+        console.error('Batch recovery error:', err);
+        showStatus('error', 'Batch recovery failed: ' + err.message, 'recover-firebase-status');
+      } finally {
+        spinner.classList.add('hidden');
+      }
+    }
+
+    // Import survey file
+    document.getElementById('import-survey-file').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const data = JSON.parse(event.target.result);
+          let surveys = [];
+          let totalPhotos = 0;
+
+          // Handle single survey format: {version: 1, survey: {...}, photos: [...]}
+          if (data.survey && data.photos) {
+            surveys = [{ survey: data.survey, photos: data.photos }];
+            totalPhotos = data.photos.length;
+          }
+          // Handle multi-survey backup format: [{survey: {...}, photos: [...]}, ...]
+          else if (Array.isArray(data)) {
+            surveys = data;
+            totalPhotos = data.reduce((sum, item) => sum + (item.photos ? item.photos.length : 0), 0);
+          } else {
+            throw new Error('Invalid format: expected {survey, photos} or array of such');
+          }
+
+          const progressContainer = document.getElementById('progress-container');
+          progressContainer.classList.remove('hidden');
+
+          let imported = 0;
+          for (const item of surveys) {
+            const survey = item.survey;
+            const photos = item.photos || [];
+
+            if (survey && survey.id) {
+              await saveSurvey(survey);
+              for (const photo of photos) {
+                await savePhoto(photo);
+                imported++;
+                document.getElementById('progress-text').textContent = `${imported} / ${totalPhotos}`;
+                document.getElementById('progress-bar-fill').style.width = ((imported / totalPhotos) * 100) + '%';
+              }
+            }
+          }
+
+          progressContainer.classList.add('hidden');
+          showStatus('success', `Imported ${surveys.length} survey(s) with ${imported} photo(s)!`, 'import-survey-status');
+          await refreshDiagnostic();
+        } catch (err) {
+          showStatus('error', 'Import failed: ' + err.message, 'import-survey-status');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Import photo batch file
+    document.getElementById('import-photos-file').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const data = JSON.parse(event.target.result);
+          const photos = data.photos || [];
+
+          if (!Array.isArray(photos)) {
+            throw new Error('Expected {photos: [...]} format');
+          }
+
+          const progressContainer = document.getElementById('progress-container');
+          progressContainer.classList.remove('hidden');
+
+          for (let i = 0; i < photos.length; i++) {
+            await savePhoto(photos[i]);
+            document.getElementById('progress-text').textContent = `${i + 1} / ${photos.length}`;
+            document.getElementById('progress-bar-fill').style.width = (((i + 1) / photos.length) * 100) + '%';
+          }
+
+          progressContainer.classList.add('hidden');
+          showStatus('success', `Imported ${photos.length} photo(s)!`, 'import-photos-status');
+          await refreshDiagnostic();
+        } catch (err) {
+          showStatus('error', 'Import failed: ' + err.message, 'import-photos-status');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        await initDB();
+        await refreshDiagnostic();
+      } catch (err) {
+        console.error('Initialization error:', err);
+        showStatus('error', 'Failed to initialize: ' + err.message, 'import-survey-status');
+      }
+    });
+  </script>
 </body>
 </html>

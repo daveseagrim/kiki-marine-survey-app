@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2119';
+const APP_VERSION = 'v2120';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1656,14 +1656,40 @@ async function deleteSurvey(id) {
   });
 }
 
+// ─── Photo session counter for backup reminders ────────────────────────────
+let _photosSinceLastBackup = 0;
+
 async function savePhoto(photo) {
-  return new Promise((resolve, reject) => {
+  const id = await new Promise((resolve, reject) => {
     const tx = db.transaction(['photos'], 'readwrite');
     const store = tx.objectStore('photos');
     const request = store.put(photo);
     request.onerror = () => reject(request.error);
     request.onsuccess = () => resolve(photo.id);
   });
+
+  // ── Auto-push to Firebase on EVERY photo save ──
+  if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled() && photo.dataUrl) {
+    FirebaseSync.pushPhoto(photo).catch(err => {
+      console.warn('[Auto-backup] Firebase push failed:', err.message);
+    });
+  }
+
+  // ── Auto-push to Google Drive every 5 photos ──
+  _photosSinceLastBackup++;
+  if (_photosSinceLastBackup >= 5 && typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn() && currentSurveyId) {
+    _photosSinceLastBackup = 0;
+    DriveBackup.backupSurvey(currentSurveyId).catch(err => {
+      console.warn('[Auto-backup] Drive backup failed:', err.message);
+    });
+  }
+
+  // ── Local backup reminder after 10 unsaved photos ──
+  if (_photosSinceLastBackup >= 10) {
+    showBackupReminder();
+  }
+
+  return id;
 }
 
 async function getPhotoById(photoId) {
@@ -2019,6 +2045,80 @@ function showToast(message) {
   toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#006699;color:white;padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
+}
+
+// ─── Backup Reminder Banner ─────────────────────────────────────────────────
+let _lastBackupReminder = 0;
+function showBackupReminder() {
+  // Only show once per hour
+  const now = Date.now();
+  if (now - _lastBackupReminder < 3600000) return;
+  if (document.getElementById('backup-reminder')) return;
+  _lastBackupReminder = now;
+
+  const banner = document.createElement('div');
+  banner.id = 'backup-reminder';
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#fef3c7;border-bottom:2px solid #f59e0b;padding:12px 16px;z-index:9998;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;color:#92400e;';
+  banner.innerHTML = `
+    <span>⚠️ <strong>${_photosSinceLastBackup} photos</strong> taken since last backup. Export now to stay safe.</span>
+    <span style="display:flex;gap:8px;">
+      <button onclick="if(currentSurveyId){exportSurvey(currentSurveyId);_photosSinceLastBackup=0;document.getElementById('backup-reminder').remove();}" style="padding:6px 14px;background:#f59e0b;color:white;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Export Now</button>
+      <button onclick="document.getElementById('backup-reminder').remove();" style="padding:6px 10px;background:transparent;border:1px solid #f59e0b;border-radius:6px;font-size:12px;cursor:pointer;color:#92400e;">Dismiss</button>
+    </span>`;
+  document.body.appendChild(banner);
+}
+
+// ─── Photo Integrity Validation (runs on startup) ───────────────────────────
+async function validatePhotoIntegrity() {
+  try {
+    const surveys = await getAllSurveys();
+    const warnings = [];
+
+    for (const survey of surveys) {
+      const items = survey.items || {};
+      let referenced = 0;
+      let missing = 0;
+
+      for (const item of Object.values(items)) {
+        if (item.photos) {
+          for (const pid of item.photos) {
+            referenced++;
+            const photo = await getPhotoById(pid);
+            if (!photo || !photo.dataUrl) missing++;
+          }
+        }
+      }
+
+      if (missing > 0) {
+        warnings.push({ name: survey.vesselName || 'Unnamed', id: survey.id, referenced, missing });
+      }
+    }
+
+    if (warnings.length > 0) {
+      console.warn('[Photo Integrity] Missing photos detected:', warnings);
+      // Show warning on home screen
+      setTimeout(() => {
+        const homeEl = document.getElementById('homeContent') || document.body;
+        const existing = document.getElementById('photo-integrity-warn');
+        if (existing) existing.remove();
+
+        const warn = document.createElement('div');
+        warn.id = 'photo-integrity-warn';
+        warn.style.cssText = 'margin:12px 16px;padding:14px 16px;background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;font-size:13px;color:#991b1b;';
+        let html = '<strong>⚠️ Missing Photos Detected</strong><br>';
+        for (const w of warnings) {
+          html += `<br>• <strong>${w.name}</strong>: ${w.missing} of ${w.referenced} photos missing from local storage`;
+        }
+        html += `<br><br><a href="import_photos.html" style="color:#dc2626;font-weight:600;">Open Photo Recovery Tool →</a>`;
+        warn.innerHTML = html;
+        homeEl.insertBefore(warn, homeEl.firstChild);
+      }, 500);
+    } else {
+      console.log('[Photo Integrity] All photos accounted for ✓');
+    }
+  } catch (err) {
+    console.warn('[Photo Integrity] Validation failed:', err);
+  }
 }
 
 // Custom modal to replace native alert() — avoids iOS "Suppress dialogs" option
@@ -16693,6 +16793,9 @@ async function initApp() {
 
     // Initialize Firebase real-time sync (non-blocking)
     try { FirebaseSync.init(); } catch (syncErr) { console.warn('Sync init error:', syncErr); }
+
+    // Run photo integrity check in background (non-blocking)
+    validatePhotoIntegrity().catch(err => console.warn('Photo integrity check failed:', err));
   } catch (e) {
     console.error('Init error:', e);
     document.getElementById('app').innerHTML = `<div style="padding: 20px; color: red;">Error initializing app: ${e.message}</div>`;
