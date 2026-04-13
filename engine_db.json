@@ -7,78 +7,6 @@
       "type": "Diesel",
       "models": [
         {
-          "model": "YSE8",
-          "hp": "8",
-          "kw": "5.9",
-          "fuel": "Diesel",
-          "cylinders": "1",
-          "displacement": "0.39L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "YSE12",
-          "hp": "12",
-          "kw": "8.8",
-          "fuel": "Diesel",
-          "cylinders": "1",
-          "displacement": "0.58L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "YSB8",
-          "hp": "8",
-          "kw": "5.9",
-          "fuel": "Diesel",
-          "cylinders": "1",
-          "displacement": "0.39L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "YSB12",
-          "hp": "12",
-          "kw": "8.8",
-          "fuel": "Diesel",
-          "cylinders": "1",
-          "displacement": "0.58L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "YSM8",
-          "hp": "8",
-          "kw": "5.9",
-          "fuel": "Diesel",
-          "cylinders": "1",
-          "displacement": "0.39L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "YSM12",
-          "hp": "12",
-          "kw": "8.8",
-          "fuel": "Diesel",
-          "cylinders": "1",
-          "displacement": "0.58L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "SB8",
-          "hp": "8",
-          "kw": "5.9",
-          "fuel": "Diesel",
-          "cylinders": "1",
-          "displacement": "0.39L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "SB12",
-          "hp": "12",
-          "kw": "8.8",
-          "fuel": "Diesel",
-          "cylinders": "1",
-          "displacement": "0.58L",
-          "engineType": "Inboard"
-        },
-        {
           "model": "1GM",
           "hp": "7",
           "kw": "5.1",
@@ -133,6 +61,33 @@
           "engineType": "Inboard"
         },
         {
+          "model": "2QM15",
+          "hp": "14",
+          "kw": "10.3",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.54L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "2QM20",
+          "hp": "18",
+          "kw": "13.2",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.66L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "2YM15",
+          "hp": "14",
+          "kw": "10.3",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.57L",
+          "engineType": "Inboard"
+        },
+        {
           "model": "3GM30",
           "hp": "27",
           "kw": "20.1",
@@ -169,21 +124,39 @@
           "engineType": "Inboard"
         },
         {
-          "model": "2QM15",
-          "hp": "14",
-          "kw": "10.3",
+          "model": "3JH2E",
+          "hp": "39",
+          "kw": "28.7",
           "fuel": "Diesel",
-          "cylinders": "2",
-          "displacement": "0.54L",
+          "cylinders": "3",
+          "displacement": "1.64L",
           "engineType": "Inboard"
         },
         {
-          "model": "2QM20",
-          "hp": "18",
-          "kw": "13.2",
+          "model": "3JH3E",
+          "hp": "39",
+          "kw": "28.7",
           "fuel": "Diesel",
-          "cylinders": "2",
-          "displacement": "0.66L",
+          "cylinders": "3",
+          "displacement": "1.64L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3JH40",
+          "hp": "40",
+          "kw": "29.4",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.64L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3JH5E",
+          "hp": "39",
+          "kw": "28.7",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.64L",
           "engineType": "Inboard"
         },
         {
@@ -193,15 +166,6 @@
           "fuel": "Diesel",
           "cylinders": "3",
           "displacement": "1.0L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "2YM15",
-          "hp": "14",
-          "kw": "10.3",
-          "fuel": "Diesel",
-          "cylinders": "2",
-          "displacement": "0.57L",
           "engineType": "Inboard"
         },
         {
@@ -232,39 +196,12 @@
           "engineType": "Inboard"
         },
         {
-          "model": "3JH2E",
-          "hp": "39",
-          "kw": "28.7",
+          "model": "4JH110",
+          "hp": "110",
+          "kw": "80.9",
           "fuel": "Diesel",
-          "cylinders": "3",
-          "displacement": "1.64L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "3JH3E",
-          "hp": "39",
-          "kw": "28.7",
-          "fuel": "Diesel",
-          "cylinders": "3",
-          "displacement": "1.64L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "3JH5E",
-          "hp": "39",
-          "kw": "28.7",
-          "fuel": "Diesel",
-          "cylinders": "3",
-          "displacement": "1.64L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "3JH40",
-          "hp": "40",
-          "kw": "29.4",
-          "fuel": "Diesel",
-          "cylinders": "3",
-          "displacement": "1.64L",
+          "cylinders": "4",
+          "displacement": "2.0L",
           "engineType": "Inboard"
         },
         {
@@ -295,12 +232,12 @@
           "engineType": "Inboard"
         },
         {
-          "model": "4JH3-TE",
-          "hp": "75",
-          "kw": "55",
+          "model": "4JH2E",
+          "hp": "50",
+          "kw": "37",
           "fuel": "Diesel",
           "cylinders": "4",
-          "displacement": "2.19L",
+          "displacement": "1.995L",
           "engineType": "Inboard"
         },
         {
@@ -322,18 +259,36 @@
           "engineType": "Inboard"
         },
         {
-          "model": "4JH4-TE",
-          "hp": "54",
-          "kw": "39.7",
+          "model": "4JH3-TE",
+          "hp": "75",
+          "kw": "55",
           "fuel": "Diesel",
           "cylinders": "4",
-          "displacement": "2.77L",
+          "displacement": "2.19L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH3E",
+          "hp": "56",
+          "kw": "41",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "1.995L",
           "engineType": "Inboard"
         },
         {
           "model": "4JH4-HTE",
           "hp": "110",
           "kw": "74",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "2.77L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "4JH4-TE",
+          "hp": "54",
+          "kw": "39.7",
           "fuel": "Diesel",
           "cylinders": "4",
           "displacement": "2.77L",
@@ -349,6 +304,15 @@
           "engineType": "Inboard"
         },
         {
+          "model": "4JH4E",
+          "hp": "54",
+          "kw": "40",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "1.995L",
+          "engineType": "Inboard"
+        },
+        {
           "model": "4JH57",
           "hp": "57",
           "kw": "41.9",
@@ -358,21 +322,21 @@
           "engineType": "Inboard"
         },
         {
+          "model": "4JH5E",
+          "hp": "54",
+          "kw": "39.7",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "1.995L",
+          "engineType": "Inboard"
+        },
+        {
           "model": "4JH80",
           "hp": "80",
           "kw": "58.8",
           "fuel": "Diesel",
           "cylinders": "4",
           "displacement": "2.77L",
-          "engineType": "Inboard"
-        },
-        {
-          "model": "4JH110",
-          "hp": "110",
-          "kw": "80.9",
-          "fuel": "Diesel",
-          "cylinders": "4",
-          "displacement": "2.0L",
           "engineType": "Inboard"
         },
         {
@@ -553,6 +517,78 @@
           "fuel": "Diesel",
           "cylinders": "8",
           "displacement": "4.46L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "SB12",
+          "hp": "12",
+          "kw": "8.8",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.58L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "SB8",
+          "hp": "8",
+          "kw": "5.9",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.39L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "YSB12",
+          "hp": "12",
+          "kw": "8.8",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.58L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "YSB8",
+          "hp": "8",
+          "kw": "5.9",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.39L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "YSE12",
+          "hp": "12",
+          "kw": "8.8",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.58L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "YSE8",
+          "hp": "8",
+          "kw": "5.9",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.39L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "YSM12",
+          "hp": "12",
+          "kw": "8.8",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.58L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "YSM8",
+          "hp": "8",
+          "kw": "5.9",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.39L",
           "engineType": "Inboard"
         }
       ]
@@ -3646,6 +3682,91 @@
   ],
   "transmissions": [
     {
+      "make": "Borg-Warner",
+      "country": "USA",
+      "models": [
+        {
+          "model": "71C",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "72C",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.5:1, 3.0:1"
+        }
+      ]
+    },
+    {
+      "make": "Capitol",
+      "country": "USA",
+      "note": "Found on older classic and vintage marine engines",
+      "models": [
+        {
+          "model": "Capitol A",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1"
+        },
+        {
+          "model": "Capitol B",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1"
+        }
+      ]
+    },
+    {
+      "make": "Hurth",
+      "country": "Germany",
+      "models": [
+        {
+          "model": "HBW 5",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1"
+        },
+        {
+          "model": "HBW 10",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "HBW 20",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "HBW 50",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.5:1, 3.0:1"
+        },
+        {
+          "model": "HBW 100",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.5:1, 3.0:1"
+        },
+        {
+          "model": "HBW 150",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.5:1, 3.0:1"
+        },
+        {
+          "model": "HBW 250",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.5:1, 3.0:1, 3.5:1"
+        }
+      ]
+    },
+    {
       "make": "Kanzaki",
       "country": "Japan",
       "note": "Yanmar's transmission division \u2014 standard gearbox on most Yanmar marine diesels",
@@ -3739,6 +3860,36 @@
           "type": "Hydraulic",
           "transmission_type": "Hydraulic Shift",
           "ratios": "2.04:1, 2.33:1, 2.62:1"
+        }
+      ]
+    },
+    {
+      "make": "Mercruiser",
+      "country": "USA",
+      "models": [
+        {
+          "model": "Alpha One",
+          "type": "Mechanical",
+          "transmission_type": "Sterndrive",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "Bravo One",
+          "type": "Hydraulic",
+          "transmission_type": "Sterndrive",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "Bravo Two",
+          "type": "Hydraulic",
+          "transmission_type": "Sterndrive",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "Bravo Three",
+          "type": "Hydraulic",
+          "transmission_type": "Sterndrive",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
         }
       ]
     },
@@ -3853,20 +4004,121 @@
       ]
     },
     {
-      "make": "Capitol",
-      "country": "USA",
-      "note": "Found on older classic and vintage marine engines",
+      "make": "Technodrive",
+      "country": "Germany",
       "models": [
         {
-          "model": "Capitol A",
-          "type": "Mechanical",
-          "transmission_type": "Manual",
-          "ratios": "2.0:1"
+          "model": "TM 93",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.5:1"
         },
         {
-          "model": "Capitol B",
+          "model": "TM 170",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "TM 345",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.5:1, 3.0:1"
+        },
+        {
+          "model": "TM 485",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "2.0:1, 2.5:1, 3.0:1, 3.5:1"
+        }
+      ]
+    },
+    {
+      "make": "Twin Disc",
+      "country": "USA",
+      "models": [
+        {
+          "model": "MG-502",
           "type": "Mechanical",
           "transmission_type": "Manual",
+          "hp_rating": "70-386",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "MG-506",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "hp_rating": "150-600",
+          "ratios": "2.5:1, 3.0:1"
+        },
+        {
+          "model": "MG-507",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "hp_rating": "250-900",
+          "ratios": "2.5:1, 3.0:1, 3.5:1"
+        },
+        {
+          "model": "MG-509",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "hp_rating": "500-2000",
+          "ratios": "1.5:1, 2.0:1, 2.5:1, 3.0:1, 4.5:1"
+        },
+        {
+          "model": "MG-5050",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "hp_rating": "150-600",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "MG-5075",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "hp_rating": "500-2000",
+          "ratios": "2.0:1, 2.5:1, 3.0:1, 3.5:1"
+        }
+      ]
+    },
+    {
+      "make": "Velvet Drive",
+      "country": "USA",
+      "models": [
+        {
+          "model": "71C",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "72C",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "2.5:1, 3.0:1"
+        }
+      ]
+    },
+    {
+      "make": "Volvo Penta",
+      "country": "Sweden",
+      "models": [
+        {
+          "model": "MS (Mechanical Shaft)",
+          "type": "Mechanical",
+          "transmission_type": "Manual Shaft Drive",
+          "ratios": "2.0:1, 2.5:1"
+        },
+        {
+          "model": "DP (Drive Package)",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Sterndrive",
+          "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "IPS (Inboard Performance System)",
+          "type": "Hydraulic",
+          "transmission_type": "Pod Drive",
           "ratios": "2.0:1, 2.5:1"
         }
       ]
@@ -3887,6 +4139,89 @@
           "type": "Mechanical",
           "transmission_type": "V-Drive",
           "ratios": "1.5:1, 2.0:1, 2.5:1"
+        }
+      ]
+    },
+    {
+      "make": "Yanmar",
+      "models": [
+        {
+          "model": "KM2P",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.21:1, 2.62:1"
+        },
+        {
+          "model": "KM3A",
+          "type": "Hydraulic",
+          "transmission_type": "Wet Multi-Disc",
+          "ratios": "2.21:1, 2.62:1"
+        },
+        {
+          "model": "KM3P",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.21:1, 2.62:1"
+        },
+        {
+          "model": "KM35A",
+          "type": "Hydraulic",
+          "transmission_type": "Wet Multi-Disc",
+          "ratios": "2.21:1, 2.62:1"
+        },
+        {
+          "model": "KM35P",
+          "type": "Mechanical",
+          "transmission_type": "Cone Clutch",
+          "ratios": "2.21:1, 2.62:1"
+        },
+        {
+          "model": "KM4A",
+          "type": "Hydraulic",
+          "transmission_type": "Wet Multi-Disc",
+          "ratios": "2.17:1, 2.62:1"
+        },
+        {
+          "model": "KM4A2",
+          "type": "Hydraulic",
+          "transmission_type": "Wet Multi-Disc",
+          "ratios": "2.17:1, 2.62:1, 3.05:1"
+        },
+        {
+          "model": "KBW20",
+          "type": "Hydraulic",
+          "transmission_type": "Wet Multi-Disc",
+          "ratios": "2.62:1, 3.05:1"
+        },
+        {
+          "model": "KBW21",
+          "type": "Hydraulic",
+          "transmission_type": "Wet Multi-Disc",
+          "ratios": "2.62:1, 3.05:1"
+        },
+        {
+          "model": "KMH4A",
+          "type": "Hydraulic",
+          "transmission_type": "Wet Multi-Disc",
+          "ratios": "2.04:1, 2.36:1"
+        },
+        {
+          "model": "KMH4A2",
+          "type": "Hydraulic",
+          "transmission_type": "Wet Multi-Disc",
+          "ratios": "2.04:1, 2.36:1"
+        },
+        {
+          "model": "KMH50A",
+          "type": "Hydraulic",
+          "transmission_type": "Wet Multi-Disc",
+          "ratios": "2.14:1, 2.48:1"
+        },
+        {
+          "model": "KMH61A",
+          "type": "Hydraulic",
+          "transmission_type": "Wet Multi-Disc",
+          "ratios": "2.14:1, 2.48:1"
         }
       ]
     },
@@ -3941,222 +4276,6 @@
           "type": "Hydraulic",
           "transmission_type": "Hydraulic Shift",
           "ratios": "2.5:1, 3.0:1, 3.5:1"
-        }
-      ]
-    },
-    {
-      "make": "Hurth",
-      "country": "Germany",
-      "models": [
-        {
-          "model": "HBW 5",
-          "type": "Mechanical",
-          "transmission_type": "Manual",
-          "ratios": "2.0:1"
-        },
-        {
-          "model": "HBW 10",
-          "type": "Mechanical",
-          "transmission_type": "Manual",
-          "ratios": "2.0:1, 2.5:1"
-        },
-        {
-          "model": "HBW 20",
-          "type": "Mechanical",
-          "transmission_type": "Manual",
-          "ratios": "2.0:1, 2.5:1"
-        },
-        {
-          "model": "HBW 50",
-          "type": "Mechanical",
-          "transmission_type": "Manual",
-          "ratios": "2.5:1, 3.0:1"
-        },
-        {
-          "model": "HBW 100",
-          "type": "Mechanical",
-          "transmission_type": "Manual",
-          "ratios": "2.5:1, 3.0:1"
-        },
-        {
-          "model": "HBW 150",
-          "type": "Hydraulic",
-          "transmission_type": "Hydraulic Shift",
-          "ratios": "2.5:1, 3.0:1"
-        },
-        {
-          "model": "HBW 250",
-          "type": "Hydraulic",
-          "transmission_type": "Hydraulic Shift",
-          "ratios": "2.5:1, 3.0:1, 3.5:1"
-        }
-      ]
-    },
-    {
-      "make": "Twin Disc",
-      "country": "USA",
-      "models": [
-        {
-          "model": "MG-502",
-          "type": "Mechanical",
-          "transmission_type": "Manual",
-          "hp_rating": "70-386",
-          "ratios": "2.0:1, 2.5:1"
-        },
-        {
-          "model": "MG-506",
-          "type": "Mechanical",
-          "transmission_type": "Manual",
-          "hp_rating": "150-600",
-          "ratios": "2.5:1, 3.0:1"
-        },
-        {
-          "model": "MG-507",
-          "type": "Mechanical",
-          "transmission_type": "Manual",
-          "hp_rating": "250-900",
-          "ratios": "2.5:1, 3.0:1, 3.5:1"
-        },
-        {
-          "model": "MG-509",
-          "type": "Mechanical",
-          "transmission_type": "Manual",
-          "hp_rating": "500-2000",
-          "ratios": "1.5:1, 2.0:1, 2.5:1, 3.0:1, 4.5:1"
-        },
-        {
-          "model": "MG-5050",
-          "type": "Hydraulic",
-          "transmission_type": "Hydraulic Shift",
-          "hp_rating": "150-600",
-          "ratios": "2.0:1, 2.5:1, 3.0:1"
-        },
-        {
-          "model": "MG-5075",
-          "type": "Hydraulic",
-          "transmission_type": "Hydraulic Shift",
-          "hp_rating": "500-2000",
-          "ratios": "2.0:1, 2.5:1, 3.0:1, 3.5:1"
-        }
-      ]
-    },
-    {
-      "make": "Borg-Warner",
-      "country": "USA",
-      "models": [
-        {
-          "model": "71C",
-          "type": "Mechanical",
-          "transmission_type": "Manual",
-          "ratios": "2.0:1, 2.5:1"
-        },
-        {
-          "model": "72C",
-          "type": "Mechanical",
-          "transmission_type": "Manual",
-          "ratios": "2.5:1, 3.0:1"
-        }
-      ]
-    },
-    {
-      "make": "Velvet Drive",
-      "country": "USA",
-      "models": [
-        {
-          "model": "71C",
-          "type": "Mechanical",
-          "transmission_type": "Manual",
-          "ratios": "2.0:1, 2.5:1"
-        },
-        {
-          "model": "72C",
-          "type": "Mechanical",
-          "transmission_type": "Manual",
-          "ratios": "2.5:1, 3.0:1"
-        }
-      ]
-    },
-    {
-      "make": "Technodrive",
-      "country": "Germany",
-      "models": [
-        {
-          "model": "TM 93",
-          "type": "Hydraulic",
-          "transmission_type": "Hydraulic Shift",
-          "ratios": "2.5:1"
-        },
-        {
-          "model": "TM 170",
-          "type": "Hydraulic",
-          "transmission_type": "Hydraulic Shift",
-          "ratios": "2.0:1, 2.5:1, 3.0:1"
-        },
-        {
-          "model": "TM 345",
-          "type": "Hydraulic",
-          "transmission_type": "Hydraulic Shift",
-          "ratios": "2.5:1, 3.0:1"
-        },
-        {
-          "model": "TM 485",
-          "type": "Hydraulic",
-          "transmission_type": "Hydraulic Shift",
-          "ratios": "2.0:1, 2.5:1, 3.0:1, 3.5:1"
-        }
-      ]
-    },
-    {
-      "make": "Volvo Penta",
-      "country": "Sweden",
-      "models": [
-        {
-          "model": "MS (Mechanical Shaft)",
-          "type": "Mechanical",
-          "transmission_type": "Manual Shaft Drive",
-          "ratios": "2.0:1, 2.5:1"
-        },
-        {
-          "model": "DP (Drive Package)",
-          "type": "Hydraulic",
-          "transmission_type": "Hydraulic Sterndrive",
-          "ratios": "2.0:1, 2.5:1, 3.0:1"
-        },
-        {
-          "model": "IPS (Inboard Performance System)",
-          "type": "Hydraulic",
-          "transmission_type": "Pod Drive",
-          "ratios": "2.0:1, 2.5:1"
-        }
-      ]
-    },
-    {
-      "make": "Mercruiser",
-      "country": "USA",
-      "models": [
-        {
-          "model": "Alpha One",
-          "type": "Mechanical",
-          "transmission_type": "Sterndrive",
-          "ratios": "2.0:1, 2.5:1"
-        },
-        {
-          "model": "Bravo One",
-          "type": "Hydraulic",
-          "transmission_type": "Sterndrive",
-          "ratios": "2.0:1, 2.5:1"
-        },
-        {
-          "model": "Bravo Two",
-          "type": "Hydraulic",
-          "transmission_type": "Sterndrive",
-          "ratios": "2.0:1, 2.5:1, 3.0:1"
-        },
-        {
-          "model": "Bravo Three",
-          "type": "Hydraulic",
-          "transmission_type": "Sterndrive",
-          "ratios": "2.0:1, 2.5:1, 3.0:1"
         }
       ]
     }

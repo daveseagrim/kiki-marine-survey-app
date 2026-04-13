@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2108';
+const APP_VERSION = 'v2110';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -6575,6 +6575,29 @@ function editSurveyDetails(surveyId) {
           }
         });
       }
+      // Auto-save: debounced save on every field change
+      let _editAutoSaveTimer = null;
+      const _editAutoSave = () => {
+        clearTimeout(_editAutoSaveTimer);
+        _editAutoSaveTimer = setTimeout(() => {
+          saveEditFormSilently().then(() => {
+            // Subtle indicator — no toast, just a quick flash on the header subtitle
+            const sub = document.querySelector('.header-subtitle');
+            if (sub) {
+              const orig = sub.textContent;
+              sub.textContent = 'Saved ✓';
+              setTimeout(() => { sub.textContent = orig; }, 800);
+            }
+          });
+        }, 1500);
+      };
+      // Attach to all inputs, selects, and textareas in the form
+      const formEl = document.getElementById('app');
+      if (formEl) {
+        formEl.addEventListener('input', _editAutoSave);
+        formEl.addEventListener('change', _editAutoSave);
+      }
+
     }, 100);
 
     // Add bottom action bar to Edit Intro page (same buttons as inspection)
