@@ -39,7 +39,7 @@ let db = null;
 const SURVEY_ID = '1775663612596';
 
 // Open IndexedDB
-const request = indexedDB.open('KikiMarineSurveys', 5);
+const request = indexedDB.open('KikiSurveyDB', 2);
 request.onerror = () => {
   document.getElementById('dbStatus').className = 'status error';
   document.getElementById('dbStatus').textContent = 'Failed to open IndexedDB: ' + request.error;
