@@ -384,9 +384,9 @@
         <div id="import-survey-status" class="status"></div>
       </div>
 
-      <!-- Import Photo Batch -->
+      <!-- Import Photo Batch (JSON) -->
       <div class="section">
-        <h2>Import Photo Batch</h2>
+        <h2>Import Photo Batch (JSON)</h2>
         <p>Import a JSON file with a collection of photos in format: {photos: [{id, surveyId, label, dataUrl, timestamp}, ...]}</p>
         <div class="input-group">
           <label for="import-photos-file" class="file-input-label">
@@ -395,6 +395,20 @@
           <input type="file" id="import-photos-file" accept=".json" multiple>
         </div>
         <div id="import-photos-status" class="status"></div>
+      </div>
+
+      <!-- Import Raw JPG Photos -->
+      <div class="section" style="border: 2px solid #006699; background: #f0f9ff;">
+        <h2 style="color: #006699;">Import JPG Photos (Recommended)</h2>
+        <p>Select JPG photos directly from extracted backup folders. Filenames must follow the pattern: <code>surveyId_timestamp_hash.jpg</code></p>
+        <p style="font-size: 13px; color: #555;">You can select ALL photos at once (Cmd+A). Each photo is processed individually so the browser won't crash.</p>
+        <div class="input-group">
+          <label for="import-jpg-files" class="file-input-label" style="background: #006699; color: white; font-size: 16px; padding: 16px 24px;">
+            Choose JPG Photos
+          </label>
+          <input type="file" id="import-jpg-files" accept="image/jpeg,image/png,.jpg,.jpeg,.png" multiple>
+        </div>
+        <div id="import-jpg-status" class="status"></div>
       </div>
 
       <!-- Firebase Recovery Section -->
@@ -858,6 +872,81 @@
       progressContainer.classList.add('hidden');
       const msg = `Imported ${totalImported} photo(s) from ${totalFiles - errors} file(s)${errors > 0 ? ` (${errors} failed)` : ''}`;
       showStatus(errors > 0 ? 'warning' : 'success', msg, 'import-photos-status');
+      await refreshDiagnostic();
+    });
+
+    // Import raw JPG photos — processes one at a time to avoid memory crashes
+    document.getElementById('import-jpg-files').addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+
+      const progressContainer = document.getElementById('progress-container');
+      progressContainer.classList.remove('hidden');
+
+      // Build label map from all surveys in DB
+      const surveys = await getAllSurveys();
+      const photoLabelMap = {};
+      for (const survey of surveys) {
+        if (survey.items) {
+          for (const [label, item] of Object.entries(survey.items)) {
+            if (item && item.photos) {
+              for (const pid of item.photos) {
+                photoLabelMap[pid] = label;
+              }
+            }
+          }
+        }
+      }
+
+      let imported = 0;
+      let skipped = 0;
+      let errors = 0;
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fname = file.name.replace(/\.(jpg|jpeg|png)$/i, '');
+        const parts = fname.split('_');
+
+        // Expect: surveyId_timestamp_hash
+        if (parts.length < 2) {
+          skipped++;
+          continue;
+        }
+
+        const surveyId = parts[0];
+        const photoId = fname;
+        const itemLabel = photoLabelMap[photoId] || 'Recovered';
+
+        try {
+          const dataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(file);
+          });
+
+          await savePhoto({
+            id: photoId,
+            surveyId: surveyId,
+            itemLabel: itemLabel,
+            dataUrl: dataUrl,
+            annotated: false,
+            createdAt: parts[1] || ''
+          });
+
+          imported++;
+        } catch (err) {
+          console.error('Error importing ' + file.name, err);
+          errors++;
+        }
+
+        document.getElementById('progress-text').textContent = `${imported} imported, ${i + 1}/${files.length} processed`;
+        document.getElementById('progress-bar-fill').style.width = (((i + 1) / files.length) * 100) + '%';
+      }
+
+      progressContainer.classList.add('hidden');
+      const msg = `Imported ${imported} photo(s)${skipped > 0 ? `, ${skipped} skipped (bad filename)` : ''}${errors > 0 ? `, ${errors} errors` : ''}`;
+      showStatus(errors > 0 ? 'warning' : 'success', msg, 'import-jpg-status');
       await refreshDiagnostic();
     });
 
