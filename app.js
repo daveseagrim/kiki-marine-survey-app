@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2106';
+const APP_VERSION = 'v2107';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -6387,9 +6387,12 @@ function editSurveyDetails(surveyId) {
     if (header) {
       header.innerHTML = `
         <button class="header-back" onclick="returnToInspection('${survey.id}')">←</button>
-        <div style="flex:1;">
-          <div class="header-title">${(survey.vesselName || 'Survey').replace(/</g, '&lt;')}</div>
-          <div class="header-subtitle">Edit Vessel Information</div>
+        <div style="flex:1;min-width:0;">
+          <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${(survey.vesselName || 'Survey').replace(/</g, '&lt;')}</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
+            <span class="header-subtitle">Edit Vessel Information</span>
+            <button onclick="forceAppUpdate()" style="background:rgba(0,102,153,0.08);color:#006699;border:1px solid #3399cc;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;">↻ Update</button>
+          </div>
         </div>
         <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
       `;
