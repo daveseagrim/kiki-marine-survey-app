@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2107';
+const APP_VERSION = 'v2108';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -6389,10 +6389,7 @@ function editSurveyDetails(surveyId) {
         <button class="header-back" onclick="returnToInspection('${survey.id}')">←</button>
         <div style="flex:1;min-width:0;">
           <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${(survey.vesselName || 'Survey').replace(/</g, '&lt;')}</div>
-          <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
-            <span class="header-subtitle">Edit Vessel Information</span>
-            <button onclick="forceAppUpdate()" style="background:rgba(0,102,153,0.08);color:#006699;border:1px solid #3399cc;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;">↻ Update</button>
-          </div>
+          <div class="header-subtitle">Edit Vessel Information — ${APP_VERSION}</div>
         </div>
         <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
       `;
@@ -6585,48 +6582,54 @@ function editSurveyDetails(surveyId) {
     if (existingBar2) existingBar2.remove();
     const editBar = document.createElement('div');
     editBar.id = 'inspectionBottomBar';
-    editBar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom, 0px)) 12px;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 -2px 10px rgba(0,0,0,0.1);z-index:100;';
+    editBar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) 12px;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 -2px 10px rgba(0,0,0,0.1);z-index:100;';
 
-    // ✨ Desc button
+    const ps = 'border:none;border-radius:22px;padding:8px 12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;';
+
+    // ↻ Update button
+    const updateBtn2 = document.createElement('button');
+    updateBtn2.style.cssText = ps + 'background:rgba(0,102,153,0.08);color:#006699;border:1px solid #3399cc;';
+    updateBtn2.innerHTML = '↻ Update';
+    updateBtn2.onclick = () => forceAppUpdate();
+    editBar.appendChild(updateBtn2);
+
+    // 📝 Desc button
     const descBtn2 = document.createElement('button');
-    descBtn2.style.cssText = 'background:#ffcc00;color:#006699;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
+    descBtn2.style.cssText = ps + 'background:#ffcc00;color:#006699;font-weight:700;';
     descBtn2.innerHTML = '📝 Desc';
     descBtn2.onclick = async () => {
-      // Save current form data first, then regenerate description
       await saveEditFormSilently();
       await regenerateDescriptionFromInspection();
-      // Re-open edit form to show updated description
       editSurveyDetails(survey.id);
     };
     editBar.appendChild(descBtn2);
 
     // 💾 Backup button
     const backupBtn2 = document.createElement('button');
-    backupBtn2.style.cssText = 'background:#16a34a;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
+    backupBtn2.style.cssText = ps + 'background:#3399cc;color:white;';
     backupBtn2.innerHTML = '💾 Backup';
     backupBtn2.onclick = async () => {
       await saveEditFormSilently();
-      // Trigger the same backup logic as the inspection page
       document.getElementById('inspectionBottomBar')?.remove();
       renderInspection(await getSurvey(survey.id));
       setTimeout(() => document.getElementById('backupBtn')?.click(), 200);
     };
     editBar.appendChild(backupBtn2);
 
-    // ✅ Check Survey button
+    // ✅ Check button
     const checkBtn2 = document.createElement('button');
-    checkBtn2.style.cssText = 'background:#d97706;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
-    checkBtn2.innerHTML = '✅ Check S…';
+    checkBtn2.style.cssText = ps + 'background:#ffcc00;color:#006699;font-weight:700;';
+    checkBtn2.innerHTML = '✅ Check';
     checkBtn2.onclick = async () => {
       await saveEditFormSilently();
       checkSurvey();
     };
     editBar.appendChild(checkBtn2);
 
-    // 📄 Preview Report button
+    // 📄 Report button
     const reportBtn2 = document.createElement('button');
-    reportBtn2.style.cssText = 'background:#006699;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;white-space:nowrap;';
-    reportBtn2.innerHTML = '📄 Preview';
+    reportBtn2.style.cssText = ps + 'background:#006699;color:white;';
+    reportBtn2.innerHTML = '📄 Report';
     reportBtn2.onclick = async () => {
       await saveEditFormSilently();
       const s = await getSurvey(survey.id);
@@ -8264,20 +8267,13 @@ function renderInspection(survey) {
     : '';
 
   app.innerHTML = `
-    <div class="header" style="flex-direction:column;align-items:stretch;gap:4px;padding-bottom:6px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <button class="header-back" onclick="backToHome()">←</button>
-        <div style="flex:1;min-width:0;">
-          <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#006699;">${esc(survey.vesselName)}</div>
-          <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
-            <span class="header-subtitle" style="color:#3399cc;">${APP_VERSION}</span>
-            <button onclick="forceAppUpdate()" style="background:rgba(0,102,153,0.08);color:#006699;border:1px solid #3399cc;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;">↻ Update</button>
-            <button onclick="regenerateDescriptionFromInspection()" style="background:#ffcc00;color:#006699;border:none;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">📝 Desc</button>
-            <button onclick="editSurveyDetails('${survey.id}')" style="background:#006699;color:white;border:none;border-radius:14px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;">✏️ Intro</button>
-          </div>
-        </div>
-        <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
+    <div class="header">
+      <button class="header-back" onclick="backToHome()">←</button>
+      <div style="flex:1;min-width:0;">
+        <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#006699;">${esc(survey.vesselName)}</div>
+        <div class="header-subtitle" style="color:#3399cc;">${APP_VERSION}</div>
       </div>
+      <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
     </div>
     ${surveyTypeBanner}
     <div class="content" id="inspection-content">
@@ -8930,16 +8926,39 @@ function ensureReportButton() {
   const fab = document.querySelector('.fab');
   if (fab) fab.remove();
 
-  // Bottom action bar container
+  // Bottom action bar container — two rows on mobile, single row on wide screens
   const bottomBar = document.createElement('div');
   bottomBar.id = 'inspectionBottomBar';
-  bottomBar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom, 0px)) 12px;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 -2px 10px rgba(0,0,0,0.1);z-index:100;';
+  bottomBar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) 12px;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 -2px 10px rgba(0,0,0,0.1);z-index:100;';
   document.body.appendChild(bottomBar);
+
+  const pillStyle = 'border:none;border-radius:22px;padding:8px 12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;';
+
+  // Update button
+  const updateBtn = document.createElement('button');
+  updateBtn.style.cssText = pillStyle + 'background:rgba(0,102,153,0.08);color:#006699;border:1px solid #3399cc;';
+  updateBtn.innerHTML = '↻ Update';
+  updateBtn.onclick = () => forceAppUpdate();
+  bottomBar.appendChild(updateBtn);
+
+  // Desc button
+  const descBtn = document.createElement('button');
+  descBtn.style.cssText = pillStyle + 'background:#ffcc00;color:#006699;font-weight:700;';
+  descBtn.innerHTML = '📝 Desc';
+  descBtn.onclick = () => regenerateDescriptionFromInspection();
+  bottomBar.appendChild(descBtn);
+
+  // Edit Intro button
+  const introBtn = document.createElement('button');
+  introBtn.style.cssText = pillStyle + 'background:#006699;color:white;';
+  introBtn.innerHTML = '✏️ Intro';
+  introBtn.onclick = () => editSurveyDetails(currentSurveyId);
+  bottomBar.appendChild(introBtn);
 
   // Backup button
   const backupBtn = document.createElement('button');
   backupBtn.id = 'backupBtn';
-  backupBtn.style.cssText = 'background:#3399cc;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(51,153,204,0.3);cursor:pointer;white-space:nowrap;';
+  backupBtn.style.cssText = pillStyle + 'background:#3399cc;color:white;box-shadow:0 2px 8px rgba(51,153,204,0.3);';
   backupBtn.innerHTML = '💾 Backup';
   backupBtn.onclick = async () => {
     // Suppress popstate during backup (share sheet can trigger it on iOS)
@@ -9007,19 +9026,19 @@ function ensureReportButton() {
   };
   bottomBar.appendChild(backupBtn);
 
-  // Check Survey button (centre)
+  // Check Survey button
   const checkBtn = document.createElement('button');
   checkBtn.id = 'checkSurveyBtn';
-  checkBtn.style.cssText = 'background:#ffcc00;color:#006699;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(255,204,0,0.3);cursor:pointer;white-space:nowrap;';
-  checkBtn.innerHTML = '✅ Check S…';
+  checkBtn.style.cssText = pillStyle + 'background:#ffcc00;color:#006699;font-weight:700;';
+  checkBtn.innerHTML = '✅ Check';
   checkBtn.onclick = () => checkSurvey();
   bottomBar.appendChild(checkBtn);
 
-  // Preview Report button (right)
+  // Preview Report button
   btn = document.createElement('button');
   btn.id = 'reportBtn';
-  btn.style.cssText = 'background:#006699;color:white;border:none;border-radius:22px;padding:10px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,102,153,0.3);cursor:pointer;white-space:nowrap;';
-  btn.innerHTML = '📄 Preview Report';
+  btn.style.cssText = pillStyle + 'background:#006699;color:white;box-shadow:0 2px 8px rgba(0,102,153,0.3);';
+  btn.innerHTML = '📄 Report';
   btn.onclick = () => generateReport();
   bottomBar.appendChild(btn);
 }
