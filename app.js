@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2122';
+const APP_VERSION = 'v2123';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -5189,11 +5189,38 @@ function createNewSurvey(formData) {
 
 // Calculate completion percentage (excludes fully-excluded categories from the count)
 function getCompletionPercentage(survey) {
-  if (!survey || !survey.totalRatedItems) return 0;
+  if (!survey) return 0;
+
+  // If totalRatedItems was already calculated (from inspection view), use it
+  let total = survey.totalRatedItems;
+
+  // Otherwise, calculate from the template on the fly
+  if (!total) {
+    const template = getTemplateForSurvey(survey);
+    if (!template || template.length === 0) return 0;
+
+    const isPowerboat = (survey.vesselType || '').toLowerCase() === 'power';
+    const sailOnlyCategories = ['Spars and rigging', 'Sails'];
+    let count = 0;
+
+    template.forEach(section => {
+      if (section.name === 'Kiki Marine Survey' && section.categories) {
+        section.categories.forEach(category => {
+          if (isPowerboat && sailOnlyCategories.includes(category.name)) return;
+          if (category.items) {
+            count += category.items.filter(item => item.type === 'list').length;
+          }
+        });
+      }
+    });
+
+    total = count || 1; // avoid divide by zero
+  }
+
   // Count items that are rated OR excluded
   const completedOrExcluded = Object.values(survey.items || {})
     .filter(item => (item.rating && item.rating !== '') || item.excluded).length;
-  return Math.min(100, Math.round((completedOrExcluded / survey.totalRatedItems) * 100));
+  return Math.min(100, Math.round((completedOrExcluded / total) * 100));
 }
 
 // UI Rendering Functions
