@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2120';
+const APP_VERSION = 'v2121';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1477,13 +1477,14 @@ async function fetchDataFiles() {
       fetch('outdrive_db.json')
     ]);
 
-    surveyTemplate = await templateRes.json();
-    insuranceSurveyTemplate = await insuranceTemplateRes.json();
-    textLibrary = await libraryRes.json();
-    boatSpecsDB = await specsRes.json();
-    boatValuesDB = await valuesRes.json();
-    engineDb = await engineRes.json();
-    outdriveDb = await outdriveRes.json();
+    // Parse each template individually so one bad file cannot prevent others from loading
+    try { surveyTemplate = await templateRes.json(); } catch (e) { console.error('Failed to parse survey_template.json:', e); }
+    try { insuranceSurveyTemplate = await insuranceTemplateRes.json(); } catch (e) { console.error('Failed to parse insurance_survey_template.json:', e); }
+    try { textLibrary = await libraryRes.json(); } catch (e) { console.error('Failed to parse text_library.json:', e); }
+    try { boatSpecsDB = await specsRes.json(); } catch (e) { console.error('Failed to parse boat_specs_db.json:', e); }
+    try { boatValuesDB = await valuesRes.json(); } catch (e) { console.error('Failed to parse boat_values_db.json:', e); }
+    try { engineDb = await engineRes.json(); } catch (e) { console.error('Failed to parse engine_db.json:', e); }
+    try { outdriveDb = await outdriveRes.json(); } catch (e) { console.error('Failed to parse outdrive_db.json:', e); }
 
     // Winch DB is optional — fetch separately so a missing file cannot break the app
     try {
