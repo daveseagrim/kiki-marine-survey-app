@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2142';
+const APP_VERSION = 'v2143';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9904,7 +9904,11 @@ function ensureReportButton() {
         window._hasUnsavedBackup = false;
       } catch (err) {
         console.error('Drive backup error:', err);
-        showToast('Drive backup failed — ' + err.message);
+        if (err.driveApiDisabled) {
+          showDriveApiDisabledDialog(err.activationUrl, 0, 1);
+        } else {
+          showToast('Drive backup failed — ' + err.message);
+        }
       } finally {
         backupBtn.innerHTML = '💾 Backup';
         backupBtn.disabled = false;
@@ -17547,6 +17551,70 @@ async function initApp() {
 // and photos directly to the surveyor's Google Drive.
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// Friendly dialog when the Google Drive API hasn't been enabled on the
+// Firebase/GCP project. Replaces the scary raw 403 JSON with a direct
+// link and a one-tap copy so Dave can fix it from his phone if needed.
+function showDriveApiDisabledDialog(activationUrl, done, total) {
+  // Remove any existing dialog
+  const existing = document.getElementById('driveApiDisabledDialog');
+  if (existing) existing.remove();
+
+  const url = activationUrl || 'https://console.developers.google.com/apis/api/drive.googleapis.com/overview';
+  const status = (done > 0 && total > 1)
+    ? `Backed up ${done} of ${total} surveys before the error — nothing after that uploaded.`
+    : 'Nothing was uploaded to Drive.';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'driveApiDisabledDialog';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;';
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:14px;max-width:460px;width:100%;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,0.3);max-height:90vh;overflow:auto;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <span style="font-size:28px;">⚙️</span>
+        <h2 style="margin:0;font-size:18px;color:#dc2626;">Drive API not enabled</h2>
+      </div>
+      <p style="margin:0 0 10px;font-size:14px;line-height:1.5;color:#374151;">
+        ${status} Your Google Cloud project needs the Drive API switched on — this is a <strong>one-time setup</strong>, not a repeat login.
+      </p>
+      <ol style="margin:0 0 14px;padding-left:20px;font-size:13px;line-height:1.6;color:#374151;">
+        <li>Tap the blue link below and sign in with <strong>daveseagrim@gmail.com</strong></li>
+        <li>Tap the blue <strong>Enable</strong> button on that page</li>
+        <li>Wait 2–3 minutes for Google to propagate the change</li>
+        <li>Come back and tap Backup again — the same sign-in still works</li>
+      </ol>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;margin-bottom:14px;">
+        <div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:4px;">ENABLE URL</div>
+        <a href="${url}" target="_blank" rel="noopener"
+           style="color:#006699;font-size:12px;word-break:break-all;text-decoration:underline;">${url}</a>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="driveApiOpenBtn" style="flex:1;min-width:140px;padding:10px;background:#006699;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+          🔗 Open Enable Page
+        </button>
+        <button id="driveApiCopyBtn" style="flex:1;min-width:120px;padding:10px;background:#f1f5f9;color:#334155;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+          📋 Copy Link
+        </button>
+        <button id="driveApiCloseBtn" style="padding:10px 16px;background:none;color:#6b7280;border:1px solid #e5e7eb;border-radius:8px;font-weight:600;cursor:pointer;">
+          Close
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.getElementById('driveApiOpenBtn').onclick = () => {
+    window.open(url, '_blank', 'noopener');
+  };
+  document.getElementById('driveApiCopyBtn').onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast('Link copied to clipboard');
+    } catch (e) {
+      showToast('Could not copy — long-press the link to copy manually');
+    }
+  };
+  document.getElementById('driveApiCloseBtn').onclick = () => overlay.remove();
+}
+
 const DriveBackup = (() => {
   let _accessToken = null;
   let _backupFolderId = null;  // "Kiki Marine Survey Backups" folder on Drive
@@ -17662,6 +17730,18 @@ const DriveBackup = (() => {
     });
     if (!res.ok) {
       const errText = await res.text();
+      // Detect the "Drive API not enabled" error and throw a friendlier message
+      if (res.status === 403 && /SERVICE_DISABLED|accessNotConfigured|has not been used in project/i.test(errText)) {
+        const projectMatch = errText.match(/project[s]?[\/\s=]+(\d+)/);
+        const projectId = projectMatch ? projectMatch[1] : '';
+        const err = new Error('DRIVE_API_DISABLED');
+        err.driveApiDisabled = true;
+        err.projectId = projectId;
+        err.activationUrl = projectId
+          ? `https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=${projectId}`
+          : 'https://console.developers.google.com/apis/api/drive.googleapis.com/overview';
+        throw err;
+      }
       throw new Error(`Drive upload failed (${res.status}): ${errText}`);
     }
     return await res.json();
@@ -17762,6 +17842,7 @@ const DriveBackup = (() => {
     let done = 0;
     let failed = 0;
     let lastError = '';
+    let apiDisabledErr = null;
     for (const survey of surveys) {
       try {
         showToast(`Backing up ${survey.vesselName || 'survey'}... (${done + 1}/${surveys.length})`);
@@ -17769,11 +17850,21 @@ const DriveBackup = (() => {
         done++;
       } catch (err) {
         console.error(`Drive backup failed for ${survey.vesselName}:`, err);
+        // If the Drive API is disabled on the Google Cloud project, stop the
+        // batch immediately — no point retrying every survey against the same
+        // broken endpoint.
+        if (err.driveApiDisabled) {
+          apiDisabledErr = err;
+          failed++;
+          break;
+        }
         lastError = err.message || String(err);
         failed++;
       }
     }
-    if (failed > 0) {
+    if (apiDisabledErr) {
+      showDriveApiDisabledDialog(apiDisabledErr.activationUrl, done, surveys.length);
+    } else if (failed > 0) {
       showAlert(`Backed up ${done} surveys. ${failed} failed.\n\nError: ${lastError}`);
     } else {
       showToast(`All ${done} surveys backed up to Drive ✓`);
