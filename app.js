@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2135';
+const APP_VERSION = 'v2136';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -15907,8 +15907,8 @@ async function generateReport() {
     <img src="https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png"
          alt="Kiki Marine Logo" style="max-width: 300px; width: 80%; height: auto;"
          onerror="this.style.display='none'">
-    <p style="font-size: 11pt; color: #333; margin-top: 14px; letter-spacing: 0.5px;">Dave Seagrim, SAMS Surveyor Associate<br/>ABYC Master Advisor</p>
-    <h1 style="font-size: 16pt; border: none; margin-top: 24px;">${survey.surveyType === 'Insurance survey' ? 'Insurance<br/>Marine Survey' : 'Report of Condition &amp; Value<br/>Marine Survey'}</h1>
+    <h1 style="font-size: 15pt; border: none; margin-top: 16px; margin-bottom: 8px;">${survey.surveyType === 'Insurance survey' ? 'Insurance Marine Survey' : 'Report of Condition &amp; Value Marine Survey'}</h1>
+    <p style="font-size: 11pt; color: #333; letter-spacing: 0.5px;">Dave Seagrim, SAMS Surveyor Associate, ABYC Master Advisor</p>
   </div>
 
   ${coverPhotoDataUrl ? `
@@ -15926,11 +15926,11 @@ async function generateReport() {
     <tr><td style="background:#e8edf2;"><strong>Surveyor</strong></td><td>Dave Seagrim, SAMS SA, ABYC Master Advisor</td></tr>
   </table>
 
-  <div style="text-align:center; margin-top: 24px; display:flex; align-items:center; justify-content:center; gap:12px;">
+  <div style="text-align:center; margin-top: 24px; display:flex; align-items:center; justify-content:center; gap:10px;">
     <img src="https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png"
          alt="Kiki Marine" style="height:28px; width:auto;"
          onerror="this.style.display='none'">
-    <span style="font-size:9pt; color:#666;">(647) 289-7876 &bull; dave@kikimarine.ca &bull; kikimarine.ca</span>
+    <span style="font-size:8pt; color:#666; white-space:nowrap;">(647) 289-7876 &bull; dave@kikimarine.ca &bull; kikimarine.ca</span>
   </div>
 
   <!-- ═══ PURPOSE AND SCOPE ═══ -->
