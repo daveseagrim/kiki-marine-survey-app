@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2124';
+const APP_VERSION = 'v2125';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1657,11 +1657,33 @@ async function deleteSurvey(id) {
   });
 }
 
-// ─── Photo backup tracking & offline retry queue ───────────────────────────
+// ─── Idle-triggered backup system ──────────────────────────────────────────
+// Photos are saved to IndexedDB instantly. Uploads only happen when the user
+// pauses activity for 5 seconds, taps Backup, or comes back online.
+// This means zero network activity while you're snapping photos or typing.
 let _photosSinceLastBackup = 0;
-let _backupStats = { firebase: 0, firebaseFail: 0, session: 0, queued: 0 };
-let _backupQueue = [];  // Photos that failed to push — retried when online
-let _backupQueueRunning = false;
+let _backupStats = { firebase: 0, session: 0, queued: 0 };
+let _pendingBackupIds = [];   // Photo IDs waiting to be uploaded
+let _backupRunning = false;   // True while the upload loop is active
+let _idleTimer = null;        // Timer that triggers backup after 5s of inactivity
+let _lastActivityTime = 0;    // Timestamp of last user activity (photo/rating/typing)
+
+// Call this whenever the user does something (photo capture, rating, typing, etc.)
+function _resetIdleTimer() {
+  _lastActivityTime = Date.now();
+  // Cancel any pending backup start
+  if (_idleTimer) { clearTimeout(_idleTimer); _idleTimer = null; }
+  // Hide the "backing up" banner if user resumes activity — uploads pause naturally
+  // because _backupRunning checks idle state
+
+  // Set a new 5-second idle timer
+  if (_pendingBackupIds.length > 0) {
+    _idleTimer = setTimeout(() => {
+      _showBackupNowBanner();
+      _processBackupQueue();
+    }, 5000);
+  }
+}
 
 async function savePhoto(photo) {
   const id = await new Promise((resolve, reject) => {
@@ -1672,112 +1694,160 @@ async function savePhoto(photo) {
     request.onsuccess = () => resolve(photo.id);
   });
 
-  // Only run backup logic for new photos (not bulk recovery imports)
+  // Only queue backup for new photos (not bulk recovery imports)
   if (photo.dataUrl && photo.itemLabel && photo.itemLabel !== 'Recovered') {
     _backupStats.session++;
 
-    // ── BACKUP 1: Firebase Storage (NON-BLOCKING — queues on failure) ──
-    if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled()) {
-      // Fire-and-forget — don't block the user
-      _pushPhotoToFirebase(photo);
-    } else {
-      // Firebase not available — queue for later
-      _addToBackupQueue(photo);
+    // Add to pending queue — NO network activity now
+    if (!_pendingBackupIds.includes(photo.id)) {
+      _pendingBackupIds.push(photo.id);
+      _backupStats.queued = _pendingBackupIds.length;
     }
 
-    // ── BACKUP 2: Google Drive every 3 photos (non-blocking) ──
-    _photosSinceLastBackup++;
-    if (_photosSinceLastBackup >= 3 && typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn() && currentSurveyId) {
-      _photosSinceLastBackup = 0;
-      DriveBackup.backupSurvey(currentSurveyId).catch(err => {
-        console.warn('[Backup] Drive backup failed:', err.message);
-      });
-    }
-
-    // ── Warn if neither cloud backup is connected ──
-    const firebaseOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled();
-    const driveOk = typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn();
-    if (!firebaseOk && !driveOk && _photosSinceLastBackup >= 3) {
-      showBackupReminder();
-    }
-
+    // Reset the idle timer — backup starts after 5s of no activity
+    _resetIdleTimer();
     _updateBackupStatusUI();
+
+    // Track for Drive backup
+    _photosSinceLastBackup++;
   }
 
   return id;
 }
 
-// Push a single photo to Firebase — retries 3 times, then queues for later
-async function _pushPhotoToFirebase(photo) {
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      await FirebaseSync.pushPhoto(photo);
-      _backupStats.firebase++;
-      _updateBackupStatusUI();
-      return; // success
-    } catch (err) {
-      console.warn(`[Backup] Firebase attempt ${attempt}/3 failed:`, err.message);
-      if (attempt < 3) await new Promise(r => setTimeout(r, 1000 * attempt));
-    }
+// Show a subtle "Backing up..." banner when idle backup starts
+function _showBackupNowBanner() {
+  const count = _pendingBackupIds.length;
+  if (count === 0) return;
+
+  let banner = document.getElementById('backup-progress-bar');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'backup-progress-bar';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9998;background:#006699;color:white;padding:8px 16px;font-size:13px;font-weight:600;text-align:center;transition:opacity 0.3s;';
+    document.body.appendChild(banner);
   }
-  // All retries failed — queue for later
-  _addToBackupQueue(photo);
-  _showBackupWarning('Firebase', photo.itemLabel || photo.id);
+  banner.style.opacity = '1';
+  banner.innerHTML = `☁️ Backing up ${count} photo${count > 1 ? 's' : ''}...`;
 }
 
-// Add a failed photo to the retry queue
-function _addToBackupQueue(photo) {
-  // Store just the ID — we'll fetch the full photo from IndexedDB when retrying
-  if (!_backupQueue.includes(photo.id)) {
-    _backupQueue.push(photo.id);
-    _backupStats.queued = _backupQueue.length;
-    _updateBackupStatusUI();
+// Update the banner during upload progress
+function _updateBackupBanner(uploaded, total) {
+  const banner = document.getElementById('backup-progress-bar');
+  if (banner) {
+    banner.innerHTML = `☁️ Backing up... ${uploaded}/${total}`;
   }
 }
 
-// Process the retry queue — called when connectivity returns
+// Hide the banner when done
+function _hideBackupBanner(message) {
+  const banner = document.getElementById('backup-progress-bar');
+  if (banner) {
+    banner.innerHTML = message || '✓ Backup complete';
+    banner.style.background = '#16a34a';
+    setTimeout(() => {
+      banner.style.opacity = '0';
+      setTimeout(() => { if (banner.parentElement) banner.remove(); }, 300);
+    }, 2000);
+  }
+}
+
+// Process the pending backup queue — uploads one at a time during idle
 async function _processBackupQueue() {
-  if (_backupQueueRunning || _backupQueue.length === 0) return;
-  if (typeof FirebaseSync === 'undefined' || !FirebaseSync.isEnabled()) return;
+  if (_backupRunning || _pendingBackupIds.length === 0) return;
 
-  _backupQueueRunning = true;
-  console.log(`[Backup] Processing retry queue: ${_backupQueue.length} photos`);
+  const firebaseOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled();
+  const driveOk = typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn();
 
-  const remaining = [..._backupQueue];
-  _backupQueue = [];
+  if (!firebaseOk && !driveOk) {
+    _showBackupWarning('No cloud backup connected', 'Connect Firebase or Google Drive');
+    return;
+  }
 
-  for (const photoId of remaining) {
-    try {
-      const photo = await getPhotoById(photoId);
-      if (photo && photo.dataUrl) {
-        await FirebaseSync.pushPhoto(photo);
-        _backupStats.firebase++;
-        _backupStats.queued = _backupQueue.length;
-        _updateBackupStatusUI();
-      }
-    } catch (err) {
-      // Re-queue this photo
-      if (!_backupQueue.includes(photoId)) _backupQueue.push(photoId);
-      console.warn(`[Backup] Retry failed for ${photoId}:`, err.message);
+  _backupRunning = true;
+  const totalToProcess = _pendingBackupIds.length;
+  let uploaded = 0;
+  let failed = 0;
+
+  while (_pendingBackupIds.length > 0) {
+    // Check if user has resumed activity — pause uploads
+    if (Date.now() - _lastActivityTime < 3000) {
+      // User is active — stop uploading, restart idle timer
+      _backupRunning = false;
+      _resetIdleTimer();
+      _hideBackupBanner(`⏸ Paused — ${uploaded} backed up, ${_pendingBackupIds.length} remaining`);
+      return;
     }
+
+    const photoId = _pendingBackupIds[0];
+
+    // Try Firebase first
+    if (firebaseOk) {
+      try {
+        const photo = await getPhotoById(photoId);
+        if (photo && photo.dataUrl) {
+          await FirebaseSync.pushPhoto(photo);
+          _backupStats.firebase++;
+        }
+        _pendingBackupIds.shift(); // Remove from queue on success
+        uploaded++;
+        _backupStats.queued = _pendingBackupIds.length;
+        _updateBackupBanner(uploaded, totalToProcess);
+        _updateBackupStatusUI();
+      } catch (err) {
+        console.warn(`[Backup] Firebase failed for ${photoId}:`, err.message);
+        failed++;
+        // Move to end of queue for retry
+        _pendingBackupIds.shift();
+        _pendingBackupIds.push(photoId);
+        // If everything is failing, stop trying
+        if (failed >= 3) {
+          _backupRunning = false;
+          _hideBackupBanner(`⚠️ Upload issues — ${uploaded} done, ${_pendingBackupIds.length} will retry`);
+          _showBackupWarning('Firebase', `${failed} uploads failed — will retry when idle`);
+          // Retry in 30 seconds
+          setTimeout(() => { if (_pendingBackupIds.length > 0) _processBackupQueue(); }, 30000);
+          return;
+        }
+      }
+    }
+
+    // Brief pause between uploads to be gentle on the connection
+    await new Promise(r => setTimeout(r, 200));
   }
 
-  _backupStats.queued = _backupQueue.length;
+  // All done — also trigger Drive backup
+  if (driveOk && currentSurveyId && _photosSinceLastBackup > 0) {
+    _photosSinceLastBackup = 0;
+    DriveBackup.backupSurvey(currentSurveyId).catch(err => {
+      console.warn('[Backup] Drive backup failed:', err.message);
+    });
+  }
+
+  _backupRunning = false;
+  _hideBackupBanner(`✓ All ${uploaded} photos backed up`);
   _updateBackupStatusUI();
-  _backupQueueRunning = false;
-
-  if (_backupQueue.length === 0) {
-    showToast('All queued photos backed up ✓');
-  } else {
-    console.log(`[Backup] ${_backupQueue.length} photos still in retry queue`);
-  }
 }
 
 // Listen for connectivity changes — auto-retry when back online
 if (typeof window !== 'undefined') {
   window.addEventListener('online', () => {
-    console.log('[Backup] Back online — processing retry queue');
-    setTimeout(() => _processBackupQueue(), 2000); // brief delay for connection to stabilise
+    console.log('[Backup] Back online — will process queue after idle');
+    setTimeout(() => {
+      if (_pendingBackupIds.length > 0) {
+        _showBackupNowBanner();
+        _processBackupQueue();
+      }
+    }, 3000);
+  });
+}
+
+// Also hook into user activity events to reset the idle timer
+if (typeof document !== 'undefined') {
+  ['touchstart', 'mousedown', 'keydown', 'scroll'].forEach(evt => {
+    document.addEventListener(evt, () => {
+      if (_pendingBackupIds.length > 0) _resetIdleTimer();
+    }, { passive: true });
   });
 }
 
