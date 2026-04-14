@@ -22,10 +22,11 @@ set -e
 cd "$(dirname "$0")/.."
 
 # Ensure node is findable even if the script was launched from a minimal shell
-export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.nvm/versions/node/current/bin:$HOME/.volta/bin:$PATH"
-if [ -z "$(command -v node)" ] && [ -s "$HOME/.nvm/nvm.sh" ]; then
+export PATH="/opt/homebrew/bin:/usr/local/bin:/opt/local/bin:$HOME/.nvm/versions/node/current/bin:$HOME/.volta/bin:$HOME/.asdf/shims:$HOME/.local/bin:$PATH"
+if [ -z "$(command -v node 2>/dev/null)" ] && [ -s "$HOME/.nvm/nvm.sh" ]; then
   . "$HOME/.nvm/nvm.sh" > /dev/null 2>&1 || true
 fi
+HAS_NODE=$(command -v node > /dev/null 2>&1 && echo "yes" || echo "no")
 
 CURRENT=$(grep -E "^const APP_VERSION" app.js | head -1 | sed -E "s/.*'(v[0-9]+)'.*/\1/")
 if [ -z "$CURRENT" ]; then
@@ -65,14 +66,19 @@ echo "  ✓ index.html: cache-busters → ?v=$NEW_NUM"
 
 # 4. Verify everything
 echo ""
-echo "▶ Running tests…"
-if ! node tests/run_tests.js > /tmp/kiki_test_output.log 2>&1; then
-  echo "✗ Tests failed — rolling back is manual. See /tmp/kiki_test_output.log"
-  tail -30 /tmp/kiki_test_output.log
-  exit 1
+if [ "$HAS_NODE" = "yes" ]; then
+  echo "▶ Running tests…"
+  if ! node tests/run_tests.js > /tmp/kiki_test_output.log 2>&1; then
+    echo "✗ Tests failed — rolling back is manual. See /tmp/kiki_test_output.log"
+    tail -30 /tmp/kiki_test_output.log
+    exit 1
+  fi
+  PASSED=$(grep -oE "[0-9]+ tests? passed" /tmp/kiki_test_output.log | head -1)
+  echo "  ✓ $PASSED"
+else
+  echo "▶ Skipping tests — Node.js not installed locally."
+  echo "  (Install with 'brew install node' to enable local testing.)"
 fi
-PASSED=$(grep -oE "[0-9]+ tests? passed" /tmp/kiki_test_output.log | head -1)
-echo "  ✓ $PASSED"
 
 echo ""
 echo "▶ Version consistency check…"

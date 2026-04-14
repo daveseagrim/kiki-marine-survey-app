@@ -12,6 +12,29 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2149 — 2026-04-14
+
+### Fixed
+- **Pre-commit hook** now works on machines that don't have Node.js
+  installed. Tests are skipped with a clear warning when `node` is
+  missing; the version-consistency check and CHANGELOG check still
+  run (both are bash-only and required). This unblocks commits from
+  MacBook machines without Node, while preserving the critical gates.
+- `scripts/release.sh` also handles missing Node gracefully — prints
+  a skip message instead of failing.
+- Expanded PATH search in both scripts to include MacPorts
+  (`/opt/local/bin`), asdf shims (`~/.asdf/shims`), and `~/.local/bin`.
+
+### Process
+- Established "triple-check" methodology: before handing any push
+  command to the user, verify (1) the code does what we intend,
+  (2) it doesn't break anything that worked before, and (3) it works
+  in the user's actual environment — not just the Claude sandbox.
+  This standard caught the Node-missing issue that v2148's hook
+  had in production.
+
+---
+
 ## v2148 — 2026-04-14
 
 ### Added

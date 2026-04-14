@@ -42,7 +42,14 @@ node tests/run_tests.js
 ```
 
 Takes about 1 second. All tests must pass before you commit. The
-pre-commit hook enforces this — you literally cannot commit with red tests.
+pre-commit hook enforces this **if Node.js is installed locally**.
+
+**If Node is NOT installed on your machine** (e.g. Dave's MacBook):
+the hook automatically skips the test step with a clear warning and
+continues with the other checks. Your Claude session's sandbox will
+have run the tests before giving you the commit command, so you're
+still protected — just less redundantly. Install node later with
+`brew install node` to get local automatic testing.
 
 ### Rule 3 — When you fix a bug, add a test for it
 
@@ -100,7 +107,33 @@ If a test fails because the behaviour intentionally changed, update the
 test to encode the new expected behaviour. Don't delete it unless the
 function itself no longer exists.
 
-### Rule 8 — Respect the "never" list from memory
+### Rule 8 — Triple-check before any push (established 2026-04-14)
+
+Before handing Dave a commit/push command, Claude must verify three
+distinct things:
+
+1. **The code does what we intend** — trace the change end-to-end,
+   from user action through save/load to report/output.
+2. **It doesn't break anything that worked before** — run tests,
+   run the pre-commit hook manually against a simulated minimal
+   environment (`env -i PATH=/usr/bin:/bin`), spot-check unrelated
+   areas that share the same code.
+3. **It works in Dave's actual environment** — not just the Claude
+   sandbox. Consider: no Node.js, stripped PATH (git hooks), iOS
+   Safari with tight memory limits, Chrome on MacBook, etc.
+
+Skipping step 3 is what let the v2147 blank-page bug and the v2148
+"node not found" bug reach Dave. Both were caught the moment we
+actually simulated his environment.
+
+### Rule 9 — Non-SAMS improvements go to `docs/backlog.md`
+
+SAMS-compliance items live in `docs/sams_rubric.md`. Everything else
+that's worth remembering but not doing right now — feature ideas,
+performance issues, UX friction — goes to `docs/backlog.md` with an
+ID, a description, and a priority.
+
+### Rule 10 — Respect the "never" list from memory
 
 - Never suggest "Clear & Reset" in Chrome — wipes IndexedDB
 - Never suggest "Clear Website Data" in iOS Safari — wipes IndexedDB
@@ -162,12 +195,17 @@ git push origin main
 The hook prints the exact reason. Common ones:
 
 **"Tests failed"** — Fix the test or the code. Don't `--no-verify`.
+(Only appears if Node is installed locally.)
 
 **"version mismatch"** — You edited one version by hand. Run
 `scripts/release.sh` to re-align them.
 
 **"CHANGELOG.md missing entry for vNNNN"** — Add a section for the
 current version before retrying the commit.
+
+**"Node.js not installed" warning (not a block)** — The hook will skip
+tests and continue. If the other checks pass, the commit proceeds. To
+also run tests locally: `brew install node`.
 
 ---
 
@@ -203,6 +241,7 @@ After extracting:
 | Bump version | `scripts/release.sh` |
 | Check versions consistent | `bash scripts/check_versions.sh` |
 | See what the SAMS rubric wants next | `cat docs/sams_rubric.md` |
+| See non-SAMS backlog items | `cat docs/backlog.md` |
 | See what to test before shipping | `cat docs/manual_regression.md` |
 | See what changed recently | `cat CHANGELOG.md` |
 | View what the pre-commit hook does | `cat .githooks/pre-commit` |
