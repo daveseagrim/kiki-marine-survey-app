@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2129';
+const APP_VERSION = 'v2130';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1873,9 +1873,6 @@ async function syncAllPhotosToFirebase() {
   }
 
   const surveys = await getAllSurveys();
-  let uploaded = 0;
-  let skipped = 0;
-  let failed = 0;
 
   // Step 1: Collect all photo IDs (keys only — no image data in memory)
   const allPhotoIds = [];
@@ -1893,32 +1890,9 @@ async function syncAllPhotosToFirebase() {
     for (const id of ids) allPhotoIds.push({ id, surveyId: survey.id });
   }
 
-  const total = allPhotoIds.length;
-  if (total === 0) { showToast('No photos to sync'); return; }
+  if (allPhotoIds.length === 0) { showToast('No photos to sync'); return; }
 
-  // Show progress bar immediately
-  let banner = document.getElementById('backup-progress-bar');
-  if (!banner) {
-    banner = document.createElement('div');
-    banner.id = 'backup-progress-bar';
-    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9998;transition:opacity 0.3s;';
-    document.body.appendChild(banner);
-  }
-  banner.style.opacity = '1';
-
-  function _updateSyncBar(msg, pct) {
-    banner.innerHTML = `
-      <div style="background:#006699;color:white;padding:10px 16px 6px;font-size:13px;font-weight:600;text-align:center;">
-        ${msg}
-      </div>
-      <div style="height:4px;background:#004466;">
-        <div style="height:100%;width:${pct}%;background:#00ccff;transition:width 0.3s ease;"></div>
-      </div>`;
-  }
-
-  _updateSyncBar(`🔥 Syncing ${total} photos...`, 0);
-
-  // Step 2: Check which photos already exist in Firebase (metadata only)
+  // Step 2: Check which photos already exist in Firebase — only need to upload the rest
   const existingInFirebase = new Set();
   for (const survey of surveys) {
     try {
@@ -1929,22 +1903,47 @@ async function syncAllPhotosToFirebase() {
     } catch (e) { /* continue */ }
   }
 
-  // Step 3: Process ONE photo at a time — load, upload, release
-  let processed = 0;
+  // Build the list of photos that actually need uploading
+  const needsUpload = allPhotoIds.filter(e => !existingInFirebase.has(e.id));
+  const totalToUpload = needsUpload.length;
+  const alreadySynced = allPhotoIds.length - totalToUpload;
+
+  if (totalToUpload === 0) {
+    showToast(`All ${alreadySynced} photos already in Firebase ✓`);
+    return;
+  }
+
+  // Show progress bar
+  let banner = document.getElementById('backup-progress-bar');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'backup-progress-bar';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9998;transition:opacity 0.3s;';
+    document.body.appendChild(banner);
+  }
+  banner.style.opacity = '1';
+
+  function _updateSyncBar(done, total) {
+    const remaining = total - done;
+    const pct = Math.round((done / total) * 100);
+    banner.innerHTML = `
+      <div style="background:#006699;color:white;padding:10px 16px 6px;font-size:13px;font-weight:600;text-align:center;">
+        ☁️ Uploading photo ${done} of ${total} — ${remaining} to go
+      </div>
+      <div style="height:4px;background:#004466;">
+        <div style="height:100%;width:${pct}%;background:#00ccff;transition:width 0.3s ease;"></div>
+      </div>`;
+  }
+
+  _updateSyncBar(0, totalToUpload);
+
+  // Step 3: Upload ONE photo at a time — load, upload, release memory
+  let uploaded = 0;
+  let failed = 0;
   let lastSurveyId = null;
 
-  for (const entry of allPhotoIds) {
-    processed++;
-
-    // Skip if already in Firebase
-    if (existingInFirebase.has(entry.id)) {
-      skipped++;
-      if (processed % 20 === 0 || processed === total) {
-        const pct = Math.round((processed / total) * 100);
-        _updateSyncBar(`🔥 ${uploaded} uploaded, ${skipped} already synced — ${pct}%`, pct);
-      }
-      continue;
-    }
+  for (let i = 0; i < needsUpload.length; i++) {
+    const entry = needsUpload[i];
 
     try {
       // Load ONE photo from IndexedDB
@@ -1952,19 +1951,17 @@ async function syncAllPhotosToFirebase() {
       if (photo && photo.dataUrl) {
         await FirebaseSync.pushPhoto(photo);
         uploaded++;
-      } else {
-        skipped++; // No data to upload
       }
+      // photo goes out of scope here — memory freed
     } catch (err) {
       failed++;
       console.warn(`[Sync] Failed: ${entry.id}`, err.message);
     }
 
-    const pct = Math.round((processed / total) * 100);
-    _updateSyncBar(`🔥 Uploading... ${uploaded} new, ${skipped} existing — ${pct}%`, pct);
+    _updateSyncBar(i + 1, totalToUpload);
 
-    // Brief pause every 5 photos to let browser breathe
-    if (uploaded % 5 === 0) await new Promise(r => setTimeout(r, 100));
+    // Pause every single upload — 200ms to let browser reclaim memory
+    await new Promise(r => setTimeout(r, 200));
 
     // Push survey data once per survey (when we move to the next one)
     if (entry.surveyId !== lastSurveyId) {
@@ -1984,9 +1981,10 @@ async function syncAllPhotosToFirebase() {
 
   // Show completion
   const bg = failed > 0 ? '#d97706' : '#16a34a';
-  banner.innerHTML = `<div style="background:${bg};color:white;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;">
-    ✓ Done — ${uploaded} uploaded, ${skipped} already existed${failed > 0 ? ', ' + failed + ' failed' : ''}
-  </div>`;
+  const msg = failed > 0
+    ? `✓ Done — ${uploaded} uploaded, ${failed} failed`
+    : `✓ All ${uploaded} photos uploaded to Firebase`;
+  banner.innerHTML = `<div style="background:${bg};color:white;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;">${msg}</div>`;
   setTimeout(() => {
     banner.style.opacity = '0';
     setTimeout(() => { if (banner.parentElement) banner.remove(); }, 300);
