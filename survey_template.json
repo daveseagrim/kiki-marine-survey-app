@@ -96,10 +96,6 @@
         "name": "Hull exterior, keel and propulsion",
         "items": [
           {
-            "type": "media",
-            "label": "Hull exterior photos"
-          },
-          {
             "type": "list",
             "label": "Hull(s) condition (below the waterline)",
             "hullItem": true,
@@ -187,11 +183,6 @@
               "Not tested/not verified"
             ],
             "sailOnly": true
-          },
-          {
-            "type": "media",
-            "label": "Rudder photo(s)",
-            "rudderItem": true
           },
           {
             "type": "list",

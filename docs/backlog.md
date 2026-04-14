@@ -97,17 +97,12 @@ When adding an entry, include:
      condition below waterline" so the snippets are naturally
      independent.
 
-### B-05 — Remove unused "Hull exterior photos" and "Rudder photos" options above Vessel Type
+### B-05 — ✅ Done in v2152
 
-- **What:** At the top of the Vessel Type section of Edit Intro, there
-  are photo-capture options for "Hull exterior photos" and "Rudder photos"
-  that Dave doesn't use and would like removed.
-- **Why:** Dave noted 2026-04-14 while surveying.
-- **Where:** Edit Intro form, near the top, above the Vessel Type field.
-  Likely a `data-photo-field="hullExteriorPhoto"` and similar rudder one.
-- **Priority:** Low (cleanup). Not blocking anything.
-- **Fix sketch:** Find the HTML block, delete it. Audit any code that
-  references the associated field names to ensure no null-pointer errors.
+Removed "Hull exterior photos" and "Rudder photo(s)" media items from
+`survey_template.json`. Correction on location: these were in the Hull
+category checklist, not above Vessel Type as originally logged.
+JSON validated; no orphaned code refs.
 
 ### B-04 — OCR the HIN photo to auto-populate the HIN number field
 

@@ -12,6 +12,32 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2152 — 2026-04-14
+
+### Fixed
+- **B-05** — Removed unused "Hull exterior photos" and "Rudder photo(s)"
+  media items from `survey_template.json`. Dave doesn't use them; they
+  were taking up space at the top of the Hull category. Changes apply
+  to in-progress surveys (including Ahoy Vey) on next page load because
+  the template is re-read each session.
+  - JSON validated.
+  - No orphaned references in app.js (the `rudderItem` flag is still
+    used on the two percussion/conductivity testing items, which is
+    the scope of B-07).
+  - If any old survey captured photos under these now-removed items,
+    the photo data remains in IndexedDB (nothing deleted) but won't
+    display in the UI.
+
+### Note on in-progress survey compatibility
+- All Edit Intro field additions from v2151 (TC Licence expiry,
+  Independent Surveys, new dropdown options) and Check-function
+  changes apply to existing surveys automatically. Template changes
+  like this one (removed items) also apply on next open. The only
+  data preserved across template changes is item-level ratings,
+  notes, and photos.
+
+---
+
 ## v2151 — 2026-04-14
 
 ### Added
