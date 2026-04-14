@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2147';
+const APP_VERSION = 'v2148';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -5621,6 +5621,7 @@ function createNewSurvey(formData) {
 
     // Survey specs section
     personsInAttendance: formData.personsInAttendance,
+    independentSurveys: formData.independentSurveys,
     reportDate: formData.reportDate,
     weather: formData.weather,
     onLandOrWater: formData.onLandOrWater,
@@ -6430,6 +6431,12 @@ function renderNewSurveyForm() {
       </div>
 
       <div class="form-group">
+        <label class="form-label">Independent Surveys</label>
+        <textarea id="independentSurveys" rows="2" placeholder="e.g. Engine survey by Joe Smith, Marine Diesel Ltd., 2026-03-15 — or leave as the default statement if none." autocapitalize="sentences"></textarea>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">SAMS requires a statement of any independent surveys (engine, electrical, ultrasonic gauging, etc.) conducted alongside this inspection. If none, the default "No independent surveys…" statement is used.</div>
+      </div>
+
+      <div class="form-group">
         <label class="form-label">Report Completion Date</label>
         <input type="date" id="reportDate">
       </div>
@@ -7211,6 +7218,7 @@ function editSurveyDetails(surveyId) {
         electricalSystem: survey.electricalSystem,
         changesToPlan: survey.changesToPlan,
         personsInAttendance: survey.personsInAttendance,
+        independentSurveys: survey.independentSurveys,
         reportDate: survey.reportDate,
         weather: survey.weather,
         onLandOrWater: survey.onLandOrWater,
@@ -7473,6 +7481,7 @@ function saveSurveyDetails(surveyId) {
       electricalSystem: document.getElementById('electricalSystem')?.value || '',
       changesToPlan: document.getElementById('changesToPlan')?.value || '',
       personsInAttendance: document.getElementById('personsInAttendance')?.value || '',
+      independentSurveys: document.getElementById('independentSurveys')?.value || '',
       reportDate: document.getElementById('reportDate')?.value || '',
       weather: document.getElementById('weather')?.value || '',
       onLandOrWater: document.getElementById('onLandOrWater')?.value || '',
@@ -7551,7 +7560,7 @@ async function saveEditFormSilently() {
     'vesselName','yearMakeModel','clientName','surveyDate','location','surveyType',
     'vesselType','boatStyle','hullType','loa','lwl','beam','displacement','ballast',
     'maxDraft','totalSailArea','construction','keelType','numberCabins','electricalSystem',
-    'changesToPlan','personsInAttendance','reportDate','weather','onLandOrWater','seaTrial',
+    'changesToPlan','personsInAttendance','independentSurveys','reportDate','weather','onLandOrWater','seaTrial',
     'powerAtTime','waterAtTime','storageDetails','engineMake','engineModel','engineSerial',
     'engineHours','engineHP','fuelType','transmissionMake','transmissionModel','transmissionSerial',
     'engine2Make','engine2Model','engine2Serial','engine2Hours','engine2HP','fuelType2',
@@ -10376,7 +10385,7 @@ async function checkSurvey() {
     ['maxDraft',          'Maximum draft'],
     ['displacement',      'Displacement'],
     ['weather',           'Weather at time of survey'],
-    ['seaTrial',          'Sea trial (yes/no)'],
+    ['seaTrial',          'Limited trial run (yes/no)'],
     ['numberCabins',      'Number of cabins'],
     ['boatStyle',         'Boat style'],
   ];
@@ -16476,6 +16485,7 @@ async function generateReport() {
     <tr><td><strong>Location of Survey Inspection</strong></td><td>${esc(survey.location) || 'N/A'}</td></tr>
     <tr><td><strong>Client / Purchaser</strong></td><td>${esc(survey.clientName) || 'N/A'}</td></tr>
     <tr><td><strong>Persons in Attendance</strong></td><td>${esc(survey.personsInAttendance) || 'N/A'}</td></tr>
+    <tr><td><strong>Independent Surveys</strong></td><td>${esc(survey.independentSurveys) || 'No independent surveys (engine, electrical, ultrasonic gauging, etc.) were conducted in conjunction with this inspection.'}</td></tr>
     <tr><td><strong>Weather Conditions</strong></td><td>${esc(survey.weather) || 'N/A'}</td></tr>
     <tr><td><strong>Surveyor</strong></td><td>Dave Seagrim, SAMS Surveyor Associate, ABYC Master Advisor</td></tr>
   </table>

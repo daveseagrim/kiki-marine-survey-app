@@ -1,0 +1,80 @@
+#!/bin/bash
+# ============================================================================
+# pre-commit — enforce process on every commit
+# ============================================================================
+# This hook runs automatically before "git commit" succeeds. If any check
+# fails, the commit is blocked and you see the error.
+#
+# To enable this hook after cloning, run (once):
+#   git config core.hooksPath .githooks
+#
+# Checks (in order):
+#   1. All unit tests pass (node tests/run_tests.js)
+#   2. APP_VERSION, CACHE_NAME, and cache-busters all match
+#   3. CHANGELOG has an entry for the current version
+# ============================================================================
+
+set -e
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+# Git hooks run with a stripped-down PATH that often doesn't include Homebrew
+# or nvm directories, so `node` can be missing even when it works in your
+# normal shell. Prepend common install locations.
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.nvm/versions/node/current/bin:$HOME/.volta/bin:$PATH"
+
+# If nvm is installed, source it so the default node is on PATH
+if [ -z "$(command -v node)" ] && [ -s "$HOME/.nvm/nvm.sh" ]; then
+  # shellcheck disable=SC1091
+  . "$HOME/.nvm/nvm.sh" > /dev/null 2>&1 || true
+fi
+
+# If still no node, block with a clear install hint rather than a cryptic error
+if ! command -v node > /dev/null 2>&1; then
+  echo ""
+  echo "✗ COMMIT BLOCKED — Node.js not found in the hook's PATH."
+  echo ""
+  echo "The pre-commit hook needs node to run tests. Options:"
+  echo ""
+  echo "  1. Install node if you haven't:"
+  echo "       brew install node"
+  echo ""
+  echo "  2. If node is installed via nvm or a custom location, add its"
+  echo "     path to the 'export PATH=...' line in .githooks/pre-commit"
+  echo ""
+  echo "  3. Emergency: skip the hook for this commit only:"
+  echo "       git commit --no-verify -m '...'"
+  echo "     (Only use this if you've manually run 'node tests/run_tests.js'"
+  echo "      and 'bash scripts/check_versions.sh' yourself.)"
+  echo ""
+  exit 1
+fi
+
+echo "▶ pre-commit: running tests…"
+if ! node tests/run_tests.js > /tmp/kiki_test_output.log 2>&1; then
+  echo ""
+  echo "✗ COMMIT BLOCKED — tests failed. Fix them before committing."
+  echo ""
+  tail -30 /tmp/kiki_test_output.log
+  echo ""
+  echo "To run tests manually: node tests/run_tests.js"
+  exit 1
+fi
+TESTS_PASSED=$(grep -oE "[0-9]+ tests? passed" /tmp/kiki_test_output.log | head -1)
+echo "  ✓ $TESTS_PASSED"
+
+echo "▶ pre-commit: checking versions…"
+if ! bash scripts/check_versions.sh > /tmp/kiki_version_output.log 2>&1; then
+  echo ""
+  echo "✗ COMMIT BLOCKED — version mismatch."
+  echo ""
+  cat /tmp/kiki_version_output.log
+  echo ""
+  echo "Fix: run scripts/release.sh to bump everything atomically,"
+  echo "or edit app.js, sw.js, and index.html so the versions agree."
+  echo "Then add a CHANGELOG.md entry for the new version."
+  exit 1
+fi
+echo "  ✓ versions match"
+
+echo "▶ pre-commit: all checks passed"

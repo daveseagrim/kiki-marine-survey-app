@@ -189,7 +189,10 @@ Status legend:
 - **Test:** `independentSurveys` field present in report, or explicit
   statement of "No independent surveys conducted" if none.
 - **MY Bad result:** ❌ Not addressed.
-- **Status:** ❌ Missing — **add Independent Surveys field to Edit Intro.**
+- **Status:** ✅ Done (v2148) — `independentSurveys` field in Edit Intro;
+  report shows the value or defaults to "No independent surveys (engine,
+  electrical, ultrasonic gauging, etc.) were conducted in conjunction
+  with this inspection."
 
 ---
 
@@ -347,13 +350,18 @@ Status legend:
   readings are not certainty of underlying moisture.
 - **Test:** Search report text for "moisture meter" — should be zero hits.
   Use "conductivity meter" instead.
-- **Status:** ❌ Audit snippet library and report boilerplate for this
-  term. **Fix required.**
+- **Status:** ✅ Done (v2148) — audit confirmed no "moisture meter"
+  references in app.js, text_library.json, or survey_template.json.
+  Only present in internal docs (rubric + reference notes), not in any
+  user-facing output.
 
 ### 8.2 Avoid "sea trial"; use "limited trial run"
-- **Test:** Search report for "sea trial" — zero hits. Use "limited trial
-  run" instead.
-- **Status:** ❌ Audit app code and templates. **Fix required.**
+- **Test:** Search report for "sea trial" — zero user-facing hits. Use
+  "limited trial run" instead.
+- **Status:** ✅ Done (v2148) — 15 snippet-library occurrences replaced;
+  Check-function label updated. Only remaining reference is in the
+  glossary definition of "Limited Trial Run" where it is deliberately
+  distinguishing the terms.
 
 ### 8.3 Canadian English spelling
 - **Test:** No "fiberglass", "color", "center", "license (noun)", etc.
@@ -367,24 +375,30 @@ Status legend:
 
 ---
 
-## Summary Scorecard (v2146)
+## Summary Scorecard (v2148)
 
-- **Done:** 19 items
+- **Done:** 22 items (+3 from v2146)
 - **Partial:** 14 items
-- **Missing:** 5 items
+- **Missing:** 2 items
 - **Manual-only:** 0 items
 
 ### Priority to-fix list
 
 1. **3.9** Below-waterline through-hull fittings statement — ❌
-2. **3.11** Independent Surveys field — ❌
-3. **6.3** Recommended Auxiliary Safety Equipment section — ❌
-4. **8.1** Audit "moisture meter" → "conductivity meter" — ❌
-5. **8.2** Audit "sea trial" → "limited trial run" — ❌
-6. **1.4** Add TP 1332 to standards list — 🟡
-7. **6.4** Structured bilge pump fields (count, location, rating) — 🟡
-8. **3.7** Add "laid up for winter storage" option to `onLandOrWater` — 🟡
-9. **2.4** Add TC Licence expiry field — 🟡
+2. **6.3** Recommended Auxiliary Safety Equipment section — ❌
+3. **1.4** Add TP 1332 to standards list — 🟡
+4. **6.4** Structured bilge pump fields (count, location, rating) — 🟡
+5. **3.7** Add "laid up for winter storage" option to `onLandOrWater` — 🟡
+   *(Note: current dropdown now has "Vessel was on the cradle on shore,
+   winterized" which partially addresses this — may already be ✅.)*
+6. **2.4** Add TC Licence expiry field — 🟡
+7. **4.3** Require ≥2 valuation sources in Check — 🟡
+
+### Recently fixed (v2148)
+
+- ✅ **3.11** Independent Surveys field
+- ✅ **8.1** "Moisture meter" audit (none found in user-facing code)
+- ✅ **8.2** "Sea trial" → "limited trial run" in snippet library
 
 ---
 

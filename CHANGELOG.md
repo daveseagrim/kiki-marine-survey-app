@@ -12,6 +12,43 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2148 — 2026-04-14
+
+### Added
+- **Independent Surveys** field in Edit Intro — free-text list of any
+  engine / electrical / ultrasonic surveys conducted alongside the
+  inspection. Report shows a default "No independent surveys…" statement
+  if blank. Addresses **SAMS 3.11**.
+- `scripts/release.sh` — atomic version bumper. Updates `APP_VERSION`
+  in app.js, `CACHE_NAME` in sw.js, and every `?v=` cache-buster in
+  index.html in a single step. Runs tests and version check afterward.
+- `scripts/check_versions.sh` — verifies all three versions agree and
+  that CHANGELOG has an entry for the current version.
+- `.githooks/pre-commit` — blocks commits when tests fail, versions are
+  mis-aligned, or CHANGELOG is missing an entry. Enable with
+  `git config core.hooksPath .githooks`.
+- `DEVELOPMENT_PROCESS.md` — the north star document. Rules, workflow,
+  quick-reference card for every change going forward.
+
+### Changed
+- All 15 snippet-library occurrences of "sea trial" replaced with
+  "limited trial run" for SAMS / legal protection. Check-function label
+  updated. Addresses **SAMS 8.2**. Report glossary retains the term
+  "sea trial" in the definition of "Limited Trial Run" where it is
+  deliberately distinguishing.
+
+### Process
+- Git hooks now enforce the process. Version-skew blank-page bugs
+  (like v2147) can no longer happen — the hook checks version
+  consistency before accepting the commit.
+- Pre-commit hook and `release.sh` prepend common Node install paths
+  (`/opt/homebrew/bin`, `/usr/local/bin`, `$HOME/.nvm/...`) so `node`
+  is findable even when git runs hooks with a stripped-down PATH.
+  Fallback error message gives install instructions instead of a
+  cryptic "node: command not found".
+
+---
+
 ## v2147 — 2026-04-14
 
 ### Fixed

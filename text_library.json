@@ -335,7 +335,7 @@
     {
       "section": "Cutlass bearing(s)",
       "rating": "C - large diameter",
-      "text": "The cutlass bearings appeared in satisfactory condition. Due to the large shaft diameter, manual play testing was inconclusive. Confirm integrity during sea trial."
+      "text": "The cutlass bearings appeared in satisfactory condition. Due to the large shaft diameter, manual play testing was inconclusive. Confirm integrity during limited trial run."
     },
     {
       "section": "Cutlass bearing(s)",
@@ -420,7 +420,7 @@
     {
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
       "rating": "C",
-      "text": "The trim tabs, actuators, and mounts appeared sound and well-maintained and functioned properly during sea trial."
+      "text": "The trim tabs, actuators, and mounts appeared sound and well-maintained and functioned properly during limited trial run."
     },
     {
       "section": "Underwater lighting",
@@ -1360,7 +1360,7 @@
     {
       "section": "Windlass",
       "rating": "C",
-      "text": "The windlass was in good working order and performed well during sea trial testing."
+      "text": "The windlass was in good working order and performed well during limited trial run testing."
     },
     {
       "section": "Windlass",
@@ -1934,7 +1934,7 @@
     {
       "section": "Outboard general condition and impression",
       "rating": "C",
-      "text": "The outboard was in satisfactory condition. Starting, idling, throttle response, and shifting were normal during sea trial."
+      "text": "The outboard was in satisfactory condition. Starting, idling, throttle response, and shifting were normal during limited trial run."
     },
     {
       "section": "Outboard general condition and impression",
@@ -1959,7 +1959,7 @@
     {
       "section": "Engine mount",
       "rating": "C",
-      "text": "The engine mount was securely mounted to the swim platform. During sea trial, expected vibration occurred in forward and reverse."
+      "text": "The engine mount was securely mounted to the swim platform. During limited trial run, expected vibration occurred in forward and reverse."
     },
     {
       "section": "Throttle, gearshift, choke",
@@ -2009,7 +2009,7 @@
     {
       "section": "Outboard propeller",
       "rating": "C",
-      "text": "The stainless propeller was free of damage and securely fastened. Performance was smooth with no discernible vibration or cavitation during sea trial."
+      "text": "The stainless propeller was free of damage and securely fastened. Performance was smooth with no discernible vibration or cavitation during limited trial run."
     },
     {
       "section": "Outboard propeller",
@@ -2019,7 +2019,7 @@
     {
       "section": "Outboard propeller",
       "rating": "C",
-      "text": "Aside from a couple of very minor dings, the stainless propeller was in good working order. It performed well during sea trial and no discernible vibration or cavitation was evident."
+      "text": "Aside from a couple of very minor dings, the stainless propeller was in good working order. It performed well during limited trial run and no discernible vibration or cavitation was evident."
     },
     {
       "section": "Outboard oil",
@@ -2558,7 +2558,7 @@
     {
       "section": "Engine gauges",
       "rating": "C",
-      "text": "The engine tachometer, oil pressure, speed, and temperature gauges at the helm functioned properly. During sea trial, engine temperature and oil pressure for given speeds and RPMs remained within expected ranges."
+      "text": "The engine tachometer, oil pressure, speed, and temperature gauges at the helm functioned properly. During limited trial run, engine temperature and oil pressure for given speeds and RPMs remained within expected ranges."
     },
     {
       "section": "Engine gauges",
@@ -2613,7 +2613,7 @@
     {
       "section": "Bow thruster",
       "rating": "C",
-      "text": "The bow thruster functioned properly during sea trial."
+      "text": "The bow thruster functioned properly during limited trial run."
     },
     {
       "section": "Bow thruster",
@@ -2633,7 +2633,7 @@
     {
       "section": "Autopilot",
       "rating": "C",
-      "text": "The autopilot was tested during sea trial and functioned properly."
+      "text": "The autopilot was tested during limited trial run and functioned properly."
     },
     {
       "section": "Autopilot",
@@ -2658,7 +2658,7 @@
     {
       "section": "MFD or Chartplotter",
       "rating": "C",
-      "text": "The chartplotter was tested during sea trial and appeared to function properly. Not all features were tested."
+      "text": "The chartplotter was tested during limited trial run and appeared to function properly. Not all features were tested."
     },
     {
       "section": "MFD or Chartplotter",
@@ -3657,7 +3657,7 @@
     {
       "section": "Engine gauges",
       "rating": "C",
-      "text": "The engine tachometer, oil pressure, speed, and temperature gauges at the helm functioned properly. During sea trial, engine temperature and oil pressure for given speeds and RPMs remained within expected ranges."
+      "text": "The engine tachometer, oil pressure, speed, and temperature gauges at the helm functioned properly. During limited trial run, engine temperature and oil pressure for given speeds and RPMs remained within expected ranges."
     },
     {
       "section": "Engine gauges",
@@ -3712,7 +3712,7 @@
     {
       "section": "Bow thruster",
       "rating": "C",
-      "text": "The bow thruster functioned properly during sea trial."
+      "text": "The bow thruster functioned properly during limited trial run."
     },
     {
       "section": "Bow thruster",
@@ -3732,7 +3732,7 @@
     {
       "section": "Autopilot",
       "rating": "C",
-      "text": "The autopilot was tested during sea trial and functioned properly."
+      "text": "The autopilot was tested during limited trial run and functioned properly."
     },
     {
       "section": "Autopilot",
@@ -3747,7 +3747,7 @@
     {
       "section": "MFD or Chartplotter",
       "rating": "C",
-      "text": "The chartplotter was tested during sea trial and appeared to function properly. Not all features were tested."
+      "text": "The chartplotter was tested during limited trial run and appeared to function properly. Not all features were tested."
     },
     {
       "section": "MFD or Chartplotter",
@@ -5155,7 +5155,7 @@
     {
       "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
       "rating": "A",
-      "text": "The drive coupling and the visible length of the propeller shaft appeared serviceable. During sea trial the stuffing box did not drip. Adjustment of the retaining nut and replacement of the internal flax are still recommended as necessary."
+      "text": "The drive coupling and the visible length of the propeller shaft appeared serviceable. During limited trial run the stuffing box did not drip. Adjustment of the retaining nut and replacement of the internal flax are still recommended as necessary."
     },
     {
       "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
