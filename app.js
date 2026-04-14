@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2131';
+const APP_VERSION = 'v2132';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1794,51 +1794,52 @@ async function _processBackupQueue() {
 
     const photoId = _pendingBackupIds[0];
 
-    // Try Firebase first
-    if (firebaseOk) {
-      try {
-        const photo = await getPhotoById(photoId);
-        if (photo && photo.dataUrl) {
+    try {
+      // Load ONE photo from IndexedDB
+      let photo = await getPhotoById(photoId);
+      if (photo && photo.dataUrl) {
+        // Upload to Firebase
+        if (firebaseOk) {
           await FirebaseSync.pushPhoto(photo);
           _backupStats.firebase++;
         }
-        _pendingBackupIds.shift(); // Remove from queue on success
-        uploaded++;
-        _backupStats.queued = _pendingBackupIds.length;
-        _updateBackupBanner(uploaded, totalToProcess);
-        _updateBackupStatusUI();
-      } catch (err) {
-        console.warn(`[Backup] Firebase failed for ${photoId}:`, err.message);
-        failed++;
-        // Move to end of queue for retry
-        _pendingBackupIds.shift();
-        _pendingBackupIds.push(photoId);
-        // If everything is failing, stop trying
-        if (failed >= 3) {
-          _backupRunning = false;
-          _hideBackupBanner(`⚠️ Upload issues — ${uploaded} done, ${_pendingBackupIds.length} will retry`);
-          _showBackupWarning('Firebase', `${failed} uploads failed — will retry when idle`);
-          // Retry in 30 seconds
-          setTimeout(() => { if (_pendingBackupIds.length > 0) _processBackupQueue(); }, 30000);
-          return;
+        // Upload to Google Drive too (if signed in)
+        if (driveOk) {
+          try { await DriveBackup.backupOnePhoto(photo); } catch (e) {
+            console.warn(`[Backup] Drive failed for ${photoId}:`, e.message);
+          }
         }
+      }
+      photo = null; // Release memory
+      _pendingBackupIds.shift(); // Remove from queue on success
+      uploaded++;
+      _backupStats.queued = _pendingBackupIds.length;
+      _updateBackupBanner(uploaded, totalToProcess);
+      _updateBackupStatusUI();
+    } catch (err) {
+      console.warn(`[Backup] Failed for ${photoId}:`, err.message);
+      failed++;
+      // Move to end of queue for retry
+      _pendingBackupIds.shift();
+      _pendingBackupIds.push(photoId);
+      // If everything is failing, stop trying
+      if (failed >= 3) {
+        _backupRunning = false;
+        _hideBackupBanner(`⚠️ Upload issues — ${uploaded} done, ${_pendingBackupIds.length} will retry`);
+        _showBackupWarning('Backup', `${failed} uploads failed — will retry when idle`);
+        // Retry in 30 seconds
+        setTimeout(() => { if (_pendingBackupIds.length > 0) _processBackupQueue(); }, 30000);
+        return;
       }
     }
 
-    // Brief pause between uploads to be gentle on the connection
-    await new Promise(r => setTimeout(r, 200));
-  }
-
-  // All done — also trigger Drive backup
-  if (driveOk && currentSurveyId && _photosSinceLastBackup > 0) {
-    _photosSinceLastBackup = 0;
-    DriveBackup.backupSurvey(currentSurveyId).catch(err => {
-      console.warn('[Backup] Drive backup failed:', err.message);
-    });
+    // 500ms pause between uploads to let browser reclaim memory
+    await new Promise(r => setTimeout(r, 500));
   }
 
   _backupRunning = false;
-  _hideBackupBanner(`✓ All ${uploaded} photos backed up`);
+  const destinations = [firebaseOk ? 'Firebase' : null, driveOk ? 'Drive' : null].filter(Boolean).join(' + ');
+  _hideBackupBanner(`✓ ${uploaded} photos backed up to ${destinations}`);
   _updateBackupStatusUI();
 }
 
@@ -17453,6 +17454,7 @@ const DriveBackup = (() => {
   }
 
   // Main backup function — uploads survey data + photos to Drive
+  // MEMORY-SAFE: loads one photo at a time via ID list
   async function backupSurvey(surveyId) {
     const survey = await getSurvey(surveyId);
     if (!survey) throw new Error('Survey not found');
@@ -17462,7 +17464,6 @@ const DriveBackup = (() => {
 
     // 1. Upload survey data (without photo blobs) as JSON
     const surveyClone = JSON.parse(JSON.stringify(survey));
-    // Strip any inline base64 from items to keep the JSON small
     if (surveyClone.items) {
       for (const key of Object.keys(surveyClone.items)) {
         const item = surveyClone.items[key];
@@ -17474,37 +17475,62 @@ const DriveBackup = (() => {
     const dateStr = new Date().toISOString().slice(0, 10);
     const surveyJson = JSON.stringify(surveyClone, null, 2);
     await uploadFile(folderId, `${vesselName.replace(/[^a-zA-Z0-9_-]/g, '_')}_${dateStr}.json`, 'application/json', surveyJson);
-    showToast('Survey data uploaded…');
 
-    // 2. Upload photos individually
-    const photos = await new Promise((resolve) => {
+    // 2. Collect photo IDs only (no image data in memory)
+    const photoIds = await new Promise((resolve) => {
       const tx = db.transaction(['photos'], 'readonly');
-      const store = tx.objectStore('photos');
-      const index = store.index('surveyId');
-      const range = IDBKeyRange.only(surveyId);
-      const results = [];
-      index.openCursor(range).onsuccess = (event) => {
-        const cursor = event.target.result;
-        if (cursor) { results.push(cursor.value); cursor.continue(); }
-        else resolve(results);
+      const index = tx.objectStore('photos').index('surveyId');
+      const keys = [];
+      index.openKeyCursor(IDBKeyRange.only(surveyId)).onsuccess = (e) => {
+        const cursor = e.target.result;
+        if (cursor) { keys.push(cursor.primaryKey); cursor.continue(); }
+        else resolve(keys);
       };
     });
 
+    // 3. Upload ONE photo at a time — load, convert, upload, release
     let uploaded = 0;
-    for (const photo of photos) {
-      if (!photo.dataUrl) continue;
-      const photoBlob = dataUrlToBlob(photo.dataUrl);
+    for (const pid of photoIds) {
+      let photo = await getPhotoById(pid);
+      if (!photo || !photo.dataUrl) { photo = null; continue; }
+
+      let photoBlob = dataUrlToBlob(photo.dataUrl);
       const ext = photo.dataUrl.startsWith('data:image/png') ? '.png' : '.jpg';
       const photoName = (photo.label || photo.id || `photo_${uploaded}`).replace(/[^a-zA-Z0-9_-]/g, '_') + ext;
-      await uploadFile(folderId, photoName, photoBlob.type, photoBlob);
+      const mimeType = photoBlob.type;
+
+      // Release the base64 string before uploading
+      photo = null;
+
+      await uploadFile(folderId, photoName, mimeType, photoBlob);
+      photoBlob = null; // Release blob after upload
       uploaded++;
-      if (uploaded % 3 === 0) showToast(`Uploaded ${uploaded}/${photos.length} photos…`);
+
+      // 500ms pause to let browser reclaim memory
+      await new Promise(r => setTimeout(r, 500));
     }
 
     showToast(`✓ Backed up to Drive: ${vesselName} (${uploaded} photos)`);
   }
 
-  // Backup ALL surveys
+  // Upload a single photo to the correct vessel folder on Drive
+  async function backupOnePhoto(photo) {
+    if (!_accessToken || !photo || !photo.dataUrl) return;
+    try {
+      const survey = await getSurvey(photo.surveyId);
+      const vesselName = (survey && survey.vesselName) || 'Unnamed';
+      const folderId = await getOrCreateVesselFolder(vesselName);
+
+      const photoBlob = dataUrlToBlob(photo.dataUrl);
+      const ext = photo.dataUrl.startsWith('data:image/png') ? '.png' : '.jpg';
+      const photoName = (photo.label || photo.id || 'photo').replace(/[^a-zA-Z0-9_-]/g, '_') + ext;
+      await uploadFile(folderId, photoName, photoBlob.type, photoBlob);
+    } catch (err) {
+      console.warn('[Drive] Single photo backup failed:', err.message);
+    }
+  }
+
+  // Backup ALL surveys — memory-safe, one survey at a time
   async function backupAll() {
     const surveys = await getAllSurveys();
     if (surveys.length === 0) { showToast('No surveys to back up'); return; }
@@ -17513,6 +17539,7 @@ const DriveBackup = (() => {
     let failed = 0;
     for (const survey of surveys) {
       try {
+        showToast(`Backing up ${survey.vesselName || 'survey'}... (${done + 1}/${surveys.length})`);
         await backupSurvey(survey.id);
         done++;
       } catch (err) {
@@ -17527,7 +17554,7 @@ const DriveBackup = (() => {
     }
   }
 
-  return { isSignedIn, signIn, backupSurvey, backupAll, ensureToken };
+  return { isSignedIn, signIn, backupSurvey, backupOnePhoto, backupAll, ensureToken };
 })();
 
 const FirebaseSync = (() => {
