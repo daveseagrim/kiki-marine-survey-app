@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v2159';
+const CACHE_NAME = 'kiki-marine-v2160';
 const URLS_TO_CACHE = [
   './',
   'index.html',
@@ -98,10 +98,16 @@ self.addEventListener('fetch', (event) => {
   if (isFirebaseCloud) {
     event.respondWith(
       fetch(event.request).catch(err => {
-        // On failure, pass the error through rather than a fallback — the
-        // app-level error handler tags the stage (fetch/xhr) and reports.
-        return new Response('SW proxy error: ' + (err && err.message || err), {
+        // On SW-proxy failure, pass the underlying error through in the
+        // response body so app-level error handlers surface the real cause
+        // (not an opaque 599). v2160: the app reads the body when status
+        // is non-ok and includes the first ~140 chars in the error message.
+        const name = (err && err.name) || 'Error';
+        const msg = (err && err.message) || String(err);
+        const detail = `SW proxy (${name}): ${msg}`;
+        return new Response(detail, {
           status: 599,
+          statusText: 'SW proxy fail',
           headers: { 'content-type': 'text/plain' }
         });
       })

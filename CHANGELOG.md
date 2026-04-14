@@ -12,6 +12,44 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2160 — 2026-04-14
+
+### Fixed — B-03 Firebase download (attempt 3)
+
+Dave's v2159 diagnostic showed my SW proxy also failed (returned the
+custom HTTP 599 I used to signal SW fetch failure). This proves the
+transport problem is deeper than which context originates the fetch —
+both page fetch and SW-context fetch hit the same iOS PWA / WKWebView
+cross-origin restriction. v2160 adds two more attack vectors:
+
+1. **Firebase SDK's native `ref.getBlob()` / `ref.getBytes()`** as the
+   primary download transport. Firebase's own SDK uses internal
+   plumbing that may bypass the iOS WKWebView fetch restriction.
+   Falls back to fetch/XHR if the method isn't available.
+2. **SW proxy passes the real error message** through to the response
+   body, and the app reads that body on non-OK status. So "HTTP 599"
+   will no longer be opaque — the log will show something like
+   `[xhr] ... HTTP 599: SW proxy (TypeError): Load failed` which
+   pinpoints whether the SW's internal fetch failed with the same
+   TypeError or something else.
+
+### Other
+- v2159's SW Firebase-cloud proxy retained (it doesn't hurt; if
+  getBlob works via SDK internals the SW proxy never fires for that
+  request path).
+
+### Process
+- Triple-checked: 106 tests pass, versions consistent, pre-commit
+  hook green in no-node simulated environment.
+
+### If v2160 still fails
+- Next step is bucket-level Firebase Storage CORS config check.
+  That's an admin task on the Firebase console, not a code fix.
+- Workaround remains: Chrome on iPhone (regular tab) downloads the
+  same photos successfully.
+
+---
+
 ## v2159 — 2026-04-14
 
 ### Fixed — B-03 Firebase download (attempt 2) + token leak belt-and-suspenders

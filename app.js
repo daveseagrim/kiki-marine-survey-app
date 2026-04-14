@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2159';
+const APP_VERSION = 'v2160';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2224,12 +2224,45 @@ function _xhrGetBlob(url, timeoutMs) {
   });
 }
 
-// Download a single photo with staged error reporting and XHR fallback.
-// Stages: URL → blob fetch → read-as-dataURL. If fetch() fails (common on
-// iOS Safari PWA), automatically retries the blob fetch via XMLHttpRequest.
+// Try the Firebase SDK's native getBlob method if available (compat SDK v10+).
+// This uses Firebase's internal transport which may bypass iOS PWA
+// cross-origin restrictions that block raw fetch/XHR. Returns Blob on
+// success, throws on failure.
+async function _firebaseSdkGetBlob(storageRef) {
+  if (!window.fsStorage) throw new Error('fsStorage not initialized');
+  const ref = window.fsStorage.ref(storageRef);
+  if (typeof ref.getBlob === 'function') {
+    return await ref.getBlob();
+  }
+  // Some compat versions expose getBytes() which returns ArrayBuffer
+  if (typeof ref.getBytes === 'function') {
+    const bytes = await ref.getBytes();
+    return new Blob([bytes]);
+  }
+  throw new Error('getBlob/getBytes not available on this SDK version');
+}
+
+// Read an error response body for richer diagnostics — strips to a bounded
+// string so error messages don't balloon.
+async function _readErrorBody(response) {
+  try {
+    const txt = await response.text();
+    if (!txt) return '';
+    return txt.substring(0, 140);
+  } catch (_) {
+    return '';
+  }
+}
+
+// Download a single photo with staged error reporting and multiple fallbacks.
+// Transport order (B-03 v2160):
+//   1. Firebase SDK getBlob()   — uses SDK's internal transport, most likely
+//                                 to work in iOS PWA WKWebView context.
+//   2. fetch(signedUrl)         — page-context fetch; historically fails on
+//                                 iOS PWA with "Load failed".
+//   3. XMLHttpRequest           — different transport; sometimes succeeds.
 //
-// On failure, throws an Error with .stage set to 'url' | 'fetch' | 'xhr' |
-// 'blob-read' so the caller can report which step broke.
+// Errors tagged with .stage = 'url' | 'sdk' | 'fetch' | 'xhr' | 'blob-read'.
 async function _downloadOneFirebasePhoto(meta) {
   const attempts = 2;
   let lastErr = null;
@@ -2237,41 +2270,53 @@ async function _downloadOneFirebasePhoto(meta) {
     let url = null;
     let blob = null;
 
-    // Stage 1 — get the signed download URL from Firebase SDK
+    // Stage 0 — try Firebase SDK native getBlob first
     try {
-      const ref = window.fsStorage.ref(meta.storageRef);
-      url = await ref.getDownloadURL();
-    } catch (err) {
-      err.stage = 'url';
-      lastErr = err;
-      if (i < attempts - 1) { await new Promise(r => setTimeout(r, 2000)); continue; }
-      break;
+      blob = await _firebaseSdkGetBlob(meta.storageRef);
+    } catch (sdkErr) {
+      // Not available or failed — fall through to URL + fetch path.
+      lastErr = sdkErr;
+      lastErr.stage = 'sdk';
     }
 
-    // Stage 2 — download the bytes as a Blob. Try fetch() first; if that
-    // fails (iOS Safari PWA often throws TypeError "Load failed"), fall
-    // back to XMLHttpRequest which has different quirks.
-    try {
+    if (blob) {
+      // Got blob from SDK; skip to stage 3 (read as dataURL)
+    } else {
+      // Stage 1 — get the signed download URL from Firebase SDK
       try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        blob = await response.blob();
-      } catch (fetchErr) {
-        // Fallback to XHR. Don't consume the retry attempt on this path —
-        // XHR is the more-reliable transport on iOS PWA.
-        try {
-          blob = await _xhrGetBlob(url, 30000);
-        } catch (xhrErr) {
-          const combined = new Error('fetch: ' + (fetchErr.name || 'err') + ' "' + (fetchErr.message || '') + '" · xhr: ' + xhrErr.message);
-          combined.stage = 'xhr';
-          throw combined;
-        }
+        const ref = window.fsStorage.ref(meta.storageRef);
+        url = await ref.getDownloadURL();
+      } catch (err) {
+        err.stage = 'url';
+        lastErr = err;
+        if (i < attempts - 1) { await new Promise(r => setTimeout(r, 2000)); continue; }
+        break;
       }
-    } catch (err) {
-      if (!err.stage) err.stage = 'fetch';
-      lastErr = err;
-      if (i < attempts - 1) { await new Promise(r => setTimeout(r, 2000)); continue; }
-      break;
+
+      // Stage 2 — download bytes via fetch, fall back to XHR.
+      try {
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            const bodySnippet = await _readErrorBody(response);
+            throw new Error('HTTP ' + response.status + (bodySnippet ? ': ' + bodySnippet : ''));
+          }
+          blob = await response.blob();
+        } catch (fetchErr) {
+          try {
+            blob = await _xhrGetBlob(url, 30000);
+          } catch (xhrErr) {
+            const combined = new Error('fetch: ' + (fetchErr.name || 'err') + ' "' + (fetchErr.message || '') + '" · xhr: ' + xhrErr.message);
+            combined.stage = 'xhr';
+            throw combined;
+          }
+        }
+      } catch (err) {
+        if (!err.stage) err.stage = 'fetch';
+        lastErr = err;
+        if (i < attempts - 1) { await new Promise(r => setTimeout(r, 2000)); continue; }
+        break;
+      }
     }
 
     // Stage 3 — read blob as a base64 data URL for IndexedDB storage
