@@ -14,6 +14,84 @@ When adding an entry, include:
 
 ## Active
 
+### B-06 — Hull/rudder below-waterline snippets: separate damage from antifouling, include rudders when present
+
+- **What:** Two related issues with the hull-and-rudder below-waterline
+  snippets:
+  1. **Damage and antifouling are conflated.** A vessel can have a
+     perfectly sound hull with antifouling in terrible condition (or
+     vice versa). Current snippets treat them as one observation.
+     Need separate observations (or at least separate clauses) so the
+     reader sees hull-damage status and antifouling status independently.
+  2. **"Hull and rudder" in the checklist item, but snippets only
+     mention the hull.** When the vessel has rudder(s), snippets should
+     describe rudder condition alongside hull condition. When the vessel
+     has no rudder (outdrive, IPS), the rudder part must be omitted
+     entirely — can't leave orphaned text referencing something that
+     doesn't exist.
+- **Why:** Dave noted 2026-04-14 while surveying. Accurate SAMS reports
+  require distinct observations per distinct system.
+- **Where:** `text_library.json` under the Hull category. Also
+  `survey_template.json` — may need to audit item labels. The
+  `{count:rudder|rudders}` pluralisation token pattern (see memory
+  `project_drive_line_plurals.md`) may apply here too — snippets should
+  be tokenised so a hasRudder=false survey renders hull-only text.
+- **Priority:** High. This directly affects report accuracy for
+  pre-purchase surveys, which is the primary revenue case.
+- **Fix sketch:**
+  1. Audit every hull-and-rudder-below-waterline snippet. Split into
+     two clauses: `{hull observation}. {rudder observation (omit if
+     no rudder)}. {antifouling observation}.`
+  2. Use `{count:rudder|rudders}` and `{plural:if-multi}` tokens for
+     rudder count.
+  3. Use `{if-no-rudder:...}` to gate rudder sentences.
+  4. Add snippets covering the common combinations:
+     - Hull OK / Rudder OK / Antifouling OK
+     - Hull OK / Rudder OK / Antifouling degraded
+     - Hull blistering / Rudder OK / Antifouling OK
+     - Hull OK / Rudder pitted / Antifouling OK
+     - etc.
+  5. Consider splitting this item into two checklist items: "Hull
+     condition below waterline (antifouling + substrate)" and "Rudder
+     condition below waterline" so the snippets are naturally
+     independent.
+
+### B-05 — Remove unused "Hull exterior photos" and "Rudder photos" options above Vessel Type
+
+- **What:** At the top of the Vessel Type section of Edit Intro, there
+  are photo-capture options for "Hull exterior photos" and "Rudder photos"
+  that Dave doesn't use and would like removed.
+- **Why:** Dave noted 2026-04-14 while surveying.
+- **Where:** Edit Intro form, near the top, above the Vessel Type field.
+  Likely a `data-photo-field="hullExteriorPhoto"` and similar rudder one.
+- **Priority:** Low (cleanup). Not blocking anything.
+- **Fix sketch:** Find the HTML block, delete it. Audit any code that
+  references the associated field names to ensure no null-pointer errors.
+
+### B-04 — OCR the HIN photo to auto-populate the HIN number field
+
+- **What:** When Dave captures the HIN plate photo, the app should read
+  the number off the photo and pre-fill the HIN text field. Dave
+  currently re-types the number manually after every capture — tedious
+  and error-prone.
+- **Why:** Dave flagged this 2026-04-14 while surveying. Quote: "I take
+  a picture of the HIN number. Could the app read the picture and
+  populate the HIN number text?"
+- **Where:** HIN photo capture (Vessel Documentation section) + the
+  `hinNumber` field. Hook the OCR into the camera capture flow so it
+  runs immediately after the photo is saved.
+- **Priority:** Medium. Not blocking, but it's a per-survey friction
+  point that would save ~30 seconds every time.
+- **Fix sketch:** Gemini API is already partially integrated in the app
+  (search for `geminiApiKey`). Gemini's vision mode can take an image
+  and return the text on it. Flow: photo saved → if Gemini key set,
+  submit photo + prompt "Extract the Hull Identification Number from
+  this photo. Return only the HIN, no explanation." → set the
+  `hinNumber` field with the result → show a "Verify ✓" button for
+  Dave to confirm before save. Fall back to manual entry if Gemini
+  key isn't set or the call fails. Same pattern could later be applied
+  to compliance-plate reading, engine-plate serial extraction, etc.
+
 ### B-03 — Firebase photo download fails with "Load failed" on iOS Safari PWA
 
 - **What:** On iPhone Safari opened from the home-screen icon (PWA mode),

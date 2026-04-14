@@ -12,6 +12,51 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2151 — 2026-04-14
+
+### Added
+- **B-01 complete** — Drive backup now resumes where it left off instead
+  of re-uploading every photo from scratch.
+  - New `listExistingFilenamesInFolder(folderId)` queries Drive once per
+    backup (with pagination for folders over 1000 files) and builds a
+    Set of filenames already present.
+  - `backupSurvey` now skips any photo whose deterministic filename
+    already exists on Drive. Same-day JSON snapshot also skipped on
+    repeat runs.
+  - `src/core/drive_backup.js` is wired into `index.html` and the service
+    worker; tests/drive_backup.test.js (14 tests) now run against the
+    live module.
+  - Progress dialog now distinguishes skipped vs uploaded photos in both
+    step label (`Skipping 17 of 202 (already on Drive)`) and detail log
+    (`⏭ hull_portside_01.jpg`).
+  - Summary subtitle reads `N new + M already on Drive = T total` when
+    any photos were skipped.
+- **SAMS 2.4** — TC Licence expiry date field added to Edit Intro.
+  Report now shows "(expires YYYY-MM-DD)" next to the licence number
+  when populated.
+- **SAMS 3.7** — Two new "laid up for winter storage" options in the
+  on-land/in-water dropdown, matching SAMS's preferred phrasing.
+- **SAMS 4.3** — Check function now warns when valuation uses fewer
+  than 2 sources. The MY Bad review flagged BUC-only as insufficient;
+  this makes the omission visible before you generate the report.
+
+### Confirmed already-done (rubric updated)
+- **SAMS 1.4** — TP 1332 is already referenced in Conduct of Survey
+  and the Definitions table. Rubric status flipped to ✅.
+
+### Backlog additions (not yet fixed, logged for future work)
+- **B-04** — OCR the HIN photo to auto-populate the HIN number field.
+  Implementation sketch includes using the existing Gemini integration.
+- **B-05** — Remove unused "Hull exterior photos" and "Rudder photos"
+  options above Vessel Type (cleanup).
+
+### Process
+- Triple-checked (intent, regression, Dave's environment). All 55 tests
+  pass; pre-commit hook green in both node-available and no-node
+  environments.
+
+---
+
 ## v2150 — 2026-04-14
 
 ### Fixed

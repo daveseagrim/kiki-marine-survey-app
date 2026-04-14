@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2150';
+const APP_VERSION = 'v2151';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -5716,6 +5716,7 @@ function createNewSurvey(formData) {
     // Vessel documentation
     tcLicenseType: formData.tcLicenseType,
     tcLicense: formData.tcLicense,
+    tcLicenseExpiry: formData.tcLicenseExpiry,
     hinNumber: formData.hinNumber,
     taxStatus: formData.taxStatus,
     compliancePlate: formData.compliancePlate,
@@ -6520,6 +6521,8 @@ function renderNewSurveyForm() {
           <option value="">Select</option>
           <option value="Vessel was in water at the dock">Vessel was in water at the dock</option>
           <option value="Vessel was in the travel lift slings for the inspection">Vessel was in the travel lift slings for the inspection</option>
+          <option value="Vessel was laid up for winter storage on a cradle">Vessel was laid up for winter storage on a cradle</option>
+          <option value="Vessel was laid up for winter storage on blocks">Vessel was laid up for winter storage on blocks</option>
           <option value="Vessel was on the cradle on shore, winterized">Vessel was on the cradle on shore, winterized</option>
           <option value="Vessel was on the hard, in a cradle, not winterized">Vessel was on the hard, in a cradle, not winterized</option>
           <option value="Vessel was on blocks, winterized">Vessel was on blocks, winterized</option>
@@ -6646,6 +6649,15 @@ function renderNewSurveyForm() {
       <div class="form-group">
         <label class="form-label">Licence / Registration Number</label>
         <input type="text" id="tcLicense" placeholder="e.g., 12A34567">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Licence Expiry Date</label>
+        <input type="date" id="tcLicenseExpiry">
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Expiry date on the licence or registration. SAMS requires this be noted (2.4 in the rubric). Leave blank if no expiry or not applicable.</div>
+      </div>
+
+      <div class="form-group" style="margin-top:-4px;">
         <div style="margin-top:8px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
           <div data-photo-field="licencePhoto">
             <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:6px 10px;">
@@ -7312,6 +7324,7 @@ function editSurveyDetails(surveyId) {
         hinNumber: survey.hinNumber,
         tcLicenseType: survey.tcLicenseType,
         tcLicense: survey.tcLicense,
+        tcLicenseExpiry: survey.tcLicenseExpiry,
         taxStatus: survey.taxStatus,
         compliancePlate: survey.compliancePlate,
         valuationLow: survey.valuationLow,
@@ -7577,6 +7590,7 @@ function saveSurveyDetails(surveyId) {
       hinNumber: document.getElementById('hinNumber')?.value || '',
       tcLicenseType: document.getElementById('tcLicenseType')?.value || '',
       tcLicense: document.getElementById('tcLicense')?.value || '',
+      tcLicenseExpiry: document.getElementById('tcLicenseExpiry')?.value || '',
       taxStatus: document.getElementById('taxStatus')?.value || '',
       compliancePlate: document.getElementById('compliancePlate')?.value || '',
       valuationLow: document.getElementById('valuationLow')?.value || '',
@@ -7629,7 +7643,7 @@ async function saveEditFormSilently() {
     'engineHours','engineHP','fuelType','transmissionMake','transmissionModel','transmissionSerial',
     'engine2Make','engine2Model','engine2Serial','engine2Hours','engine2HP','fuelType2',
     'transmission2Make','transmission2Model','transmission2Serial',
-    'vesselDescription','hinNumber','tcLicenseType','tcLicense','taxStatus','compliancePlate',
+    'vesselDescription','hinNumber','tcLicenseType','tcLicense','tcLicenseExpiry','taxStatus','compliancePlate',
     'valuationLow','valuationHigh','valuationRationale','replacementCost','overallCondition'
   ];
   for (const f of fields) {
@@ -9184,6 +9198,7 @@ function startNewSurvey() {
 
     tcLicenseType: document.getElementById('tcLicenseType')?.value || '',
     tcLicense: document.getElementById('tcLicense')?.value || '',
+    tcLicenseExpiry: document.getElementById('tcLicenseExpiry')?.value || '',
     hinNumber: document.getElementById('hinNumber')?.value || '',
     taxStatus: document.getElementById('taxStatus')?.value || '',
     compliancePlate: document.getElementById('compliancePlate')?.value || '',
@@ -10083,7 +10098,9 @@ function ensureReportButton() {
         window._hasUnsavedBackup = false;
         BackupProgress.finish({
           title: '✓ Backup complete',
-          subtitle: `${result.vesselName} · ${result.uploaded} of ${result.totalPhotos} photos uploaded`,
+          subtitle: (result.skipped || 0) > 0
+            ? `${result.vesselName} · ${result.uploaded} new + ${result.skipped} already on Drive = ${result.totalPhotos} total`
+            : `${result.vesselName} · ${result.uploaded} of ${result.totalPhotos} photos uploaded`,
           success: true
         });
       } catch (err) {
@@ -10759,6 +10776,18 @@ async function checkSurvey() {
     add('warning', 'Valuation', 'No comparable vessels entered', null, 'valuationLow');
   }
   if (!survey.replacementCost) add('info', 'Valuation', 'Missing: Replacement cost estimate', null, 'replacementCost');
+
+  // SAMS 4.3 — valuation must cite at least 2 independent sources. The MY Bad
+  // review: "Statement of method used for valuation, however, only used BUC.
+  // Not sufficient to provide a reasonable valuation."
+  const sources = Array.isArray(survey.valuationSources)
+    ? survey.valuationSources.filter(s => s && s.trim())
+    : [];
+  if (sources.length === 1) {
+    add('warning', 'Valuation', `Only one valuation source cited (${sources[0]}). SAMS expects at least two \u2014 add comparable sold vessels, replacement-cost analysis, or another guide.`, null, 'valuationLow');
+  } else if (sources.length === 0 && (survey.valuationLow || survey.valuationHigh)) {
+    add('warning', 'Valuation', 'Valuation entered but no source checked. SAMS requires at least two sources (e.g. BUC + comparables + replacement cost).', null, 'valuationLow');
+  }
 
   // ── 6. SAFETY EQUIPMENT ─────────────────────────────────────────────────
   if (!survey.safetyEquipment || survey.safetyEquipment.length === 0) {
@@ -16539,7 +16568,7 @@ async function generateReport() {
     <tr><td><strong>Vessel Name</strong></td><td>${esc(survey.vesselName) || 'N/A'}</td></tr>
     <tr><td><strong>Year/Make/Model</strong></td><td>${esc(survey.yearMakeModel) || 'N/A'}</td></tr>
     <tr><td><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
-    ${(survey.tcLicense || survey.tcLicenseType) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}</td></tr>` : ''}
+    ${(survey.tcLicense || survey.tcLicenseType) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${survey.tcLicenseExpiry ? ' (expires ' + esc(survey.tcLicenseExpiry) + ')' : ''}</td></tr>` : ''}
     <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
     <tr><td><strong>Vessel Material</strong></td><td>${esc(survey.construction) || 'N/A'}</td></tr>
     <tr><td><strong>LOA (Length Overall)</strong></td><td>${esc(survey.loa) || 'N/A'}</td></tr>
@@ -16629,7 +16658,7 @@ ${survey.locationLat && survey.locationLon ? `
   <h2>VESSEL DOCUMENTATION DATA</h2>
   <table>
     <tr><td style="width:40%;"><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
-    ${(survey.tcLicense || survey.tcLicenseType || licencePhotoDataUrl || tcPaperLicencePhotoDataUrl) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${licencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Licence number on hull:</em><br><img src="' + licencePhotoDataUrl + '" alt="Licence Number on Hull" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}${tcPaperLicencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Transport Canada paper licence:</em><br><img src="' + tcPaperLicencePhotoDataUrl + '" alt="TC Paper Licence" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>` : ''}
+    ${(survey.tcLicense || survey.tcLicenseType || licencePhotoDataUrl || tcPaperLicencePhotoDataUrl) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${survey.tcLicenseExpiry ? ' (expires ' + esc(survey.tcLicenseExpiry) + ')' : ''}${licencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Licence number on hull:</em><br><img src="' + licencePhotoDataUrl + '" alt="Licence Number on Hull" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}${tcPaperLicencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Transport Canada paper licence:</em><br><img src="' + tcPaperLicencePhotoDataUrl + '" alt="TC Paper Licence" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>` : ''}
     <tr><td><strong>Tax Status (Duties Paid)</strong></td><td>${esc(survey.taxStatus) || 'N/A'}</td></tr>
     <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
   </table>
@@ -18082,6 +18111,39 @@ const DriveBackup = (() => {
     return createData.id;
   }
 
+  // List all filenames already present in a Drive folder, as a Set.
+  // Paginates through results in case the folder has >1000 files.
+  // Used by backupSurvey to skip photos already uploaded (B-01 resume).
+  async function listExistingFilenamesInFolder(folderId) {
+    const token = await ensureToken();
+    const names = new Set();
+    let pageToken = null;
+    const q = encodeURIComponent(`'${folderId}' in parents and trashed=false`);
+    do {
+      const pageParam = pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : '';
+      const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=nextPageToken,files(name)&pageSize=1000${pageParam}`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) {
+        const errText = await res.text();
+        if (res.status === 403 && /SERVICE_DISABLED|accessNotConfigured|has not been used in project/i.test(errText)) {
+          const projectMatch = errText.match(/project[s]?[\/\s=]+(\d+)/);
+          const projectId = projectMatch ? projectMatch[1] : '';
+          const err = new Error('DRIVE_API_DISABLED');
+          err.driveApiDisabled = true;
+          err.activationUrl = projectId
+            ? `https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=${projectId}`
+            : 'https://console.developers.google.com/apis/api/drive.googleapis.com/overview';
+          throw err;
+        }
+        throw new Error(`Drive list failed (${res.status}): ${errText}`);
+      }
+      const data = await res.json();
+      if (data.files) data.files.forEach(f => names.add(f.name));
+      pageToken = data.nextPageToken || null;
+    } while (pageToken);
+    return names;
+  }
+
   // Upload a file to Drive using multipart upload
   async function uploadFile(folderId, fileName, mimeType, content) {
     const token = await ensureToken();
@@ -18138,7 +18200,21 @@ const DriveBackup = (() => {
     report({ surveyLabel: vesselName, stepLabel: 'Preparing vessel folder…', percent: 0 });
     const folderId = await getOrCreateVesselFolder(vesselName);
 
-    // 1. Upload survey data (without photo blobs) as JSON
+    // B-01: scan Drive folder to see which photos are already uploaded
+    report({ stepLabel: 'Checking Drive for existing photos…', percent: 1 });
+    let existingFilenames = new Set();
+    try {
+      existingFilenames = await listExistingFilenamesInFolder(folderId);
+    } catch (listErr) {
+      // If the list fails (e.g. Drive API disabled), propagate — this is the
+      // same call type as upload, so failure here means upload will also fail.
+      throw listErr;
+    }
+
+    // 1. Upload survey data (without photo blobs) as JSON — always uploaded
+    // fresh because it may have changed since the last backup. Filename
+    // includes the date so same-day re-runs overwrite, different days create
+    // a new snapshot.
     report({ stepLabel: 'Uploading survey data…', percent: 2 });
     const surveyClone = JSON.parse(JSON.stringify(survey));
     if (surveyClone.items) {
@@ -18150,9 +18226,14 @@ const DriveBackup = (() => {
       }
     }
     const dateStr = new Date().toISOString().slice(0, 10);
+    const surveyJsonName = `${vesselName.replace(/[^a-zA-Z0-9_-]/g, '_')}_${dateStr}.json`;
     const surveyJson = JSON.stringify(surveyClone, null, 2);
-    await uploadFile(folderId, `${vesselName.replace(/[^a-zA-Z0-9_-]/g, '_')}_${dateStr}.json`, 'application/json', surveyJson);
-    report({ detail: `✓ ${vesselName}_${dateStr}.json` });
+    if (!existingFilenames.has(surveyJsonName)) {
+      await uploadFile(folderId, surveyJsonName, 'application/json', surveyJson);
+      report({ detail: `✓ ${surveyJsonName}` });
+    } else {
+      report({ detail: `⏭ ${surveyJsonName} (already on Drive today)` });
+    }
 
     // 2. Collect photo IDs only (no image data in memory)
     const photoIds = await new Promise((resolve) => {
@@ -18169,23 +18250,49 @@ const DriveBackup = (() => {
     const totalPhotos = photoIds.length;
     if (totalPhotos === 0) {
       report({ stepLabel: 'No photos to upload', percent: 100 });
+      return { vesselName, uploaded: 0, skipped: 0, totalPhotos: 0 };
     }
 
-    // 3. Upload ONE photo at a time — load, convert, upload, release
+    // 3. Upload ONE photo at a time, SKIPPING any that are already on Drive
+    //    (B-01 resume fix). KikiDriveBackup.photoFilename is the shared
+    //    deterministic filename generator used for comparison.
+    const photoFilename = (window.KikiDriveBackup && window.KikiDriveBackup.photoFilename) || null;
     let uploaded = 0;
+    let skipped = 0;
+    let processed = 0;
+
     for (const pid of photoIds) {
       if (typeof checkCancelled === 'function' && checkCancelled()) {
         const err = new Error('Backup cancelled by user');
         err.cancelled = true;
         throw err;
       }
+      processed++;
 
       let photo = await getPhotoById(pid);
       if (!photo || !photo.dataUrl) { photo = null; continue; }
 
-      let photoBlob = dataUrlToBlob(photo.dataUrl);
+      // Compute filename and check if already on Drive
       const ext = photo.dataUrl.startsWith('data:image/png') ? '.png' : '.jpg';
-      const photoName = (photo.label || photo.id || `photo_${uploaded}`).replace(/[^a-zA-Z0-9_-]/g, '_') + ext;
+      // Prefer the pure helper (covered by tests) but fall back to inline
+      // logic if the module didn't load for any reason.
+      const photoName = photoFilename
+        ? photoFilename(photo, processed - 1)
+        : (photo.label || photo.id || `photo_${uploaded}`).replace(/[^a-zA-Z0-9_-]/g, '_') + ext;
+
+      if (existingFilenames.has(photoName)) {
+        skipped++;
+        photo = null;
+        report({
+          stepLabel: `Skipping ${processed} of ${totalPhotos} (already on Drive)…`,
+          detail: `⏭ ${photoName}`,
+          percent: Math.round((processed / totalPhotos) * 100)
+        });
+        continue;
+      }
+
+      // Upload the new photo
+      let photoBlob = dataUrlToBlob(photo.dataUrl);
       const mimeType = photoBlob.type;
       const sizeKb = Math.round(photoBlob.size / 1024);
 
@@ -18193,25 +18300,28 @@ const DriveBackup = (() => {
       photo = null;
 
       report({
-        stepLabel: `Uploading photo ${uploaded + 1} of ${totalPhotos} (${sizeKb} KB)…`,
-        percent: Math.round(((uploaded + 0.5) / Math.max(totalPhotos, 1)) * 100)
+        stepLabel: `Uploading photo ${processed} of ${totalPhotos} (${sizeKb} KB)…`,
+        percent: Math.round(((processed - 0.5) / totalPhotos) * 100)
       });
 
       await uploadFile(folderId, photoName, mimeType, photoBlob);
-      photoBlob = null; // Release blob after upload
+      photoBlob = null;
       uploaded++;
 
       report({
         detail: `✓ ${photoName}`,
-        percent: Math.round((uploaded / Math.max(totalPhotos, 1)) * 100)
+        percent: Math.round((processed / totalPhotos) * 100)
       });
 
       // 500ms pause to let browser reclaim memory
       await new Promise(r => setTimeout(r, 500));
     }
 
-    report({ stepLabel: `Uploaded ${uploaded} of ${totalPhotos} photos`, percent: 100 });
-    return { vesselName, uploaded, totalPhotos };
+    const summary = skipped > 0
+      ? `Uploaded ${uploaded} · Skipped ${skipped} (already on Drive) · Total ${totalPhotos}`
+      : `Uploaded ${uploaded} of ${totalPhotos} photos`;
+    report({ stepLabel: summary, percent: 100 });
+    return { vesselName, uploaded, skipped, totalPhotos };
   }
 
   // Upload a single photo to the correct vessel folder on Drive
@@ -18269,7 +18379,8 @@ const DriveBackup = (() => {
         );
         done++;
         totalPhotosUploaded += (result && result.uploaded) || 0;
-        BackupProgress.update({ detail: `✓ ${survey.vesselName}: ${result.uploaded}/${result.totalPhotos} photos` });
+        const skipStr = (result.skipped || 0) > 0 ? ` (${result.skipped} already on Drive)` : '';
+        BackupProgress.update({ detail: `✓ ${survey.vesselName}: ${result.uploaded}/${result.totalPhotos} photos${skipStr}` });
       } catch (err) {
         console.error(`Drive backup failed for ${survey.vesselName}:`, err);
         if (err.cancelled) { cancelled = true; break; }

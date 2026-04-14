@@ -61,7 +61,9 @@ Status legend:
 - **Test:** Search report for "TP 1332" or "Transport Canada Small Vessel
   Construction Standards" and confirm at least one mention.
 - **MY Bad result:** ❌ Missing.
-- **Status:** 🟡 Partial — to add.
+- **Status:** ✅ Done — Report mentions "TP 1332 — Construction Standards
+  for Small Vessels" in both the Conduct of Survey paragraph and the
+  Definitions of Terms table. Confirmed during v2151 audit.
 
 ---
 
@@ -97,8 +99,9 @@ Status legend:
   all populated in the report.
 - **MY Bad result:** ❌ SAMS comment: "No photo of vessel licence and no
   information of expiry."
-- **Status:** 🟡 Partial — app has `tcLicenseType`, `tcLicense`, and
-  `licencePhoto` fields. **Expiry date field not yet present.**
+- **Status:** ✅ Done (v2151) — `tcLicenseExpiry` date field added to
+  Edit Intro. Report shows "(expires YYYY-MM-DD)" after the licence
+  number when populated.
 
 ### 2.5 Engine and major equipment serial numbers
 - **Where:** Vessel Specifications table + engine photo thumbnails.
@@ -148,8 +151,9 @@ Status legend:
   SAMS also noted: state lay-up-for-winter-storage if applicable.
 - **MY Bad result:** ❌ "Clear statement that vessel was laid up for
   winter storage not provided."
-- **Status:** 🟡 Partial — the three dropdown options exist. **Add a fourth
-  explicit "Vessel was laid up for winter storage on cradle" option.**
+- **Status:** ✅ Done (v2151) — two explicit SAMS-worded options added
+  to the dropdown: "Vessel was laid up for winter storage on a cradle"
+  and "Vessel was laid up for winter storage on blocks".
 
 ### 3.8 Parties present during survey
 - **Where:** Survey Conditions or intro.
@@ -212,9 +216,10 @@ Status legend:
   only used BUC. Not sufficient to provide a reasonable valuation."
 - **Test:** At least TWO valuation sources cited (e.g. BUC plus comparable
   sold vessels plus replacement cost analysis).
-- **Status:** 🟡 Partial — multi-source UI exists but single-source
-  submissions still pass. **Add a Check-function warning if only one
-  source is selected.**
+- **Status:** ✅ Done (v2151) — Check function warns when only 1 source
+  is cited, with specific suggestions (comparable sold vessels,
+  replacement-cost analysis). Also warns if valuation is entered with
+  no source selected.
 
 ### 4.4 Comparable vessels listed
 - **Test:** At least 2 comparables with vessel, year, price, source.
@@ -375,10 +380,10 @@ Status legend:
 
 ---
 
-## Summary Scorecard (v2148)
+## Summary Scorecard (v2151)
 
-- **Done:** 22 items (+3 from v2146)
-- **Partial:** 14 items
+- **Done:** 26 items (+4 from v2148)
+- **Partial:** 10 items
 - **Missing:** 2 items
 - **Manual-only:** 0 items
 
@@ -386,15 +391,17 @@ Status legend:
 
 1. **3.9** Below-waterline through-hull fittings statement — ❌
 2. **6.3** Recommended Auxiliary Safety Equipment section — ❌
-3. **1.4** Add TP 1332 to standards list — 🟡
-4. **6.4** Structured bilge pump fields (count, location, rating) — 🟡
-5. **3.7** Add "laid up for winter storage" option to `onLandOrWater` — 🟡
-   *(Note: current dropdown now has "Vessel was on the cradle on shore,
-   winterized" which partially addresses this — may already be ✅.)*
-6. **2.4** Add TC Licence expiry field — 🟡
-7. **4.3** Require ≥2 valuation sources in Check — 🟡
+3. **6.4** Structured bilge pump fields (count, location, rating) — 🟡
+4. Remaining partial items — minor polish (see status lines above)
 
-### Recently fixed (v2148)
+### Recently fixed (v2151)
+
+- ✅ **1.4** TP 1332 in standards list (confirmed already present)
+- ✅ **2.4** TC Licence expiry date field
+- ✅ **3.7** "Laid up for winter storage" dropdown options
+- ✅ **4.3** Check warns when <2 valuation sources
+
+### Fixed earlier (v2148)
 
 - ✅ **3.11** Independent Surveys field
 - ✅ **8.1** "Moisture meter" audit (none found in user-facing code)
