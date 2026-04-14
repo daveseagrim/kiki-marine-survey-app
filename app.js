@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2141';
+const APP_VERSION = 'v2142';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -10405,12 +10405,20 @@ async function checkSurvey() {
   let unratedCount = 0;
   let missingTextAB = 0;
 
+  // Group skipped items by category so we can summarize them together
+  const skippedByCategory = {};  // { categoryName: [itemLabel, ...] }
+  const totalByCategory = {};     // { categoryName: totalItemCount }
+  expandedItems.forEach(item => {
+    totalByCategory[item.categoryName] = (totalByCategory[item.categoryName] || 0) + 1;
+  });
+
   expandedItems.forEach(item => {
     const data = survey.items[item.label];
 
-    // Excluded (skipped) items — show as "Skipped" instead of hiding
+    // Excluded (skipped) items — collect for category-level summary below
     if (data && data.excluded) {
-      add('info', 'Skipped Items', `Skipped: ${item.label}`, item.label);
+      if (!skippedByCategory[item.categoryName]) skippedByCategory[item.categoryName] = [];
+      skippedByCategory[item.categoryName].push(item.label);
       return;
     }
 
@@ -10467,6 +10475,23 @@ async function checkSurvey() {
   // Summary for large unrated counts
   if (unratedCount > 20) {
     add('warning', 'Checklist Completion', `...and ${unratedCount - 20} more unrated items (${unratedCount} total)`, null);
+  }
+
+  // Summarize skipped items: if an entire category is skipped, report it once;
+  // otherwise list the individual skipped items. Skipped sections are treated
+  // as dealt-with (info-level acknowledgement, not warnings).
+  for (const [catName, skippedLabels] of Object.entries(skippedByCategory)) {
+    const total = totalByCategory[catName] || skippedLabels.length;
+    if (skippedLabels.length === total && total > 1) {
+      // Whole category skipped — one acknowledgement
+      add('info', 'Skipped Sections', `Entire "${catName}" section skipped (${total} items) — excluded from report`, null);
+    } else if (skippedLabels.length > 3) {
+      // Many individual items in this category — summarize
+      add('info', 'Skipped Items', `${skippedLabels.length} items skipped in "${catName}": ${skippedLabels.slice(0, 3).join(', ')} (+${skippedLabels.length - 3} more)`, null);
+    } else {
+      // A few — list them
+      skippedLabels.forEach(lbl => add('info', 'Skipped Items', `Skipped: ${lbl}`, lbl));
+    }
   }
 
   // ── 5. VALUATION ────────────────────────────────────────────────────────
@@ -10561,7 +10586,7 @@ async function checkSurvey() {
 
   const criticalCount = issues.filter(i => i.severity === 'critical').length;
   const warningCount = issues.filter(i => i.severity === 'warning').length;
-  const skippedCount = issues.filter(i => i.category === 'Skipped Items').length;
+  const skippedCount = issues.filter(i => i.category === 'Skipped Items' || i.category === 'Skipped Sections').length;
   const infoCount = issues.filter(i => i.severity === 'info').length - skippedCount;
 
   // Score calculation
@@ -10734,7 +10759,7 @@ async function checkSurvey() {
     // Skip reviewed items — they'll appear in the Resolved section
     if (reviewedState[item._checkId]) return;
     // Separate skipped items into their own section
-    if (item.category === 'Skipped Items') { skippedItems.push(item); return; }
+    if (item.category === 'Skipped Items' || item.category === 'Skipped Sections') { skippedItems.push(item); return; }
     if (item.severity !== currentSev) {
       currentSev = item.severity;
       sections.push({ severity: currentSev, items: [] });
@@ -11523,10 +11548,9 @@ function _csCheckSingleIssue(issue, data, survey) {
     return { fixed: false, reason: 'Safety item still has no standard reference. Check an ABYC or TC standard checkbox.' };
   }
 
-  // Skipped Items
-  if (cat === 'Skipped Items') {
-    if (!data || !data.excluded) return { fixed: true };
-    return { fixed: false, reason: 'Item is still excluded. Tap "⊘ Skip" again to un-skip it, or Force OK if intentional.' };
+  // Skipped Items / Skipped Sections — these are acknowledgements only, always considered "handled"
+  if (cat === 'Skipped Items' || cat === 'Skipped Sections') {
+    return { fixed: true };
   }
 
   // Grammar & Spelling
