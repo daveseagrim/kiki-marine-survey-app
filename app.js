@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2132';
+const APP_VERSION = 'v2133';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -5699,14 +5699,14 @@ function renderHome() {
     const content = document.getElementById('surveys-content');
 
     // Import, Export, and Drive Backup buttons at top — branded pill style
-    const pillBase = 'flex:1;border:none;border-radius:22px;padding:8px 0;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;';
+    const pillBase = 'flex:1;border:none;border-radius:22px;padding:8px 4px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;text-align:center;';
     const driveBtn = DriveBackup.isSignedIn()
       ? `<button style="${pillBase}background:#3399cc;color:white;" onclick="DriveBackup.backupAll()">☁️ Backup to Drive</button>`
       : `<button style="${pillBase}background:rgba(0,102,153,0.08);color:#006699;border:1px solid #3399cc;" onclick="(async()=>{try{await DriveBackup.signIn();showToast('Signed in to Google Drive ✓');renderHome();}catch(e){if(e.code!=='auth/popup-closed-by-user')showAlert('Sign-in failed: '+e.message);}})()">☁️ Google Drive</button>`;
     const firebaseSyncBtn = (typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled())
       ? `<button style="${pillBase}background:#f59e0b;color:white;" onclick="syncAllPhotosToFirebase()">🔥 Sync All to Firebase</button>`
       : '';
-    const importBtn = `<div style="display:flex;gap:8px;margin-bottom:12px;">
+    const importBtn = `<div style="display:flex;gap:6px;margin-bottom:12px;padding:0 4px;">
         ${driveBtn}
         ${firebaseSyncBtn}
         <button style="${pillBase}background:#ffcc00;color:#006699;font-weight:700;" onclick="exportAllSurveys()">📦 Export</button>
@@ -5846,7 +5846,7 @@ function renderHome() {
 
     const fab = document.createElement('button');
     fab.className = 'fab';
-    fab.innerHTML = '+';
+    fab.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#006699" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
     fab.onclick = () => renderNewSurveyForm();
     document.body.appendChild(fab);
   });
