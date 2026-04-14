@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2126';
+const APP_VERSION = 'v2127';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1724,32 +1724,45 @@ function _showBackupNowBanner() {
   if (!banner) {
     banner = document.createElement('div');
     banner.id = 'backup-progress-bar';
-    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9998;background:#006699;color:white;padding:8px 16px;font-size:13px;font-weight:600;text-align:center;transition:opacity 0.3s;';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9998;transition:opacity 0.3s;';
     document.body.appendChild(banner);
   }
   banner.style.opacity = '1';
-  banner.innerHTML = `☁️ Backing up ${count} photo${count > 1 ? 's' : ''}...`;
+  banner.innerHTML = `
+    <div style="background:#006699;color:white;padding:10px 16px 6px;font-size:13px;font-weight:600;text-align:center;">
+      ☁️ Backing up ${count} photo${count > 1 ? 's' : ''}...
+    </div>
+    <div style="height:4px;background:#004466;">
+      <div id="backup-fill-bar" style="height:100%;width:0%;background:#00ccff;transition:width 0.3s ease;"></div>
+    </div>`;
 }
 
 // Update the banner during upload progress
 function _updateBackupBanner(uploaded, total) {
   const banner = document.getElementById('backup-progress-bar');
-  if (banner) {
-    banner.innerHTML = `☁️ Backing up... ${uploaded}/${total}`;
-  }
+  if (!banner) return;
+  const pct = Math.round((uploaded / total) * 100);
+  const textEl = banner.querySelector('div');
+  if (textEl) textEl.innerHTML = `☁️ Backing up... ${uploaded} of ${total} (${pct}%)`;
+  const fill = document.getElementById('backup-fill-bar');
+  if (fill) fill.style.width = pct + '%';
 }
 
 // Hide the banner when done
 function _hideBackupBanner(message) {
   const banner = document.getElementById('backup-progress-bar');
-  if (banner) {
-    banner.innerHTML = message || '✓ Backup complete';
-    banner.style.background = '#16a34a';
-    setTimeout(() => {
-      banner.style.opacity = '0';
-      setTimeout(() => { if (banner.parentElement) banner.remove(); }, 300);
-    }, 2000);
-  }
+  if (!banner) return;
+  const isSuccess = message && (message.includes('✓') || message.includes('All'));
+  const isPause = message && message.includes('⏸');
+  const bg = isSuccess ? '#16a34a' : isPause ? '#d97706' : '#dc2626';
+  banner.innerHTML = `
+    <div style="background:${bg};color:white;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;">
+      ${message || '✓ Backup complete'}
+    </div>`;
+  setTimeout(() => {
+    banner.style.opacity = '0';
+    setTimeout(() => { if (banner.parentElement) banner.remove(); }, 300);
+  }, isSuccess ? 2500 : 3500);
 }
 
 // Process the pending backup queue — uploads one at a time during idle
@@ -2021,13 +2034,14 @@ function _updateBackupStatusUI() {
   const backed = _backupStats.firebase;
   const failed = _backupStats.firebaseFail;
 
+  const queued = _backupStats.queued || 0;
+
   if (total === 0 && queued === 0) {
     badge.style.display = 'none';
     return;
   }
 
   badge.style.display = 'inline-flex';
-  const queued = _backupStats.queued || 0;
 
   // Colour: green if all backed up, yellow if some queued, red if none backed up
   if (queued === 0 && backed >= total && firebaseOk) {
