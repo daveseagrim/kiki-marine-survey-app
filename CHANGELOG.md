@@ -12,6 +12,20 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2147 — 2026-04-14
+
+### Fixed
+- **Blank page on refresh** caused by `const` name collision between the
+  new `src/core/*.js` modules and `app.js`. Both files declared
+  `RATING_COLORS`, `getRatingShortLabel`, etc. with `const` at the top
+  level, which classic-script semantics treat as a SyntaxError, blocking
+  `app.js` from parsing. Wrapped each core module in an IIFE and exposed
+  its API under a namespace (`window.KikiRatings`, `window.KikiPlaceholders`,
+  `window.KikiSkipLogic`) so there's no conflict. `app.js` continues to
+  work unchanged.
+
+---
+
 ## v2146 — 2026-04-14
 
 ### Added
