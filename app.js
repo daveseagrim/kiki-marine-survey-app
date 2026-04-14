@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2130';
+const APP_VERSION = 'v2131';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1937,7 +1937,9 @@ async function syncAllPhotosToFirebase() {
 
   _updateSyncBar(0, totalToUpload);
 
-  // Step 3: Upload ONE photo at a time — load, upload, release memory
+  // Step 3: Upload ONE photo at a time with aggressive memory management
+  // We inline the upload logic instead of calling pushPhoto() so we can
+  // null out references between steps and give the GC time to reclaim memory.
   let uploaded = 0;
   let failed = 0;
   let lastSurveyId = null;
@@ -1946,13 +1948,31 @@ async function syncAllPhotosToFirebase() {
     const entry = needsUpload[i];
 
     try {
-      // Load ONE photo from IndexedDB
-      const photo = await getPhotoById(entry.id);
+      // Load ONE photo from IndexedDB — get only the dataUrl and metadata we need
+      let photo = await getPhotoById(entry.id);
       if (photo && photo.dataUrl) {
-        await FirebaseSync.pushPhoto(photo);
+        // Step A: Convert base64 dataUrl → blob (binary, smaller in memory)
+        let blob = await (await fetch(photo.dataUrl)).blob();
+
+        // Step B: Upload blob to Firebase Storage
+        const storageRef = `photos/${photo.surveyId}/${photo.id}`;
+        await window.fsStorage.ref(storageRef).put(blob);
+
+        // Step C: Save metadata (no dataUrl) to Firestore
+        const meta = {};
+        for (const key of Object.keys(photo)) {
+          if (key !== 'dataUrl') meta[key] = photo[key];
+        }
+        meta.storageRef = storageRef;
+        await window.fsDb.collection('photos').doc(photo.id).set(meta);
+
+        // Step D: Aggressively release memory
+        blob = null;
+        photo = null;
         uploaded++;
+      } else {
+        photo = null;
       }
-      // photo goes out of scope here — memory freed
     } catch (err) {
       failed++;
       console.warn(`[Sync] Failed: ${entry.id}`, err.message);
@@ -1960,8 +1980,8 @@ async function syncAllPhotosToFirebase() {
 
     _updateSyncBar(i + 1, totalToUpload);
 
-    // Pause every single upload — 200ms to let browser reclaim memory
-    await new Promise(r => setTimeout(r, 200));
+    // 500ms pause after EVERY photo to let Chrome's GC reclaim memory
+    await new Promise(r => setTimeout(r, 500));
 
     // Push survey data once per survey (when we move to the next one)
     if (entry.surveyId !== lastSurveyId) {
