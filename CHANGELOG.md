@@ -12,6 +12,43 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2154 — 2026-04-14
+
+### Added — Persistent Save Status indicator
+- New **SaveStatus** pill in the top-right corner of every survey page
+  (inspection + Edit Intro). Always visible, always current.
+- Shows: green dot + "✓ Saved Xs ago · NN 📷" — the seconds-ago counter
+  refreshes every 2 seconds, and the photo counter recounts after every
+  photo capture.
+- Goes amber + "Saving…" while a write is in progress, red + "Save error"
+  if the IndexedDB write fails (with the error message in the tooltip).
+- **Tap reveals a detail panel** with full sync status: photos in
+  IndexedDB on this device, last data save time, Firebase backup state
+  (connected? backed up? queued?), Drive backup state.
+- Hooked into every save site: `savePhoto`, `autoSaveItemText`,
+  `selectRating`, and the Edit Intro debounced auto-save. So whether
+  you rate an item, type a note, take a photo, or change a form field,
+  the pill blinks amber → green within a second to confirm the write.
+- Pill auto-hides on the home page (it's per-survey).
+
+### Other (deferred from B-07 part 2 → ships in a later release)
+- Internal: `buildComponentFindings`, `renderComponentBuilder`, and
+  `onComponentBuilderChange` extended with **multi-select checkbox
+  support** for component builders. The plumbing is in place but no
+  schema yet uses `multiSelect: true`, so no behaviour change for
+  Dave. The percussion-testing and deck/coachroof checkbox builder
+  schemas will land in v2155 with their own tests.
+
+### Backlog additions
+- **B-08** logged: cannot un-skip an item back to a rated state. Low
+  priority per Dave's request.
+
+### Process
+- Triple-checked: 81 tests pass, version consistency confirmed,
+  pre-commit hook green in no-node simulated environment.
+
+---
+
 ## v2153 — 2026-04-14
 
 ### Added (B-07 part 1 — rudder gating)

@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2153';
+const APP_VERSION = 'v2154';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -957,7 +957,14 @@ const COMPONENT_BUILDERS = {
 const RATING_PRIORITY = { 'A': 3, 'B': 2, 'NT': 1, 'C': 0 };
 const RATING_PRIORITY_REVERSE = { 3: 'A - Critical', 2: 'B - Needs Attention', 1: 'Not tested/not verified', 0: 'C - Serviceable' };
 
-// Build finding text from component builder selections
+// Build finding text from component builder selections.
+// Supports two per-component modes:
+//   - default (single-select): selections[comp.key] is an option index string
+//   - multiSelect (checkboxes): selections[comp.key] is an array of option
+//     index strings. Each ticked option contributes its fragment. Worst
+//     rating across ticked options wins. Fragments joined by spaces (or by
+//     comp.join if provided, which supports "and"-list joining for noun
+//     phrases like area/method lists).
 function buildComponentFindings(builderKey, selections) {
   const builder = COMPONENT_BUILDERS[builderKey];
   if (!builder) return { text: '', rating: '' };
@@ -965,20 +972,12 @@ function buildComponentFindings(builderKey, selections) {
   const fragments = [builder.intro];
   let worstRating = 0;
 
-  for (const comp of builder.components) {
-    const sel = selections[comp.key];
-    if (sel === undefined || sel === null || sel === '') continue;
-
-    const option = comp.options[parseInt(sel)];
-    if (!option) continue;
-
-    // rating: null means "Not inspected" — skip this component entirely
-    if (option.rating === null) continue;
-
-    let fragment = option.fragment;
-    if (!fragment) continue; // empty fragment = skip (e.g. "No issues" or "Same condition")
-
-    // Replace quantity/location placeholders if present
+  // Helper: pull fragment out of an option, do placeholder replacement
+  function fragmentFor(comp, option) {
+    if (!option) return '';
+    if (option.rating === null && !option.alwaysInclude) return '';
+    let fragment = option.fragment || '';
+    if (!fragment) return '';
     if (fragment.includes('{qty}')) {
       const qty = selections[comp.key + '_qty'] || '?';
       fragment = fragment.replace('{qty}', qty);
@@ -987,9 +986,58 @@ function buildComponentFindings(builderKey, selections) {
       const loc = selections[comp.key + '_location'] || '?';
       fragment = fragment.replace('{location}', loc);
     }
+    return fragment;
+  }
 
+  // Helper: join a list of noun-phrase fragments like "A, B, and C"
+  function joinAsList(parts) {
+    if (parts.length === 0) return '';
+    if (parts.length === 1) return parts[0];
+    if (parts.length === 2) return parts[0] + ' and ' + parts[1];
+    return parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1];
+  }
+
+  for (const comp of builder.components) {
+    const sel = selections[comp.key];
+    if (sel === undefined || sel === null || sel === '') continue;
+
+    if (comp.multiSelect) {
+      // Multi-select: sel is an array of option index strings
+      const indices = Array.isArray(sel) ? sel : [];
+      if (indices.length === 0) continue;
+      const pieces = [];
+      for (const idxStr of indices) {
+        const option = comp.options[parseInt(idxStr)];
+        if (!option) continue;
+        const frag = fragmentFor(comp, option);
+        if (frag) pieces.push(frag);
+        // Track worst rating across ticked options
+        if (option.rating) {
+          const ratingVal = RATING_PRIORITY[option.rating] || 0;
+          if (ratingVal > worstRating) worstRating = ratingVal;
+        }
+      }
+      if (pieces.length === 0) continue;
+      let compOutput;
+      if (comp.join === 'list') {
+        compOutput = joinAsList(pieces);
+        if (comp.prefix) compOutput = comp.prefix + compOutput;
+        if (comp.suffix) compOutput = compOutput + comp.suffix;
+      } else {
+        // Default: each fragment is its own complete sentence, joined by space
+        compOutput = pieces.join(' ');
+      }
+      fragments.push(compOutput);
+      continue;
+    }
+
+    // Single-select (original path)
+    const option = comp.options[parseInt(sel)];
+    if (!option) continue;
+    if (option.rating === null) continue;
+    const fragment = fragmentFor(comp, option);
+    if (!fragment) continue;
     fragments.push(fragment);
-
     const ratingVal = RATING_PRIORITY[option.rating] || 0;
     if (ratingVal > worstRating) worstRating = ratingVal;
   }
@@ -1035,15 +1083,39 @@ function renderComponentBuilder(builderKey, itemLabel, savedSelections, category
     const selVal = selections[comp.key] !== undefined ? selections[comp.key] : '';
     html += `
       <div style="padding:8px 20px;border-bottom:1px solid #f0f0f0;">
-        <label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">${comp.name}</label>
+        <label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">${comp.name}${comp.multiSelect ? ' <span style="font-weight:400;color:#6b7280;">(tick any that apply)</span>' : ''}</label>
+    `;
+    if (comp.multiSelect) {
+      // Render checkbox group. Saved state: selections[comp.key] is an array
+      // of option-index strings.
+      const selectedIndices = Array.isArray(selVal) ? selVal.map(String) : [];
+      html += `<div id="cb-${comp.key}_group" style="display:flex;flex-direction:column;gap:4px;">`;
+      comp.options.forEach((opt, idx) => {
+        const isChecked = selectedIndices.includes(String(idx));
+        const ratingTag = opt.rating
+          ? `<span style="font-size:10px;background:#e5e7eb;color:#374151;padding:1px 5px;border-radius:3px;margin-left:6px;">${opt.rating}</span>`
+          : '';
+        html += `
+          <label style="display:flex;align-items:flex-start;gap:8px;padding:6px 8px;background:${isChecked ? '#dbeafe' : '#f9fafb'};border:1px solid ${isChecked ? '#93c5fd' : '#e5e7eb'};border-radius:6px;cursor:pointer;">
+            <input type="checkbox" class="cb-multi-${comp.key}" value="${idx}" ${isChecked ? 'checked' : ''}
+                   onchange="onComponentBuilderChange('${safeLabel}', '${builderKey.replace(/'/g, "\\'")}')"
+                   style="width:16px;height:16px;margin-top:1px;accent-color:#006699;flex-shrink:0;">
+            <span style="font-size:13px;line-height:1.35;">${opt.label}${ratingTag}</span>
+          </label>
+        `;
+      });
+      html += `</div>`;
+    } else {
+      html += `
         <select id="cb-${comp.key}" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;background:white;"
                 onchange="onComponentBuilderChange('${safeLabel}', '${builderKey.replace(/'/g, "\\'")}')">
           <option value="">— Select —</option>
-    `;
-    comp.options.forEach((opt, idx) => {
-      html += `<option value="${idx}" ${selVal === String(idx) ? 'selected' : ''}>${opt.label}</option>`;
-    });
-    html += `</select>`;
+      `;
+      comp.options.forEach((opt, idx) => {
+        html += `<option value="${idx}" ${selVal === String(idx) ? 'selected' : ''}>${opt.label}</option>`;
+      });
+      html += `</select>`;
+    }
 
     // Add quantity input if this component has it
     if (comp.quantityPrompt) {
@@ -1135,8 +1207,14 @@ function onComponentBuilderChange(itemLabel, builderKey) {
   // Collect current selections from the DOM
   const selections = {};
   for (const comp of builder.components) {
-    const el = document.getElementById(`cb-${comp.key}`);
-    if (el) selections[comp.key] = el.value;
+    if (comp.multiSelect) {
+      // Multi-select: collect all checked checkbox values into an array
+      const checked = document.querySelectorAll(`.cb-multi-${comp.key}:checked`);
+      selections[comp.key] = Array.from(checked).map(cb => cb.value);
+    } else {
+      const el = document.getElementById(`cb-${comp.key}`);
+      if (el) selections[comp.key] = el.value;
+    }
     // Also collect qty and location if they exist
     const qtyEl = document.getElementById(`cb-${comp.key}_qty`);
     if (qtyEl) selections[comp.key + '_qty'] = qtyEl.value;
@@ -1716,13 +1794,21 @@ function _resetIdleTimer() {
 }
 
 async function savePhoto(photo) {
+  if (typeof SaveStatus !== 'undefined') SaveStatus.markSaving();
   const id = await new Promise((resolve, reject) => {
     const tx = db.transaction(['photos'], 'readwrite');
     const store = tx.objectStore('photos');
     const request = store.put(photo);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => { if (typeof SaveStatus !== 'undefined') SaveStatus.markError(request.error && request.error.message); reject(request.error); };
     request.onsuccess = () => resolve(photo.id);
   });
+  if (typeof SaveStatus !== 'undefined') {
+    SaveStatus.markSaved();
+    // Recount photos for the current survey so the pill shows the new total
+    if (typeof currentSurveyId !== 'undefined' && currentSurveyId) {
+      refreshSavePillPhotoCount(currentSurveyId);
+    }
+  }
 
   // Only queue backup for new photos (not bulk recovery imports)
   if (photo.dataUrl && photo.itemLabel && photo.itemLabel !== 'Recovered') {
@@ -2283,6 +2369,161 @@ async function pullPhotosFromFirebase() {
 
   window._photoWarnDismissed = true;
   if (downloaded > 0) renderHome();
+}
+
+// ============================================================================
+// SaveStatus — persistent visible save indicator
+// ============================================================================
+// Shows in the top-right corner of every page. Reports:
+//   - Photo count in IndexedDB for the current survey
+//   - Time since last data save ("Saved 5s ago")
+//   - State (green = saved, amber = saving, red = error)
+//
+// Hooked into savePhoto, saveSurvey, and autoSaveItemText so it updates
+// whenever ANYTHING is persisted to IndexedDB. Updates the "X seconds ago"
+// label every 2 seconds via setInterval.
+//
+// Tap reveals a detail panel with sync status (Firebase / Drive).
+// ============================================================================
+const SaveStatus = (() => {
+  let _lastSaveAt = 0;
+  let _state = 'idle';   // idle | saving | saved | error
+  let _photoCount = 0;
+  let _refreshTimer = null;
+  let _pill = null;
+
+  function show() {
+    if (_pill && document.body.contains(_pill)) return;
+    _pill = document.createElement('button');
+    _pill.id = 'saveStatusPill';
+    _pill.style.cssText = 'position:fixed;top:calc(8px + env(safe-area-inset-top, 0px));right:8px;z-index:1500;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.96);color:#0f172a;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.12);cursor:pointer;font-family:inherit;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);';
+    _pill.innerHTML = '<span id="saveDot" style="width:8px;height:8px;border-radius:50%;background:#9ca3af;display:inline-block;"></span><span id="saveText">Idle</span>';
+    _pill.title = 'Save status — tap for sync details';
+    _pill.onclick = _showDetailPanel;
+    document.body.appendChild(_pill);
+    if (!_refreshTimer) {
+      _refreshTimer = setInterval(_refresh, 2000);
+    }
+    _refresh();
+  }
+
+  function hide() {
+    if (_pill) { _pill.remove(); _pill = null; }
+    if (_refreshTimer) { clearInterval(_refreshTimer); _refreshTimer = null; }
+  }
+
+  function setPhotoCount(n) {
+    _photoCount = n;
+    _refresh();
+  }
+
+  function markSaving() {
+    _state = 'saving';
+    _refresh();
+  }
+
+  function markSaved() {
+    _state = 'saved';
+    _lastSaveAt = Date.now();
+    _refresh();
+  }
+
+  function markError(msg) {
+    _state = 'error';
+    _refresh();
+    if (_pill) _pill.title = 'Save error — ' + (msg || 'unknown') + '. Tap for details.';
+  }
+
+  function _refresh() {
+    if (!_pill) return;
+    const dot = document.getElementById('saveDot');
+    const text = document.getElementById('saveText');
+    if (!dot || !text) return;
+
+    let dotColor, label;
+    if (_state === 'saving') {
+      dotColor = '#f59e0b';
+      label = 'Saving…';
+    } else if (_state === 'error') {
+      dotColor = '#dc2626';
+      label = 'Save error';
+    } else if (_state === 'saved' || _state === 'idle') {
+      dotColor = '#16a34a';
+      const photos = _photoCount > 0 ? `· ${_photoCount} 📷` : '';
+      if (_lastSaveAt === 0) {
+        label = `✓ Saved ${photos}`;
+      } else {
+        const secs = Math.floor((Date.now() - _lastSaveAt) / 1000);
+        let when;
+        if (secs < 5) when = 'just now';
+        else if (secs < 60) when = `${secs}s ago`;
+        else if (secs < 3600) when = `${Math.floor(secs / 60)}m ago`;
+        else when = `${Math.floor(secs / 3600)}h ago`;
+        label = `✓ Saved ${when} ${photos}`.trim();
+      }
+    }
+    dot.style.background = dotColor;
+    text.textContent = label;
+  }
+
+  function _showDetailPanel() {
+    const existing = document.getElementById('saveStatusDetail');
+    if (existing) { existing.remove(); return; }
+
+    const firebaseOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled();
+    const driveOk = typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn();
+    const session = (window._backupStats && window._backupStats.session) || 0;
+    const fbBacked = (window._backupStats && window._backupStats.firebase) || 0;
+    const queued = (window._backupStats && window._backupStats.queued) || 0;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'saveStatusDetail';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:10000;display:flex;align-items:flex-start;justify-content:flex-end;padding:60px 8px 0 8px;';
+    overlay.innerHTML = `
+      <div style="background:white;border-radius:12px;width:100%;max-width:340px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,0.2);" onclick="event.stopPropagation();">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <strong style="font-size:14px;color:#0f172a;">Save status</strong>
+          <button id="ssClose" style="background:none;border:none;font-size:20px;color:#64748b;cursor:pointer;line-height:1;">×</button>
+        </div>
+        <div style="font-size:13px;line-height:1.7;color:#374151;">
+          <div><strong>Local (this device):</strong></div>
+          <div style="padding-left:10px;">📷 ${_photoCount} photos in IndexedDB</div>
+          <div style="padding-left:10px;">💾 Last data save: ${_lastSaveAt ? new Date(_lastSaveAt).toLocaleTimeString() : 'no saves yet this session'}</div>
+          <div style="margin-top:8px;"><strong>Cloud (Firebase):</strong></div>
+          <div style="padding-left:10px;">${firebaseOk ? `✓ Connected · ${fbBacked}/${session} this session backed up` : '○ Not connected'}</div>
+          ${queued > 0 ? `<div style="padding-left:10px;color:#d97706;">⏳ ${queued} photos queued for upload</div>` : ''}
+          <div style="margin-top:8px;"><strong>Cloud (Google Drive):</strong></div>
+          <div style="padding-left:10px;">${driveOk ? '✓ Signed in · use 💾 Backup to push' : '○ Not signed in'}</div>
+        </div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid #e5e7eb;font-size:11px;color:#6b7280;">
+          Local saves happen instantly to IndexedDB on this device. Cloud
+          backups happen automatically (Firebase) when you pause for 5+ seconds,
+          or on demand (Drive backup button).
+        </div>
+      </div>
+    `;
+    overlay.onclick = () => overlay.remove();
+    document.body.appendChild(overlay);
+    const closeBtn = document.getElementById('ssClose');
+    if (closeBtn) closeBtn.onclick = () => overlay.remove();
+  }
+
+  return { show, hide, markSaving, markSaved, markError, setPhotoCount };
+})();
+
+// Wrapper to count photos in IndexedDB for a survey and update the pill
+async function refreshSavePillPhotoCount(surveyId) {
+  if (!surveyId || typeof db === 'undefined' || !db) return;
+  try {
+    const count = await new Promise((resolve, reject) => {
+      const tx = db.transaction(['photos'], 'readonly');
+      const index = tx.objectStore('photos').index('surveyId');
+      const req = index.count(IDBKeyRange.only(surveyId));
+      req.onsuccess = () => resolve(req.result || 0);
+      req.onerror = () => reject(req.error);
+    });
+    SaveStatus.setPhotoCount(count);
+  } catch (e) { /* swallow — non-essential */ }
 }
 
 // Update the backup status badge in the bottom bar
@@ -5876,6 +6117,8 @@ function renderHome() {
   // Remove inspection bottom bar (Backup / Check Survey / Preview Report)
   const bottomBar = document.getElementById('inspectionBottomBar');
   if (bottomBar) bottomBar.remove();
+  // Hide the save status pill on the home page (it's per-survey)
+  if (typeof SaveStatus !== 'undefined') SaveStatus.hide();
   // Hide the floating collapse button (only relevant on inspection view)
   updateCollapseButton(false);
   const app = document.getElementById('app');
@@ -7256,6 +7499,12 @@ function editSurveyDetails(surveyId) {
     // Render the same form as renderNewSurveyForm but in edit mode
     currentSurveyId = survey.id;
 
+    // Show the persistent save status pill while editing intro fields
+    if (typeof SaveStatus !== 'undefined') {
+      SaveStatus.show();
+      if (survey.id) refreshSavePillPhotoCount(survey.id);
+    }
+
     const existingFab = document.querySelector('.fab');
     if (existingFab) existingFab.remove();
     const bottomBarEl3 = document.getElementById('inspectionBottomBar');
@@ -7468,8 +7717,10 @@ function editSurveyDetails(surveyId) {
       let _editAutoSaveTimer = null;
       const _editAutoSave = () => {
         clearTimeout(_editAutoSaveTimer);
+        if (typeof SaveStatus !== 'undefined') SaveStatus.markSaving();
         _editAutoSaveTimer = setTimeout(() => {
           saveEditFormSilently().then(() => {
+            if (typeof SaveStatus !== 'undefined') SaveStatus.markSaved();
             // Subtle indicator — no toast, just a quick flash on the header subtitle
             const sub = document.querySelector('.header-subtitle');
             if (sub) {
@@ -7477,6 +7728,8 @@ function editSurveyDetails(surveyId) {
               sub.textContent = 'Saved ✓';
               setTimeout(() => { sub.textContent = orig; }, 800);
             }
+          }).catch(err => {
+            if (typeof SaveStatus !== 'undefined') SaveStatus.markError(err && err.message);
           });
         }, 1500);
       };
@@ -9386,6 +9639,13 @@ function renderInspection(survey) {
   if (existingFab) existingFab.remove();
   const existingBottomBar = document.getElementById('inspectionBottomBar');
   if (existingBottomBar) existingBottomBar.remove();
+
+  // Show the persistent save status pill (top-right). Initialize the photo
+  // count for this survey so it shows immediately.
+  if (typeof SaveStatus !== 'undefined') {
+    SaveStatus.show();
+    if (survey && survey.id) refreshSavePillPhotoCount(survey.id);
+  }
 
   // Migrate old item labels to current template (runs once per survey)
   if (migrateSurveyLabels(survey)) {
@@ -14759,7 +15019,9 @@ function selectRating(itemLabel, categoryName, rating) {
       }
     }
 
+    if (typeof SaveStatus !== 'undefined') SaveStatus.markSaving();
     saveSurvey(survey).then(() => {
+      if (typeof SaveStatus !== 'undefined') SaveStatus.markSaved();
       // Try compact card update first (new layout)
       const compactDiv = document.querySelector(`.compact-item-wrapper[data-item-label="${itemLabel.replace(/"/g, '\\"')}"]`);
       if (compactDiv) {
@@ -15306,8 +15568,12 @@ function autoSaveItemText(itemLabel, categoryName) {
     // Auto-sync engine checklist data → intro header fields
     _syncEngineFieldsFromBody(survey, itemLabel, text);
 
+    if (typeof SaveStatus !== 'undefined') SaveStatus.markSaving();
     saveSurvey(survey).then(() => {
+      if (typeof SaveStatus !== 'undefined') SaveStatus.markSaved();
       showToast('Saved');
+    }).catch(err => {
+      if (typeof SaveStatus !== 'undefined') SaveStatus.markError(err && err.message);
     });
   });
 }

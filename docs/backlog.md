@@ -14,6 +14,21 @@ When adding an entry, include:
 
 ## Active
 
+### B-08 — Cannot un-skip an item back to a rated state
+
+- **What:** Once an item is marked Skipped (⊘), tapping the rating
+  badge / using the rating sheet does not seem to re-rate it. The
+  excluded flag may be sticky, blocking subsequent rating changes.
+- **Why:** Dave noted 2026-04-14 mid-survey. Not blocking but irritating.
+- **Where:** `selectRating` / `selectRatingFromSheet` in app.js. Likely
+  the path that sets `itemData.rating` doesn't also clear
+  `itemData.excluded`. Or the UI doesn't re-render after the rating
+  change. Or the toggleExclude path is needed first.
+- **Priority:** Low (Dave explicitly said not a priority).
+- **Fix sketch:** When `selectRating` is called on an item with
+  `excluded === true`, automatically clear the excluded flag and
+  re-render. Add a confirmation toast: "Item un-skipped and rated X".
+
 ### B-07 — Percussion testing: rudder gating ✅ (v2153) + checkbox builder (remaining)
 
 **Part 1 — Rudder gating: ✅ Done in v2153.** Tokenisation system
