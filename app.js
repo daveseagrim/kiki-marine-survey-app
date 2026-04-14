@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2123';
+const APP_VERSION = 'v2124';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1657,9 +1657,11 @@ async function deleteSurvey(id) {
   });
 }
 
-// ─── Photo backup tracking ─────────────────────────────────────────────────
+// ─── Photo backup tracking & offline retry queue ───────────────────────────
 let _photosSinceLastBackup = 0;
-let _backupStats = { firebase: 0, firebaseFail: 0, cameraRoll: 0, cameraRollFail: 0, session: 0 };
+let _backupStats = { firebase: 0, firebaseFail: 0, session: 0, queued: 0 };
+let _backupQueue = [];  // Photos that failed to push — retried when online
+let _backupQueueRunning = false;
 
 async function savePhoto(photo) {
   const id = await new Promise((resolve, reject) => {
@@ -1670,55 +1672,194 @@ async function savePhoto(photo) {
     request.onsuccess = () => resolve(photo.id);
   });
 
-  _backupStats.session++;
+  // Only run backup logic for new photos (not bulk recovery imports)
+  if (photo.dataUrl && photo.itemLabel && photo.itemLabel !== 'Recovered') {
+    _backupStats.session++;
 
-  // ── BACKUP 1: Firebase Storage (with retry — up to 3 attempts) ──
-  if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled() && photo.dataUrl) {
-    let pushed = false;
-    for (let attempt = 1; attempt <= 3 && !pushed; attempt++) {
-      try {
-        await FirebaseSync.pushPhoto(photo);
-        pushed = true;
-        _backupStats.firebase++;
-      } catch (err) {
-        console.warn(`[Backup] Firebase attempt ${attempt}/3 failed:`, err.message);
-        if (attempt < 3) await new Promise(r => setTimeout(r, 1000 * attempt));
-      }
+    // ── BACKUP 1: Firebase Storage (NON-BLOCKING — queues on failure) ──
+    if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled()) {
+      // Fire-and-forget — don't block the user
+      _pushPhotoToFirebase(photo);
+    } else {
+      // Firebase not available — queue for later
+      _addToBackupQueue(photo);
     }
-    if (!pushed) {
-      _backupStats.firebaseFail++;
-      _showBackupWarning('Firebase', photo.itemLabel || photo.id);
+
+    // ── BACKUP 2: Google Drive every 3 photos (non-blocking) ──
+    _photosSinceLastBackup++;
+    if (_photosSinceLastBackup >= 3 && typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn() && currentSurveyId) {
+      _photosSinceLastBackup = 0;
+      DriveBackup.backupSurvey(currentSurveyId).catch(err => {
+        console.warn('[Backup] Drive backup failed:', err.message);
+      });
     }
-  } else if (photo.dataUrl && photo.itemLabel && photo.itemLabel !== 'Recovered') {
-    // Firebase not available — warn immediately
-    _backupStats.firebaseFail++;
-    _showBackupWarning('Firebase (not connected)', photo.itemLabel || photo.id);
-  }
 
-  // ── BACKUP 2: Google Drive every 3 photos (was 5, now more frequent) ──
-  _photosSinceLastBackup++;
-  if (_photosSinceLastBackup >= 3 && typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn() && currentSurveyId) {
-    _photosSinceLastBackup = 0;
-    try {
-      await DriveBackup.backupSurvey(currentSurveyId);
-      _backupStats.drive = (_backupStats.drive || 0) + 1;
-    } catch (err) {
-      console.warn('[Backup] Drive backup failed:', err.message);
-      _showBackupWarning('Google Drive', 'survey backup');
+    // ── Warn if neither cloud backup is connected ──
+    const firebaseOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled();
+    const driveOk = typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn();
+    if (!firebaseOk && !driveOk && _photosSinceLastBackup >= 3) {
+      showBackupReminder();
     }
-  }
 
-  // ── Reminder if neither cloud backup is connected ──
-  const firebaseOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled();
-  const driveOk = typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn();
-  if (!firebaseOk && !driveOk && _photosSinceLastBackup >= 3) {
-    showBackupReminder();
+    _updateBackupStatusUI();
   }
-
-  // ── Update backup status indicator ──
-  _updateBackupStatusUI();
 
   return id;
+}
+
+// Push a single photo to Firebase — retries 3 times, then queues for later
+async function _pushPhotoToFirebase(photo) {
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      await FirebaseSync.pushPhoto(photo);
+      _backupStats.firebase++;
+      _updateBackupStatusUI();
+      return; // success
+    } catch (err) {
+      console.warn(`[Backup] Firebase attempt ${attempt}/3 failed:`, err.message);
+      if (attempt < 3) await new Promise(r => setTimeout(r, 1000 * attempt));
+    }
+  }
+  // All retries failed — queue for later
+  _addToBackupQueue(photo);
+  _showBackupWarning('Firebase', photo.itemLabel || photo.id);
+}
+
+// Add a failed photo to the retry queue
+function _addToBackupQueue(photo) {
+  // Store just the ID — we'll fetch the full photo from IndexedDB when retrying
+  if (!_backupQueue.includes(photo.id)) {
+    _backupQueue.push(photo.id);
+    _backupStats.queued = _backupQueue.length;
+    _updateBackupStatusUI();
+  }
+}
+
+// Process the retry queue — called when connectivity returns
+async function _processBackupQueue() {
+  if (_backupQueueRunning || _backupQueue.length === 0) return;
+  if (typeof FirebaseSync === 'undefined' || !FirebaseSync.isEnabled()) return;
+
+  _backupQueueRunning = true;
+  console.log(`[Backup] Processing retry queue: ${_backupQueue.length} photos`);
+
+  const remaining = [..._backupQueue];
+  _backupQueue = [];
+
+  for (const photoId of remaining) {
+    try {
+      const photo = await getPhotoById(photoId);
+      if (photo && photo.dataUrl) {
+        await FirebaseSync.pushPhoto(photo);
+        _backupStats.firebase++;
+        _backupStats.queued = _backupQueue.length;
+        _updateBackupStatusUI();
+      }
+    } catch (err) {
+      // Re-queue this photo
+      if (!_backupQueue.includes(photoId)) _backupQueue.push(photoId);
+      console.warn(`[Backup] Retry failed for ${photoId}:`, err.message);
+    }
+  }
+
+  _backupStats.queued = _backupQueue.length;
+  _updateBackupStatusUI();
+  _backupQueueRunning = false;
+
+  if (_backupQueue.length === 0) {
+    showToast('All queued photos backed up ✓');
+  } else {
+    console.log(`[Backup] ${_backupQueue.length} photos still in retry queue`);
+  }
+}
+
+// Listen for connectivity changes — auto-retry when back online
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    console.log('[Backup] Back online — processing retry queue');
+    setTimeout(() => _processBackupQueue(), 2000); // brief delay for connection to stabilise
+  });
+}
+
+// Sync ALL existing photos to Firebase (for photos that were never backed up)
+async function syncAllPhotosToFirebase() {
+  if (typeof FirebaseSync === 'undefined' || !FirebaseSync.isEnabled()) {
+    showAlert('Firebase is not connected. Open the app and ensure the sync dot is green.');
+    return;
+  }
+
+  const surveys = await getAllSurveys();
+  let total = 0;
+  let uploaded = 0;
+  let skipped = 0;
+  let failed = 0;
+
+  // First, count all photos
+  for (const survey of surveys) {
+    const photos = await new Promise((resolve) => {
+      const tx = db.transaction(['photos'], 'readonly');
+      const index = tx.objectStore('photos').index('surveyId');
+      const results = [];
+      index.openCursor(IDBKeyRange.only(survey.id)).onsuccess = (e) => {
+        const cursor = e.target.result;
+        if (cursor) { results.push(cursor.value); cursor.continue(); }
+        else resolve(results);
+      };
+    });
+    total += photos.length;
+  }
+
+  if (total === 0) { showToast('No photos to sync'); return; }
+
+  const doSync = await new Promise(resolve => {
+    showAlert(`Sync ${total} photos across ${surveys.length} surveys to Firebase? This may take a while.`,
+      'Start Sync', () => resolve(true), 'Cancel', () => resolve(false));
+  });
+  if (!doSync) return;
+
+  showToast(`Syncing ${total} photos to Firebase...`);
+
+  for (const survey of surveys) {
+    // Check which photos are already in Firebase
+    let existingIds = new Set();
+    try {
+      const snap = await window.fsDb.collection('photos')
+        .where('surveyId', '==', survey.id)
+        .get();
+      snap.docs.forEach(doc => existingIds.add(doc.id));
+    } catch (e) { /* continue anyway */ }
+
+    const photos = await new Promise((resolve) => {
+      const tx = db.transaction(['photos'], 'readonly');
+      const index = tx.objectStore('photos').index('surveyId');
+      const results = [];
+      index.openCursor(IDBKeyRange.only(survey.id)).onsuccess = (e) => {
+        const cursor = e.target.result;
+        if (cursor) { results.push(cursor.value); cursor.continue(); }
+        else resolve(results);
+      };
+    });
+
+    for (const photo of photos) {
+      if (existingIds.has(photo.id)) {
+        skipped++;
+        continue;
+      }
+      try {
+        await FirebaseSync.pushPhoto(photo);
+        uploaded++;
+        if (uploaded % 10 === 0) showToast(`Synced ${uploaded} photos (${skipped} already existed)...`);
+      } catch (err) {
+        failed++;
+        console.warn(`[Sync] Failed: ${photo.id}`, err.message);
+      }
+    }
+
+    // Also push the survey data
+    try { await FirebaseSync.pushSurvey(survey); } catch (e) { /* non-critical */ }
+  }
+
+  showAlert(`Firebase sync complete!\n\n${uploaded} uploaded, ${skipped} already existed, ${failed} failed.`);
 }
 
 // Update the backup status badge in the bottom bar
@@ -1732,22 +1873,27 @@ function _updateBackupStatusUI() {
   const backed = _backupStats.firebase;
   const failed = _backupStats.firebaseFail;
 
-  if (total === 0) {
+  if (total === 0 && queued === 0) {
     badge.style.display = 'none';
     return;
   }
 
   badge.style.display = 'inline-flex';
+  const queued = _backupStats.queued || 0;
 
-  // Colour: green if all backed up, yellow if some failed, red if none backed up
-  if (failed === 0 && firebaseOk) {
+  // Colour: green if all backed up, yellow if some queued, red if none backed up
+  if (queued === 0 && backed >= total && firebaseOk) {
     badge.style.background = '#16a34a';
     badge.textContent = `☁️ ${backed}/${total}`;
-    badge.title = `${backed} of ${total} photos backed up to Firebase${driveOk ? ' + Drive' : ''}`;
+    badge.title = `All ${total} photos backed up to Firebase${driveOk ? ' + Drive' : ''}`;
+  } else if (queued > 0) {
+    badge.style.background = '#d97706';
+    badge.textContent = `⏳ ${queued} queued`;
+    badge.title = `${queued} photos waiting to upload — will sync when online`;
   } else if (backed > 0) {
     badge.style.background = '#d97706';
-    badge.textContent = `⚠️ ${backed}/${total}`;
-    badge.title = `${backed} of ${total} backed up, ${failed} failed — check connection`;
+    badge.textContent = `☁️ ${backed}/${total}`;
+    badge.title = `${backed} of ${total} backed up`;
   } else {
     badge.style.background = '#dc2626';
     badge.textContent = `🚨 0/${total}`;
@@ -5322,8 +5468,12 @@ function renderHome() {
     const driveBtn = DriveBackup.isSignedIn()
       ? `<button style="${pillBase}background:#3399cc;color:white;" onclick="DriveBackup.backupAll()">☁️ Backup to Drive</button>`
       : `<button style="${pillBase}background:rgba(0,102,153,0.08);color:#006699;border:1px solid #3399cc;" onclick="(async()=>{try{await DriveBackup.signIn();showToast('Signed in to Google Drive ✓');renderHome();}catch(e){if(e.code!=='auth/popup-closed-by-user')showAlert('Sign-in failed: '+e.message);}})()">☁️ Google Drive</button>`;
+    const firebaseSyncBtn = (typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled())
+      ? `<button style="${pillBase}background:#f59e0b;color:white;" onclick="syncAllPhotosToFirebase()">🔥 Sync All to Firebase</button>`
+      : '';
     const importBtn = `<div style="display:flex;gap:8px;margin-bottom:12px;">
         ${driveBtn}
+        ${firebaseSyncBtn}
         <button style="${pillBase}background:#ffcc00;color:#006699;font-weight:700;" onclick="exportAllSurveys()">📦 Export</button>
         <button style="${pillBase}background:#006699;color:white;" onclick="importSurvey()">📥 Import</button>
       </div>`;
