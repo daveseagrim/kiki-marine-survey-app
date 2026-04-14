@@ -14,6 +14,47 @@ When adding an entry, include:
 
 ## Active
 
+### B-07 — Percussion testing snippets: gate rudder mentions on hasRudder + checkbox sentence builder
+
+- **What:** Two related requests for the "Hull and rudder(s) percussion
+  testing" checklist item:
+  1. **Suppress rudder mentions when the vessel has no rudder.** An
+     outdrive or IPS vessel has no rudder; the snippet must say only
+     "The hull was percussion tested…" and omit any rudder clause.
+     When `survey.hasRudder === true`, include rudder(s) using the
+     `{count:rudder|rudders}` pluralisation pattern already in the
+     app (see memory `project_drive_line_plurals.md`).
+  2. **Build sentences from checkboxes.** Dave wants to tick multiple
+     checkboxes describing what was tested and what was found, and have
+     those compose into a grammatically-correct sentence. This is the
+     same idea as the existing "component builder" pattern
+     (`onComponentBuilderChange` / `cb-customNotes` referenced in
+     app.js) but applied to percussion testing.
+- **Why:** Dave noted 2026-04-14 while surveying. Currently snippets
+  with rudder references appear on vessels that have no rudder — a
+  report-accuracy issue. And the checkbox builder would turn a long
+  fuzzy-match snippet pick into a quick tick-tick-done composition.
+- **Where:** `text_library.json` under Hull category for the snippet
+  content. For the checkbox builder: audit how `onComponentBuilderChange`
+  works today and extend the pattern to percussion testing specifically.
+  Likely new `componentSchema` for percussion testing in app.js or a
+  data file.
+- **Priority:** High. Rudder mention on a no-rudder vessel is an
+  embarrassing error in a paid report.
+- **Fix sketch:**
+  1. Add `{if-hasRudder:...}` and `{count:rudder|rudders}` tokenisation
+     support in whatever render function emits these snippets.
+  2. Rewrite percussion-testing snippets to use the tokens.
+  3. Add a component-builder schema for percussion testing with
+     checkboxes for: testing method (hammer, mallet, other), areas
+     tested (hull sides, transom, keel, rudder if present), findings
+     (no anomalies, suspicious tonal change at X, voids detected, etc.).
+     Selecting boxes composes a sentence via the existing builder
+     framework.
+  4. Covers a subset of the broader B-06 work but is more urgent —
+     percussion testing is done on every survey, rudder-mention errors
+     are visible every time.
+
 ### B-06 — Hull/rudder below-waterline snippets: separate damage from antifouling, include rudders when present
 
 - **What:** Two related issues with the hull-and-rudder below-waterline
