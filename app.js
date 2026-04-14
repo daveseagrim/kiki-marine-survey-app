@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2136';
+const APP_VERSION = 'v2137';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -17344,32 +17344,34 @@ const DriveBackup = (() => {
     }
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.addScope(DRIVE_SCOPE);
+    // Set custom parameter to skip account chooser if already signed in
+    provider.setCustomParameters({ prompt: 'consent', login_hint: 'daveseagrim@gmail.com' });
     const result = await firebase.auth().signInWithPopup(provider);
     _accessToken = result.credential.accessToken;
-    // Persist token expiry awareness — tokens last ~1 hour
     window._driveTokenTime = Date.now();
+    console.log('[Drive] Signed in, token obtained');
     return _accessToken;
   }
 
   // Refresh token if expired (tokens last ~1 hour)
   async function ensureToken() {
-    if (!_accessToken || (Date.now() - (window._driveTokenTime || 0)) > 3300000) {
-      // Re-auth silently if possible, otherwise prompt
-      const user = firebase.auth().currentUser;
-      if (user) {
-        try {
-          const provider = new firebase.auth.GoogleAuthProvider();
-          provider.addScope(DRIVE_SCOPE);
-          const result = await user.reauthenticateWithPopup(provider);
-          _accessToken = result.credential.accessToken;
-          window._driveTokenTime = Date.now();
-        } catch (e) {
-          // Fall through to full sign-in
-          await signIn();
-        }
-      } else {
-        await signIn();
-      }
+    if (_accessToken && (Date.now() - (window._driveTokenTime || 0)) < 3300000) {
+      return _accessToken; // Still valid
+    }
+    console.log('[Drive] Token expired or missing, refreshing...');
+    // Use signInWithPopup with login_hint to auto-select account
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.addScope(DRIVE_SCOPE);
+    provider.setCustomParameters({ prompt: 'none', login_hint: 'daveseagrim@gmail.com' });
+    try {
+      const result = await firebase.auth().signInWithPopup(provider);
+      _accessToken = result.credential.accessToken;
+      window._driveTokenTime = Date.now();
+      console.log('[Drive] Token refreshed');
+    } catch (e) {
+      console.warn('[Drive] Silent refresh failed, trying full sign-in:', e.message);
+      // Fall back to full sign-in
+      await signIn();
     }
     return _accessToken;
   }
@@ -17539,6 +17541,7 @@ const DriveBackup = (() => {
 
     let done = 0;
     let failed = 0;
+    let lastError = '';
     for (const survey of surveys) {
       try {
         showToast(`Backing up ${survey.vesselName || 'survey'}... (${done + 1}/${surveys.length})`);
@@ -17546,11 +17549,12 @@ const DriveBackup = (() => {
         done++;
       } catch (err) {
         console.error(`Drive backup failed for ${survey.vesselName}:`, err);
+        lastError = err.message || String(err);
         failed++;
       }
     }
     if (failed > 0) {
-      showAlert(`Backed up ${done} surveys. ${failed} failed.`);
+      showAlert(`Backed up ${done} surveys. ${failed} failed.\n\nError: ${lastError}`);
     } else {
       showToast(`All ${done} surveys backed up to Drive ✓`);
     }
