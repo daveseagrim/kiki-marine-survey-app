@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2128';
+const APP_VERSION = 'v2129';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1865,6 +1865,7 @@ if (typeof document !== 'undefined') {
 }
 
 // Sync ALL existing photos to Firebase (for photos that were never backed up)
+// MEMORY-SAFE: only loads one photo at a time to avoid Aw Snap crashes
 async function syncAllPhotosToFirebase() {
   if (typeof FirebaseSync === 'undefined' || !FirebaseSync.isEnabled()) {
     showAlert('Firebase is not connected. Open the app and ensure the sync dot is green.');
@@ -1872,26 +1873,27 @@ async function syncAllPhotosToFirebase() {
   }
 
   const surveys = await getAllSurveys();
-  let total = 0;
   let uploaded = 0;
   let skipped = 0;
   let failed = 0;
 
-  // First, count all photos
+  // Step 1: Collect all photo IDs (keys only — no image data in memory)
+  const allPhotoIds = [];
   for (const survey of surveys) {
-    const photos = await new Promise((resolve) => {
+    const ids = await new Promise((resolve) => {
       const tx = db.transaction(['photos'], 'readonly');
       const index = tx.objectStore('photos').index('surveyId');
-      const results = [];
-      index.openCursor(IDBKeyRange.only(survey.id)).onsuccess = (e) => {
+      const keys = [];
+      index.openKeyCursor(IDBKeyRange.only(survey.id)).onsuccess = (e) => {
         const cursor = e.target.result;
-        if (cursor) { results.push(cursor.value); cursor.continue(); }
-        else resolve(results);
+        if (cursor) { keys.push(cursor.primaryKey); cursor.continue(); }
+        else resolve(keys);
       };
     });
-    total += photos.length;
+    for (const id of ids) allPhotoIds.push({ id, surveyId: survey.id });
   }
 
+  const total = allPhotoIds.length;
   if (total === 0) { showToast('No photos to sync'); return; }
 
   // Show progress bar immediately
@@ -1914,54 +1916,70 @@ async function syncAllPhotosToFirebase() {
       </div>`;
   }
 
-  _updateSyncBar(`🔥 Checking ${surveys.length} surveys... 0/${total} photos`, 0);
+  _updateSyncBar(`🔥 Syncing ${total} photos...`, 0);
 
-  let processed = 0; // total photos we've looked at (uploaded + skipped)
-
+  // Step 2: Check which photos already exist in Firebase (metadata only)
+  const existingInFirebase = new Set();
   for (const survey of surveys) {
-    // Check which photos are already in Firebase
-    let existingIds = new Set();
     try {
       const snap = await window.fsDb.collection('photos')
         .where('surveyId', '==', survey.id)
         .get();
-      snap.docs.forEach(doc => existingIds.add(doc.id));
-    } catch (e) { /* continue anyway */ }
+      snap.docs.forEach(doc => existingInFirebase.add(doc.id));
+    } catch (e) { /* continue */ }
+  }
 
-    const photos = await new Promise((resolve) => {
-      const tx = db.transaction(['photos'], 'readonly');
-      const index = tx.objectStore('photos').index('surveyId');
-      const results = [];
-      index.openCursor(IDBKeyRange.only(survey.id)).onsuccess = (e) => {
-        const cursor = e.target.result;
-        if (cursor) { results.push(cursor.value); cursor.continue(); }
-        else resolve(results);
-      };
-    });
+  // Step 3: Process ONE photo at a time — load, upload, release
+  let processed = 0;
+  let lastSurveyId = null;
 
-    for (const photo of photos) {
-      if (existingIds.has(photo.id)) {
-        skipped++;
-        processed++;
+  for (const entry of allPhotoIds) {
+    processed++;
+
+    // Skip if already in Firebase
+    if (existingInFirebase.has(entry.id)) {
+      skipped++;
+      if (processed % 20 === 0 || processed === total) {
         const pct = Math.round((processed / total) * 100);
-        if (skipped % 20 === 0) _updateSyncBar(`🔥 ${uploaded} uploaded, ${skipped} already synced — ${pct}%`, pct);
-        continue;
+        _updateSyncBar(`🔥 ${uploaded} uploaded, ${skipped} already synced — ${pct}%`, pct);
       }
-      try {
-        await FirebaseSync.pushPhoto(photo);
-        uploaded++;
-        processed++;
-        const pct = Math.round((processed / total) * 100);
-        _updateSyncBar(`🔥 Uploading... ${uploaded} new, ${skipped} existing — ${pct}%`, pct);
-      } catch (err) {
-        failed++;
-        processed++;
-        console.warn(`[Sync] Failed: ${photo.id}`, err.message);
-      }
+      continue;
     }
 
-    // Also push the survey data
-    try { await FirebaseSync.pushSurvey(survey); } catch (e) { /* non-critical */ }
+    try {
+      // Load ONE photo from IndexedDB
+      const photo = await getPhotoById(entry.id);
+      if (photo && photo.dataUrl) {
+        await FirebaseSync.pushPhoto(photo);
+        uploaded++;
+      } else {
+        skipped++; // No data to upload
+      }
+    } catch (err) {
+      failed++;
+      console.warn(`[Sync] Failed: ${entry.id}`, err.message);
+    }
+
+    const pct = Math.round((processed / total) * 100);
+    _updateSyncBar(`🔥 Uploading... ${uploaded} new, ${skipped} existing — ${pct}%`, pct);
+
+    // Brief pause every 5 photos to let browser breathe
+    if (uploaded % 5 === 0) await new Promise(r => setTimeout(r, 100));
+
+    // Push survey data once per survey (when we move to the next one)
+    if (entry.surveyId !== lastSurveyId) {
+      if (lastSurveyId) {
+        const prevSurvey = surveys.find(s => s.id === lastSurveyId);
+        if (prevSurvey) { try { await FirebaseSync.pushSurvey(prevSurvey); } catch(e) {} }
+      }
+      lastSurveyId = entry.surveyId;
+    }
+  }
+
+  // Push the final survey
+  if (lastSurveyId) {
+    const lastSurvey = surveys.find(s => s.id === lastSurveyId);
+    if (lastSurvey) { try { await FirebaseSync.pushSurvey(lastSurvey); } catch(e) {} }
   }
 
   // Show completion
