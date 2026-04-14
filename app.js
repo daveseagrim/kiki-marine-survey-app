@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2138';
+const APP_VERSION = 'v2139';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -5699,7 +5699,7 @@ function renderHome() {
     const content = document.getElementById('surveys-content');
 
     // Import, Export, and Drive Backup buttons at top — branded pill style
-    const pillBase = 'flex:1;border:none;border-radius:22px;padding:8px 4px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;text-align:center;';
+    const pillBase = 'flex:1;border:none;border-radius:14px;padding:8px 4px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;text-align:center;';
     const driveBtn = DriveBackup.isSignedIn()
       ? `<button style="${pillBase}background:#3399cc;color:white;" onclick="DriveBackup.backupAll()">☁️ Backup to Drive</button>`
       : `<button style="${pillBase}background:rgba(0,102,153,0.08);color:#006699;border:1px solid #3399cc;" onclick="(async()=>{try{await DriveBackup.signIn();showToast('Signed in to Google Drive ✓');renderHome();}catch(e){if(e.code!=='auth/popup-closed-by-user')showAlert('Sign-in failed: '+e.message);}})()">☁️ Google Drive</button>`;
@@ -5813,17 +5813,18 @@ function renderHome() {
                     </svg>
                     <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:${progressColour};">${completion}</div>
                   </div>
-                  <span id="${rowId}-chev" style="display:inline-flex;align-items:center;justify-content:center;min-width:32px;min-height:44px;font-size:18px;color:#94a3b8;flex-shrink:0;"
-                        onclick="event.stopPropagation();toggleSurveyRow('${survey.id}')">▸</span>
                 </div>
+                <!-- Expand arrow (left side) -->
+                <span id="${rowId}-chev" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;font-size:24px;color:#94a3b8;flex-shrink:0;order:-1;"
+                      onclick="event.stopPropagation();toggleSurveyRow('${survey.id}')">▸</span>
               </div>
               <!-- Expandable actions panel -->
-              <div id="${rowId}" style="display:none;padding:0 10px 10px 42px;">
+              <div id="${rowId}" style="display:none;padding:0 10px 10px 52px;">
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                  <button onclick="event.stopPropagation();openSurvey('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#006699;color:white;border:none;border-radius:8px;cursor:pointer;">Open</button>
-                  <button onclick="event.stopPropagation();exportSurvey('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:8px;cursor:pointer;">📤 Export</button>
-                  <button onclick="event.stopPropagation();duplicateSurvey('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:8px;cursor:pointer;">📋 Copy</button>
-                  <button onclick="event.stopPropagation();deleteSurveyConfirm('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#fef2f2;color:#dc2626;border:none;border-radius:8px;cursor:pointer;">🗑 Delete</button>
+                  <button onclick="event.stopPropagation();openSurvey('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#006699;color:white;border:none;border-radius:14px;cursor:pointer;">Open</button>
+                  <button onclick="event.stopPropagation();(async()=>{const s=await getSurvey('${survey.id}');if(s)generateReport(s);})()" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:14px;cursor:pointer;">📄 Report</button>
+                  <button onclick="event.stopPropagation();exportSurvey('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:14px;cursor:pointer;">📤 Export</button>
+                  <button onclick="event.stopPropagation();deleteSurveyConfirm('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#fef2f2;color:#dc2626;border:none;border-radius:14px;cursor:pointer;">🗑 Delete</button>
                 </div>
               </div>
             </div>
@@ -9655,14 +9656,7 @@ function ensureReportButton() {
   bottomBar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) 12px;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 -2px 10px rgba(0,0,0,0.1);z-index:100;';
   document.body.appendChild(bottomBar);
 
-  const pillStyle = 'border:none;border-radius:22px;padding:8px 12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;';
-
-  // Update button
-  const updateBtn = document.createElement('button');
-  updateBtn.style.cssText = pillStyle + 'background:rgba(0,102,153,0.08);color:#006699;border:1px solid #3399cc;';
-  updateBtn.innerHTML = '↻ Update';
-  updateBtn.onclick = () => forceAppUpdate();
-  bottomBar.appendChild(updateBtn);
+  const pillStyle = 'border:none;border-radius:14px;padding:8px 12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;';
 
   // Desc button
   const descBtn = document.createElement('button');
@@ -9843,14 +9837,6 @@ function ensureReportButton() {
     }
   };
   bottomBar.appendChild(recoverBtn);
-
-  // Check Survey button
-  const checkBtn = document.createElement('button');
-  checkBtn.id = 'checkSurveyBtn';
-  checkBtn.style.cssText = pillStyle + 'background:#ffcc00;color:#006699;font-weight:700;';
-  checkBtn.innerHTML = '✅ Check';
-  checkBtn.onclick = () => checkSurvey();
-  bottomBar.appendChild(checkBtn);
 
   // Preview Report button
   btn = document.createElement('button');
@@ -15108,7 +15094,7 @@ function updateCollapseButton(show) {
     if (!btn) {
       btn = document.createElement('button');
       btn.id = 'floatingCollapseBtn';
-      btn.style.cssText = 'position:fixed;bottom:100px;right:16px;z-index:9998;background:#006699;color:white;border:none;border-radius:24px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.35);display:flex;align-items:center;gap:6px;';
+      btn.style.cssText = 'position:fixed;bottom:130px;right:16px;z-index:9998;background:#006699;color:white;border:none;border-radius:14px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.35);display:flex;align-items:center;gap:6px;';
       btn.innerHTML = '▲ Collapse';
       btn.title = 'Collapse current section';
       btn.onclick = collapseCurrentSection;
