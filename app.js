@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2139';
+const APP_VERSION = 'v2140';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -5682,7 +5682,6 @@ function renderHome() {
              onerror="this.style.display='none'">
         <div style="display:flex;align-items:center;gap:8px;padding-bottom:2px;">
           <span style="color:#3399cc;font-size:13px;">Marine Vessel Surveys — ${APP_VERSION}</span>
-          <button onclick="forceAppUpdate()" style="background:rgba(0,102,153,0.08);border:1px solid #3399cc;color:#006699;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;min-height:32px;font-weight:600;">↻ Update</button>
         </div>
       </div>
       <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
@@ -5706,11 +5705,17 @@ function renderHome() {
     const firebaseSyncBtn = (typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled())
       ? `<button style="${pillBase}background:#f59e0b;color:white;" onclick="syncAllPhotosToFirebase()">🔥 Sync All to Firebase</button>`
       : '';
-    const importBtn = `<div style="display:flex;gap:6px;margin-bottom:12px;padding:0 4px;">
+    const importBtn = `<div style="display:flex;gap:6px;margin-bottom:12px;padding:0 4px;align-items:center;">
         ${driveBtn}
         ${firebaseSyncBtn}
-        <button style="${pillBase}background:#ffcc00;color:#006699;font-weight:700;" onclick="exportAllSurveys()">📦 Export</button>
-        <button style="${pillBase}background:#006699;color:white;" onclick="importSurvey()">📥 Import</button>
+        <div style="position:relative;flex:0 0 auto;">
+          <button style="border:none;border-radius:14px;padding:8px 12px;font-size:14px;font-weight:700;cursor:pointer;background:#f1f5f9;color:#64748b;" onclick="event.stopPropagation();const m=document.getElementById('homeOverflowMenu');if(m)m.style.display=m.style.display==='none'?'flex':'none';">⋯</button>
+          <div id="homeOverflowMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.18);padding:6px;flex-direction:column;gap:4px;min-width:170px;z-index:200;">
+            <button onclick="document.getElementById('homeOverflowMenu').style.display='none';exportAllSurveys()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#006699;">📦 Export All Surveys</button>
+            <button onclick="document.getElementById('homeOverflowMenu').style.display='none';importSurvey()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#006699;">📥 Import Survey</button>
+            <button onclick="document.getElementById('homeOverflowMenu').style.display='none';forceAppUpdate()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#64748b;">↻ Force Update</button>
+          </div>
+        </div>
       </div>`;
 
     if (surveys.length === 0) {
@@ -5821,8 +5826,7 @@ function renderHome() {
               <!-- Expandable actions panel -->
               <div id="${rowId}" style="display:none;padding:0 10px 10px 52px;">
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                  <button onclick="event.stopPropagation();openSurvey('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#006699;color:white;border:none;border-radius:14px;cursor:pointer;">Open</button>
-                  <button onclick="event.stopPropagation();(async()=>{const s=await getSurvey('${survey.id}');if(s)generateReport(s);})()" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:14px;cursor:pointer;">📄 Report</button>
+                  <button onclick="event.stopPropagation();(async()=>{const s=await getSurvey('${survey.id}');if(s)generateReport(s);})()" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#006699;color:white;border:none;border-radius:14px;cursor:pointer;">📄 Report</button>
                   <button onclick="event.stopPropagation();exportSurvey('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:14px;cursor:pointer;">📤 Export</button>
                   <button onclick="event.stopPropagation();deleteSurveyConfirm('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#fef2f2;color:#dc2626;border:none;border-radius:14px;cursor:pointer;">🗑 Delete</button>
                 </div>
@@ -7061,8 +7065,7 @@ function editSurveyDetails(surveyId) {
     const formActions = document.querySelector('.form-actions');
     if (formActions) {
       formActions.innerHTML = `
-        <button class="btn-secondary" onclick="returnToInspection('${survey.id}')">Cancel</button>
-        <button class="btn-primary" onclick="saveSurveyDetails('${survey.id}')">Save & Return to Inspection</button>
+        <button class="btn-primary" onclick="saveSurveyDetails('${survey.id}')">← Back to Inspection</button>
       `;
     }
 
@@ -7267,13 +7270,6 @@ function editSurveyDetails(surveyId) {
     editBar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) 12px;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 -2px 10px rgba(0,0,0,0.1);z-index:100;';
 
     const ps = 'border:none;border-radius:22px;padding:8px 12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;';
-
-    // ↻ Update button
-    const updateBtn2 = document.createElement('button');
-    updateBtn2.style.cssText = ps + 'background:rgba(0,102,153,0.08);color:#006699;border:1px solid #3399cc;';
-    updateBtn2.innerHTML = '↻ Update';
-    updateBtn2.onclick = () => forceAppUpdate();
-    editBar.appendChild(updateBtn2);
 
     // 📝 Desc button — regenerate and update textarea in-place (no page re-render)
     const descBtn2 = document.createElement('button');
@@ -9511,7 +9507,7 @@ function renderInspection(survey) {
       <div class="accordion-content" style="display: none;">
         <div style="padding: 10px 0; font-size: 13px; color: #555; border-bottom: 1px solid #e5e7eb; margin-bottom: 12px;">
           <em>Photograph each instrument or electronic device. Mark whether it is operational, then optionally use AI to identify make, model and year.</em>
-          <br/><button onclick="updateGeminiApiKey()" style="margin-top:6px;background:none;border:1px solid #7c3aed;color:#7c3aed;padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;">⚙️ ${localStorage.getItem('geminiApiKey') ? 'Update' : 'Set'} Gemini API Key</button>
+          ${!localStorage.getItem('geminiApiKey') ? `<br/><button onclick="updateGeminiApiKey()" style="margin-top:6px;background:none;border:1px solid #7c3aed;color:#7c3aed;padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;">⚙️ Set Gemini API Key</button>` : ''}
         </div>
   `;
 
@@ -9750,12 +9746,31 @@ function ensureReportButton() {
   };
   bottomBar.appendChild(backupBtn);
 
-  // Recover Photos from Firebase button
-  const recoverBtn = document.createElement('button');
-  recoverBtn.id = 'recoverPhotosBtn';
-  recoverBtn.style.cssText = pillStyle + 'background:#dc2626;color:white;font-weight:700;box-shadow:0 2px 8px rgba(220,38,38,0.3);';
-  recoverBtn.innerHTML = '🔄 Recover Photos';
-  recoverBtn.onclick = async () => {
+  // ⋯ More overflow menu (Recover Photos, Force Update)
+  const moreWrap = document.createElement('div');
+  moreWrap.style.cssText = 'position:relative;';
+  const moreBtn = document.createElement('button');
+  moreBtn.style.cssText = pillStyle + 'background:#f1f5f9;color:#64748b;font-size:16px;padding:8px 10px;';
+  moreBtn.innerHTML = '⋯';
+  moreBtn.title = 'More actions';
+  moreBtn.onclick = (e) => {
+    e.stopPropagation();
+    const menu = document.getElementById('inspOverflowMenu');
+    if (menu) { menu.style.display = menu.style.display === 'none' ? 'flex' : 'none'; }
+  };
+  moreWrap.appendChild(moreBtn);
+
+  const overflowMenu = document.createElement('div');
+  overflowMenu.id = 'inspOverflowMenu';
+  overflowMenu.style.cssText = 'display:none;position:absolute;bottom:100%;right:0;margin-bottom:8px;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.18);padding:6px;flex-direction:column;gap:4px;min-width:180px;z-index:200;';
+
+  // Recover Photos option
+  const recoverOpt = document.createElement('button');
+  recoverOpt.id = 'recoverPhotosBtn';
+  recoverOpt.style.cssText = 'border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#dc2626;';
+  recoverOpt.innerHTML = '🔄 Recover Photos';
+  recoverOpt.onclick = async () => {
+    overflowMenu.style.display = 'none';
     if (!window.fsDb || !FirebaseSync.isEnabled()) {
       showAlert('Firebase sync is not active. Cannot recover photos.');
       return;
@@ -9763,37 +9778,29 @@ function ensureReportButton() {
     const survey = await getSurvey(currentSurveyId);
     if (!survey) { showAlert('Survey not found'); return; }
 
-    recoverBtn.innerHTML = '🔄 Checking Firebase…';
-    recoverBtn.disabled = true;
+    recoverOpt.innerHTML = '🔄 Checking…';
+    recoverOpt.disabled = true;
     try {
-      // Count photo metadata in Firestore
       const snap = await window.fsDb.collection('photos')
         .where('surveyId', '==', survey.id)
         .get();
       const total = snap.docs.length;
-
       if (total === 0) {
-        showAlert('No photos found in Firebase for this survey. Firebase may not have had the photos uploaded.');
+        showAlert('No photos found in Firebase for this survey.');
         return;
       }
-
       const doRecover = await new Promise(resolve => {
-        showAlert(`Found ${total} photos in Firebase cloud storage. Download them all now?`,
+        showAlert(`Found ${total} photos in Firebase. Download them all now?`,
           'Download', () => resolve(true), 'Cancel', () => resolve(false));
       });
       if (!doRecover) return;
 
-      recoverBtn.innerHTML = `🔄 0 / ${total}`;
-      let recovered = 0;
-      let skipped = 0;
-      let failed = 0;
-
+      showToast('Recovering photos…');
+      let recovered = 0, skipped = 0, failed = 0;
       for (const doc of snap.docs) {
         const meta = doc.data();
-        // Check if already local
         const local = await getPhotoById(meta.id);
-        if (local && local.dataUrl) { skipped++; recovered++; recoverBtn.innerHTML = `🔄 ${recovered} / ${total}`; continue; }
-
+        if (local && local.dataUrl) { skipped++; recovered++; continue; }
         if (meta.storageRef) {
           try {
             const ref = window.fsStorage.ref(meta.storageRef);
@@ -9805,25 +9812,15 @@ function ensureReportButton() {
               reader.onloadend = () => res(reader.result);
               reader.readAsDataURL(blob);
             });
-            const photo = { ...meta, dataUrl };
-            await savePhoto(photo);
+            await savePhoto({ ...meta, dataUrl });
             recovered++;
           } catch (dlErr) {
             console.warn(`[Recovery] Failed photo ${meta.id}:`, dlErr);
-            failed++;
-            recovered++;
+            failed++; recovered++;
           }
-        } else {
-          failed++;
-          recovered++;
-        }
-        recoverBtn.innerHTML = `🔄 ${recovered} / ${total}`;
+        } else { failed++; recovered++; }
       }
-
-      const msg = `Photo recovery complete!\n\nDownloaded: ${recovered - skipped - failed}\nAlready local: ${skipped}\nFailed: ${failed}`;
-      showAlert(msg);
-
-      // Reload the inspection view to show recovered photos
+      showAlert(`Recovery complete!\n\nDownloaded: ${recovered - skipped - failed}\nAlready local: ${skipped}\nFailed: ${failed}`);
       if (currentSurveyId) {
         const s = await getSurvey(currentSurveyId);
         if (s) showInspection(s);
@@ -9832,11 +9829,27 @@ function ensureReportButton() {
       console.error('Photo recovery error:', err);
       showAlert('Recovery failed: ' + err.message);
     } finally {
-      recoverBtn.innerHTML = '🔄 Recover Photos';
-      recoverBtn.disabled = false;
+      recoverOpt.innerHTML = '🔄 Recover Photos';
+      recoverOpt.disabled = false;
     }
   };
-  bottomBar.appendChild(recoverBtn);
+  overflowMenu.appendChild(recoverOpt);
+
+  // Force Update option
+  const updateOpt = document.createElement('button');
+  updateOpt.style.cssText = 'border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#006699;';
+  updateOpt.innerHTML = '↻ Force Update';
+  updateOpt.onclick = () => { overflowMenu.style.display = 'none'; forceAppUpdate(); };
+  overflowMenu.appendChild(updateOpt);
+
+  moreWrap.appendChild(overflowMenu);
+  bottomBar.appendChild(moreWrap);
+
+  // Close overflow when tapping elsewhere
+  document.addEventListener('click', () => {
+    const menu = document.getElementById('inspOverflowMenu');
+    if (menu) menu.style.display = 'none';
+  }, { once: false, passive: true });
 
   // Preview Report button
   btn = document.createElement('button');
@@ -15555,34 +15568,17 @@ async function saveAllInspectionData() {
 
 async function backToHome() {
   updateCollapseButton(false);
-  const changed = await saveAllInspectionData();
+  await saveAllInspectionData();
 
-  // If there are unsaved backup changes, prompt to back up first
-  if (window._hasUnsavedBackup && currentSurveyId) {
-    const backup = await showConfirm(
-      'You have changes that haven\'t been backed up. Would you like to save a backup first?',
-      '💾 Backup First', 'Skip'
-    );
-    if (backup) {
-      await exportSurvey(currentSurveyId);
-      window._hasUnsavedBackup = false;
-    }
-  }
-
-  const msg = changed
-    ? 'Your work has been saved. Return to home screen?'
-    : 'Return to home screen?';
-  const yes = await showConfirm(msg, 'Go Home', 'Stay');
-  if (yes) {
-    // Remove bottom action bar when leaving inspection
-    const bottomBar = document.getElementById('inspectionBottomBar');
-    if (bottomBar) bottomBar.remove();
-    const reportBtn = document.getElementById('reportBtn');
-    if (reportBtn) reportBtn.remove();
-    const backupBtn = document.getElementById('backupBtn');
-    if (backupBtn) backupBtn.remove();
-    renderHome();
-  }
+  // Remove bottom action bar when leaving inspection
+  const bottomBar = document.getElementById('inspectionBottomBar');
+  if (bottomBar) bottomBar.remove();
+  const reportBtn = document.getElementById('reportBtn');
+  if (reportBtn) reportBtn.remove();
+  const backupBtn = document.getElementById('backupBtn');
+  if (backupBtn) backupBtn.remove();
+  window._hasUnsavedBackup = false;
+  renderHome();
 }
 
 // Report generation
