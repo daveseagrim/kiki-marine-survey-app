@@ -12,6 +12,50 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2153 — 2026-04-14
+
+### Added (B-07 part 1 — rudder gating)
+- **New pure module** `src/core/snippet_tokens.js` with token-expansion and
+  label-transformation functions, plus 26 tests (`snippet_tokens.test.js`).
+  Now at 81 tests total.
+- **`{if-rudder:...}` / `{if-no-rudder:...}` / `{count:rudder|rudders}`
+  tokens** supported in snippet text. Expanded automatically at snippet
+  insert time based on `survey.hasRudder` and `survey.driveLineCount`.
+- **`transformLabelForDisplay()` helper** detects the legacy
+  "and rudder(s) (if applicable)" phrase in checklist item labels and
+  rewrites it based on the current survey:
+  - hasRudder = false: drops the clause entirely. "Hull and rudder(s)
+    (if applicable) impact and resonance testing" → "Hull impact and
+    resonance testing"
+  - hasRudder = true, rudderCount = 1: "Hull and rudder impact..."
+  - hasRudder = true, rudderCount >= 2: "Hull and rudders impact..."
+  Applied at three display sites: the compact checklist card, the
+  single-item expanded view, and the report (both the checklist summary
+  table and the Findings & Recommendations section).
+- **Tokenised 12 hull-and-rudder snippets** in `text_library.json`
+  (impact/resonance + conductivity testing). On no-rudder vessels the
+  snippets now render as hull-only text, no awkward rudder mentions.
+
+### Fixed
+- **Percussion/conductivity testing items no longer hidden on
+  non-rudder vessels.** Previous behaviour: `rudderItem: true` in
+  the template caused these items to disappear on outdrive/IPS vessels,
+  which meant they couldn't be rated at all. Now the items show for
+  every vessel, and rudder-related wording is suppressed on no-rudder
+  cases via the token system.
+
+### Deferred (B-07 part 2 → v2154)
+- Checkbox-driven percussion testing builder. The existing component
+  builder pattern is dropdown-based; extending it to checkboxes for
+  method/areas/findings is a UX design problem best tackled in its own
+  focused release. Tracked in the backlog.
+
+### Process
+- Triple-checked: 81 tests, hook green in both node-present and no-node
+  environments, version files consistent.
+
+---
+
 ## v2152 — 2026-04-14
 
 ### Fixed

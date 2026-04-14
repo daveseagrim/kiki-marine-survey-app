@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2152';
+const APP_VERSION = 'v2153';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -242,6 +242,22 @@ const RATING_SHORT_LABELS = {
 
 function getRatingShortLabel(rating) {
   return RATING_SHORT_LABELS[rating] || rating;
+}
+
+// Transform a raw checklist-item label into its display form for the current
+// survey — applies rudder-gating so "Hull and rudder(s) (if applicable) X"
+// becomes "Hull X" on no-rudder vessels, "Hull and rudder X" on single-rudder,
+// and "Hull and rudders X" on twin-rudder. Internal keys (survey.items map)
+// continue to use the raw label — this is for DISPLAY only.
+// The survey arg is optional; defaults to the window-cached current survey.
+function displayItemLabel(rawLabel, survey) {
+  if (!rawLabel) return '';
+  const s = survey || window._currentSurveyCache || null;
+  if (!s || typeof window.transformLabelForDisplay !== 'function') return rawLabel;
+  const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
+    ? window.KikiSnippetTokens.contextFromSurvey(s)
+    : { hasRudder: s.hasRudder !== false, rudderCount: s.driveLineCount || 1 };
+  return window.transformLabelForDisplay(rawLabel, ctx);
 }
 
 // Standards by category — covers all 24 inspection categories
@@ -3258,6 +3274,15 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
       ? 1
       : ((survey && survey.driveLineCount) ? parseInt(survey.driveLineCount, 10) || 1 : 1);
     let resolved = resolveCountTokens(text, dlc);
+    // Expand rudder-gating tokens ({if-rudder:...}, {if-no-rudder:...})
+    // so hull-and-rudder snippets drop the rudder clause on no-rudder
+    // vessels (B-07).
+    if (typeof window.expandSnippetTokens === 'function' && survey) {
+      const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
+        ? window.KikiSnippetTokens.contextFromSurvey(survey)
+        : { hasRudder: survey.hasRudder !== false, rudderCount: survey.driveLineCount || 1 };
+      resolved = window.expandSnippetTokens(resolved, ctx);
+    }
     // For per-drive-line expanded items, inject the side qualifier into
     // the first instance of the subject noun so the sentence reads
     // "The port propeller..." instead of "The propeller...".
@@ -14165,7 +14190,7 @@ function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
   let html = `
     <div class="compact-item ${isExcluded ? 'excluded' : ''} ${isFlagged ? 'flagged' : ''}">
       <div class="compact-item-label ${isExcluded ? 'struck' : ''}">
-        ${isFlagged ? '🚩 ' : ''}${isExcluded ? '⊘ ' : ''}${itemLabel}${photoBadge}
+        ${isFlagged ? '🚩 ' : ''}${isExcluded ? '⊘ ' : ''}${displayItemLabel(itemLabel)}${photoBadge}
       </div>
       <button class="compact-rating-badge ${itemData.rating ? '' : 'unrated'}"
               style="${itemData.rating ? `background:${ratingColor};` : ''}"
@@ -14236,7 +14261,7 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
   const isFlagged = itemData.flagged;
 
   let html = `
-    <div class="item-name" style="${isExcluded ? 'text-decoration:line-through;color:#9ca3af;' : ''}">${isFlagged ? '🚩 ' : ''}${isExcluded ? '⊘ ' : ''}${itemLabel}</div>
+    <div class="item-name" style="${isExcluded ? 'text-decoration:line-through;color:#9ca3af;' : ''}">${isFlagged ? '🚩 ' : ''}${isExcluded ? '⊘ ' : ''}${displayItemLabel(itemLabel)}</div>
     <div class="rating-options">
   `;
 
@@ -14820,6 +14845,13 @@ function insertSnippet(itemLabel, categoryName, text, cardEl, placeholdersJson) 
       ? 1
       : ((survey && survey.driveLineCount) ? parseInt(survey.driveLineCount, 10) || 1 : 1);
     let resolved = resolveCountTokens(text, dlc);
+    // Expand rudder-gating tokens (B-07)
+    if (typeof window.expandSnippetTokens === 'function' && survey) {
+      const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
+        ? window.KikiSnippetTokens.contextFromSurvey(survey)
+        : { hasRudder: survey.hasRudder !== false, rudderCount: survey.driveLineCount || 1 };
+      resolved = window.expandSnippetTokens(resolved, ctx);
+    }
     if (sideWord) {
       resolved = applySidePrefix(resolved, sideWord);
     }
@@ -16715,7 +16747,7 @@ ${survey.vesselDescription ? `
 
           html += `<tr>
             <td style="text-align:center;">${tableRow}</td>
-            <td>${esc(item.label)}</td>
+            <td>${esc(displayItemLabel(item.label, survey))}</td>
             <td class="text-snippet" title="${esc(d.text || '')}">${esc(textSnippet)}</td>
             <td><span class="rating-pill" style="background:${ratingColor};">${ratingShort} — ${rating.startsWith('Not') ? 'Not Tested' : rating.split(' - ')[1] || rating}</span></td>
             <td style="text-align:center;" class="${isViolation ? 'violation-yes' : 'violation-no'}">${isViolation ? 'YES' : 'No'}</td>
@@ -16952,7 +16984,7 @@ ${survey.vesselDescription ? `
 
           html += `
   <div class="item" style="border-left-color: ${RATING_COLORS[ratingLabel] || '#006699'};">
-    <p><strong>${esc(item.label)}</strong>${ratingLabel ? ` — <span class="${ratingClass}">${ratingLabel}</span>${codeTag}` : ''}</p>
+    <p><strong>${esc(displayItemLabel(item.label, survey))}</strong>${ratingLabel ? ` — <span class="${ratingClass}">${ratingLabel}</span>${codeTag}` : ''}</p>
     ${outdriveInfoHtml}
     ${winchInfoHtml}
     ${mastOptionsHtml}
@@ -17005,7 +17037,7 @@ ${survey.vesselDescription ? `
   // Helper to render a single finding entry
   function renderFinding(f, color, severity) {
     return `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid ${color};">
-      <strong style="color:${color};">Finding ${f.code}</strong> — ${esc(f.label)}
+      <strong style="color:${color};">Finding ${f.code}</strong> — ${esc(displayItemLabel(f.label, survey))}
       ${f.text ? `<p style="margin:3px 0;">${esc(depersonalise(dedup(f.text)))}</p>` : ''}
       ${findingPhotos(f)}
       ${buildRecommendation(f, severity)}

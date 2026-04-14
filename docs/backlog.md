@@ -14,7 +14,20 @@ When adding an entry, include:
 
 ## Active
 
-### B-07 — Percussion testing snippets: gate rudder mentions on hasRudder + checkbox sentence builder
+### B-07 — Percussion testing: rudder gating ✅ (v2153) + checkbox builder (remaining)
+
+**Part 1 — Rudder gating: ✅ Done in v2153.** Tokenisation system
+(`{if-rudder:...}` and `{count:rudder|rudders}`) added in
+`src/core/snippet_tokens.js`. Checklist item labels rewrite based on
+hasRudder/rudderCount. 12 hull-and-rudder snippets in text_library.json
+tokenised. Percussion and conductivity items now show on all vessels
+(previously hidden on non-rudder vessels).
+
+**Part 2 — Checkbox sentence builder: still pending.** The existing
+component builder pattern is dropdown-based. Extending it to support
+multi-select checkboxes requires design work around the
+`onComponentBuilderChange` / `renderComponentBuilder` functions in
+app.js. When re-starting this:
 
 - **What:** Two related requests for the "Hull and rudder(s) percussion
   testing" checklist item:

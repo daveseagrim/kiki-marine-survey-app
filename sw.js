@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v2152';
+const CACHE_NAME = 'kiki-marine-v2153';
 const URLS_TO_CACHE = [
   './',
   'index.html',
@@ -7,6 +7,7 @@ const URLS_TO_CACHE = [
   'src/core/placeholders.js',
   'src/core/skip_logic.js',
   'src/core/drive_backup.js',
+  'src/core/snippet_tokens.js',
   'manifest.json',
   'survey_template.json',
   'insurance_survey_template.json',
