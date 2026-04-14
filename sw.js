@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v2158';
+const CACHE_NAME = 'kiki-marine-v2159';
 const URLS_TO_CACHE = [
   './',
   'index.html',
@@ -84,7 +84,32 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // Don't intercept external API calls (weather, location search, map tiles, etc.)
+  // B-03 fix attempt (v2159): iOS Safari PWA sometimes fails cross-origin
+  // fetches when the SW "returns" passively (no respondWith). Explicitly
+  // proxy fetches to Firebase Storage and Firestore through the SW so iOS
+  // honors them. This is the fix for the "xhr: XHR network error" + "fetch:
+  // TypeError Load failed" symptom Dave hit on 2026-04-14.
+  const isFirebaseCloud = (
+    url.hostname === 'firebasestorage.googleapis.com' ||
+    url.hostname === 'firestore.googleapis.com' ||
+    url.hostname.endsWith('.firebaseapp.com') ||
+    url.hostname.endsWith('.firebaseio.com')
+  );
+  if (isFirebaseCloud) {
+    event.respondWith(
+      fetch(event.request).catch(err => {
+        // On failure, pass the error through rather than a fallback — the
+        // app-level error handler tags the stage (fetch/xhr) and reports.
+        return new Response('SW proxy error: ' + (err && err.message || err), {
+          status: 599,
+          headers: { 'content-type': 'text/plain' }
+        });
+      })
+    );
+    return;
+  }
+
+  // Don't intercept other external API calls (weather, location search, map tiles, etc.)
   // Let them go straight to the network so errors propagate properly.
   // Exception: Firebase SDK files from gstatic.com — serve from cache for offline
   const isFirebaseSDK = url.origin === 'https://www.gstatic.com' && url.pathname.includes('firebasejs');

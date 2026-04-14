@@ -14,6 +14,40 @@ When adding an entry, include:
 
 ## Active
 
+### B-09 — Auto-derive `hasRudder` from `driveType` for power vessels
+
+- **What:** `{if-rudder:}` token expansion depends on `survey.hasRudder`.
+  Today:
+  - Sailboats → `hasRudder = true` (correct)
+  - Power + shaft drive → `hasRudder = true` (correct)
+  - Power + outdrive / IPS / saildrive → `hasRudder` defaults to true
+    but should be **false** (the drive steers, no separate rudder)
+  - Twin engines → `driveLineCount = 2` → `{count:rudder|rudders}`
+    renders "rudders" (correct)
+- **Why:** Dave asked 2026-04-14 during Ahoy Vey survey how the rudder
+  autofill gets its data. Surfaced that outdrive/IPS vessels aren't
+  getting `hasRudder = false` automatically, so hull-and-rudder snippets
+  incorrectly include rudder wording on drives that have no rudder.
+- **Where:** `saveSurveyDetails` in app.js — the block that already
+  clears incompatible drive settings when vesselType changes. Extend
+  it to set `hasRudder = false` when `driveType` is outdrive / ips /
+  saildrive, and `hasRudder = true` otherwise (unless manually overridden).
+- **Priority:** Medium. Produces wrong-vessel-type wording in reports.
+- **Fix sketch:** Add to `saveSurveyDetails`:
+  ```js
+  if (survey.vesselType === 'power') {
+    const noRudderDrives = ['outdrive', 'ips', 'saildrive'];
+    if (noRudderDrives.includes(survey.driveType)) {
+      survey.hasRudder = false;
+      survey.driveLineCount = survey.driveLineCount || 1;
+    } else {
+      survey.hasRudder = true;
+    }
+  }
+  ```
+  Consider a manual-override checkbox in Edit Intro for edge cases
+  (e.g. outdrive vessel with a separate rudder, rare but possible).
+
 ### B-08 — Cannot un-skip an item back to a rated state
 
 - **What:** Once an item is marked Skipped (⊘), tapping the rating
@@ -156,7 +190,58 @@ JSON validated; no orphaned code refs.
   key isn't set or the call fails. Same pattern could later be applied
   to compliance-plate reading, engine-plate serial extraction, etc.
 
-### B-03 — Firebase photo download fails with "Load failed" on iOS Safari PWA
+### B-03 — Firebase photo download on iOS PWA — STILL BROKEN (re-opened 2026-04-14)
+
+**Reopened 2026-04-14 after confirming v2145's XHR fallback did not fix
+it.** Dave on v2157, iPhone Safari PWA (home-screen icon), 540 photos
+across Riverdance / Ex-Ta-Sea / Grace O'Malley. Tapping "Download from
+Firebase" produces errors and runs for a very long time.
+
+**What we know:**
+
+- fetch() → Load failed (from v2145 diagnostics). Stage-tagged `[fetch]`.
+- XHR fallback → also failing (else downloaded count would advance).
+  Stage tag should be `[xhr]` with a specific message.
+- 30s XHR timeout × 2 attempts × 540 photos = potential 9 hours worst
+  case. That matches "very long time."
+- Chrome on iPhone (regular tab) pulls the same photos successfully.
+  Only iOS Safari PWA context is affected.
+
+**Next diagnostic step before more speculative fixes:**
+
+Ask Dave to reproduce and screenshot the progress-dialog detail log
+during failure. The stage tags `[url]` / `[fetch]` / `[xhr]` /
+`[blob-read]` added in v2145 pinpoint which step is breaking. The
+specific error text after the stage tag tells us whether it's:
+- Network error (transport-level failure)
+- HTTP status (403 auth / 404 missing / 429 rate limit / 5xx backend)
+- Timeout (reaching the 30s ceiling)
+- Some other JS exception
+
+Don't ship another blind fix. Get the diagnostic first.
+
+**Possible root causes to investigate once we have stage tags:**
+
+1. **iOS PWA fetch/XHR throttling.** PWAs on iOS have undocumented
+   network quota limits. May be hitting them.
+2. **Firebase Storage CORS for the PWA origin.** The GitHub Pages
+   origin may not be on the allowed-origins list. Verify with
+   `gsutil cors get gs://<bucket>`.
+3. **Auth token expiry mid-batch.** Firebase Storage download URLs
+   may have short-lived tokens; a 540-photo run could span multiple
+   token lifetimes. Reauthenticate per-batch.
+4. **iOS keep-alive / connection-pool exhaustion.** Rapid sequential
+   requests to the same origin may trigger iOS-specific limits.
+   Could help by introducing larger pauses between photos.
+5. **Service worker fetch-event interference.** Despite the origin
+   check that should bypass firebasestorage.googleapis.com — verify
+   in Safari Dev Tools (Web Inspector) that the SW really is bypassing.
+6. **Signed URL format.** Check whether getDownloadURL() on v10
+   compat SDK returns URLs that iOS PWA can actually resolve.
+
+**For now: user has a workaround.** Chrome on iPhone (regular tab, not
+PWA) does download these successfully. Dave can use that as a disaster
+recovery path until B-03 is properly fixed.
 
 - **What:** On iPhone Safari opened from the home-screen icon (PWA mode),
   tapping Download from Firebase with 589 photos produces 0% progress and

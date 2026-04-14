@@ -12,6 +12,40 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2159 — 2026-04-14
+
+### Fixed — B-03 Firebase download (attempt 2) + token leak belt-and-suspenders
+- **B-03 (Firebase download on iOS Safari PWA).** Dave's diagnostic
+  screenshot showed both fetch and XHR failing with transport-level
+  errors (`TypeError "Load failed"` + `XHR network error`) on the same
+  URL. That rules out CORS, auth, timeout, and HTTP-status causes;
+  the symptoms match a known iOS Safari PWA issue where the service
+  worker's passive "return" from a cross-origin fetch event is not
+  reliably honored. v2159's fix: `sw.js` now **explicitly proxies**
+  requests to `firebasestorage.googleapis.com`, `firestore.googleapis.com`,
+  and `*.firebaseapp.com` / `*.firebaseio.com` via
+  `event.respondWith(fetch(event.request))`. The SW acts as a proxy
+  layer that iOS PWA treats as a same-origin request, bypassing the
+  cross-origin transport restriction.
+- **Token leak belt-and-suspenders.** v2158's token-expansion fix for
+  the Notes sheet textarea should have resolved the raw `{if-rudder:}`
+  display bug, but Dave's screenshot on v2158 showed the tokens still
+  visible. Cause unclear (possibly stale SW-cached code). v2159 adds a
+  second cleanup pass **after the overlay is mounted** in the DOM —
+  scans the textarea value for any residual `{if-rudder:...}` /
+  `{if-no-rudder:...}` tokens and replaces them with the expanded form,
+  then re-saves the cleaned value so the item's saved state is also
+  migrated.
+
+### Process
+- Triple-checked: 106 tests pass, versions consistent, pre-commit hook
+  green in no-node simulated environment.
+- Belt-and-suspenders pattern noted: when a display fix isn't reliable
+  (maybe due to stale caching), add a DOM-level cleanup that runs after
+  mount to catch whatever slipped through.
+
+---
+
 ## v2158 — 2026-04-14
 
 ### Fixed — raw `{if-rudder:...}` tokens leaking into the UI

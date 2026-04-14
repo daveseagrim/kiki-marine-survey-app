@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2158';
+const APP_VERSION = 'v2159';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3551,6 +3551,26 @@ function showNotesSheet(itemLabel, categoryName) {
 
     // Auto-expand textarea to fit existing content (no scrolling needed)
     const ta = document.getElementById(`sheet-text-${sanitizedLabel}`);
+    // B-07 belt-and-suspenders (v2159): if any raw {if-rudder:...} /
+    // {if-no-rudder:...} tokens slipped through the initialTextareaText
+    // expansion (e.g. stale SW-cached code), clean them up NOW from the
+    // DOM value. Also re-saves the cleaned text so the token never
+    // re-appears on subsequent opens.
+    if (ta && ta.value && /\{if-(?:rudder|no-rudder):/.test(ta.value) &&
+        typeof window.expandSnippetTokens === 'function') {
+      const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
+        ? window.KikiSnippetTokens.contextFromSurvey(survey)
+        : { hasRudder: survey.hasRudder !== false, rudderCount: survey.driveLineCount || 1 };
+      const cleaned = window.expandSnippetTokens(ta.value, ctx);
+      if (cleaned !== ta.value) {
+        ta.value = cleaned;
+        // Persist the cleaned version so this item's saved state matches.
+        if (survey.items[itemLabel]) {
+          survey.items[itemLabel].text = cleaned;
+          saveSurvey(survey);
+        }
+      }
+    }
     if (ta && ta.value) {
       ta.style.height = 'auto';
       ta.style.height = ta.scrollHeight + 'px';
