@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2127';
+const APP_VERSION = 'v2128';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1894,13 +1894,29 @@ async function syncAllPhotosToFirebase() {
 
   if (total === 0) { showToast('No photos to sync'); return; }
 
-  const doSync = await new Promise(resolve => {
-    showAlert(`Sync ${total} photos across ${surveys.length} surveys to Firebase? This may take a while.`,
-      'Start Sync', () => resolve(true), 'Cancel', () => resolve(false));
-  });
-  if (!doSync) return;
+  // Show progress bar immediately
+  let banner = document.getElementById('backup-progress-bar');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'backup-progress-bar';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9998;transition:opacity 0.3s;';
+    document.body.appendChild(banner);
+  }
+  banner.style.opacity = '1';
 
-  showToast(`Syncing ${total} photos to Firebase...`);
+  function _updateSyncBar(msg, pct) {
+    banner.innerHTML = `
+      <div style="background:#006699;color:white;padding:10px 16px 6px;font-size:13px;font-weight:600;text-align:center;">
+        ${msg}
+      </div>
+      <div style="height:4px;background:#004466;">
+        <div style="height:100%;width:${pct}%;background:#00ccff;transition:width 0.3s ease;"></div>
+      </div>`;
+  }
+
+  _updateSyncBar(`🔥 Checking ${surveys.length} surveys... 0/${total} photos`, 0);
+
+  let processed = 0; // total photos we've looked at (uploaded + skipped)
 
   for (const survey of surveys) {
     // Check which photos are already in Firebase
@@ -1926,14 +1942,20 @@ async function syncAllPhotosToFirebase() {
     for (const photo of photos) {
       if (existingIds.has(photo.id)) {
         skipped++;
+        processed++;
+        const pct = Math.round((processed / total) * 100);
+        if (skipped % 20 === 0) _updateSyncBar(`🔥 ${uploaded} uploaded, ${skipped} already synced — ${pct}%`, pct);
         continue;
       }
       try {
         await FirebaseSync.pushPhoto(photo);
         uploaded++;
-        if (uploaded % 10 === 0) showToast(`Synced ${uploaded} photos (${skipped} already existed)...`);
+        processed++;
+        const pct = Math.round((processed / total) * 100);
+        _updateSyncBar(`🔥 Uploading... ${uploaded} new, ${skipped} existing — ${pct}%`, pct);
       } catch (err) {
         failed++;
+        processed++;
         console.warn(`[Sync] Failed: ${photo.id}`, err.message);
       }
     }
@@ -1942,7 +1964,15 @@ async function syncAllPhotosToFirebase() {
     try { await FirebaseSync.pushSurvey(survey); } catch (e) { /* non-critical */ }
   }
 
-  showAlert(`Firebase sync complete!\n\n${uploaded} uploaded, ${skipped} already existed, ${failed} failed.`);
+  // Show completion
+  const bg = failed > 0 ? '#d97706' : '#16a34a';
+  banner.innerHTML = `<div style="background:${bg};color:white;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;">
+    ✓ Done — ${uploaded} uploaded, ${skipped} already existed${failed > 0 ? ', ' + failed + ' failed' : ''}
+  </div>`;
+  setTimeout(() => {
+    banner.style.opacity = '0';
+    setTimeout(() => { if (banner.parentElement) banner.remove(); }, 300);
+  }, 4000);
 }
 
 // Pull missing photos from Firebase to this device
