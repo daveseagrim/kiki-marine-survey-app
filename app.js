@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2140';
+const APP_VERSION = 'v2141';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -229,6 +229,20 @@ const RATING_COLORS = {
   'Not applicable': '#6b7280',
   'Not tested/not verified': '#6b7280'
 };
+
+// Short display labels for rating buttons (keeps full internal key unchanged)
+const RATING_SHORT_LABELS = {
+  'A - Critical': 'A',
+  'B - Needs Attention': 'B',
+  'C - Serviceable': 'C',
+  'Powered up only': 'PO',
+  'Not tested/not verified': 'Not Tested',
+  'Not applicable': 'NA'
+};
+
+function getRatingShortLabel(rating) {
+  return RATING_SHORT_LABELS[rating] || rating;
+}
 
 // Standards by category — covers all 24 inspection categories
 // Matching uses longest-key-wins partial matching (see getStandardsForCategory)
@@ -2643,7 +2657,7 @@ function showRatingSheet(itemLabel, categoryName, options) {
         <div class="sheet-rating-option" onclick="selectRatingFromSheet('${safeLabel}', '${safeCat}', '${option}')">
           <div class="radio-circle ${isSelected ? 'selected' : ''}"></div>
           <div class="rating-dot" style="background:${color};"></div>
-          <span>${option}</span>
+          <span><strong>${getRatingShortLabel(option)}</strong>${option !== getRatingShortLabel(option) ? ` — ${option.replace(/^[ABC] - /, '')}` : ''}</span>
         </div>
       `;
     });
@@ -5826,9 +5840,10 @@ function renderHome() {
               <!-- Expandable actions panel -->
               <div id="${rowId}" style="display:none;padding:0 10px 10px 52px;">
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                  <button onclick="event.stopPropagation();(async()=>{const s=await getSurvey('${survey.id}');if(s)generateReport(s);})()" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#006699;color:white;border:none;border-radius:14px;cursor:pointer;">📄 Report</button>
-                  <button onclick="event.stopPropagation();exportSurvey('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:14px;cursor:pointer;">📤 Export</button>
-                  <button onclick="event.stopPropagation();deleteSurveyConfirm('${survey.id}')" style="flex:1;min-width:80px;padding:8px 10px;font-size:12px;font-weight:600;background:#fef2f2;color:#dc2626;border:none;border-radius:14px;cursor:pointer;">🗑 Delete</button>
+                  <button onclick="event.stopPropagation();(async()=>{currentSurveyId='${survey.id}';checkSurvey();})()" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#ffcc00;color:#006699;border:none;border-radius:14px;cursor:pointer;">✅ Check</button>
+                  <button onclick="event.stopPropagation();(async()=>{const s=await getSurvey('${survey.id}');if(s)generateReport(s);})()" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#006699;color:white;border:none;border-radius:14px;cursor:pointer;">📄 Report</button>
+                  <button onclick="event.stopPropagation();exportSurvey('${survey.id}')" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:14px;cursor:pointer;">📤 Export</button>
+                  <button onclick="event.stopPropagation();deleteSurveyConfirm('${survey.id}')" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#fef2f2;color:#dc2626;border:none;border-radius:14px;cursor:pointer;">🗑 Delete</button>
                 </div>
               </div>
             </div>
@@ -6382,8 +6397,9 @@ function renderNewSurveyForm() {
       <div class="form-group">
         <label class="form-label">Overall Description of Vessel</label>
         <button class="btn-secondary" style="margin-bottom:8px;font-size:13px;" onclick="generateVesselDescription()">✨ Auto-Generate Description</button>
-        <textarea id="vesselDescription" rows="8" placeholder="Describe the vessel: hull type/material, rig, keel, propulsion, layout, cabins, history (e.g., freshwater only), any known damage or repairs..." autocapitalize="sentences"></textarea>
-        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Provide a narrative description of the vessel's type, layout, construction, and notable features. This is required by SAMS. Use the auto-generate button to create a template, then fill in the [bracketed] placeholders.</div>
+        <textarea id="vesselDescription" rows="8" placeholder="Describe the vessel: hull type/material, rig, keel, propulsion, layout, cabins, history (e.g., freshwater only), any known damage or repairs..." autocapitalize="sentences" oninput="markDescriptionManuallyEdited()"></textarea>
+        <div id="placeholderCount" style="font-size:12px;color:#d97706;margin-top:4px;display:none;"></div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Auto-fills from form data when you save. Edit manually to override — placeholders in [BRACKETS] show what still needs attention.</div>
       </div>
 
       <h2 class="form-heading">Vessel Documentation</h2>
@@ -7260,6 +7276,10 @@ function editSurveyDetails(surveyId) {
         formEl.addEventListener('change', _editAutoSave);
       }
 
+      // Show placeholder count if description exists
+      const descEl = document.getElementById('vesselDescription');
+      if (descEl && descEl.value) updatePlaceholderCount(descEl.value);
+
     }, 100);
 
     // Add bottom action bar to Edit Intro page (same buttons as inspection)
@@ -7406,6 +7426,12 @@ function saveSurveyDetails(surveyId) {
       if (survey.driveType === 'outdrive' || survey.driveType === 'ips') survey.driveType = '';
     } else if (survey.vesselType === 'power') {
       if (survey.driveType === 'saildrive') survey.driveType = '';
+    }
+
+    // Auto-generate vessel description if empty or previously auto-generated
+    if (!survey.vesselDescription || !survey.vesselDescription.trim() || survey.descriptionAutoGenerated) {
+      survey.vesselDescription = buildDescriptionFromSurvey(survey);
+      survey.descriptionAutoGenerated = true;
     }
 
     saveSurvey(survey).then(() => {
@@ -8425,6 +8451,13 @@ async function generateVesselDescription() {
     textarea.value = desc;
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight + 'px';
+    updatePlaceholderCount(desc);
+    // Mark as auto-generated so future saves keep it updated
+    if (currentSurveyId) {
+      getSurvey(currentSurveyId).then(s => {
+        if (s) { s.descriptionAutoGenerated = true; saveSurvey(s); }
+      });
+    }
   }
 }
 
@@ -8582,8 +8615,186 @@ async function regenerateDescriptionFromInspection() {
   }
 
   survey.vesselDescription = desc;
+  survey.descriptionAutoGenerated = true;
   await saveSurvey(survey);
   showToast('Description regenerated with latest survey data');
+  updatePlaceholderCount(desc);
+}
+
+// Pure function: build vessel description from a survey object (no DOM access)
+function buildDescriptionFromSurvey(survey) {
+  const ymm = survey.yearMakeModel || '';
+  const { year, make, model } = parseYearMakeModel(ymm);
+  const vesselType = survey.vesselType || '';
+  const boatStyle = survey.boatStyle || '';
+  const hullType = survey.hullType || '';
+  const construction = survey.construction || '';
+  const loa = survey.loa || '';
+  const beam = survey.beam || '';
+  const draft = survey.maxDraft || '';
+  const displacement = survey.displacement || '';
+  const keelType = survey.keelType || '';
+  const sailArea = survey.totalSailArea || '';
+  const cabins = survey.numberCabins || '';
+  const electrical = survey.electricalSystem || '';
+  const vesselName = survey.vesselName || '[VESSEL NAME]';
+
+  const yearStr = year || '[YEAR]';
+  const makeStr = make || '[MAKE]';
+  const modelStr = model || '[MODEL]';
+  const typeStr = boatStyle || (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : '[VESSEL TYPE]');
+
+  const engineMake = survey.engineMake || '';
+  const engineModel = survey.engineModel || '';
+  const engineHP = survey.engineHP || '';
+  const fuelType = survey.fuelType || '';
+  const transmissionMake = survey.transmissionMake || '';
+  const transmissionModel = survey.transmissionModel || '';
+  const engineTypeFromDb = lookupEngineType(engineMake, engineModel);
+  const engineTypeStr = engineTypeFromDb ? engineTypeFromDb.toLowerCase() : '';
+
+  let rigDesc = '';
+  if (vesselType === 'sail') {
+    const rigType = boatStyle ? boatStyle.toLowerCase() : '[SLOOP/CUTTER/KETCH]';
+    const mastData = survey.items?.['Main mast'] || {};
+    const steppingStr = mastData.mastStepping ? mastData.mastStepping.toLowerCase() : '[deck-stepped/keel-stepped]';
+    const trackStr = mastData.mastTrackType ? ` with ${mastData.mastTrackType.toLowerCase()}` : '';
+    rigDesc = ` She is ${rigType}-rigged with a ${steppingStr} [aluminium/carbon fibre] mast${trackStr}.`;
+    if (sailArea) rigDesc += ` Total sail area is ${sailArea}.`;
+  }
+
+  const engMakeModel = (engineMake && engineModel) ? `${engineMake} ${engineModel}` :
+                       engineMake ? `${engineMake} [MODEL]` : '[MAKE/MODEL]';
+  const engFuel = fuelType || '[DIESEL/GASOLINE]';
+  const engHPStr = engineHP ? `${engineHP} horsepower` : '[XX] horsepower';
+  const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
+                         transmissionMake ? `${transmissionMake} [MODEL]` : '[MAKE/MODEL]';
+
+  const hasEngine2 = !!survey.engine2Make;
+
+  let engineDesc = '';
+  if (vesselType === 'human') {
+    engineDesc = `This is a human-powered vessel with no auxiliary engine.`;
+  } else if (vesselType === 'sail') {
+    const engType = engineTypeStr || '[inboard/outboard]';
+    const driveType = engineTypeStr === 'inboard' ? '[shaft drive/saildrive]' : '[SHAFT DRIVE/SAILDRIVE]';
+    engineDesc = `Auxiliary power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a ${driveType}.`;
+  } else if (hasEngine2) {
+    const engType = engineTypeStr || '[inboard/outboard/sterndrive]';
+    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines rated at ${engHPStr} each, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through [SHAFT DRIVE(S)/STERNDRIVE(S)].`;
+  } else {
+    const engType = engineTypeStr || '[inboard/outboard/sterndrive]';
+    engineDesc = `Power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING] [3/4]-blade propeller through a [SHAFT DRIVE/STERNDRIVE].`;
+  }
+
+  // Propeller/shaft data from survey items
+  let propDesc = '';
+  if (survey.items) {
+    const propellerItems = Object.keys(survey.items).filter(k => k.toLowerCase().includes('propeller') && survey.items[k].text);
+    const shaftItems = Object.keys(survey.items).filter(k => (k.toLowerCase().includes('shaft') || k.toLowerCase().includes('stern tube')) && survey.items[k].text);
+    const cutlassItems = Object.keys(survey.items).filter(k => k.toLowerCase().includes('cutlass') && survey.items[k].text);
+    if (propellerItems.length > 0 || shaftItems.length > 0) {
+      propDesc = '\n\n';
+      if (shaftItems.length > 0) propDesc += shaftItems.map(k => survey.items[k].text).join(' ') + ' ';
+      if (cutlassItems.length > 0) propDesc += cutlassItems.map(k => survey.items[k].text).join(' ') + ' ';
+      if (propellerItems.length > 0) propDesc += propellerItems.map(k => survey.items[k].text).join(' ');
+    }
+  }
+
+  // Electronics from survey items
+  let electronicsDesc = '';
+  if (survey.items) {
+    const electronicItems = ['VHF radio', 'GPS/chartplotter', 'Depth sounder/fish finder', 'Radar', 'Autopilot', 'AIS transponder/receiver'];
+    const foundElectronics = [];
+    for (const eLabel of electronicItems) {
+      const match = Object.keys(survey.items).find(k => k.toLowerCase().includes(eLabel.toLowerCase().split('/')[0]));
+      if (match && survey.items[match].rating && survey.items[match].rating.startsWith('C')) {
+        foundElectronics.push(eLabel.split('/')[0]);
+      }
+    }
+    if (foundElectronics.length > 0) {
+      electronicsDesc = `Navigation and communication equipment includes ${foundElectronics.join(', ')}.`;
+    }
+  }
+
+  // Safety equipment from TC TP 511
+  let safetyDesc = '';
+  if (survey.safetyEquipment && survey.safetyEquipment.length > 0) {
+    const onBoard = survey.safetyEquipment.filter(e => e.checked).length;
+    const missing = survey.safetyEquipment.length - onBoard;
+    safetyDesc = `Safety equipment per Transport Canada TP 511: ${onBoard} of ${survey.safetyEquipment.length} required items verified on board.`;
+    if (missing > 0) {
+      const missingNames = survey.safetyEquipment.filter(e => !e.checked).map(e => e.name).slice(0, 5);
+      safetyDesc += ` Missing: ${missingNames.join(', ')}${missing > 5 ? ` and ${missing - 5} more` : ''}.`;
+    }
+  }
+
+  const constructionStr = construction || '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
+  const hullTypeStr = hullType || '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
+  const keelStr = vesselType === 'sail'
+    ? (keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : ' with a [FIN/FULL/SHOAL/WING] keel')
+    : '';
+  const draftStr = draft ? ` with a maximum draft of ${draft}` : (vesselType === 'sail' ? ' with a maximum draft of [X\'X"]' : '');
+
+  let desc = `"${vesselName}" is a ${yearStr} ${makeStr} ${modelStr}, a ${constructionStr} ${hullTypeStr} ${typeStr}. `;
+  desc += `She has an overall length of ${loa || '[XX\'XX"]'}, a beam of ${beam || '[XX\'XX"]'}${keelStr}${draftStr}`;
+  if (displacement) desc += `, and a displacement of ${displacement}`;
+  desc += `.`;
+  desc += rigDesc;
+  desc += `\n\n`;
+  desc += engineDesc;
+  desc += propDesc;
+  desc += `\n\n`;
+  desc += `The hull is [COLOUR] with a [COLOUR] boot stripe. The deck is [COLOUR] with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
+  const cabinStr = cabins || '[NUMBER]';
+  desc += `The vessel features ${cabinStr} cabin(s) with [NUMBER] berth(s), [NUMBER] head(s) with [MANUAL/ELECTRIC] marine toilet(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
+  desc += `The galley is [PORT/STARBOARD/AFT] and includes a [PROPANE/ELECTRIC/ALCOHOL] stove with [OVEN], a [12V/120V] refrigerator, and a [SINGLE/DOUBLE] stainless steel sink.`;
+  desc += `\n\n`;
+  if (electrical) {
+    desc += `The electrical system is ${electrical}. `;
+  } else {
+    desc += `The electrical system is [12V DC / 120V AC] with [XX] amp shore power service. `;
+  }
+  desc += electronicsDesc || `Navigation and communication equipment includes [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
+  desc += '\n\n';
+  desc += safetyDesc || `Safety equipment includes [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
+  desc += `\n\n`;
+  desc += `The vessel is in [GOOD/FAIR/POOR] overall cosmetic condition and appears to have been [WELL/REASONABLY/POORLY] maintained. [ANY NOTABLE MODIFICATIONS, DAMAGE HISTORY, OR OBSERVATIONS].`;
+
+  return desc;
+}
+
+// Mark description as manually edited (disables auto-regeneration on save)
+// Debounced so rapid typing doesn't hammer IndexedDB
+let _descEditTimer = null;
+function markDescriptionManuallyEdited() {
+  // Update placeholder count immediately (visual only)
+  const textarea = document.getElementById('vesselDescription');
+  if (textarea) updatePlaceholderCount(textarea.value);
+  // Debounce the DB write
+  clearTimeout(_descEditTimer);
+  _descEditTimer = setTimeout(() => {
+    if (!currentSurveyId) return;
+    getSurvey(currentSurveyId).then(survey => {
+      if (survey && survey.descriptionAutoGenerated) {
+        survey.descriptionAutoGenerated = false;
+        saveSurvey(survey);
+      }
+    });
+  }, 2000);
+}
+
+// Show count of remaining [PLACEHOLDER] items in the description
+function updatePlaceholderCount(text) {
+  const countEl = document.getElementById('placeholderCount');
+  if (!countEl) return;
+  const placeholders = (text || '').match(/\[[A-Z][A-Z/\s'"\d&,.-]*\]/g) || [];
+  if (placeholders.length > 0) {
+    countEl.style.display = 'block';
+    countEl.innerHTML = `⚠️ ${placeholders.length} placeholder${placeholders.length > 1 ? 's' : ''} still need attention (shown in [BRACKETS])`;
+  } else {
+    countEl.style.display = 'none';
+  }
 }
 
 // Apply the suggested valuation to the form fields
@@ -9654,12 +9865,13 @@ function ensureReportButton() {
 
   const pillStyle = 'border:none;border-radius:14px;padding:8px 12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;';
 
-  // Desc button
-  const descBtn = document.createElement('button');
-  descBtn.style.cssText = pillStyle + 'background:#ffcc00;color:#006699;font-weight:700;';
-  descBtn.innerHTML = '📝 Desc';
-  descBtn.onclick = () => regenerateDescriptionFromInspection();
-  bottomBar.appendChild(descBtn);
+  // Check button — pre-flight survey validation
+  const checkBtn = document.createElement('button');
+  checkBtn.style.cssText = pillStyle + 'background:#ffcc00;color:#006699;font-weight:700;';
+  checkBtn.innerHTML = '✅ Check';
+  checkBtn.title = 'Pre-flight check — find missing fields, empty ratings, and issues before generating report';
+  checkBtn.onclick = () => checkSurvey();
+  bottomBar.appendChild(checkBtn);
 
   // Edit Intro button
   const introBtn = document.createElement('button');
@@ -13656,7 +13868,7 @@ function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
               style="${itemData.rating ? `background:${ratingColor};` : ''}"
               data-options="${optionsAttr}"
               onclick="showRatingSheet('${safeLabel}', '${safeCat}', this.getAttribute('data-options').split('|||'))">
-        ${itemData.rating || 'Select response'}
+        ${itemData.rating ? getRatingShortLabel(itemData.rating) : 'Rate'}
       </button>
     </div>
   `;
@@ -13688,22 +13900,24 @@ function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
     html += `</div>`;
   }
 
-  // Action row
+  // Action row — icons only (no text labels), larger touch targets
   html += `
     <div class="compact-action-row">
-      <button class="compact-action-btn ${hasNotes ? 'has-content' : ''}" onclick="showNotesSheet('${safeLabel}', '${safeCat}')">
-        📝 ${hasNotes ? 'Notes ✓' : 'Add note'}
+      <button class="compact-action-btn ${hasNotes ? 'has-content' : ''}" onclick="showNotesSheet('${safeLabel}', '${safeCat}')"
+              title="${hasNotes ? 'Edit notes' : 'Add note'}">
+        📝${hasNotes ? ' ✓' : ''}
       </button>
-      <button class="compact-action-btn ${photoCount > 0 ? 'has-content' : ''}" onclick="showMediaSheet('${safeLabel}', '${safeCat}')">
-        📷 ${photoCount > 0 ? `Photos (${photoCount})` : 'Photos'}
+      <button class="compact-action-btn ${photoCount > 0 ? 'has-content' : ''}" onclick="showMediaSheet('${safeLabel}', '${safeCat}')"
+              title="${photoCount > 0 ? photoCount + ' photos' : 'Add photos'}">
+        📷${photoCount > 0 ? ` ${photoCount}` : ''}
       </button>
       <button class="compact-action-btn ${isFlagged ? 'has-content' : ''}" onclick="toggleFlag('${safeLabel}')"
               title="Flag for follow-up">
-        ${isFlagged ? '🚩' : '🏳️'} Flag
+        ${isFlagged ? '🚩' : '🏳️'}
       </button>
       <button class="compact-action-btn ${isExcluded ? 'has-content' : ''}" onclick="toggleExclude('${safeLabel}')"
               title="Exclude from report">
-        ⊘ ${isExcluded ? 'Excluded' : 'Skip'}
+        ${isExcluded ? '⊘ ✓' : '⊘'}
       </button>
     </div>
   `;
@@ -13732,7 +13946,7 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
               style="${isActive ? `background-color: ${color}; border-color: ${color};` : ''}"
               title="${getRatingTooltip(option)}"
               onclick="selectRating('${safeLabel}', '${safeCat}', '${option}')">
-        ${option}
+        ${getRatingShortLabel(option)}
       </button>
     `;
   });
@@ -16149,7 +16363,7 @@ ${survey.vesselDescription ? `
   <!-- ═══ VESSEL DESCRIPTION ═══ -->
   <h2>VESSEL DESCRIPTION</h2>
   <div class="scope-text">
-    <p>${esc(survey.vesselDescription)}</p>
+    <p>${esc(survey.vesselDescription).replace(/\[([A-Z][A-Z\/\s'"\d&amp;,.\-]*)\]/g, '<span style="background:#fef3c7;color:#92400e;padding:1px 4px;border-radius:3px;font-weight:600;">[$1]</span>')}</p>
   </div>
 ` : ''}
 
