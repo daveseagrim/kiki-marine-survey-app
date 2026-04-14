@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2143';
+const APP_VERSION = 'v2145';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2027,81 +2027,182 @@ async function syncAllPhotosToFirebase() {
 }
 
 // Pull missing photos from Firebase to this device
+// Download a single photo with one retry on transient failures.
+// Caller is responsible for releasing references — we return null on give-up.
+async function _downloadOneFirebasePhoto(meta) {
+  const attempts = 2;
+  let lastErr = null;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const ref = window.fsStorage.ref(meta.storageRef);
+      const url = await ref.getDownloadURL();
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      let blob = await response.blob();
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error || new Error('FileReader error'));
+        reader.readAsDataURL(blob);
+      });
+      blob = null; // release blob reference
+      return dataUrl;
+    } catch (err) {
+      lastErr = err;
+      if (i < attempts - 1) {
+        // Wait 2 seconds before retrying — network glitches often resolve quickly
+        await new Promise(r => setTimeout(r, 2000));
+      }
+    }
+  }
+  throw lastErr || new Error('Download failed');
+}
+
 async function pullPhotosFromFirebase() {
   if (typeof FirebaseSync === 'undefined' || !FirebaseSync.isEnabled()) {
     showAlert('Firebase is not connected. Ensure the sync dot is green, then try again.');
     return;
   }
 
+  // Remove the banner nag — the dialog is taking over as the source of truth
   const warn = document.getElementById('photo-integrity-warn');
-  if (warn) warn.innerHTML = '<strong>☁️ Downloading photos from Firebase...</strong><br><span style="font-size:12px;">This may take a few minutes. Please keep the app open.</span>';
+  if (warn) warn.remove();
+
+  // Show persistent progress dialog (same one used by backup)
+  BackupProgress.show();
+  const titleEl = document.getElementById('bpTitle');
+  if (titleEl) titleEl.textContent = '☁️ Downloading from Firebase';
+  BackupProgress.update({ surveyLabel: 'Scanning for photos…', stepLabel: 'Checking Firebase catalogue', percent: 0 });
 
   const surveys = await getAllSurveys();
-  let downloaded = 0;
+
+  // Build full list of photos-to-download first, so we have a real denominator
+  const toDownload = [];  // { meta, vesselName }
   let alreadyHad = 0;
-  let failed = 0;
+  let catalogueErrors = 0;
 
   for (const survey of surveys) {
+    if (BackupProgress.isCancelled()) break;
     try {
       const snap = await window.fsDb.collection('photos')
         .where('surveyId', '==', survey.id)
         .get();
-
       for (const doc of snap.docs) {
         const meta = doc.data();
-        // Check if we already have this photo locally
         const local = await getPhotoById(meta.id);
         if (local && local.dataUrl) { alreadyHad++; continue; }
-
-        // Download from Storage
-        if (meta.storageRef) {
-          try {
-            const ref = window.fsStorage.ref(meta.storageRef);
-            const url = await ref.getDownloadURL();
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const dataUrl = await new Promise((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(reader.result);
-              reader.onerror = reject;
-              reader.readAsDataURL(blob);
-            });
-            const photo = { ...meta, dataUrl };
-            // Save directly to IndexedDB — don't trigger backup queue
-            await new Promise((resolve, reject) => {
-              const tx = db.transaction(['photos'], 'readwrite');
-              const store = tx.objectStore('photos');
-              store.put(photo);
-              tx.oncomplete = () => resolve();
-              tx.onerror = () => reject(tx.error);
-            });
-            downloaded++;
-            if (downloaded % 10 === 0 && warn) {
-              warn.innerHTML = `<strong>☁️ Downloaded ${downloaded} photos...</strong><br><span style="font-size:12px;">Still going — please keep the app open.</span>`;
-            }
-          } catch (dlErr) {
-            failed++;
-            console.warn(`[Pull] Could not download photo ${meta.id}:`, dlErr);
-          }
-        }
+        if (meta.storageRef) toDownload.push({ meta, vesselName: survey.vesselName || 'Unnamed' });
       }
     } catch (err) {
-      console.warn(`[Pull] Error pulling photos for ${survey.vesselName}:`, err);
+      console.warn(`[Pull] Error pulling catalogue for ${survey.vesselName}:`, err);
+      catalogueErrors++;
+      BackupProgress.update({ detail: `⚠ Catalogue error for ${survey.vesselName}: ${err.message || err}` });
     }
   }
 
-  // Remove the warning banner
-  if (warn) warn.remove();
-  window._photoWarnDismissed = true;
-
-  if (downloaded > 0 || failed > 0) {
-    showAlert(`Download complete!\n\n${downloaded} photos downloaded, ${alreadyHad} already here, ${failed} failed.`);
-    renderHome();
-  } else if (alreadyHad > 0) {
-    showAlert(`All ${alreadyHad} photos already on this device.`);
-  } else {
-    showAlert('No photos found in Firebase. Use "Sync All to Firebase" on the device that has the photos first.');
+  if (toDownload.length === 0) {
+    BackupProgress.finish({
+      title: alreadyHad > 0 ? '✓ Already up to date' : 'Nothing to download',
+      subtitle: alreadyHad > 0
+        ? `All ${alreadyHad} photos already on this device.`
+        : 'No photos found in Firebase. Sync from the device that has them first.',
+      success: true
+    });
+    return;
   }
+
+  const total = toDownload.length;
+  BackupProgress.update({
+    surveyLabel: `Downloading ${total} photos`,
+    stepLabel: `0 of ${total} downloaded · ${alreadyHad} already here`,
+    percent: 0
+  });
+
+  // Download ONE at a time with memory release between each
+  let downloaded = 0;
+  const failedPhotos = [];  // { label, vesselName, reason }
+
+  for (const item of toDownload) {
+    if (BackupProgress.isCancelled()) break;
+
+    const photoLabel = item.meta.label || item.meta.id;
+    BackupProgress.update({
+      stepLabel: `${downloaded + 1} of ${total}: ${photoLabel.substring(0, 50)}`,
+      percent: Math.round((downloaded / total) * 100)
+    });
+
+    try {
+      let dataUrl = await _downloadOneFirebasePhoto(item.meta);
+      let photo = { ...item.meta, dataUrl };
+      dataUrl = null;
+
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(['photos'], 'readwrite');
+        const store = tx.objectStore('photos');
+        store.put(photo);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+      photo = null; // release the whole photo record incl base64
+
+      downloaded++;
+      BackupProgress.update({
+        detail: `✓ ${item.vesselName} — ${photoLabel}`,
+        percent: Math.round((downloaded / total) * 100)
+      });
+
+      // Give iOS Safari a moment to reclaim memory between photos. Without
+      // this pause, downloading 500+ photos tends to crash the tab.
+      await new Promise(r => setTimeout(r, 300));
+    } catch (err) {
+      console.warn(`[Pull] Failed photo ${item.meta.id}:`, err);
+      failedPhotos.push({ label: photoLabel, vesselName: item.vesselName, reason: err.message || String(err) });
+      BackupProgress.update({ detail: `✗ ${item.vesselName} — ${photoLabel}: ${err.message || err}` });
+    }
+  }
+
+  const cancelled = BackupProgress.isCancelled();
+  const remaining = total - downloaded - failedPhotos.length;
+
+  // Build final summary
+  let title, subtitle, success;
+  if (cancelled) {
+    title = '⚠ Download cancelled';
+    subtitle = `Downloaded ${downloaded} of ${total} photos · ${remaining} still in Firebase · ${alreadyHad} already here`;
+    success = false;
+  } else if (failedPhotos.length === 0) {
+    title = '✓ Download complete';
+    subtitle = `Downloaded ${downloaded} photos · ${alreadyHad} already here`;
+    success = true;
+  } else if (downloaded > 0) {
+    title = '⚠ Download finished with errors';
+    subtitle = `Downloaded ${downloaded} · Failed ${failedPhotos.length} · ${alreadyHad} already here. Tap Download again to retry the failed ones.`;
+    success = false;
+  } else {
+    title = '✗ Download failed';
+    subtitle = `All ${failedPhotos.length} downloads failed. Check your internet connection and try again.`;
+    success = false;
+  }
+
+  BackupProgress.finish({ title, subtitle, success });
+
+  // Log failed photos grouped by vessel so Dave can see patterns
+  if (failedPhotos.length > 0) {
+    const byVessel = {};
+    failedPhotos.forEach(f => {
+      if (!byVessel[f.vesselName]) byVessel[f.vesselName] = [];
+      byVessel[f.vesselName].push(f);
+    });
+    console.group('[Pull] Failed photos by vessel');
+    for (const [vessel, fails] of Object.entries(byVessel)) {
+      console.log(`  ${vessel}: ${fails.length} failed`);
+      fails.slice(0, 5).forEach(f => console.log(`    - ${f.label}: ${f.reason}`));
+    }
+    console.groupEnd();
+  }
+
+  window._photoWarnDismissed = true;
+  if (downloaded > 0) renderHome();
 }
 
 // Update the backup status badge in the bottom bar
@@ -9899,15 +10000,32 @@ function ensureReportButton() {
     if (DriveBackup.isSignedIn()) {
       backupBtn.innerHTML = '💾 Uploading…';
       backupBtn.disabled = true;
+      BackupProgress.show();
       try {
-        await DriveBackup.backupSurvey(currentSurveyId);
+        const result = await DriveBackup.backupSurvey(
+          currentSurveyId,
+          (update) => BackupProgress.update(update),
+          () => BackupProgress.isCancelled()
+        );
         window._hasUnsavedBackup = false;
+        BackupProgress.finish({
+          title: '✓ Backup complete',
+          subtitle: `${result.vesselName} · ${result.uploaded} of ${result.totalPhotos} photos uploaded`,
+          success: true
+        });
       } catch (err) {
         console.error('Drive backup error:', err);
         if (err.driveApiDisabled) {
+          BackupProgress.hide();
           showDriveApiDisabledDialog(err.activationUrl, 0, 1);
+        } else if (err.cancelled) {
+          BackupProgress.finish({ title: '⚠ Backup cancelled', subtitle: '', success: false });
         } else {
-          showToast('Drive backup failed — ' + err.message);
+          BackupProgress.finish({
+            title: '⚠ Backup failed',
+            subtitle: err.message || String(err),
+            success: false
+          });
         }
       } finally {
         backupBtn.innerHTML = '💾 Backup';
@@ -10006,43 +10124,97 @@ function ensureReportButton() {
         return;
       }
       const doRecover = await new Promise(resolve => {
-        showAlert(`Found ${total} photos in Firebase. Download them all now?`,
+        showAlert(`Found ${total} photos in Firebase for ${survey.vesselName}. Download them all now?`,
           'Download', () => resolve(true), 'Cancel', () => resolve(false));
       });
       if (!doRecover) return;
 
-      showToast('Recovering photos…');
-      let recovered = 0, skipped = 0, failed = 0;
+      // Filter out photos we already have locally
+      const toDownload = [];
+      let alreadyHad = 0;
       for (const doc of snap.docs) {
         const meta = doc.data();
         const local = await getPhotoById(meta.id);
-        if (local && local.dataUrl) { skipped++; recovered++; continue; }
-        if (meta.storageRef) {
-          try {
-            const ref = window.fsStorage.ref(meta.storageRef);
-            const url = await ref.getDownloadURL();
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const dataUrl = await new Promise((res) => {
-              const reader = new FileReader();
-              reader.onloadend = () => res(reader.result);
-              reader.readAsDataURL(blob);
-            });
-            await savePhoto({ ...meta, dataUrl });
-            recovered++;
-          } catch (dlErr) {
-            console.warn(`[Recovery] Failed photo ${meta.id}:`, dlErr);
-            failed++; recovered++;
-          }
-        } else { failed++; recovered++; }
+        if (local && local.dataUrl) { alreadyHad++; continue; }
+        if (meta.storageRef) toDownload.push(meta);
       }
-      showAlert(`Recovery complete!\n\nDownloaded: ${recovered - skipped - failed}\nAlready local: ${skipped}\nFailed: ${failed}`);
-      if (currentSurveyId) {
+
+      if (toDownload.length === 0) {
+        showAlert(`All ${alreadyHad} photos are already on this device.`);
+        return;
+      }
+
+      // Use the progress dialog for live feedback
+      BackupProgress.show();
+      const titleEl = document.getElementById('bpTitle');
+      if (titleEl) titleEl.textContent = '🔄 Recovering photos';
+      BackupProgress.update({
+        surveyLabel: `${survey.vesselName} — ${toDownload.length} photos`,
+        stepLabel: `0 of ${toDownload.length} downloaded`,
+        percent: 0
+      });
+
+      let downloaded = 0;
+      const failedLabels = [];
+
+      for (const meta of toDownload) {
+        if (BackupProgress.isCancelled()) break;
+        const photoLabel = meta.label || meta.id;
+        BackupProgress.update({
+          stepLabel: `${downloaded + 1} of ${toDownload.length}: ${photoLabel.substring(0, 50)}`,
+          percent: Math.round((downloaded / toDownload.length) * 100)
+        });
+        try {
+          let dataUrl = await _downloadOneFirebasePhoto(meta);
+          let photo = { ...meta, dataUrl };
+          dataUrl = null;
+          await new Promise((resolve, reject) => {
+            const tx = db.transaction(['photos'], 'readwrite');
+            tx.objectStore('photos').put(photo);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+          });
+          photo = null;
+          downloaded++;
+          BackupProgress.update({
+            detail: `✓ ${photoLabel}`,
+            percent: Math.round((downloaded / toDownload.length) * 100)
+          });
+          await new Promise(r => setTimeout(r, 300));
+        } catch (err) {
+          failedLabels.push(photoLabel);
+          BackupProgress.update({ detail: `✗ ${photoLabel}: ${err.message || err}` });
+        }
+      }
+
+      const cancelled = BackupProgress.isCancelled();
+      if (cancelled) {
+        BackupProgress.finish({
+          title: '⚠ Recovery cancelled',
+          subtitle: `Downloaded ${downloaded} of ${toDownload.length}. ${alreadyHad} already here.`,
+          success: false
+        });
+      } else if (failedLabels.length === 0) {
+        BackupProgress.finish({
+          title: '✓ Recovery complete',
+          subtitle: `Downloaded ${downloaded} photos · ${alreadyHad} already here`,
+          success: true
+        });
+      } else {
+        BackupProgress.finish({
+          title: '⚠ Recovery finished with errors',
+          subtitle: `Downloaded ${downloaded} · Failed ${failedLabels.length} · ${alreadyHad} already here. Tap Recover again to retry.`,
+          success: false
+        });
+      }
+
+      if (currentSurveyId && downloaded > 0) {
         const s = await getSurvey(currentSurveyId);
         if (s) showInspection(s);
       }
     } catch (err) {
       console.error('Photo recovery error:', err);
+      BackupProgress.hide();
       showAlert('Recovery failed: ' + err.message);
     } finally {
       recoverOpt.innerHTML = '🔄 Recover Photos';
@@ -17551,6 +17723,126 @@ async function initApp() {
 // and photos directly to the surveyor's Google Drive.
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// Persistent backup progress dialog — sticks on screen through the whole
+// upload so Dave can actually see what's happening. Replaces transient toasts.
+const BackupProgress = (() => {
+  let _overlay = null;
+  let _cancelled = false;
+  let _startTime = 0;
+
+  function isCancelled() { return _cancelled; }
+
+  function show() {
+    _cancelled = false;
+    _startTime = Date.now();
+    const existing = document.getElementById('backupProgressOverlay');
+    if (existing) existing.remove();
+
+    _overlay = document.createElement('div');
+    _overlay.id = 'backupProgressOverlay';
+    _overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10002;display:flex;align-items:center;justify-content:center;padding:20px;';
+    _overlay.innerHTML = `
+      <div style="background:white;border-radius:14px;max-width:460px;width:100%;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <span style="font-size:24px;">☁️</span>
+          <h2 id="bpTitle" style="margin:0;font-size:18px;color:#006699;">Backing up to Google Drive</h2>
+        </div>
+        <div id="bpSurveyLabel" style="font-size:14px;font-weight:600;color:#374151;margin-bottom:6px;">Preparing…</div>
+        <div id="bpStepLabel" style="font-size:12px;color:#6b7280;margin-bottom:12px;">—</div>
+        <div style="background:#e5e7eb;border-radius:10px;height:14px;overflow:hidden;margin-bottom:6px;">
+          <div id="bpBar" style="background:linear-gradient(90deg,#3399cc,#006699);height:100%;width:0%;transition:width 0.3s ease;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:14px;">
+          <span id="bpPercent">0%</span>
+          <span id="bpElapsed">0s elapsed</span>
+        </div>
+        <div id="bpDetails" style="font-size:11px;color:#94a3b8;margin-bottom:14px;max-height:60px;overflow:auto;font-family:monospace;"></div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;">
+          <button id="bpCancelBtn" style="padding:8px 14px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(_overlay);
+    document.getElementById('bpCancelBtn').onclick = () => {
+      _cancelled = true;
+      const btn = document.getElementById('bpCancelBtn');
+      if (btn) { btn.textContent = 'Cancelling…'; btn.disabled = true; }
+    };
+
+    // Update elapsed timer
+    _overlay._timer = setInterval(() => {
+      const el = document.getElementById('bpElapsed');
+      if (el) {
+        const s = Math.floor((Date.now() - _startTime) / 1000);
+        el.textContent = s < 60 ? `${s}s elapsed` : `${Math.floor(s / 60)}m ${s % 60}s elapsed`;
+      }
+    }, 1000);
+  }
+
+  function update({ surveyLabel, stepLabel, percent, detail }) {
+    if (!_overlay) return;
+    if (surveyLabel !== undefined) {
+      const el = document.getElementById('bpSurveyLabel');
+      if (el) el.textContent = surveyLabel;
+    }
+    if (stepLabel !== undefined) {
+      const el = document.getElementById('bpStepLabel');
+      if (el) el.textContent = stepLabel;
+    }
+    if (typeof percent === 'number') {
+      const bar = document.getElementById('bpBar');
+      const pct = document.getElementById('bpPercent');
+      const clamped = Math.max(0, Math.min(100, percent));
+      if (bar) bar.style.width = `${clamped}%`;
+      if (pct) pct.textContent = `${Math.round(clamped)}%`;
+    }
+    if (detail) {
+      const det = document.getElementById('bpDetails');
+      if (det) {
+        const line = document.createElement('div');
+        line.textContent = detail;
+        det.appendChild(line);
+        det.scrollTop = det.scrollHeight;
+      }
+    }
+  }
+
+  function finish({ title, subtitle, success }) {
+    if (!_overlay) return;
+    const titleEl = document.getElementById('bpTitle');
+    const surveyEl = document.getElementById('bpSurveyLabel');
+    const stepEl = document.getElementById('bpStepLabel');
+    const cancelBtn = document.getElementById('bpCancelBtn');
+    const bar = document.getElementById('bpBar');
+    if (titleEl) {
+      titleEl.textContent = title || (success ? '✓ Backup complete' : '⚠ Backup finished with errors');
+      titleEl.style.color = success ? '#16a34a' : '#dc2626';
+    }
+    if (surveyEl) surveyEl.textContent = subtitle || '';
+    if (stepEl) stepEl.textContent = '';
+    if (bar && success) { bar.style.width = '100%'; bar.style.background = '#16a34a'; }
+    if (cancelBtn) {
+      cancelBtn.textContent = 'Close';
+      cancelBtn.style.background = '#f1f5f9';
+      cancelBtn.style.color = '#334155';
+      cancelBtn.style.borderColor = '#e5e7eb';
+      cancelBtn.disabled = false;
+      cancelBtn.onclick = () => hide();
+    }
+  }
+
+  function hide() {
+    if (_overlay) {
+      if (_overlay._timer) clearInterval(_overlay._timer);
+      _overlay.remove();
+      _overlay = null;
+    }
+    _cancelled = false;
+  }
+
+  return { show, update, finish, hide, isCancelled };
+})();
+
 // Friendly dialog when the Google Drive API hasn't been enabled on the
 // Firebase/GCP project. Replaces the scary raw 403 JSON with a direct
 // link and a one-tap copy so Dave can fix it from his phone if needed.
@@ -17759,14 +18051,20 @@ const DriveBackup = (() => {
 
   // Main backup function — uploads survey data + photos to Drive
   // MEMORY-SAFE: loads one photo at a time via ID list
-  async function backupSurvey(surveyId) {
+  // onProgress: optional ({ surveyLabel, stepLabel, percent, detail }) callback
+  // checkCancelled: optional () => boolean to abort mid-upload
+  async function backupSurvey(surveyId, onProgress, checkCancelled) {
     const survey = await getSurvey(surveyId);
     if (!survey) throw new Error('Survey not found');
 
     const vesselName = survey.vesselName || 'Unnamed';
+    const report = (update) => { if (typeof onProgress === 'function') onProgress(update); };
+
+    report({ surveyLabel: vesselName, stepLabel: 'Preparing vessel folder…', percent: 0 });
     const folderId = await getOrCreateVesselFolder(vesselName);
 
     // 1. Upload survey data (without photo blobs) as JSON
+    report({ stepLabel: 'Uploading survey data…', percent: 2 });
     const surveyClone = JSON.parse(JSON.stringify(survey));
     if (surveyClone.items) {
       for (const key of Object.keys(surveyClone.items)) {
@@ -17779,6 +18077,7 @@ const DriveBackup = (() => {
     const dateStr = new Date().toISOString().slice(0, 10);
     const surveyJson = JSON.stringify(surveyClone, null, 2);
     await uploadFile(folderId, `${vesselName.replace(/[^a-zA-Z0-9_-]/g, '_')}_${dateStr}.json`, 'application/json', surveyJson);
+    report({ detail: `✓ ${vesselName}_${dateStr}.json` });
 
     // 2. Collect photo IDs only (no image data in memory)
     const photoIds = await new Promise((resolve) => {
@@ -17792,9 +18091,20 @@ const DriveBackup = (() => {
       };
     });
 
+    const totalPhotos = photoIds.length;
+    if (totalPhotos === 0) {
+      report({ stepLabel: 'No photos to upload', percent: 100 });
+    }
+
     // 3. Upload ONE photo at a time — load, convert, upload, release
     let uploaded = 0;
     for (const pid of photoIds) {
+      if (typeof checkCancelled === 'function' && checkCancelled()) {
+        const err = new Error('Backup cancelled by user');
+        err.cancelled = true;
+        throw err;
+      }
+
       let photo = await getPhotoById(pid);
       if (!photo || !photo.dataUrl) { photo = null; continue; }
 
@@ -17802,19 +18112,31 @@ const DriveBackup = (() => {
       const ext = photo.dataUrl.startsWith('data:image/png') ? '.png' : '.jpg';
       const photoName = (photo.label || photo.id || `photo_${uploaded}`).replace(/[^a-zA-Z0-9_-]/g, '_') + ext;
       const mimeType = photoBlob.type;
+      const sizeKb = Math.round(photoBlob.size / 1024);
 
       // Release the base64 string before uploading
       photo = null;
+
+      report({
+        stepLabel: `Uploading photo ${uploaded + 1} of ${totalPhotos} (${sizeKb} KB)…`,
+        percent: Math.round(((uploaded + 0.5) / Math.max(totalPhotos, 1)) * 100)
+      });
 
       await uploadFile(folderId, photoName, mimeType, photoBlob);
       photoBlob = null; // Release blob after upload
       uploaded++;
 
+      report({
+        detail: `✓ ${photoName}`,
+        percent: Math.round((uploaded / Math.max(totalPhotos, 1)) * 100)
+      });
+
       // 500ms pause to let browser reclaim memory
       await new Promise(r => setTimeout(r, 500));
     }
 
-    showToast(`✓ Backed up to Drive: ${vesselName} (${uploaded} photos)`);
+    report({ stepLabel: `Uploaded ${uploaded} of ${totalPhotos} photos`, percent: 100 });
+    return { vesselName, uploaded, totalPhotos };
   }
 
   // Upload a single photo to the correct vessel folder on Drive
@@ -17839,35 +18161,75 @@ const DriveBackup = (() => {
     const surveys = await getAllSurveys();
     if (surveys.length === 0) { showToast('No surveys to back up'); return; }
 
+    BackupProgress.show();
+
     let done = 0;
     let failed = 0;
     let lastError = '';
     let apiDisabledErr = null;
-    for (const survey of surveys) {
+    let totalPhotosUploaded = 0;
+    let cancelled = false;
+
+    for (let i = 0; i < surveys.length; i++) {
+      if (BackupProgress.isCancelled()) { cancelled = true; break; }
+      const survey = surveys[i];
+      const prefix = `Survey ${i + 1} of ${surveys.length}: ${survey.vesselName || 'Unnamed'}`;
+
       try {
-        showToast(`Backing up ${survey.vesselName || 'survey'}... (${done + 1}/${surveys.length})`);
-        await backupSurvey(survey.id);
+        const result = await backupSurvey(
+          survey.id,
+          (update) => {
+            // Prepend the overall position and scale per-survey percent into the
+            // overall percent across the whole batch.
+            const overallUpdate = { ...update };
+            if (typeof update.percent === 'number') {
+              overallUpdate.percent = ((i + update.percent / 100) / surveys.length) * 100;
+            }
+            if (update.surveyLabel !== undefined) {
+              overallUpdate.surveyLabel = `${prefix}`;
+            }
+            BackupProgress.update(overallUpdate);
+          },
+          () => BackupProgress.isCancelled()
+        );
         done++;
+        totalPhotosUploaded += (result && result.uploaded) || 0;
+        BackupProgress.update({ detail: `✓ ${survey.vesselName}: ${result.uploaded}/${result.totalPhotos} photos` });
       } catch (err) {
         console.error(`Drive backup failed for ${survey.vesselName}:`, err);
-        // If the Drive API is disabled on the Google Cloud project, stop the
-        // batch immediately — no point retrying every survey against the same
-        // broken endpoint.
+        if (err.cancelled) { cancelled = true; break; }
         if (err.driveApiDisabled) {
           apiDisabledErr = err;
           failed++;
           break;
         }
+        BackupProgress.update({ detail: `✗ ${survey.vesselName}: ${err.message || err}` });
         lastError = err.message || String(err);
         failed++;
       }
     }
+
     if (apiDisabledErr) {
+      BackupProgress.hide();
       showDriveApiDisabledDialog(apiDisabledErr.activationUrl, done, surveys.length);
+    } else if (cancelled) {
+      BackupProgress.finish({
+        title: '⚠ Backup cancelled',
+        subtitle: `${done} of ${surveys.length} surveys completed before cancel`,
+        success: false
+      });
     } else if (failed > 0) {
-      showAlert(`Backed up ${done} surveys. ${failed} failed.\n\nError: ${lastError}`);
+      BackupProgress.finish({
+        title: '⚠ Backup finished with errors',
+        subtitle: `${done} surveys uploaded, ${failed} failed. Last error: ${lastError}`,
+        success: false
+      });
     } else {
-      showToast(`All ${done} surveys backed up to Drive ✓`);
+      BackupProgress.finish({
+        title: '✓ Backup complete',
+        subtitle: `All ${done} surveys backed up · ${totalPhotosUploaded} photos uploaded`,
+        success: true
+      });
     }
   }
 
