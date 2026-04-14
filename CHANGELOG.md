@@ -12,6 +12,47 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2161 — 2026-04-14
+
+### Changed — B-03 Firebase download (attempt 4)
+
+v2160 diagnostic confirmed the SW's internal `fetch(event.request)`
+throws the same `TypeError: Load failed` as page-context fetch. That
+proves the SW is not causing nor can it fix the problem. v2161:
+
+- **Reverted the SW Firebase-cloud proxy** — passive return again.
+  Keeping the proxy was only wrapping the failure in a 599 without
+  helping. Weather and Nominatim fetches already work via passive
+  return, so Firebase should have the same opportunity.
+- **Explicit fetch options** on the app-side Firebase Storage
+  download: `mode:'cors'`, `credentials:'omit'`, `cache:'no-store'`,
+  `redirect:'follow'`. Strips default cookies/credentials that iOS
+  WKWebView standalone (PWA) mode may reject cross-origin. This is
+  the last code-level attempt; if it still fails the remaining path
+  is Firebase Storage bucket CORS configuration (admin task, not app
+  code).
+
+### If this still fails — the likely remaining cause
+Firebase Storage bucket needs explicit CORS config allowing the
+GitHub Pages PWA origin. To check and fix (requires Google Cloud
+shell or `gsutil` locally):
+
+```
+gsutil cors get gs://<your-bucket>
+# If empty or restrictive, set:
+echo '[{"origin":["https://daveseagrim.github.io"],"method":["GET"],"maxAgeSeconds":3600}]' > cors.json
+gsutil cors set cors.json gs://<your-bucket>
+```
+
+The bucket name is visible in Firebase Console → Storage → "gs://..."
+header.
+
+### Process
+- Triple-checked: 106 tests pass, versions consistent, pre-commit hook
+  green in no-node simulated environment.
+
+---
+
 ## v2160 — 2026-04-14
 
 ### Fixed — B-03 Firebase download (attempt 3)

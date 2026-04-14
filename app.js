@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2160';
+const APP_VERSION = 'v2161';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2294,9 +2294,19 @@ async function _downloadOneFirebasePhoto(meta) {
       }
 
       // Stage 2 — download bytes via fetch, fall back to XHR.
+      // v2161: pass explicit fetch options — strips default cookies /
+      // credentials / cache that iOS WKWebView standalone (PWA) mode may
+      // reject cross-origin. mode:cors + credentials:omit is the minimal
+      // request iOS should honor.
       try {
         try {
-          const response = await fetch(url);
+          const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            credentials: 'omit',
+            cache: 'no-store',
+            redirect: 'follow'
+          });
           if (!response.ok) {
             const bodySnippet = await _readErrorBody(response);
             throw new Error('HTTP ' + response.status + (bodySnippet ? ': ' + bodySnippet : ''));

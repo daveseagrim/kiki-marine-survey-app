@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v2160';
+const CACHE_NAME = 'kiki-marine-v2161';
 const URLS_TO_CACHE = [
   './',
   'index.html',
@@ -84,38 +84,19 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // B-03 fix attempt (v2159): iOS Safari PWA sometimes fails cross-origin
-  // fetches when the SW "returns" passively (no respondWith). Explicitly
-  // proxy fetches to Firebase Storage and Firestore through the SW so iOS
-  // honors them. This is the fix for the "xhr: XHR network error" + "fetch:
-  // TypeError Load failed" symptom Dave hit on 2026-04-14.
-  const isFirebaseCloud = (
-    url.hostname === 'firebasestorage.googleapis.com' ||
-    url.hostname === 'firestore.googleapis.com' ||
-    url.hostname.endsWith('.firebaseapp.com') ||
-    url.hostname.endsWith('.firebaseio.com')
-  );
-  if (isFirebaseCloud) {
-    event.respondWith(
-      fetch(event.request).catch(err => {
-        // On SW-proxy failure, pass the underlying error through in the
-        // response body so app-level error handlers surface the real cause
-        // (not an opaque 599). v2160: the app reads the body when status
-        // is non-ok and includes the first ~140 chars in the error message.
-        const name = (err && err.name) || 'Error';
-        const msg = (err && err.message) || String(err);
-        const detail = `SW proxy (${name}): ${msg}`;
-        return new Response(detail, {
-          status: 599,
-          statusText: 'SW proxy fail',
-          headers: { 'content-type': 'text/plain' }
-        });
-      })
-    );
-    return;
-  }
+  // B-03 history:
+  //   v2159 added an explicit SW proxy for Firebase Cloud hostnames.
+  //   v2160 passed the proxy error through.
+  //   v2160 diagnostic proved the SW's internal fetch hits the SAME
+  //     "TypeError: Load failed" that page-context fetch hits — so the
+  //     restriction isn't caused by the SW. Keeping the proxy active does
+  //     nothing useful; the proxy's own fetch just fails.
+  //   v2161: REVERT the Firebase proxy and let passive return handle these
+  //     requests (let the browser do the fetch natively, error or not).
+  //     Don't intercept other external API calls either — weather, Nominatim,
+  //     etc. all work fine with passive return.
 
-  // Don't intercept other external API calls (weather, location search, map tiles, etc.)
+  // Don't intercept external API calls (weather, location search, map tiles, etc.)
   // Let them go straight to the network so errors propagate properly.
   // Exception: Firebase SDK files from gstatic.com — serve from cache for offline
   const isFirebaseSDK = url.origin === 'https://www.gstatic.com' && url.pathname.includes('firebasejs');
