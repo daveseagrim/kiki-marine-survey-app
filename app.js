@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2133';
+const APP_VERSION = 'v2134';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -15855,7 +15855,7 @@ async function generateReport() {
       #exportToolbar { display: none !important; }
     }
     body { font-family: Arial, Helvetica, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; font-size: 11pt; }
-    h1 { text-align: center; border-bottom: 3px solid #006699; padding-bottom: 10px; margin-bottom: 6px; }
+    h1 { text-align: center; padding-bottom: 10px; margin-bottom: 6px; }
     h2 { background: #006699; color: white; padding: 8px 12px; margin-top: 24px; font-size: 13pt; }
     h3 { color: #006699; margin-top: 18px; font-size: 12pt; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
     table { width: 100%; border-collapse: collapse; margin: 8px 0; }
@@ -15907,9 +15907,8 @@ async function generateReport() {
     <img src="https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png"
          alt="Kiki Marine Logo" style="max-width: 300px; width: 80%; height: auto;"
          onerror="this.style.display='none'">
-    <h1 style="margin-top: 12px; font-size: 22pt;">KIKI MARINE</h1>
-    <p style="font-size: 10pt; color: #555; margin-top: -8px;">SAMS &bull; ABYC Master Advisor</p>
-    <h1 style="font-size: 16pt; border: none; margin-top: 20px; border-bottom: 2px solid #006699; display: inline-block; padding-bottom: 6px;">${survey.surveyType === 'Insurance survey' ? 'Insurance<br/>Marine Survey' : 'Report of Condition &amp; Value<br/>Marine Survey'}</h1>
+    <p style="font-size: 11pt; color: #333; margin-top: 14px; letter-spacing: 0.5px;">Dave Seagrim, SAMS Surveyor Associate<br/>ABYC Master Advisor</p>
+    <h1 style="font-size: 16pt; border: none; margin-top: 24px;">${survey.surveyType === 'Insurance survey' ? 'Insurance<br/>Marine Survey' : 'Report of Condition &amp; Value<br/>Marine Survey'}</h1>
   </div>
 
   ${coverPhotoDataUrl ? `
