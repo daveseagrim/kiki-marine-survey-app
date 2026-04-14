@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2125';
+const APP_VERSION = 'v2126';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1932,6 +1932,84 @@ async function syncAllPhotosToFirebase() {
   showAlert(`Firebase sync complete!\n\n${uploaded} uploaded, ${skipped} already existed, ${failed} failed.`);
 }
 
+// Pull missing photos from Firebase to this device
+async function pullPhotosFromFirebase() {
+  if (typeof FirebaseSync === 'undefined' || !FirebaseSync.isEnabled()) {
+    showAlert('Firebase is not connected. Ensure the sync dot is green, then try again.');
+    return;
+  }
+
+  const warn = document.getElementById('photo-integrity-warn');
+  if (warn) warn.innerHTML = '<strong>☁️ Downloading photos from Firebase...</strong><br><span style="font-size:12px;">This may take a few minutes. Please keep the app open.</span>';
+
+  const surveys = await getAllSurveys();
+  let downloaded = 0;
+  let alreadyHad = 0;
+  let failed = 0;
+
+  for (const survey of surveys) {
+    try {
+      const snap = await window.fsDb.collection('photos')
+        .where('surveyId', '==', survey.id)
+        .get();
+
+      for (const doc of snap.docs) {
+        const meta = doc.data();
+        // Check if we already have this photo locally
+        const local = await getPhotoById(meta.id);
+        if (local && local.dataUrl) { alreadyHad++; continue; }
+
+        // Download from Storage
+        if (meta.storageRef) {
+          try {
+            const ref = window.fsStorage.ref(meta.storageRef);
+            const url = await ref.getDownloadURL();
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const dataUrl = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
+            const photo = { ...meta, dataUrl };
+            // Save directly to IndexedDB — don't trigger backup queue
+            await new Promise((resolve, reject) => {
+              const tx = db.transaction(['photos'], 'readwrite');
+              const store = tx.objectStore('photos');
+              store.put(photo);
+              tx.oncomplete = () => resolve();
+              tx.onerror = () => reject(tx.error);
+            });
+            downloaded++;
+            if (downloaded % 10 === 0 && warn) {
+              warn.innerHTML = `<strong>☁️ Downloaded ${downloaded} photos...</strong><br><span style="font-size:12px;">Still going — please keep the app open.</span>`;
+            }
+          } catch (dlErr) {
+            failed++;
+            console.warn(`[Pull] Could not download photo ${meta.id}:`, dlErr);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(`[Pull] Error pulling photos for ${survey.vesselName}:`, err);
+    }
+  }
+
+  // Remove the warning banner
+  if (warn) warn.remove();
+  window._photoWarnDismissed = true;
+
+  if (downloaded > 0 || failed > 0) {
+    showAlert(`Download complete!\n\n${downloaded} photos downloaded, ${alreadyHad} already here, ${failed} failed.`);
+    renderHome();
+  } else if (alreadyHad > 0) {
+    showAlert(`All ${alreadyHad} photos already on this device.`);
+  } else {
+    showAlert('No photos found in Firebase. Use "Sync All to Firebase" on the device that has the photos first.');
+  }
+}
+
 // Update the backup status badge in the bottom bar
 function _updateBackupStatusUI() {
   const badge = document.getElementById('backupStatusBadge');
@@ -2391,6 +2469,8 @@ async function validatePhotoIntegrity() {
 
     if (warnings.length > 0) {
       console.warn('[Photo Integrity] Missing photos detected:', warnings);
+      // Check if user dismissed this warning already this session
+      if (window._photoWarnDismissed) return;
       // Show warning on home screen
       setTimeout(() => {
         const homeEl = document.getElementById('homeContent') || document.body;
@@ -2399,12 +2479,16 @@ async function validatePhotoIntegrity() {
 
         const warn = document.createElement('div');
         warn.id = 'photo-integrity-warn';
-        warn.style.cssText = 'margin:12px 16px;padding:14px 16px;background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;font-size:13px;color:#991b1b;';
-        let html = '<strong>⚠️ Missing Photos Detected</strong><br>';
+        warn.style.cssText = 'margin:12px 16px;padding:14px 16px;background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;font-size:13px;color:#92400e;position:relative;';
+        const totalMissing = warnings.reduce((s, w) => s + w.missing, 0);
+        let html = '<button onclick="document.getElementById(\'photo-integrity-warn\').remove();window._photoWarnDismissed=true;" style="position:absolute;top:8px;right:10px;background:none;border:none;font-size:18px;color:#92400e;cursor:pointer;padding:0;line-height:1;">✕</button>';
+        html += `<strong>📷 ${totalMissing} photos on another device</strong><br>`;
+        html += '<span style="font-size:12px;color:#78716c;">These photos exist in Firebase but haven\'t been downloaded to this device yet.</span><br>';
         for (const w of warnings) {
-          html += `<br>• <strong>${w.name}</strong>: ${w.missing} of ${w.referenced} photos missing from local storage`;
+          html += `<br>• <strong>${w.name}</strong>: ${w.missing} of ${w.referenced}`;
         }
-        html += `<br><br><a href="import_photos.html" style="color:#dc2626;font-weight:600;">Open Photo Recovery Tool →</a>`;
+        html += `<br><br><button onclick="pullPhotosFromFirebase()" style="padding:8px 16px;background:#f59e0b;color:white;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">☁️ Download from Firebase</button>`;
+        html += ` <button onclick="document.getElementById('photo-integrity-warn').remove();window._photoWarnDismissed=true;" style="padding:8px 16px;background:transparent;border:1px solid #fcd34d;border-radius:6px;font-size:13px;cursor:pointer;color:#92400e;">Dismiss</button>`;
         warn.innerHTML = html;
         homeEl.insertBefore(warn, homeEl.firstChild);
       }, 500);
