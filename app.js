@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2154';
+const APP_VERSION = 'v2157';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -950,6 +950,100 @@ const COMPONENT_BUILDERS = {
         ]
       }
     ]
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // DECK / COACHROOF PERCUSSION TESTING — checkbox-driven builder.
+  // Surveyor first rates the item (A/B/C/NT), then ticks the observations
+  // that apply for that rating. The "Areas tested" and "Method" components
+  // are always visible and contribute context sentences; "Findings" options
+  // are filtered by rating so only the relevant granular choices appear.
+  // Add / edit / reorder options freely — schema ships as a starter set.
+  // ═══════════════════════════════════════════════════════════════════════
+  'Bowsprit, deck and coachroof/pilothouse impact and resonance testing': {
+    title: 'Deck & Coachroof Percussion Testing',
+    intro: '',
+    components: [
+      {
+        name: 'Areas tested',
+        key: 'areas',
+        multiSelect: true,
+        join: 'list',
+        prefix: 'Percussion testing was performed on ',
+        suffix: '.',
+        options: [
+          { label: 'Deck', rating: null, alwaysInclude: true, fragment: 'the deck' },
+          { label: 'Coachroof', rating: null, alwaysInclude: true, fragment: 'the coachroof' },
+          { label: 'Cockpit sole', rating: null, alwaysInclude: true, fragment: 'the cockpit sole' },
+          { label: 'Side decks', rating: null, alwaysInclude: true, fragment: 'the side decks' },
+          { label: 'Foredeck', rating: null, alwaysInclude: true, fragment: 'the foredeck' },
+          { label: 'Bowsprit', rating: null, alwaysInclude: true, fragment: 'the bowsprit' },
+          { label: 'Pilothouse', rating: null, alwaysInclude: true, fragment: 'the pilothouse' },
+          { label: 'Flybridge', rating: null, alwaysInclude: true, fragment: 'the flybridge' },
+          { label: 'Transom (exterior)', rating: null, alwaysInclude: true, fragment: 'the transom exterior' }
+        ]
+      },
+      {
+        name: 'Method',
+        key: 'method',
+        multiSelect: true,
+        join: 'list',
+        prefix: 'Testing was conducted using ',
+        suffix: '.',
+        options: [
+          { label: 'Phenolic hammer', rating: null, alwaysInclude: true, fragment: 'a phenolic hammer' }
+        ]
+      },
+      {
+        // Findings are filtered by the item's rating (A/B/C/NT). Each rating
+        // tier has multiple granular options; tick any that apply.
+        // allowLocationPerOption: every ticked option reveals a free-text
+        // Location field so the surveyor can pinpoint where. Options that use
+        // {location} in their fragment substitute the typed text inline; the
+        // rest get the location appended in parentheses.
+        name: 'Findings',
+        key: 'findings',
+        multiSelect: true,
+        filterByRating: true,
+        allowLocationPerOption: true,
+        options: [
+          // ── A — Critical (immediate safety / structural) ────────────────
+          // SAMS vocabulary per Dave: "dull thud" → possible moisture in core;
+          // "ringing" → may indicate delamination / core separation / lack of
+          // resin / void beneath the skin.
+          { label: 'Extensive dull thuds across large areas', rating: 'A', fragment: 'Extensive areas of the deck sounded as dull thuds, indicating substantial and widespread moisture in the core. Immediate professional assessment and repair is required before the vessel can be considered safe for use.' },
+          { label: 'Widespread ringing across large areas', rating: 'A', fragment: 'Multiple areas of the deck sounded ringing, indicating widespread delamination, core separation, lack of resin, or void areas beneath the skin. Immediate professional repair is critical.' },
+          { label: 'Structural separation at high-load fitting', rating: 'A', fragment: 'Percussion indicated structural separation beneath the skin at a high-load fitting at {location}. Load paths are compromised; immediate repair is required before the vessel is sailed or loaded.' },
+          { label: 'Combined dull thud + ringing throughout', rating: 'A', fragment: 'The deck produced a mixture of dull thuds and ringing tones throughout, indicating both core moisture and internal separation/voids. Structural integrity is compromised; immediate professional evaluation is required.' },
+
+          // ── B — Needs attention (should be addressed) ──────────────────
+          { label: 'Dull thud (possible moisture in core)', rating: 'B', fragment: 'An area at {location} sounded as a dull thud, indicating possible moisture in the core.' },
+          { label: 'Ringing (possible delamination / void / lack of resin)', rating: 'B', fragment: 'An area at {location} sounded ringing, which may indicate delamination, core separation, lack of resin, or a void beneath the skin.' },
+          { label: 'Tonal change at hardware mount', rating: 'B', fragment: 'A tonal change was noted around a hardware mount at {location}, consistent with water ingress at the fastener penetration. Rebed the fitting and investigate core condition during removal.' },
+          { label: 'Inconsistent tone at hatch cutout', rating: 'B', fragment: 'Inconsistent tone was detected at a hatch cutout at {location}. Water is likely tracking into the core at the cutout edge; seal and repair as part of regular maintenance.' },
+          { label: 'Tone consistent with prior repair', rating: 'B', fragment: 'A tonal change consistent with a prior repair was noted at {location}. The repair appeared sound at the time of survey but warrants monitoring.' },
+          { label: 'Dull thud near coachroof corner', rating: 'B', fragment: 'A dull thud was noted near a coachroof corner at {location}, indicating possible moisture tracking along the coachroof-to-deck seam.' },
+          { label: 'Tonal change around stanchion base', rating: 'B', fragment: 'A tonal change was noted around a stanchion base at {location}. Rebed the stanchion and inspect for core moisture during removal.' },
+          { label: 'Dull thud at high-traffic area', rating: 'B', fragment: 'A dull thud was detected at {location}, a high-traffic area of the deck. Monitor and plan localised repair before the next major season.' },
+
+          // ── C — Serviceable (no repair needed) ─────────────────────────
+          { label: 'Consistent, solid tone throughout', rating: 'C', fragment: 'Percussion testing produced a consistent, solid tone throughout the tested areas. No dull thuds or ringing tones were detected.' },
+          { label: 'No tonal anomalies detected', rating: 'C', fragment: 'No tonal anomalies suggestive of core moisture, delamination, or voids were detected.' },
+          { label: 'Expected variation at known layup changes', rating: 'C', fragment: 'Minor tonal variation was observed at known layup changes (reinforcement pads, hardware backing plates). This is consistent with the original construction and is not indicative of damage.' },
+          { label: 'Solid response around all fittings', rating: 'C', fragment: 'A solid, consistent response was obtained around all inspected deck fittings and hardware mounts.' },
+
+          // ── Not tested (limitations) ───────────────────────────────────
+          { label: 'Covered by non-skid / overlay — access limited', rating: 'Not tested', fragment: 'Portions of the deck were covered by non-skid or an overlay (teak, cork, synthetic) that prevented direct percussion testing of the underlying laminate.' },
+          { label: 'Weather / water on deck — testing deferred', rating: 'Not tested', fragment: 'Testing of portions of the deck was deferred because of weather conditions or water on the surface at the time of survey. Retest is recommended.' },
+          { label: 'Obstructed by gear / canvas', rating: 'Not tested', fragment: 'Portions of the deck were obstructed by gear or canvas covers at the time of survey and were not accessible for percussion testing.' },
+
+          // ── Always-available context add-ons ───────────────────────────
+          { label: 'Add: limited by thick coatings', rating: null, alwaysInclude: true, fragment: 'Testing was limited in some areas due to thick coatings.' },
+          { label: 'Add: some areas not accessible', rating: null, alwaysInclude: true, fragment: 'Portions of the deck were not accessible for percussion testing.' },
+          { label: 'Add: further investigation recommended', rating: null, alwaysInclude: true, fragment: 'Further investigation (moisture probe, core sampling) is recommended to confirm findings.' }
+        ]
+      }
+    ]
   }
 };
 
@@ -958,118 +1052,38 @@ const RATING_PRIORITY = { 'A': 3, 'B': 2, 'NT': 1, 'C': 0 };
 const RATING_PRIORITY_REVERSE = { 3: 'A - Critical', 2: 'B - Needs Attention', 1: 'Not tested/not verified', 0: 'C - Serviceable' };
 
 // Build finding text from component builder selections.
-// Supports two per-component modes:
-//   - default (single-select): selections[comp.key] is an option index string
-//   - multiSelect (checkboxes): selections[comp.key] is an array of option
-//     index strings. Each ticked option contributes its fragment. Worst
-//     rating across ticked options wins. Fragments joined by spaces (or by
-//     comp.join if provided, which supports "and"-list joining for noun
-//     phrases like area/method lists).
+// Delegates to the pure composition function in src/core/component_builder.js
+// so logic is testable and single-sourced. The pure module handles:
+//   - single-select and multi-select components
+//   - join=list with prefix/suffix
+//   - {qty}, {location}, and per-option {_locText} substitution
+//   - alwaysInclude options
+//   - ABYC citation dedup
+//   - rating propagation
+// If the pure module didn't load for any reason (shouldn't happen in
+// production), a minimal inline fallback returns an empty composition.
 function buildComponentFindings(builderKey, selections) {
   const builder = COMPONENT_BUILDERS[builderKey];
   if (!builder) return { text: '', rating: '' };
-
-  const fragments = [builder.intro];
-  let worstRating = 0;
-
-  // Helper: pull fragment out of an option, do placeholder replacement
-  function fragmentFor(comp, option) {
-    if (!option) return '';
-    if (option.rating === null && !option.alwaysInclude) return '';
-    let fragment = option.fragment || '';
-    if (!fragment) return '';
-    if (fragment.includes('{qty}')) {
-      const qty = selections[comp.key + '_qty'] || '?';
-      fragment = fragment.replace('{qty}', qty);
-    }
-    if (fragment.includes('{location}')) {
-      const loc = selections[comp.key + '_location'] || '?';
-      fragment = fragment.replace('{location}', loc);
-    }
-    return fragment;
+  if (typeof window !== 'undefined' && window.KikiComponentBuilder && window.KikiComponentBuilder.composeFindings) {
+    return window.KikiComponentBuilder.composeFindings(builder, selections);
   }
-
-  // Helper: join a list of noun-phrase fragments like "A, B, and C"
-  function joinAsList(parts) {
-    if (parts.length === 0) return '';
-    if (parts.length === 1) return parts[0];
-    if (parts.length === 2) return parts[0] + ' and ' + parts[1];
-    return parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1];
-  }
-
-  for (const comp of builder.components) {
-    const sel = selections[comp.key];
-    if (sel === undefined || sel === null || sel === '') continue;
-
-    if (comp.multiSelect) {
-      // Multi-select: sel is an array of option index strings
-      const indices = Array.isArray(sel) ? sel : [];
-      if (indices.length === 0) continue;
-      const pieces = [];
-      for (const idxStr of indices) {
-        const option = comp.options[parseInt(idxStr)];
-        if (!option) continue;
-        const frag = fragmentFor(comp, option);
-        if (frag) pieces.push(frag);
-        // Track worst rating across ticked options
-        if (option.rating) {
-          const ratingVal = RATING_PRIORITY[option.rating] || 0;
-          if (ratingVal > worstRating) worstRating = ratingVal;
-        }
-      }
-      if (pieces.length === 0) continue;
-      let compOutput;
-      if (comp.join === 'list') {
-        compOutput = joinAsList(pieces);
-        if (comp.prefix) compOutput = comp.prefix + compOutput;
-        if (comp.suffix) compOutput = compOutput + comp.suffix;
-      } else {
-        // Default: each fragment is its own complete sentence, joined by space
-        compOutput = pieces.join(' ');
-      }
-      fragments.push(compOutput);
-      continue;
-    }
-
-    // Single-select (original path)
-    const option = comp.options[parseInt(sel)];
-    if (!option) continue;
-    if (option.rating === null) continue;
-    const fragment = fragmentFor(comp, option);
-    if (!fragment) continue;
-    fragments.push(fragment);
-    const ratingVal = RATING_PRIORITY[option.rating] || 0;
-    if (ratingVal > worstRating) worstRating = ratingVal;
-  }
-
-  // Deduplicate "Per ABYC X-Y, ..." clauses — keep only the first mention of each standard
-  const mentionedStandards = new Set();
-  const dedupedFragments = fragments.map(frag => {
-    return frag.replace(/Per (ABYC [A-Z]+-\d+),\s*[^.]+\./g, (match, stdCode) => {
-      if (mentionedStandards.has(stdCode)) {
-        return ''; // Strip duplicate standard reference
-      }
-      mentionedStandards.add(stdCode);
-      return match;
-    }).replace(/\s{2,}/g, ' ').trim();
-  });
-
-  // Map worst rating back to display label
-  const ratingLabel = RATING_PRIORITY_REVERSE[worstRating] || 'C';
-
-  return {
-    text: dedupedFragments.join(' '),
-    rating: ratingLabel
-  };
+  return { text: '', rating: '' };
 }
 
 // Render the component builder HTML for the bottom sheet
-function renderComponentBuilder(builderKey, itemLabel, savedSelections, categoryName) {
+function renderComponentBuilder(builderKey, itemLabel, savedSelections, categoryName, itemRating) {
   const builder = COMPONENT_BUILDERS[builderKey];
   if (!builder) return '';
 
   const safeLabel = itemLabel.replace(/'/g, "\\'");
   const selections = savedSelections || {};
+  // For findings-style components that filter by rating, the current rating
+  // letter (A/B/C/N for Not-Tested) determines which options are visible.
+  // Options with no `rating` field, with `rating === null`, or with
+  // `alwaysInclude: true` always render. Options whose rating differs from
+  // the current item rating are hidden.
+  const baseRatingLetter = itemRating ? (itemRating.startsWith('Not') ? 'N' : itemRating.charAt(0)) : '';
 
   let html = `
     <div id="component-builder-panel" style="border-bottom:2px solid #006699;margin-bottom:8px;">
@@ -1087,23 +1101,54 @@ function renderComponentBuilder(builderKey, itemLabel, savedSelections, category
     `;
     if (comp.multiSelect) {
       // Render checkbox group. Saved state: selections[comp.key] is an array
-      // of option-index strings.
+      // of option-index strings. Per-option location text lives at
+      // selections[comp.key + '_locText'] = { [idx]: text }.
       const selectedIndices = Array.isArray(selVal) ? selVal.map(String) : [];
+      const locTextMap = selections[comp.key + '_locText'] || {};
+      // Location inputs are shown only for options that either have a
+      // {location} placeholder in their fragment OR are meant to allow a
+      // freeform location (comp.allowLocationPerOption).
+      const offerLoc = (opt) => comp.allowLocationPerOption ||
+        (opt && opt.fragment && opt.fragment.includes('{location}'));
       html += `<div id="cb-${comp.key}_group" style="display:flex;flex-direction:column;gap:4px;">`;
+      let renderedCount = 0;
       comp.options.forEach((opt, idx) => {
+        // Rating filter: if comp.filterByRating is true and the item has a
+        // rating set, only show options matching that rating. Options with
+        // alwaysInclude render regardless.
+        if (comp.filterByRating && baseRatingLetter && !opt.alwaysInclude) {
+          const optLetter = opt.rating ? (String(opt.rating).startsWith('Not') ? 'N' : String(opt.rating).charAt(0)) : '';
+          if (optLetter && optLetter !== baseRatingLetter) return;
+        }
         const isChecked = selectedIndices.includes(String(idx));
         const ratingTag = opt.rating
           ? `<span style="font-size:10px;background:#e5e7eb;color:#374151;padding:1px 5px;border-radius:3px;margin-left:6px;">${opt.rating}</span>`
           : '';
+        const showLocInput = offerLoc(opt);
+        const locVal = (locTextMap[String(idx)] || '').replace(/"/g, '&quot;');
         html += `
           <label style="display:flex;align-items:flex-start;gap:8px;padding:6px 8px;background:${isChecked ? '#dbeafe' : '#f9fafb'};border:1px solid ${isChecked ? '#93c5fd' : '#e5e7eb'};border-radius:6px;cursor:pointer;">
             <input type="checkbox" class="cb-multi-${comp.key}" value="${idx}" ${isChecked ? 'checked' : ''}
                    onchange="onComponentBuilderChange('${safeLabel}', '${builderKey.replace(/'/g, "\\'")}')"
                    style="width:16px;height:16px;margin-top:1px;accent-color:#006699;flex-shrink:0;">
-            <span style="font-size:13px;line-height:1.35;">${opt.label}${ratingTag}</span>
+            <span style="font-size:13px;line-height:1.35;flex:1;">${opt.label}${ratingTag}</span>
           </label>
         `;
+        if (showLocInput && isChecked) {
+          html += `
+            <div style="padding:2px 8px 6px 32px;">
+              <input type="text" class="cb-multi-loc-${comp.key}" data-optidx="${idx}" value="${locVal}"
+                     placeholder="Where? (e.g. forward starboard stanchion)"
+                     oninput="onComponentBuilderChange('${safeLabel}', '${builderKey.replace(/'/g, "\\'")}')"
+                     style="width:100%;padding:6px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;background:#fffdf7;">
+            </div>
+          `;
+        }
+        renderedCount++;
       });
+      if (renderedCount === 0 && comp.filterByRating && baseRatingLetter) {
+        html += `<div style="font-size:11px;color:#6b7280;font-style:italic;padding:8px;">No ${baseRatingLetter}-rated options for this component yet.</div>`;
+      }
       html += `</div>`;
     } else {
       html += `
@@ -1211,6 +1256,17 @@ function onComponentBuilderChange(itemLabel, builderKey) {
       // Multi-select: collect all checked checkbox values into an array
       const checked = document.querySelectorAll(`.cb-multi-${comp.key}:checked`);
       selections[comp.key] = Array.from(checked).map(cb => cb.value);
+      // Also collect per-option location text (v2156).
+      const locInputs = document.querySelectorAll(`.cb-multi-loc-${comp.key}`);
+      if (locInputs.length) {
+        const locMap = {};
+        locInputs.forEach(el => {
+          const idx = el.getAttribute('data-optidx');
+          const val = (el.value || '').trim();
+          if (idx && val) locMap[idx] = val;
+        });
+        if (Object.keys(locMap).length) selections[comp.key + '_locText'] = locMap;
+      }
     } else {
       const el = document.getElementById(`cb-${comp.key}`);
       if (el) selections[comp.key] = el.value;
@@ -1251,14 +1307,30 @@ function applyComponentBuilder(itemLabel, builderKey, categoryName) {
   const builder = COMPONENT_BUILDERS[builderKey];
   if (!builder) return;
 
-  // Collect selections
+  // Collect selections — mirrors onComponentBuilderChange so Apply/preview agree.
   const selections = {};
   for (const comp of builder.components) {
-    const el = document.getElementById(`cb-${comp.key}`);
-    if (el) selections[comp.key] = el.value;
+    if (comp.multiSelect) {
+      const checked = document.querySelectorAll(`.cb-multi-${comp.key}:checked`);
+      selections[comp.key] = Array.from(checked).map(cb => cb.value);
+      // Per-option location text (v2156)
+      const locInputs = document.querySelectorAll(`.cb-multi-loc-${comp.key}`);
+      if (locInputs.length) {
+        const locMap = {};
+        locInputs.forEach(el => {
+          const idx = el.getAttribute('data-optidx');
+          const val = (el.value || '').trim();
+          if (idx && val) locMap[idx] = val;
+        });
+        if (Object.keys(locMap).length) selections[comp.key + '_locText'] = locMap;
+      }
+    } else {
+      const el = document.getElementById(`cb-${comp.key}`);
+      if (el) selections[comp.key] = el.value;
+    }
     const qtyEl = document.getElementById(`cb-${comp.key}_qty`);
     if (qtyEl) selections[comp.key + '_qty'] = qtyEl.value;
-    // Location: multi-select checkboxes or single-select dropdown
+    // Location: multi-select checkboxes or single-select dropdown (legacy component-level location)
     if (comp.locationMultiSelect) {
       const checked = document.querySelectorAll(`.cb-loc-${comp.key}:checked`);
       const locs = Array.from(checked).map(cb => cb.value);
@@ -3399,7 +3471,7 @@ function showNotesSheet(itemLabel, categoryName) {
     }
     if (builderKey) {
       const savedSelections = itemData.componentSelections || {};
-      componentBuilderHtml = renderComponentBuilder(builderKey, itemLabel, savedSelections, categoryName);
+      componentBuilderHtml = renderComponentBuilder(builderKey, itemLabel, savedSelections, categoryName, itemData.rating);
       // When a builder is present, hide the quick-insert snippets — the builder replaces them
       snippetsHtml = '';
     }

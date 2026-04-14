@@ -12,6 +12,135 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2157 — 2026-04-14
+
+### Changed — SAMS vocabulary + simplified method
+- **Method simplified to Phenolic hammer only.** Dave confirmed this is
+  the only tool used for percussion testing on deck/coachroof. The other
+  options (sounding hammer, rubber mallet, brass hammer, plastic mallet)
+  are removed from the Method checkbox group.
+- **SAMS-compliant finding vocabulary** applied across all rating tiers:
+  - "Soft area" / "soft spot" language removed — not SAMS vocabulary.
+  - **B-rated findings rewritten** using the correct SAMS pattern:
+    - "An area at {location} sounded as a **dull thud**, indicating
+      possible moisture in the core."
+    - "An area at {location} sounded **ringing**, which may indicate
+      delamination, core separation, lack of resin, or a void beneath
+      the skin."
+  - **A-rated findings** escalate the same language: "extensive dull
+    thuds" (widespread moisture), "widespread ringing" (widespread
+    delamination / voids), combined pattern, structural separation at
+    high-load fitting.
+  - **C-rated findings** use "no dull thuds or ringing tones were
+    detected" as the SAMS-appropriate positive finding.
+
+### Scope
+- This release updates the "Bowsprit, deck and coachroof/pilothouse
+  impact and resonance testing" builder only. Same pattern will be
+  applied to hull percussion and conductivity testing once this is
+  validated on Ahoy Vey.
+
+### Process
+- Triple-checked: 106 tests pass, version consistency confirmed,
+  pre-commit hook green in no-node simulated environment.
+
+---
+
+## v2156 — 2026-04-14
+
+### Added — per-option location + Phenolic hammer (B-07 pt 2 progress)
+- **Each ticked finding checkbox now reveals a free-text Location input.**
+  Type where the issue was observed ("forward starboard stanchion base",
+  "port coachroof corner", "amidships side deck, 18 inches aft of the
+  rubrail") and the location flows into the composed finding.
+- **Fragments with `{location}` placeholder** substitute the text inline
+  so the sentence reads naturally: "A possible soft area was detected
+  at the forward starboard stanchion base."
+- **Fragments without `{location}`** (e.g. general observations) get the
+  location appended in parentheses, nothing is lost.
+- **B-rated findings rewritten** to use `{location}` placeholders where
+  granular location matters. Added paired **Possible / Confirmed soft
+  area** options so surveyor can express certainty level.
+- **Phenolic hammer** added to the Method multi-select (alongside
+  sounding hammer, rubber mallet, brass hammer, plastic mallet).
+
+### Changed — internal refactor
+- `app.js` `buildComponentFindings` now **delegates to the pure
+  `src/core/component_builder.js` module** instead of duplicating the
+  logic. Single source of truth; easier to extend; covered by the 25
+  composition tests (including 5 new ones for per-option location).
+  Total tests: 106.
+
+### Scope note — testing before full rollout
+- This release targets **only** the "Bowsprit, deck and coachroof/pilothouse
+  impact and resonance testing" item. Try it on Ahoy Vey and report back
+  before the same pattern is applied to hull percussion, conductivity
+  testing, and other categories.
+
+### Coming next (deferred to v2157+)
+- Slot-based sentence templates (Certainty dropdown × Finding-type
+  dropdown × Location text × Cause dropdown) for even more flexible
+  sentence composition from a compact palette.
+- Hull percussion / conductivity builders with rudder gating.
+
+### Process
+- Triple-checked: 106 tests pass, version consistency confirmed,
+  pre-commit hook green in no-node simulated environment.
+
+---
+
+## v2155 — 2026-04-14
+
+### Added — B-07 part 2: checkbox component builder for deck/coachroof percussion testing
+- **First fully checkbox-driven component builder** ships against the
+  "Bowsprit, deck and coachroof/pilothouse impact and resonance testing"
+  checklist item.
+- Three components: **Areas tested** (multi-select, joined as Oxford-comma
+  list), **Method** (multi-select, joined as list), and **Findings**
+  (multi-select, filtered by the item's current rating).
+- **Granular options per rating tier** — 5 A-rated scenarios, 8 B-rated,
+  4 C-rated, 3 Not-Tested limitations, and 3 always-available context
+  add-ons (limited by coatings, areas not accessible, further
+  investigation recommended). Surveyor ticks every observation that
+  applies; the builder composes a multi-sentence finding.
+- **Rating-aware option filtering** — when the item is rated B, only
+  B-tier findings appear in the Findings checklist (plus the always-
+  include context add-ons). Same for A, C, NT.
+- **Pure composition logic** extracted to `src/core/component_builder.js`
+  with 20 new tests in `tests/component_builder.test.js` covering
+  single-select, multi-select, join=list with prefix/suffix,
+  alwaysInclude options, multi-component composition, and ABYC citation
+  dedup. Total tests now: 101.
+- The existing dropdown-based component builders (outdrives, winches,
+  generators, etc.) are unchanged — multi-select is opt-in per
+  component via `multiSelect: true`.
+
+### How the new builder works (workflow)
+1. On the deck/coachroof percussion item, tap the rating badge (A / B /
+   C / NT). The rating defines which Findings checkboxes appear.
+2. Tap the 📝 (notes) icon. The bottom sheet opens with the builder
+   panel instead of snippet cards.
+3. Tick the areas tested (deck, coachroof, side decks, etc.).
+4. Tick the methods used (sounding hammer, mallet, etc.).
+5. Tick the granular findings that apply for your chosen rating.
+6. Optionally tick context add-ons (limited by coatings, etc.).
+7. Tap "Generate Finding Text" — the composed multi-sentence finding
+   lands in the textarea with the correct rating set automatically.
+
+### Coming next (deferred)
+- Same builder pattern applied to: Bowsprit/deck/coachroof
+  conductivity testing, Hull and rudder impact and resonance testing
+  (with hasRudder gating via rudderOnly options), Hull and rudder
+  conductivity testing.
+- Hull/rudder/antifouling snippet split (B-06).
+- B-04 (OCR HIN), B-02 (delete sync), SAMS 3.9 + 6.3, B-08.
+
+### Process
+- Triple-checked: 101 tests pass, version consistency confirmed,
+  pre-commit hook green in no-node simulated environment.
+
+---
+
 ## v2154 — 2026-04-14
 
 ### Added — Persistent Save Status indicator
