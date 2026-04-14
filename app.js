@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2157';
+const APP_VERSION = 'v2158';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3216,6 +3216,16 @@ function showNotesSheet(itemLabel, categoryName) {
     const safeLabel = itemLabel.replace(/'/g, "\\'");
     const safeCat = categoryName.replace(/'/g, "\\'");
     const sanitizedLabel = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
+    // B-07 bug fix (v2158): saved text from earlier runs may contain raw
+    // {if-rudder:...} tokens that were never expanded. Clean them up on
+    // display so the textarea never shows raw braces to the surveyor.
+    let initialTextareaText = itemData.text || '';
+    if (initialTextareaText && typeof window.expandSnippetTokens === 'function') {
+      const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
+        ? window.KikiSnippetTokens.contextFromSurvey(survey)
+        : { hasRudder: survey.hasRudder !== false, rudderCount: survey.driveLineCount || 1 };
+      initialTextareaText = window.expandSnippetTokens(initialTextareaText, ctx);
+    }
 
     let snippetsHtml = '';
     // Cache variants on window so the click handler attached after mount can
@@ -3258,13 +3268,24 @@ function showNotesSheet(itemLabel, categoryName) {
         `;
         sheetVariants.forEach((variant, idx) => {
           const ratingBadge = variant.rating || baseRating;
-          const isActive = itemData.text === variant.text;
-          // If the variant uses token syntax, render a clean preview instead
-          // of showing raw {count:...}/{any:...} braces in the card.
-          const hasTokens = /\{(count:|specify:|any:|standards\?)/.test(variant.text);
+          // B-07 bug fix (v2158): expand rudder-gating tokens ({if-rudder:},
+          // {if-no-rudder:}, {count:rudder|rudders}) BEFORE displaying or
+          // comparing card text so raw tokens never leak into the card UI
+          // and isActive comparison works against the clean text.
+          let variantTextForDisplay = variant.text;
+          if (typeof window.expandSnippetTokens === 'function' && survey) {
+            const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
+              ? window.KikiSnippetTokens.contextFromSurvey(survey)
+              : { hasRudder: survey.hasRudder !== false, rudderCount: survey.driveLineCount || 1 };
+            variantTextForDisplay = window.expandSnippetTokens(variant.text, ctx);
+          }
+          const isActive = itemData.text === variantTextForDisplay || itemData.text === variant.text;
+          // If the variant still uses other token syntax after rudder expansion,
+          // render a clean preview instead of showing raw {count:...}/{any:...}.
+          const hasTokens = /\{(count:|specify:|any:|standards\?)/.test(variantTextForDisplay);
           const displayText = hasTokens
-            ? escSnippet(renderSnippetPreview(variant.text))
-            : (highlightedTexts[idx] || escSnippet(variant.text));
+            ? escSnippet(renderSnippetPreview(variantTextForDisplay))
+            : (highlightedTexts[idx] || escSnippet(variantTextForDisplay));
           snippetsHtml += `
             <button type="button" class="snippet-card-sheet" data-variant-idx="${idx}" style="display:block;width:100%;text-align:left;appearance:none;-webkit-appearance:none;border:none;border-bottom:1px solid #f0f0f0;padding:10px 20px;background:${isActive ? '#d1fae5' : 'white'};${isActive ? 'border-left:4px solid #16a34a;' : ''}cursor:pointer;font:inherit;color:inherit;">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;">
@@ -3488,13 +3509,13 @@ function showNotesSheet(itemLabel, categoryName) {
     overlay.innerHTML = `
       <div class="bottom-sheet" onclick="event.stopPropagation();">
         <div class="bottom-sheet-handle"></div>
-        <div class="bottom-sheet-title">${itemLabel} — Notes <span style="font-size:10px;color:#9ca3af;font-weight:400;">${APP_VERSION}</span></div>
+        <div class="bottom-sheet-title">${displayItemLabel(itemLabel, survey)} — Notes <span style="font-size:10px;color:#9ca3af;font-weight:400;">${APP_VERSION}</span></div>
         ${mastOptionsHtml}
         ${outdriveOptionsHtml}
         ${winchOptionsHtml}
         ${componentBuilderHtml}
         <div style="padding:12px 20px;">
-          <textarea id="sheet-text-${sanitizedLabel}" placeholder="Add inspection notes..." style="min-height:80px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;overflow:hidden;" spellcheck="true" autocorrect="on" autocapitalize="sentences" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';window._mainSheetToneCheck && window._mainSheetToneCheck(this);window._clearSheetCardHighlight && window._clearSheetCardHighlight(this);">${itemData.text || ''}</textarea>
+          <textarea id="sheet-text-${sanitizedLabel}" placeholder="Add inspection notes..." style="min-height:80px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;overflow:hidden;" spellcheck="true" autocorrect="on" autocapitalize="sentences" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';window._mainSheetToneCheck && window._mainSheetToneCheck(this);window._clearSheetCardHighlight && window._clearSheetCardHighlight(this);">${initialTextareaText}</textarea>
           <div id="sheet-text-${sanitizedLabel}-tone" data-main-tone-warning="1" style="display:none;margin-top:6px;padding:8px 12px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;line-height:1.4;"></div>
           <div id="sheet-text-${sanitizedLabel}-chipstrip" style="display:none;flex-wrap:wrap;gap:6px;margin-top:6px;padding:8px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;"></div>
         </div>

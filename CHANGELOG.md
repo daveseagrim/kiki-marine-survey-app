@@ -12,6 +12,45 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2158 — 2026-04-14
+
+### Fixed — raw `{if-rudder:...}` tokens leaking into the UI
+- **Bug reported by Dave** on v2154 surveying Ahoy Vey: the Notes sheet
+  for the Hull and rudder percussion testing item showed raw
+  `{if-rudder: and rudder}` tokens in three places:
+  1. **The snippet template cards** rendered the unexpanded template.
+  2. **The textarea** showed saved text that still contained tokens.
+  3. **The sheet title** showed the raw "(if applicable)" label.
+- **Root cause:** v2153's token expansion only ran at snippet-insert
+  time. Card rendering, textarea initial content, and the sheet title
+  never passed through the expander, so raw tokens leaked into display.
+- **Fix:** Expand rudder-gating tokens at every display point:
+  - Template cards in the Notes sheet now expand
+    `{if-rudder:...}` / `{count:rudder|rudders}` based on survey.hasRudder
+    before rendering. No more raw braces in cards.
+  - Textarea initial content (loaded from `survey.items[label].text`)
+    expands tokens on sheet open, so previously-saved text with tokens
+    is cleaned up on display.
+  - The Notes sheet title uses `displayItemLabel()` so
+    "Hull and rudder(s) (if applicable) percussion testing" becomes
+    "Hull percussion testing" / "Hull and rudder percussion testing" /
+    "Hull and rudders percussion testing" based on vessel rudder state.
+- Consequence: the chip-strip builder no longer sees `{if-rudder:}`
+  as a placeholder, so the empty "Choose one" panel that confused
+  Dave earlier should be populated correctly based on actual
+  placeholders in the expanded snippet (or hidden if none remain).
+
+### About version packing
+This push combines v2155 through v2158 since Dave was surveying between
+my releases. CHANGELOG preserves per-version detail; git commit message
+notes the version range.
+
+### Process
+- Triple-checked: 106 tests pass, version consistency confirmed,
+  pre-commit hook green in no-node simulated environment.
+
+---
+
 ## v2157 — 2026-04-14
 
 ### Changed — SAMS vocabulary + simplified method
