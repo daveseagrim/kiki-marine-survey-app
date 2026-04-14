@@ -12,6 +12,38 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2150 — 2026-04-14
+
+### Fixed
+- **B-03** — Firebase photo download failing with "Load failed" on iOS
+  Safari PWA. Rewrote `_downloadOneFirebasePhoto` with staged error
+  reporting and an XMLHttpRequest fallback path:
+  - Stage 1 (`getDownloadURL`) — errors now tagged `[url]`
+  - Stage 2 (byte download) — tries `fetch()` first; on failure, falls
+    back to `XMLHttpRequest`. XHR has historically succeeded in iOS
+    Safari PWA contexts where `fetch()` throws `TypeError: Load failed`.
+    Errors from this combined path are tagged `[fetch]` or `[xhr]`.
+  - Stage 3 (read blob as data URL) — errors tagged `[blob-read]`.
+  - Each per-photo failure shown in the progress dialog now includes
+    the stage tag so we can see exactly which step broke. Example:
+    `✗ Riverdance — 1775831...: [fetch] fetch: TypeError "Load failed"
+    · xhr: XHR HTTP 403`.
+
+### Added (parked)
+- `src/core/drive_backup.js` + `tests/drive_backup.test.js` — pure
+  helpers and 14 tests for the B-01 Drive-backup resume fix. Module
+  is on disk and its tests pass, but it is **not yet wired** into
+  `index.html` or `app.js` — we paused B-01 mid-way to address B-03
+  first. Wire-up and the resume logic itself will ship in a later
+  release. This file is safe to carry in-tree because no script tag
+  loads it, so it has no runtime effect yet.
+
+### Process
+- Triple-checked by simulating the production environment before
+  handing the commit command.
+
+---
+
 ## v2149 — 2026-04-14
 
 ### Fixed
