@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2137';
+const APP_VERSION = 'v2138';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -15926,11 +15926,11 @@ async function generateReport() {
     <tr><td style="background:#e8edf2;"><strong>Surveyor</strong></td><td>Dave Seagrim, SAMS SA, ABYC Master Advisor</td></tr>
   </table>
 
-  <div style="text-align:center; margin-top: 24px; display:flex; align-items:center; justify-content:center; gap:10px;">
+  <div style="text-align:center; margin-top: 24px; display:flex; align-items:center; justify-content:center; gap:14px;">
     <img src="https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png"
          alt="Kiki Marine" style="height:28px; width:auto;"
          onerror="this.style.display='none'">
-    <span style="font-size:8pt; color:#666; white-space:nowrap;">(647) 289-7876 &bull; dave@kikimarine.ca &bull; kikimarine.ca</span>
+    <span style="font-size:13pt; color:#555; white-space:nowrap;">(647) 289-7876 &bull; dave@kikimarine.ca &bull; kikimarine.ca</span>
   </div>
 
   <!-- ═══ PURPOSE AND SCOPE ═══ -->
