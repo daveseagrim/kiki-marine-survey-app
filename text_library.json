@@ -103,27 +103,6 @@
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "The anti-fouling was in good condition."
-    },
-    {
-      "section": "Hull(s) condition (below the waterline)",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "The anti-fouling was showing normal seasonal wear."
-    },
-    {
-      "section": "Hull(s) condition (below the waterline)",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "The anti-fouling had been recently reapplied and was intact."
-    },
-    {
-      "section": "Hull(s) condition (below the waterline)",
-      "rating": "C",
       "phase": "means",
       "severity": 1,
       "text": "The hull is suitable for continued use without structural concern."
@@ -154,13 +133,6 @@
       "rating": "C",
       "phase": "action",
       "severity": 2,
-      "text": "Routine maintenance of the anti-fouling at next haul-out is recommended."
-    },
-    {
-      "section": "Hull(s) condition (below the waterline)",
-      "rating": "C",
-      "phase": "action",
-      "severity": 2,
       "text": "Continue the regular seasonal inspection programme."
     },
     {
@@ -170,20 +142,6 @@
       "always": true,
       "text": "Below the waterline, the hull was serviceable overall.",
       "severity": 1
-    },
-    {
-      "section": "Hull(s) condition (below the waterline)",
-      "rating": "B",
-      "phase": "observed",
-      "text": "The anti-fouling has worn thin in [describe area(s)].",
-      "severity": 1
-    },
-    {
-      "section": "Hull(s) condition (below the waterline)",
-      "rating": "B",
-      "phase": "observed",
-      "text": "The anti-fouling is worn off in [describe area(s)], exposing the gelcoat.",
-      "severity": 2
     },
     {
       "section": "Hull(s) condition (below the waterline)",
@@ -252,43 +210,43 @@
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "action",
-      "text": "The affected areas should be lightly sanded and recoated with anti-fouling before the vessel is relaunched.",
-      "severity": 1
+      "severity": 1,
+      "text": "Lightly sand and fill the affected areas to restore a fair surface before relaunching the vessel."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "action",
-      "text": "The affected areas should be sanded to the gelcoat and recoated with anti-fouling before the vessel is relaunched.",
-      "severity": 2
+      "severity": 2,
+      "text": "Sand the affected areas back to the gelcoat and fair the surface before relaunching the vessel."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "action",
-      "text": "The affected areas should be sanded to the barrier coat and recoated with gelcoat and anti-fouling before the vessel is relaunched.",
-      "severity": 3
+      "severity": 3,
+      "text": "Sand the affected areas to the barrier coat and recoat with gelcoat before relaunching the vessel."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "action",
-      "text": "The affected areas should be filled with fairing compound, faired, and recoated with epoxy barrier coat, gelcoat, and anti-fouling before the vessel is relaunched.",
-      "severity": 4
+      "severity": 4,
+      "text": "Fill the affected areas with fairing compound, fair, and recoat with epoxy barrier coat and gelcoat before relaunching the vessel."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "action",
-      "text": "The affected areas should be touched up with gelcoat and anti-fouling before the vessel is relaunched.",
-      "severity": 2
+      "severity": 2,
+      "text": "Touch up the affected areas with gelcoat before relaunching the vessel."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "action",
-      "text": "The affected areas should be recoated with epoxy barrier coat, gelcoat, and anti-fouling before the vessel is relaunched.",
-      "severity": 4
+      "severity": 4,
+      "text": "Recoat the affected areas with epoxy barrier coat and gelcoat before relaunching the vessel."
     },
     {
       "section": "Rudder(s) condition",
@@ -569,31 +527,6 @@
       "phase": "action",
       "text": "Recheck seasonally to confirm stability.",
       "severity": 2
-    },
-    {
-      "section": "Primer, barrier coat, anti-fouling",
-      "rating": "B - many coats. Sanding.",
-      "text": "Local repairs to the primer, barrier coat, and anti-fouling are advisable. Multiple legacy coats of anti-fouling are flaking. Suggest sanding the epoxy barrier coat and applying new anti-fouling within the next one to two seasons."
-    },
-    {
-      "section": "Primer, barrier coat, anti-fouling",
-      "rating": "B - localized repairs",
-      "text": "Localized repairs to the primer, barrier coat, and anti-fouling are advisable. Overall, the coating system was serviceable."
-    },
-    {
-      "section": "Primer, barrier coat, anti-fouling",
-      "rating": "B - some sanding and reapplication of anti-fouling",
-      "text": "Although the barrier coat appeared intact, several areas of the anti-fouling should be lightly sanded and reapplied before the next launch."
-    },
-    {
-      "section": "Primer, barrier coat, anti-fouling",
-      "rating": "C - small touch ups",
-      "text": "The primer, barrier coat, and anti-fouling were intact and in good order, with only some areas requiring touch-ups for next season."
-    },
-    {
-      "section": "Primer, barrier coat, anti-fouling",
-      "rating": "C",
-      "text": "The primer, barrier coat, and anti-fouling were intact and in acceptable condition."
     },
     {
       "section": "Keel and keel joint",
@@ -1187,11 +1120,6 @@
       "text": "The swim platform was solidly mounted and in acceptable condition. The swim ladder was securely fastened. Conductivity readings were within acceptable ranges."
     },
     {
-      "section": "Primer, barrier coat, anti-fouling",
-      "rating": "A",
-      "text": "The barrier coat was compromised and the anti-fouling had failed or was missing in large areas. The hull is at risk of osmotic blistering and material degradation. Haul out and apply a complete barrier coat and anti-fouling system immediately."
-    },
-    {
       "section": "Keel and keel joint",
       "rating": "A",
       "text": "The keel or keel joint exhibited visible cracking, corrosion, or separation. Structural integrity is compromised. Immediate professional inspection and repair is critical."
@@ -1240,6 +1168,205 @@
       "section": "Ventilation grills/covers",
       "rating": "A",
       "text": "The ventilation grills or covers were damaged, missing, or not functioning. Proper ventilation may be compromised. Repair or replacement is required."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 1,
+      "always": true,
+      "text": "The primer, barrier coat, and anti-fouling were inspected below the waterline."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The anti-fouling had failed or was missing over large areas of the hull."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The barrier coat was compromised and the underlying laminate was exposed."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The primer had flaked off extensively, leaving the gelcoat unprotected."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "The hull is at risk of osmotic damage without immediate protection."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "These findings compromise the coating system's ability to protect the laminate."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "A",
+      "phase": "action",
+      "severity": 4,
+      "text": "Strip the failed coating system back to sound substrate, reapply primer, barrier coat, and anti-fouling before relaunching the vessel."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "The vessel should not be returned to the water until the coating system is restored."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 1,
+      "always": true,
+      "text": "The primer, barrier coat, and anti-fouling were inspected below the waterline."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anti-fouling had worn thin in [describe area(s)]."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The anti-fouling was worn off in [describe area(s)], exposing the barrier coat."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Multiple legacy layers of anti-fouling have built up and were flaking in [describe area(s)]."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The barrier coat remained intact but localized repairs to the anti-fouling are advisable."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "B",
+      "phase": "means",
+      "severity": 2,
+      "text": "The coating system is serviceable overall but attention is required to maintain protection."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Accumulated legacy coats add weight and can mask problems beneath."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "B",
+      "phase": "action",
+      "severity": 1,
+      "text": "Lightly sand and reapply anti-fouling to the affected areas before relaunching the vessel."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Spot-repair the anti-fouling in the worn areas before relaunching the vessel."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Sand back the accumulated legacy coats to a sound surface and apply fresh anti-fouling."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Carry out localized repairs to the primer, barrier coat, and anti-fouling as required."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "always": true,
+      "text": "The primer, barrier coat, and anti-fouling were inspected below the waterline."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The primer, barrier coat, and anti-fouling were intact and in good order."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The primer, barrier coat, and anti-fouling were intact and in acceptable condition."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Minor touch-ups to the anti-fouling are recommended in [describe area(s)] for normal seasonal upkeep."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The coating system is providing effective protection to the hull."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The findings are consistent with normal seasonal wear."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Refresh the anti-fouling at the next scheduled haul-out."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection programme."
     }
   ],
   "Spars and rigging": [

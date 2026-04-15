@@ -12,6 +12,40 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2177 — 2026-04-14
+
+### Changed — Scope split between Hull damage vs Primer/barrier coat/anti-fouling
+
+Two separate template items exist:
+- "Evident damage or repairs to hull and rudder(s) (if applicable) below
+  the waterline" — structural damage/repair concerns
+- "Primer, barrier coat, anti-fouling" — coating-system condition
+
+Anti-fouling chips were bleeding into the damage section, overlapping
+scope with the dedicated coating item. Removed 12 anti-fouling-related
+chips from the hull damage section across all 3 ratings and replaced
+the B-rating action chips with damage-focused treatments (sand to
+gelcoat, fair with compound, recoat with epoxy barrier) that stop at
+the barrier coat layer. Anti-fouling recommendations now live only in
+the coating section.
+
+### Rewritten — Primer, barrier coat, anti-fouling library (A/B/C)
+
+Full 3-phase curation with severity sorting:
+- **A (Critical)**: 8 chips. Failed/missing anti-fouling, compromised
+  barrier coat, extensive primer flaking. Immediate coating restoration.
+- **B (Needs Attention)**: 11 chips. Worn thin / worn off anti-fouling,
+  accumulated legacy coats, localized barrier-coat issues. Monitor +
+  spot-repair / full recoat recommendations.
+- **C (Serviceable)**: 9 chips. Intact coating system in good order,
+  normal seasonal wear. Routine touch-ups, seasonal refresh, or no
+  action required.
+
+All chips use coating-system vocabulary only — no reference to hull
+structural damage, which lives in the other item.
+
+---
+
 ## v2176 — 2026-04-14
 
 ### Fixed — `{specify:opt1|opt2|...}` tokens now decompose into chips
