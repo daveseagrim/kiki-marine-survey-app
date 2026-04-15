@@ -12,6 +12,51 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2216 — 2026-04-15
+
+### Fixed — "Not applicable" no longer pulls in "Not tested" chips (and vice versa)
+
+The chip picker used to match library chips by the first character of
+the rating only. Both "Not applicable" and "Not tested/not verified"
+start with 'N', so selecting one rating surfaced chips from the other.
+Dave's Autopilot N/A screenshot showed "The autopilot was not tested
+because the vessel was out of the water." appearing (badge reading
+"Not tested") when he'd rated it N/A. Same issue on the Propane item.
+
+`findTextVariants(category, label, surveyRating, survey)` now takes the
+full rating string (instead of a 1-char base) and uses a smarter
+matcher:
+
+- Survey rating `"Not applicable"` or `"N/A"` → matches only library
+  chips whose rating starts with `N/A` or `Not applicable`.
+- Survey rating `"Not tested/not verified"` → matches only library
+  chips whose rating starts with `Not tested`, `Not verified`, or `NT`.
+- A / B / C / Powered up → first-char match, unchanged.
+
+Both call sites (`showNotesSheet` bottom-sheet flow + `buildSingleItem
+InnerHTML` inline flow) updated to pass the full rating.
+
+**Impact for Dave's N/A flow:** selecting N/A now either shows:
+- The explicit N/A library chip when one exists (e.g. Propane → "There
+  is no propane system installed on this vessel."; LPG → same; Bow
+  thruster → "No bow thruster was installed."), OR
+- The synthesized fallback ("No {item} was fitted on this vessel.")
+  when the library has no N/A chip for that section.
+
+Either way, "Not tested" verbiage is strictly confined to the Not
+tested rating now.
+
+### Audit
+
+- JSON parses ✓
+- JavaScript compiles ✓
+- Both `findTextVariants` call sites pass full rating ✓
+- Three internal rating-filter call sites updated to use `isRatingMatch`
+  helper ✓
+- Version strings aligned ✓
+
+---
+
 ## v2215 — 2026-04-15
 
 ### Added — Bow thruster N/A chip: "No bow thruster was installed."

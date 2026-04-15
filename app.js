@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2215';
+const APP_VERSION = 'v2216';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2760,7 +2760,9 @@ function showNotesSheet(itemLabel, categoryName) {
     let sheetVariants = [];
     if (itemData.rating && !isOtherItem) {
       const baseRating = itemData.rating.charAt(0);
-      sheetVariants = findTextVariants(categoryName, itemLabel, baseRating, survey);
+      // v2216: pass full rating so findTextVariants can distinguish
+      // "Not applicable" from "Not tested/not verified" (both start with 'N')
+      sheetVariants = findTextVariants(categoryName, itemLabel, itemData.rating, survey);
       // v2180/v2182: synthesize chips for "Not applicable" / "Not tested"
       // ratings. The library has no entries for these, but the surveyor still
       // needs a sentence saying the item wasn't fitted / wasn't tested.
@@ -4945,15 +4947,37 @@ function escSnippet(s) {
 
 // Find text variants from library
 // v2214: optional `survey` param enables chip-level vesselType filtering.
+// v2216: `surveyRating` is now the FULL rating string ("Not applicable",
+// "Not tested/not verified", "A - Critical", etc.) rather than a single
+// char, so N-prefixed ratings can be distinguished ("Not applicable"
+// must not pick up "Not tested" chips and vice versa). Callers that still
+// pass a 1-char value continue to work via first-char fallback.
 // Chips tagged with `vesselType: 'sail'` or `'power'` are dropped when the
 // survey's vesselType doesn't match. Chips without vesselType always show.
-function findTextVariants(categoryName, itemLabel, baseRating, survey) {
+function findTextVariants(categoryName, itemLabel, surveyRating, survey) {
   if (!textLibrary) return [];
 
   const sheetName = SHEET_MAPPING[categoryName] || categoryName;
   const sheet = textLibrary[sheetName];
 
   if (!sheet) return [];
+
+  // Build a rating matcher that distinguishes N-prefixed ratings.
+  const _fullRating = String(surveyRating || '');
+  const _ratingLower = _fullRating.toLowerCase();
+  const _firstChar = _fullRating.charAt(0).toUpperCase();
+  const isRatingMatch = (entryRating) => {
+    const er = (entryRating || '').toString();
+    if (!er) return false;
+    if (_ratingLower.startsWith('not applicable') || _ratingLower === 'n/a') {
+      return /^(n\/a|not applicable)\b/i.test(er);
+    }
+    if (_ratingLower.startsWith('not tested') || _ratingLower.startsWith('not verified') || _ratingLower === 'nt') {
+      return /^(not tested|not verified|nt)\b/i.test(er);
+    }
+    // A / B / C / Powered up / other — fall back to first-char match.
+    return er.charAt(0).toUpperCase() === _firstChar;
+  };
 
   // Strip expansion prefixes for matching expanded items back to base snippets
   // Head: "Head 2 — Toilet" → "Head, Toilet"
@@ -4980,8 +5004,7 @@ function findTextVariants(categoryName, itemLabel, baseRating, survey) {
   // 1. Exact section name match (case-insensitive)
   let matches = sheet.filter(entry => {
     if (!entry.section || !entry.rating) return false;
-    const isRatingMatch = entry.rating.toString().charAt(0) === baseRating;
-    if (!isRatingMatch) return false;
+    if (!isRatingMatch(entry.rating)) return false;
     return entry.section.toLowerCase() === matchLabel;
   });
 
@@ -4996,8 +5019,7 @@ function findTextVariants(categoryName, itemLabel, baseRating, survey) {
     matches = sheet.filter(entry => {
       if (!entry.section || !entry.rating) return false;
       const section = entry.section.toLowerCase();
-      const isRatingMatch = entry.rating.toString().charAt(0) === baseRating;
-      if (!isRatingMatch) return false;
+      if (!isRatingMatch(entry.rating)) return false;
       return section.includes(matchLabel);
     });
     // If multiple sections matched, prefer the one closest in length to the search label
@@ -5036,8 +5058,7 @@ function findTextVariants(categoryName, itemLabel, baseRating, survey) {
     if (bestSection) {
       matches = sheet.filter(entry => {
         if (!entry.section || !entry.rating) return false;
-        const isRatingMatch = entry.rating.toString().charAt(0) === baseRating;
-        return isRatingMatch && entry.section === bestSection;
+        return isRatingMatch(entry.rating) && entry.section === bestSection;
       });
     }
   }
@@ -15127,7 +15148,9 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options, su
   // Text snippet cards (tap to insert)
   if (itemData.rating && ['A - Critical', 'B - Needs Attention', 'C - Serviceable', 'Powered up only', 'Not tested / not verified', 'Not applicable'].includes(itemData.rating)) {
     const baseRating = itemData.rating.charAt(0);
-    const variants = findTextVariants(categoryName, itemLabel, baseRating, survey);
+    // v2216: pass full rating so findTextVariants can distinguish
+    // "Not applicable" from "Not tested/not verified" (both start with 'N')
+    const variants = findTextVariants(categoryName, itemLabel, itemData.rating, survey);
 
     if (variants.length > 0) {
       // Pre-compute diff-highlighted display texts
