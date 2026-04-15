@@ -272,7 +272,7 @@
           "multi": true
         }
       },
-      "phase": "observed",
+      "phase": "means",
       "severity": 4
     },
     {
@@ -307,7 +307,7 @@
     {
       "section": "Hull and rudder(s) impact and resonance testing",
       "rating": "A",
-      "phase": "observed",
+      "phase": "means",
       "severity": 5,
       "text": "A ringing tone was returned in multiple areas, consistent with voids or delamination."
     },
@@ -475,7 +475,7 @@
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
-      "phase": "observed",
+      "phase": "means",
       "text": "Multiple areas of the hull showed readings in the upper end of the scale, consistent with significant moisture saturation.",
       "severity": 4
     },
@@ -601,14 +601,14 @@
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
-      "phase": "observed",
+      "phase": "means",
       "text": "The hull returned readings consistent with proper condition, with no elevated conductivity detected.",
       "severity": 1
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
-      "phase": "observed",
+      "phase": "means",
       "text": "The hull returned elevated readings of [insert reading range], consistent with vessels of similar age and construction.",
       "severity": 2
     },
@@ -770,7 +770,7 @@
       "section": "Transducers (speed, depth, etc.)",
       "rating": "B",
       "text": "Remove coating to ensure proper operation.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -784,7 +784,7 @@
       "section": "Transducers (speed, depth, etc.)",
       "rating": "B",
       "text": "Remove coatings to ensure proper performance.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -1064,7 +1064,7 @@
       "section": "Propeller/drive anode(s)",
       "rating": "A",
       "text": "The propeller and/or drive anodes were completely depleted and provided no galvanic protection.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -1546,7 +1546,7 @@
     {
       "section": "Hull exterior above the waterline",
       "rating": "B",
-      "phase": "observed",
+      "phase": "means",
       "severity": 2,
       "text": "Minor scratches and light oxidation were noted on the hull, consistent with a vessel of this age and use."
     },
@@ -1651,7 +1651,7 @@
     {
       "section": "Hull exterior above the waterline",
       "rating": "C",
-      "phase": "observed",
+      "phase": "means",
       "severity": 1,
       "text": "Minor cosmetic scratches consistent with normal use were noted on the hull."
     },
@@ -1778,7 +1778,7 @@
       "section": "Hull side windows and portholes (exterior observations)",
       "rating": "A",
       "text": "The affected units require immediate resealing or replacement to prevent water ingress.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -1850,7 +1850,7 @@
           "multi": false
         }
       },
-      "phase": "observed",
+      "phase": "means",
       "severity": 5
     },
     {
@@ -2211,7 +2211,7 @@
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
       "rating": "B",
-      "phase": "observed",
+      "phase": "means",
       "severity": 2,
       "text": "Minor surface corrosion consistent with normal use was noted on the drive {drives:housing|housings}."
     },
@@ -2351,7 +2351,7 @@
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
       "rating": "C",
-      "phase": "observed",
+      "phase": "means",
       "severity": 1,
       "text": "The drive {drives:housing showed|housings showed} minor surface corrosion consistent with normal use."
     },
@@ -2562,7 +2562,7 @@
       "section": "Underwater lighting",
       "rating": "C",
       "text": "The underwater lighting functioned properly and provided adequate illumination.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 1
     },
     {
@@ -2638,7 +2638,7 @@
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "A",
-      "phase": "observed",
+      "phase": "means",
       "severity": 5,
       "text": "The barrier coat was compromised and the underlying laminate was exposed."
     },
@@ -2854,7 +2854,7 @@
     },
     {
       "rating": "A",
-      "phase": "observed",
+      "phase": "means",
       "severity": 5,
       "text": "The swim platform showed delamination or soft spots consistent with extensive moisture ingress.",
       "section": "Swim platform and ladder"
@@ -3043,7 +3043,7 @@
     },
     {
       "rating": "A",
-      "phase": "observed",
+      "phase": "means",
       "severity": 5,
       "text": "The swim platform showed delamination or soft spots consistent with extensive moisture ingress.",
       "section": "Swim platform and ladder - condition and conductivity readings"
@@ -3295,7 +3295,7 @@
     },
     {
       "rating": "A",
-      "phase": "observed",
+      "phase": "means",
       "severity": 5,
       "text": "The swim platform returned saturated conductivity readings consistent with extensive core moisture.",
       "section": "Swim platform and ladder"
@@ -3323,7 +3323,7 @@
     },
     {
       "rating": "A",
-      "phase": "observed",
+      "phase": "means",
       "severity": 5,
       "text": "The swim platform returned saturated conductivity readings consistent with extensive core moisture.",
       "section": "Swim platform and ladder - condition and conductivity readings"
@@ -4027,6 +4027,20 @@
       "phase": "means",
       "severity": 1,
       "text": "The readings were consistent with a sound laminate."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "An area warranting attention was noted on this item."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "An area warranting attention was noted on this item."
     }
   ],
   "Spars and rigging": [
@@ -6220,7 +6234,7 @@
       "section": "Cover",
       "rating": "C",
       "text": "The cover is in acceptable condition and provides adequate weather protection.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 1
     },
     {
@@ -6255,7 +6269,7 @@
       "section": "Seating",
       "rating": "C",
       "text": "Seating is in satisfactory condition and provides safe, without deficiency use.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -6458,7 +6472,7 @@
       "section": "Percussion testing",
       "rating": "B",
       "text": "The photographs indicate areas of concern that warrant monitoring and potential repair.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -6971,6 +6985,20 @@
       "phase": "action",
       "severity": 2,
       "text": "Recommend testing the sink, faucet and drain when the vessel is commissioned for the season."
+    },
+    {
+      "section": "Cover",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "This item was inspected and found in acceptable condition."
+    },
+    {
+      "section": "Seating",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "This item was inspected and found in acceptable condition."
     }
   ],
   "Outboard": [
@@ -7631,7 +7659,7 @@
       "section": "Steering wheel and steering",
       "rating": "A",
       "text": "A qualified mechanic should examine and service the system.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -7750,7 +7778,7 @@
       "section": "Pushpit",
       "rating": "B",
       "text": "Remove the bases, repair the mounting surfaces, and re-bed the stanchions.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -8595,7 +8623,7 @@
     },
     {
       "rating": "C",
-      "phase": "observed",
+      "phase": "means",
       "severity": 1,
       "text": "The cockpit returned conductivity readings consistent with a sound laminate.",
       "section": "Cockpit conductivity testing"
@@ -10384,7 +10412,7 @@
       "section": "Entertainment/stereo",
       "rating": "C",
       "text": "The entertainment and stereo system functioned properly and provided good sound quality.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -10489,7 +10517,7 @@
       "section": "Spotlight/searchlight",
       "rating": "C",
       "text": "The spotlight or searchlight functioned properly and provided adequate illumination.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 1
     },
     {
@@ -10778,6 +10806,20 @@
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
+    },
+    {
+      "section": "Entertainment/stereo",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "This item was inspected and found in acceptable condition."
+    },
+    {
+      "section": "Spotlight/searchlight",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "This item was inspected and found in acceptable condition."
     }
   ],
   "Flybridge": [
@@ -11135,7 +11177,7 @@
       "section": "Safety rail",
       "rating": "B",
       "text": "Remove the bases, repair the mounting surfaces, and re-bed the stanchions.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -11730,7 +11772,7 @@
       "section": "Flybridge Storage locker(s)",
       "rating": "B",
       "text": "The lockers remain functional.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -11821,7 +11863,7 @@
       "section": "Flybridge Bimini/dodger/hardtop",
       "rating": "C",
       "text": "The flybridge Bimini, dodger, or hardtop was in satisfactory condition and provided adequate weather protection.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 1
     },
     {
@@ -11856,7 +11898,7 @@
       "section": "Flybridge Stereo and speakers",
       "rating": "C",
       "text": "The flybridge stereo and speakers operated properly and provided adequate sound quality.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 1
     },
     {
@@ -12873,6 +12915,13 @@
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "This item was inspected and found in acceptable condition."
     }
   ],
   "Flybridge gauges and instrument": [
@@ -15521,7 +15570,7 @@
       "section": "Cabin sole",
       "rating": "C",
       "text": "The cabin sole presented no deficiencies and provided safe, dry footing throughout the cabin.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -15556,7 +15605,7 @@
       "section": "Berths and upholstery",
       "rating": "C",
       "text": "The berths and upholstery were functioning as intended and provided safe, comfortable sleeping accommodation.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -15591,7 +15640,7 @@
       "section": "Interior lighting",
       "rating": "C",
       "text": "All interior lights functioned properly and provided adequate illumination throughout the cabin.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 1
     },
     {
@@ -16755,6 +16804,27 @@
       "phase": "action",
       "severity": 2,
       "text": "Recommend testing the fresh water pump when the vessel is commissioned for the season."
+    },
+    {
+      "section": "Cabin sole",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "This item was inspected and found in acceptable condition."
+    },
+    {
+      "section": "Berths and upholstery",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "This item was inspected and found in acceptable condition."
+    },
+    {
+      "section": "Interior lighting",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "This item was inspected and found in acceptable condition."
     }
   ],
   "Head": [
@@ -18775,7 +18845,7 @@
       "section": "Generator (if installed)",
       "rating": "C",
       "text": "The generator is operational and provides reliable power generation.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -19062,7 +19132,7 @@
       "section": "Stuffing box/packing gland/dripless seal",
       "rating": "A",
       "text": "The vessel should not be operated until the seal is addressed.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19841,6 +19911,20 @@
       "phase": "action",
       "severity": 2,
       "text": "Recommend testing the cooling water intake seacocks and strainers when the vessel is commissioned for the season."
+    },
+    {
+      "section": "Generator (if installed)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "This item was inspected and found in acceptable condition."
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "A significant concern was observed with this item."
     }
   ],
   "Steering & Hydraulics": [
@@ -20655,7 +20739,7 @@
       "section": "House battery(ies)",
       "rating": "A - multiple conductors",
       "text": "It was recommended that the smaller conductors be relocated to a fused distribution block or provided with individual fuses within 7 inches of the battery connection.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -21173,7 +21257,7 @@
       "section": "Generator",
       "rating": "C",
       "text": "The generator is operational and provides reliable power generation.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -22820,6 +22904,13 @@
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
+    },
+    {
+      "section": "Generator",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "This item was inspected and found in acceptable condition."
     }
   ],
   "Safety & Nav Equipment": [
@@ -24380,48 +24471,6 @@
       "severity": 3
     },
     {
-      "section": "Grab rails",
-      "rating": "B",
-      "text": "The stainless grab rails were generally serviceable.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Grab rails",
-      "rating": "B",
-      "text": "[Describe any specific deficiency if applicable].",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Grab rails",
-      "rating": "C - stainless",
-      "text": "The stainless grab rails were solidly attached and were functioning as intended.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Grab rails",
-      "rating": "C - teak refinishing",
-      "text": "The teak grab rails were solidly attached and were found to be in order.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Grab rails",
-      "rating": "C - teak refinishing",
-      "text": "Refinishing would improve appearance.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Grab rails",
-      "rating": "C - teak",
-      "text": "The teak grab rails were solidly attached and showed no signs of deterioration.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
       "section": "Brightwork",
       "rating": "B",
       "text": "All brightwork would benefit from refinishing for appearance and protection.",
@@ -24737,20 +24786,6 @@
       "severity": 3
     },
     {
-      "section": "Grab rails",
-      "rating": "A",
-      "text": "Grab rails are loose, cracked, or missing, creating a safety hazard.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Grab rails",
-      "rating": "A",
-      "text": "Repair or replacement is required.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
       "section": "Brightwork",
       "rating": "A",
       "text": "Brightwork is severely deteriorated or rotted, compromising structural integrity.",
@@ -25020,7 +25055,7 @@
       "section": "Deck hatch(es), windows and portholes (exterior observations)",
       "rating": "B",
       "text": "Deck hatches, windows, and portholes were visually inspected from the exterior. {any:One or more seals showed deterioration and should be replaced|Crazing on one or more hatch lenses was significant and replacement is recommended|A hatch frame was loose and should be re-bedded|Corrosion was noted around one or more porthole frames}.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 5
     },
     {
@@ -25556,41 +25591,6 @@
       "text": "No action required at this time."
     },
     {
-      "section": "Grab rails",
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "This represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Grab rails",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "The finding should be monitored and addressed in the near term."
-    },
-    {
-      "section": "Grab rails",
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Address this at the next scheduled service."
-    },
-    {
-      "section": "Grab rails",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No immediate concern was noted for continued use."
-    },
-    {
-      "section": "Grab rails",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No action required at this time."
-    },
-    {
       "section": "Brightwork",
       "rating": "A",
       "phase": "means",
@@ -26012,7 +26012,7 @@
     },
     {
       "rating": "C",
-      "phase": "observed",
+      "phase": "means",
       "severity": 2,
       "text": "Slight movement was present in one or more stanchions, consistent with normal wear.",
       "section": "Stanchions"
@@ -26058,6 +26058,132 @@
       "phase": "action",
       "severity": 2,
       "text": "Recommend testing the shore water hookup under pressure when the vessel is commissioned for the season."
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "One or more grab rails were loose, cracked, or detached from their mounts.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The mounting hardware for one or more grab rails was severely corroded or had pulled free.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "A failing grab rail cannot be relied upon and represents a safety hazard for anyone moving about the vessel.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Replace the affected grab rails and rebed the mounts before the vessel is returned to service.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The finish on one or more grab rails was worn or weathered.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The bedding compound around one or more grab rail bases was failing or missing.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Minor movement was present in one or more grab rails.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "B",
+      "phase": "means",
+      "severity": 2,
+      "text": "Worn finish leaves the underlying material exposed to further weathering.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Failing bedding allows water ingress and over time loosens the mounting.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Refinish the affected grab rails to protect the underlying material.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Inspect, rebed, and retighten the noted grab rail mounts.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "All grab rails were solidly mounted and showed no visible deficiencies.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The mounting hardware and bedding were intact.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "C",
+      "phase": "means",
+      "severity": 2,
+      "text": "Minor cosmetic wear of the finish was noted, consistent with a vessel of this age.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The grab rails were providing a safe handhold at the time of survey.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program.",
+      "section": "Grab rails"
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "An area warranting attention was noted on this item."
     }
   ]
 }

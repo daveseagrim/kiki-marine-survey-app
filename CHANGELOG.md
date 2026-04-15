@@ -72,6 +72,46 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2206 — 2026-04-14
+
+### Rewritten — Grab rails A/B/C (no "functioning as intended")
+
+Curated 17 chips with non-mechanical vocabulary:
+
+- **A**: loose/cracked/detached rails, severely corroded mounts,
+  safety-hazard means, replace-and-rebed action.
+- **B**: worn finish, failing bedding, minor movement, weathering
+  concern means, refinish + rebed/retighten actions.
+- **C**: solidly mounted / intact / minor cosmetic wear, safe
+  handhold means, no action / routine program.
+
+"Refinishing" sits in action phase (not observed) where it belongs.
+
+### Re-classified — 42 library chips moved to correct phase
+
+Library-wide pass over every chip currently tagged `observed`. Applied
+the picker's phase classifier and moved chips whose text clearly
+describes an ACTION (starts with Monitor / Replace / Refinish /
+Refurbish / Service / The affected / A qualified / etc.) or a MEANS
+(contains interpretive patterns like "represents", "is a concern",
+"cannot be relied upon", "warrants", "consistent with", "provides
+effective"). Conservative — only moved observed → action/means;
+never demoted existing action or means chips.
+
+- 7 chips moved observed → action
+- 35 chips moved observed → means
+
+After reclassification, 14 section-rating combos had new phase gaps
+(chips that had been filling observed no longer did). Re-backfilled
+those 14 gaps with the generic rating-appropriate default chips.
+
+### Verified — 838/838 combos, 0 phase gaps
+
+Final audit confirms: every section × active rating still has at
+least one chip in each of observed / means / action.
+
+---
+
 ## v2205 — 2026-04-14
 
 ### Added — "On shore + winterized" NT chips for every water-using item
