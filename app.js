@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2167';
+const APP_VERSION = 'v2168';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1487,6 +1487,8 @@ const ITEM_SNIPPET_MAP = {
   'Hull(s) condition (below the waterline)': 'Hull(s) condition (below the waterline)',
   'Hull condition (below the waterline)': 'Hull(s) condition (below the waterline)',
   'Evident damage or repairs to hull and rudder below the waterline': 'Hull(s) condition (below the waterline)',
+  'Evident damage or repairs to hull and rudder(s) (if applicable) below the waterline': 'Hull(s) condition (below the waterline)',
+  'Hydraulic steering (hoses, fittings, steering cylinder, tiller arm / tiller bolt or tie-bar, rudder post and stuffing box, etc.)': 'Hydraulic steering (hoses, fittings, steering cylinder, tiller arm or tie bar, rudder post and stuffing box, etc.)',
   'Hull exterior above the waterline': 'Hull(s) condition (above the waterline)',
   'Hull and rudder(s) (if applicable) percussion testing': 'Hull and rudder(s) impact and resonance testing',
   'Rudder(s) condition': 'Rudder(s) condition',

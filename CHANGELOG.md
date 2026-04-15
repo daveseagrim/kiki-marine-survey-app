@@ -12,6 +12,25 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2168 — 2026-04-14
+
+### Fixed (urgent) — Snippet cards / chip-builder now appear for renamed hull+rudder + Hydraulic steering items
+
+`ITEM_SNIPPET_MAP` only had the OLD label forms (pre-v2162), so items
+with the current template labels had no snippet section match —
+`findTextVariants` returned zero, no cards appeared, and the
+check-off-chip builder never activated. Added mappings:
+
+- `Evident damage or repairs to hull and rudder(s) (if applicable) below the waterline`
+  → `Hull(s) condition (below the waterline)`
+- `Hydraulic steering (hoses, fittings, steering cylinder, tiller arm / tiller bolt or tie-bar, rudder post and stuffing box, etc.)`
+  → `Hydraulic steering (hoses, fittings, steering cylinder, tiller arm or tie bar, rudder post and stuffing box, etc.)`
+
+The three other renamed rudder labels (percussion testing, conductivity
+testing, impact-and-resonance testing) were already mapped correctly.
+
+---
+
 ## v2167 — 2026-04-14
 
 ### Fixed (urgent) — Firestore listener will no longer overwrite richer local surveys
