@@ -111,6 +111,7 @@
           {
             "type": "list",
             "label": "Rudder(s) condition",
+            "rudderItem": true,
             "options": [
               "A - Critical",
               "B - Needs Attention",

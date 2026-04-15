@@ -246,51 +246,6 @@
       "text": "Recoat the affected areas with epoxy barrier coat and gelcoat before relaunching the vessel."
     },
     {
-      "section": "Rudder(s) condition",
-      "rating": "A",
-      "text": "The {specify:rudder|rudders} exhibited {any:structural cracking^TP1332|significant delamination^TP1332|visible impact damage^TP1332|exposed laminate^TP1332|wet core^TP1332|severe corrosion^TP1332|a bent rudder stock^TP1332|excessive play in the rudder bearing(s)^TP1332|dezincification of the bronze casting^TP1332|wasted metal requiring replacement^TP1332} [describe area(s)] that compromised structural integrity. Immediate professional repair is required before the vessel is relaunched.{standards? This condition violates STANDARDS.}",
-      "placeholders": {
-        "specify:rudder|rudders": {
-          "multi": false
-        },
-        "any:structural cracking^TP1332|significant delamination^TP1332|visible impact damage^TP1332|exposed laminate^TP1332|wet core^TP1332|severe corrosion^TP1332|a bent rudder stock^TP1332|excessive play in the rudder bearing(s)^TP1332|dezincification of the bronze casting^TP1332|wasted metal requiring replacement^TP1332": {
-          "multi": true
-        }
-      },
-      "phase": "means",
-      "severity": 5
-    },
-    {
-      "section": "Rudder(s) condition",
-      "rating": "B",
-      "text": "The {specify:rudder|rudders} were in overall sound condition. {any:The anti-fouling has worn thin [describe area(s)] and should be lightly sanded and recoated with anti-fouling before the vessel is relaunched|The anti-fouling is worn off [describe area(s)], exposing the gelcoat, and these areas should be sanded and recoated with anti-fouling before the vessel is relaunched|Surface cracking was observed [describe area(s)] and the affected area(s) should be sanded to the gelcoat and recoated with anti-fouling before the vessel is relaunched|Blistering was noted [describe area(s)] and the affected area(s) should be sanded to the barrier coat, recoated with gelcoat and anti-fouling before the vessel is relaunched|Gouging was noted [describe area(s)] and the affected area(s) should be filled with fairing compound, faired, and recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|Exposed fibreglass was noted [describe area(s)] and should be recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|Light surface corrosion was noted on the bronze casting [describe area(s)] and should be cleaned and treated with an appropriate protective coating before the vessel is relaunched|Light surface corrosion was noted on the steel rudder [describe area(s)] and the affected area(s) should be wire-brushed, primed, and painted before the vessel is relaunched|Minor play was detected in the rudder bearing(s) and should be monitored during future inspections|The rudder stock showed light surface corrosion and should be cleaned, primed, and coated before the vessel is relaunched}.",
-      "placeholders": {
-        "specify:rudder|rudders": {
-          "multi": false
-        },
-        "any:The anti-fouling has worn thin [describe area(s)] and should be lightly sanded and recoated with anti-fouling before the vessel is relaunched|The anti-fouling is worn off [describe area(s)], exposing the gelcoat, and these areas should be sanded and recoated with anti-fouling before the vessel is relaunched|Surface cracking was observed [describe area(s)] and the affected area(s) should be sanded to the gelcoat and recoated with anti-fouling before the vessel is relaunched|Blistering was noted [describe area(s)] and the affected area(s) should be sanded to the barrier coat, recoated with gelcoat and anti-fouling before the vessel is relaunched|Gouging was noted [describe area(s)] and the affected area(s) should be filled with fairing compound, faired, and recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|Exposed fibreglass was noted [describe area(s)] and should be recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|Light surface corrosion was noted on the bronze casting [describe area(s)] and should be cleaned and treated with an appropriate protective coating before the vessel is relaunched|Light surface corrosion was noted on the steel rudder [describe area(s)] and the affected area(s) should be wire-brushed, primed, and painted before the vessel is relaunched|Minor play was detected in the rudder bearing(s) and should be monitored during future inspections|The rudder stock showed light surface corrosion and should be cleaned, primed, and coated before the vessel is relaunched": {
-          "multi": true
-        }
-      },
-      "phase": "means",
-      "severity": 4
-    },
-    {
-      "section": "Rudder(s) condition",
-      "rating": "C",
-      "text": "The {specify:rudder|rudders} were {specify:in satisfactory condition with no visible damage|in good overall condition with only cosmetic wear|in without deficiencies for normal use}.",
-      "placeholders": {
-        "specify:rudder|rudders": {
-          "multi": false
-        },
-        "specify:serviceable with no visible damage|in good overall condition with only cosmetic wear|in serviceable condition for normal use": {
-          "multi": false
-        }
-      },
-      "phase": "observed",
-      "severity": 2
-    },
-    {
       "section": "Hull and rudder(s) impact and resonance testing",
       "rating": "A",
       "phase": "observed",
@@ -1195,21 +1150,21 @@
     },
     {
       "section": "Cutlass bearing(s)",
-      "rating": "C - large diameter",
+      "rating": "Not tested - large diameter",
       "text": "The cutlass bearings appeared in satisfactory condition.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Cutlass bearing(s)",
-      "rating": "C - large diameter",
+      "rating": "Not tested - large diameter",
       "text": "Due to the large shaft diameter, manual play testing was inconclusive.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Cutlass bearing(s)",
-      "rating": "C - large diameter",
+      "rating": "Not tested - large diameter",
       "text": "Confirm integrity during limited trial run.",
       "phase": "action",
       "severity": 3
@@ -1227,41 +1182,6 @@
       "text": "Applying pressure to the propeller shaft in multiple directions did not produce excessive movement.",
       "phase": "observed",
       "severity": 3
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "C",
-      "text": "The folding two-blade propeller opened and closed smoothly.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "C",
-      "text": "It was properly secured with the required pins and nuts.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "C",
-      "text": "The assembly was intact and in good order.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "C - multiple props",
-      "text": "Despite minor corrosion, the propellers were in proper working condition and properly attached with the correct nuts and pins.",
-      "phase": "observed",
-      "severity": 2
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "C - single prop, minor corrosion",
-      "text": "Despite minor corrosion, the propeller was in satisfactory condition and properly attached with the correct nuts and pin.",
-      "phase": "observed",
-      "severity": 2
     },
     {
       "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
@@ -1337,55 +1257,6 @@
       "section": "Exhaust discharge position and condition",
       "rating": "C",
       "text": "The installation was found to be in order.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "B - none installed",
-      "text": "No anodes were installed on the trim tabs.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "B - none installed",
-      "text": "In the absence of proper anode protection, the stainless-steel tab planes and hydraulic/electric actuators would have been vulnerable to galvanic corrosion.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "B - none installed",
-      "text": "Suitable anodes should have been installed in accordance with ABYC A-28 and replaced as part of routine maintenance.",
-      "phase": "observed",
-      "severity": 2
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "B",
-      "text": "Despite minor corrosion, the trim tabs, actuators, and mounts were serviceable.",
-      "phase": "observed",
-      "severity": 2
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "B",
-      "text": "The anodes were at least fifty percent consumed and require replacement.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "C",
-      "text": "Despite minor corrosion, the trim tabs, actuators, mounts, and anodes showed no signs of deterioration.",
-      "phase": "observed",
-      "severity": 2
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "C",
-      "text": "The trim tabs, actuators, and mounts appeared sound and well-maintained and functioned properly during limited trial run.",
       "phase": "observed",
       "severity": 3
     },
@@ -1815,48 +1686,6 @@
       "text": "The hull and deck joint was intact and in satisfactory condition.",
       "phase": "observed",
       "severity": 1
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "A",
-      "text": "The {count:propeller|propellers} exhibited {any:significant damage|substantial impact damage} including {any:chipped blade(s)^ABYC P-4|bent blade(s)^ABYC P-4|cracked blade(s)^ABYC P-4|missing blade(s)^ABYC P-4|deep scoring^ABYC P-4|severe pitting^ABYC P-4|severe corrosion^ABYC P-4|shaft-end galling^ABYC P-4|a loose retaining nut^ABYC P-4|a missing retaining nut^ABYC P-4|a missing retaining pin^ABYC P-4}. The {count:propeller was|propellers were} not serviceable in {count:its|their} current condition and required immediate replacement.{standards? This condition violates STANDARDS.}",
-      "placeholders": {
-        "any:significant damage|substantial impact damage": {
-          "multi": false
-        },
-        "any:chipped blade(s)^ABYC P-4|bent blade(s)^ABYC P-4|cracked blade(s)^ABYC P-4|missing blade(s)^ABYC P-4|deep scoring^ABYC P-4|severe pitting^ABYC P-4|severe corrosion^ABYC P-4|shaft-end galling^ABYC P-4|a loose retaining nut^ABYC P-4|a missing retaining nut^ABYC P-4|a missing retaining pin^ABYC P-4": {
-          "multi": true
-        }
-      },
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "B",
-      "text": "The {count:propeller|propellers} showed {any:moderate wear|minor blade damage|chipped blade tip(s)|light edge burr(s)|light pitting|surface corrosion|minor shaft-end mark(s)} that merited attention. The {count:propeller|propellers} should be {specify:removed, inspected, and reconditioned before the vessel is relaunched|removed, inspected, and reconditioned or replaced as necessary before the vessel is relaunched|rebalanced before the vessel is relaunched|touched up and rebalanced before the vessel is relaunched|monitored during future inspections and reconditioned only if the condition deteriorates|re-evaluated at the next haul-out and reconditioned if the condition has worsened}.{standards? Note: this represents a minor deviation from STANDARDS and does not require immediate repair.}",
-      "placeholders": {
-        "any:moderate wear|minor blade damage|chipped blade tip(s)|light edge burr(s)|light pitting|surface corrosion|minor shaft-end mark(s)": {
-          "multi": true
-        },
-        "specify:removed, inspected, and reconditioned before the vessel is relaunched|removed, inspected, and reconditioned or replaced as necessary before the vessel is relaunched|rebalanced before the vessel is relaunched|touched up and rebalanced before the vessel is relaunched|monitored during future inspections and reconditioned only if the condition deteriorates|re-evaluated at the next haul-out and reconditioned if the condition has worsened": {
-          "multi": false
-        }
-      },
-      "phase": "means",
-      "severity": 5
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "C",
-      "text": "The {specify:fixed two-blade|fixed three-blade|fixed four-blade|folding two-blade|folding three-blade|feathering three-blade|controllable pitch} {count:propeller was|propellers were} in without deficiencies with no significant damage, pitting, or corrosion. Blades were intact and {count:securely attached to the shaft|securely attached to their respective shafts}.",
-      "placeholders": {
-        "specify:fixed two-blade|fixed three-blade|fixed four-blade|folding two-blade|folding three-blade|feathering three-blade|controllable pitch": {
-          "multi": false
-        }
-      },
-      "phase": "observed",
-      "severity": 5
     },
     {
       "section": "Propeller shaft(s)",
@@ -2566,27 +2395,6 @@
       "severity": 3
     },
     {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "A",
-      "text": "The trim tabs exhibited severe corrosion, cracking, or structural failure.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "A",
-      "text": "The actuators or anodes were severely degraded.",
-      "phase": "observed",
-      "severity": 4
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "A",
-      "text": "Immediate professional inspection and replacement is critical before the vessel can be safely operated.",
-      "phase": "action",
-      "severity": 5
-    },
-    {
       "section": "Ventilation grills/covers",
       "rating": "A",
       "text": "The ventilation grills or covers were damaged, missing, or not functioning.",
@@ -2802,27 +2610,6 @@
       "phase": "action",
       "severity": 2,
       "text": "Continue the regular seasonal inspection program."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "A",
-      "phase": "observed",
-      "severity": 1,
-      "text": "No anodes were fitted on the trim tabs — this varies by manufacturer and is not a deficiency."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "B",
-      "phase": "observed",
-      "severity": 1,
-      "text": "No anodes were fitted on the trim tabs — this varies by manufacturer and is not a deficiency."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "No anodes were fitted on the trim tabs — this varies by manufacturer and is not a deficiency."
     },
     {
       "rating": "A",
@@ -3259,48 +3046,6 @@
       "section": "Swim platform and ladder - condition and conductivity readings"
     },
     {
-      "section": "Rudder(s) condition",
-      "rating": "A",
-      "phase": "observed",
-      "severity": 5,
-      "text": "A significant concern was observed with this item."
-    },
-    {
-      "section": "Rudder(s) condition",
-      "rating": "A",
-      "phase": "action",
-      "severity": 5,
-      "text": "Professional assessment and repair is required before the vessel is returned to service."
-    },
-    {
-      "section": "Rudder(s) condition",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "The finding should be monitored and addressed in the near term."
-    },
-    {
-      "section": "Rudder(s) condition",
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Address this at the next scheduled service."
-    },
-    {
-      "section": "Rudder(s) condition",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No immediate concern was noted."
-    },
-    {
-      "section": "Rudder(s) condition",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No action required at this time."
-    },
-    {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "observed",
@@ -3539,41 +3284,6 @@
       "text": "No immediate concern was noted."
     },
     {
-      "section": "Propeller(s)",
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "This represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "A",
-      "phase": "action",
-      "severity": 5,
-      "text": "Professional assessment and repair is required before the vessel is returned to service."
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "The finding should be monitored and addressed in the near term."
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Address this at the next scheduled service."
-    },
-    {
-      "section": "Propeller(s)",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No action required at this time."
-    },
-    {
       "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
       "rating": "A",
       "phase": "observed",
@@ -3624,41 +3334,6 @@
     },
     {
       "section": "Exhaust discharge position and condition",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No action required at this time."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "This represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "The finding should be monitored and addressed in the near term."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Address this at the next scheduled service."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No immediate concern was noted."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
       "rating": "C",
       "phase": "action",
       "severity": 1,
@@ -3945,7 +3620,7 @@
       "text": "The readings were consistent with a sound laminate."
     },
     {
-      "section": "Rudder(s) condition",
+      "section": "Transom",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
@@ -3953,17 +3628,430 @@
     },
     {
       "section": "Propeller(s)",
-      "rating": "B",
+      "rating": "A",
       "phase": "observed",
-      "severity": 3,
-      "text": "An area warranting attention was noted on this item."
+      "severity": 5,
+      "text": "One or more propeller blades were chipped, cracked, or bent."
     },
     {
-      "section": "Transom",
+      "section": "Propeller(s)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "A propeller blade was missing."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "Severe pitting or corrosion had compromised one or more blades."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The propeller retaining nut or pin was loose or missing."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "A compromised propeller creates excessive vibration, reduces efficiency, and can damage the shaft, cutlass bearing, and transmission."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "The propeller should be removed, professionally assessed, and repaired or replaced before the vessel is returned to service."
+    },
+    {
+      "section": "Propeller(s)",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "An area warranting attention was noted on this item."
+      "text": "Light edge nicks or minor blade damage were noted."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Light pitting or surface corrosion was noted on the blades."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Minor galling or tool marks were noted at the shaft-end interface."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "These findings warranted attention to prevent further deterioration, vibration, or imbalance."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Remove, inspect, and recondition the propeller at the next scheduled haul-out."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Dress the light nicks at next service and monitor."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The {specify:fixed two-blade|fixed three-blade|fixed four-blade|folding two-blade|folding three-blade|feathering three-blade|controllable pitch} propeller was in serviceable condition with no significant damage, pitting, or corrosion."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The blades were intact and securely attached to the shaft."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The folding or feathering propeller opened and closed smoothly."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The propeller was properly secured with the correct retaining nut and pin."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Despite minor cosmetic corrosion, the propeller was in satisfactory condition and properly attached."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The propeller was providing effective propulsion at the time of survey."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Significant structural damage was observed on the rudder — cracking, delamination, or impact damage that compromised the blade."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "Excessive play or movement was detected at the rudder post or bearings."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "Visible corrosion or pitting had compromised the rudder shaft or stock."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "A compromised rudder represents a loss-of-steering risk and is a significant concern for the vessel's safe operation."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Professional assessment and repair is required before the vessel is returned to service."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Minor surface cracking or crazing was noted on the rudder, typical for a vessel of this age."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The anti-fouling on the rudder had worn thin in the lower sections."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Slight play was present at the rudder post, consistent with normal bearing wear."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Minor weeping was noted at the rudder stuffing box; this is common when the vessel has been out of the water."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "These findings warranted attention to prevent water ingress into the rudder core and to maintain steering response."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Inspect the rudder for moisture at the next haul-out and recondition the anti-fouling surface."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Monitor the rudder stuffing box after launch; continued leakage beyond a few days warrants service."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The rudder was in sound condition with no visible damage, delamination, or significant corrosion."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The rudder moved freely through its full range without binding, stiffness, or excessive play."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The rudder post and bearings were in proper working order."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anti-fouling on the rudder was intact."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The steering system was responding appropriately at the time of survey."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No anodes were fitted on the trim tabs — this varies by manufacturer and is not necessarily a deficiency."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The actuators or anodes were severely degraded."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The trim tabs exhibited severe corrosion, cracking, or structural failure."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "This represents a significant concern for the vessel's safe or structural operation."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Immediate professional inspection and replacement is critical before the vessel can be safely operated."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No anodes were fitted on the trim tabs — this varies by manufacturer and is not necessarily a deficiency."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Minor corrosion was noted on the trim tabs, actuators, or mounts, but they remained serviceable."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The anodes were at least fifty percent consumed and require replacement."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "No anodes were installed on the trim tabs."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 2,
+      "text": "These findings did not currently affect serviceability but warranted attention to prevent further deterioration."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "In the absence of proper anode protection, the stainless-steel tab planes and hydraulic or electric actuators are vulnerable to galvanic corrosion."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "The finding should be monitored and addressed in the near term."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Replace the anodes at the next scheduled service."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Address this at the next scheduled service."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Suitable anodes should be installed in accordance with ABYC A-28 and replaced as part of routine maintenance."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No anodes were fitted on the trim tabs — this varies by manufacturer and is not necessarily a deficiency."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The trim tabs, actuators, mounts, and anodes were in satisfactory condition with no signs of deterioration."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Despite minor cosmetic corrosion, the trim tabs, actuators, mounts, and anodes showed no signs of significant deterioration."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The trim tabs, actuators, and mounts appeared sound and well-maintained and functioned properly during limited trial run."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "No immediate concern was noted."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program."
     }
   ],
   "Spars and rigging": [

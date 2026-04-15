@@ -12,6 +12,127 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2210 — 2026-04-15
+
+### Changed — Cutlass bearing "too big to move" chips moved from Serviceable to Not tested
+
+The three "C - large diameter" chips under Cutlass bearing(s) described
+the case where a shaft is too big/heavy to physically wiggle for play
+testing — i.e., the surveyor could not actually test the bearing. That
+belongs in Not tested, not Serviceable. Re-rated them to
+`Not tested - large diameter` (following the established
+`Not tested - dripless` / `Not tested - stuffing box` naming pattern):
+
+  - observed: "The cutlass bearings appeared in satisfactory condition."
+  - observed: "Due to the large shaft diameter, manual play testing was inconclusive."
+  - action:   "Confirm integrity during limited trial run."
+
+The regular-diameter C chips (where play testing actually succeeds) stay
+in Serviceable unchanged.
+
+### Rewritten — Propeller(s) A/B/C chip list
+
+The old Propeller(s) section was a mix of tokenized multi-chip blobs
+({count:propeller|propellers}, {any:chipped|bent|cracked|…}) and a few
+simple chips. Replaced with a fully curated chip list in the same style
+as Stanchions / Engine locker lid:
+
+- **A** (critical, 6 chips): missing/chipped/cracked/bent blades; severe
+  pitting or corrosion; loose or missing retaining nut/pin; means chip
+  explaining vibration + shaft/cutlass/transmission damage;
+  professional-assessment action.
+- **B** (attention, 6 chips): light edge nicks, light pitting, minor
+  shaft-end galling; means chip for preventing further deterioration;
+  recondition-at-haul-out and dress-at-service actions.
+- **C** (serviceable, 8 chips): `{specify:fixed two-blade|fixed three-
+  blade|fixed four-blade|folding two-blade|folding three-blade|
+  feathering three-blade|controllable pitch}` type-select chip; blades
+  intact; folding/feathering open-close chip; properly secured with
+  nut + pin; minor-cosmetic-corrosion-but-serviceable chip; means chip
+  confirming propulsion; no-action + seasonal-program action chips.
+
+### Rewritten — Rudder(s) condition A/B/C chip list
+
+Same treatment as Propeller(s). The old Rudder(s) section was thin
+(two tokenized chips plus a handful of generic "An area warranting
+attention was noted" fallbacks). Replaced with a curated chip list
+covering the observations Dave actually writes on a shaft-drive power
+boat or sailboat:
+
+- **A** (critical, 5 chips): structural damage / delamination / impact
+  damage; excessive play at rudder post or bearings; corrosion or
+  pitting on shaft/stock; loss-of-steering-risk means chip; professional-
+  assessment action.
+- **B** (attention, 7 chips): minor surface cracking or crazing; worn
+  anti-fouling on lower sections; slight play at rudder post; minor
+  weeping at rudder stuffing box; water-ingress-prevention means chip;
+  next-haul-out moisture-inspection action; post-launch stuffing-box
+  monitoring action.
+- **C** (serviceable, 7 chips): sound condition observations (blade,
+  movement, post/bearings, anti-fouling); steering-responding means
+  chip; no-action + seasonal-program action chips.
+
+### Added — Rudder filtering for power boats without a rudder
+
+`"Rudder(s) condition"` in `survey_template.json` now has
+`rudderItem: true`. The item is hidden on power boats whose drive type
+is outdrive, saildrive, or IPS (those have integrated steering, no
+traditional rudder). Shaft-drive power boats and all sailboats
+continue to see the item.
+
+`shouldShowItem` was updated to derive `hasRudder` from `driveType`
+when the explicit `survey.hasRudder` field is missing (older surveys
+never saved it). Outdrive/saildrive/IPS → no rudder; shaft / sail /
+unknown → has rudder. Explicit `survey.hasRudder === true|false` still
+wins.
+
+### Added — ITEM_SNIPPET_MAP: Propeller ↔ Propeller(s)
+
+With the Propeller(s) chips now curated, added explicit mappings so
+the snippet resolver always lands on the right library section even
+when `driveLineCount = 1` strips the "(s)" from the checklist label.
+
+### Rewritten — Trim tabs (exterior tabs, actuators, mounts and anodes) A/B/C
+
+Three related fixes in one pass:
+
+1. **Softer anode-neutral phrasing.** The shared neutral chip now reads
+   "No anodes were fitted on the trim tabs — this varies by manufacturer
+   and is **not necessarily** a deficiency." (was "is not a deficiency.")
+   Applied to all three ratings so Dave isn't committing to a judgment
+   call before he's seen the boat.
+
+2. **B rating now has proper observed / means / action structure.**
+   Previously the B chips were mostly miscategorized as "observed" when
+   they were actually means or action statements, and most lived under a
+   `B - none installed` subclass. Collapsed everything back under plain
+   `B` and split into the three standard phases:
+
+   - **observed** (4 chips, sev 1→3): neutral chip; minor corrosion;
+     50% anode depletion; no anodes installed.
+   - **means** (3 chips, sev 2→3): serviceability not currently affected
+     but warrants attention; galvanic-corrosion exposure when anodes
+     are absent; near-term monitoring.
+   - **action** (3 chips, sev 2→3): replace anodes at next service;
+     address at next service; install suitable anodes per ABYC A-28.
+
+3. **Chips ordered least → worst within each phase.** All three ratings
+   now list chips in ascending severity so the card flows from the
+   mildest observation at the top to the most serious at the bottom.
+   A: observed 1→4→5; B: observed 1→2→3→3, means 2→3→3, action 2→3→3;
+   C: observed 1→1→2→3, means 1, action 1→2.
+
+### Audit
+
+- JSON files parse ✓
+- JavaScript compiles (app.js + sw.js) ✓
+- Every chip has text + rating + section + phase + severity ✓
+- Trim tabs chips ordered ascending within each phase ✓
+- Zero remaining "not a deficiency" (without "necessarily") phrases ✓
+- Version strings aligned across app.js, sw.js, CACHE_NAME ✓
+
+---
+
 ## v2190 — 2026-04-14
 
 ### Changed — ALL component builders retired; every item uses the chip picker

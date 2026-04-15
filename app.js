@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2209';
+const APP_VERSION = 'v2210';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -948,6 +948,8 @@ const ITEM_SNIPPET_MAP = {
   'Hull and rudder(s) (if applicable) percussion testing': 'Hull and rudder(s) impact and resonance testing',
   'Rudder(s) condition': 'Rudder(s) condition',
   'Rudder condition': 'Rudder(s) condition',
+  'Propeller(s)': 'Propeller(s)',
+  'Propeller': 'Propeller(s)',
   'Hull and rudder(s) (if applicable) impact and resonance testing': 'Hull and rudder(s) impact and resonance testing',
   'Hull and rudder(s) (if applicable) conductivity testing': 'Hull and rudder(s) conductivity testing',
   'Hydraulic steering': 'Hydraulic steering (hoses, fittings, steering cylinder, tiller arm or tie bar, rudder post and stuffing box, etc.)',
@@ -10134,7 +10136,15 @@ function renderInspection(survey) {
   function shouldShowItem(item) {
     if (isPowerboat && item.sailOnly) return false;
     if (isSailboat && item.powerOnly) return false;
-    if (isPowerboat && item.rudderItem && !survey.hasRudder) return false;
+    if (isPowerboat && item.rudderItem) {
+      // v2210: derive hasRudder from driveType when explicit field is absent
+      // (existing surveys have no hasRudder). Outdrive/saildrive/IPS → no rudder;
+      // shaft drive → has rudder. Explicit survey.hasRudder (boolean) still wins.
+      const _hasRudder = (typeof survey.hasRudder === 'boolean')
+        ? survey.hasRudder
+        : !['outdrive','saildrive','ips'].includes((survey.driveType||'').toLowerCase());
+      if (!_hasRudder) return false;
+    }
     if (isPowerboat && SAIL_ONLY_ITEM_LABELS.includes(item.label)) return false;
     // Drive type filtering
     if (driveType) {
@@ -11300,7 +11310,15 @@ async function checkSurvey() {
   function itemApplies(item) {
     if (isPowerboat && item.sailOnly) return false;
     if ((survey.vesselType || '').toLowerCase() === 'sail' && item.powerOnly) return false;
-    if (isPowerboat && item.rudderItem && !survey.hasRudder) return false;
+    if (isPowerboat && item.rudderItem) {
+      // v2210: derive hasRudder from driveType when explicit field is absent
+      // (existing surveys have no hasRudder). Outdrive/saildrive/IPS → no rudder;
+      // shaft drive → has rudder. Explicit survey.hasRudder (boolean) still wins.
+      const _hasRudder = (typeof survey.hasRudder === 'boolean')
+        ? survey.hasRudder
+        : !['outdrive','saildrive','ips'].includes((survey.driveType||'').toLowerCase());
+      if (!_hasRudder) return false;
+    }
     if (isPowerboat && ['Keel and keel joint', 'Keel bolts'].includes(item.label)) return false;
     if (driveType) {
       if (driveType === 'outdrive' && (SAILDRIVE_ONLY.includes(item.label) || IPS_ONLY.includes(item.label) || SHAFT_ONLY.includes(item.label))) return false;
@@ -15285,7 +15303,15 @@ function updateCategoryHeader(survey, categoryName) {
   function shouldShowHeaderItem(item) {
     if (isPowerboat && item.sailOnly) return false;
     if (isSailboat && item.powerOnly) return false;
-    if (isPowerboat && item.rudderItem && !survey.hasRudder) return false;
+    if (isPowerboat && item.rudderItem) {
+      // v2210: derive hasRudder from driveType when explicit field is absent
+      // (existing surveys have no hasRudder). Outdrive/saildrive/IPS → no rudder;
+      // shaft drive → has rudder. Explicit survey.hasRudder (boolean) still wins.
+      const _hasRudder = (typeof survey.hasRudder === 'boolean')
+        ? survey.hasRudder
+        : !['outdrive','saildrive','ips'].includes((survey.driveType||'').toLowerCase());
+      if (!_hasRudder) return false;
+    }
     if (isPowerboat && ['Keel and keel joint', 'Keel bolts'].includes(item.label)) return false;
     // Drive type filtering
     if (driveType) {
