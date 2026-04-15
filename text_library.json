@@ -6957,6 +6957,20 @@
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
+    },
+    {
+      "section": "Sink, faucet and drain",
+      "rating": "Not tested/not verified",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The sink, faucet and drain was not tested because the vessel was on shore and winterized at the time of survey."
+    },
+    {
+      "section": "Sink, faucet and drain",
+      "rating": "Not tested/not verified",
+      "phase": "action",
+      "severity": 2,
+      "text": "Recommend testing the sink, faucet and drain when the vessel is commissioned for the season."
     }
   ],
   "Outboard": [
@@ -16699,6 +16713,48 @@
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
+    },
+    {
+      "section": "Cockpit sink, faucets and drain",
+      "rating": "Not tested/not verified",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The cockpit sink, faucets and drain was not tested because the vessel was on shore and winterized at the time of survey."
+    },
+    {
+      "section": "Cockpit sink, faucets and drain",
+      "rating": "Not tested/not verified",
+      "phase": "action",
+      "severity": 2,
+      "text": "Recommend testing the cockpit sink, faucets and drain when the vessel is commissioned for the season."
+    },
+    {
+      "section": "Fresh water tank(s) and plumbing",
+      "rating": "Not tested/not verified",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The fresh water tanks and plumbing was not tested because the vessel was on shore and winterized at the time of survey."
+    },
+    {
+      "section": "Fresh water tank(s) and plumbing",
+      "rating": "Not tested/not verified",
+      "phase": "action",
+      "severity": 2,
+      "text": "Recommend testing the fresh water tanks and plumbing when the vessel is commissioned for the season."
+    },
+    {
+      "section": "Fresh water pump",
+      "rating": "Not tested/not verified",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The fresh water pump was not tested because the vessel was on shore and winterized at the time of survey."
+    },
+    {
+      "section": "Fresh water pump",
+      "rating": "Not tested/not verified",
+      "phase": "action",
+      "severity": 2,
+      "text": "Recommend testing the fresh water pump when the vessel is commissioned for the season."
     }
   ],
   "Head": [
@@ -17023,6 +17079,34 @@
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
+    },
+    {
+      "section": "Head, toilet and seacock",
+      "rating": "Not tested/not verified",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The head, toilet and seacock was not tested because the vessel was on shore and winterized at the time of survey."
+    },
+    {
+      "section": "Head, toilet and seacock",
+      "rating": "Not tested/not verified",
+      "phase": "action",
+      "severity": 2,
+      "text": "Recommend testing the head, toilet and seacock when the vessel is commissioned for the season."
+    },
+    {
+      "section": "Head, faucet, sink and drain",
+      "rating": "Not tested/not verified",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The head, faucet, sink and drain was not tested because the vessel was on shore and winterized at the time of survey."
+    },
+    {
+      "section": "Head, faucet, sink and drain",
+      "rating": "Not tested/not verified",
+      "phase": "action",
+      "severity": 2,
+      "text": "Recommend testing the head, faucet, sink and drain when the vessel is commissioned for the season."
     }
   ],
   "Fuel & Tanks": [
@@ -17956,6 +18040,34 @@
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
+    },
+    {
+      "section": "Hot water tank(s), plumbing and electrical",
+      "rating": "Not tested/not verified",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The hot water tanks, plumbing and electrical was not tested because the vessel was on shore and winterized at the time of survey."
+    },
+    {
+      "section": "Hot water tank(s), plumbing and electrical",
+      "rating": "Not tested/not verified",
+      "phase": "action",
+      "severity": 2,
+      "text": "Recommend testing the hot water tanks, plumbing and electrical when the vessel is commissioned for the season."
+    },
+    {
+      "section": "Black water tank(s) and plumbing",
+      "rating": "Not tested/not verified",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The black water tanks and plumbing was not tested because the vessel was on shore and winterized at the time of survey."
+    },
+    {
+      "section": "Black water tank(s) and plumbing",
+      "rating": "Not tested/not verified",
+      "phase": "action",
+      "severity": 2,
+      "text": "Recommend testing the black water tanks and plumbing when the vessel is commissioned for the season."
     }
   ],
   "Engine & Powertrain": [
@@ -19715,6 +19827,20 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair is required before the vessel is returned to service."
+    },
+    {
+      "section": "Cooling water intake seacock(s) and strainer(s)",
+      "rating": "Not tested/not verified",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The cooling water intake seacocks and strainers was not tested because the vessel was on shore and winterized at the time of survey."
+    },
+    {
+      "section": "Cooling water intake seacock(s) and strainer(s)",
+      "rating": "Not tested/not verified",
+      "phase": "action",
+      "severity": 2,
+      "text": "Recommend testing the cooling water intake seacocks and strainers when the vessel is commissioned for the season."
     }
   ],
   "Steering & Hydraulics": [

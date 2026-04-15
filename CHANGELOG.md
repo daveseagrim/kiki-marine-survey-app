@@ -72,6 +72,36 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2205 — 2026-04-14
+
+### Added — "On shore + winterized" NT chips for every water-using item
+
+10 water-system items in the template now have dedicated
+Not-tested/not-verified chips explaining "vessel was on shore and
+winterized at the time of survey":
+
+- Shore water hookup
+- Sink, faucet and drain
+- Cockpit sink, faucets and drain
+- Head, toilet and seacock
+- Head, faucet, sink and drain
+- Hot water tank(s), plumbing and electrical
+- Black water tank(s) and plumbing
+- Fresh water tank(s) and plumbing
+- Fresh water pump
+- Cooling water intake seacock(s) and strainer(s)
+
+Each gets two chips:
+- Observed: "The [item] was not tested because the vessel was on
+  shore and winterized at the time of survey."
+- Action: "Recommend testing the [item] when the vessel is
+  commissioned for the season."
+
+Shore water hookup already had this from v2204 so it was skipped —
+9 net items received the NT chips in this pass.
+
+---
+
 ## v2204 — 2026-04-14
 
 ### Rewritten — Stanchions A/B/C (hand-curated)
