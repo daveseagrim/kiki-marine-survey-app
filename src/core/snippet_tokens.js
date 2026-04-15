@@ -67,6 +67,17 @@
       return hasRudder ? '' : content;
     });
 
+    // v2165: Scrub UNTOKENIZED rudder mentions when hasRudder is false.
+    // The text library has 37+ snippets that mention rudders without being
+    // wrapped in {if-rudder:...} (legacy content from before the token
+    // system). On outdrive / IPS / saildrive vessels we strip them at
+    // expand-time so the surveyor never sees rudder verbiage in their notes
+    // or report. This is conservative: it only fires when ctx.hasRudder is
+    // explicitly false (sail and shaft-drive power boats are unaffected).
+    if (ctx.hasRudder === false) {
+      out = scrubNakedRudderRefs(out);
+    }
+
     // Whitespace cleanup — collapse multiple spaces, remove space before
     // punctuation, trim ends.
     out = out.replace(/\s+([,.;:!?])/g, '$1');  // space before punctuation
@@ -75,6 +86,69 @@
     out = out.replace(/\s{2,}/g, ' ').trim();
 
     return out;
+  }
+
+  /**
+   * Strip naked rudder references from prose for no-rudder vessels.
+   * Conservative pattern set:
+   *   1. Drop any sentence whose subject is rudder ("The rudder was…",
+   *      "Rudder(s) condition…", "Rudders showed…").
+   *   2. Strip inline "and rudder(s)" / "and the rudder" / "and rudders".
+   *   3. Strip leading "rudder(s) and " before another noun.
+   *   4. Drop dangling {specify:rudder|rudders} tokens (these become empty
+   *      in the chip-strip builder for no-rudder vessels anyway).
+   *
+   * Leaves verb agreement alone — "the hull and rudder were inspected"
+   * becomes "the hull were inspected" which is awkward but readable, and
+   * fixing English subject/verb agreement programmatically is fragile.
+   * Surveyor can hand-edit if needed.
+   */
+  function scrubNakedRudderRefs(text) {
+    if (!text) return text;
+    let t = text;
+
+    // 1. Sentence-level: drop any sentence whose subject IS rudder.
+    //    Detection covers naked "Rudder(s)" / "The rudder" forms AND
+    //    sentences that start with the {specify:rudder|rudders} token,
+    //    because those are also rudder-subject sentences.
+    //    Split on sentence terminators while keeping them attached.
+    const RUDDER_SUBJECT = /^\s*(?:The\s+|These\s+|That\s+|Both\s+)?(?:\{specify:rudders?(?:\(\s*s\s*\))?\|rudders?(?:\(\s*s\s*\))?\}|[Rr]udders?(?:\(s\))?\b)/;
+    const SENT_RE = /([^.!?]+[.!?]+)(\s*)/g;
+    const kept = [];
+    let m, lastIdx = 0;
+    let sawAnySentence = false;
+    while ((m = SENT_RE.exec(t)) !== null) {
+      sawAnySentence = true;
+      const sentence = m[1];
+      const trail = m[2] || '';
+      if (!RUDDER_SUBJECT.test(sentence)) kept.push(sentence + trail);
+      lastIdx = m.index + m[0].length;
+    }
+    if (sawAnySentence) {
+      // Replace t with the kept sentences + any trailing fragment.
+      // If everything was dropped, t legitimately becomes empty.
+      t = kept.join('') + t.slice(lastIdx);
+    }
+
+    // 2. Drop any leftover {specify:rudder|rudders} tokens (e.g. mid-sentence)
+    t = t.replace(/\{specify:rudders?(?:\(\s*s\s*\))?\|rudders?(?:\(\s*s\s*\))?\}/gi, '');
+
+    // 3. Special-case verb-agreement fix BEFORE the generic strip:
+    //    "the hull and rudder(s) were/are" → "the hull was/is"
+    //    so we don't end up with "The hull were percussion tested."
+    t = t.replace(/\b(the\s+)?hull\s+and\s+rudders?(?:\(s\))?\s+(were|are)\b/gi, function (_m, the, verb) {
+      const tense = verb.toLowerCase() === 'were' ? 'was' : 'is';
+      return `${the || ''}hull ${tense}`;
+    });
+
+    // 4. Inline: strip "and rudder(s)" / "and the rudder" / "and rudders"
+    //    (covers "hull and rudder was tested" → "hull was tested" too)
+    t = t.replace(/\s+and\s+(?:the\s+)?rudders?(?:\(s\))?\b/gi, '');
+
+    // 5. Strip leading "rudder(s) and " before another noun
+    t = t.replace(/\b(?:the\s+)?rudders?(?:\(s\))?\s+and\s+/gi, '');
+
+    return t;
   }
 
   /**
@@ -108,6 +182,15 @@
     ctx = ctx || {};
     const hasRudder = !!ctx.hasRudder;
     const rudderCount = typeof ctx.rudderCount === 'number' ? ctx.rudderCount : (hasRudder ? 1 : 0);
+
+    // v2165: "Hydraulic steering (... rudder post and stuffing box ...)"
+    // For no-rudder vessels (outdrive / IPS) the parenthetical mentions
+    // components that don't exist. Truncate to just "Hydraulic steering"
+    // — outdrive hydraulic steering exists (cylinder pushes the drive),
+    // but it has no rudder post / tiller arm.
+    if (!hasRudder && /^Hydraulic steering\s*\(/.test(label) && /rudder/i.test(label)) {
+      return 'Hydraulic steering';
+    }
 
     // Pattern: " and rudder(s) (if applicable)" with any casing on "and"
     const pattern = /\s+and\s+rudder\(s\)\s+\(if applicable\)\s+/i;

@@ -12,6 +12,45 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2165 — 2026-04-14
+
+### Fixed — Strip naked rudder mentions from snippets and Hydraulic steering label on no-rudder vessels
+
+Outdrive / IPS / saildrive vessels (`hasRudder=false`) were still seeing
+"rudder" in inserted snippet text and on the Hydraulic steering item
+label. Root cause: 37 of the 49 rudder-mentioning snippets in
+`text_library.json` are legacy content that predates the
+`{if-rudder:...}` token system, so they passed through expansion
+unchanged. The Hydraulic steering label has "rudder post and stuffing
+box" inline in the parenthetical — components that don't exist on
+outdrive boats.
+
+Fix in `src/core/snippet_tokens.js`:
+
+1. `expandTokens` now calls `scrubNakedRudderRefs` whenever
+   `ctx.hasRudder === false`. Conservative pattern set:
+   - Drops any sentence whose subject is rudder
+     ("Rudder(s) condition was good.", "The rudders showed wear.")
+   - Drops sentences led by `{specify:rudder|rudders}` token
+   - Special-case verb-agreement fix: "the hull and rudder were/are X"
+     → "the hull was/is X" (avoids "The hull were percussion tested.")
+   - Strips inline " and rudder(s)" / " and the rudder" / " and rudders"
+   - Strips leading "rudder(s) and " before another noun
+   - Drops any leftover `{specify:rudder|rudders}` tokens
+2. `transformLabelForDisplay` now collapses "Hydraulic steering
+   (... rudder post and stuffing box ...)" → "Hydraulic steering"
+   when `hasRudder=false`.
+
+Sail and shaft-drive power vessels (hasRudder=true) are unaffected —
+all original text passes through unchanged.
+
+Tested with 5 representative snippet patterns + both rudder labels;
+all behaved as expected. Surveyor can still hand-edit textarea text
+for any edge cases the scrubber misses (the 49 known rudder snippets
+mostly use stable patterns the scrubber covers).
+
+---
+
 ## v2164 — 2026-04-14
 
 ### Added — "Spotlight/searchlight" item in Cockpit gauges category
