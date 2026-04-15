@@ -12,6 +12,60 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2218 — 2026-04-15
+
+### Removed — "This item was inspected and found in acceptable condition" (library-wide)
+
+Dave flagged this phrase as not SAMS-appropriate. Removed all 15
+instances across the library (generic boilerplate in 15 C-rated
+observation chips) and replaced each with a section-specific
+SAMS-appropriate observation:
+
+- Aft Deck / Cover → "The aft deck cover was sound and in good order at the time of survey."
+- Aft Deck / Seating → "The aft deck seating was in good condition at the time of survey."
+- Cabin / Berths and upholstery → "The berths and upholstery were sound and in good order at the time of survey."
+- Cabin / Cabin sole → "The cabin sole was sound and in good order at the time of survey."
+- Cabin / Floor and carpet → "The floor and carpet were in good order at the time of survey."
+- Cabin / Interior lighting → "The interior lighting functioned properly at the time of survey."
+- Deck / Fuel and water fill ports and waste deck pump-out port → "…were secure and in good order at the time of survey."
+- Electrical / Generator → "The generator functioned properly at the time of survey."
+- Engine condition → two chips (see next section)
+- Engine / Generator (if installed) → "The generator functioned properly at the time of survey."
+- Flybridge / Arch → "The arch was sound and in good order at the time of survey."
+- Flybridge / Bimini/dodger/hardtop → "…was sound and in good order at the time of survey."
+- Gauges / Entertainment/stereo → "…functioned properly at the time of survey."
+- Gauges / Spotlight/searchlight → "…functioned properly at the time of survey."
+- Spars / Backstay, turnbuckle(s), retaining rings/pins and chain →
+  "The backstay, turnbuckles, retaining rings or pins, and chain were
+  sound and in good order at the time of survey."
+
+### Added — Engine condition singular + plural variants
+
+Dave's rule: if there are two propellers, there are two engines, and
+the chip should say "engines" plural. Pre-purchase template already
+splits Engine into Port / Starboard (via `driveLineItem`) so each
+side uses singular "engine" naturally; insurance template rates a
+single combined Engine item where plural matters.
+
+Now every rated phase of Engine condition has a singular + plural
+variant chip:
+
+- **C/observed/1**: "The engine was in good order at the time of survey." + plural
+- **C/means/3**: "The engine was relatively clean with an appearance that suggested it had been maintained." + plural ("engines were … they had been maintained.")
+- **B/observed/3**: "The engine exhibited a moderate level of cleanliness." + plural
+- **A/observed/3**: "The engine was damaged or non-functional." + plural
+  (also fixed the present-tense "is damaged" → past-tense "was damaged")
+
+### Audit
+
+- JSON parses ✓
+- JavaScript compiles ✓
+- Zero "this item was inspected" chips remain (expect 0) ✓
+- Engine condition: singular + plural variants at every rated phase ✓
+- Version strings aligned ✓
+
+---
+
 ## v2217 — 2026-04-15
 
 ### Added — VHF antenna condition as a separate chip at every rating

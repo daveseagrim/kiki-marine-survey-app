@@ -6018,13 +6018,6 @@
     {
       "section": "Backstay, turnbuckle(s), retaining rings/pins and chainplate(s)/tang(s)",
       "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "This item was inspected and found in acceptable condition."
-    },
-    {
-      "section": "Backstay, turnbuckle(s), retaining rings/pins and chainplate(s)/tang(s)",
-      "rating": "C",
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
@@ -6301,6 +6294,13 @@
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
+    },
+    {
+      "section": "Backstay, turnbuckle(s), retaining rings/pins and chain",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The backstay, turnbuckles, retaining rings or pins, and chain were sound and in good order at the time of survey."
     }
   ],
   "Aft Deck": [
@@ -7205,14 +7205,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "This item was inspected and found in acceptable condition."
+      "text": "The aft deck cover was sound and in good order at the time of survey."
     },
     {
       "section": "Seating",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "This item was inspected and found in acceptable condition."
+      "text": "The aft deck seating was in good condition at the time of survey."
     }
   ],
   "Outboard": [
@@ -11102,20 +11102,6 @@
       "text": "No action required at this time."
     },
     {
-      "section": "Entertainment/stereo",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "This item was inspected and found in acceptable condition."
-    },
-    {
-      "section": "Spotlight/searchlight",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "This item was inspected and found in acceptable condition."
-    },
-    {
       "section": "Blower",
       "rating": "A",
       "phase": "observed",
@@ -11254,6 +11240,20 @@
       "phase": "observed",
       "severity": 1,
       "text": "The windshield wiper operated smoothly and effectively cleared the windshield."
+    },
+    {
+      "section": "Entertainment/stereo",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The entertainment or stereo system functioned properly at the time of survey."
+    },
+    {
+      "section": "Spotlight/searchlight",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The spotlight or searchlight functioned properly at the time of survey."
     }
   ],
   "Flybridge": [
@@ -13337,25 +13337,25 @@
       "text": "No action required at this time."
     },
     {
-      "section": "Flybridge Bimini/dodger/hardtop",
-      "rating": "C",
+      "section": "Flybridge, floor, seats and coaming (spider cracks, etc.)",
+      "rating": "B",
       "phase": "observed",
-      "severity": 1,
-      "text": "This item was inspected and found in acceptable condition."
+      "severity": 3,
+      "text": "An area warranting attention was noted on this item."
     },
     {
       "section": "Arch",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "This item was inspected and found in acceptable condition."
+      "text": "The arch was sound and in good order at the time of survey."
     },
     {
-      "section": "Flybridge, floor, seats and coaming (spider cracks, etc.)",
-      "rating": "B",
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "C",
       "phase": "observed",
-      "severity": 3,
-      "text": "An area warranting attention was noted on this item."
+      "severity": 1,
+      "text": "The flybridge bimini, dodger, or hardtop was sound and in good order at the time of survey."
     }
   ],
   "Flybridge gauges and instrument": [
@@ -16878,13 +16878,6 @@
     {
       "section": "Floor and carpet",
       "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "This item was inspected and found in acceptable condition."
-    },
-    {
-      "section": "Floor and carpet",
-      "rating": "C",
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
@@ -17324,27 +17317,6 @@
       "text": "Recommend testing the fresh water pump when the vessel is commissioned for the season."
     },
     {
-      "section": "Cabin sole",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "This item was inspected and found in acceptable condition."
-    },
-    {
-      "section": "Berths and upholstery",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "This item was inspected and found in acceptable condition."
-    },
-    {
-      "section": "Interior lighting",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "This item was inspected and found in acceptable condition."
-    },
-    {
       "section": "Hull deck joint (interior)",
       "rating": "B",
       "phase": "observed",
@@ -17357,6 +17329,34 @@
       "phase": "observed",
       "severity": 3,
       "text": "An area warranting attention was noted on this item."
+    },
+    {
+      "section": "Berths and upholstery",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The berths and upholstery were sound and in good order at the time of survey."
+    },
+    {
+      "section": "Cabin sole",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The cabin sole was sound and in good order at the time of survey."
+    },
+    {
+      "section": "Floor and carpet",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The floor and carpet were in good order at the time of survey."
+    },
+    {
+      "section": "Interior lighting",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The interior lighting functioned properly at the time of survey."
     }
   ],
   "Head": [
@@ -19383,7 +19383,7 @@
     {
       "section": "Engine condition",
       "rating": "A",
-      "text": "The engine is damaged or non-functional.",
+      "text": "The engine was damaged or non-functional.",
       "phase": "observed",
       "severity": 3
     },
@@ -19848,13 +19848,6 @@
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
-    },
-    {
-      "section": "Engine condition",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "This item was inspected and found in acceptable condition."
     },
     {
       "section": "Engine condition",
@@ -20445,18 +20438,53 @@
       "text": "Recommend testing the cooling water intake seacocks and strainers when the vessel is commissioned for the season."
     },
     {
-      "section": "Generator (if installed)",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "This item was inspected and found in acceptable condition."
-    },
-    {
       "section": "Stuffing box/packing gland/dripless seal",
       "rating": "A",
       "phase": "observed",
       "severity": 5,
       "text": "A significant concern was observed with this item."
+    },
+    {
+      "section": "Engine condition",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The engine was in good order at the time of survey."
+    },
+    {
+      "section": "Engine condition",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The engines were in good order at the time of survey."
+    },
+    {
+      "section": "Generator (if installed)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The generator functioned properly at the time of survey."
+    },
+    {
+      "section": "Engine condition",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The engines exhibited a moderate level of cleanliness."
+    },
+    {
+      "section": "Engine condition",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "The engines were relatively clean with an appearance that suggested they had been maintained."
+    },
+    {
+      "section": "Engine condition",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The engines were damaged or non-functional."
     }
   ],
   "Steering & Hydraulics": [
@@ -23443,7 +23471,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "This item was inspected and found in acceptable condition."
+      "text": "The generator functioned properly at the time of survey."
     }
   ],
   "Safety & Nav Equipment": [
@@ -26028,13 +26056,6 @@
     {
       "section": "Fuel and water fill ports and waste deck pump-out port",
       "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "This item was inspected and found in acceptable condition."
-    },
-    {
-      "section": "Fuel and water fill ports and waste deck pump-out port",
-      "rating": "C",
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
@@ -26710,6 +26731,13 @@
       "phase": "observed",
       "severity": 3,
       "text": "An area warranting attention was noted on this item."
+    },
+    {
+      "section": "Fuel and water fill ports and waste deck pump-out port",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The fuel and water fill ports and waste deck pump-out port were secure and in good order at the time of survey."
     }
   ]
 }
