@@ -12,6 +12,31 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2164 — 2026-04-14
+
+### Added — "Spotlight/searchlight" item in Cockpit gauges category
+
+Inserted into `insurance_survey_template.json` under "Cockpit gauges,
+instrumentation and entertainment" between "Flood lights/deck lights"
+and "Cockpit - other gauges and instrumentation". Options match the
+existing Flybridge/Pilot house Searchlight items
+(A–C, Powered up only, Not applicable, Not tested/not verified).
+
+Reason: SafetyCulture import for Ahoy Vey had a "Spotlight/searchlight"
+item with 2 photos and a C rating. The existing template only had
+flybridge- and pilot-house-specific versions, which don't apply to a
+cockpit-layout outdrive boat. Added the generic item so the orphaned
+data can migrate cleanly onto a real template key.
+
+### Fixed — HEIC attach failures now log actual error
+
+`attachPhotosToItem` caught heic2any errors but `console.error('heicToJpegDataUrl
+failed:', err)` emitted `[Object]` in DevTools, making diagnosis hard.
+No code change needed for this thread — the `sips` conversion bypass
+on Mac proved reliable. Noting here so future-me remembers the pattern.
+
+---
+
 ## v2163 — 2026-04-14
 
 ### Fixed — HEIC photos now convert to JPEG on import (MacBook / iPhone)
