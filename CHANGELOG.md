@@ -12,6 +12,26 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2169 — 2026-04-14
+
+### Fixed (urgent) — Snippet card preview now shows expanded text on no-rudder vessels
+
+Cards in the Quick Insert panel were showing raw tokens like
+`{if-rudder: and {count:rudder|rudders}}` on outdrive surveys because
+`highlightSnippetDiffs` operated on `v.text` directly — never running
+the rudder-gating token expansion before diffing. The surveyor saw
+the literal placeholder text on the card face even though insertion
+into the textarea would have produced clean prose.
+
+Fix in `showNotesSheet`: before diffing, build a parallel
+`sheetVariantsForDisplay` array with each `.text` field pre-expanded
+through `expandSnippetTokens` (using the survey's
+`KikiSnippetTokens.contextFromSurvey` context). The originals stay on
+`sheetVariants` so insertion-time expansion still runs on the raw
+template.
+
+---
+
 ## v2168 — 2026-04-14
 
 ### Fixed (urgent) — Snippet cards / chip-builder now appear for renamed hull+rudder + Hydraulic steering items

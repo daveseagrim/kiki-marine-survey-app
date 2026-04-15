@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2168';
+const APP_VERSION = 'v2169';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3293,8 +3293,21 @@ function showNotesSheet(itemLabel, categoryName) {
       const baseRating = itemData.rating.charAt(0);
       sheetVariants = findTextVariants(categoryName, itemLabel, baseRating);
       if (sheetVariants.length > 0) {
-        // Pre-compute diff-highlighted display texts for bottom sheet
-        const highlightedTexts = highlightSnippetDiffs(sheetVariants);
+        // v2169: expand rudder-gating tokens on a CLONE of each variant
+        // BEFORE computing diff highlights. Without this pre-pass, raw
+        // `{if-rudder:...}` / `{count:...}` tokens leak into the card
+        // preview on no-rudder vessels because the diff-highlighter
+        // operates on `v.text` directly. The original `variant.text` is
+        // preserved on the real objects for insertion-time expansion.
+        const _expandCtx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
+          ? window.KikiSnippetTokens.contextFromSurvey(survey)
+          : { hasRudder: survey && survey.hasRudder !== false, rudderCount: (survey && survey.driveLineCount) || 1 };
+        const sheetVariantsForDisplay = (typeof window.expandSnippetTokens === 'function')
+          ? sheetVariants.map(v => Object.assign({}, v, { text: window.expandSnippetTokens(v.text, _expandCtx) }))
+          : sheetVariants;
+        // Pre-compute diff-highlighted display texts for bottom sheet (from
+        // the expanded text so the highlighter operates on clean prose).
+        const highlightedTexts = highlightSnippetDiffs(sheetVariantsForDisplay);
 
         // Keyed cache lookup — escape the key for use in inline onclick
         const cacheKey = itemLabel.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
