@@ -1035,13 +1035,6 @@
     {
       "section": "Propeller/drive anode(s)",
       "rating": "B - wrong metal",
-      "text": "For freshwater service, magnesium anodes are preferred due to their higher driving voltage and improved protection in low-conductivity environments.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "B - wrong metal",
       "text": "Replacement with magnesium is recommended.",
       "phase": "observed",
       "severity": 3
@@ -1934,13 +1927,6 @@
       "text": "This is a safety-critical issue requiring immediate repair.",
       "phase": "observed",
       "severity": 5
-    },
-    {
-      "section": "Transom",
-      "rating": "B",
-      "text": "The transom shows signs of elevated conductivity with readings of [insert reading range], with readings of [insert reading range], or minor damage.",
-      "phase": "observed",
-      "severity": 3
     },
     {
       "section": "Transom",
@@ -2904,13 +2890,6 @@
     {
       "rating": "B",
       "phase": "observed",
-      "severity": 3,
-      "text": "Elevated conductivity readings of [insert reading range] were noted in localized areas of the swim platform.",
-      "section": "Swim platform and ladder"
-    },
-    {
-      "rating": "B",
-      "phase": "observed",
       "severity": 2,
       "text": "The swim ladder showed minor corrosion on the hardware.",
       "section": "Swim platform and ladder"
@@ -2920,13 +2899,6 @@
       "phase": "observed",
       "severity": 2,
       "text": "The swim ladder was stiff to deploy or retract.",
-      "section": "Swim platform and ladder"
-    },
-    {
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "The elevated conductivity warranted monitoring to rule out progressing moisture ingress or delamination.",
       "section": "Swim platform and ladder"
     },
     {
@@ -2990,13 +2962,6 @@
       "phase": "observed",
       "severity": 1,
       "text": "The swim ladder feet were protected and intact.",
-      "section": "Swim platform and ladder"
-    },
-    {
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "No notable areas of elevated conductivity with readings of [insert reading range] were observed on the swim platform.",
       "section": "Swim platform and ladder"
     },
     {
@@ -3219,36 +3184,8 @@
     {
       "rating": "B",
       "phase": "observed",
-      "severity": 3,
-      "text": "Conductivity testing of the swim platform returned elevated readings of [insert reading range].",
-      "section": "Swim platform and ladder"
-    },
-    {
-      "rating": "B",
-      "phase": "observed",
-      "severity": 3,
-      "text": "Conductivity readings were generally acceptable but elevated in [describe area(s)] with readings of [insert reading range].",
-      "section": "Swim platform and ladder"
-    },
-    {
-      "rating": "B",
-      "phase": "observed",
       "severity": 2,
       "text": "The swim platform showed minor localized wear and loose fittings in [describe area(s)].",
-      "section": "Swim platform and ladder"
-    },
-    {
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "The elevated conductivity readings suggested early-stage moisture absorption within the platform core.",
-      "section": "Swim platform and ladder"
-    },
-    {
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Recheck the conductivity readings at the next haul-out to confirm the condition has not progressed.",
       "section": "Swim platform and ladder"
     },
     {
@@ -3285,27 +3222,6 @@
       "severity": 3,
       "text": "Recheck the conductivity readings at the next haul-out to confirm the condition has not progressed.",
       "section": "Swim platform and ladder - condition and conductivity readings"
-    },
-    {
-      "rating": "A",
-      "phase": "observed",
-      "severity": 5,
-      "text": "Conductivity testing of the swim platform returned readings at or near 999 across large areas.",
-      "section": "Swim platform and ladder"
-    },
-    {
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "The swim platform returned saturated conductivity readings consistent with extensive core moisture.",
-      "section": "Swim platform and ladder"
-    },
-    {
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "The severely elevated conductivity indicated significant moisture ingress and possible delamination.",
-      "section": "Swim platform and ladder"
     },
     {
       "rating": "A",
@@ -4037,6 +3953,13 @@
     },
     {
       "section": "Propeller(s)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "An area warranting attention was noted on this item."
+    },
+    {
+      "section": "Transom",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
@@ -7593,62 +7516,6 @@
       "severity": 3
     },
     {
-      "section": "Engine locker lid",
-      "rating": "C",
-      "text": "The engine locker lid was in satisfactory condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Engine locker lid",
-      "rating": "C",
-      "text": "The hydraulic locker lift functioned properly.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Engine locker lid",
-      "rating": "C",
-      "text": "The engine locker lid was undamaged and showed no elevated conductivity.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Engine locker lid",
-      "rating": "C",
-      "text": "The engine locker lid was undamaged, easily removed, and showed no elevated conductivity.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Engine locker lid",
-      "rating": "B",
-      "text": "The engine locker lid was undamaged and easily removed.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Engine locker lid",
-      "rating": "B",
-      "text": "areas of elevated conductivity with readings of [insert reading range] were present with readings of [insert reading range].",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Engine locker lid",
-      "rating": "B",
-      "text": "One area at [insert location] indicated near saturation.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Engine locker lid",
-      "rating": "B",
-      "text": "Localized repair is recommended.",
-      "phase": "observed",
-      "severity": 2
-    },
-    {
       "section": "Steering wheel and steering",
       "rating": "A",
       "text": "The steering wheel was very hard to turn.",
@@ -7843,13 +7710,6 @@
       "text": "It was not tested.",
       "phase": "observed",
       "severity": 3
-    },
-    {
-      "section": "Arch",
-      "rating": "C",
-      "text": "The arch was solid and showed no concerning areas of cracking, delamination, or conductivity.",
-      "phase": "observed",
-      "severity": 5
     },
     {
       "section": "Davits",
@@ -8115,20 +7975,6 @@
       "rating": "B",
       "text": "Servicing is recommended.",
       "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Engine locker lid",
-      "rating": "A",
-      "text": "The lid is cracked, loose, or non-functional.",
-      "phase": "observed",
-      "severity": 4
-    },
-    {
-      "section": "Engine locker lid",
-      "rating": "A",
-      "text": "Repair or replacement is required.",
-      "phase": "action",
       "severity": 3
     },
     {
@@ -8867,34 +8713,6 @@
       "text": "No action required at this time."
     },
     {
-      "section": "Engine locker lid",
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "This represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Engine locker lid",
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Address this at the next scheduled service."
-    },
-    {
-      "section": "Engine locker lid",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No immediate concern was noted."
-    },
-    {
-      "section": "Engine locker lid",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No action required at this time."
-    },
-    {
       "section": "Steering wheel and steering",
       "rating": "A",
       "phase": "means",
@@ -9250,6 +9068,125 @@
       "phase": "observed",
       "severity": 1,
       "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The engine locker lid could not be opened or was detached.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The {specify:hydraulic|electric} engine lid control was not working.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "Engine access is essential for routine service and emergency response; a non-functional lid represents a safety and maintenance concern.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Repair or replace the lid control mechanism before the vessel is returned to service.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The {specify:hydraulic|electric} engine lid control was not working.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Localized wear or cosmetic damage was noted on the engine locker lid.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The seal or gasket around the engine locker lid was deteriorating.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "A failing seal allows water and fumes to migrate between the engine compartment and the cockpit.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Service or replace the lid control mechanism at the next scheduled service.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Replace the seal or gasket to restore a weather-tight fit.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 1,
+      "text": "Localized repair is recommended.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The engine locker lid was undamaged and easily removed.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The {specify:hydraulic|electric} engine lid control was working as intended.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The seal or gasket around the engine locker lid was intact.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "Engine access was unimpeded at the time of survey.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time.",
+      "section": "Engine locker lid"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program.",
+      "section": "Engine locker lid"
     }
   ],
   "Gauges and Instrumentation": [
@@ -11202,13 +11139,6 @@
       "severity": 3
     },
     {
-      "section": "Arch",
-      "rating": "C",
-      "text": "The arch was solid and showed no concerning areas of cracking, delamination, or conductivity.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
       "section": "Bimini, dodger and canvas enclosure",
       "rating": "B",
       "text": "The bimini was in fair condition.",
@@ -11291,13 +11221,6 @@
       "text": "Repair is critical.",
       "phase": "action",
       "severity": 5
-    },
-    {
-      "section": "Flybridge, floor, seats and coaming (spider cracks, etc.)",
-      "rating": "B",
-      "text": "Spider cracks or minor signs of elevated conductivity with readings of [insert reading range] with readings of [insert reading range] were visible.",
-      "phase": "observed",
-      "severity": 3
     },
     {
       "section": "Flybridge, floor, seats and coaming (spider cracks, etc.)",
@@ -12922,6 +12845,20 @@
       "phase": "observed",
       "severity": 1,
       "text": "This item was inspected and found in acceptable condition."
+    },
+    {
+      "section": "Arch",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "This item was inspected and found in acceptable condition."
+    },
+    {
+      "section": "Flybridge, floor, seats and coaming (spider cracks, etc.)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "An area warranting attention was noted on this item."
     }
   ],
   "Flybridge gauges and instrument": [
@@ -14448,13 +14385,6 @@
     },
     {
       "section": "Chainplates (interior)",
-      "rating": "C - bulkheads",
-      "text": "The chainplates were solidly mounted on the bulkheads with no signs of movement or conductivity.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Chainplates (interior)",
       "rating": "Not inspected",
       "text": "Decorative covers prevented access to the chainplates from the cabin.",
       "phase": "observed",
@@ -15072,13 +15002,6 @@
     {
       "section": "Hull deck joint (interior)",
       "rating": "B",
-      "text": "Minor cracking or signs of elevated conductivity with readings of [insert reading range] are visible.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Hull deck joint (interior)",
-      "rating": "B",
       "text": "Monitor and re-seal as needed.",
       "phase": "action",
       "severity": 3
@@ -15501,13 +15424,6 @@
       "rating": "A",
       "text": "Repair is required.",
       "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Bulkheads",
-      "rating": "B",
-      "text": "minor cracking or elevated conductivity with readings of [insert reading range] was detected.",
-      "phase": "observed",
       "severity": 3
     },
     {
@@ -16825,6 +16741,20 @@
       "phase": "observed",
       "severity": 1,
       "text": "This item was inspected and found in acceptable condition."
+    },
+    {
+      "section": "Hull deck joint (interior)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "An area warranting attention was noted on this item."
+    },
+    {
+      "section": "Bulkheads",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "An area warranting attention was noted on this item."
     }
   ],
   "Head": [
@@ -24592,13 +24522,6 @@
     {
       "section": "Deck and coachroof/pilothouse condition",
       "rating": "B",
-      "text": "The deck or pilothouse showed spider cracks or minor signs of elevated conductivity with readings of [insert reading range] with readings of [insert reading range].",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck and coachroof/pilothouse condition",
-      "rating": "B",
       "text": "Monitor and treat to prevent deterioration.",
       "phase": "action",
       "severity": 3
@@ -24699,13 +24622,6 @@
       "rating": "A",
       "text": "Repair is required.",
       "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Anchor locker",
-      "rating": "B",
-      "text": "The locker shows corrosion or minor damage with areas of elevated conductivity with readings of [insert reading range].",
-      "phase": "observed",
       "severity": 3
     },
     {
@@ -25140,13 +25056,6 @@
       "phase": "action",
       "severity": 2,
       "text": "Monitor the noted areas at the next haul-out.",
-      "section": "Deck and coachroof/pilot percussion testing"
-    },
-    {
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Recommend conductivity testing of the noted areas to confirm the findings.",
       "section": "Deck and coachroof/pilot percussion testing"
     },
     {
@@ -26180,6 +26089,13 @@
     },
     {
       "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "An area warranting attention was noted on this item."
+    },
+    {
+      "section": "Deck and coachroof/pilothouse condition",
       "rating": "B",
       "phase": "observed",
       "severity": 3,

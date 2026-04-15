@@ -72,6 +72,46 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2209 — 2026-04-14
+
+### Rewritten — Engine locker lid A/B/C (no conductivity, hydraulic/electric pick-one)
+
+17 curated chips:
+- **A** (critical): lid can't be opened / detached, {specify:hydraulic|
+  electric} control not working; engine-access-safety means;
+  repair-before-service action.
+- **B** (attention): same {specify:hydraulic|electric} control not-
+  working chip (B-rating severity), localized wear, deteriorating
+  seal; means on seal/fume leakage; service-mechanism / replace-seal /
+  localized-repair actions.
+- **C** (serviceable): **"The engine locker lid was undamaged and
+  easily removed."** (per user preference — moved from B to C), hydraulic/
+  electric control was-working chip, seal intact; unimpeded-access
+  means; no-action / seasonal-program actions.
+
+The `{specify:hydraulic|electric}` token decomposes into two separate
+chips at render time, so the surveyor picks the one that matches the
+vessel.
+
+### Removed — Conductivity references from non-conductivity sections
+
+Library-wide sweep: any chip mentioning "conductivity" in a section
+that is NOT about conductivity testing was either dropped (if the
+entire chip was conductivity-only) or trimmed of its conductivity
+clause. 21 chips removed, 0 trimmed (all leaks were entire-sentence
+chips rather than tangential clauses).
+
+6 phase gaps introduced by the removals were auto-backfilled with
+generic rating-appropriate chips. Zero remaining conductivity leaks
+into non-conductivity sections.
+
+### Final audit
+
+- 838/838 section-rating combos have all 3 phases ✓
+- Zero conductivity-in-non-conductivity-section leaks ✓
+
+---
+
 ## v2208 — 2026-04-14
 
 ### Fixed — One empty-rating chip in Flybridge ladder/staircase
