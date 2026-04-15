@@ -263,7 +263,7 @@
     {
       "section": "Rudder(s) condition",
       "rating": "B",
-      "text": "The {specify:rudder|rudders} were serviceable overall. {any:The anti-fouling has worn thin [describe area(s)] and should be lightly sanded and recoated with anti-fouling before the vessel is relaunched|The anti-fouling is worn off [describe area(s)], exposing the gelcoat, and these areas should be sanded and recoated with anti-fouling before the vessel is relaunched|Surface cracking was observed [describe area(s)] and the affected area(s) should be sanded to the gelcoat and recoated with anti-fouling before the vessel is relaunched|Blistering was noted [describe area(s)] and the affected area(s) should be sanded to the barrier coat, recoated with gelcoat and anti-fouling before the vessel is relaunched|Gouging was noted [describe area(s)] and the affected area(s) should be filled with fairing compound, faired, and recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|Exposed fibreglass was noted [describe area(s)] and should be recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|Light surface corrosion was noted on the bronze casting [describe area(s)] and should be cleaned and treated with an appropriate protective coating before the vessel is relaunched|Light surface corrosion was noted on the steel rudder [describe area(s)] and the affected area(s) should be wire-brushed, primed, and painted before the vessel is relaunched|Minor play was detected in the rudder bearing(s) and should be monitored during future inspections|The rudder stock showed light surface corrosion and should be cleaned, primed, and coated before the vessel is relaunched}.",
+      "text": "The {specify:rudder|rudders} were in overall sound condition. {any:The anti-fouling has worn thin [describe area(s)] and should be lightly sanded and recoated with anti-fouling before the vessel is relaunched|The anti-fouling is worn off [describe area(s)], exposing the gelcoat, and these areas should be sanded and recoated with anti-fouling before the vessel is relaunched|Surface cracking was observed [describe area(s)] and the affected area(s) should be sanded to the gelcoat and recoated with anti-fouling before the vessel is relaunched|Blistering was noted [describe area(s)] and the affected area(s) should be sanded to the barrier coat, recoated with gelcoat and anti-fouling before the vessel is relaunched|Gouging was noted [describe area(s)] and the affected area(s) should be filled with fairing compound, faired, and recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|Exposed fibreglass was noted [describe area(s)] and should be recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|Light surface corrosion was noted on the bronze casting [describe area(s)] and should be cleaned and treated with an appropriate protective coating before the vessel is relaunched|Light surface corrosion was noted on the steel rudder [describe area(s)] and the affected area(s) should be wire-brushed, primed, and painted before the vessel is relaunched|Minor play was detected in the rudder bearing(s) and should be monitored during future inspections|The rudder stock showed light surface corrosion and should be cleaned, primed, and coated before the vessel is relaunched}.",
       "placeholders": {
         "specify:rudder|rudders": {
           "multi": false
@@ -539,7 +539,7 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "observed",
-      "text": "Localized elevated readings were observed in several areas of the hull.",
+      "text": "Localized elevated readings of [insert reading range] were observed in several areas of the hull.",
       "severity": 2
     },
     {
@@ -3375,7 +3375,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Rudder(s) condition",
@@ -3410,7 +3410,7 @@
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "Some readings were elevated."
+      "text": "Some readings were elevated with readings of [insert reading range]."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
@@ -3431,7 +3431,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Keel and keel joint",
@@ -3459,7 +3459,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Through-hulls, strainers",
@@ -3487,7 +3487,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Transducers (speed, depth, etc.)",
@@ -3515,7 +3515,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Stern tube(s) (external)",
@@ -3543,7 +3543,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Propeller shaft(s)",
@@ -3578,7 +3578,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Propeller/drive anode(s)",
@@ -3599,7 +3599,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Skeg(s)",
@@ -3620,7 +3620,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Propeller(s)",
@@ -3676,7 +3676,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
@@ -3704,7 +3704,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Exhaust discharge position and condition",
@@ -3739,7 +3739,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
@@ -3760,7 +3760,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Underwater lighting",
@@ -3795,7 +3795,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Transom",
@@ -3816,7 +3816,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Ventilation grills/covers",
@@ -3851,7 +3851,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Hull side windows and portholes (exterior observations)",
@@ -3886,7 +3886,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Rub rail",
@@ -3921,7 +3921,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Hull–deck joint (exterior)",
@@ -3949,7 +3949,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
@@ -3977,7 +3977,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Stern thruster",
@@ -4012,7 +4012,7 @@
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "Some readings were elevated."
+      "text": "Some readings were elevated with readings of [insert reading range]."
     },
     {
       "section": "Swim platform and ladder - condition and conductivity readings",
@@ -5386,7 +5386,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Jib/genoa furler, furling line and tackle",
@@ -5414,7 +5414,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Forestay (as inspected from the deck)",
@@ -5442,7 +5442,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Spinnaker/whisker pole, uphaul and downhaul",
@@ -5484,7 +5484,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Chainplates (exterior)pins and bolts",
@@ -5512,7 +5512,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Spreaders/boots",
@@ -5533,7 +5533,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Main mast",
@@ -5568,7 +5568,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Mast partner, mast collar, mast step",
@@ -5582,7 +5582,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Boom, gooseneck, boom vang, outhaul, and reefing lines",
@@ -5617,7 +5617,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Winch (main mast)",
@@ -5645,7 +5645,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Deckline organizers, blocks, fairleads and clutches",
@@ -5673,7 +5673,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Halyards",
@@ -5708,7 +5708,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Winch(es) and cleats (cabin-top and cockpit)",
@@ -5743,7 +5743,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Jib/genoa tracks/cars",
@@ -5771,7 +5771,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Main sheet",
@@ -5834,7 +5834,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Genoa 1 (largest)",
@@ -5862,7 +5862,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Genoa 2 (mid-size)",
@@ -5890,7 +5890,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Genoa 3 (smallest)",
@@ -5918,7 +5918,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Staysail",
@@ -5946,7 +5946,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Misen",
@@ -5974,7 +5974,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Sails - other",
@@ -5995,7 +5995,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Mast(s)",
@@ -6023,7 +6023,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Main",
@@ -6058,7 +6058,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Spinnaker",
@@ -6485,7 +6485,7 @@
     {
       "section": "Conductivity testing",
       "rating": "A",
-      "text": "The aft deck returned readings consistently at or near 999 across large areas, indicating severe elevated conductivity and likely structural damage.",
+      "text": "The aft deck returned readings consistently at or near 999 across large areas, indicating severe elevated conductivity and likely structural damage with readings of [insert reading range].",
       "phase": "observed",
       "severity": 5
     },
@@ -6536,7 +6536,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Aft deck condition (spider cracks, etc.)",
@@ -6557,7 +6557,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Aft deck impact and resonance testing",
@@ -6599,7 +6599,7 @@
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "Some readings were elevated."
+      "text": "Some readings were elevated with readings of [insert reading range]."
     },
     {
       "section": "Aft deck conductivity testing",
@@ -6648,7 +6648,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Cover",
@@ -6683,7 +6683,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Seating",
@@ -6718,7 +6718,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Storage",
@@ -6746,7 +6746,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Lighting",
@@ -6788,7 +6788,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Drainage",
@@ -6823,7 +6823,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Sink, faucet and drain",
@@ -6858,7 +6858,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Condition (spider cracks, etc.)",
@@ -6893,7 +6893,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Percussion testing",
@@ -6935,7 +6935,7 @@
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "Some readings were elevated."
+      "text": "Some readings were elevated with readings of [insert reading range]."
     },
     {
       "section": "Conductivity testing",
@@ -6963,7 +6963,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Conductivity testing",
@@ -7294,7 +7294,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Outboard general condition and impression",
@@ -7329,7 +7329,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Throttle, gearshift, choke",
@@ -7350,7 +7350,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Outboard tilt",
@@ -7371,7 +7371,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Outboard anodes",
@@ -7392,7 +7392,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Outboard propeller",
@@ -7420,7 +7420,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     }
   ],
   "Cockpit": [
@@ -8710,7 +8710,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Cockpit, floor, seats and coaming",
@@ -8738,7 +8738,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Cockpit impact and resonance testing",
@@ -8766,7 +8766,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Cockpit drains",
@@ -8801,7 +8801,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Cockpit table",
@@ -8829,7 +8829,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Cockpit lighting",
@@ -8857,7 +8857,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Cockpit lockers and lazarettes",
@@ -8885,7 +8885,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Engine locker lid",
@@ -8927,7 +8927,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Steering wheel and steering",
@@ -8955,7 +8955,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Binnacle",
@@ -8990,7 +8990,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Tiller",
@@ -9025,7 +9025,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Pushpit",
@@ -9053,7 +9053,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Propane valve, regulator, gauge, storage compartment and vent",
@@ -9088,7 +9088,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "BBQ or grill",
@@ -9116,7 +9116,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Davits",
@@ -9144,7 +9144,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Swim platform shower",
@@ -9172,7 +9172,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Companionway",
@@ -9193,7 +9193,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Pushpit/pulpit",
@@ -9221,7 +9221,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Steering wheel, steering",
@@ -10525,7 +10525,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Wiper blade operation",
@@ -10553,7 +10553,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "AIS",
@@ -10581,7 +10581,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Bow thruster controls",
@@ -10609,7 +10609,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Stern thruster controls",
@@ -10644,7 +10644,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Trim tab controls",
@@ -10672,7 +10672,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "VHF radio and antenna",
@@ -10700,7 +10700,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Entertainment/stereo",
@@ -10728,7 +10728,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Windshield wipers",
@@ -10763,7 +10763,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Horn/sound signal (powered)",
@@ -10798,7 +10798,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Spotlight/searchlight",
@@ -10930,10 +10930,10 @@
     },
     {
       "section": "Flybridge ladder/staircase",
-      "rating": "",
+      "rating": "C",
       "text": "The flybridge ladder/staircase was firmly affixed.",
       "phase": "observed",
-      "severity": 3
+      "severity": 1
     },
     {
       "section": "Safety rails",
@@ -11995,7 +11995,7 @@
     {
       "section": "Flybridge conductivity testing",
       "rating": "A",
-      "text": "The flybridge returned readings consistently at or near 999 across large areas, indicating severe elevated conductivity.",
+      "text": "The flybridge returned readings consistently at or near 999 across large areas, indicating severe elevated conductivity with readings of [insert reading range].",
       "phase": "observed",
       "severity": 5
     },
@@ -12025,7 +12025,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Remote compressor and condensing refrigeration unit",
@@ -12060,7 +12060,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Magnetic compass",
@@ -12088,7 +12088,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Arch",
@@ -12116,7 +12116,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Bimini, dodger and canvas enclosure",
@@ -12144,7 +12144,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Sink, faucets and drain",
@@ -12172,7 +12172,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge ladder/staircase",
@@ -12200,7 +12200,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge, floor, seats and coaming (spider cracks, etc.)",
@@ -12228,7 +12228,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge percussion testing",
@@ -12270,7 +12270,7 @@
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "Some readings were elevated."
+      "text": "Some readings were elevated with readings of [insert reading range]."
     },
     {
       "section": "Flybridge conductivity testing",
@@ -12326,7 +12326,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Safety rails",
@@ -12368,7 +12368,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge drains",
@@ -12396,7 +12396,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge table",
@@ -12424,7 +12424,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge lighting",
@@ -12452,7 +12452,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge lockers and lazarettes",
@@ -12480,7 +12480,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge steering wheel, steering",
@@ -12515,7 +12515,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Safety rail",
@@ -12543,7 +12543,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge - other features",
@@ -12571,7 +12571,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge 12V or USB",
@@ -12599,7 +12599,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge Arch",
@@ -12627,7 +12627,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge Helm seat",
@@ -12655,7 +12655,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge Radar dome",
@@ -12697,7 +12697,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge Refrigerator/cooler",
@@ -12732,7 +12732,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge Seating",
@@ -12767,7 +12767,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge Storage locker(s)",
@@ -12809,7 +12809,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge splash shield/windshield",
@@ -12844,7 +12844,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge Bimini/dodger/hardtop",
@@ -12872,7 +12872,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge Sink, faucet and drain",
@@ -12907,7 +12907,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge Safety rails",
@@ -13840,7 +13840,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Bow thruster",
@@ -13854,7 +13854,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Blower",
@@ -13882,7 +13882,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Engine start and stop",
@@ -13917,7 +13917,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Engine gauges",
@@ -13945,7 +13945,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Engine gearshift and throttle",
@@ -13966,7 +13966,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Outdrive tilt",
@@ -13994,7 +13994,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Trim tabs",
@@ -14022,7 +14022,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Anchor windlass controls",
@@ -14057,7 +14057,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Autopilot",
@@ -14085,7 +14085,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "MFD or Chartplotter",
@@ -14113,7 +14113,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Depth sounder",
@@ -14127,7 +14127,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Wind instruments",
@@ -14148,7 +14148,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "VHF",
@@ -14183,7 +14183,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Search light",
@@ -14211,7 +14211,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Radar",
@@ -14239,7 +14239,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Log",
@@ -14267,7 +14267,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "12V or USB outlets",
@@ -14295,7 +14295,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flood lights and deck lights",
@@ -14323,7 +14323,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flybridge Stereo and speakers",
@@ -15781,7 +15781,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Stereo and speakers",
@@ -15816,7 +15816,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Signs of water ingress",
@@ -15851,7 +15851,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Hull deck joint (interior)",
@@ -15886,7 +15886,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Chainplates (interior)",
@@ -15921,7 +15921,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Cabin lining and ceiling",
@@ -15949,7 +15949,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Deck hatches, windows and portholes – interior observations",
@@ -15984,7 +15984,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Cabin lights",
@@ -16019,7 +16019,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Woodwork, doors and framing",
@@ -16054,7 +16054,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Upholstery",
@@ -16082,7 +16082,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Table",
@@ -16110,7 +16110,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Navigation table",
@@ -16138,7 +16138,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Storage, galley cabinets, drawers and galley counter",
@@ -16166,7 +16166,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Galley faucet, sink and drain",
@@ -16194,7 +16194,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Seawater pump for galley sink",
@@ -16257,7 +16257,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Stove",
@@ -16292,7 +16292,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Microwave",
@@ -16320,7 +16320,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Cabin fan or fans",
@@ -16404,7 +16404,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Bulkheads",
@@ -16446,7 +16446,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Keel bolts",
@@ -16488,7 +16488,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Oven",
@@ -16523,7 +16523,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Heating and/or air conditioning system",
@@ -16551,7 +16551,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Television",
@@ -16586,7 +16586,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Cabin sole",
@@ -16621,7 +16621,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Berths and upholstery",
@@ -16656,7 +16656,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Interior lighting",
@@ -16698,7 +16698,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Cabin windows and hatches (interior observations)",
@@ -16726,7 +16726,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Refrigerator/freezer",
@@ -16754,7 +16754,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Sink, faucet and drain (galley)",
@@ -17057,7 +17057,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Head, toilet and seacock",
@@ -17085,7 +17085,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Head, faucet, sink and drain",
@@ -17113,7 +17113,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Head, shower, drain, sump and pump",
@@ -17141,7 +17141,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Shower, sump and drain",
@@ -17850,7 +17850,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Fuel tank(s)",
@@ -17878,7 +17878,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Hot water tank(s), plumbing and electrical",
@@ -17906,7 +17906,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Black water tank(s) and plumbing",
@@ -17934,7 +17934,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Black water gauge",
@@ -17962,7 +17962,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Freshwater tank and plumbing",
@@ -17990,7 +17990,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Freshwater pump",
@@ -18018,7 +18018,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Deck wash pump, plumbing and electrical",
@@ -18046,7 +18046,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Black water vacuum pump(s)",
@@ -18074,7 +18074,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Black water macerator(s)",
@@ -18102,7 +18102,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Freshwater level gauge",
@@ -19357,7 +19357,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Cooling water intake seacock(s) and strainer(s)",
@@ -19399,7 +19399,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Manifolds and risers",
@@ -19434,7 +19434,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Exhaust condition",
@@ -19462,7 +19462,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Manual fuel pump(s)",
@@ -19490,7 +19490,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Oil level and condition",
@@ -19518,7 +19518,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Coolant level and quality",
@@ -19553,7 +19553,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Belts and pulleys",
@@ -19581,7 +19581,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Anti-vibration mounts",
@@ -19623,7 +19623,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Hoses",
@@ -19658,7 +19658,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Gearbox general condition and impressions",
@@ -19686,7 +19686,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Gearbox oil",
@@ -19742,7 +19742,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Bilge, stringers and ribs – accessible from engine bay",
@@ -19777,7 +19777,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Generator (if installed)",
@@ -19812,7 +19812,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Automatic engine compartment fire extinguishing system",
@@ -19833,7 +19833,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Drive coupling",
@@ -19854,7 +19854,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Stuffing box/packing gland/dripless seal",
@@ -19875,7 +19875,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Generator valve and sea strainer",
@@ -20164,7 +20164,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)",
@@ -20192,7 +20192,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Hydraulic steering (hoses, fittings, steering cylinder, tiller arm or tie bar, rudder post and stuffing box, etc.)",
@@ -20213,7 +20213,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Outdrive trim/tilt hydraulic pump and system",
@@ -20234,7 +20234,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Trim tab hydraulic pump and system",
@@ -20262,7 +20262,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Trim tab mechanism (interior)",
@@ -21951,7 +21951,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Shore power overcurrent protection",
@@ -21979,7 +21979,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Inverter and grounding",
@@ -22028,7 +22028,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Battery charger and grounding",
@@ -22056,7 +22056,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Battery selector switch, combiner, VSR",
@@ -22098,7 +22098,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Battery ventilation",
@@ -22133,7 +22133,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Starter battery(ies)",
@@ -22161,7 +22161,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "House battery(ies)",
@@ -22196,7 +22196,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Battery(ies) overcurrent protection",
@@ -22224,7 +22224,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Distribution panel 12V",
@@ -22259,7 +22259,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Distribution panel 110V",
@@ -22294,7 +22294,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Voltmeter/ammeter",
@@ -22329,7 +22329,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Bundling support and wiring",
@@ -22364,7 +22364,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "AC outlets",
@@ -22399,7 +22399,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Shore power cable(s)",
@@ -22434,7 +22434,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Shore power receptacle",
@@ -22469,7 +22469,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Solar panel(s)",
@@ -22504,7 +22504,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Generator",
@@ -22546,7 +22546,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Galvanic isolator",
@@ -22574,7 +22574,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Isolation transformer",
@@ -22616,7 +22616,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Battery hydrometer test",
@@ -22651,7 +22651,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Battery load test",
@@ -22686,7 +22686,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Reverse polarity light",
@@ -22714,7 +22714,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Heating and air conditioning",
@@ -22742,7 +22742,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Electrical – other features",
@@ -22770,7 +22770,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Battery(ies), house",
@@ -22805,7 +22805,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Battery(ies), starter",
@@ -22833,7 +22833,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Protected positive battery lugs and positive bus bars",
@@ -22868,7 +22868,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Navigation lights",
@@ -22896,7 +22896,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Lighting (cabin)",
@@ -23626,7 +23626,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Emergency tiller",
@@ -23668,7 +23668,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Watertight flashlight",
@@ -23710,7 +23710,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Lifejackets and PFDs",
@@ -23738,7 +23738,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Life ring or heaving line",
@@ -23759,7 +23759,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Horn or sound signalling device",
@@ -23780,7 +23780,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Extra anchor, chain and rode",
@@ -23808,7 +23808,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Bilge pump, manual",
@@ -23822,7 +23822,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Bilge pump, automatic float",
@@ -23843,7 +23843,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Flares",
@@ -23864,7 +23864,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Fire extinguisher",
@@ -23885,7 +23885,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Carbon monoxide detector(s)",
@@ -23913,7 +23913,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "LPG cut off solenoid valve switch",
@@ -23934,7 +23934,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Navigation lights (port, starboard, anchor, steaming, other)",
@@ -23969,7 +23969,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "EPIRB",
@@ -24011,7 +24011,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Radar reflector",
@@ -24046,7 +24046,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Propane gas detector",
@@ -25231,7 +25231,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
@@ -25266,7 +25266,7 @@
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "Some readings were elevated."
+      "text": "Some readings were elevated with readings of [insert reading range]."
     },
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
@@ -25315,7 +25315,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Pulpit",
@@ -25357,7 +25357,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Bow roller",
@@ -25385,7 +25385,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Primary anchor, chain and rode",
@@ -25413,7 +25413,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Windlass",
@@ -25448,7 +25448,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Anchor locker",
@@ -25476,7 +25476,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Lifelines and safety rail",
@@ -25546,7 +25546,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Mooring cleats and chocks",
@@ -25581,7 +25581,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Toerail and gunwale",
@@ -25623,7 +25623,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Brightwork",
@@ -25658,7 +25658,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Deck hatches, windows, and portholes – exterior observations",
@@ -25686,7 +25686,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Windshield, pilothouse windows, frames, and studs",
@@ -25721,7 +25721,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Arch – external condition and equipment",
@@ -25756,7 +25756,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
@@ -25784,7 +25784,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Shore water hookup",
@@ -25819,7 +25819,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Toerail/gunwale",
@@ -25847,7 +25847,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Fuel and water fill ports, and waste deck pump-out port",
@@ -25875,7 +25875,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Windshield, pilot house windows, frames and seals",
@@ -25903,7 +25903,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "No immediate concern was noted for continued use."
+      "text": "No immediate concern was noted."
     },
     {
       "section": "Deck hatch(es), windows and portholes (exterior observations)",

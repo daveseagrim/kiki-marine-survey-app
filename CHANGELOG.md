@@ -72,6 +72,76 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2208 — 2026-04-14
+
+### Fixed — One empty-rating chip in Flybridge ladder/staircase
+
+Deep audit found 1 library entry with no rating field:
+"The flybridge ladder/staircase was firmly affixed." Set rating to C,
+phase to observed, severity 1.
+
+### Final audit — zero breakable issues
+
+Deep repair-audit scan complete:
+- JSON files parse ✓
+- JavaScript compiles (app.js + sw.js) ✓
+- Every chip has text + rating + section + phase + severity ✓
+- All bracket placeholders balanced ({}, [], ()) ✓
+- All token names valid (if-rudder, if-no-rudder, count, drives,
+  specify, any, standards?) — no unknown tokens ✓
+- All 174 ITEM_SNIPPET_MAP targets exist in the library ✓
+- Every onclick handler resolves to a defined function ✓
+- Every local script referenced in index.html exists ✓
+- Version strings aligned (app.js = sw.js = index.html cache busters) ✓
+- Every section × active A/B/C rating has all 3 phases ✓
+- No breaking syntax, no missing functions, no orphaned references.
+
+Only outstanding item: 5 uncommitted local files (v2204→v2208
+changes). One push deploys everything.
+
+---
+
+## v2207 — 2026-04-14
+
+### Audit & Repair — Triple-read consistency check of every change from the last 12 hours
+
+Ran a comprehensive audit against every invariant established in the
+session. Three violations found and repaired:
+
+1. **"for continued use" filler** — 262 chips still contained this
+   phrase. Root cause: v2202's backfill `DEFAULTS` dict included it
+   in C-rating means ("No immediate concern was noted for continued
+   use.") and was applied to many sections. Stripped from all 262.
+2. **"serviceable overall"** — 1 leftover entry (a rudder chip with
+   nested `{any:...}` token that escaped v2178's cleanup). Rewrote
+   to "in overall sound condition."
+3. **9 elevated-reading conductivity chips without [insert reading
+   range]** — heuristic classification introduced entries like "Some
+   readings were elevated." without a range input. Injected
+   [insert reading range] into every one.
+
+### Triple-read pass — 16/16 invariants confirmed 3 times in a row:
+
+- No "bowsprit" in library / insurance template / survey template.
+- No "programme" (→ "program").
+- No "vintage" (→ "age").
+- No "serviceable overall" leftover.
+- No "for continued use" filler.
+- No "without deficiency condition" grammar bug.
+- All 3,730 library chips have `severity`.
+- All chips have `phase`.
+- No `always` flag remaining (v2178 concept retired).
+- All 838 active section-rating combos have all 3 phases
+  (observed / means / action).
+- All 7 conductivity sections × active ratings have a standalone
+  0-to-999 scale chip.
+- Every elevated-reading conductivity observed chip includes
+  [insert reading range].
+- COMPONENT_BUILDERS is empty — every item uses the chip picker.
+- All 174 ITEM_SNIPPET_MAP targets exist in the library.
+
+---
+
 ## v2206 — 2026-04-14
 
 ### Rewritten — Grab rails A/B/C (no "functioning as intended")
