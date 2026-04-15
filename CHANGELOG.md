@@ -12,6 +12,47 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2173 — 2026-04-14
+
+### Added — Observed/Means/Action 3-phase grouping in sentence picker + rating-aware severity
+
+Baked the SAMS observation pattern into the picker UI:
+1. **What was observed** — findings (the measurements / what you saw)
+2. **What it means for this vessel** — interpretation in context
+3. **What should be done** — recommendation / next step
+
+Library entries can set `phase: "observed" | "means" | "action"`.
+Entries without a phase fall back to a heuristic classifier:
+- Starts with Monitor/Recheck/Recommend/Haul/Investigate/Professional/
+  Immediate/Schedule → action
+- Contains indicates/suggests/consistent/considered/abnormal/warrants/
+  evidences/implies → means
+- Otherwise → observed
+
+Chips render grouped under phase headers (gray section bars). `always`
+boilerplate stays pinned at the top of its phase.
+
+### Rewritten — Hull conductivity A/B/C with rating-appropriate severity
+
+Each rating's chips now strictly match its severity:
+- **A (Critical)** — 10 chips. Severe findings only ("readings at or near
+  999 across large areas", "softness/delamination detected"),
+  structural-compromise interpretations, immediate-action
+  recommendations. No "age-appropriate" reassurance language.
+- **B (Needs Attention)** — 11 chips. Moderate elevated readings,
+  "warrants monitoring", proactive actions. No "immediate" language.
+- **C (Serviceable)** — 8 chips. Clean/baseline findings, "within normal
+  range for vessel age", routine monitoring only. No "warrants action"
+  language.
+
+Pattern reference for future curation: A-observed chips describe
+severe measurements; A-means chips interpret as structural risk;
+A-action chips are urgent. B-means describe concerns to track;
+B-action is "monitor" / "recheck" / "address proactively". C-means
+is reassuring; C-action is "no action required" / "routine check".
+
+---
+
 ## v2172 — 2026-04-14
 
 ### Added — "always" boilerplate + inline range inputs in sentence picker

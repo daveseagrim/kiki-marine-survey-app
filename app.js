@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2172';
+const APP_VERSION = 'v2173';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3337,54 +3337,84 @@ function showNotesSheet(itemLabel, categoryName) {
         // the expanded, deduped text so the highlighter operates on clean prose).
         const highlightedTexts = highlightSnippetDiffs(sheetVariantsForDisplay);
 
-        // v2171/v2172: Sentence-level picker. Break each variant into
-        // sentences, dedupe across all variants, render each as a checkbox.
-        // Ticking sentences rebuilds the textarea from the current selection.
-        // v2172 adds two pieces:
-        //   - An `always: true` flag on a variant auto-checks its sentence
-        //     and locks it on (no uncheck) so boilerplate ("readings taken
-        //     on a 0-999 scale") is always part of the output.
-        //   - Any "[insert reading range]" placeholder in a sentence is
-        //     replaced with a pair of inline number inputs; the picker
-        //     rebuild interpolates the numbers into the chip's text.
+        // v2171/v2172/v2173: Sentence-level picker. Break each variant
+        // into sentences, dedupe across all variants, render each as a
+        // checkbox grouped by phase. The SAMS observation pattern is:
+        //   1. What was observed
+        //   2. What it means for this vessel
+        //   3. What should be done about it
+        // Library entries can set `phase: "observed" | "means" | "action"`
+        // to classify. Entries without a phase fall into an "observed"
+        // bucket by default (heuristic: sentences starting with
+        // "Monitor", "Recheck", "Recommend" → action; containing
+        // "indicates"/"suggests" → means).
         const _splitSentences = (s) => (s || '')
           .split(/(?<=[.!?])\s+/)
           .map(x => x.trim())
           .filter(Boolean);
-        const _pickerSentences = [];      // { text, always }
+        const _classifyPhase = (sent) => {
+          if (/^(Monitor|Recheck|Recommend|Haul|Investigate|Professional|Immediate|Schedule)\b/i.test(sent)) return 'action';
+          if (/\b(indicates|suggests|consistent|considered|abnormal|warrants|evidences|implies)\b/i.test(sent)) return 'means';
+          return 'observed';
+        };
+        const _pickerSentences = [];      // { text, always, phase }
         const _pickerSeen = new Map();    // normKey -> index
         sheetVariantsForDisplay.forEach(v => {
+          const vPhase = v.phase; // optional, set per-variant in library
           _splitSentences(v.text).forEach(sent => {
             const normKey = sent.replace(/\s+/g, ' ').toLowerCase();
             if (!_pickerSeen.has(normKey)) {
               _pickerSeen.set(normKey, _pickerSentences.length);
-              _pickerSentences.push({ text: sent, always: !!v.always });
+              _pickerSentences.push({
+                text: sent,
+                always: !!v.always,
+                phase: vPhase || _classifyPhase(sent),
+              });
             } else if (v.always) {
-              // If a later variant with the same sentence is flagged always,
-              // upgrade the existing entry.
               _pickerSentences[_pickerSeen.get(normKey)].always = true;
             }
           });
         });
-        // Put any `always` sentences at the top of the picker list so the
-        // surveyor sees them first.
-        _pickerSentences.sort((a, b) => (b.always ? 1 : 0) - (a.always ? 1 : 0));
+        // Sort: phase order (observed → means → action), then always first
+        // within each phase, then original order.
+        const _phaseRank = { observed: 0, means: 1, action: 2 };
+        _pickerSentences.forEach((p, i) => { p._origIdx = i; });
+        _pickerSentences.sort((a, b) => {
+          const pr = (_phaseRank[a.phase] || 0) - (_phaseRank[b.phase] || 0);
+          if (pr) return pr;
+          const ar = (b.always ? 1 : 0) - (a.always ? 1 : 0);
+          if (ar) return ar;
+          return a._origIdx - b._origIdx;
+        });
         window._sentencePicker = window._sentencePicker || {};
         window._sentencePicker[sanitizedLabel] = _pickerSentences;
 
         let sentencePickerHtml = '';
         if (_pickerSentences.length >= 2) {
+          const PHASE_LABELS = {
+            observed: 'What was observed',
+            means: 'What it means for this vessel',
+            action: 'What should be done',
+          };
           sentencePickerHtml = `
             <div class="sheet-section-title" style="padding-top:8px;">
-              Pick sentences
-              <span style="color:#9ca3af;font-weight:400;font-size:11px;margin-left:6px;">tap to add to your observation</span>
+              Build observation
+              <span style="color:#9ca3af;font-weight:400;font-size:11px;margin-left:6px;">tick sentences to compose</span>
             </div>
             <div id="sheet-sentence-picker" style="padding:0;">
           `;
+          let lastPhase = null;
           _pickerSentences.forEach((sObj, idx) => {
+            const phase = sObj.phase || 'observed';
+            if (phase !== lastPhase) {
+              sentencePickerHtml += `
+                <div style="background:#f3f4f6;color:#374151;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding:6px 20px;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;">
+                  ${PHASE_LABELS[phase] || phase}
+                </div>
+              `;
+              lastPhase = phase;
+            }
             const s = sObj.text;
-            // Render [insert reading range] as two inline number inputs.
-            // After render the chip handler joins both numbers as "N-M".
             let rendered = escSnippet(s).replace(/\[insert reading range\]/gi,
               `<span class="kk-range-slot" style="display:inline-flex;align-items:center;gap:4px;">` +
                 `<input type="number" class="kk-range-low" placeholder="low" min="0" max="999" ` +
