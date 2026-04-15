@@ -12,6 +12,73 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2217 — 2026-04-15
+
+### Added — VHF antenna condition as a separate chip at every rating
+
+Dave's rule: the VHF antenna can be in a different state than the
+radio itself. The radio might work while the antenna is damaged or
+missing, or vice versa. Antenna condition therefore belongs in its
+own standalone chip.
+
+Added three antenna observation chips under every VHF rating (A, B,
+C, and Powered up) in both the Cockpit/Gauges sheet and the Flybridge
+sheet:
+
+- observed/sev 1: "The VHF antenna was installed and appeared serviceable."
+- observed/sev 3: "The VHF antenna was installed but damaged."
+- observed/sev 4: "No VHF antenna was installed on this vessel."
+
+Tap whichever antenna chip matches alongside the existing radio
+observation to compose a two-sentence statement that separates the
+two components. Total: 24 new chips (3 antenna states × 4 ratings × 2
+sheets).
+
+### Consolidated — VHF section duplicates
+
+The library had two overlapping sections, `VHF` and `VHF radio and
+antenna`, each partially populated. Merged the 9 `VHF radio and
+antenna` entries into the canonical `VHF` section and deduplicated.
+Updated `ITEM_SNIPPET_MAP['Pilot house VHF radio and antenna']` from
+`'VHF radio and antenna'` to `'VHF'` so every VHF template item now
+hits the one canonical library section.
+
+### Added — Windshield wipers singular/plural variants at every rating
+
+Dave's rule: the vessel may have one wiper blade or two. Library chips
+previously only used the plural ("windshield wipers were…"). Added
+matching singular ("windshield wiper was…") variants at A, B, and C:
+
+- **A** (non-functional): singular + plural versions of "non-functional
+  or the motor was broken."
+- **B** (sluggish / partial): singular + plural versions of "operated
+  but with sluggish or streaking performance" plus a new twin-specific
+  partial-failure chip: "One of the two windshield wipers was not
+  working; the other operated correctly."
+- **C** (serviceable): singular + plural versions of both
+  "functioned properly and the blade(s) were in acceptable condition"
+  and "operated smoothly and effectively cleared the windshield."
+
+### Consolidated — Windshield wipers section duplicates
+
+Merged the 9 chips under the orphan `Windshield wipers` library
+section into the canonical `Wiper blade operation` section (which is
+what `ITEM_SNIPPET_MAP` targets for every template item — `Windshield
+wipers`, `Pilot house Windshield wiper(s) operation`, and `Windshield
+wiper(s) operation`). Dedupe removed exact duplicates.
+
+### Audit
+
+- JSON parses ✓
+- JavaScript compiles ✓
+- VHF canonical section has 3 antenna chips × A/B/C/Powered up ✓
+- Wiper blade operation has singular + plural observation chips at A/B/C ✓
+- Orphan `VHF radio and antenna` and `Windshield wipers` section
+  entries: 0 remaining ✓
+- Version strings aligned ✓
+
+---
+
 ## v2216 — 2026-04-15
 
 ### Fixed — "Not applicable" no longer pulls in "Not tested" chips (and vice versa)

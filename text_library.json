@@ -10654,35 +10654,35 @@
       "severity": 3
     },
     {
-      "section": "VHF radio and antenna",
+      "section": "VHF",
       "rating": "A",
       "text": "The VHF radio was non-functional or damaged.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "VHF radio and antenna",
+      "section": "VHF",
       "rating": "A",
       "text": "Repair or replacement is required for mandatory safety communications capability.",
       "phase": "action",
       "severity": 3
     },
     {
-      "section": "VHF radio and antenna",
+      "section": "VHF",
       "rating": "B",
       "text": "The VHF radio operated but with weak transmission or poor reception.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "VHF radio and antenna",
+      "section": "VHF",
       "rating": "B",
       "text": "Service and antenna inspection are recommended to improve performance.",
       "phase": "action",
       "severity": 3
     },
     {
-      "section": "VHF radio and antenna",
+      "section": "VHF",
       "rating": "C",
       "text": "The VHF radio and antenna functioned properly with clear transmission and reception.",
       "phase": "observed",
@@ -10724,35 +10724,35 @@
       "severity": 3
     },
     {
-      "section": "Windshield wipers",
+      "section": "Wiper blade operation",
       "rating": "A",
       "text": "The windshield wipers were non-functional or the motor was broken.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Windshield wipers",
+      "section": "Wiper blade operation",
       "rating": "A",
       "text": "Repair or replacement is required for safe forward visibility during rain.",
       "phase": "action",
       "severity": 3
     },
     {
-      "section": "Windshield wipers",
+      "section": "Wiper blade operation",
       "rating": "B",
       "text": "The windshield wipers operated but with sluggish or streaking performance.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Windshield wipers",
+      "section": "Wiper blade operation",
       "rating": "B",
       "text": "Service and blade replacement are recommended to restore effective operation.",
       "phase": "action",
       "severity": 3
     },
     {
-      "section": "Windshield wipers",
+      "section": "Wiper blade operation",
       "rating": "C",
       "text": "The windshield wipers operated smoothly and effectively cleared the windshield.",
       "phase": "observed",
@@ -10962,28 +10962,28 @@
       "text": "No action required at this time."
     },
     {
-      "section": "VHF radio and antenna",
+      "section": "VHF",
       "rating": "A",
       "phase": "means",
       "severity": 5,
       "text": "This represents a significant concern for the vessel's safe or structural operation."
     },
     {
-      "section": "VHF radio and antenna",
+      "section": "VHF",
       "rating": "B",
       "phase": "means",
       "severity": 3,
       "text": "The finding should be monitored and addressed in the near term."
     },
     {
-      "section": "VHF radio and antenna",
+      "section": "VHF",
       "rating": "C",
       "phase": "means",
       "severity": 1,
       "text": "No immediate concern was noted."
     },
     {
-      "section": "VHF radio and antenna",
+      "section": "VHF",
       "rating": "C",
       "phase": "action",
       "severity": 1,
@@ -11018,32 +11018,18 @@
       "text": "No action required at this time."
     },
     {
-      "section": "Windshield wipers",
+      "section": "Wiper blade operation",
       "rating": "A",
       "phase": "means",
       "severity": 5,
       "text": "This represents a significant concern for the vessel's safe or structural operation."
     },
     {
-      "section": "Windshield wipers",
+      "section": "Wiper blade operation",
       "rating": "B",
       "phase": "means",
       "severity": 3,
       "text": "The finding should be monitored and addressed in the near term."
-    },
-    {
-      "section": "Windshield wipers",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No immediate concern was noted."
-    },
-    {
-      "section": "Windshield wipers",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No action required at this time."
     },
     {
       "section": "Horn/sound signal (powered)",
@@ -11149,6 +11135,125 @@
       "phase": "observed",
       "severity": 1,
       "text": "Both blowers operated properly and vent tubing was clear and intact from the fans to the outside."
+    },
+    {
+      "section": "VHF",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The VHF antenna was installed and appeared serviceable."
+    },
+    {
+      "section": "VHF",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The VHF antenna was installed but damaged."
+    },
+    {
+      "section": "VHF",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "No VHF antenna was installed on this vessel."
+    },
+    {
+      "section": "VHF",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The VHF antenna was installed and appeared serviceable."
+    },
+    {
+      "section": "VHF",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The VHF antenna was installed but damaged."
+    },
+    {
+      "section": "VHF",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 4,
+      "text": "No VHF antenna was installed on this vessel."
+    },
+    {
+      "section": "VHF",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The VHF antenna was installed and appeared serviceable."
+    },
+    {
+      "section": "VHF",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The VHF antenna was installed but damaged."
+    },
+    {
+      "section": "VHF",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 4,
+      "text": "No VHF antenna was installed on this vessel."
+    },
+    {
+      "section": "VHF",
+      "rating": "Powered up",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The VHF antenna was installed and appeared serviceable."
+    },
+    {
+      "section": "VHF",
+      "rating": "Powered up",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The VHF antenna was installed but damaged."
+    },
+    {
+      "section": "VHF",
+      "rating": "Powered up",
+      "phase": "observed",
+      "severity": 4,
+      "text": "No VHF antenna was installed on this vessel."
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The windshield wiper was non-functional or the motor was broken."
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The windshield wiper operated but with sluggish or streaking performance."
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "One of the two windshield wipers was not working; the other operated correctly."
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The windshield wiper functioned properly and the blade was in acceptable condition."
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The windshield wiper operated smoothly and effectively cleared the windshield."
     }
   ],
   "Flybridge": [
@@ -14681,6 +14786,90 @@
       "phase": "observed",
       "severity": 1,
       "text": "Both blowers operated properly and vent tubing was clear and intact from the fans to the outside."
+    },
+    {
+      "section": "VHF",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The VHF antenna was installed and appeared serviceable."
+    },
+    {
+      "section": "VHF",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The VHF antenna was installed but damaged."
+    },
+    {
+      "section": "VHF",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "No VHF antenna was installed on this vessel."
+    },
+    {
+      "section": "VHF",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The VHF antenna was installed and appeared serviceable."
+    },
+    {
+      "section": "VHF",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The VHF antenna was installed but damaged."
+    },
+    {
+      "section": "VHF",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 4,
+      "text": "No VHF antenna was installed on this vessel."
+    },
+    {
+      "section": "VHF",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The VHF antenna was installed and appeared serviceable."
+    },
+    {
+      "section": "VHF",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The VHF antenna was installed but damaged."
+    },
+    {
+      "section": "VHF",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 4,
+      "text": "No VHF antenna was installed on this vessel."
+    },
+    {
+      "section": "VHF",
+      "rating": "Powered up",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The VHF antenna was installed and appeared serviceable."
+    },
+    {
+      "section": "VHF",
+      "rating": "Powered up",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The VHF antenna was installed but damaged."
+    },
+    {
+      "section": "VHF",
+      "rating": "Powered up",
+      "phase": "observed",
+      "severity": 4,
+      "text": "No VHF antenna was installed on this vessel."
     }
   ],
   "Cabin and conveniences": [

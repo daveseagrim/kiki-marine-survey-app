@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2216';
+const APP_VERSION = 'v2217';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1066,7 +1066,7 @@ const ITEM_SNIPPET_MAP = {
   'Pilot house Radar': 'Radar',
   'Pilot house Searchlight': 'Search light',
   'Pilot house Trim tab controls': 'Trim tab controls',
-  'Pilot house VHF radio and antenna': 'VHF radio and antenna',
+  'Pilot house VHF radio and antenna': 'VHF',
   'Pilot house Windshield wiper(s) operation': 'Wiper blade operation',
   'Pilot house steering wheel': 'Steering wheel and steering',
   'Pilot house, floor and seat(s)': 'Cockpit, floor, seats and coaming',
