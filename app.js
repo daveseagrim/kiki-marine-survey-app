@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2213';
+const APP_VERSION = 'v2215';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2760,7 +2760,7 @@ function showNotesSheet(itemLabel, categoryName) {
     let sheetVariants = [];
     if (itemData.rating && !isOtherItem) {
       const baseRating = itemData.rating.charAt(0);
-      sheetVariants = findTextVariants(categoryName, itemLabel, baseRating);
+      sheetVariants = findTextVariants(categoryName, itemLabel, baseRating, survey);
       // v2180/v2182: synthesize chips for "Not applicable" / "Not tested"
       // ratings. The library has no entries for these, but the surveyor still
       // needs a sentence saying the item wasn't fitted / wasn't tested.
@@ -4944,7 +4944,10 @@ function escSnippet(s) {
 }
 
 // Find text variants from library
-function findTextVariants(categoryName, itemLabel, baseRating) {
+// v2214: optional `survey` param enables chip-level vesselType filtering.
+// Chips tagged with `vesselType: 'sail'` or `'power'` are dropped when the
+// survey's vesselType doesn't match. Chips without vesselType always show.
+function findTextVariants(categoryName, itemLabel, baseRating, survey) {
   if (!textLibrary) return [];
 
   const sheetName = SHEET_MAPPING[categoryName] || categoryName;
@@ -5037,6 +5040,17 @@ function findTextVariants(categoryName, itemLabel, baseRating) {
         return isRatingMatch && entry.section === bestSection;
       });
     }
+  }
+
+  // v2214: vessel-type chip filtering. Chips tagged with `vesselType: 'sail'`
+  // or `'power'` are dropped when the survey's vesselType doesn't match.
+  // Chips without vesselType always show (default behavior).
+  if (survey && survey.vesselType) {
+    const vt = survey.vesselType.toLowerCase();
+    matches = matches.filter(entry => {
+      if (!entry.vesselType) return true;
+      return entry.vesselType.toLowerCase() === vt;
+    });
   }
 
   return matches;
@@ -14970,7 +14984,8 @@ function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
 }
 
 // Build the inner HTML for a single rated item (used by selectRating for targeted DOM updates)
-function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
+// v2214: optional `survey` param threaded through to findTextVariants for vesselType chip filtering.
+function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options, survey) {
   const safeLabel = itemLabel.replace(/'/g, "\\'");
   const safeCat = categoryName.replace(/'/g, "\\'");
   const isExcluded = itemData.excluded;
@@ -15112,7 +15127,7 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options) {
   // Text snippet cards (tap to insert)
   if (itemData.rating && ['A - Critical', 'B - Needs Attention', 'C - Serviceable', 'Powered up only', 'Not tested / not verified', 'Not applicable'].includes(itemData.rating)) {
     const baseRating = itemData.rating.charAt(0);
-    const variants = findTextVariants(categoryName, itemLabel, baseRating);
+    const variants = findTextVariants(categoryName, itemLabel, baseRating, survey);
 
     if (variants.length > 0) {
       // Pre-compute diff-highlighted display texts
@@ -15520,7 +15535,7 @@ function selectRating(itemLabel, categoryName, rating) {
 
       const isExcluded = itemData.excluded;
       itemDiv.style.cssText = isExcluded ? 'opacity:0.5;border-left:4px solid #d1d5db;' : itemData.flagged ? 'border-left:4px solid #f59e0b;' : '';
-      itemDiv.innerHTML = buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options);
+      itemDiv.innerHTML = buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options, survey);
 
       if (itemData.photos && itemData.photos.length > 0) {
         itemData.photos.forEach(photoId => {
@@ -15704,7 +15719,7 @@ function updateItemInPlace(survey, itemLabel) {
 
   const isExcluded = itemData.excluded;
   itemDiv.style.cssText = isExcluded ? 'opacity:0.5;border-left:4px solid #d1d5db;' : itemData.flagged ? 'border-left:4px solid #f59e0b;' : '';
-  itemDiv.innerHTML = buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options);
+  itemDiv.innerHTML = buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options, survey);
 
   if (itemData.photos && itemData.photos.length > 0) {
     itemData.photos.forEach(photoId => {

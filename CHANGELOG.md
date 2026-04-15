@@ -12,6 +12,127 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2215 — 2026-04-15
+
+### Added — Bow thruster N/A chip: "No bow thruster was installed."
+
+Matches the language pattern already used by Blower ("No blower was
+installed."). Added to Hull sheet, Bow thruster section:
+
+- N/A / observed / sev 1: "No bow thruster was installed."
+
+When Bow thruster is rated N/A, the "Bow thruster controls" item is
+already auto-hidden by the `conditional: 'bowThruster'` rule, so a
+single chip on the physical-unit section covers both surveys.
+
+### Audit
+
+- JSON parses ✓
+- JavaScript compiles ✓
+- Version strings aligned ✓
+
+---
+
+## v2214 — 2026-04-15
+
+### Added — Chip-level `vesselType` filtering
+
+New capability: chips in the library can now carry a `vesselType: 'sail'`
+or `vesselType: 'power'` tag. When present, the chip is dropped from
+the picker if the survey's vesselType doesn't match. Chips without the
+tag continue to show for every vessel (default behavior).
+
+Implementation:
+
+- `findTextVariants(category, label, baseRating, survey)` accepts a new
+  optional `survey` param and applies the vesselType filter after all
+  other matching stages.
+- `buildSingleItemInnerHTML` accepts a new `survey` param and threads
+  it through to `findTextVariants`.
+- Both call sites (bottom-sheet notes flow + inline item rendering) now
+  pass `survey`.
+- `hasRudder`-style filtering already existed via `contextFromSurvey`;
+  this is a parallel, simpler mechanism for binary vessel-type chips
+  where no token expansion is needed.
+
+### Steering wheel / helm — sail-only chips tagged
+
+Dave's rule: on a power boat there's one cockpit helm, no binnacle, no
+need to mention where the wheel is mounted. Applied via chip tags:
+
+**Tagged `vesselType: 'sail'`** (hidden on power-boat surveys):
+- Cockpit / Steering wheel and steering (B): "The steering wheel was
+  solidly affixed to the binnacle, and the steering moved from block to
+  block without binding or stiffness."
+- Cockpit / Steering wheel and steering (C): "Both cockpit helms were
+  solidly affixed and the steering moved from block to block without
+  binding or stiffness."
+- Cockpit / Steering wheel and steering (C - binnacle block to block):
+  same binnacle text as B.
+- Steering & Hydraulics / Mechanical steering (C - control cable):
+  "The steering wheel was connected beneath the binnacle to a nylon
+  jacketed control cable…"
+
+**Added** neutral power-friendly chips (no binnacle, no mount location):
+- B/observed/sev 3: "The steering wheel was solidly affixed and the
+  steering moved from block to block without binding or stiffness."
+- C/observed/sev 3: same text under C.
+
+**Consolidated** the orphan library section `Steering wheel, steering`
+(10 chips, unreachable via `ITEM_SNIPPET_MAP`) into the canonical
+`Steering wheel and steering` section. Dupes deduplicated (4 removed).
+Power boats now have a rich A/B/C chip list that works without any
+sail-specific vocabulary.
+
+### Insurance template — Tiller and Binnacle hidden on power boats
+
+Pre-purchase template already had `sailOnly: true` on these items; the
+insurance template did not. Added the flag so both surveys behave
+identically — no binnacle or tiller checklist item surfaces for a
+power boat.
+
+### Propane / LPG — "no propane system installed" N/A chip
+
+When the surveyor selects "Not applicable" on either of these items, a
+new chip is now available:
+
+> There is no propane system installed on this vessel.
+
+Added to library sections:
+- Cockpit / `Propane valve, regulator, gauge, storage compartment and vent`
+- Safety & Nav Equipment / `LPG cut off solenoid valve switch`
+
+Rating `N/A`, observed phase. The existing synthesis-fallback chip
+("No propane valve, regulator, gauge, storage compartment and vent was
+fitted on this vessel.") is bypassed because a real chip now exists.
+
+### Blower — "two blowers" option at A, B, and C
+
+Some power boats fit twin blowers. Added parallel twin-blower chips
+beside the existing singular chips in both blower library sheets
+(`Gauges and Instrumentation` + `Flybridge gauges and instrument`):
+
+- A/observed/sev 3: "Both bilge blowers were inoperative during testing."
+- B/observed/sev 3: "One of the two engine compartment blowers was not
+  functional; the other operated correctly."
+- C/observed/sev 1: "Both blowers operated properly and vent tubing was
+  clear and intact from the fans to the outside."
+
+### Audit
+
+- JSON files parse ✓
+- JavaScript compiles (app.js + sw.js) ✓
+- `findTextVariants` signature and both call sites updated ✓
+- `buildSingleItemInnerHTML` threads `survey` to both callers ✓
+- Insurance template: Tiller + Binnacle carry `sailOnly: true` ✓
+- 4 binnacle / twin-helm chips tagged `vesselType: 'sail'` ✓
+- Steering wheel orphan section consolidated, dupes removed ✓
+- Propane and LPG N/A chips present ✓
+- Twin-blower chips present in both sheets ✓
+- Version strings aligned across app.js, sw.js, index.html, CACHE_NAME ✓
+
+---
+
 ## v2213 — 2026-04-15
 
 ### Added — Engine locker lid B rating: positive lid-body chip

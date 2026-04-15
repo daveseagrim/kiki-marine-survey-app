@@ -4248,6 +4248,13 @@
       "phase": "action",
       "severity": 5,
       "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Bow thruster",
+      "rating": "N/A",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No bow thruster was installed."
     }
   ],
   "Spars and rigging": [
@@ -7895,7 +7902,8 @@
       "rating": "B",
       "text": "The steering wheel was solidly affixed to the binnacle, and the steering moved from block to block without binding or stiffness.",
       "phase": "observed",
-      "severity": 3
+      "severity": 3,
+      "vesselType": "sail"
     },
     {
       "section": "Steering wheel and steering",
@@ -7909,14 +7917,16 @@
       "rating": "C",
       "text": "Both cockpit helms were solidly affixed and the steering moved from block to block without binding or stiffness.",
       "phase": "observed",
-      "severity": 3
+      "severity": 3,
+      "vesselType": "sail"
     },
     {
       "section": "Steering wheel and steering",
       "rating": "C - binnacle block to block",
       "text": "The steering wheel was solidly affixed to the binnacle, and the steering moved from block to block without binding or stiffness.",
       "phase": "observed",
-      "severity": 3
+      "severity": 3,
+      "vesselType": "sail"
     },
     {
       "section": "Binnacle",
@@ -8619,42 +8629,42 @@
       "severity": 5
     },
     {
-      "section": "Steering wheel, steering",
+      "section": "Steering wheel and steering",
       "rating": "A",
       "text": "The steering wheel or steering mechanism was broken, bent, or non-functional.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Steering wheel, steering",
+      "section": "Steering wheel and steering",
       "rating": "A",
       "text": "Repair or replacement is critical for safe operation of the vessel.",
       "phase": "action",
       "severity": 5
     },
     {
-      "section": "Steering wheel, steering",
+      "section": "Steering wheel and steering",
       "rating": "B",
       "text": "The steering wheel operated but with stiffness or excessive play.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Steering wheel, steering",
+      "section": "Steering wheel and steering",
       "rating": "B",
       "text": "Service and lubrication are recommended to restore smooth and safe operation.",
       "phase": "action",
       "severity": 3
     },
     {
-      "section": "Steering wheel, steering",
+      "section": "Steering wheel and steering",
       "rating": "C",
       "text": "The steering wheel and steering mechanism operated smoothly without stiffness or binding.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Steering wheel, steering",
+      "section": "Steering wheel and steering",
       "rating": "C",
       "text": "The wheel was properly mounted and in proper condition.",
       "phase": "observed",
@@ -9382,34 +9392,6 @@
       "text": "No action required at this time."
     },
     {
-      "section": "Steering wheel, steering",
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "This represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Steering wheel, steering",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "The finding should be monitored and addressed in the near term."
-    },
-    {
-      "section": "Steering wheel, steering",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No immediate concern was noted."
-    },
-    {
-      "section": "Steering wheel, steering",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No action required at this time."
-    },
-    {
       "section": "Cockpit conductivity testing",
       "rating": "A",
       "phase": "observed",
@@ -9555,6 +9537,27 @@
       "phase": "observed",
       "severity": 1,
       "text": "The engine locker lid itself was sound and undamaged."
+    },
+    {
+      "section": "Propane valve, regulator, gauge, storage compartment and vent",
+      "rating": "N/A",
+      "phase": "observed",
+      "severity": 1,
+      "text": "There is no propane system installed on this vessel."
+    },
+    {
+      "section": "Steering wheel and steering",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The steering wheel was solidly affixed and the steering moved from block to block without binding or stiffness."
+    },
+    {
+      "section": "Steering wheel and steering",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The steering wheel was solidly affixed and the steering moved from block to block without binding or stiffness."
     }
   ],
   "Gauges and Instrumentation": [
@@ -11125,6 +11128,27 @@
       "phase": "observed",
       "severity": 1,
       "text": "This item was inspected and found in acceptable condition."
+    },
+    {
+      "section": "Blower",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Both bilge blowers were inoperative during testing."
+    },
+    {
+      "section": "Blower",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "One of the two engine compartment blowers was not functional; the other operated correctly."
+    },
+    {
+      "section": "Blower",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Both blowers operated properly and vent tubing was clear and intact from the fans to the outside."
     }
   ],
   "Flybridge": [
@@ -14636,6 +14660,27 @@
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
+    },
+    {
+      "section": "Blower",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Both bilge blowers were inoperative during testing."
+    },
+    {
+      "section": "Blower",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "One of the two engine compartment blowers was not functional; the other operated correctly."
+    },
+    {
+      "section": "Blower",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Both blowers operated properly and vent tubing was clear and intact from the fans to the outside."
     }
   ],
   "Cabin and conveniences": [
@@ -20231,7 +20276,8 @@
       "rating": "C - control cable",
       "text": "The steering wheel was connected beneath the binnacle to a nylon jacketed control cable that transmitted helm inputs to the rudder.",
       "phase": "observed",
-      "severity": 3
+      "severity": 3,
+      "vesselType": "sail"
     },
     {
       "section": "Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)",
@@ -24352,6 +24398,13 @@
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
+    },
+    {
+      "section": "LPG cut off solenoid valve switch",
+      "rating": "N/A",
+      "phase": "observed",
+      "severity": 1,
+      "text": "There is no propane system installed on this vessel."
     }
   ],
   "Deck": [
