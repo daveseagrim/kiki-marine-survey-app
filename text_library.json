@@ -278,7 +278,7 @@
     {
       "section": "Rudder(s) condition",
       "rating": "C",
-      "text": "The {specify:rudder|rudders} were {specify:in satisfactory condition with no visible damage|in good overall condition with only cosmetic wear|in without deficiency condition for normal use}.",
+      "text": "The {specify:rudder|rudders} were {specify:in satisfactory condition with no visible damage|in good overall condition with only cosmetic wear|in without deficiencies for normal use}.",
       "placeholders": {
         "specify:rudder|rudders": {
           "multi": false
@@ -678,21 +678,7 @@
     {
       "section": "Keel and keel joint",
       "rating": "B",
-      "text": "A longitudinal crack was observed at the keel and hull joint.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Keel and keel joint",
-      "rating": "B",
       "text": "This is common and is typically repaired periodically as part of maintenance.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Keel and keel joint",
-      "rating": "B",
-      "text": "Retorquing the keel bolts while the vessel is in the cradle is recommended.",
       "phase": "observed",
       "severity": 3
     },
@@ -784,13 +770,6 @@
       "section": "Transducers (speed, depth, etc.)",
       "rating": "B",
       "text": "Remove coating to ensure proper operation.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Transducers (speed, depth, etc.)",
-      "rating": "B",
-      "text": "Transducers were securely mounted.",
       "phase": "observed",
       "severity": 3
     },
@@ -1134,13 +1113,6 @@
       "section": "Skeg(s)",
       "rating": "C - multiple, stainless steel",
       "text": "The stainless steel skegs were solidly mounted to the hull with no visible distortion or corrosion at the attachment points.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Skeg(s)",
-      "rating": "C - multiple, stainless steel",
-      "text": "Weld seams were intact.",
       "phase": "observed",
       "severity": 1
     },
@@ -1884,7 +1856,7 @@
     {
       "section": "Propeller(s)",
       "rating": "C",
-      "text": "The {specify:fixed two-blade|fixed three-blade|fixed four-blade|folding two-blade|folding three-blade|feathering three-blade|controllable pitch} {count:propeller was|propellers were} in without deficiency condition with no significant damage, pitting, or corrosion. Blades were intact and {count:securely attached to the shaft|securely attached to their respective shafts}.",
+      "text": "The {specify:fixed two-blade|fixed three-blade|fixed four-blade|folding two-blade|folding three-blade|feathering three-blade|controllable pitch} {count:propeller was|propellers were} in without deficiencies with no significant damage, pitting, or corrosion. Blades were intact and {count:securely attached to the shaft|securely attached to their respective shafts}.",
       "placeholders": {
         "specify:fixed two-blade|fixed three-blade|fixed four-blade|folding two-blade|folding three-blade|feathering three-blade|controllable pitch": {
           "multi": false
@@ -3416,22 +3388,43 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "A",
+      "phase": "means",
       "severity": 5,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; readings indicated significant moisture or delamination."
+      "text": "The readings indicated significant moisture or delamination."
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; some readings were elevated."
+      "text": "Some readings were elevated."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; readings were consistent with a sound laminate."
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The readings were consistent with a sound laminate."
     },
     {
       "section": "Keel and keel joint",
@@ -3997,22 +3990,43 @@
       "section": "Swim platform and ladder - condition and conductivity readings",
       "rating": "A",
       "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Swim platform and ladder - condition and conductivity readings",
+      "rating": "A",
+      "phase": "means",
       "severity": 5,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; readings indicated significant moisture or delamination."
+      "text": "The readings indicated significant moisture or delamination."
+    },
+    {
+      "section": "Swim platform and ladder - condition and conductivity readings",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
     },
     {
       "section": "Swim platform and ladder - condition and conductivity readings",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; some readings were elevated."
+      "text": "Some readings were elevated."
     },
     {
       "section": "Swim platform and ladder - condition and conductivity readings",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; readings were consistent with a sound laminate."
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Swim platform and ladder - condition and conductivity readings",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The readings were consistent with a sound laminate."
     }
   ],
   "Spars and rigging": [
@@ -4096,7 +4110,7 @@
     {
       "section": "Forestay (as inspected from the deck)",
       "rating": "C",
-      "text": "As seen from the deck, the forestay appeared in without deficiency condition.",
+      "text": "As seen from the deck, the forestay appeared in without deficiencies.",
       "phase": "observed",
       "severity": 3
     },
@@ -4218,20 +4232,6 @@
       "text": "However, the tension should be checked and adjusted by a professional rigger.",
       "phase": "means",
       "severity": 3
-    },
-    {
-      "section": "Shrouds, swages and turnbuckles",
-      "rating": "B",
-      "text": "As seen from the deck, the shrouds did not have any visible broken strands.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Shrouds, swages and turnbuckles",
-      "rating": "B",
-      "text": "Also, the swages and turnbuckles were all in serviceable condition.",
-      "phase": "observed",
-      "severity": 1
     },
     {
       "section": "Shrouds, swages and turnbuckles",
@@ -4796,13 +4796,6 @@
     {
       "section": "Traveller and tackle",
       "rating": "C",
-      "text": "The tackle moved smoothly along its track; the blocks were securely attached with the required pins, and they operated smoothly.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Traveller and tackle",
-      "rating": "C",
       "text": "The cleats on both sides worked properly.",
       "phase": "observed",
       "severity": 3
@@ -4978,7 +4971,7 @@
     {
       "section": "Staysail",
       "rating": "C",
-      "text": "The sail is in without deficiency condition and safe for use.",
+      "text": "The sail is in without deficiencies and safe for use.",
       "phase": "observed",
       "severity": 3
     },
@@ -6147,13 +6140,6 @@
       "severity": 3
     },
     {
-      "section": "Aft deck impact and resonance testing",
-      "rating": "C",
-      "text": "Percussion testing of the aft deck produced a clear and even tone with no indications of delamination or voids.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
       "section": "Aft deck conductivity testing",
       "rating": "A",
       "text": "The aft deck returned readings of [insert reading range].",
@@ -6198,7 +6184,7 @@
     {
       "section": "Aft deck conductivity testing",
       "rating": "C",
-      "text": "Conductivity testing of the aft deck indicated a in good order condition with no elevated conductivity detected.",
+      "text": "Conductivity testing of the aft deck indicated the vessel was in good order with no elevated conductivity detected.",
       "phase": "means",
       "severity": 3
     },
@@ -6570,8 +6556,15 @@
       "section": "Aft deck conductivity testing",
       "rating": "A",
       "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Aft deck conductivity testing",
+      "rating": "A",
+      "phase": "means",
       "severity": 5,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; readings indicated significant moisture or delamination."
+      "text": "The readings indicated significant moisture or delamination."
     },
     {
       "section": "Aft deck conductivity testing",
@@ -6584,8 +6577,15 @@
       "section": "Aft deck conductivity testing",
       "rating": "B",
       "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Aft deck conductivity testing",
+      "rating": "B",
+      "phase": "observed",
       "severity": 3,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; some readings were elevated."
+      "text": "Some readings were elevated."
     },
     {
       "section": "Aft deck conductivity testing",
@@ -6599,7 +6599,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; readings were consistent with a sound laminate."
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Aft deck conductivity testing",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The readings were consistent with a sound laminate."
     },
     {
       "section": "Aft deck conductivity testing",
@@ -6885,8 +6892,15 @@
       "section": "Conductivity testing",
       "rating": "A",
       "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Conductivity testing",
+      "rating": "A",
+      "phase": "means",
       "severity": 5,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; readings indicated significant moisture or delamination."
+      "text": "The readings indicated significant moisture or delamination."
     },
     {
       "section": "Conductivity testing",
@@ -6899,8 +6913,15 @@
       "section": "Conductivity testing",
       "rating": "B",
       "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Conductivity testing",
+      "rating": "B",
+      "phase": "observed",
       "severity": 3,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; some readings were elevated."
+      "text": "Some readings were elevated."
     },
     {
       "section": "Conductivity testing",
@@ -6914,7 +6935,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; readings were consistent with a sound laminate."
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Conductivity testing",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The readings were consistent with a sound laminate."
     },
     {
       "section": "Conductivity testing",
@@ -7392,13 +7420,6 @@
     {
       "section": "Cockpit impact and resonance testing",
       "rating": "B - Singular spot",
-      "text": "Percussion testing of the cockpit floor produced a clear and even tone across most areas with no indications of delamination or voids.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Cockpit impact and resonance testing",
-      "rating": "B - Singular spot",
       "text": "One localized area at [insert location] produced a dull thud suggestive of present saturation or past saturation with core deterioration.",
       "phase": "observed",
       "severity": 2
@@ -7409,13 +7430,6 @@
       "text": "The photographs show the hammer tip indicating the area.",
       "phase": "observed",
       "severity": 3
-    },
-    {
-      "section": "Cockpit impact and resonance testing",
-      "rating": "B - Singular spot",
-      "text": "Monitor and plan localized repair if softness develops.",
-      "phase": "action",
-      "severity": 2
     },
     {
       "section": "Cockpit impact and resonance testing",
@@ -9173,6 +9187,27 @@
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
+    },
+    {
+      "section": "Cockpit conductivity testing",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Cockpit conductivity testing",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Cockpit conductivity testing",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
     }
   ],
   "Gauges and Instrumentation": [
@@ -9579,13 +9614,6 @@
       "section": "Wind instruments",
       "rating": "C",
       "text": "Wind direction and speed appeared to be displayed correctly on the MFD.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Wind instruments",
-      "rating": "C",
-      "text": "Wind direction and speed appeared to be displayed correctly.",
       "phase": "observed",
       "severity": 3
     },
@@ -10790,13 +10818,6 @@
     },
     {
       "section": "Flybridge percussion testing",
-      "rating": "C",
-      "text": "Percussion testing produced a clear and even tone with no indications of delamination or voids.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Flybridge percussion testing",
       "rating": "Not tested",
       "text": "Percussion testing of the Flybridge floor was not possible because the surface was covered with PE or EVA foam material.",
       "phase": "observed",
@@ -10827,20 +10848,6 @@
       "section": "Flybridge conductivity testing",
       "rating": "C",
       "text": "A single area at [insert location] showed an elevated reading of [insert reading range].",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Flybridge conductivity testing",
-      "rating": "C",
-      "text": "This was not immediately concerning and should be monitored.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Flybridge conductivity testing",
-      "rating": "C",
-      "text": "A single area at [describe location] showed an elevated reading of [insert reading range].",
       "phase": "observed",
       "severity": 3
     },
@@ -11729,7 +11736,7 @@
     {
       "section": "Flybridge splash shield/windshield",
       "rating": "C",
-      "text": "The Flybridge splash shield or windshield is in without deficiency condition with no cracks or crazing.",
+      "text": "The Flybridge splash shield or windshield is in without deficiencies with no cracks or crazing.",
       "phase": "observed",
       "severity": 3
     },
@@ -11763,36 +11770,8 @@
     },
     {
       "section": "Flybridge steering wheel, steering",
-      "rating": "A",
-      "text": "The flybridge steering wheel or steering mechanism was broken or non-functional.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Flybridge steering wheel, steering",
-      "rating": "A",
-      "text": "Repair or replacement is critical for safe vessel operation from the flybridge.",
-      "phase": "action",
-      "severity": 5
-    },
-    {
-      "section": "Flybridge steering wheel, steering",
       "rating": "B",
       "text": "The flybridge steering wheel operated but with stiffness or excessive movement.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Flybridge steering wheel, steering",
-      "rating": "B",
-      "text": "Service is recommended to restore smooth and reliable operation.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Flybridge steering wheel, steering",
-      "rating": "C",
-      "text": "The flybridge steering wheel and mechanism operated smoothly and were properly mounted and in proper condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -12206,8 +12185,15 @@
       "section": "Flybridge conductivity testing",
       "rating": "A",
       "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Flybridge conductivity testing",
+      "rating": "A",
+      "phase": "means",
       "severity": 5,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; readings indicated significant moisture or delamination."
+      "text": "The readings indicated significant moisture or delamination."
     },
     {
       "section": "Flybridge conductivity testing",
@@ -12220,8 +12206,15 @@
       "section": "Flybridge conductivity testing",
       "rating": "B",
       "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Flybridge conductivity testing",
+      "rating": "B",
+      "phase": "observed",
       "severity": 3,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; some readings were elevated."
+      "text": "Some readings were elevated."
     },
     {
       "section": "Flybridge conductivity testing",
@@ -12235,7 +12228,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; readings were consistent with a sound laminate."
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Flybridge conductivity testing",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The readings were consistent with a sound laminate."
     },
     {
       "section": "Flybridge conductivity testing",
@@ -13209,13 +13209,6 @@
       "section": "Wind instruments",
       "rating": "C",
       "text": "Wind direction and speed appeared to be displayed correctly on the MFD.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Wind instruments",
-      "rating": "C",
-      "text": "Wind direction and speed appeared to be displayed correctly.",
       "phase": "observed",
       "severity": 3
     },
@@ -14463,13 +14456,6 @@
     {
       "section": "Deck hatches, windows and portholes – interior observations",
       "rating": "C - expected crazing",
-      "text": "All deck hatches and portholes opened and closed properly.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck hatches, windows and portholes – interior observations",
-      "rating": "C - expected crazing",
       "text": "Hatches, portholes, and windows were in satisfactory condition with age expected crazing.",
       "phase": "observed",
       "severity": 3
@@ -14533,7 +14519,7 @@
     {
       "section": "Table",
       "rating": "C",
-      "text": "The table and support were solid and in without deficiency condition.",
+      "text": "The table and support were solid and in without deficiencies.",
       "phase": "observed",
       "severity": 3
     },
@@ -14583,20 +14569,6 @@
       "section": "Galley faucet, sink and drain",
       "rating": "C",
       "text": "The galley tap worked well.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Galley faucet, sink and drain",
-      "rating": "C",
-      "text": "The sink drain showed no signs of leakage.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Galley faucet, sink and drain",
-      "rating": "C",
-      "text": "The drain seacock was properly installed and opened and closed easily.",
       "phase": "observed",
       "severity": 3
     },
@@ -14688,13 +14660,6 @@
       "section": "Stove",
       "rating": "C - Propane all lit except engine",
       "text": "The oven was not lit.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Stove",
-      "rating": "C - Propane all lit",
-      "text": "The LPG switch, all burners and the oven appeared to function properly.",
       "phase": "observed",
       "severity": 3
     },
@@ -17134,13 +17099,6 @@
     {
       "section": "Fuel tank(s)",
       "rating": "B",
-      "text": "The fuel tank was located [insert location].",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Fuel tank(s)",
-      "rating": "B",
       "text": "It appeared serviceable with the correct SAE-rated hose and a fuel shut-off valve.",
       "phase": "observed",
       "severity": 1
@@ -17265,13 +17223,6 @@
       "severity": 3
     },
     {
-      "section": "Black water tank(s) and plumbing",
-      "rating": "C - not visible but looks right",
-      "text": "No leakage or unusual odour was observed.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
       "section": "Black water vacuum pump(s)",
       "rating": "Not tested",
       "text": "The black water vacuum pump was not tested because the vessel was out of the water.",
@@ -17343,29 +17294,8 @@
     },
     {
       "section": "Freshwater tank and plumbing",
-      "rating": "C - single",
-      "text": "No sign of leakage was observed.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Freshwater tank and plumbing",
       "rating": "C - single - not visible",
       "text": "The freshwater tank was located in the [insert location] and was not visible.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Freshwater tank and plumbing",
-      "rating": "C - single - not visible",
-      "text": "However, it appeared correctly installed with securely attached plumbing of what appeared to be FDA or NSF-certified potable water-grade components.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Freshwater tank and plumbing",
-      "rating": "C - single - not visible",
-      "text": "No sign of leakage was observed.",
       "phase": "observed",
       "severity": 3
     },
@@ -18234,13 +18164,6 @@
     },
     {
       "section": "Exhaust condition",
-      "rating": "C - expected rust",
-      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Exhaust condition",
       "rating": "Not tested - covered in insulation",
       "text": "Despite expected rust at the mixing elbow, the exhaust appeared serviceable.",
       "phase": "observed",
@@ -18280,13 +18203,6 @@
       "text": "Not tested.",
       "phase": "observed",
       "severity": 3
-    },
-    {
-      "section": "Oil level and condition",
-      "rating": "B",
-      "text": "The engine oil appeared discoloured and should be changed as part of routine maintenance.",
-      "phase": "means",
-      "severity": 2
     },
     {
       "section": "Oil level and condition",
@@ -18430,13 +18346,6 @@
     },
     {
       "section": "Belts and pulleys",
-      "rating": "C - single belt",
-      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Belts and pulleys",
       "rating": "Not tested",
       "text": "Inspection was not performed because the belts and pulleys were covered by a guard.",
       "phase": "observed",
@@ -18481,13 +18390,6 @@
       "section": "Anti-vibration mounts",
       "rating": "C - just changed",
       "text": "They showed virtually no corrosion or cracking and appeared in satisfactory condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Anti-vibration mounts",
-      "rating": "C - just changed",
-      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended.",
       "phase": "observed",
       "severity": 3
     },
@@ -18571,13 +18473,6 @@
     {
       "section": "Gearbox oil",
       "rating": "B",
-      "text": "The gearbox oil appeared clean.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Gearbox oil",
-      "rating": "B",
       "text": "However, gearbox oil often shows less colouring than engine oil and should be changed at least as often as the engine oil.",
       "phase": "means",
       "severity": 3
@@ -18644,13 +18539,6 @@
       "text": "Adjust the retaining nut and/or replace the internal flax as necessary.",
       "phase": "observed",
       "severity": 3
-    },
-    {
-      "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
-      "rating": "A",
-      "text": "The drive coupling and the visible length of the propeller shaft appeared serviceable.",
-      "phase": "observed",
-      "severity": 1
     },
     {
       "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
@@ -20366,13 +20254,6 @@
     },
     {
       "section": "Battery selector switch, combiner, VSR",
-      "rating": "C - multiple switches",
-      "text": "All appeared to function properly and were clearly labelled.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Battery selector switch, combiner, VSR",
       "rating": "C - with combiner/VSR",
       "text": "A battery selector switch and automatic combiner (VSR) were fitted.",
       "phase": "observed",
@@ -20501,13 +20382,6 @@
       "section": "Starter battery(ies)",
       "rating": "C - singular, no box",
       "text": "The starter battery's positive terminal was properly protected.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Starter battery(ies)",
-      "rating": "C - singular, no box",
-      "text": "Terminal connections were clean and tight.",
       "phase": "observed",
       "severity": 3
     },
@@ -21067,7 +20941,7 @@
     {
       "section": "Shore power cable(s)",
       "rating": "C",
-      "text": "The shore power cable appeared to be in without deficiency condition with no signs of overheating or burning.",
+      "text": "The shore power cable appeared to be in without deficiencies with no signs of overheating or burning.",
       "phase": "observed",
       "severity": 1
     },
@@ -21339,50 +21213,8 @@
     },
     {
       "section": "Battery selector switch, combiner, VSR",
-      "rating": "A - single switch",
-      "text": "Repair or replacement is required.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Battery selector switch, combiner, VSR",
       "rating": "B - single switch",
       "text": "The switch or combiner shows corrosion or stiff operation.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Battery selector switch, combiner, VSR",
-      "rating": "B - single switch",
-      "text": "Service is recommended.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Battery selector switch, combiner, VSR",
-      "rating": "C - two switches",
-      "text": "Two battery selector switches were fitted.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Battery selector switch, combiner, VSR",
-      "rating": "C - two switches",
-      "text": "Both appeared to function properly and were clearly labelled.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Battery selector switch, combiner, VSR",
-      "rating": "C - multiple switches",
-      "text": "Multiple battery selector switches were fitted.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Battery selector switch, combiner, VSR",
-      "rating": "C - multiple switches",
-      "text": "All appeared to function properly and were clearly labelled.",
       "phase": "observed",
       "severity": 3
     },
@@ -24144,7 +23976,7 @@
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "C - no conductivity",
-      "text": "Conductivity testing of the deck and coachroof produced readings consistent with a without deficiency condition, with no elevated conductivity detected.",
+      "text": "Conductivity testing of the deck and coachroof produced readings consistent with a sound laminate, with no elevated conductivity detected.",
       "phase": "means",
       "severity": 3
     },
@@ -24285,62 +24117,6 @@
       "section": "Anchor locker",
       "rating": "C",
       "text": "The anchor locker presented no deficiencies and housed a deck wash spigot and hose.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Stanchions",
-      "rating": "B - one stanchion",
-      "text": "One stanchion located at [insert location] was loose at the base and required re-bedding and tightening.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Stanchions",
-      "rating": "B - one stanchion",
-      "text": "The remaining stanchions were securely fastened and in good condition.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Stanchions",
-      "rating": "B - loose",
-      "text": "Several stanchions at the base were loose and required re-bedding and tightening.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Stanchions",
-      "rating": "C - some movement",
-      "text": "Some movement was present in several stanchions typical of age.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Stanchions",
-      "rating": "C - some movement",
-      "text": "The stanchions were adequately secured to the deck.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Stanchions",
-      "rating": "C - cracks but solid",
-      "text": "Typical of a boat this age, there were several spider/stress cracks at the base of many stanchions.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Stanchions",
-      "rating": "C - cracks but solid",
-      "text": "However, they were firmly mounted to the deck and in proper condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Stanchions",
-      "rating": "C",
-      "text": "All stanchions were solidly affixed to the deck and were found to be in order.",
       "phase": "observed",
       "severity": 3
     },
@@ -24765,20 +24541,6 @@
       "severity": 3
     },
     {
-      "section": "Stanchions",
-      "rating": "A",
-      "text": "Multiple stanchions are loose or cracked, creating a safety hazard.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Stanchions",
-      "rating": "A",
-      "text": "Immediate repair or replacement is required.",
-      "phase": "action",
-      "severity": 5
-    },
-    {
       "section": "Lifelines and safety rail",
       "rating": "A",
       "text": "The lifelines or safety rail are broken or loose, creating a fall hazard.",
@@ -25124,20 +24886,6 @@
     {
       "section": "Deck hatch(es), windows and portholes (exterior observations)",
       "rating": "C - with crazing",
-      "text": "All deck hatches, windows, and portholes were visually inspected from the exterior.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck hatch(es), windows and portholes (exterior observations)",
-      "rating": "C - with crazing",
-      "text": "The frames were securely fastened and the seals appeared serviceable with no significant deterioration.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Deck hatch(es), windows and portholes (exterior observations)",
-      "rating": "C - with crazing",
       "text": "Some crazing was noted on the acrylic, typical of a vessel of this age.",
       "phase": "observed",
       "severity": 3
@@ -25328,8 +25076,15 @@
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "A",
       "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Deck and coachroof/pilothouse conductivity testing",
+      "rating": "A",
+      "phase": "means",
       "severity": 5,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; readings indicated significant moisture or delamination."
+      "text": "The readings indicated significant moisture or delamination."
     },
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
@@ -25342,8 +25097,15 @@
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "B",
       "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Deck and coachroof/pilothouse conductivity testing",
+      "rating": "B",
+      "phase": "observed",
       "severity": 3,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; some readings were elevated."
+      "text": "Some readings were elevated."
     },
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
@@ -25357,7 +25119,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "Conductivity testing was carried out on a relative 0 to 999 scale; readings were consistent with a sound laminate."
+      "text": "Conductivity testing was carried out on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Deck and coachroof/pilothouse conductivity testing",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The readings were consistent with a sound laminate."
     },
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
@@ -25522,34 +25291,6 @@
     },
     {
       "section": "Anchor locker",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No action required at this time."
-    },
-    {
-      "section": "Stanchions",
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "This represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Stanchions",
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Address this at the next scheduled service."
-    },
-    {
-      "section": "Stanchions",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No immediate concern was noted for continued use."
-    },
-    {
-      "section": "Stanchions",
       "rating": "C",
       "phase": "action",
       "severity": 1,
@@ -26044,6 +25785,153 @@
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "One or more stanchions were loose at the base and did not offer secure fall protection.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "One or more stanchions were broken, bent, or had pulled free of their mounts.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Significant structural cracking was observed at the base of one or more stanchions, extending into the deck.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "A failing stanchion cannot be relied upon to arrest a fall overboard and represents a safety hazard.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "The affected stanchions should be rebedded or replaced, and the deck core inspected and repaired as required, before the vessel is returned to service.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Some movement was present in several stanchions, typical for a vessel of this age.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Minor spider or stress cracks were noted at the base of one or more stanchions.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The bedding compound around the base of one or more stanchions was failing or missing.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "These findings warranted attention to prevent water ingress into the deck core and to maintain the strength of the mounting.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Inspect and rebed the noted stanchions to seal the mounting and retighten the hardware.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Monitor the cracked areas at the next haul-out and address if they progress.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "All stanchions were solidly affixed to the deck and showed no visible deficiencies.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The stanchion bases and bedding compound were intact.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Minor spider cracks typical for a vessel of this age were noted at the base of one or more stanchions.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Slight movement was present in one or more stanchions, consistent with normal wear.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The stanchions were providing effective fall protection at the time of survey.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "C",
+      "phase": "means",
+      "severity": 2,
+      "text": "The findings were cosmetic and did not affect the strength of the mounting.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time.",
+      "section": "Stanchions"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program.",
+      "section": "Stanchions"
+    },
+    {
+      "section": "Shore water hookup",
+      "rating": "Not tested/not verified",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The shore water hookup was not tested because the vessel was on shore and winterized at the time of survey."
+    },
+    {
+      "section": "Shore water hookup",
+      "rating": "Not tested/not verified",
+      "phase": "action",
+      "severity": 2,
+      "text": "Recommend testing the shore water hookup under pressure when the vessel is commissioned for the season."
     }
   ]
 }

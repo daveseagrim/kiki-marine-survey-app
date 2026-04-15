@@ -72,6 +72,91 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2204 — 2026-04-14
+
+### Rewritten — Stanchions A/B/C (hand-curated)
+
+Old C rating had 5 near-duplicate chips describing the same "firmly
+mounted to the deck" finding. Replaced with 19 curated chips across
+the three ratings, past tense, severity-ordered, no redundancy:
+
+- **A** (critical safety): loose/broken/pulled-free stanchions,
+  structural cracking into the deck; fall-protection hazard means;
+  rebed-or-replace-before-service action.
+- **B** (attention): movement typical for age, minor spider cracks,
+  failing bedding; warrants attention to prevent core ingress;
+  inspect-rebed / monitor-at-haul actions.
+- **C** (serviceable): solidly affixed, intact bases, minor cosmetic
+  spider cracks, slight movement; effective fall protection / cosmetic
+  means; no-action / routine-program.
+
+### Removed — 44 library-wide near-duplicate chips
+
+Pass over every (section, rating, phase) group using Jaccard word-set
+similarity with a 0.82 threshold. 455 groups checked, 44 chips removed
+where a near-identical sibling already existed in the same group.
+Preserves every functionally distinct chip; eliminates variant
+paraphrases that produced redundant prose when both were ticked.
+
+Phase-coverage verification after dedupe: **838 active combos, 0 gaps**.
+Severity field populated on every chip (v2186 batch + v2187/202
+curated). Picker sorts by severity ascending within phase (v2175), so
+chips always appear from lightest finding at top to most severe at
+bottom.
+
+### Added — Shore water hookup: "on-shore + winterized" NT chip
+
+Dedicated Not-tested/not-verified chips for when the vessel was on
+shore and winterized:
+- Observed: "The shore water hookup was not tested because the vessel
+  was on shore and winterized at the time of survey."
+- Action: "Recommend testing the shore water hookup under pressure
+  when the vessel is commissioned for the season."
+
+---
+
+## v2203 — 2026-04-14
+
+### Changed — Split combined 0-999 chips into separate observed + means chips
+
+v2202's backfill had each conductivity scale chip combined with its
+interpretation ("…scale; readings were consistent with a sound
+laminate.") — which mixed observed and means in one sentence. Split
+all 18 combined chips into two separate chips:
+
+- Observed: "Conductivity testing was carried out on a relative 0 to
+  999 scale." (severity 1)
+- Means: "The readings were consistent with a sound laminate." / "The
+  readings indicated significant moisture or delamination." / etc.
+  (severity matches rating)
+- For B, "some readings were elevated" was re-classified as a
+  second observed-phase chip rather than means — it's a finding, not
+  an interpretation.
+
+Also added the standalone 0-to-999 scale chip to Cockpit conductivity
+testing A/B/C (which had inline-scaled chips from an earlier curation
+but no bare scale statement).
+
+### Fixed — Grammar on "without deficiency condition" phrasings
+
+9 library entries contained malformed phrases like "readings
+consistent with a without deficiency condition" and "indicated a in
+good order condition". Rewrote to clean grammar:
+
+- "readings consistent with a without deficiency condition" → "readings
+  consistent with a sound laminate"
+- "was in without deficiency condition" → "showed no deficiencies"
+- "in a without deficiency condition" → "with no deficiencies"
+- "indicated a in good order condition" → "indicated the vessel was
+  in good order"
+- "indicated a without deficiency condition" → "showed no deficiencies"
+- "with in proper condition" → "in proper working condition"
+- "without deficiency condition" → "without deficiencies"
+
+Zero "without deficiency condition" patterns remain.
+
+---
+
 ## v2202 — 2026-04-14
 
 ### Added (library-wide) — Every section × A/B/C rating now has all 3 phases
