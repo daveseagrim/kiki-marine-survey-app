@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2166';
+const APP_VERSION = 'v2167';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -19261,7 +19261,37 @@ const FirebaseSync = (() => {
             : 0;
 
           if (!localSurvey || remoteTime > localTime) {
-            // Remote is newer — save locally (skip re-syncing to Firebase)
+            // v2167: regression guard. The remote-newer test relies on
+            // lastModified being current. If a local edit (or a manual
+            // IndexedDB migration) didn't bump that field, a stale cloud
+            // copy can overwrite richer local data. Before replacing,
+            // count the data on both sides — if local has substantially
+            // MORE saved content, refuse the overwrite and instead push
+            // local up so cloud catches up.
+            if (localSurvey) {
+              const lScore = _scoreSurveyContent(localSurvey);
+              const rScore = _scoreSurveyContent(remoteSurvey);
+              const localRicher =
+                lScore.textChars > rScore.textChars * 1.2 + 50 ||
+                lScore.photoCount > rScore.photoCount ||
+                lScore.ratedItems > rScore.ratedItems;
+              if (localRicher) {
+                console.warn(
+                  `[Sync] REFUSED overwrite of "${localSurvey.vesselName || localSurvey.id}" — ` +
+                  `local is richer (text=${lScore.textChars}ch vs ${rScore.textChars}ch, ` +
+                  `photos=${lScore.photoCount} vs ${rScore.photoCount}, ` +
+                  `rated=${lScore.ratedItems} vs ${rScore.ratedItems}). ` +
+                  `Pushing local to cloud instead.`
+                );
+                // Push local up to fix the cloud copy. saveSurvey will bump
+                // lastModified and trigger pushSurvey via the wrapper.
+                await saveSurvey(localSurvey);
+                return;
+              }
+            }
+
+            // Remote is newer AND not a regression — save locally
+            // (skip re-syncing to Firebase)
             _suppressLocalWrite = true;
             await saveSurvey(remoteSurvey);
             _suppressLocalWrite = false;
@@ -19294,6 +19324,20 @@ const FirebaseSync = (() => {
       console.error('Firestore listener error:', err);
       updateSyncStatusUI('error', err.message);
     });
+  }
+
+  // v2167: helper for the regression guard above. Counts content density
+  // so we can detect when a remote pull would silently shrink local data.
+  function _scoreSurveyContent(survey) {
+    let textChars = 0, photoCount = 0, ratedItems = 0;
+    if (!survey || !survey.items) return { textChars, photoCount, ratedItems };
+    for (const k of Object.keys(survey.items)) {
+      const it = survey.items[k] || {};
+      if (it.text && typeof it.text === 'string') textChars += it.text.length;
+      if (Array.isArray(it.photos)) photoCount += it.photos.length;
+      if (it.rating && String(it.rating).trim()) ratedItems += 1;
+    }
+    return { textChars, photoCount, ratedItems };
   }
 
   // ── Photo Sync (Firebase Storage) ──────────────────────────────────

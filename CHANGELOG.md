@@ -12,6 +12,38 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2167 — 2026-04-14
+
+### Fixed (urgent) — Firestore listener will no longer overwrite richer local surveys
+
+Root cause of the Ahoy Vey data loss: when the user ran a manual
+DevTools migration that wrote directly to IndexedDB via
+`objectStore.put()`, it bypassed the `saveSurvey` wrapper that bumps
+`lastModified` and pushes to Firebase. Cloud kept its older copy with
+the older timestamp. On next page load the Firestore real-time listener
+saw `remote.lastModified > local.lastModified` (because cloud had been
+pushed by an earlier in-app save with `lastModified=now`, while local's
+was unchanged from the SC import) and called `saveSurvey(remoteSurvey)`,
+silently overwriting the merged data — losing 135ch of observation
+text and 6 of the 12 photos on the hull/rudder item.
+
+Defensive guard added in the Firestore `onSnapshot` listener: before
+overwriting local with remote, score both surveys for content density
+(text length, photo count, rated-item count). If local has
+substantially MORE content than remote, the listener REFUSES the
+overwrite and instead pushes the local copy back to Firebase to repair
+the cloud. Threshold: local wins if it has > remote.text * 1.2 + 50
+chars of text, OR more photos, OR more rated items.
+
+This protects against any future scenario — manual migrations, race
+conditions on multi-device sync, or a corrupted cloud copy — where a
+naive timestamp comparison would silently regress data.
+
+Console will print a clear warning whenever the guard fires:
+`[Sync] REFUSED overwrite of "Ahoy Vey" — local is richer (...). Pushing local to cloud instead.`
+
+---
+
 ## v2166 — 2026-04-14
 
 ### Fixed — Card labels now strip rudder text on outdrive/IPS surveys
