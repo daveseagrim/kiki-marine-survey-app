@@ -4717,1149 +4717,6 @@
       "severity": 3
     }
   ],
-  "Deck & Bowsprit": [
-    {
-      "section": "Deck and coachroof/pilothouse condition",
-      "rating": "C",
-      "text": "Minor spider and stress cracks were noted in the deck and coachroof, typical of a vessel of this age.",
-      "phase": "observed",
-      "severity": 2
-    },
-    {
-      "section": "Deck and coachroof/pilothouse condition",
-      "rating": "C",
-      "text": "These were not considered concerning at the time of inspection and should be monitored.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
-      "rating": "B",
-      "text": "Percussion testing produced acoustics that may indicate saturation or rot within the core.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
-      "rating": "B",
-      "text": "The photographs show the areas identified by the hammer tip.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
-      "rating": "B",
-      "text": "No distinct soft spots were noted.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
-      "rating": "B",
-      "text": "Although they do not currently present any safety concerns, in order to mitigate the spread, these areas should be repaired.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
-      "rating": "C - one or two minor areas",
-      "text": "Percussion testing of most of the deck and coachroof produced a clear and even tone across most areas with no indications of delamination or voids.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
-      "rating": "C - one or two minor areas",
-      "text": "However, [insert number of] localized areas produced dull thuds suggestive of present or past saturation with core deterioration.",
-      "phase": "observed",
-      "severity": 2
-    },
-    {
-      "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
-      "rating": "C - one or two minor areas",
-      "text": "The photographs show the hammer tip indicating the areas.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
-      "rating": "C - one or two minor areas",
-      "text": "Monitor and plan localized repair if softness develops.",
-      "phase": "action",
-      "severity": 2
-    },
-    {
-      "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
-      "rating": "C - with bowsprit",
-      "text": "Percussion testing of the bowsprit, deck, and coachroof produced a clear and even tone with no indications of delamination or voids.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Deck and coachroof/pilothouse conductivity testing",
-      "rating": "A",
-      "text": "The deck and coachroof returned readings between [insert details] and [insert details].",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck and coachroof/pilothouse conductivity testing",
-      "rating": "A",
-      "text": "Close monitoring for softness was recommended in the area indicated as 999.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Deck and coachroof/pilothouse conductivity testing",
-      "rating": "A",
-      "text": "Removal and replacement of decking and any saturated material should be considered.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Deck and coachroof/pilothouse conductivity testing",
-      "rating": "B - some significantly wet places",
-      "text": "The deck, and coachroof returned readings between [insert reading range] and [insert reading range].",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck and coachroof/pilothouse conductivity testing",
-      "rating": "B - some significantly wet places",
-      "text": "The pictured areas should be watched closely this season for any softness.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Deck and coachroof/pilothouse conductivity testing",
-      "rating": "B - some significantly wet places",
-      "text": "Where saturation is significant, removal and replacement of decking and wet material should be considered.",
-      "phase": "means",
-      "severity": 5
-    },
-    {
-      "section": "Deck and coachroof/pilothouse conductivity testing",
-      "rating": "C - some small areas",
-      "text": "The deck and coachroof returned elevated readings between [insert reading range] and [insert reading range].",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck and coachroof/pilothouse conductivity testing",
-      "rating": "C - some small areas",
-      "text": "Although these levels are typical for the vessel's age, they should be monitored between seasons for signs of saturation or delamination.",
-      "phase": "means",
-      "severity": 5
-    },
-    {
-      "section": "Deck and coachroof/pilothouse conductivity testing",
-      "rating": "C - no conductivity",
-      "text": "Conductivity testing of the deck and coachroof produced readings consistent with a without deficiency condition, with no elevated conductivity detected.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Pulpit",
-      "rating": "B",
-      "text": "Cracking was present in the decking at the aft feet of the pulpit.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Pulpit",
-      "rating": "B",
-      "text": "Repair in the short term and tighten the bases to the deck to prevent water ingress.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Pulpit",
-      "rating": "C",
-      "text": "Spider and stress cracks were present at the bases of some pulpit stanchions.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Pulpit",
-      "rating": "C",
-      "text": "The pulpit remained solidly attached to the deck and was in proper working condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Pulpit",
-      "rating": "C",
-      "text": "The pulpit was solidly attached to the deck and was in satisfactory condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Bow roller",
-      "rating": "B",
-      "text": "The bow roller showed wear at the roller component and should be replaced.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Bow roller",
-      "rating": "C",
-      "text": "The bow roller assembly was solidly mounted, and the roller was intact and in acceptable condition.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Primary anchor, chain and rode",
-      "rating": "B",
-      "text": "The primary anchor was undersized for the vessel and merits replacement.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Primary anchor, chain and rode",
-      "rating": "B",
-      "text": "As a guide, use approximately 1.5 to 2 lb per foot for modern patterns such as Rocna, Mantus, or Spade, and 2 to 2.5 lb per foot for older plow or Danforth types such as CQR, Bruce, or Delta.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Primary anchor, chain and rode",
-      "rating": "B",
-      "text": "For Great Lakes service, use chain length approximately equal to the vessel length.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Primary anchor, chain and rode",
-      "rating": "B",
-      "text": "Retaining wire should be fitted on the main shackle that attaches the chain to the anchor.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Primary anchor, chain and rode",
-      "rating": "B",
-      "text": "Only about [insert chain length] feet of chain was fitted.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Primary anchor, chain and rode",
-      "rating": "B",
-      "text": "As a guide, chain length should be approximately equal to the vessel length.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Primary anchor, chain and rode",
-      "rating": "C",
-      "text": "The primary anchor appeared to be of appropriate weight, was properly secured to the chain, and had adequate chain and rode.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Windlass",
-      "rating": "C",
-      "text": "The windlass was in good working order and performed well during limited trial run testing.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Windlass",
-      "rating": "Not tested",
-      "text": "The windlass appeared serviceable.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Windlass",
-      "rating": "Not tested",
-      "text": "The vessel was ashore and the windlass was not tested under load.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Anchor locker",
-      "rating": "C",
-      "text": "The anchor locker lid was solidly attached to its hinges and operated smoothly.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Anchor locker",
-      "rating": "C",
-      "text": "The drain appeared clear.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Anchor locker",
-      "rating": "C",
-      "text": "The anchor locker presented no deficiencies and housed a deck wash spigot and hose.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Stanchions",
-      "rating": "B - one stanchion",
-      "text": "One stanchion located at [insert location] was loose at the base and required re-bedding and tightening.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Stanchions",
-      "rating": "B - one stanchion",
-      "text": "The remaining stanchions were securely fastened and in good condition.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Stanchions",
-      "rating": "B - loose",
-      "text": "Several stanchions at the base were loose and required re-bedding and tightening.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Stanchions",
-      "rating": "C - some movement",
-      "text": "Some movement was present in several stanchions typical of age.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Stanchions",
-      "rating": "C - some movement",
-      "text": "The stanchions were adequately secured to the deck.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Stanchions",
-      "rating": "C - cracks but solid",
-      "text": "Typical of a boat this age, there were several spider/stress cracks at the base of many stanchions.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Stanchions",
-      "rating": "C - cracks but solid",
-      "text": "However, they were firmly mounted to the deck and in proper condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Stanchions",
-      "rating": "C",
-      "text": "All stanchions were solidly affixed to the deck and were found to be in order.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Lifelines and safety rail",
-      "rating": "B",
-      "text": "Plastic-coated lifelines displayed areas of rust staining that affected appearance only.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Lifelines and safety rail",
-      "rating": "B",
-      "text": "The pelican clip at the boarding position was difficult to release and close and should be adjusted or replaced.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Lifelines and safety rail",
-      "rating": "C",
-      "text": "The safety rail was securely mounted along the stanchions.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Lifelines and safety rail",
-      "rating": "C",
-      "text": "All lifelines showed no signs of deterioration with functional pelican clips at the boarding positions.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Fuel and water fill ports and waste deck pump-out port",
-      "rating": "B",
-      "text": "[specify fuel, water, or waste] fill caps were found without retaining chains, which violates ABYC H-27.7.1 and ABYC H-33.9.3.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Fuel and water fill ports and waste deck pump-out port",
-      "rating": "B",
-      "text": "Fit retaining chains to prevent loss of caps and possible water ingress.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Fuel and water fill ports and waste deck pump-out port",
-      "rating": "B",
-      "text": "Fuel, water, and deck pump-out ports were properly sealed.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Fuel and water fill ports and waste deck pump-out port",
-      "rating": "B",
-      "text": "Not all caps were fitted with retaining chains, in violation of ABYC H-27.7.1.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Fuel and water fill ports and waste deck pump-out port",
-      "rating": "B",
-      "text": "Fit retaining chains on all caps to prevent loss.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Fuel and water fill ports and waste deck pump-out port",
-      "rating": "C",
-      "text": "Fuel, water, and deck pump-out ports were properly sealed and fitted with the required safety chains.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Mooring cleats and chocks",
-      "rating": "C",
-      "text": "Despite pressure cracks at some bases typical of age, all mooring cleats were firmly affixed and appeared sound and well-maintained.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Mooring cleats and chocks",
-      "rating": "C",
-      "text": "All mooring cleats were firmly affixed and were intact and in good order.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Mooring cleats and chocks",
-      "rating": "C",
-      "text": "All mooring cleats and chocks were firmly affixed and were in proper working condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Toerail and gunwale",
-      "rating": "B",
-      "text": "Although the toerail could benefit from refinishing for appearance, it remained firmly attached at the gunwale and was serviceable.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Toerail and gunwale",
-      "rating": "C - aluminum toe rail",
-      "text": "The aluminium toerail formed part of the hull and deck joint backing and served as the toerail.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Toerail and gunwale",
-      "rating": "C - aluminum toe rail",
-      "text": "It was securely attached and was in satisfactory condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Toerail and gunwale",
-      "rating": "C - part of the deck good condition",
-      "text": "The toerail was in acceptable condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Toerail and gunwale",
-      "rating": "C - attached",
-      "text": "The toerail was firmly attached at the gunwale and was in good working order.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Toerail and gunwale",
-      "rating": "C - part of the deck.",
-      "text": "The toerail presented no deficiencies.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Grab rails",
-      "rating": "B",
-      "text": "The stainless grab rails were generally serviceable.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Grab rails",
-      "rating": "B",
-      "text": "[Describe any specific deficiency if applicable].",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Grab rails",
-      "rating": "C - stainless",
-      "text": "The stainless grab rails were solidly attached and were functioning as intended.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Grab rails",
-      "rating": "C - teak refinishing",
-      "text": "The teak grab rails were solidly attached and were found to be in order.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Grab rails",
-      "rating": "C - teak refinishing",
-      "text": "Refinishing would improve appearance.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Grab rails",
-      "rating": "C - teak",
-      "text": "The teak grab rails were solidly attached and showed no signs of deterioration.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Brightwork",
-      "rating": "B",
-      "text": "All brightwork would benefit from refinishing for appearance and protection.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Brightwork",
-      "rating": "C",
-      "text": "The brightwork was generally in satisfactory condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck hatches, windows, and portholes – exterior observations",
-      "rating": "B - sealant issue",
-      "text": "Sealant around several windows was lifting.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck hatches, windows, and portholes – exterior observations",
-      "rating": "B - sealant issue",
-      "text": "Renew sealant to prevent water ingress.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck hatches, windows, and portholes – exterior observations",
-      "rating": "C",
-      "text": "The single deck hatch appeared without deficiency from the exterior.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck hatches, windows, and portholes – exterior observations",
-      "rating": "C",
-      "text": "All deck hatches, windows, and portholes appeared in proper condition from the exterior.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck hatches, windows, and portholes – exterior observations",
-      "rating": "C",
-      "text": "Despite age-typical crazing, all deck hatches, windows, and portholes appeared in good order from the exterior.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Windshield, pilothouse windows, frames, and studs",
-      "rating": "B",
-      "text": "The windshield and frames were solid and serviceable.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Windshield, pilothouse windows, frames, and studs",
-      "rating": "B",
-      "text": "[Add detail on any specific deficiency if applicable].",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Windshield, pilothouse windows, frames, and studs",
-      "rating": "C",
-      "text": "The windshield, pilothouse windows, frames, and studs were in acceptable condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Windshield, pilothouse windows, frames, and studs",
-      "rating": "C",
-      "text": "The windshield, pilothouse windows, frames, and seals were in good working order.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Windshield, pilothouse windows, frames, and studs",
-      "rating": "C",
-      "text": "The windshield, pilothouse windows, frames, and studs were structurally sound, solid, and without deficiency.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Arch – external condition and equipment",
-      "rating": "B",
-      "text": "The arch was solidly attached and was serviceable.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Arch – external condition and equipment",
-      "rating": "B",
-      "text": "Cracking was present along the top at the bases of mounted instruments.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Arch – external condition and equipment",
-      "rating": "C",
-      "text": "The arch was solidly attached and was functioning as intended.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck and coachroof/pilothouse condition",
-      "rating": "A",
-      "text": "The deck or pilothouse shows significant cracking, delamination, or structural compromise.",
-      "phase": "means",
-      "severity": 5
-    },
-    {
-      "section": "Deck and coachroof/pilothouse condition",
-      "rating": "A",
-      "text": "Immediate repair is required.",
-      "phase": "action",
-      "severity": 5
-    },
-    {
-      "section": "Deck and coachroof/pilothouse condition",
-      "rating": "B",
-      "text": "The deck or pilothouse showed spider cracks or minor signs of elevated conductivity with readings of [insert reading range] with readings of [insert reading range].",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck and coachroof/pilothouse condition",
-      "rating": "B",
-      "text": "Monitor and treat to prevent deterioration.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
-      "rating": "A",
-      "text": "Percussion testing revealed multiple soft or delaminated areas indicating structural failure.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Bowsprit, deck and coachroof/pilothouse impact and resonance testing",
-      "rating": "A",
-      "text": "Repair is critical.",
-      "phase": "action",
-      "severity": 5
-    },
-    {
-      "section": "Pulpit",
-      "rating": "A",
-      "text": "The pulpit is structurally compromised or loose, posing a safety hazard.",
-      "phase": "means",
-      "severity": 5
-    },
-    {
-      "section": "Pulpit",
-      "rating": "A",
-      "text": "Immediate repair or replacement is required.",
-      "phase": "action",
-      "severity": 5
-    },
-    {
-      "section": "Bow roller",
-      "rating": "A",
-      "text": "The bow roller is broken or non-functional, preventing safe anchor deployment.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Bow roller",
-      "rating": "A",
-      "text": "Replacement is required.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Primary anchor, chain and rode",
-      "rating": "A",
-      "text": "The anchor, chain, or rode is damaged or corroded beyond safe use.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Primary anchor, chain and rode",
-      "rating": "A",
-      "text": "Replacement or significant repair is required.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Windlass",
-      "rating": "A",
-      "text": "The windlass is non-functional or poses a safety hazard.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Windlass",
-      "rating": "A",
-      "text": "Repair or replacement is required.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Windlass",
-      "rating": "B",
-      "text": "The windlass operates but shows signs of wear or intermittent function.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Windlass",
-      "rating": "B",
-      "text": "Service is recommended.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Anchor locker",
-      "rating": "A",
-      "text": "The anchor locker is damaged or corroded, compromising safe anchor stowage.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Anchor locker",
-      "rating": "A",
-      "text": "Repair is required.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Anchor locker",
-      "rating": "B",
-      "text": "The locker shows corrosion or minor damage with areas of elevated conductivity with readings of [insert reading range].",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Anchor locker",
-      "rating": "B",
-      "text": "Treatment and ventilation improvement are advisable.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Stanchions",
-      "rating": "A",
-      "text": "Multiple stanchions are loose or cracked, creating a safety hazard.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Stanchions",
-      "rating": "A",
-      "text": "Immediate repair or replacement is required.",
-      "phase": "action",
-      "severity": 5
-    },
-    {
-      "section": "Lifelines and safety rail",
-      "rating": "A",
-      "text": "The lifelines or safety rail are broken or loose, creating a fall hazard.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Lifelines and safety rail",
-      "rating": "A",
-      "text": "Immediate repair is required.",
-      "phase": "action",
-      "severity": 5
-    },
-    {
-      "section": "Fuel and water fill ports and waste deck pump-out port",
-      "rating": "A",
-      "text": "The ports are leaking, cracked, or non-functional.",
-      "phase": "observed",
-      "severity": 4
-    },
-    {
-      "section": "Fuel and water fill ports and waste deck pump-out port",
-      "rating": "A",
-      "text": "Repair or replacement is required to prevent water ingress or spills.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Mooring cleats and chocks",
-      "rating": "A",
-      "text": "Cleats or chocks are broken or corroded, compromising mooring security.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Mooring cleats and chocks",
-      "rating": "A",
-      "text": "Replacement is required.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Mooring cleats and chocks",
-      "rating": "B",
-      "text": "Cleats or chocks show corrosion or loose fasteners.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Mooring cleats and chocks",
-      "rating": "B",
-      "text": "Service and tighten as needed.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Toerail and gunwale",
-      "rating": "A",
-      "text": "The toerail or gunwale is cracked, loose, or deteriorated, affecting structural integrity.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Toerail and gunwale",
-      "rating": "A",
-      "text": "Repair or replacement is required.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Grab rails",
-      "rating": "A",
-      "text": "Grab rails are loose, cracked, or missing, creating a safety hazard.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Grab rails",
-      "rating": "A",
-      "text": "Repair or replacement is required.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Brightwork",
-      "rating": "A",
-      "text": "Brightwork is severely deteriorated or rotted, compromising structural integrity.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Brightwork",
-      "rating": "A",
-      "text": "Replacement is required.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck hatches, windows, and portholes – exterior observations",
-      "rating": "A",
-      "text": "Hatches or portholes are cracked, leaking, or non-functional.",
-      "phase": "observed",
-      "severity": 4
-    },
-    {
-      "section": "Deck hatches, windows, and portholes – exterior observations",
-      "rating": "A",
-      "text": "Immediate repair or replacement is required.",
-      "phase": "action",
-      "severity": 5
-    },
-    {
-      "section": "Arch – external condition and equipment",
-      "rating": "A",
-      "text": "The arch is structurally compromised, bent, or showing signs of failure.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Arch – external condition and equipment",
-      "rating": "A",
-      "text": "Repair or replacement is required.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
-      "rating": "A",
-      "text": "The deck and coachroof exhibited significant cracking, delamination, or structural damage.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
-      "rating": "A",
-      "text": "Immediate professional assessment and repair is required to ensure structural integrity and prevent water ingress.",
-      "phase": "action",
-      "severity": 5
-    },
-    {
-      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
-      "rating": "B",
-      "text": "The deck and coachroof displayed moderate stress cracks and localized damage.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
-      "rating": "B",
-      "text": "Monitoring and repair planning is recommended to prevent further deterioration.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
-      "rating": "C",
-      "text": "The deck and coachroof displayed minor spider and stress cracks typical of the vessel's age.",
-      "phase": "observed",
-      "severity": 2
-    },
-    {
-      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
-      "rating": "C",
-      "text": "The condition was found to be in order with no immediate action required.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Shore water hookup",
-      "rating": "A",
-      "text": "The shore water hookup fitting was missing, damaged, or non-functional.",
-      "phase": "observed",
-      "severity": 4
-    },
-    {
-      "section": "Shore water hookup",
-      "rating": "A",
-      "text": "Installation or repair is required for shore water connection capability.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Shore water hookup",
-      "rating": "B",
-      "text": "The shore water hookup was functional but showed signs of corrosion or wear.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Shore water hookup",
-      "rating": "B",
-      "text": "Service and cleaning are recommended to ensure reliable operation.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Shore water hookup",
-      "rating": "C",
-      "text": "The shore water hookup showed no signs of deterioration and functional with no signs of leakage or corrosion.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Toerail/gunwale",
-      "rating": "A",
-      "text": "The toerail or gunwale exhibited significant cracking, separation, or structural damage.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Toerail/gunwale",
-      "rating": "A",
-      "text": "Immediate repair is required to restore proper support and safety.",
-      "phase": "action",
-      "severity": 5
-    },
-    {
-      "section": "Toerail/gunwale",
-      "rating": "B",
-      "text": "The toerail or gunwale showed minor cracking or loosening at attachment points.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Toerail/gunwale",
-      "rating": "B",
-      "text": "Tightening and monitoring are recommended to prevent further deterioration.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Toerail/gunwale",
-      "rating": "C",
-      "text": "The toerail and gunwale were solidly mounted and in satisfactory condition with no notable defects.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Fuel and water fill ports, and waste deck pump-out port",
-      "rating": "A",
-      "text": "One or more fill ports or pump-out ports were damaged, missing, or leaking.",
-      "phase": "observed",
-      "severity": 4
-    },
-    {
-      "section": "Fuel and water fill ports, and waste deck pump-out port",
-      "rating": "A",
-      "text": "Immediate repair or replacement is required to prevent water ingress and ensure proper functionality.",
-      "phase": "action",
-      "severity": 5
-    },
-    {
-      "section": "Fuel and water fill ports, and waste deck pump-out port",
-      "rating": "B",
-      "text": "The fill ports and pump-out were functional but showed signs of corrosion or wear.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Fuel and water fill ports, and waste deck pump-out port",
-      "rating": "B",
-      "text": "Seals should be inspected and replaced as needed to prevent leakage.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Fuel and water fill ports, and waste deck pump-out port",
-      "rating": "C",
-      "text": "The fuel and water fill ports and waste pump-out were intact and in good order and properly sealed with no signs of leakage.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Windshield, pilot house windows, frames and seals",
-      "rating": "A",
-      "text": "The windshield or pilot house windows were cracked, damaged, or the seals were severely compromised.",
-      "phase": "means",
-      "severity": 4
-    },
-    {
-      "section": "Windshield, pilot house windows, frames and seals",
-      "rating": "A",
-      "text": "Water ingress is likely.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Windshield, pilot house windows, frames and seals",
-      "rating": "A",
-      "text": "Immediate replacement or resealing is required.",
-      "phase": "action",
-      "severity": 5
-    },
-    {
-      "section": "Windshield, pilot house windows, frames and seals",
-      "rating": "B",
-      "text": "The windshield or windows showed signs of wear with minor crazing or loose frames.",
-      "phase": "observed",
-      "severity": 2
-    },
-    {
-      "section": "Windshield, pilot house windows, frames and seals",
-      "rating": "B",
-      "text": "Resealing is recommended to prevent water ingress and improve clarity.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Windshield, pilot house windows, frames and seals",
-      "rating": "C",
-      "text": "The windshield and pilot house windows were in proper working condition with clear visibility and secure frames.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Windshield, pilot house windows, frames and seals",
-      "rating": "C",
-      "text": "Seals were intact and in in good order condition.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Deck hatch(es), windows and portholes (exterior observations)",
-      "rating": "C",
-      "text": "All deck hatches, windows, and portholes were visually inspected from the exterior.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck hatch(es), windows and portholes (exterior observations)",
-      "rating": "C",
-      "text": "The frames were securely fastened and the seals appeared serviceable with no significant deterioration.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Deck hatch(es), windows and portholes (exterior observations)",
-      "rating": "C",
-      "text": "No cracking or crazing was noted in the acrylic or glass.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck hatch(es), windows and portholes (exterior observations)",
-      "rating": "C - with crazing",
-      "text": "All deck hatches, windows, and portholes were visually inspected from the exterior.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck hatch(es), windows and portholes (exterior observations)",
-      "rating": "C - with crazing",
-      "text": "The frames were securely fastened and the seals appeared serviceable with no significant deterioration.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Deck hatch(es), windows and portholes (exterior observations)",
-      "rating": "C - with crazing",
-      "text": "Some crazing was noted on the acrylic, typical of a vessel of this age.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck hatch(es), windows and portholes (exterior observations)",
-      "rating": "B",
-      "text": "Deck hatches, windows, and portholes were visually inspected from the exterior. {any:One or more seals showed deterioration and should be replaced|Crazing on one or more hatch lenses was significant and replacement is recommended|A hatch frame was loose and should be re-bedded|Corrosion was noted around one or more porthole frames}.",
-      "phase": "observed",
-      "severity": 5
-    }
-  ],
   "Aft Deck": [
     {
       "section": "Aft deck condition (spider cracks, etc.)",
@@ -17462,6 +16319,1282 @@
       "text": "Service or replacement is advisable.",
       "phase": "action",
       "severity": 3
+    }
+  ],
+  "Deck": [
+    {
+      "section": "Deck and coachroof/pilothouse condition",
+      "rating": "C",
+      "text": "Minor spider and stress cracks were noted in the deck and coachroof, typical of a vessel of this age.",
+      "phase": "observed",
+      "severity": 2
+    },
+    {
+      "section": "Deck and coachroof/pilothouse condition",
+      "rating": "C",
+      "text": "These were not considered concerning at the time of inspection and should be monitored.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "rating": "B",
+      "text": "Percussion testing produced acoustics that may indicate saturation or rot within the core.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "rating": "B",
+      "text": "The photographs show the areas identified by the hammer tip.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "rating": "B",
+      "text": "No distinct soft spots were noted.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "rating": "B",
+      "text": "Although they do not currently present any safety concerns, in order to mitigate the spread, these areas should be repaired.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "rating": "C - one or two minor areas",
+      "text": "Percussion testing of most of the deck and coachroof produced a clear and even tone across most areas with no indications of delamination or voids.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "rating": "C - one or two minor areas",
+      "text": "However, [insert number of] localized areas produced dull thuds suggestive of present or past saturation with core deterioration.",
+      "phase": "observed",
+      "severity": 2
+    },
+    {
+      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "rating": "C - one or two minor areas",
+      "text": "The photographs show the hammer tip indicating the areas.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "rating": "C - one or two minor areas",
+      "text": "Monitor and plan localized repair if softness develops.",
+      "phase": "action",
+      "severity": 2
+    },
+    {
+      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "rating": "C",
+      "text": "Percussion testing of the deck, and coachroof produced a clear and even tone with no indications of delamination or voids.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Deck and coachroof/pilothouse conductivity testing",
+      "rating": "A",
+      "text": "The deck and coachroof returned readings between [insert details] and [insert details].",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilothouse conductivity testing",
+      "rating": "A",
+      "text": "Close monitoring for softness was recommended in the area indicated as 999.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilothouse conductivity testing",
+      "rating": "A",
+      "text": "Removal and replacement of decking and any saturated material should be considered.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilothouse conductivity testing",
+      "rating": "B - some significantly wet places",
+      "text": "The deck, and coachroof returned readings between [insert reading range] and [insert reading range].",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilothouse conductivity testing",
+      "rating": "B - some significantly wet places",
+      "text": "The pictured areas should be watched closely this season for any softness.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilothouse conductivity testing",
+      "rating": "B - some significantly wet places",
+      "text": "Where saturation is significant, removal and replacement of decking and wet material should be considered.",
+      "phase": "means",
+      "severity": 5
+    },
+    {
+      "section": "Deck and coachroof/pilothouse conductivity testing",
+      "rating": "C - some small areas",
+      "text": "The deck and coachroof returned elevated readings between [insert reading range] and [insert reading range].",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilothouse conductivity testing",
+      "rating": "C - some small areas",
+      "text": "Although these levels are typical for the vessel's age, they should be monitored between seasons for signs of saturation or delamination.",
+      "phase": "means",
+      "severity": 5
+    },
+    {
+      "section": "Deck and coachroof/pilothouse conductivity testing",
+      "rating": "C - no conductivity",
+      "text": "Conductivity testing of the deck and coachroof produced readings consistent with a without deficiency condition, with no elevated conductivity detected.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Pulpit",
+      "rating": "B",
+      "text": "Cracking was present in the decking at the aft feet of the pulpit.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Pulpit",
+      "rating": "B",
+      "text": "Repair in the short term and tighten the bases to the deck to prevent water ingress.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Pulpit",
+      "rating": "C",
+      "text": "Spider and stress cracks were present at the bases of some pulpit stanchions.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Pulpit",
+      "rating": "C",
+      "text": "The pulpit remained solidly attached to the deck and was in proper working condition.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Pulpit",
+      "rating": "C",
+      "text": "The pulpit was solidly attached to the deck and was in satisfactory condition.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Bow roller",
+      "rating": "B",
+      "text": "The bow roller showed wear at the roller component and should be replaced.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Bow roller",
+      "rating": "C",
+      "text": "The bow roller assembly was solidly mounted, and the roller was intact and in acceptable condition.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Primary anchor, chain and rode",
+      "rating": "B",
+      "text": "The primary anchor was undersized for the vessel and merits replacement.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Primary anchor, chain and rode",
+      "rating": "B",
+      "text": "As a guide, use approximately 1.5 to 2 lb per foot for modern patterns such as Rocna, Mantus, or Spade, and 2 to 2.5 lb per foot for older plow or Danforth types such as CQR, Bruce, or Delta.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Primary anchor, chain and rode",
+      "rating": "B",
+      "text": "For Great Lakes service, use chain length approximately equal to the vessel length.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Primary anchor, chain and rode",
+      "rating": "B",
+      "text": "Retaining wire should be fitted on the main shackle that attaches the chain to the anchor.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Primary anchor, chain and rode",
+      "rating": "B",
+      "text": "Only about [insert chain length] feet of chain was fitted.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Primary anchor, chain and rode",
+      "rating": "B",
+      "text": "As a guide, chain length should be approximately equal to the vessel length.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Primary anchor, chain and rode",
+      "rating": "C",
+      "text": "The primary anchor appeared to be of appropriate weight, was properly secured to the chain, and had adequate chain and rode.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Windlass",
+      "rating": "C",
+      "text": "The windlass was in good working order and performed well during limited trial run testing.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Windlass",
+      "rating": "Not tested",
+      "text": "The windlass appeared serviceable.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Windlass",
+      "rating": "Not tested",
+      "text": "The vessel was ashore and the windlass was not tested under load.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Anchor locker",
+      "rating": "C",
+      "text": "The anchor locker lid was solidly attached to its hinges and operated smoothly.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Anchor locker",
+      "rating": "C",
+      "text": "The drain appeared clear.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Anchor locker",
+      "rating": "C",
+      "text": "The anchor locker presented no deficiencies and housed a deck wash spigot and hose.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Stanchions",
+      "rating": "B - one stanchion",
+      "text": "One stanchion located at [insert location] was loose at the base and required re-bedding and tightening.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Stanchions",
+      "rating": "B - one stanchion",
+      "text": "The remaining stanchions were securely fastened and in good condition.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Stanchions",
+      "rating": "B - loose",
+      "text": "Several stanchions at the base were loose and required re-bedding and tightening.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Stanchions",
+      "rating": "C - some movement",
+      "text": "Some movement was present in several stanchions typical of age.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Stanchions",
+      "rating": "C - some movement",
+      "text": "The stanchions were adequately secured to the deck.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Stanchions",
+      "rating": "C - cracks but solid",
+      "text": "Typical of a boat this age, there were several spider/stress cracks at the base of many stanchions.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Stanchions",
+      "rating": "C - cracks but solid",
+      "text": "However, they were firmly mounted to the deck and in proper condition.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Stanchions",
+      "rating": "C",
+      "text": "All stanchions were solidly affixed to the deck and were found to be in order.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Lifelines and safety rail",
+      "rating": "B",
+      "text": "Plastic-coated lifelines displayed areas of rust staining that affected appearance only.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Lifelines and safety rail",
+      "rating": "B",
+      "text": "The pelican clip at the boarding position was difficult to release and close and should be adjusted or replaced.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Lifelines and safety rail",
+      "rating": "C",
+      "text": "The safety rail was securely mounted along the stanchions.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Lifelines and safety rail",
+      "rating": "C",
+      "text": "All lifelines showed no signs of deterioration with functional pelican clips at the boarding positions.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Fuel and water fill ports and waste deck pump-out port",
+      "rating": "B",
+      "text": "[specify fuel, water, or waste] fill caps were found without retaining chains, which violates ABYC H-27.7.1 and ABYC H-33.9.3.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Fuel and water fill ports and waste deck pump-out port",
+      "rating": "B",
+      "text": "Fit retaining chains to prevent loss of caps and possible water ingress.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Fuel and water fill ports and waste deck pump-out port",
+      "rating": "B",
+      "text": "Fuel, water, and deck pump-out ports were properly sealed.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Fuel and water fill ports and waste deck pump-out port",
+      "rating": "B",
+      "text": "Not all caps were fitted with retaining chains, in violation of ABYC H-27.7.1.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Fuel and water fill ports and waste deck pump-out port",
+      "rating": "B",
+      "text": "Fit retaining chains on all caps to prevent loss.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Fuel and water fill ports and waste deck pump-out port",
+      "rating": "C",
+      "text": "Fuel, water, and deck pump-out ports were properly sealed and fitted with the required safety chains.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Mooring cleats and chocks",
+      "rating": "C",
+      "text": "Despite pressure cracks at some bases typical of age, all mooring cleats were firmly affixed and appeared sound and well-maintained.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Mooring cleats and chocks",
+      "rating": "C",
+      "text": "All mooring cleats were firmly affixed and were intact and in good order.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Mooring cleats and chocks",
+      "rating": "C",
+      "text": "All mooring cleats and chocks were firmly affixed and were in proper working condition.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Toerail and gunwale",
+      "rating": "B",
+      "text": "Although the toerail could benefit from refinishing for appearance, it remained firmly attached at the gunwale and was serviceable.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Toerail and gunwale",
+      "rating": "C - aluminum toe rail",
+      "text": "The aluminium toerail formed part of the hull and deck joint backing and served as the toerail.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Toerail and gunwale",
+      "rating": "C - aluminum toe rail",
+      "text": "It was securely attached and was in satisfactory condition.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Toerail and gunwale",
+      "rating": "C - part of the deck good condition",
+      "text": "The toerail was in acceptable condition.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Toerail and gunwale",
+      "rating": "C - attached",
+      "text": "The toerail was firmly attached at the gunwale and was in good working order.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Toerail and gunwale",
+      "rating": "C - part of the deck.",
+      "text": "The toerail presented no deficiencies.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Grab rails",
+      "rating": "B",
+      "text": "The stainless grab rails were generally serviceable.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Grab rails",
+      "rating": "B",
+      "text": "[Describe any specific deficiency if applicable].",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Grab rails",
+      "rating": "C - stainless",
+      "text": "The stainless grab rails were solidly attached and were functioning as intended.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Grab rails",
+      "rating": "C - teak refinishing",
+      "text": "The teak grab rails were solidly attached and were found to be in order.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Grab rails",
+      "rating": "C - teak refinishing",
+      "text": "Refinishing would improve appearance.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Grab rails",
+      "rating": "C - teak",
+      "text": "The teak grab rails were solidly attached and showed no signs of deterioration.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Brightwork",
+      "rating": "B",
+      "text": "All brightwork would benefit from refinishing for appearance and protection.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Brightwork",
+      "rating": "C",
+      "text": "The brightwork was generally in satisfactory condition.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck hatches, windows, and portholes – exterior observations",
+      "rating": "B - sealant issue",
+      "text": "Sealant around several windows was lifting.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck hatches, windows, and portholes – exterior observations",
+      "rating": "B - sealant issue",
+      "text": "Renew sealant to prevent water ingress.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck hatches, windows, and portholes – exterior observations",
+      "rating": "C",
+      "text": "The single deck hatch appeared without deficiency from the exterior.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck hatches, windows, and portholes – exterior observations",
+      "rating": "C",
+      "text": "All deck hatches, windows, and portholes appeared in proper condition from the exterior.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck hatches, windows, and portholes – exterior observations",
+      "rating": "C",
+      "text": "Despite age-typical crazing, all deck hatches, windows, and portholes appeared in good order from the exterior.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Windshield, pilothouse windows, frames, and studs",
+      "rating": "B",
+      "text": "The windshield and frames were solid and serviceable.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Windshield, pilothouse windows, frames, and studs",
+      "rating": "B",
+      "text": "[Add detail on any specific deficiency if applicable].",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Windshield, pilothouse windows, frames, and studs",
+      "rating": "C",
+      "text": "The windshield, pilothouse windows, frames, and studs were in acceptable condition.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Windshield, pilothouse windows, frames, and studs",
+      "rating": "C",
+      "text": "The windshield, pilothouse windows, frames, and seals were in good working order.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Windshield, pilothouse windows, frames, and studs",
+      "rating": "C",
+      "text": "The windshield, pilothouse windows, frames, and studs were structurally sound, solid, and without deficiency.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Arch – external condition and equipment",
+      "rating": "B",
+      "text": "The arch was solidly attached and was serviceable.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Arch – external condition and equipment",
+      "rating": "B",
+      "text": "Cracking was present along the top at the bases of mounted instruments.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Arch – external condition and equipment",
+      "rating": "C",
+      "text": "The arch was solidly attached and was functioning as intended.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilothouse condition",
+      "rating": "A",
+      "text": "The deck or pilothouse shows significant cracking, delamination, or structural compromise.",
+      "phase": "means",
+      "severity": 5
+    },
+    {
+      "section": "Deck and coachroof/pilothouse condition",
+      "rating": "A",
+      "text": "Immediate repair is required.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Deck and coachroof/pilothouse condition",
+      "rating": "B",
+      "text": "The deck or pilothouse showed spider cracks or minor signs of elevated conductivity with readings of [insert reading range] with readings of [insert reading range].",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilothouse condition",
+      "rating": "B",
+      "text": "Monitor and treat to prevent deterioration.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "rating": "A",
+      "text": "Percussion testing revealed multiple soft or delaminated areas indicating structural failure.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "rating": "A",
+      "text": "Repair is critical.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Pulpit",
+      "rating": "A",
+      "text": "The pulpit is structurally compromised or loose, posing a safety hazard.",
+      "phase": "means",
+      "severity": 5
+    },
+    {
+      "section": "Pulpit",
+      "rating": "A",
+      "text": "Immediate repair or replacement is required.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Bow roller",
+      "rating": "A",
+      "text": "The bow roller is broken or non-functional, preventing safe anchor deployment.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Bow roller",
+      "rating": "A",
+      "text": "Replacement is required.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Primary anchor, chain and rode",
+      "rating": "A",
+      "text": "The anchor, chain, or rode is damaged or corroded beyond safe use.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Primary anchor, chain and rode",
+      "rating": "A",
+      "text": "Replacement or significant repair is required.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Windlass",
+      "rating": "A",
+      "text": "The windlass is non-functional or poses a safety hazard.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Windlass",
+      "rating": "A",
+      "text": "Repair or replacement is required.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Windlass",
+      "rating": "B",
+      "text": "The windlass operates but shows signs of wear or intermittent function.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Windlass",
+      "rating": "B",
+      "text": "Service is recommended.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Anchor locker",
+      "rating": "A",
+      "text": "The anchor locker is damaged or corroded, compromising safe anchor stowage.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Anchor locker",
+      "rating": "A",
+      "text": "Repair is required.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Anchor locker",
+      "rating": "B",
+      "text": "The locker shows corrosion or minor damage with areas of elevated conductivity with readings of [insert reading range].",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Anchor locker",
+      "rating": "B",
+      "text": "Treatment and ventilation improvement are advisable.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Stanchions",
+      "rating": "A",
+      "text": "Multiple stanchions are loose or cracked, creating a safety hazard.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Stanchions",
+      "rating": "A",
+      "text": "Immediate repair or replacement is required.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Lifelines and safety rail",
+      "rating": "A",
+      "text": "The lifelines or safety rail are broken or loose, creating a fall hazard.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Lifelines and safety rail",
+      "rating": "A",
+      "text": "Immediate repair is required.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Fuel and water fill ports and waste deck pump-out port",
+      "rating": "A",
+      "text": "The ports are leaking, cracked, or non-functional.",
+      "phase": "observed",
+      "severity": 4
+    },
+    {
+      "section": "Fuel and water fill ports and waste deck pump-out port",
+      "rating": "A",
+      "text": "Repair or replacement is required to prevent water ingress or spills.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Mooring cleats and chocks",
+      "rating": "A",
+      "text": "Cleats or chocks are broken or corroded, compromising mooring security.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Mooring cleats and chocks",
+      "rating": "A",
+      "text": "Replacement is required.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Mooring cleats and chocks",
+      "rating": "B",
+      "text": "Cleats or chocks show corrosion or loose fasteners.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Mooring cleats and chocks",
+      "rating": "B",
+      "text": "Service and tighten as needed.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Toerail and gunwale",
+      "rating": "A",
+      "text": "The toerail or gunwale is cracked, loose, or deteriorated, affecting structural integrity.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Toerail and gunwale",
+      "rating": "A",
+      "text": "Repair or replacement is required.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Grab rails",
+      "rating": "A",
+      "text": "Grab rails are loose, cracked, or missing, creating a safety hazard.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Grab rails",
+      "rating": "A",
+      "text": "Repair or replacement is required.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Brightwork",
+      "rating": "A",
+      "text": "Brightwork is severely deteriorated or rotted, compromising structural integrity.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Brightwork",
+      "rating": "A",
+      "text": "Replacement is required.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck hatches, windows, and portholes – exterior observations",
+      "rating": "A",
+      "text": "Hatches or portholes are cracked, leaking, or non-functional.",
+      "phase": "observed",
+      "severity": 4
+    },
+    {
+      "section": "Deck hatches, windows, and portholes – exterior observations",
+      "rating": "A",
+      "text": "Immediate repair or replacement is required.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Arch – external condition and equipment",
+      "rating": "A",
+      "text": "The arch is structurally compromised, bent, or showing signs of failure.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Arch – external condition and equipment",
+      "rating": "A",
+      "text": "Repair or replacement is required.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "A",
+      "text": "The deck and coachroof exhibited significant cracking, delamination, or structural damage.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "A",
+      "text": "Immediate professional assessment and repair is required to ensure structural integrity and prevent water ingress.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "B",
+      "text": "The deck and coachroof displayed moderate stress cracks and localized damage.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "B",
+      "text": "Monitoring and repair planning is recommended to prevent further deterioration.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "C",
+      "text": "The deck and coachroof displayed minor spider and stress cracks typical of the vessel's age.",
+      "phase": "observed",
+      "severity": 2
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "C",
+      "text": "The condition was found to be in order with no immediate action required.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Shore water hookup",
+      "rating": "A",
+      "text": "The shore water hookup fitting was missing, damaged, or non-functional.",
+      "phase": "observed",
+      "severity": 4
+    },
+    {
+      "section": "Shore water hookup",
+      "rating": "A",
+      "text": "Installation or repair is required for shore water connection capability.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Shore water hookup",
+      "rating": "B",
+      "text": "The shore water hookup was functional but showed signs of corrosion or wear.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Shore water hookup",
+      "rating": "B",
+      "text": "Service and cleaning are recommended to ensure reliable operation.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Shore water hookup",
+      "rating": "C",
+      "text": "The shore water hookup showed no signs of deterioration and functional with no signs of leakage or corrosion.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Toerail/gunwale",
+      "rating": "A",
+      "text": "The toerail or gunwale exhibited significant cracking, separation, or structural damage.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Toerail/gunwale",
+      "rating": "A",
+      "text": "Immediate repair is required to restore proper support and safety.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Toerail/gunwale",
+      "rating": "B",
+      "text": "The toerail or gunwale showed minor cracking or loosening at attachment points.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Toerail/gunwale",
+      "rating": "B",
+      "text": "Tightening and monitoring are recommended to prevent further deterioration.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Toerail/gunwale",
+      "rating": "C",
+      "text": "The toerail and gunwale were solidly mounted and in satisfactory condition with no notable defects.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Fuel and water fill ports, and waste deck pump-out port",
+      "rating": "A",
+      "text": "One or more fill ports or pump-out ports were damaged, missing, or leaking.",
+      "phase": "observed",
+      "severity": 4
+    },
+    {
+      "section": "Fuel and water fill ports, and waste deck pump-out port",
+      "rating": "A",
+      "text": "Immediate repair or replacement is required to prevent water ingress and ensure proper functionality.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Fuel and water fill ports, and waste deck pump-out port",
+      "rating": "B",
+      "text": "The fill ports and pump-out were functional but showed signs of corrosion or wear.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Fuel and water fill ports, and waste deck pump-out port",
+      "rating": "B",
+      "text": "Seals should be inspected and replaced as needed to prevent leakage.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Fuel and water fill ports, and waste deck pump-out port",
+      "rating": "C",
+      "text": "The fuel and water fill ports and waste pump-out were intact and in good order and properly sealed with no signs of leakage.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Windshield, pilot house windows, frames and seals",
+      "rating": "A",
+      "text": "The windshield or pilot house windows were cracked, damaged, or the seals were severely compromised.",
+      "phase": "means",
+      "severity": 4
+    },
+    {
+      "section": "Windshield, pilot house windows, frames and seals",
+      "rating": "A",
+      "text": "Water ingress is likely.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Windshield, pilot house windows, frames and seals",
+      "rating": "A",
+      "text": "Immediate replacement or resealing is required.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Windshield, pilot house windows, frames and seals",
+      "rating": "B",
+      "text": "The windshield or windows showed signs of wear with minor crazing or loose frames.",
+      "phase": "observed",
+      "severity": 2
+    },
+    {
+      "section": "Windshield, pilot house windows, frames and seals",
+      "rating": "B",
+      "text": "Resealing is recommended to prevent water ingress and improve clarity.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Windshield, pilot house windows, frames and seals",
+      "rating": "C",
+      "text": "The windshield and pilot house windows were in proper working condition with clear visibility and secure frames.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Windshield, pilot house windows, frames and seals",
+      "rating": "C",
+      "text": "Seals were intact and in in good order condition.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "C",
+      "text": "All deck hatches, windows, and portholes were visually inspected from the exterior.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "C",
+      "text": "The frames were securely fastened and the seals appeared serviceable with no significant deterioration.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "C",
+      "text": "No cracking or crazing was noted in the acrylic or glass.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "C - with crazing",
+      "text": "All deck hatches, windows, and portholes were visually inspected from the exterior.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "C - with crazing",
+      "text": "The frames were securely fastened and the seals appeared serviceable with no significant deterioration.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "C - with crazing",
+      "text": "Some crazing was noted on the acrylic, typical of a vessel of this age.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "text": "Deck hatches, windows, and portholes were visually inspected from the exterior. {any:One or more seals showed deterioration and should be replaced|Crazing on one or more hatch lenses was significant and replacement is recommended|A hatch frame was loose and should be re-bedded|Corrosion was noted around one or more porthole frames}.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Impact testing of most of the deck and coachroof produced dull thuds indicating possible saturation, specifically at [insert location].",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Impact testing of most of the deck and coachroof produced ringing tones indicating possible voids, poor resin impregnation, or delamination, specifically at [insert location].",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "These findings were consistent with significant core moisture saturation or structural delamination.",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Haul the vessel for exploratory work to confirm the extent of the core damage.",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "The affected areas should be professionally assessed and remediated before the vessel is returned to service.",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Impact and resonance testing was carried out across the deck and coachroof.",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Most of the deck and coachroof produced a clear and even tone; however, localized dull thuds indicating possible saturation were noted at [insert location].",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Most of the deck and coachroof produced a clear and even tone; however, localized ringing indicating possible voids, poor resin impregnation, or delamination was noted at [insert location].",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Isolated areas of slight dullness were noted at [insert location].",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "The localized findings warranted further monitoring to rule out progressing core moisture or delamination.",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "B",
+      "phase": "means",
+      "severity": 2,
+      "text": "No widespread core compromise was evident at the time of survey.",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Monitor the noted areas at the next haul-out.",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Recommend conductivity testing of the noted areas to confirm the findings.",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Impact and resonance testing was carried out across the deck and coachroof.",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Most of the deck and coachroof produced a clear and even tone with no indications of core moisture, voids, or delamination.",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No dull thuds or ringing tones were detected during impact testing.",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The findings were consistent with a sound deck laminate and intact core.",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time.",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program.",
+      "section": "Deck and coachroof/pilot percussion testing"
     }
   ]
 }

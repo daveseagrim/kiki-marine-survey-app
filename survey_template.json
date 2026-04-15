@@ -493,7 +493,7 @@
           },
           {
             "type": "list",
-            "label": "Bowsprit, deck and coachroof/pilot house impact and resonance testing",
+            "label": "Deck and coachroof/pilot house impact and resonance testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -505,7 +505,7 @@
           },
           {
             "type": "list",
-            "label": "Bowsprit, deck and coachroof/pilot house conductivity testing",
+            "label": "Deck and coachroof/pilot house conductivity testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",

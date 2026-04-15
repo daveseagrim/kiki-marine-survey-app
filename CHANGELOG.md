@@ -72,6 +72,43 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2199 — 2026-04-14
+
+### Removed — All bowsprit references throughout the survey
+
+Per user preference, bowsprit has its own dedicated item elsewhere and
+shouldn't bleed into deck/coachroof testing. Scrubbed:
+
+- `survey_template.json`: "Bowsprit, deck and coachroof/pilot house
+  impact and resonance testing" → "Deck and coachroof/pilot house
+  impact and resonance testing" (+ conductivity equivalent).
+- `text_library.json`: sheet "Deck & Bowsprit" renamed to "Deck";
+  SHEET_MAPPING updated to point at the new name. 14 bowsprit
+  occurrences (inline phrases, rating labels, 1 modified entry)
+  cleaned. Zero bowsprit mentions remain across library + templates.
+
+### Rewritten — Deck and coachroof percussion A/B/C with [insert location] inputs
+
+Every A-rating and B-rating chip that says "most of the deck" now
+has an `[insert location]` text input so the surveyor can specify
+exactly where the dull thuds or ringing tones were detected:
+
+- **A**: "Impact testing of most of the deck and coachroof produced
+  dull thuds indicating possible saturation, specifically at
+  [location]."
+- **A**: "... produced ringing tones indicating possible voids, poor
+  resin impregnation, or delamination, specifically at [location]."
+- **B**: "Most of the deck and coachroof produced a clear and even
+  tone; however, localized dull thuds indicating possible saturation
+  were noted at [location]." (+ ringing-tone variant)
+- **B**: "Isolated areas of slight dullness were noted at [location]."
+- **C**: Pure no-concern findings — no location input needed.
+
+19 chips total (5 A / 8 B / 6 C). Past tense, phase-sorted,
+severity-ordered, no bowsprit mentions.
+
+---
+
 ## v2198 — 2026-04-14
 
 ### Fixed — "Take Photos" in area sections now opens the camera (not the file picker)

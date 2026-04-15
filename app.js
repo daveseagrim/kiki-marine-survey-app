@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2198';
+const APP_VERSION = 'v2199';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -873,7 +873,7 @@ const SHEET_MAPPING = {
   'Hull exterior , keel and propulsion': 'Hull',
   'Hull exterior, keel and propulsion': 'Hull',
   'Spars and rigging': 'Spars and rigging',
-  'Deck and coachroof/pilot house': 'Deck & Bowsprit',
+  'Deck and coachroof/pilot house': 'Deck',
   'Aft deck': 'Aft Deck',
   'Outboard engine': 'Outboard',
   'Cockpit': 'Cockpit',
