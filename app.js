@@ -8243,13 +8243,26 @@ function saveSurveyDetails(surveyId) {
     // Merge updates into existing survey (preserving items, photos, etc.)
     Object.assign(survey, updates);
 
-    // Clean up incompatible drive settings when vessel type changes from intro
+    // Clean up incompatible drive settings when vessel type changes from intro.
+    // B-09 (v2162): auto-derive hasRudder from vesselType + driveType.
+    //   Sailboats: always hasRudder=true.
+    //   Power shaft-drive: hasRudder=true.
+    //   Power outdrive / IPS / saildrive: hasRudder=false (drive itself
+    //     steers; no separate rudder). Makes the v2153 token system
+    //     automatically strip rudder mentions from snippets + labels.
     if (survey.vesselType === 'sail') {
       survey.driveLineCount = 1;
       survey.hasRudder = true;
       if (survey.driveType === 'outdrive' || survey.driveType === 'ips') survey.driveType = '';
     } else if (survey.vesselType === 'power') {
       if (survey.driveType === 'saildrive') survey.driveType = '';
+      const noRudderDrives = ['outdrive', 'ips', 'saildrive'];
+      if (survey.driveType && noRudderDrives.includes(survey.driveType)) {
+        survey.hasRudder = false;
+      } else if (survey.driveType === 'shaft') {
+        survey.hasRudder = true;
+      }
+      // If driveType is blank, leave hasRudder as-is (don't override explicit setting)
     }
 
     // Auto-generate vessel description if empty or previously auto-generated
@@ -15669,11 +15682,13 @@ function updateDriveType(driveType) {
       survey.driveLineCount = 1;
       survey.hasRudder = true;
     } else {
-      // Powerboats: auto-set rudder based on drive type
-      if (driveType === 'outdrive' || driveType === 'ips') {
-        survey.hasRudder = false; // outdrives and IPS pods steer, no separate rudder
+      // Powerboats: auto-set rudder based on drive type (B-09).
+      // Outdrive / IPS / saildrive all steer via the drive unit, no rudder.
+      // Shaft drive is the only power configuration with a separate rudder.
+      if (driveType === 'outdrive' || driveType === 'ips' || driveType === 'saildrive') {
+        survey.hasRudder = false;
       } else if (driveType === 'shaft') {
-        survey.hasRudder = true; // shaft-driven boats have rudder(s)
+        survey.hasRudder = true;
       }
     }
     saveSurvey(survey).then(() => {

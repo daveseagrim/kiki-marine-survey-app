@@ -90,15 +90,11 @@
         ]
       },
       {
-        "name": "Hull exterior , keel and propulsion",
+        "name": "Hull exterior, keel and propulsion",
         "items": [
           {
-            "type": "media",
-            "label": "Hull exterior photos"
-          },
-          {
             "type": "list",
-            "label": "Evident damage or repairs to hull and rudder below the waterline",
+            "label": "Evident damage or repairs to hull and rudder(s) (if applicable) below the waterline",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -227,10 +223,6 @@
               "Not applicable",
               "Not tested/not verified"
             ]
-          },
-          {
-            "type": "media",
-            "label": "Rudder photo(s)"
           },
           {
             "type": "list",

@@ -23,7 +23,7 @@
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "C",
-      "text": "Below the waterline, the hull was {specify:in good order with no visible damage|in good overall condition with only cosmetic wear|in in acceptable condition condition for normal use}. The anti-fouling was {specify:in good condition|showing normal seasonal wear|recently reapplied and intact}.",
+      "text": "Below the waterline, the hull was {specify:in good order with no visible damage|in good overall condition with only cosmetic wear|in acceptable condition for normal use}. The anti-fouling was {specify:in good condition|showing normal seasonal wear|recently reapplied and intact}.",
       "placeholders": {
         "specify:serviceable with no visible damage|in good overall condition with only cosmetic wear|in serviceable condition for normal use": {
           "multi": false
@@ -145,7 +145,7 @@
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. Conductivity testing of the hull{if-rudder: and {count:rudder|rudders}} returned readings consistent with a in proper condition condition, with no elevated conductivity detected."
+      "text": "Conductivity readings were taken on a relative scale of 0 to 999. Conductivity testing of the hull{if-rudder: and {count:rudder|rudders}} returned readings consistent with proper condition, with no elevated conductivity detected."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
@@ -450,7 +450,7 @@
     {
       "section": "Swim platform and ladder",
       "rating": "C - inegrated swim platform, minor conductivity",
-      "text": "The swim platform was integrated with the transom and, aside from minor localized conductivity readings [insert readings], was generally dry and in good order. The swim ladder was securely mounted and in in acceptable condition condition. Continued monitoring of the areas with elevated conductivity is recommended to identify any developing softness or delamination."
+      "text": "The swim platform was integrated with the transom and, aside from minor localized conductivity readings [insert readings], was generally dry and in good order. The swim ladder was securely mounted and in acceptable condition. Continued monitoring of the areas with elevated conductivity is recommended to identify any developing softness or delamination."
     },
     {
       "section": "Swim platform and ladder",
@@ -590,7 +590,7 @@
     {
       "section": "Hull–deck joint (exterior)",
       "rating": "C",
-      "text": "The hull and deck joint was intact and in in satisfactory condition condition."
+      "text": "The hull and deck joint was intact and in satisfactory condition."
     },
     {
       "section": "Propeller(s)",
@@ -833,7 +833,7 @@
     {
       "section": "Jib/genoa furler, furling line and tackle",
       "rating": "C",
-      "text": "The furling drum, foil, swivel, and related parts all appeared to be in in satisfactory condition condition. The furling line was fed through securely attached and working blocks to a functional [insert control point] at the cockpit."
+      "text": "The furling drum, foil, swivel, and related parts all appeared to be in satisfactory condition. The furling line was fed through securely attached and working blocks to a functional [insert control point] at the cockpit."
     },
     {
       "section": "Jib/genoa furler, furling line and tackle",
@@ -863,7 +863,7 @@
     {
       "section": "Spinnaker/whisker pole, uphaul and downhaul",
       "rating": "C",
-      "text": "The spinnaker pole appeared to be functional, with all fittings in good working order. The uphaul and downhaul were both pliable, free of fraying, with all tackle in in proper condition condition."
+      "text": "The spinnaker pole appeared to be functional, with all fittings in good working order. The uphaul and downhaul were both pliable, free of fraying, with all tackle in proper condition."
     },
     {
       "section": "Spinnaker/whisker pole, uphaul and downhaul",
@@ -903,7 +903,7 @@
     {
       "section": "Shrouds, swages and turnbuckles",
       "rating": "C",
-      "text": "As seen from the deck, the shrouds and swages appeared in in satisfactory condition condition, and the turnbuckles had all appropriate retaining pins in place. The rig tension was approximately correct."
+      "text": "As seen from the deck, the shrouds and swages appeared in satisfactory condition, and the turnbuckles had all appropriate retaining pins in place. The rig tension was approximately correct."
     },
     {
       "section": "Chainplates (exterior)pins and bolts",
@@ -1113,7 +1113,7 @@
     {
       "section": "Genoa 2 (mid-size)",
       "rating": "C",
-      "text": "The sail is in in acceptable condition condition and safe for use."
+      "text": "The sail is in acceptable condition and safe for use."
     },
     {
       "section": "Genoa 3 (smallest)",
@@ -1128,7 +1128,7 @@
     {
       "section": "Genoa 3 (smallest)",
       "rating": "C",
-      "text": "The sail is in in satisfactory condition condition and safe for use."
+      "text": "The sail is in satisfactory condition and safe for use."
     },
     {
       "section": "Staysail",
@@ -1158,7 +1158,7 @@
     {
       "section": "Misen",
       "rating": "C",
-      "text": "The mizzen sail is in in proper condition condition and safe for use."
+      "text": "The mizzen sail is in proper condition and safe for use."
     },
     {
       "section": "Sails - other",
@@ -1500,7 +1500,7 @@
     {
       "section": "Brightwork",
       "rating": "C",
-      "text": "The brightwork was generally in in satisfactory condition condition."
+      "text": "The brightwork was generally in satisfactory condition."
     },
     {
       "section": "Deck hatches, windows, and portholes – exterior observations",
@@ -1782,7 +1782,7 @@
     {
       "section": "Aft deck conductivity testing",
       "rating": "C",
-      "text": "Conductivity testing of the aft deck produced readings consistent with a in proper condition condition with no elevated conductivity detected."
+      "text": "Conductivity testing of the aft deck produced readings consistent with proper condition with no elevated conductivity detected."
     },
     {
       "section": "Aft deck conductivity testing",
@@ -1807,7 +1807,7 @@
     {
       "section": "Cover",
       "rating": "C",
-      "text": "The cover is in in acceptable condition condition and provides adequate weather protection."
+      "text": "The cover is in acceptable condition and provides adequate weather protection."
     },
     {
       "section": "Seating",
@@ -1822,7 +1822,7 @@
     {
       "section": "Seating",
       "rating": "C",
-      "text": "Seating is in in satisfactory condition condition and provides safe, without deficiency use."
+      "text": "Seating is in satisfactory condition and provides safe, without deficiency use."
     },
     {
       "section": "Storage",
@@ -1944,7 +1944,7 @@
     {
       "section": "Outboard general condition and impression",
       "rating": "C",
-      "text": "The outboard presented in in acceptable condition condition with no notable defects."
+      "text": "The outboard presented in acceptable condition with no notable defects."
     },
     {
       "section": "Engine mount",
@@ -3400,7 +3400,7 @@
     {
       "section": "Flybridge - other features",
       "rating": "C",
-      "text": "Other Flybridge features are in in proper condition condition."
+      "text": "Other Flybridge features are in proper condition."
     },
     {
       "section": "Flybridge - other features",
@@ -3490,7 +3490,7 @@
     {
       "section": "Flybridge Seating",
       "rating": "C",
-      "text": "Flybridge seating is in in acceptable condition condition with no structural issues."
+      "text": "Flybridge seating is in acceptable condition with no structural issues."
     },
     {
       "section": "Flybridge Seating",
@@ -3505,7 +3505,7 @@
     {
       "section": "Flybridge Storage locker(s)",
       "rating": "C",
-      "text": "Flybridge storage lockers are in in satisfactory condition condition with properly functioning latches and hinges."
+      "text": "Flybridge storage lockers are in satisfactory condition with properly functioning latches and hinges."
     },
     {
       "section": "Flybridge Storage locker(s)",
@@ -4324,7 +4324,7 @@
     {
       "section": "Oven",
       "rating": "C",
-      "text": "The oven is in in satisfactory condition condition and operates safely."
+      "text": "The oven is in satisfactory condition and operates safely."
     },
     {
       "section": "Heating and/or air conditioning system",
@@ -5744,7 +5744,7 @@
     {
       "section": "Shore power receptacle",
       "rating": "C",
-      "text": "The shore power receptacle appeared to be in in proper condition condition with no signs of overheating or burning."
+      "text": "The shore power receptacle appeared to be in proper condition with no signs of overheating or burning."
     },
     {
       "section": "Shore power receptacle",
@@ -6086,7 +6086,7 @@
     {
       "section": "Lifejackets and PFDs",
       "rating": "C",
-      "text": "An adequate number of approved lifejackets in in satisfactory condition condition were found on board."
+      "text": "An adequate number of approved lifejackets in satisfactory condition were found on board."
     },
     {
       "section": "Life ring or heaving line",
