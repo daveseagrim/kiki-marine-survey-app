@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2218';
+const APP_VERSION = 'v2219';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -10496,40 +10496,58 @@ function renderInspection(survey) {
     }
 
     // Render area photos at top of category (inline file input for reliable iOS behaviour)
+    // v2219: area photos are now skippable per section. Skipped media items
+    // render as a collapsed row with an Unskip button; the photos remain in
+    // IndexedDB so unskipping restores them.
     const catMediaItems = mediaItemsByCategory[categoryName] || [];
     catMediaItems.forEach(mediaItem => {
       const mediaData = survey.items[mediaItem.label] || { photos: [] };
       const photos = mediaData.photos || [];
+      const isMediaExcluded = !!mediaData.excluded;
       const safeLabel = mediaItem.label.replace(/'/g, "\\'");
       const safeCat = categoryName.replace(/'/g, "\\'");
       const sanitized = mediaItem.label.replace(/[^a-zA-Z0-9]/g, '_');
-      html += `
-        <div id="area-photo-wrap-${sanitized}" style="margin-bottom:16px;padding:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
-          <div style="font-weight:600;font-size:14px;color:#0369a1;margin-bottom:8px;">📷 ${mediaItem.label}</div>
-          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
-            ${photos.map(pid => `
-              <div style="position:relative;width:84px;">
-                <img id="thumb-${pid}" src="" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
-                <button onclick="event.stopPropagation();deleteAreaPhoto('${pid}', '${safeLabel}')" aria-label="Delete photo" style="position:absolute;top:-8px;right:-8px;background:#dc2626;color:white;border:2px solid white;border-radius:50%;width:30px;height:30px;font-size:16px;font-weight:700;cursor:pointer;line-height:26px;text-align:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,0.3);">×</button>
-                <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#006699;color:white;border:none;border-radius:6px;padding:6px 0;font-size:12px;font-weight:700;cursor:pointer;">Move ↗</button>
-              </div>
-            `).join('')}
+      if (isMediaExcluded) {
+        html += `
+          <div id="area-photo-wrap-${sanitized}" style="margin-bottom:16px;padding:12px;background:#f3f4f6;border:1px dashed #d1d5db;border-radius:8px;opacity:0.75;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+              <div style="font-weight:600;font-size:14px;color:#6b7280;">⊘ ${mediaItem.label} — skipped${photos.length > 0 ? ` (${photos.length} photo${photos.length === 1 ? '' : 's'} retained)` : ''}</div>
+              <button onclick="toggleExclude('${safeLabel}')" style="background:white;color:#006699;border:1px solid #006699;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;">Unskip</button>
+            </div>
           </div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;">
-            <button type="button"
-              onclick="openBatchCamera('${safeLabel}', { isArea: true, categoryName: '${safeCat}' })"
-              style="background:#006699;color:white;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
-              📷 ${photos.length > 0 ? `Take More (${photos.length})` : 'Take Photos'}
-            </button>
-            <button type="button"
-              onclick="importPhotosForItem('${safeLabel}')"
-              style="background:white;color:#006699;border:2px solid #006699;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
-              🖼️ Import photos from library / files
-            </button>
+        `;
+      } else {
+        html += `
+          <div id="area-photo-wrap-${sanitized}" style="margin-bottom:16px;padding:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
+              <div style="font-weight:600;font-size:14px;color:#0369a1;">📷 ${mediaItem.label}</div>
+              <button onclick="toggleExclude('${safeLabel}')" style="background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;" title="Skip this photo section">⊘ Skip</button>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+              ${photos.map(pid => `
+                <div style="position:relative;width:84px;">
+                  <img id="thumb-${pid}" src="" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
+                  <button onclick="event.stopPropagation();deleteAreaPhoto('${pid}', '${safeLabel}')" aria-label="Delete photo" style="position:absolute;top:-8px;right:-8px;background:#dc2626;color:white;border:2px solid white;border-radius:50%;width:30px;height:30px;font-size:16px;font-weight:700;cursor:pointer;line-height:26px;text-align:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,0.3);">×</button>
+                  <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#006699;color:white;border:none;border-radius:6px;padding:6px 0;font-size:12px;font-weight:700;cursor:pointer;">Move ↗</button>
+                </div>
+              `).join('')}
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <button type="button"
+                onclick="openBatchCamera('${safeLabel}', { isArea: true, categoryName: '${safeCat}' })"
+                style="background:#006699;color:white;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
+                📷 ${photos.length > 0 ? `Take More (${photos.length})` : 'Take Photos'}
+              </button>
+              <button type="button"
+                onclick="importPhotosForItem('${safeLabel}')"
+                style="background:white;color:#006699;border:2px solid #006699;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
+                🖼️ Import photos from library / files
+              </button>
+            </div>
+            <div style="font-size:11px;color:#6b7280;margin-top:6px;">Both buttons support selecting multiple photos at once. On desktop, you can also drag photo files onto any item card.</div>
           </div>
-          <div style="font-size:11px;color:#6b7280;margin-top:6px;">Both buttons support selecting multiple photos at once. On desktop, you can also drag photo files onto any item card.</div>
-        </div>
-      `;
+        `;
+      }
     });
 
     items.forEach(item => {
@@ -13787,14 +13805,32 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
 
   const mediaData = survey.items[mediaLabel] || { photos: [] };
   const photos = mediaData.photos || [];
+  const isMediaExcluded = !!mediaData.excluded;
   const safeLabel = mediaLabel.replace(/'/g, "\\'");
   // Look up the category name from the wrapper's enclosing accordion
   const accordion = wrapper.closest('.category-accordion');
   const catName = accordion ? (accordion.dataset.categoryName || '') : '';
   const safeCat = catName.replace(/'/g, "\\'");
 
+  // v2219: respect excluded state on media items
+  if (isMediaExcluded) {
+    wrapper.style.cssText = 'margin-bottom:16px;padding:12px;background:#f3f4f6;border:1px dashed #d1d5db;border-radius:8px;opacity:0.75;';
+    wrapper.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <div style="font-weight:600;font-size:14px;color:#6b7280;">⊘ ${mediaLabel} — skipped${photos.length > 0 ? ` (${photos.length} photo${photos.length === 1 ? '' : 's'} retained)` : ''}</div>
+        <button onclick="toggleExclude('${safeLabel}')" style="background:white;color:#006699;border:1px solid #006699;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;">Unskip</button>
+      </div>
+    `;
+    return;
+  }
+
+  // Not excluded — reset styling and render the full UI
+  wrapper.style.cssText = 'margin-bottom:16px;padding:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;';
   wrapper.innerHTML = `
-    <div style="font-weight:600;font-size:14px;color:#0369a1;margin-bottom:8px;">📷 ${mediaLabel}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
+      <div style="font-weight:600;font-size:14px;color:#0369a1;">📷 ${mediaLabel}</div>
+      <button onclick="toggleExclude('${safeLabel}')" style="background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;" title="Skip this photo section">⊘ Skip</button>
+    </div>
     <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
       ${photos.map(pid => `
         <div style="position:relative;width:84px;">
@@ -15871,7 +15907,9 @@ async function toggleCategoryExclude(categoryName, exclude) {
       if (section.categories) {
         section.categories.forEach(cat => {
           if (categoriesToSkip.includes(cat.name) && cat.items) {
-            itemLabels.push(...cat.items.filter(i => i.type === 'list').map(i => i.label));
+            // v2219: include both rated items and media (area-photo) items
+            // so skipping a category covers everything in it.
+            itemLabels.push(...cat.items.filter(i => i.type === 'list' || i.type === 'media').map(i => i.label));
           }
         });
       }

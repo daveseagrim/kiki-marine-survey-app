@@ -12,6 +12,47 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2219 — 2026-04-15
+
+### Added — Skip option for area-photo sections (and category skip now covers them)
+
+Previously only rated (list) items were skippable; the area-photo
+sections at the top of each category could not be individually skipped,
+and the "Skip entire category" action left them in the unaffected
+(camera / import) state.
+
+**Individual skip on each area-photo section.** Each `📷 Area photos`
+header now has a "⊘ Skip" button (top-right). Tapping it marks the
+media item `excluded = true` and re-renders the section as a compact
+dashed-border row:
+
+    ⊘ Engine name plate(s) — skipped (4 photos retained)   [Unskip]
+
+Any existing photos stay in IndexedDB — unskipping restores the full
+UI with the photos intact. The skip state persists across reloads.
+
+**Category skip now includes area photos.** `toggleCategoryExclude`
+used to only flip `excluded` on `type === 'list'` items. It now also
+flips `excluded` on `type === 'media'` items in the same category (and
+in any linked categories, per the existing Pilot-house / Flybridge
+linkage).
+
+Note: area-photo items have never counted toward completion percentage
+(only rated list items do), so skipping or unskipping them has no
+effect on the progress bar — it's purely a UI-clutter reduction for
+sections where the surveyor doesn't want to capture area photos.
+
+### Audit
+
+- JavaScript compiles ✓
+- JSON parses ✓
+- Both `renderInspection` (initial render) and `refreshAreaPhotoGrid`
+  (post-toggle re-render) handle the excluded state ✓
+- `toggleCategoryExclude` now covers both `list` and `media` items ✓
+- Version strings aligned ✓
+
+---
+
 ## v2218 — 2026-04-15
 
 ### Removed — "This item was inspected and found in acceptable condition" (library-wide)
