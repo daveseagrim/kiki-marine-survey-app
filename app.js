@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2165';
+const APP_VERSION = 'v2166';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -10089,6 +10089,14 @@ function collectComparables() {
 }
 
 function renderInspection(survey) {
+  // v2166: populate the global survey cache so displayItemLabel() — which
+  // only takes a label — can find the current survey context for the
+  // rudder transforms. Without this, every card renders with the raw
+  // template label (rudder text appears even on outdrive boats).
+  if (survey && typeof window !== 'undefined') {
+    window._currentSurveyCache = survey;
+  }
+
   // Remove any existing fab/bottom bar from home or other views
   const existingFab = document.querySelector('.fab');
   if (existingFab) existingFab.remove();

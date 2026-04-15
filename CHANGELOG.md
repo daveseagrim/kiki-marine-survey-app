@@ -12,6 +12,40 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2166 — 2026-04-14
+
+### Fixed — Card labels now strip rudder text on outdrive/IPS surveys
+
+Two latent bugs combined to make v2165's transform invisible on cards:
+
+1. `displayItemLabel(itemLabel)` in `buildCompactItemHTML` was called
+   without a `survey` argument, so it fell back to
+   `window._currentSurveyCache` — which was READ in two places but
+   never WRITTEN anywhere in the codebase. The transform always saw
+   a null survey and returned the raw label unchanged.
+2. `contextFromSurvey` defaulted `hasRudder` to true unless the
+   survey had `hasRudder === false` saved explicitly. The
+   SafetyCulture import never sets `hasRudder` (the B-09 logic that
+   derives it only fires inside `saveSurveyDetails`), so Ahoy Vey
+   had `hasRudder === undefined` and resolved to true.
+
+Fixes:
+
+1. `renderInspection` now sets
+   `window._currentSurveyCache = survey` at entry. All
+   `displayItemLabel(label)` calls (cards, finding lists, anywhere
+   the survey isn't passed in) now see the right context.
+2. `contextFromSurvey` derives hasRudder from `driveType` when the
+   explicit field isn't saved: outdrive / IPS / saildrive →
+   `hasRudder=false`, shaft / sail → `hasRudder=true`. Explicit
+   `survey.hasRudder` still wins if set.
+
+Verified: Ahoy Vey-shaped survey (vesselType=power, driveType=outdrive,
+no `hasRudder` field) now correctly transforms all 4 rudder labels to
+the no-rudder form. Sailboats unaffected.
+
+---
+
 ## v2165 — 2026-04-14
 
 ### Fixed — Strip naked rudder mentions from snippets and Hydraulic steering label on no-rudder vessels

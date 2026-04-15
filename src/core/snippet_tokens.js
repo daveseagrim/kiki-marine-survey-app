@@ -158,7 +158,23 @@
    */
   function contextFromSurvey(survey) {
     if (!survey) return { hasRudder: false, rudderCount: 0 };
-    const hasRudder = survey.hasRudder !== false; // default true
+    // v2166: derive hasRudder from driveType when the explicit hasRudder
+    // field hasn't been saved. SafetyCulture imports and older surveys
+    // never saved hasRudder; relying on `!== false` defaulted them to
+    // hasRudder=true even on outdrive/IPS, which leaked rudder text into
+    // the cards. Now: outdrive/IPS/saildrive always means no rudder
+    // regardless of the saved field. Shaft drive defaults to having a
+    // rudder. Sailboats always have a rudder.
+    const noRudderDrives = new Set(['outdrive', 'ips', 'saildrive']);
+    const drive = (survey.driveType || '').toLowerCase();
+    let hasRudder;
+    if (typeof survey.hasRudder === 'boolean') {
+      hasRudder = survey.hasRudder; // explicit setting wins
+    } else if (drive && noRudderDrives.has(drive)) {
+      hasRudder = false;
+    } else {
+      hasRudder = true; // sailboat / shaft / unknown → assume rudder
+    }
     const driveCount = survey.driveLineCount || 1;
     const rudderCount = hasRudder ? driveCount : 0;
     return { hasRudder, rudderCount };
