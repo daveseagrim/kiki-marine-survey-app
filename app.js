@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2175';
+const APP_VERSION = 'v2176';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -30,6 +30,54 @@ function loadSpellDict() {
     .then(r => r.json())
     .then(arr => {
       SPELL_DICT = new Set(arr);
+      // v2176: supplement the base dictionary with marine-surveyor vocabulary
+      // that general English dictionaries often miss. These are real words
+      // that were being flagged as typos in inspection notes.
+      const MARINE_EXTRAS = [
+        'recoat', 'recoated', 'recoating', 'recoats',
+        'anti-fouling', 'antifouling', 'antifouled',
+        'gelcoat', 'gelcoats', 'gelcoated',
+        'fibreglass', 'fibreglasses',
+        'delamination', 'delaminated', 'delaminating',
+        'osmotic', 'osmosis',
+        'blistering', 'blister', 'blisters', 'blistered',
+        'fairing', 'faired', 'fairs',
+        'stanchion', 'stanchions',
+        'pulpit', 'pulpits',
+        'pushpit', 'pushpits',
+        'saildrive', 'saildrives', 'outdrive', 'outdrives',
+        'sterndrive', 'sterndrives',
+        'cutlass', 'cutlasses',
+        'seacock', 'seacocks',
+        'skeg', 'skegs',
+        'transom', 'transoms',
+        'chainplate', 'chainplates',
+        'coachroof', 'coachroofs',
+        'chartplotter', 'chartplotters',
+        'autohelm', 'autopilot', 'autopilots',
+        'binnacle', 'binnacles',
+        'bimini', 'biminis',
+        'pontoon', 'pontoons',
+        'coaming', 'coamings',
+        'bulkhead', 'bulkheads',
+        'bowsprit', 'bowsprits',
+        'cleat', 'cleats',
+        'windlass', 'windlasses',
+        'genoa', 'genoas',
+        'spinnaker', 'spinnakers',
+        'halyard', 'halyards',
+        'traveller', 'travellers',
+        'lazarette', 'lazarettes',
+        'knot', 'knots',
+        'kts',
+        'abyc', 'solas', 'nmma', 'tp1332',
+        'sams',
+        'heeled', 'heeling',
+        'tacking', 'tack',
+        'relaunch', 'relaunched', 'relaunching', 'relaunches',
+        'touched-up', 'touched',
+      ];
+      MARINE_EXTRAS.forEach(w => SPELL_DICT.add(w.toLowerCase()));
       SPELL_DICT_LOADING = false;
       // Re-run tone check on any currently-open sheet textarea so the new
       // dictionary catches words already typed.
@@ -3348,34 +3396,55 @@ function showNotesSheet(itemLabel, categoryName) {
         // bucket by default (heuristic: sentences starting with
         // "Monitor", "Recheck", "Recommend" → action; containing
         // "indicates"/"suggests" → means).
-        // v2174: decompose `{any:opt1|opt2|...}` tokens into individual
-        // chip-worthy sentences. Each option becomes a separate chip.
-        // The surrounding prose (before/after the token) is preserved as
-        // its own sentence. Citations (`^TP1332`) are stripped from
-        // options for readability — they'll still attach via the
-        // existing auto-standards flow on insert.
+        // v2174/v2176: decompose `{any:...}` AND `{specify:...}` tokens
+        // into individual chip-worthy sentences. For `{specify:...}` the
+        // surrounding prose (e.g. "The hull was ") is grafted onto each
+        // option so each chip reads as a complete sentence.
+        //   "The hull was {specify:good|fair|poor}. The paint was fine."
+        // →  "The hull was good."
+        //    "The hull was fair."
+        //    "The hull was poor."
+        //    "The paint was fine."
         const _expandAnyOptionsToSentences = (text) => {
           if (!text) return [];
           const out = [];
-          let remaining = text;
-          while (true) {
-            const m = /\{any:([^{}]*)\}/.exec(remaining);
-            if (!m) {
-              if (remaining.trim()) out.push(remaining);
-              break;
+          // First, for each sentence in the text, detect if it contains a
+          // {specify:...} token. If so, graft the surrounding context onto
+          // each option. {any:...} is handled separately by pipe-splitting.
+          const sentenceChunks = (text || '').split(/(?<=[.!?])\s+/);
+          sentenceChunks.forEach(chunk => {
+            const trimmed = chunk.trim();
+            if (!trimmed) return;
+
+            // Handle {specify:...} by substituting each option back into
+            // the sentence, producing one chip per option.
+            const specifyMatch = /\{specify:([^{}]*)\}/.exec(trimmed);
+            if (specifyMatch) {
+              const opts = specifyMatch[1].split('|').map(s => s.replace(/\^[^|]*$/, '').trim()).filter(Boolean);
+              opts.forEach(opt => {
+                const sentence = trimmed.slice(0, specifyMatch.index) + opt + trimmed.slice(specifyMatch.index + specifyMatch[0].length);
+                out.push(sentence.trim());
+              });
+              return;
             }
-            // Text before the {any:...}
-            const before = remaining.slice(0, m.index).trim();
-            if (before) out.push(before);
-            // Split options on unescaped `|` and strip `^CITATION` tags
-            const opts = m[1].split('|').map(s => s.replace(/\^[^|]*$/, '').trim()).filter(Boolean);
-            opts.forEach(o => {
-              // Ensure each option ends with a period for clean joining later
-              const sent = /[.!?]$/.test(o) ? o : o + '.';
-              out.push(sent);
-            });
-            remaining = remaining.slice(m.index + m[0].length);
-          }
+
+            // Handle {any:...} by extracting each option as its own chip.
+            const anyMatch = /\{any:([^{}]*)\}/.exec(trimmed);
+            if (anyMatch) {
+              const before = trimmed.slice(0, anyMatch.index).trim();
+              if (before) out.push(before);
+              const opts = anyMatch[1].split('|').map(s => s.replace(/\^[^|]*$/, '').trim()).filter(Boolean);
+              opts.forEach(o => {
+                const sent = /[.!?]$/.test(o) ? o : o + '.';
+                out.push(sent);
+              });
+              const after = trimmed.slice(anyMatch.index + anyMatch[0].length).trim();
+              if (after) out.push(after);
+              return;
+            }
+
+            out.push(trimmed);
+          });
           return out;
         };
         const _splitSentences = (s) => {

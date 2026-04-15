@@ -3,12 +3,165 @@
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "A",
-      "text": "Below the waterline, the hull exhibited {any:deep gouging^TP1332|significant delamination^TP1332|structural cracking^TP1332|extensive osmotic blistering^TP1332|visible impact damage^TP1332|exposed laminate^TP1332|wet core^TP1332|severe corrosion on metal surfaces^TP1332} [describe area(s)] that compromised structural integrity. Immediate professional repair is required before the vessel is relaunched.{standards? This condition violates STANDARDS.}",
-      "placeholders": {
-        "any:deep gouging^TP1332|significant delamination^TP1332|structural cracking^TP1332|extensive osmotic blistering^TP1332|visible impact damage^TP1332|exposed laminate^TP1332|wet core^TP1332|severe corrosion on metal surfaces^TP1332": {
-          "multi": true
-        }
-      }
+      "phase": "observed",
+      "severity": 1,
+      "always": true,
+      "text": "An inspection of the hull below the waterline was conducted."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Significant structural damage was observed in [describe area(s)]."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Widespread blistering was noted across [describe area(s)]."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Delamination of the hull laminate was detected in [describe area(s)]."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Impact damage penetrating the gelcoat and into the laminate was observed in [describe area(s)]."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "These findings represent a structural concern that compromises the vessel's seaworthiness."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "The extent of the damage requires professional assessment prior to return to service."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "The vessel should not be returned to service until the damage has been professionally assessed and remediated."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "A",
+      "phase": "action",
+      "severity": 4,
+      "text": "A qualified fibreglass technician should inspect and repair the affected areas prior to relaunch."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Haul the vessel and carry out exploratory work to determine the full extent of the damage."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "always": true,
+      "text": "Below the waterline, the hull was serviceable overall."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The hull was in good order with no visible damage."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The hull was in good overall condition with only cosmetic wear."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The hull was in acceptable condition for normal use."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anti-fouling was in good condition."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anti-fouling was showing normal seasonal wear."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anti-fouling had been recently reapplied and was intact."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The hull is suitable for continued use without structural concern."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The findings are consistent with typical wear for the vessel's age and use."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "C",
+      "phase": "means",
+      "severity": 2,
+      "text": "The cosmetic wear does not impact structural integrity."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Routine maintenance of the anti-fouling at next haul-out is recommended."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection programme."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
@@ -136,19 +289,6 @@
       "phase": "action",
       "text": "The affected areas should be recoated with epoxy barrier coat, gelcoat, and anti-fouling before the vessel is relaunched.",
       "severity": 4
-    },
-    {
-      "section": "Hull(s) condition (below the waterline)",
-      "rating": "C",
-      "text": "Below the waterline, the hull was {specify:in good order with no visible damage|in good overall condition with only cosmetic wear|in acceptable condition for normal use}. The anti-fouling was {specify:in good condition|showing normal seasonal wear|recently reapplied and intact}.",
-      "placeholders": {
-        "specify:serviceable with no visible damage|in good overall condition with only cosmetic wear|in serviceable condition for normal use": {
-          "multi": false
-        },
-        "specify:in good condition|showing normal seasonal wear|recently reapplied and intact": {
-          "multi": false
-        }
-      }
     },
     {
       "section": "Rudder(s) condition",

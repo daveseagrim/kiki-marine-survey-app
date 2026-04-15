@@ -12,6 +12,44 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2176 — 2026-04-14
+
+### Fixed — `{specify:opt1|opt2|...}` tokens now decompose into chips
+
+The picker's sentence decomposer only handled `{any:...}` tokens.
+`{specify:...}` tokens (single-select inline lists) leaked raw into
+chip previews. v2176 decomposes them the same way: for each option,
+graft the surrounding sentence context so each chip reads as a
+complete sentence.
+  "The hull was {specify:good|fair|poor}." →
+  "The hull was good." / "The hull was fair." / "The hull was poor."
+
+### Added — Marine-surveyor vocabulary supplements the spell dictionary
+
+Inspection notes were flagging common trade terms ("recoated",
+"fibreglass", "gelcoat", "delamination", "stanchion", "saildrive",
+etc.) as unknown words. Added ~60 marine/surveyor terms as a
+MARINE_EXTRAS list that augments `SPELL_DICT` after the base
+dictionary loads. Covers finishes, structures, rigging, hardware,
+and common abbreviations (ABYC, TP1332, NMMA, SOLAS).
+
+### Rewritten — Hull(s) condition (below the waterline) A and C ratings
+
+Curated both A and C with the 3-phase pattern:
+- **A (Critical)**: 5 observed chips covering structural damage,
+  blistering, delamination, impact penetration. 2 means chips on
+  seaworthiness and remediation. 3 action chips for immediate
+  professional response.
+- **C (Serviceable)**: 7 observed chips for "good order / cosmetic
+  wear / acceptable condition" variants + anti-fouling state. 3
+  means chips for reassurance. 3 action chips for "no action / routine
+  maintenance / seasonal inspection".
+
+All three ratings (A, B, C) for this section now follow the same
+phase-structured, severity-ordered pattern.
+
+---
+
 ## v2175 — 2026-04-14
 
 ### Added — Severity-sorted chips within each phase + rating badge in header
