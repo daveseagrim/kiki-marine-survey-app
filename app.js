@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2181';
+const APP_VERSION = 'v2182';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3198,30 +3198,86 @@ function showNotesSheet(itemLabel, categoryName) {
     if (itemData.rating) {
       const baseRating = itemData.rating.charAt(0);
       sheetVariants = findTextVariants(categoryName, itemLabel, baseRating);
-      // v2180: synthesize chips for "Not applicable" / "Not tested/not verified"
+      // v2180/v2182: synthesize chips for "Not applicable" / "Not tested"
       // ratings. The library has no entries for these, but the surveyor still
       // needs a sentence saying the item wasn't fitted / wasn't tested.
+      // v2182 adds proper grammar — detects plural vs singular vs uncountable
+      // nouns from the label, chooses correct verb (was/were), article (a/an/
+      // none), and strips "(s)" tokens for display. "Hull anodes was" becomes
+      // "Hull anodes were".
       if (sheetVariants.length === 0 && /^Not\b/i.test(itemData.rating)) {
         const displayLabel = (typeof displayItemLabel === 'function')
           ? displayItemLabel(itemLabel, survey)
           : itemLabel;
+        // If the label has "(s)" (e.g. "Fuel tank(s)"), convert to plural
+        // form ("Fuel tanks") for N/A sentence rendering. Strip any trailing
+        // period so we don't end up with doubled "..".
+        const hasTokenPlural = /\(s\)/.test(displayLabel);
+        let cleaned = displayLabel
+          .replace(/\(s\)/g, 's')           // Fuel tank(s) → Fuel tanks
+          .replace(/\s+/g, ' ')
+          .trim()
+          .replace(/\.+$/, '');              // drop trailing periods
+        const cleanLower = cleaned.toLowerCase();
+        const capFirst = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+        // Plural detection:
+        //   1. original had "(s)" → plural-capable
+        //   2. ends in plural-sounding "s" (not "ss"/"us"/"is"/"as"/"os"/
+        //      "lass"/"ness"/"ous")
+        //   3. contains a known plural noun
+        const pluralNouns = /\b(anodes|stanchions|lifelines|rudders|propellers|shafts|bolts|chainplates|rails|drains|pulleys|belts|hoses|strands|nuts|brackets|connectors|terminals|cables|wires|handles|plugs|seals|switches|controls|batteries|lights|sails|spars|tanks|gauges|instruments|wipers|fixtures|hatches|windows|portholes|mounts|actuators)\b/i;
+        const endsInPlural = /s$/i.test(cleanLower) && !/(ss|us|is|as|os|lass|ness|ous|sis)$/i.test(cleanLower);
+        const isPlural = hasTokenPlural || pluralNouns.test(cleanLower) || endsInPlural;
+        // Uncountable abstract nouns
+        const isUncountable = /\b(lighting|plumbing|heating|steering|cooling|charging|wiring|insulation|ventilation|instrumentation|equipment|fouling|trim)\b/i.test(cleanLower);
+        // Leading article for "equipped with ..." construction
+        const article = /^[aeiou]/i.test(cleanLower) ? 'an' : 'a';
+
+        const synth = [];
         const isNotApplicable = /^Not applicable/i.test(itemData.rating);
         const isNotTested = /^Not tested|not verified/i.test(itemData.rating);
-        const synth = [];
+
         if (isNotApplicable) {
-          synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
-            text: `A ${displayLabel.toLowerCase()} was not fitted on this vessel.` });
-          synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
-            text: `This vessel was not equipped with a ${displayLabel.toLowerCase()}.` });
-          synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
-            text: `The ${displayLabel.toLowerCase()} was not applicable to this vessel.` });
+          if (isPlural) {
+            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
+              text: `No ${cleanLower} were fitted on this vessel.` });
+            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
+              text: `This vessel was not equipped with ${cleanLower}.` });
+            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
+              text: `${capFirst} were not applicable to this vessel.` });
+          } else if (isUncountable) {
+            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
+              text: `No ${cleanLower} was fitted on this vessel.` });
+            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
+              text: `This vessel was not equipped with ${cleanLower}.` });
+            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
+              text: `${capFirst} was not applicable to this vessel.` });
+          } else {
+            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
+              text: `No ${cleanLower} was fitted on this vessel.` });
+            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
+              text: `This vessel was not equipped with ${article} ${cleanLower}.` });
+            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
+              text: `The ${cleanLower} was not applicable to this vessel.` });
+          }
         } else if (isNotTested) {
-          synth.push({ rating: 'NT', phase: 'observed', severity: 1,
-            text: `The ${displayLabel.toLowerCase()} was not tested at the time of survey.` });
-          synth.push({ rating: 'NT', phase: 'observed', severity: 1,
-            text: `Operation of the ${displayLabel.toLowerCase()} was not verified at the time of survey.` });
-          synth.push({ rating: 'NT', phase: 'action', severity: 2,
-            text: `Recommend testing the ${displayLabel.toLowerCase()} under operational conditions.` });
+          const verbWas = isPlural ? 'were' : 'was';
+          const theOrEmpty = isUncountable ? '' : 'The ';
+          if (isPlural) {
+            synth.push({ rating: 'NT', phase: 'observed', severity: 1,
+              text: `The ${cleanLower} were not tested at the time of survey.` });
+            synth.push({ rating: 'NT', phase: 'observed', severity: 1,
+              text: `Operation of the ${cleanLower} was not verified at the time of survey.` });
+            synth.push({ rating: 'NT', phase: 'action', severity: 2,
+              text: `Recommend testing the ${cleanLower} under operational conditions.` });
+          } else {
+            synth.push({ rating: 'NT', phase: 'observed', severity: 1,
+              text: `${theOrEmpty}${cleanLower} ${verbWas} not tested at the time of survey.` });
+            synth.push({ rating: 'NT', phase: 'observed', severity: 1,
+              text: `Operation of ${isUncountable ? '' : 'the '}${cleanLower} was not verified at the time of survey.` });
+            synth.push({ rating: 'NT', phase: 'action', severity: 2,
+              text: `Recommend testing ${isUncountable ? '' : 'the '}${cleanLower} under operational conditions.` });
+          }
         }
         if (synth.length) sheetVariants = synth;
       }

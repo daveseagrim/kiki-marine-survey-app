@@ -12,6 +12,53 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2182 — 2026-04-14
+
+### Fixed — Grammar for auto-synthesized N/A chips
+
+Items with plural labels ("Hull anodes", "Stanchions", "Lifelines/safety
+rail") were producing grammatically wrong chips:
+  "A hull anodes was not fitted on this vessel." ← wrong
+  "This vessel was not equipped with a hull anodes." ← wrong
+  "The hull anodes was not applicable to this vessel." ← wrong verb
+
+Rewrote the N/A and Not-tested synthesizer with proper English:
+
+1. **Plural detection**: original had `(s)` token, label contains a
+   known plural noun (anodes, stanchions, lifelines, rudders,
+   propellers, shafts, chainplates, rails, cables, gauges, tanks,
+   etc.), or ends in plural-sounding "s" (excluding "ss"/"us"/"is"/
+   "ness"/"ous" which are singular).
+2. **Uncountable detection**: labels containing "lighting",
+   "plumbing", "heating", "steering", "wiring", "instrumentation",
+   etc. get no article.
+3. **Article choice**: "a" vs "an" based on first vowel.
+4. **`(s)` → "s"** expansion so "Fuel tank(s)" renders as "Fuel
+   tanks" (not "Fuel tank" which would produce "No fuel tank were
+   fitted").
+5. **Trailing periods stripped** so labels like "Propane valve,
+   regulator, gauge, storage compartment and vent." no longer
+   produce doubled periods.
+
+Examples after the fix:
+- "Hull anodes" → "No hull anodes were fitted on this vessel." /
+  "This vessel was not equipped with hull anodes." / "Hull anodes
+  were not applicable to this vessel."
+- "Binnacle" → "No binnacle was fitted on this vessel." / "This
+  vessel was not equipped with a binnacle." / "The binnacle was not
+  applicable to this vessel."
+- "Lighting (cabin)" → "No lighting (cabin) was fitted on this
+  vessel." / "This vessel was not equipped with lighting (cabin)." /
+  "Lighting (cabin) was not applicable to this vessel."
+- "Fuel tank(s)" → "No fuel tanks were fitted on this vessel." /
+  "This vessel was not equipped with fuel tanks." / "Fuel tanks were
+  not applicable to this vessel."
+
+Not-tested chips get parallel grammar treatment (was/were agreement,
+article handling, "(s)" expansion).
+
+---
+
 ## v2181 — 2026-04-14
 
 ### Changed — Outdrive now uses the chip picker (retired dropdown builder)
