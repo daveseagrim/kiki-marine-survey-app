@@ -1495,118 +1495,6 @@
       "severity": 1
     },
     {
-      "section": "Swim platform and ladder",
-      "rating": "C",
-      "text": "The swim platform was integrated with the transom and was generally dry and without deficiency.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "C",
-      "text": "The swim ladder was solidly mounted and in proper condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "C - inegrated swim platform, minor conductivity",
-      "text": "The swim platform was integrated with the transom and, aside from minor localized conductivity readings [insert readings], was generally dry and in good order.",
-      "phase": "observed",
-      "severity": 2
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "C - inegrated swim platform, minor conductivity",
-      "text": "The swim ladder was securely mounted and in acceptable condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "C - inegrated swim platform, minor conductivity",
-      "text": "Continued monitoring of the areas with elevated conductivity is recommended to identify any developing softness or delamination.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "C - integrated swim platform. NO conductivity.",
-      "text": "The swim platform was integrated with the transom.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "C - integrated swim platform. NO conductivity.",
-      "text": "The platform was generally dry and in satisfactory condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "C - integrated swim platform. NO conductivity.",
-      "text": "The swim ladder was securely mounted and in without deficiency condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "C",
-      "text": "The swim platform and ladder were solidly mounted with minor localized damage and some indication of elevated conductivity.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "C",
-      "text": "Both remained in proper condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "C",
-      "text": "The swim platform and ladder were solidly mounted and in good order with minor localized damage.",
-      "phase": "observed",
-      "severity": 2
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "C",
-      "text": "No notable areas of elevated conductivity were observed.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "C",
-      "text": "The swim platform and ladder were solidly mounted.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "C",
-      "text": "No notable areas of elevated conductivity were observed.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "C - ladder with feet",
-      "text": "The swim ladder was securely mounted with protected feet and showed no signs of deterioration.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "C - no swim platform, retractable",
-      "text": "The swim ladder was securely mounted and extended and retracted properly.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
       "section": "Transom",
       "rating": "C - with door",
       "text": "The transom appeared sound and well-maintained.",
@@ -2107,34 +1995,6 @@
       "section": "Transom",
       "rating": "B",
       "text": "Inspect and treat to prevent further deterioration.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "A",
-      "text": "The swim platform or ladder is structurally compromised or unsafe.",
-      "phase": "means",
-      "severity": 5
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "A",
-      "text": "Repair or replacement is required before use.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "B",
-      "text": "The platform or ladder shows wear and loose fittings.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder",
-      "rating": "B",
-      "text": "Service and tighten hardware to ensure safe use.",
       "phase": "action",
       "severity": 3
     },
@@ -2685,62 +2545,6 @@
       "severity": 1
     },
     {
-      "section": "Swim platform and ladder - condition and conductivity readings",
-      "rating": "A",
-      "text": "The swim platform was severely degraded with extensive corrosion and structural compromise.",
-      "phase": "means",
-      "severity": 5
-    },
-    {
-      "section": "Swim platform and ladder - condition and conductivity readings",
-      "rating": "A",
-      "text": "Conductivity readings were elevated throughout.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder - condition and conductivity readings",
-      "rating": "A",
-      "text": "Immediate professional repair or replacement is required before the vessel can be launched.",
-      "phase": "action",
-      "severity": 5
-    },
-    {
-      "section": "Swim platform and ladder - condition and conductivity readings",
-      "rating": "B",
-      "text": "The swim platform and ladder were serviceable with minor localized damage.",
-      "phase": "observed",
-      "severity": 2
-    },
-    {
-      "section": "Swim platform and ladder - condition and conductivity readings",
-      "rating": "B",
-      "text": "Conductivity readings in isolated areas were elevated and should be monitored for developing softness.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder - condition and conductivity readings",
-      "rating": "C",
-      "text": "The swim platform was solidly mounted and in acceptable condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder - condition and conductivity readings",
-      "rating": "C",
-      "text": "The swim ladder was securely fastened.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Swim platform and ladder - condition and conductivity readings",
-      "rating": "C",
-      "text": "Conductivity readings were within acceptable ranges.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
       "section": "Keel and keel joint",
       "rating": "A",
       "text": "The keel or keel joint exhibited visible cracking, corrosion, or separation.",
@@ -3082,6 +2886,510 @@
       "phase": "observed",
       "severity": 1,
       "text": "No anodes were fitted on the trim tabs — this varies by manufacturer and is not a deficiency."
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The swim platform and ladder were inspected.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Structural damage was observed on the swim platform in [describe area(s)].",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The swim platform showed delamination or soft spots consistent with extensive moisture ingress.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The swim ladder was insecure or had failed hardware.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "These findings compromised the structural integrity and safe use of the swim platform.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "The swim platform should not be used until it has been professionally assessed and repaired.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "A",
+      "phase": "action",
+      "severity": 4,
+      "text": "Replace the failed ladder hardware before the vessel is returned to service.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The swim platform and ladder were inspected.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Localized damage was noted on the swim platform in [describe area(s)].",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Elevated conductivity readings of [insert reading range] were noted in localized areas of the swim platform.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The swim ladder showed minor corrosion on the hardware.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The swim ladder was stiff to deploy or retract.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "The elevated conductivity warranted monitoring to rule out progressing moisture ingress or delamination.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "B",
+      "phase": "means",
+      "severity": 2,
+      "text": "The findings did not compromise safe use of the swim platform at the time of survey.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Monitor the affected areas of the swim platform seasonally for signs of softness or delamination.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Clean and lubricate the swim ladder hardware to restore smooth operation.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Repair the localized damage on the swim platform before relaunching the vessel.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The swim platform and ladder were inspected.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The swim platform was integrated with the transom and was dry with no visible damage.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The swim ladder was securely mounted and showed no signs of deterioration.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The swim ladder extended and retracted smoothly.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The swim ladder feet were protected and intact.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No notable areas of elevated conductivity were observed on the swim platform.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No deficiencies were noted on the swim platform or ladder.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The swim platform and ladder were in sound condition for continued use.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The swim platform and ladder were inspected.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Structural damage was observed on the swim platform in [describe area(s)].",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The swim platform showed delamination or soft spots consistent with extensive moisture ingress.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The swim ladder was insecure or had failed hardware.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "These findings compromised the structural integrity and safe use of the swim platform.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "The swim platform should not be used until it has been professionally assessed and repaired.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "A",
+      "phase": "action",
+      "severity": 4,
+      "text": "Replace the failed ladder hardware before the vessel is returned to service.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The swim platform and ladder were inspected.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Localized damage was noted on the swim platform in [describe area(s)].",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Elevated conductivity readings of [insert reading range] were noted in localized areas of the swim platform.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The swim ladder showed minor corrosion on the hardware.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The swim ladder was stiff to deploy or retract.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "The elevated conductivity warranted monitoring to rule out progressing moisture ingress or delamination.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "B",
+      "phase": "means",
+      "severity": 2,
+      "text": "The findings did not compromise safe use of the swim platform at the time of survey.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Monitor the affected areas of the swim platform seasonally for signs of softness or delamination.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Clean and lubricate the swim ladder hardware to restore smooth operation.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Repair the localized damage on the swim platform before relaunching the vessel.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The swim platform and ladder were inspected.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The swim platform was integrated with the transom and was dry with no visible damage.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The swim ladder was securely mounted and showed no signs of deterioration.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The swim ladder extended and retracted smoothly.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The swim ladder feet were protected and intact.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No notable areas of elevated conductivity were observed on the swim platform.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No deficiencies were noted on the swim platform or ladder.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The swim platform and ladder were in sound condition for continued use.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Conductivity testing of the swim platform returned elevated readings of [insert reading range].",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Conductivity readings were generally acceptable but elevated in [describe area(s)].",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The swim platform showed minor localized wear and loose fittings in [describe area(s)].",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "The elevated conductivity readings suggested early-stage moisture absorption within the platform core.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Recheck the conductivity readings at the next haul-out to confirm the condition has not progressed.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Conductivity testing of the swim platform returned elevated readings of [insert reading range].",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Conductivity readings were generally acceptable but elevated in [describe area(s)].",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The swim platform showed minor localized wear and loose fittings in [describe area(s)].",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "The elevated conductivity readings suggested early-stage moisture absorption within the platform core.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Recheck the conductivity readings at the next haul-out to confirm the condition has not progressed.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Conductivity testing of the swim platform returned readings at or near 999 across large areas.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The swim platform returned saturated conductivity readings consistent with extensive core moisture.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "The severely elevated conductivity indicated significant moisture ingress and possible delamination.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Haul the vessel for exploratory work to confirm the extent of the moisture damage in the swim platform.",
+      "section": "Swim platform and ladder"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Conductivity testing of the swim platform returned readings at or near 999 across large areas.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The swim platform returned saturated conductivity readings consistent with extensive core moisture.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "The severely elevated conductivity indicated significant moisture ingress and possible delamination.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Haul the vessel for exploratory work to confirm the extent of the moisture damage in the swim platform.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
     }
   ],
   "Spars and rigging": [

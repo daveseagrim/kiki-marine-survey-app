@@ -72,6 +72,38 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2192 — 2026-04-14
+
+### Rewritten — Swim platform and ladder A/B/C with conductivity chips across all ratings
+
+Old chips read: "The swim ladder was solidly mounted and in proper
+condition" / "in without deficiency condition" / multiple near-
+duplicates of the same sentence. Curated both section names
+("Swim platform and ladder" + "Swim platform and ladder - condition
+and conductivity readings") with a single canonical set per rating,
+including conductivity language:
+
+- **A (Critical)** — 11 chips. Structural damage, delamination/soft
+  spots, failed ladder hardware, readings at/near 999, saturated
+  core moisture. Moisture-ingress means. Haul for exploratory work.
+- **B (Needs Attention)** — 15 chips. Localized damage, elevated
+  conductivity of [range], generally-acceptable-but-elevated,
+  minor-corrosion / stiff-ladder, localized wear with loose fittings
+  (non-awkward grammar). Warrant-monitoring means + moisture-
+  absorption interpretation. Recheck at next haul-out + repair
+  actions.
+- **C (Serviceable)** — 10 chips. Integrated with transom, dry, no
+  visible damage, ladder secure + smooth + protected feet, no
+  elevated conductivity, no deficiencies. Sound-condition means.
+  No action / routine program.
+
+All chips past tense, no "proper condition" / "without deficiency
+condition" / "shows wear" present-tense grammar. Verified both
+section names render identically since the template item uses the
+long form.
+
+---
+
 ## v2191 — 2026-04-14
 
 ### Rewritten — Hull exterior above the waterline A/B/C with non-mechanical vocabulary
