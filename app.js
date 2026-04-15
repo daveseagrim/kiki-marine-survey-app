@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2195';
+const APP_VERSION = 'v2196';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3877,10 +3877,18 @@ async function attachPhotosToItem(itemLabel, fileList) {
     });
   }
 
-  // Refresh the compact card so the photo count / thumbnails update
+  // Refresh the compact card so the photo count / thumbnails update.
+  // v2196: also refresh the area-photo grid if this label has one,
+  // so imports into cockpit/deck/etc. photo sections show immediately.
   try {
     const survey = await getSurvey(currentSurveyId);
     updateCompactItem(survey, itemLabel, '');
+    if (typeof refreshAreaPhotoGrid === 'function') {
+      const sanitized = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
+      if (document.getElementById(`area-photo-wrap-${sanitized}`)) {
+        refreshAreaPhotoGrid(survey, itemLabel);
+      }
+    }
   } catch (_) {}
 
   if (heicFailed > 0 && saved === 0) {
@@ -13736,11 +13744,19 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
         </div>
       `).join('')}
     </div>
-    <button type="button"
-      onclick="openBatchCamera('${safeLabel}', { isArea: true, categoryName: '${safeCat}' })"
-      style="display:inline-block;background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
-      📷 ${photos.length > 0 ? `Add More (${photos.length})` : 'Take Photos'}
-    </button>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      <button type="button"
+        onclick="openBatchCamera('${safeLabel}', { isArea: true, categoryName: '${safeCat}' })"
+        style="background:#006699;color:white;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
+        📷 ${photos.length > 0 ? `Take More (${photos.length})` : 'Take Photos'}
+      </button>
+      <button type="button"
+        onclick="importPhotosForItem('${safeLabel}')"
+        style="background:white;color:#006699;border:2px solid #006699;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
+        🖼️ Import photos from library / files
+      </button>
+    </div>
+    <div style="font-size:11px;color:#6b7280;margin-top:6px;">Both buttons support selecting multiple photos at once. On desktop, you can also drag photo files onto any item card.</div>
   `;
 
   // Load thumbnails from IndexedDB

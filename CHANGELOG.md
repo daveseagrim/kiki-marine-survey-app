@@ -72,6 +72,27 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2196 — 2026-04-14
+
+### Changed — Area photo sections now offer both Take and Import buttons
+
+Area photo sections (cockpit photos, deck photos, cabin photos, etc.)
+had a single "Add More" button that went straight to the camera. The
+per-item media sheet has offered both Take + Import since v2163 — area
+sections now match that UX.
+
+- 📷 Take Photos (primary, filled) — launches the batch camera
+- 🖼️ Import photos from library / files (outlined) — file picker,
+  multi-select, converts HEIC to JPEG automatically
+- Helper caption: "Both buttons support selecting multiple photos at
+  once. On desktop, you can also drag photo files onto any item card."
+
+Also wired `attachPhotosToItem` to refresh the area-photo grid when
+the label has one, so imports into cockpit/deck/etc. sections show
+the new thumbnails immediately without reload.
+
+---
+
 ## v2195 — 2026-04-14
 
 ### Added — Confirm dialog when skipping an item that has saved notes
