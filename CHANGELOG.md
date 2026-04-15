@@ -12,6 +12,59 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2212 — 2026-04-15
+
+### Fixed — ABYC anode recommendation moved from observation chips to action chips
+
+In v2211 the ABYC "replace at ~50% degradation" sentence was appended to
+each of the four degradation observation chips. Dave pointed out that
+guideline belongs in the "what should be done" phase, not mixed into the
+observed sentence — the observation should say what was seen, cleanly.
+
+**Observation chips now read as plain single sentences** — no ABYC
+trailer. 24 chips had the trailing ABYC sentence stripped:
+
+- "The anodes were new with no visible degradation."
+- "The anodes were approximately twenty-five percent degraded and
+  retained adequate sacrificial material."
+- "The anodes were approximately fifty percent degraded."
+- "The anodes were approximately seventy-five percent degraded."
+
+**Added as an action chip under every rating (A, B, C) in every anode
+section:**
+
+> It is recommended by the ABYC that anodes should be changed at fifty
+> percent degradation.
+
+So regardless of whether the surveyor rates the anodes A, B, or C, the
+ABYC guideline chip surfaces in the action phase of the picker.
+
+**Sections updated** (same chip set, consistent across both insurance
+and pre-purchase templates since both read the same library):
+
+1. Hull anodes
+2. Propeller/drive anode(s)
+3. Outboard anodes
+4. Outdrive(s) - (external)…
+5. Sail drive(s) - (external)…
+6. Trim tabs (exterior tabs, actuators, mounts and anodes)
+
+**Redundant chip removed.** The C/2 "Continue the regular seasonal
+inspection program — replace when approximately fifty percent degraded"
+action chip was a near-duplicate of the new ABYC line and has been
+dropped from all six sections (6 chips total).
+
+### Audit
+
+- JSON files parse ✓
+- JavaScript compiles ✓
+- Every anode section has ABYC action chip under C, B, and A ✓
+- Zero observation chips mention ABYC ✓
+- Phase coverage (observed/means/action per A/B/C) intact ✓
+- Version strings aligned across app.js, sw.js, index.html, CACHE_NAME ✓
+
+---
+
 ## v2211 — 2026-04-15
 
 ### Rewritten — Anode chips standardized across every section with anodes

@@ -3596,14 +3596,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes were new with no visible degradation. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were new with no visible degradation."
     },
     {
       "section": "Hull anodes",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material."
     },
     {
       "section": "Hull anodes",
@@ -3628,24 +3628,17 @@
     },
     {
       "section": "Hull anodes",
-      "rating": "C",
-      "phase": "action",
-      "severity": 2,
-      "text": "Continue the regular seasonal inspection program — replace when approximately fifty percent degraded."
-    },
-    {
-      "section": "Hull anodes",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "The anodes were approximately fifty percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately fifty percent degraded."
     },
     {
       "section": "Hull anodes",
       "rating": "B",
       "phase": "observed",
       "severity": 4,
-      "text": "The anodes were approximately seventy-five percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately seventy-five percent degraded."
     },
     {
       "section": "Hull anodes",
@@ -3708,14 +3701,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes were new with no visible degradation. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were new with no visible degradation."
     },
     {
       "section": "Propeller/drive anode(s)",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material."
     },
     {
       "section": "Propeller/drive anode(s)",
@@ -3740,24 +3733,17 @@
     },
     {
       "section": "Propeller/drive anode(s)",
-      "rating": "C",
-      "phase": "action",
-      "severity": 2,
-      "text": "Continue the regular seasonal inspection program — replace when approximately fifty percent degraded."
-    },
-    {
-      "section": "Propeller/drive anode(s)",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "The anodes were approximately fifty percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately fifty percent degraded."
     },
     {
       "section": "Propeller/drive anode(s)",
       "rating": "B",
       "phase": "observed",
       "severity": 4,
-      "text": "The anodes were approximately seventy-five percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately seventy-five percent degraded."
     },
     {
       "section": "Propeller/drive anode(s)",
@@ -3834,14 +3820,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes were new with no visible degradation. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were new with no visible degradation."
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material."
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
@@ -3866,24 +3852,17 @@
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "C",
-      "phase": "action",
-      "severity": 2,
-      "text": "Continue the regular seasonal inspection program — replace when approximately fifty percent degraded."
-    },
-    {
-      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "The anodes were approximately fifty percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately fifty percent degraded."
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
       "rating": "B",
       "phase": "observed",
       "severity": 4,
-      "text": "The anodes were approximately seventy-five percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately seventy-five percent degraded."
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
@@ -3946,14 +3925,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes were new with no visible degradation. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were new with no visible degradation."
     },
     {
       "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material."
     },
     {
       "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
@@ -3978,24 +3957,17 @@
     },
     {
       "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
-      "rating": "C",
-      "phase": "action",
-      "severity": 2,
-      "text": "Continue the regular seasonal inspection program — replace when approximately fifty percent degraded."
-    },
-    {
-      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "The anodes were approximately fifty percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately fifty percent degraded."
     },
     {
       "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "B",
       "phase": "observed",
       "severity": 4,
-      "text": "The anodes were approximately seventy-five percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately seventy-five percent degraded."
     },
     {
       "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
@@ -4058,14 +4030,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes were new with no visible degradation. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were new with no visible degradation."
     },
     {
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material."
     },
     {
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
@@ -4090,24 +4062,17 @@
     },
     {
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "C",
-      "phase": "action",
-      "severity": 2,
-      "text": "Continue the regular seasonal inspection program — replace when approximately fifty percent degraded."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "The anodes were approximately fifty percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately fifty percent degraded."
     },
     {
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
       "rating": "B",
       "phase": "observed",
       "severity": 4,
-      "text": "The anodes were approximately seventy-five percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately seventy-five percent degraded."
     },
     {
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
@@ -4178,6 +4143,111 @@
       "phase": "observed",
       "severity": 1,
       "text": "The rudder was stainless steel."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
     }
   ],
   "Spars and rigging": [
@@ -7515,14 +7585,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes were new with no visible degradation. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were new with no visible degradation."
     },
     {
       "section": "Outboard anodes",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material."
     },
     {
       "section": "Outboard anodes",
@@ -7547,24 +7617,17 @@
     },
     {
       "section": "Outboard anodes",
-      "rating": "C",
-      "phase": "action",
-      "severity": 2,
-      "text": "Continue the regular seasonal inspection program — replace when approximately fifty percent degraded."
-    },
-    {
-      "section": "Outboard anodes",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "The anodes were approximately fifty percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately fifty percent degraded."
     },
     {
       "section": "Outboard anodes",
       "rating": "B",
       "phase": "observed",
       "severity": 4,
-      "text": "The anodes were approximately seventy-five percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+      "text": "The anodes were approximately seventy-five percent degraded."
     },
     {
       "section": "Outboard anodes",
@@ -7621,6 +7684,27 @@
       "phase": "action",
       "severity": 5,
       "text": "New anodes must be installed before the vessel is placed in the water, per ABYC E-2 (Cathodic Protection)."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
     }
   ],
   "Cockpit": [
