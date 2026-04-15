@@ -72,6 +72,26 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2200 — 2026-04-14
+
+### Fixed — Area photo INITIAL render also shows Take + Import buttons
+
+v2196 updated `refreshAreaPhotoGrid` (the post-change redraw) to show
+both the camera and the library-import buttons, but the initial
+render of area-photo sections used a different code path inside
+`renderInspection` — a `<label>` wrapping a hidden
+`<input type="file">`. Deck and coachroof photos (and any section
+rendered on first page load with zero photos) still showed only the
+old single Take Photos button. Replaced the label-wrapped input with
+the same two-button layout used by the refresh path.
+
+Now every area-photo section shows:
+- 📷 Take Photos (solid blue, opens batch camera)
+- 🖼️ Import photos from library / files (outlined)
+- Helper caption explaining multi-select + desktop drag-drop
+
+---
+
 ## v2199 — 2026-04-14
 
 ### Removed — All bowsprit references throughout the survey
