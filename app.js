@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2187';
+const APP_VERSION = 'v2188';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3937,9 +3937,17 @@ window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
     // [side] → port / starboard / both
     const side = (lbl.querySelector('.kk-side-input') || {}).value || '';
     if (/\[side\]/i.test(text)) {
-      // If the survey is single-drive, [side] was already collapsed to ''
-      // during render. Otherwise swap in the selection, or keep placeholder.
-      text = text.replace(/\[side\]\s*/gi, side ? `${side} ` : '[side] ');
+      if (side === 'both') {
+        // "The [side] anodes" / "the [side] lower seals" → "Both anodes" /
+        // "both lower seals" (strip preceding article).
+        text = text.replace(/\bThe\s+\[side\]\s*/g, 'Both ');
+        text = text.replace(/\bthe\s+\[side\]\s*/g, 'both ');
+        // Any remaining bare [side] (e.g. "on [side] sides") → "both"
+        text = text.replace(/\[side\]\s*/gi, 'both ');
+      } else if (side) {
+        text = text.replace(/\[side\]\s*/gi, `${side} `);
+      }
+      // else leave placeholder visible so surveyor sees unfilled field
       // Clean up doubled spaces from the optional space
       text = text.replace(/\s{2,}/g, ' ').replace(/\s+([.,;:])/g, '$1');
     }

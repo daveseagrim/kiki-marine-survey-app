@@ -12,6 +12,22 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2188 — 2026-04-14
+
+### Fixed — "The both anodes" → "Both anodes" (grammar for side=both)
+
+`[side]` replacement produced "The both anodes were more than 50%
+depleted." when the surveyor picked Both. Updated the rebuild
+handler to special-case side=both: strip preceding article and
+capitalize when at sentence start.
+
+- "The [side] anodes were …"      → side=both → "Both anodes were …"
+- "the [side] lower seals"        → side=both → "both lower seals"
+- "on [side] sides"               → side=both → "on both sides"
+- Port/starboard still work the standard way.
+
+---
+
 ## v2187 — 2026-04-14
 
 ### Added — Drive-count-aware pluralization + port/starboard/both side selector
