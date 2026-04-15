@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2197';
+const APP_VERSION = 'v2198';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -19695,10 +19695,14 @@ async function openBatchCamera(itemLabel, opts) {
 function _batchCameraFallback(itemLabel, opts) {
   // Fall back to existing multi-file picker flow
   if (opts.isArea) {
-    // Build a hidden input and hand off to handleAreaPhotoCapture
+    // Build a hidden input and hand off to handleAreaPhotoCapture.
+    // v2198: set `capture="environment"` so mobile browsers open the
+    // rear camera directly instead of a file picker. Users who want to
+    // import from library should use the separate "Import photos" button.
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
+    input.capture = 'environment';
     input.multiple = true;
     input.onchange = () => handleAreaPhotoCapture(itemLabel, input);
     setCameraActive(true);

@@ -72,6 +72,24 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2198 — 2026-04-14
+
+### Fixed — "Take Photos" in area sections now opens the camera (not the file picker)
+
+When `navigator.mediaDevices.getUserMedia` isn't available, area-photo
+capture falls back to a hidden `<input type="file">`. The fallback
+was missing `capture="environment"`, so mobile browsers treated it as
+a generic file picker and opened the photo library instead of the
+rear camera. Added `input.capture = 'environment'` to the fallback
+path.
+
+Desktop Chrome still uses the live-camera overlay via getUserMedia.
+The separate "🖼️ Import photos from library / files" button remains
+available on every area section for users who want to pick existing
+photos.
+
+---
+
 ## v2197 — 2026-04-14
 
 ### Removed — Redundant standalone "Conductivity readings were taken" chips
