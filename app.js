@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2184';
+const APP_VERSION = 'v2185';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -1405,7 +1405,7 @@ const ITEM_SNIPPET_MAP = {
   'Manifold(s) and riser(s)': 'Manifolds and risers',
   'Outboard anode(s)': 'Outboard anodes',
   'Outboard general condition/impression': 'Outboard general condition and impression',
-  'Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows': 'Outdrive(s) corrosion, anodes, propeller(s), boots and bellows',
+  'Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows': 'Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows',
   'Pilot house Engine controls (throttle, gearshift, etc.)': 'Engine gearshift and throttle',
   'Pilot house Engine gauges (tachometer, speedometer, fuel, temperature, etc.)': 'Engine gauges',
   'Pilot house Engine start/stop': 'Engine start and stop',

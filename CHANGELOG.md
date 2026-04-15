@@ -12,6 +12,22 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2185 — 2026-04-14
+
+### Fixed (urgent) — Outdrive chip picker was silently empty due to section-name mismatch
+
+`ITEM_SNIPPET_MAP['Outdrive(s) - (external), corrosion, anodes,
+propeller(s), boots and bellows']` mapped to the SHORTER legacy
+section name, but v2181's curated library entries were stored under
+the FULL long form. `findTextVariants` couldn't find any section
+match, returned zero entries, so the picker never rendered — only
+the manufacturer/model dropdowns showed above an empty textarea.
+Fixed the map so the lookup section equals the stored section.
+After push, the Outdrive(s) item will show the 15 A + 19 B + 11 C
+chips with 3-phase grouping.
+
+---
+
 ## v2184 — 2026-04-14
 
 ### Added — Inline count, location, and area inputs on chips
