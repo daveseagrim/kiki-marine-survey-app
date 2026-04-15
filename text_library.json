@@ -5,7 +5,6 @@
       "rating": "A",
       "phase": "observed",
       "severity": 1,
-      "always": true,
       "text": "An inspection of the hull below the waterline was conducted."
     },
     {
@@ -41,14 +40,14 @@
       "rating": "A",
       "phase": "means",
       "severity": 5,
-      "text": "These findings represent a structural concern that compromises the vessel's seaworthiness."
+      "text": "These findings represented a structural concern that compromised the vessel's seaworthiness."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "A",
       "phase": "means",
       "severity": 5,
-      "text": "The extent of the damage requires professional assessment prior to return to service."
+      "text": "The extent of the damage required professional assessment prior to return to service."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
@@ -76,8 +75,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "always": true,
-      "text": "Below the waterline, the hull was serviceable overall."
+      "text": "Below the waterline, no evident damage was observed on the hull."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
@@ -105,7 +103,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The hull is suitable for continued use without structural concern."
+      "text": "The hull was suitable for continued use without structural concern."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
@@ -119,7 +117,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 2,
-      "text": "The cosmetic wear does not impact structural integrity."
+      "text": "The cosmetic wear did not impact structural integrity."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
@@ -133,14 +131,13 @@
       "rating": "C",
       "phase": "action",
       "severity": 2,
-      "text": "Continue the regular seasonal inspection programme."
+      "text": "Continue the regular seasonal inspection program."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "observed",
-      "always": true,
-      "text": "Below the waterline, the hull was serviceable overall.",
+      "text": "Below the waterline, no evident damage was observed on the hull.",
       "severity": 1
     },
     {
@@ -189,21 +186,21 @@
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "means",
-      "text": "The damage is cosmetic and not structurally concerning.",
+      "text": "The damage was cosmetic and not structurally concerning.",
       "severity": 1
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "means",
-      "text": "The findings are localized and limited in extent.",
+      "text": "The findings were localized and limited in extent.",
       "severity": 2
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "means",
-      "text": "These findings are consistent with typical wear for the vessel's age and use.",
+      "text": "These findings were consistent with typical wear for the vessel's age and use.",
       "severity": 1
     },
     {
@@ -326,7 +323,6 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "observed",
-      "always": true,
       "text": "Conductivity readings were taken on a relative 0 to 999 scale.",
       "severity": 1
     },
@@ -355,21 +351,21 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "means",
-      "text": "This indicates severe and widespread elevated conductivity.",
+      "text": "This indicated severe and widespread elevated conductivity.",
       "severity": 5
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "means",
-      "text": "The extent of the readings is consistent with structural compromise.",
+      "text": "The extent of the readings was consistent with structural compromise.",
       "severity": 5
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "means",
-      "text": "These findings are consistent with significant moisture ingress and possible delamination.",
+      "text": "These findings were consistent with significant moisture ingress and possible delamination.",
       "severity": 5
     },
     {
@@ -397,7 +393,6 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "observed",
-      "always": true,
       "text": "Conductivity readings were taken on a relative 0 to 999 scale.",
       "severity": 1
     },
@@ -426,14 +421,14 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "means",
-      "text": "These readings warrant monitoring to rule out osmotic blistering or moisture ingress.",
+      "text": "These readings warranted monitoring to rule out osmotic blistering or moisture ingress.",
       "severity": 3
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "means",
-      "text": "These findings suggest early-stage moisture absorption that should be addressed proactively.",
+      "text": "These findings suggested early-stage moisture absorption that should be addressed proactively.",
       "severity": 3
     },
     {
@@ -475,7 +470,6 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
       "phase": "observed",
-      "always": true,
       "text": "Conductivity readings were taken on a relative 0 to 999 scale.",
       "severity": 1
     },
@@ -497,14 +491,14 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
       "phase": "means",
-      "text": "These readings are not considered abnormal for the vessel's age.",
+      "text": "These readings were not considered abnormal for the vessel's age.",
       "severity": 1
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
       "phase": "means",
-      "text": "The readings fall within the normal range for a fibreglass hull of this vintage.",
+      "text": "The readings fell within the normal range for a fibreglass hull of this vintage.",
       "severity": 1
     },
     {
@@ -1174,7 +1168,6 @@
       "rating": "A",
       "phase": "observed",
       "severity": 1,
-      "always": true,
       "text": "The primer, barrier coat, and anti-fouling were inspected below the waterline."
     },
     {
@@ -1203,14 +1196,14 @@
       "rating": "A",
       "phase": "means",
       "severity": 5,
-      "text": "The hull is at risk of osmotic damage without immediate protection."
+      "text": "The hull was at risk of osmotic damage without immediate protection."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "A",
       "phase": "means",
       "severity": 5,
-      "text": "These findings compromise the coating system's ability to protect the laminate."
+      "text": "These findings compromised the coating system's ability to protect the laminate."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
@@ -1231,7 +1224,6 @@
       "rating": "B",
       "phase": "observed",
       "severity": 1,
-      "always": true,
       "text": "The primer, barrier coat, and anti-fouling were inspected below the waterline."
     },
     {
@@ -1267,14 +1259,14 @@
       "rating": "B",
       "phase": "means",
       "severity": 2,
-      "text": "The coating system is serviceable overall but attention is required to maintain protection."
+      "text": "The coating system was in overall sound condition but attention was required to maintain protection."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "B",
       "phase": "means",
       "severity": 3,
-      "text": "Accumulated legacy coats add weight and can mask problems beneath."
+      "text": "Accumulated legacy coats added weight and could mask problems beneath."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
@@ -1309,7 +1301,6 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "always": true,
       "text": "The primer, barrier coat, and anti-fouling were inspected below the waterline."
     },
     {
@@ -1338,14 +1329,14 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The coating system is providing effective protection to the hull."
+      "text": "The coating system was providing effective protection to the hull."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The findings are consistent with normal seasonal wear."
+      "text": "The findings were consistent with normal seasonal wear."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
@@ -1366,7 +1357,7 @@
       "rating": "C",
       "phase": "action",
       "severity": 2,
-      "text": "Continue the regular seasonal inspection programme."
+      "text": "Continue the regular seasonal inspection program."
     }
   ],
   "Spars and rigging": [

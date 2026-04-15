@@ -12,6 +12,51 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2178 — 2026-04-14
+
+### Changed — Writing conventions enforced: past tense + "program" + no "serviceable" + no auto-included sentence
+
+Three user-preference changes that shape every future chip curation:
+
+1. **Past tense** for observed + means phases. Rewrote 22 curated
+   library entries that were present-tense ("the damage is cosmetic"
+   → "the damage was cosmetic"). Action phase stays imperative
+   ("should be sanded").
+
+2. **"program"** not "programme" — explicit exception to the
+   otherwise-Canadian-English rule. Library scan + rewrite converted
+   all existing uses.
+
+3. **Avoid "serviceable"** — Dave is consciously differentiating
+   Kiki's output from stock SAMS prose. Rewrote 3 curated-section
+   uses of "the hull was serviceable overall" to "no evident damage
+   was observed on the hull" and similar alternatives. 50 remaining
+   uses in non-curated sections will get rewritten as Dave touches
+   those sections.
+
+4. **"Always" locked-chip concept removed.** Previously the top of
+   each picker showed a pre-checked, disabled "boilerplate" sentence
+   (e.g. "Conductivity readings were taken on a relative 0 to 999
+   scale"). Removed the green "always" badge, the disabled state, and
+   the row tinting. All chips are now optional and equal. Dropped the
+   `always: true` flag from 9 library entries.
+
+### Added — `applyWritingFixups` runs on note load AND save
+
+Known present-tense snippet fragments + "programme" → "program" get
+rewritten every time a note is opened (display-side fix) and saved
+(persistence fix). This progressively cleans up already-saved
+observations as the surveyor works through the items. Surveyor does
+not need to re-pick chips to get the corrected text — it appears
+automatically when the item is opened.
+
+### Saved — Writing style feedback memory
+
+Persisted these writing conventions to `.auto-memory/feedback_writing_style.md`
+so future conversations remember them.
+
+---
+
 ## v2177 — 2026-04-14
 
 ### Changed — Scope split between Hull damage vs Primer/barrier coat/anti-fouling

@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2177';
+const APP_VERSION = 'v2178';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3324,7 +3324,13 @@ function showNotesSheet(itemLabel, categoryName) {
     // B-07 bug fix (v2158): saved text from earlier runs may contain raw
     // {if-rudder:...} tokens that were never expanded. Clean them up on
     // display so the textarea never shows raw braces to the surveyor.
-    let initialTextareaText = itemData.text || '';
+    // v2178: apply writing fixups on load so the surveyor immediately sees
+    // corrected text (programme→program, present→past tense for known
+    // snippet phrases). Persists on next Save Notes via applyWritingFixups
+    // in saveNotesFromSheet.
+    let initialTextareaText = (typeof applyWritingFixups === 'function')
+      ? applyWritingFixups(itemData.text || '')
+      : (itemData.text || '');
     if (initialTextareaText && typeof window.expandSnippetTokens === 'function') {
       const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
         ? window.KikiSnippetTokens.contextFromSurvey(survey)
@@ -3481,7 +3487,7 @@ function showNotesSheet(itemLabel, categoryName) {
           if (/\b(serviceable|no (?:action|concerns|softness|visible)|consistent with proper condition|within (?:normal|the normal) range|no elevated|no signs)\b/.test(s)) return 1;
           return 3;
         };
-        const _pickerSentences = [];      // { text, always, phase, severity }
+        const _pickerSentences = [];      // { text, phase, severity }
         const _pickerSeen = new Map();    // normKey -> index
         sheetVariantsForDisplay.forEach(v => {
           const vPhase = v.phase;
@@ -3492,27 +3498,21 @@ function showNotesSheet(itemLabel, categoryName) {
               _pickerSeen.set(normKey, _pickerSentences.length);
               _pickerSentences.push({
                 text: sent,
-                always: !!v.always,
                 phase: vPhase || _classifyPhase(sent),
                 severity: vSeverity != null ? vSeverity : _estimateSeverity(sent),
               });
-            } else if (v.always) {
-              _pickerSentences[_pickerSeen.get(normKey)].always = true;
             }
           });
         });
-        // v2175: Sort:
+        // v2178: dropped the `always` concept per user preference. Sort:
         //   1. Phase order (observed → means → action)
-        //   2. `always` pinned first within its phase (boilerplate)
-        //   3. Severity ASCENDING (less severe first, more severe last)
-        //   4. Original insertion order to break ties
+        //   2. Severity ASCENDING (less severe first, more severe last)
+        //   3. Original insertion order to break ties
         const _phaseRank = { observed: 0, means: 1, action: 2 };
         _pickerSentences.forEach((p, i) => { p._origIdx = i; });
         _pickerSentences.sort((a, b) => {
           const pr = (_phaseRank[a.phase] || 0) - (_phaseRank[b.phase] || 0);
           if (pr) return pr;
-          const ar = (b.always ? 1 : 0) - (a.always ? 1 : 0);
-          if (ar) return ar;
           const sr = (a.severity || 3) - (b.severity || 3);
           if (sr) return sr;
           return a._origIdx - b._origIdx;
@@ -3561,14 +3561,12 @@ function showNotesSheet(itemLabel, categoryName) {
                   `onclick="event.preventDefault();event.stopPropagation();" ` +
                   `style="width:52px;padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">` +
               `</span>`);
-            const isAlways = sObj.always ? 'checked disabled' : '';
-            const alwaysBadge = sObj.always ? `<span style="font-size:10px;background:#dcfce7;color:#166534;padding:1px 5px;border-radius:4px;margin-left:6px;">always</span>` : '';
             sentencePickerHtml += `
-              <label style="display:flex;gap:10px;padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;font-size:13px;line-height:1.45;${sObj.always ? 'background:#f0fdf4;' : ''}">
-                <input type="checkbox" class="kk-sentence-chip" data-picker-key="${sanitizedLabel}" data-sentence-idx="${idx}" ${isAlways}
+              <label style="display:flex;gap:10px;padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;font-size:13px;line-height:1.45;">
+                <input type="checkbox" class="kk-sentence-chip" data-picker-key="${sanitizedLabel}" data-sentence-idx="${idx}"
                   onchange="_kkRebuildFromSentencePicker('${sanitizedLabel}')"
                   style="margin-top:3px;flex-shrink:0;">
-                <span>${rendered}${alwaysBadge}</span>
+                <span>${rendered}</span>
               </label>
             `;
           });
@@ -4115,12 +4113,45 @@ function closeNotesSheet(itemLabel) {
 window.closeNotesSheet = closeNotesSheet;
 
 // Save notes from the notes sheet and close
+// v2178: on-save text fixups so already-saved observations get cleaned
+// up next time the surveyor saves them. Keeps the whole-file migration
+// non-destructive — the surveyor has to open and re-save the item.
+function applyWritingFixups(text) {
+  if (!text) return text;
+  let t = text;
+  // programme → program (user preference; overrides Canadian-English rule)
+  t = t.replace(/\bprogramme\b/g, 'program');
+  t = t.replace(/\bProgramme\b/g, 'Program');
+  // Present-tense → past-tense phrases from the curated library rewrite.
+  // These ONLY match literal sentence fragments used in snippets, so they
+  // don't false-match free-typed prose.
+  const rewrites = [
+    ['The hull is suitable for continued use', 'The hull was suitable for continued use'],
+    ['The damage is cosmetic and not structurally concerning', 'The damage was cosmetic and not structurally concerning'],
+    ['The findings are localized and limited in extent', 'The findings were localized and limited in extent'],
+    ['These findings are consistent with typical wear', 'These findings were consistent with typical wear'],
+    ['These readings are not considered abnormal', 'These readings were not considered abnormal'],
+    ['The readings fall within the normal range', 'The readings fell within the normal range'],
+    ['These readings warrant monitoring', 'These readings warranted monitoring'],
+    ['These findings suggest early-stage moisture absorption', 'These findings suggested early-stage moisture absorption'],
+    ['This indicates severe and widespread elevated conductivity', 'This indicated severe and widespread elevated conductivity'],
+    ['The extent of the readings is consistent with structural compromise', 'The extent of the readings was consistent with structural compromise'],
+    ['These findings are consistent with significant moisture ingress', 'These findings were consistent with significant moisture ingress'],
+    ['The cosmetic wear does not impact structural integrity', 'The cosmetic wear did not impact structural integrity'],
+    ['The coating system is providing effective protection', 'The coating system was providing effective protection'],
+    ['The findings are consistent with normal seasonal wear', 'The findings were consistent with normal seasonal wear'],
+    ['The hull is at risk of osmotic damage', 'The hull was at risk of osmotic damage'],
+  ];
+  rewrites.forEach(([from, to]) => { t = t.split(from).join(to); });
+  return t;
+}
+
 function saveNotesFromSheet(itemLabel, categoryName, sanitizedLabel) {
   const textarea = document.getElementById(`sheet-text-${sanitizedLabel}`);
   if (!textarea) return;
   // Expand any {standards?...} block with collected citations before saving
   const finalized = (typeof finalizeSnippetText === 'function') ? finalizeSnippetText(textarea) : textarea.value;
-  const newText = finalized.trim();
+  const newText = applyWritingFixups(finalized.trim());
 
   getSurvey(currentSurveyId).then(survey => {
     if (!survey.items[itemLabel]) {
