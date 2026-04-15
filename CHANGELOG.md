@@ -72,6 +72,35 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2191 — 2026-04-14
+
+### Rewritten — Hull exterior above the waterline A/B/C with non-mechanical vocabulary
+
+The section's chips were using mechanical phrasing ("in good working
+order", "functioning as intended") inappropriate for a structural,
+non-mechanical item, plus "serviceable" which the user is avoiding.
+Replaced all existing entries with curated A/B/C chips using
+structural/cosmetic vocabulary:
+
+- **A (Critical)** — 8 chips. Significant damage, structural cracking,
+  impact penetration. Structural-concern means. Immediate professional
+  assessment actions.
+- **B (Needs Attention)** — 12 chips. Cosmetic scratches, gelcoat
+  crazing, surface cracking, chalking/UV degradation. Means chips
+  cover cosmetic vs gelcoat protection. Actions: buff/wax, sand/fair,
+  compound polish, gelcoat refinish.
+- **C (Serviceable)** — 11 chips. Good overall condition, recently
+  buffed/waxed, gelcoat in good condition, cosmetic scratches only.
+  Sound-condition means. Routine wash/polish/wax actions.
+
+Improved phrasing on the scratches-and-oxidation sentence:
+  old: "The hull showed minor scratches and oxidation typical of a
+        boat of this age."
+  new: "Minor scratches and light oxidation were noted on the hull,
+        consistent with a vessel of this age and use."
+
+---
+
 ## v2189 — 2026-04-14
 
 ### Changed — Survey cards now display the FULL completed note (no truncation)

@@ -1643,52 +1643,220 @@
     },
     {
       "section": "Hull exterior above the waterline",
-      "rating": "B",
-      "text": "The hull exterior above the waterline was generally serviceable with minor scratches and oxidation typical for age.",
+      "rating": "A",
       "phase": "observed",
-      "severity": 2
+      "severity": 1,
+      "text": "The hull exterior above the waterline was inspected."
     },
     {
       "section": "Hull exterior above the waterline",
-      "rating": "B",
-      "text": "Localized areas noted in the photos warrant cosmetic repair.",
+      "rating": "A",
       "phase": "observed",
-      "severity": 2
+      "severity": 5,
+      "text": "Significant damage was observed on the hull exterior above the waterline in [describe area(s)]."
     },
     {
       "section": "Hull exterior above the waterline",
-      "rating": "C",
-      "text": "The hull exterior above the waterline was in acceptable condition.",
+      "rating": "A",
       "phase": "observed",
-      "severity": 3
+      "severity": 5,
+      "text": "Structural cracking was observed in [describe area(s)]."
     },
     {
       "section": "Hull exterior above the waterline",
-      "rating": "C - buffed with minor scratches",
-      "text": "The hull exterior above the waterline was well buffed and waxed and was in good overall condition with minor scratches consistent with normal use.",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Impact damage penetrating the gelcoat and laminate was observed in [describe area(s)]."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "A",
       "phase": "means",
-      "severity": 2
+      "severity": 5,
+      "text": "These findings represented a structural concern that compromised the hull's integrity."
     },
     {
       "section": "Hull exterior above the waterline",
-      "rating": "C - minor scratch",
-      "text": "The hull exterior above the waterline was in good working order with minor scratches and oxidation typical for a boat this age.",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "The extent of the damage required professional assessment prior to return to service."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "The vessel should not be returned to service until the damage has been professionally assessed and remediated."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "A",
+      "phase": "action",
+      "severity": 4,
+      "text": "A qualified fibreglass technician should inspect and repair the affected areas."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "B",
       "phase": "observed",
-      "severity": 2
+      "severity": 1,
+      "text": "The hull exterior above the waterline was inspected."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Minor scratches and light oxidation were noted on the hull, consistent with a vessel of this age and use."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Localized cosmetic damage was noted in [describe area(s)]."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Gelcoat crazing was observed in [describe area(s)]."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Surface cracking was observed in [describe area(s)]."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Chalking or UV degradation was evident on the hull sides."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "B",
+      "phase": "means",
+      "severity": 2,
+      "text": "The findings were cosmetic and did not affect the hull's structural integrity."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "The gelcoat warrants attention to maintain its protective qualities."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "B",
+      "phase": "action",
+      "severity": 1,
+      "text": "Buff and wax the affected areas to restore the finish."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Lightly sand and fair the affected areas before refinishing."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Address the gelcoat crazing with compound polish or targeted gelcoat repair."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "A professional gelcoat refinish is recommended to protect the underlying laminate from UV exposure."
     },
     {
       "section": "Hull exterior above the waterline",
       "rating": "C",
-      "text": "The hull exterior above the waterline presented no deficiencies.",
       "phase": "observed",
-      "severity": 3
+      "severity": 1,
+      "text": "The hull exterior above the waterline was inspected."
     },
     {
       "section": "Hull exterior above the waterline",
       "rating": "C",
-      "text": "The hull exterior above the waterline was well buffed and waxed and was functioning as intended.",
       "phase": "observed",
-      "severity": 3
+      "severity": 1,
+      "text": "The hull exterior above the waterline was in good overall condition."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The hull exterior above the waterline had been recently buffed and waxed."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The gelcoat was in good condition with no visible cracking or damage."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Minor cosmetic scratches consistent with normal use were noted on the hull."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No deficiencies were noted on the hull exterior above the waterline."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The hull exterior was in sound condition for continued use."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The findings were consistent with typical wear for the vessel's age and use."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Maintain the gelcoat with routine wash, polish, and wax to preserve the finish."
+    },
+    {
+      "section": "Hull exterior above the waterline",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program."
     },
     {
       "section": "Ventilation grills/covers",
@@ -2641,20 +2809,6 @@
       "text": "The underwater lighting functioned properly and provided adequate illumination.",
       "phase": "observed",
       "severity": 1
-    },
-    {
-      "section": "Hull exterior above the waterline",
-      "rating": "A",
-      "text": "The hull exterior above the waterline exhibited significant damage, cracking, or structural compromise.",
-      "phase": "means",
-      "severity": 5
-    },
-    {
-      "section": "Hull exterior above the waterline",
-      "rating": "A",
-      "text": "Professional assessment and repair is required.",
-      "phase": "action",
-      "severity": 3
     },
     {
       "section": "Rub rail",
