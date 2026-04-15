@@ -12,6 +12,95 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2211 — 2026-04-15
+
+### Rewritten — Anode chips standardized across every section with anodes
+
+Dave's rule: **anode observations should never be mixed into sentences
+about other parts**, because the part (hull, propeller shaft, trim tab,
+outdrive housing, sail drive) can be in perfect order while the anodes
+are degraded, or vice versa. Also, degradation should be rateable as
+a level, not a vague "worn" observation.
+
+Every anode-bearing section now carries the same standardized chip set:
+
+**Observed chips (ordered least → worst, ABYC replacement line on each
+degradation chip):**
+
+- C/1 — "The anodes were new with no visible degradation. It is
+  recommended by the ABYC that anodes be replaced when approximately
+  fifty percent degraded."
+- C/1 — "The anodes were approximately twenty-five percent degraded…"
+  (same ABYC line)
+- B/3 — "The anodes were approximately fifty percent degraded…" (ABYC)
+- B/4 — "The anodes were approximately seventy-five percent degraded…"
+  (ABYC)
+- Plus mounting-condition chip, service-life chip, and A-rating chips
+  for missing / fully consumed anodes.
+
+**Means + action chips (per rating):**
+
+- C: "providing effective galvanic protection" means; "no action" +
+  "continue seasonal program — replace when approximately fifty percent
+  degraded" action chips.
+- B: "continued service will reduce galvanic protection" means;
+  "replace at next scheduled service" (sev 3) and "replace before
+  relaunch" (sev 4) action chips.
+- A: "without anode protection, galvanic corrosion will progress
+  rapidly" means; "new anodes must be installed per ABYC E-2" action.
+
+**Sections standardized** (same chip set applied to every one):
+
+1. **Hull anodes** — count/location template chip retained; 23 old
+   chips → 17 standardized chips.
+2. **Propeller/drive anode(s)** — keeps the "B - wrong metal" subclass
+   for aluminium-where-magnesium-needed; overall 18 chips.
+3. **Outboard anodes** — 16 chips.
+4. **Outdrive(s) - (external)…** — 10 anode-mentioning chips removed
+   from the combined section; 16 standardized anode chips added
+   alongside the 40 remaining part-only chips (housing, bellows, seals,
+   propeller, paint, tilt/trim).
+5. **Sail drive(s) - (external)…** — duplicate no-hyphen section name
+   collapsed into the canonical hyphenated name (10 entries merged);
+   4 anode-mentioning chips removed; 16 standardized anode chips added
+   alongside the 15 remaining part-only chips.
+6. **Trim tabs (exterior tabs, actuators, mounts and anodes)** — 11
+   anode-mentioning chips removed from the trim-tab-body chips (the
+   v2210 neutral "not necessarily a deficiency" chips were anode-state
+   statements — those are now covered by the standardized anode chips);
+   16 standardized anode chips added alongside the 11 remaining trim-
+   tab-body chips.
+
+**Anode leakage scrubbed from non-anode sections:**
+
+- **Bow thruster** — 2 chips had their anode clauses stripped ("…and
+  the anode was intact" trimmed); 1 anode-only chip dropped.
+- **Stern thruster** — 1 chip scrubbed, 1 dropped.
+
+### Added — Rudder material chips (bronze / stainless steel)
+
+For shaft-drive power boats (one or two rudders) and sailboats, two new
+C-rating observation chips identify the rudder material:
+
+- "The rudder was bronze."
+- "The rudder was stainless steel."
+
+These live under `Rudder(s) condition` alongside the v2210 curated
+chip list. The surveyor taps whichever applies.
+
+### Audit
+
+- JSON files parse ✓
+- JavaScript compiles (app.js + sw.js) ✓
+- Every anode section has A/B/C × observed/means/action coverage ✓
+- Every degradation-level observation chip carries the ABYC line ✓
+- Zero anode mentions remain in Bow thruster / Stern thruster ✓
+- Sail drive duplicate section consolidated into canonical name ✓
+- Rudder material chips present on Rudder(s) condition ✓
+- Version strings aligned across app.js, sw.js, index.html, CACHE_NAME ✓
+
+---
+
 ## v2210 — 2026-04-15
 
 ### Changed — Cutlass bearing "too big to move" chips moved from Serviceable to Not tested

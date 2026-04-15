@@ -771,167 +771,6 @@
       "severity": 3
     },
     {
-      "section": "Hull anodes",
-      "rating": "A",
-      "phase": "observed",
-      "severity": 5,
-      "text": "[insert count] hull anodes were fitted on this vessel, located at [insert location(s)]."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "A",
-      "phase": "observed",
-      "severity": 5,
-      "text": "The hull anodes were severely depleted."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "A",
-      "phase": "observed",
-      "severity": 5,
-      "text": "The hull anodes were missing entirely."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "Without galvanic protection, corrosion of metallic fasteners and fittings will accelerate."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "Missing or fully consumed anodes expose underwater metals to galvanic attack."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "A",
-      "phase": "action",
-      "severity": 5,
-      "text": "Per ABYC E-2, new anodes must be installed before the vessel is placed in the water."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "A",
-      "phase": "action",
-      "severity": 5,
-      "text": "Replace the hull anodes before relaunching the vessel."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "B",
-      "phase": "observed",
-      "severity": 3,
-      "text": "[insert count] hull anodes were fitted on this vessel, located at [insert location(s)]."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "B",
-      "phase": "observed",
-      "severity": 3,
-      "text": "The hull anodes were more than 50% depleted."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "B",
-      "phase": "observed",
-      "severity": 3,
-      "text": "One or more hull anodes showed signs of degradation."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "B",
-      "phase": "observed",
-      "severity": 2,
-      "text": "A hull anode at [insert location] was noticeably worn and approaching the end of its service life."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "B",
-      "phase": "means",
-      "severity": 2,
-      "text": "Continued service without replacement will reduce galvanic protection over time."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Replace the depleted hull anodes before relaunching the vessel."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "B",
-      "phase": "action",
-      "severity": 2,
-      "text": "Replace the worn hull anodes at the next scheduled haul-out."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "[insert count] hull anodes were fitted on this vessel, located at [insert location(s)]."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "The hull anodes were securely mounted and did not exhibit undue corrosion."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "The hull anodes had more than 50% of their original material remaining."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "The hull anodes appeared new or recently replaced."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "Although not a hull anode, a bonding plate was present and without deficiency."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "The anodes were providing effective galvanic protection to the hull's underwater metals."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No action required at this time."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "C",
-      "phase": "action",
-      "severity": 2,
-      "text": "Monitor the anodes at each haul-out and replace when approximately 50% consumed."
-    },
-    {
       "section": "Stern tube(s) (external)",
       "rating": "C",
       "text": "The external stern tube was functioning as intended.",
@@ -944,90 +783,6 @@
       "text": "The propeller shaft appeared true with no significant corrosion.",
       "phase": "observed",
       "severity": 5
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "B - none there",
-      "text": "No shaft anodes were installed on the propeller shafts.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "B - none there",
-      "text": "Without proper anode protection, the shafts, couplings, and propellers would have been vulnerable to galvanic corrosion.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "B - none there",
-      "text": "Suitable shaft anodes should have been installed and periodically maintained in accordance with ABYC A-28 guidance.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "B - multiple",
-      "text": "Propeller and drive anodes showed significant corrosion and merited replacement.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "B - single",
-      "text": "The propeller shaft anode showed significant corrosion and merited replacement.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "B - wrong metal",
-      "text": "The propeller shaft or drive anode appeared to be aluminium.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "B - wrong metal",
-      "text": "Replacement with magnesium is recommended.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "C - multiple",
-      "text": "Propeller and drive anodes were securely mounted and did not exhibit undue corrosion.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "C - single",
-      "text": "The propeller anode was securely mounted and did not exhibit significant corrosion.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "A",
-      "text": "The propeller and/or drive anodes were completely depleted and provided no galvanic protection.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "A",
-      "text": "The shafts and propeller are at severe risk of galvanic corrosion.",
-      "phase": "observed",
-      "severity": 5
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "A",
-      "text": "Replace anodes immediately in accordance with ABYC A-28.",
-      "phase": "action",
-      "severity": 3
     },
     {
       "section": "Skeg(s)",
@@ -1184,44 +939,30 @@
       "severity": 3
     },
     {
-      "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
-      "rating": "C",
-      "text": "Despite minor corrosion, the sail drive, propeller, and anode were in good working order.",
-      "phase": "observed",
-      "severity": 2
-    },
-    {
-      "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "A",
       "text": "The sail drive exhibited severe corrosion or the seal was compromised, allowing water ingress.",
       "phase": "means",
       "severity": 5
     },
     {
-      "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "A",
       "text": "Immediate professional inspection and repair is required before the vessel is launched.",
       "phase": "action",
       "severity": 5
     },
     {
-      "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "B",
       "text": "The sail drive boot showed deterioration and minor leaking at the seal.",
       "phase": "observed",
       "severity": 2
     },
     {
-      "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "B",
       "text": "Gasket replacement should be planned.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
-      "rating": "B",
-      "text": "The anode showed moderate depletion and should be replaced.",
       "phase": "means",
       "severity": 3
     },
@@ -1277,7 +1018,7 @@
     {
       "section": "Bow thruster",
       "rating": "A",
-      "text": "Significant corrosion was present on the gear leg and the anode was severely degraded.",
+      "text": "Significant corrosion was present on the gear leg.",
       "phase": "observed",
       "severity": 5
     },
@@ -1290,13 +1031,6 @@
     },
     {
       "section": "Bow thruster",
-      "rating": "B",
-      "text": "The anode was degraded and should be replaced.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Bow thruster",
       "rating": "C",
       "text": "The bow thruster gear leg was solid and the propeller rotated freely.",
       "phase": "observed",
@@ -1305,7 +1039,7 @@
     {
       "section": "Bow thruster",
       "rating": "C",
-      "text": "Corrosion was not concerning and the anode was intact.",
+      "text": "Corrosion was not concerning.",
       "phase": "observed",
       "severity": 1
     },
@@ -1893,23 +1627,9 @@
     {
       "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "B",
-      "text": "The sail drive boot showed signs of deterioration and the anode exhibited moderate depletion.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
-      "rating": "B",
       "text": "Service and replacement should be planned in the near term.",
       "phase": "action",
       "severity": 3
-    },
-    {
-      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
-      "rating": "C",
-      "text": "The sail drive, propeller, and anode were found to be in order with minor corrosion not requiring immediate attention.",
-      "phase": "observed",
-      "severity": 5
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
@@ -1956,13 +1676,6 @@
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
       "rating": "A",
-      "phase": "observed",
-      "severity": 4,
-      "text": "The [side] anodes were severely depleted or missing."
-    },
-    {
-      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "A",
       "phase": "means",
       "severity": 5,
       "text": "Cracked bellows are a sinking hazard below the waterline when the {drives:drive is|drives are} lowered."
@@ -1973,13 +1686,6 @@
       "phase": "means",
       "severity": 5,
       "text": "A damaged propeller will cause severe vibration that can damage the shaft, bearings, and transmission."
-    },
-    {
-      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "Without sacrificial anodes, galvanic corrosion will progress rapidly on the {drives:drive|drives}."
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
@@ -2001,13 +1707,6 @@
       "phase": "action",
       "severity": 5,
       "text": "The {drives:propeller must be|propellers must be} reconditioned or replaced before the vessel is operated."
-    },
-    {
-      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "A",
-      "phase": "action",
-      "severity": 5,
-      "text": "New anodes must be installed before the vessel is placed in the water."
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
@@ -2063,13 +1762,6 @@
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "The [side] anodes were more than 50% depleted."
-    },
-    {
-      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "B",
-      "phase": "observed",
-      "severity": 3,
       "text": "The paint on the [side] drive {drives:housing was|housings were} peeling or deteriorated."
     },
     {
@@ -2085,13 +1777,6 @@
       "phase": "means",
       "severity": 2,
       "text": "The findings are consistent with normal wear for the vessel's age and use."
-    },
-    {
-      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed."
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
@@ -2127,13 +1812,6 @@
       "phase": "action",
       "severity": 2,
       "text": "Remove and recondition the {drives:propeller|propellers} at a qualified propeller shop."
-    },
-    {
-      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Replace the depleted anodes before relaunching the vessel."
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
@@ -2196,27 +1874,6 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes had adequate material remaining."
-    },
-    {
-      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "The anodes appeared new or recently replaced."
-    },
-    {
-      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "No anodes were fitted on {drives:this outdrive|these outdrives}."
-    },
-    {
-      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
       "text": "The paint on the drive {drives:housing was|housings were} intact."
     },
     {
@@ -2255,13 +1912,6 @@
       "text": "Continue the regular seasonal inspection program."
     },
     {
-      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "C",
-      "phase": "action",
-      "severity": 2,
-      "text": "Monitor the anode condition at each haul-out."
-    },
-    {
       "section": "Stern thruster",
       "rating": "A",
       "text": "The stern thruster gear leg was soft to percussion or the propeller was seized.",
@@ -2285,13 +1935,6 @@
     {
       "section": "Stern thruster",
       "rating": "B",
-      "text": "The anode was degraded and should be replaced.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Stern thruster",
-      "rating": "B",
       "text": "Corrosion was evident and should be monitored.",
       "phase": "means",
       "severity": 3
@@ -2306,7 +1949,7 @@
     {
       "section": "Stern thruster",
       "rating": "C",
-      "text": "Corrosion was not concerning and the anode was intact.",
+      "text": "Corrosion was not concerning.",
       "phase": "observed",
       "severity": 1
     },
@@ -3214,41 +2857,6 @@
       "text": "No action required at this time."
     },
     {
-      "section": "Propeller/drive anode(s)",
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "This represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "The finding should be monitored and addressed in the near term."
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Address this at the next scheduled service."
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No immediate concern was noted."
-    },
-    {
-      "section": "Propeller/drive anode(s)",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No action required at this time."
-    },
-    {
       "section": "Skeg(s)",
       "rating": "B",
       "phase": "means",
@@ -3284,28 +2892,28 @@
       "text": "No immediate concern was noted."
     },
     {
-      "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "A",
       "phase": "observed",
       "severity": 5,
       "text": "A significant concern was observed with this item."
     },
     {
-      "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
     },
     {
-      "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "C",
       "phase": "means",
       "severity": 1,
       "text": "No immediate concern was noted."
     },
     {
-      "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "C",
       "phase": "action",
       "severity": 1,
@@ -3903,20 +3511,6 @@
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
       "rating": "A",
       "phase": "observed",
-      "severity": 1,
-      "text": "No anodes were fitted on the trim tabs — this varies by manufacturer and is not necessarily a deficiency."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "A",
-      "phase": "observed",
-      "severity": 4,
-      "text": "The actuators or anodes were severely degraded."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "A",
-      "phase": "observed",
       "severity": 5,
       "text": "The trim tabs exhibited severe corrosion, cracking, or structural failure."
     },
@@ -3938,29 +3532,8 @@
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
       "rating": "B",
       "phase": "observed",
-      "severity": 1,
-      "text": "No anodes were fitted on the trim tabs — this varies by manufacturer and is not necessarily a deficiency."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "B",
-      "phase": "observed",
       "severity": 2,
       "text": "Minor corrosion was noted on the trim tabs, actuators, or mounts, but they remained serviceable."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "B",
-      "phase": "observed",
-      "severity": 3,
-      "text": "The anodes were at least fifty percent consumed and require replacement."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "B",
-      "phase": "observed",
-      "severity": 3,
-      "text": "No anodes were installed on the trim tabs."
     },
     {
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
@@ -3974,21 +3547,7 @@
       "rating": "B",
       "phase": "means",
       "severity": 3,
-      "text": "In the absence of proper anode protection, the stainless-steel tab planes and hydraulic or electric actuators are vulnerable to galvanic corrosion."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
       "text": "The finding should be monitored and addressed in the near term."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "B",
-      "phase": "action",
-      "severity": 2,
-      "text": "Replace the anodes at the next scheduled service."
     },
     {
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
@@ -3996,34 +3555,6 @@
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Suitable anodes should be installed in accordance with ABYC A-28 and replaced as part of routine maintenance."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "No anodes were fitted on the trim tabs — this varies by manufacturer and is not necessarily a deficiency."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "The trim tabs, actuators, mounts, and anodes were in satisfactory condition with no signs of deterioration."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 2,
-      "text": "Despite minor cosmetic corrosion, the trim tabs, actuators, mounts, and anodes showed no signs of significant deterioration."
     },
     {
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
@@ -4052,6 +3583,601 @@
       "phase": "action",
       "severity": 2,
       "text": "Continue the regular seasonal inspection program."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "[insert count] anodes were fitted, located at [insert location(s)]."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were new with no visible degradation. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were securely mounted and did not exhibit undue corrosion."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The anodes were providing effective galvanic protection at the time of survey."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program — replace when approximately fifty percent degraded."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The anodes were approximately fifty percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The anodes were approximately seventy-five percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "One or more anodes at [insert location] were approaching the end of their service life."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Continued service without replacement will reduce galvanic protection to the associated underwater metals."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Replace the anodes at the next scheduled service."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "B",
+      "phase": "action",
+      "severity": 4,
+      "text": "Replace the anodes before the vessel is relaunched."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The anodes were fully consumed and provided no effective galvanic protection."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The anodes were missing entirely."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "Without sacrificial anode protection, galvanic corrosion of the underwater metals will progress rapidly."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "New anodes must be installed before the vessel is placed in the water, per ABYC E-2 (Cathodic Protection)."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were new with no visible degradation. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were securely mounted and did not exhibit undue corrosion."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The anodes were providing effective galvanic protection at the time of survey."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program — replace when approximately fifty percent degraded."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The anodes were approximately fifty percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The anodes were approximately seventy-five percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "One or more anodes at [insert location] were approaching the end of their service life."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Continued service without replacement will reduce galvanic protection to the associated underwater metals."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Replace the anodes at the next scheduled service."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 4,
+      "text": "Replace the anodes before the vessel is relaunched."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "B - wrong metal",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The anode metal appeared to be aluminium."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "B - wrong metal",
+      "phase": "action",
+      "severity": 3,
+      "text": "Anode metal should match the vessel's primary environment — zinc for salt water, aluminium for brackish or mixed use, magnesium for fresh water."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The anodes were fully consumed and provided no effective galvanic protection."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The anodes were missing entirely."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "Without sacrificial anode protection, galvanic corrosion of the underwater metals will progress rapidly."
+    },
+    {
+      "section": "Propeller/drive anode(s)",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "New anodes must be installed before the vessel is placed in the water, per ABYC E-2 (Cathodic Protection)."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were new with no visible degradation. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were securely mounted and did not exhibit undue corrosion."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The anodes were providing effective galvanic protection at the time of survey."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program — replace when approximately fifty percent degraded."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The anodes were approximately fifty percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The anodes were approximately seventy-five percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "One or more anodes at [insert location] were approaching the end of their service life."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Continued service without replacement will reduce galvanic protection to the associated underwater metals."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Replace the anodes at the next scheduled service."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "action",
+      "severity": 4,
+      "text": "Replace the anodes before the vessel is relaunched."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The anodes were fully consumed and provided no effective galvanic protection."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The anodes were missing entirely."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "Without sacrificial anode protection, galvanic corrosion of the underwater metals will progress rapidly."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "New anodes must be installed before the vessel is placed in the water, per ABYC E-2 (Cathodic Protection)."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were new with no visible degradation. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were securely mounted and did not exhibit undue corrosion."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The anodes were providing effective galvanic protection at the time of survey."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program — replace when approximately fifty percent degraded."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The anodes were approximately fifty percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The anodes were approximately seventy-five percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "One or more anodes at [insert location] were approaching the end of their service life."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Continued service without replacement will reduce galvanic protection to the associated underwater metals."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Replace the anodes at the next scheduled service."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 4,
+      "text": "Replace the anodes before the vessel is relaunched."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The anodes were fully consumed and provided no effective galvanic protection."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The anodes were missing entirely."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "Without sacrificial anode protection, galvanic corrosion of the underwater metals will progress rapidly."
+    },
+    {
+      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "New anodes must be installed before the vessel is placed in the water, per ABYC E-2 (Cathodic Protection)."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were new with no visible degradation. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were securely mounted and did not exhibit undue corrosion."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The anodes were providing effective galvanic protection at the time of survey."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program — replace when approximately fifty percent degraded."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The anodes were approximately fifty percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The anodes were approximately seventy-five percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "One or more anodes at [insert location] were approaching the end of their service life."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Continued service without replacement will reduce galvanic protection to the associated underwater metals."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Replace the anodes at the next scheduled service."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 4,
+      "text": "Replace the anodes before the vessel is relaunched."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The anodes were fully consumed and provided no effective galvanic protection."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The anodes were missing entirely."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "Without sacrificial anode protection, galvanic corrosion of the underwater metals will progress rapidly."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "New anodes must be installed before the vessel is placed in the water, per ABYC E-2 (Cathodic Protection)."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The rudder was bronze."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The rudder was stainless steel."
     }
   ],
   "Spars and rigging": [
@@ -7182,34 +7308,6 @@
       "severity": 3
     },
     {
-      "section": "Outboard anodes",
-      "rating": "C",
-      "text": "Anodes were intact with limited consumption and were appropriate for the service environment.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Outboard anodes",
-      "rating": "B",
-      "text": "Two anodes were fitted, a stacked transom-mounted anode and a fin anode.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Outboard anodes",
-      "rating": "B",
-      "text": "Both were partly eroded and should be replaced before next season.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Outboard anodes",
-      "rating": "C",
-      "text": "Anodes were securely mounted and consumption was within normal limits for the service environment.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
       "section": "Outboard propeller",
       "rating": "C",
       "text": "The stainless propeller was free of damage and securely fastened.",
@@ -7371,27 +7469,6 @@
       "text": "No action required at this time."
     },
     {
-      "section": "Outboard anodes",
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Address this at the next scheduled service."
-    },
-    {
-      "section": "Outboard anodes",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No immediate concern was noted."
-    },
-    {
-      "section": "Outboard anodes",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No action required at this time."
-    },
-    {
       "section": "Outboard propeller",
       "rating": "B",
       "phase": "action",
@@ -7432,6 +7509,118 @@
       "phase": "means",
       "severity": 1,
       "text": "No immediate concern was noted."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were new with no visible degradation. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes were securely mounted and did not exhibit undue corrosion."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The anodes were providing effective galvanic protection at the time of survey."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program — replace when approximately fifty percent degraded."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The anodes were approximately fifty percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The anodes were approximately seventy-five percent degraded. It is recommended by the ABYC that anodes be replaced when approximately fifty percent degraded."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "One or more anodes at [insert location] were approaching the end of their service life."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Continued service without replacement will reduce galvanic protection to the associated underwater metals."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Replace the anodes at the next scheduled service."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "B",
+      "phase": "action",
+      "severity": 4,
+      "text": "Replace the anodes before the vessel is relaunched."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The anodes were fully consumed and provided no effective galvanic protection."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The anodes were missing entirely."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "Without sacrificial anode protection, galvanic corrosion of the underwater metals will progress rapidly."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "New anodes must be installed before the vessel is placed in the water, per ABYC E-2 (Cathodic Protection)."
     }
   ],
   "Cockpit": [
