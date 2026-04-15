@@ -13,12 +13,111 @@
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
-      "text": "Below the waterline, the hull was serviceable overall. {any:The anti-fouling has worn thin [describe area(s)] and should be lightly sanded and recoated with anti-fouling before the vessel is relaunched|The anti-fouling is worn off [describe area(s)], exposing the gelcoat, and these areas should be sanded and recoated with anti-fouling before the vessel is relaunched|Surface cracking was observed [describe area(s)] and the affected area(s) should be sanded to the gelcoat and recoated with anti-fouling before the vessel is relaunched|Blistering was noted [describe area(s)] and the affected area(s) should be sanded to the barrier coat, recoated with gelcoat and anti-fouling before the vessel is relaunched|Gouging was noted [describe area(s)] and the affected area(s) should be filled with fairing compound, faired, and recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|Scrapes and dings were noted [describe area(s)] and the affected area(s) should be touched up with gelcoat and anti-fouling before the vessel is relaunched|Cosmetic scoring was noted [describe area(s)] and should be lightly sanded and recoated with anti-fouling before the vessel is relaunched|Exposed fibreglass was noted [describe area(s)] and should be recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched}.",
-      "placeholders": {
-        "any:The anti-fouling has worn thin [describe area(s)] and should be lightly sanded and recoated with anti-fouling before the vessel is relaunched|The anti-fouling is worn off [describe area(s)], exposing the gelcoat, and these areas should be sanded and recoated with anti-fouling before the vessel is relaunched|Surface cracking was observed [describe area(s)] and the affected area(s) should be sanded to the gelcoat and recoated with anti-fouling before the vessel is relaunched|Blistering was noted [describe area(s)] and the affected area(s) should be sanded to the barrier coat, recoated with gelcoat and anti-fouling before the vessel is relaunched|Gouging was noted [describe area(s)] and the affected area(s) should be filled with fairing compound, faired, and recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched|Scrapes and dings were noted [describe area(s)] and the affected area(s) should be touched up with gelcoat and anti-fouling before the vessel is relaunched|Cosmetic scoring was noted [describe area(s)] and should be lightly sanded and recoated with anti-fouling before the vessel is relaunched|Exposed fibreglass was noted [describe area(s)] and should be recoated with epoxy barrier coat, gelcoat and anti-fouling before the vessel is relaunched": {
-          "multi": true
-        }
-      }
+      "phase": "observed",
+      "always": true,
+      "text": "Below the waterline, the hull was serviceable overall."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "observed",
+      "text": "The anti-fouling has worn thin in [describe area(s)]."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "observed",
+      "text": "The anti-fouling is worn off in [describe area(s)], exposing the gelcoat."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "observed",
+      "text": "Surface cracking was observed in [describe area(s)]."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "observed",
+      "text": "Blistering was noted in [describe area(s)]."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "observed",
+      "text": "Gouging was noted in [describe area(s)]."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "observed",
+      "text": "Scrapes and dings were noted in [describe area(s)]."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "observed",
+      "text": "Cosmetic scoring was noted in [describe area(s)]."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "observed",
+      "text": "Exposed fibreglass was noted in [describe area(s)]."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "means",
+      "text": "The damage is cosmetic and not structurally concerning."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "means",
+      "text": "The findings are localized and limited in extent."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "means",
+      "text": "These findings are consistent with typical wear for the vessel's age and use."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "action",
+      "text": "The affected areas should be lightly sanded and recoated with anti-fouling before the vessel is relaunched."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "action",
+      "text": "The affected areas should be sanded to the gelcoat and recoated with anti-fouling before the vessel is relaunched."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "action",
+      "text": "The affected areas should be sanded to the barrier coat and recoated with gelcoat and anti-fouling before the vessel is relaunched."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "action",
+      "text": "The affected areas should be filled with fairing compound, faired, and recoated with epoxy barrier coat, gelcoat, and anti-fouling before the vessel is relaunched."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "action",
+      "text": "The affected areas should be touched up with gelcoat and anti-fouling before the vessel is relaunched."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "B",
+      "phase": "action",
+      "text": "The affected areas should be recoated with epoxy barrier coat, gelcoat, and anti-fouling before the vessel is relaunched."
     },
     {
       "section": "Hull(s) condition (below the waterline)",

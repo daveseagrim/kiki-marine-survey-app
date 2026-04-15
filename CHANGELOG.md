@@ -12,6 +12,46 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2174 — 2026-04-14
+
+### Fixed — `{any:opt1|opt2|...}` tokens now decompose into individual chips
+
+The sentence-splitter in the picker was treating the whole
+`{any:...}` token as one "sentence", producing a giant raw-text chip
+with all options concatenated by `|` (unusable). v2174 preprocesses
+text by:
+
+1. Scanning for `{any:...}` tokens
+2. Splitting prose before/after each token as its own sentence
+3. Splitting each option inside the token as its own sentence (with
+   `^CITATION` tags stripped)
+4. Then applying the normal sentence splitter
+
+This means every non-curated item with `{any:...}` options now renders
+each option as a separate tickable chip, auto-classified by phase via
+the heuristic. Surveyor can tick the specific findings that apply
+without reading a wall of pipe-separated text.
+
+### Rewritten — Hull(s) condition (below the waterline) B rating
+
+Replaced the single `{any:...}` pipe-encoded entry with 18 curated
+chips split into observed (9) / means (3) / action (6). Each chip is
+one discrete finding or recommendation:
+
+- **Observed**: anti-fouling worn thin / worn off, surface cracking,
+  blistering, gouging, scrapes and dings, cosmetic scoring, exposed
+  fibreglass — each with `[describe area(s)]` placeholder for
+  hand-fill.
+- **Means**: damage is cosmetic / localized / consistent with age.
+- **Action**: range of treatments from light sand-and-recoat up to
+  fairing compound + epoxy barrier + gelcoat + anti-fouling.
+
+Surveyor ticks the observations that apply + the matching treatment
+action. Always-on "Below the waterline, the hull was serviceable
+overall." anchors the paragraph.
+
+---
+
 ## v2173 — 2026-04-14
 
 ### Added — Observed/Means/Action 3-phase grouping in sentence picker + rating-aware severity

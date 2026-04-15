@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2173';
+const APP_VERSION = 'v2174';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3348,10 +3348,49 @@ function showNotesSheet(itemLabel, categoryName) {
         // bucket by default (heuristic: sentences starting with
         // "Monitor", "Recheck", "Recommend" → action; containing
         // "indicates"/"suggests" → means).
-        const _splitSentences = (s) => (s || '')
-          .split(/(?<=[.!?])\s+/)
-          .map(x => x.trim())
-          .filter(Boolean);
+        // v2174: decompose `{any:opt1|opt2|...}` tokens into individual
+        // chip-worthy sentences. Each option becomes a separate chip.
+        // The surrounding prose (before/after the token) is preserved as
+        // its own sentence. Citations (`^TP1332`) are stripped from
+        // options for readability — they'll still attach via the
+        // existing auto-standards flow on insert.
+        const _expandAnyOptionsToSentences = (text) => {
+          if (!text) return [];
+          const out = [];
+          let remaining = text;
+          while (true) {
+            const m = /\{any:([^{}]*)\}/.exec(remaining);
+            if (!m) {
+              if (remaining.trim()) out.push(remaining);
+              break;
+            }
+            // Text before the {any:...}
+            const before = remaining.slice(0, m.index).trim();
+            if (before) out.push(before);
+            // Split options on unescaped `|` and strip `^CITATION` tags
+            const opts = m[1].split('|').map(s => s.replace(/\^[^|]*$/, '').trim()).filter(Boolean);
+            opts.forEach(o => {
+              // Ensure each option ends with a period for clean joining later
+              const sent = /[.!?]$/.test(o) ? o : o + '.';
+              out.push(sent);
+            });
+            remaining = remaining.slice(m.index + m[0].length);
+          }
+          return out;
+        };
+        const _splitSentences = (s) => {
+          // First expand any {any:...} options, then split remaining
+          // prose on sentence terminators.
+          const chunks = _expandAnyOptionsToSentences(s || '');
+          const sentences = [];
+          chunks.forEach(chunk => {
+            chunk.split(/(?<=[.!?])\s+/).forEach(sent => {
+              const trimmed = sent.trim();
+              if (trimmed) sentences.push(trimmed);
+            });
+          });
+          return sentences;
+        };
         const _classifyPhase = (sent) => {
           if (/^(Monitor|Recheck|Recommend|Haul|Investigate|Professional|Immediate|Schedule)\b/i.test(sent)) return 'action';
           if (/\b(indicates|suggests|consistent|considered|abnormal|warrants|evidences|implies)\b/i.test(sent)) return 'means';
