@@ -12,6 +12,89 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2187 — 2026-04-14
+
+### Added — Drive-count-aware pluralization + port/starboard/both side selector
+
+Twin-outdrive vessels were reading singular prose ("The outdrive unit
+was visually inspected") even when `driveLineCount === 2`. Two
+additions:
+
+1. **`{drives:singular|plural}` token** — resolves against
+   `driveLineCount` in `contextFromSurvey`. Works identically to
+   `{count:...}` but driven by drive count rather than rudder count,
+   so it applies to outdrive / shaft / saildrive / IPS regardless
+   of rudder presence. Applied to 44 curated outdrive chips.
+   Examples on a twin-drive survey:
+   - "The outdrive {drives:unit was|units were} visually inspected."
+     → "The outdrive units were visually inspected."
+   - "Minor blade damage was noted on the {drives:propeller|propellers}."
+     → "Minor blade damage was noted on the propellers."
+
+2. **`[side]` placeholder** — renders as a Port / Starboard / Both
+   selector inline in the chip. Only renders when the survey has
+   2+ drive lines (single-drive vessels don't need a side qualifier
+   — the placeholder is collapsed to empty on render). Applied to 12
+   outdrive chips where side-specific findings are common:
+   - "Moderate corrosion was observed on the [side] drive housings in [area]."
+   - "A minor oil weep was visible at the [side] lower seals."
+   - "The [side] anodes were more than 50% depleted."
+
+Both the drives token and the side selector are extensible — future
+curation for any twin-drive system (twin shafts, twin saildrives, IPS
+pods) can reuse them without code changes.
+
+---
+
+## v2186 — 2026-04-14
+
+### Added — Phase + severity metadata on every library entry (batch-tagged)
+
+Every entry in `text_library.json` now carries `phase` and `severity`
+fields. Multi-sentence entries were split into one entry per sentence,
+each tagged individually. Process:
+
+1. **Split**: entries containing 2+ sentences → one entry per sentence,
+   preserving section + rating. 1789 multi-sentence entries split.
+2. **Phase classification** (expanded from v2173 heuristic):
+   - Starts with `Monitor/Recheck/Recommend/Haul/Investigate/Professional/
+     Immediate/Schedule/Replace/Service/Repair/Strip/Sand/Clean/Install/
+     Address/Reseal/Retighten/Tighten/Fair/Refinish/Inspect/Verify/Test/
+     Consult/Check/Confirm/Consider/Ensure/Apply/Fill/Refresh/Continue/
+     Restore` → **action**
+   - Contains interpretive verbs
+     (`indicates/suggests/consistent/considered/abnormal/warrants/
+     implies/represents/compromises`) or modal-recommendation patterns
+     (`should be`, `must be`, `will cause`, `can mask`, etc.) → **means**
+   - Otherwise → **observed**
+3. **Severity estimation** 1–5 based on keyword patterns
+   (severe/critical → 5, mild/routine → 1).
+4. Entries with unexpanded `{any:...}` / `{specify:...}` tokens get a
+   single conservative phase/severity — the picker still decomposes
+   them per-option at render time.
+
+Result: **2,419 total entries, every one tagged.** Phase distribution:
+1754 observed / 264 means / 401 action. Skew toward observed reflects
+the library's descriptive-prose style — individual sections can be
+rebalanced by explicit re-curation when the surveyor hits any case
+where the heuristic misclassified.
+
+The 6 sections with full hand-curation (Hull conductivity, Hull
+below-waterline damage, Primer/barrier/anti-fouling, Hull percussion,
+Hull anodes, Outdrive) stay as authored — this pass skipped entries
+that already had `phase` and `severity` set.
+
+### Fixed — Outdrive chip picker empty due to map mismatch
+
+`ITEM_SNIPPET_MAP` redirected the outdrive label to a section name
+(`Outdrive(s) corrosion, anodes, propeller(s), boots and bellows`)
+that didn't exist in the library after v2181's rewrite. Fixed to
+point at the same long-form section name used by the stored entries
+(`Outdrive(s) - (external), corrosion, anodes, propeller(s), boots
+and bellows`).
+
+---
+
 ## v2185 — 2026-04-14
 
 ### Fixed (urgent) — Outdrive chip picker was silently empty due to section-name mismatch

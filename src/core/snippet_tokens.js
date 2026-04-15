@@ -49,13 +49,23 @@
     const rudderCount = (typeof ctx.rudderCount === 'number' && ctx.rudderCount > 0)
       ? ctx.rudderCount
       : (hasRudder ? 1 : 0);
+    // v2187: drive count (outdrives, shafts, saildrives, IPS pods). Always
+    // reflects how many propulsion units the vessel has, regardless of
+    // whether it has rudders.
+    const driveCount = (typeof ctx.driveCount === 'number' && ctx.driveCount > 0)
+      ? ctx.driveCount
+      : 1;
 
     let out = text;
 
-    // Expand {count:singular|plural} first (innermost). May appear outside
-    // {if-rudder:...} — treat as rudder count regardless.
+    // Expand {count:singular|plural} first (innermost). Tied to rudder count.
     out = out.replace(/\{count:([^|}]*)\|([^}]*)\}/g, function (_m, singular, plural) {
       return rudderCount >= 2 ? plural : singular;
+    });
+    // v2187: {drives:singular|plural} picks based on driveCount — used for
+    // outdrive / shaft / saildrive / IPS pluralization in report prose.
+    out = out.replace(/\{drives:([^|}]*)\|([^}]*)\}/g, function (_m, singular, plural) {
+      return driveCount >= 2 ? plural : singular;
     });
 
     // Expand {if-rudder:...} and {if-no-rudder:...}
@@ -177,7 +187,7 @@
     }
     const driveCount = survey.driveLineCount || 1;
     const rudderCount = hasRudder ? driveCount : 0;
-    return { hasRudder, rudderCount };
+    return { hasRudder, rudderCount, driveCount };
   }
 
   /**

@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2185';
+const APP_VERSION = 'v2187';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3500,7 +3500,24 @@ function showNotesSheet(itemLabel, categoryName) {
               `<input type="text" class="kk-area-input" placeholder="area(s)…" ` +
                 `oninput="_kkRebuildFromSentencePicker('${sanitizedLabel}')" ` +
                 `onclick="event.preventDefault();event.stopPropagation();" ` +
-                `style="width:180px;padding:2px 6px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">`);
+                `style="width:180px;padding:2px 6px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">`)
+            // v2187: [side] placeholder for twin-drive port/starboard/both
+            // selection. Renders as a compact select. Only rendered when the
+            // survey has >1 drive lines; otherwise the placeholder is dropped
+            // (single-drive surveys don't need a side qualifier).
+            .replace(/\[side\]/gi, (() => {
+              const dc = (survey && survey.driveLineCount) || 1;
+              if (dc < 2) return '';
+              return `<select class="kk-side-input" ` +
+                `onchange="_kkRebuildFromSentencePicker('${sanitizedLabel}')" ` +
+                `onclick="event.stopPropagation();" ` +
+                `style="padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">` +
+                  `<option value="">— side —</option>` +
+                  `<option value="port">port</option>` +
+                  `<option value="starboard">starboard</option>` +
+                  `<option value="both">both</option>` +
+                `</select>`;
+            })());
             sentencePickerHtml += `
               <label style="display:flex;gap:10px;padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;font-size:13px;line-height:1.45;">
                 <input type="checkbox" class="kk-sentence-chip" data-picker-key="${sanitizedLabel}" data-sentence-idx="${idx}"
@@ -3916,6 +3933,15 @@ window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
     if (/\[describe area\(s\)\]/i.test(text)) {
       text = text.replace(/\[describe area\(s\)\]/gi,
         area || '[describe area(s)]');
+    }
+    // [side] → port / starboard / both
+    const side = (lbl.querySelector('.kk-side-input') || {}).value || '';
+    if (/\[side\]/i.test(text)) {
+      // If the survey is single-drive, [side] was already collapsed to ''
+      // during render. Otherwise swap in the selection, or keep placeholder.
+      text = text.replace(/\[side\]\s*/gi, side ? `${side} ` : '[side] ');
+      // Clean up doubled spaces from the optional space
+      text = text.replace(/\s{2,}/g, ' ').replace(/\s+([.,;:])/g, '$1');
     }
     parts.push(text);
   });
