@@ -12,6 +12,39 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2163 — 2026-04-14
+
+### Fixed — HEIC photos now convert to JPEG on import (MacBook / iPhone)
+
+Surveyor imported 6 photos from MacBook Finder into the "Evident damage
+or repairs to hull and rudder below the waterline" item and all 6
+rendered as broken-image placeholders in the media sheet. Root cause:
+HEIC is Apple's default format for iPhone / Mac Photos, and Chrome
+cannot decode HEIC in a standard `<img>` tag. The old import pipeline
+ran `img.src = dataUrl`, `img.onerror` fired, and the canvas path
+returned the original HEIC dataUrl unchanged — which then got saved to
+IndexedDB and could never be rendered.
+
+Fix:
+1. `attachPhotosToItem` now detects HEIC by MIME type
+   (`image/heic`, `image/heif`) or filename (`.heic`, `.heif`).
+2. On detection, `heic2any` is dynamically loaded from CDN
+   (cdnjs, cached after first use) and the file is converted to a
+   JPEG blob before entering the date-stamp / canvas pipeline.
+3. A final guard rejects anything that is not a renderable image MIME
+   (`jpeg`, `png`, `webp`, `gif`) so we can never save a non-renderable
+   format to IndexedDB again, even if future formats slip through.
+4. Drag-drop and file picker also accept files with a `.heic`/`.heif`
+   extension when the browser reports an empty MIME type (Finder DnD
+   case).
+5. Toast messaging: "Converting N HEIC photos…" on start,
+   per-file failure count reported on completion.
+
+Any photo already saved in HEIC format from v2162 will still show as a
+broken placeholder — those need to be re-imported after pulling v2163.
+
+---
+
 ## v2162 — 2026-04-14
 
 ### Changed — Snippet cards now APPEND on tap (multi-sentence composition)

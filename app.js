@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2162';
+const APP_VERSION = 'v2163';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3817,48 +3817,126 @@ function saveNotesFromSheet(itemLabel, categoryName, sanitizedLabel) {
 // All non-camera paths funnel through attachPhotosToItem() so a future
 // change to the save pipeline only needs to happen once.
 // ───────────────────────────────────────────────────────────────────────────
+// Load heic2any (~300 KB) on demand the first time a HEIC file shows up.
+// iPhone and Mac Photos default to HEIC and Chrome can't decode it in <img>.
+// Cached result is re-used across imports.
+let _heic2anyPromise = null;
+function loadHeic2any() {
+  if (window.heic2any) return Promise.resolve(window.heic2any);
+  if (_heic2anyPromise) return _heic2anyPromise;
+  _heic2anyPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js';
+    s.async = true;
+    s.onload = () => resolve(window.heic2any);
+    s.onerror = () => { _heic2anyPromise = null; reject(new Error('heic2any failed to load')); };
+    document.head.appendChild(s);
+  });
+  return _heic2anyPromise;
+}
+
+function isHeicFile(file) {
+  const t = (file.type || '').toLowerCase();
+  if (t === 'image/heic' || t === 'image/heif' || t === 'image/heic-sequence' || t === 'image/heif-sequence') return true;
+  const n = (file.name || '').toLowerCase();
+  return /\.(heic|heif)$/.test(n);
+}
+
+// Convert a HEIC File/Blob to a JPEG dataUrl. Returns null on failure.
+async function heicToJpegDataUrl(file) {
+  try {
+    const heic2any = await loadHeic2any();
+    const jpegBlob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
+    const blob = Array.isArray(jpegBlob) ? jpegBlob[0] : jpegBlob;
+    return await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => resolve(ev.target.result);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch (err) {
+    console.error('heicToJpegDataUrl failed:', err);
+    return null;
+  }
+}
+
 async function attachPhotosToItem(itemLabel, fileList) {
-  const files = Array.from(fileList || []).filter(f => f && f.type && f.type.startsWith('image/'));
+  // Accept anything with image/* mime OR a .heic/.heif filename (some browsers
+  // report empty mime for HEIC dragged in from Finder).
+  const files = Array.from(fileList || []).filter(f => {
+    if (!f) return false;
+    if (f.type && f.type.startsWith('image/')) return true;
+    return /\.(heic|heif)$/i.test(f.name || '');
+  });
   if (files.length === 0) {
     showToast('No image files selected');
     return 0;
   }
-  if (files.length > 1) showToast(`Saving ${files.length} photos…`);
 
+  const heicCount = files.filter(isHeicFile).length;
+  if (heicCount > 0) {
+    showToast(`Converting ${heicCount} HEIC photo${heicCount === 1 ? '' : 's'}…`);
+  } else if (files.length > 1) {
+    showToast(`Saving ${files.length} photos…`);
+  }
+
+  let saved = 0;
+  let heicFailed = 0;
   for (const file of files) {
-    await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = async (ev) => {
-        try {
-          const stamped = (typeof addDateStampToPhoto === 'function')
-            ? await addDateStampToPhoto(ev.target.result)
-            : ev.target.result;
-          const photoId = `${currentSurveyId}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-          const photo = {
-            id: photoId,
-            surveyId: currentSurveyId,
-            itemLabel: itemLabel,
-            dataUrl: stamped,
-            annotated: false,
-            createdAt: new Date().toISOString()
-          };
-          await savePhoto(photo);
-          const survey = await getSurvey(currentSurveyId);
-          if (!survey.items[itemLabel]) {
-            survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
-          }
-          if (!Array.isArray(survey.items[itemLabel].photos)) {
-            survey.items[itemLabel].photos = [];
-          }
-          survey.items[itemLabel].photos.push(photoId);
-          await saveSurvey(survey);
-        } catch (err) {
-          console.error('attachPhotosToItem error:', err);
+    await new Promise(async (resolve) => {
+      try {
+        let dataUrl = null;
+        if (isHeicFile(file)) {
+          dataUrl = await heicToJpegDataUrl(file);
+          if (!dataUrl) { heicFailed++; resolve(); return; }
+        } else {
+          dataUrl = await new Promise((res) => {
+            const reader = new FileReader();
+            reader.onload = (ev) => res(ev.target.result);
+            reader.onerror = () => res(null);
+            reader.readAsDataURL(file);
+          });
+          if (!dataUrl) { resolve(); return; }
         }
-        resolve();
-      };
-      reader.onerror = () => resolve();
-      reader.readAsDataURL(file);
+
+        const stamped = (typeof addDateStampToPhoto === 'function')
+          ? await addDateStampToPhoto(dataUrl)
+          : dataUrl;
+
+        // Final guard: never save a non-renderable format to IndexedDB.
+        // addDateStampToPhoto returns the ORIGINAL dataUrl if the canvas
+        // path fails, so we might still have HEIC here. Reject it explicitly.
+        if (!/^data:image\/(jpeg|jpg|png|webp|gif)[;,]/i.test(stamped)) {
+          console.error('attachPhotosToItem: refusing to save non-renderable format', stamped.substring(0, 40));
+          heicFailed++;
+          resolve();
+          return;
+        }
+
+        const photoId = `${currentSurveyId}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+        const photo = {
+          id: photoId,
+          surveyId: currentSurveyId,
+          itemLabel: itemLabel,
+          dataUrl: stamped,
+          annotated: false,
+          createdAt: new Date().toISOString()
+        };
+        await savePhoto(photo);
+        const survey = await getSurvey(currentSurveyId);
+        if (!survey.items[itemLabel]) {
+          survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+        }
+        if (!Array.isArray(survey.items[itemLabel].photos)) {
+          survey.items[itemLabel].photos = [];
+        }
+        survey.items[itemLabel].photos.push(photoId);
+        await saveSurvey(survey);
+        saved++;
+      } catch (err) {
+        console.error('attachPhotosToItem error:', err);
+      }
+      resolve();
     });
   }
 
@@ -3868,8 +3946,14 @@ async function attachPhotosToItem(itemLabel, fileList) {
     updateCompactItem(survey, itemLabel, '');
   } catch (_) {}
 
-  showToast(`Attached ${files.length} photo${files.length === 1 ? '' : 's'}`);
-  return files.length;
+  if (heicFailed > 0 && saved === 0) {
+    showToast(`Could not convert ${heicFailed} HEIC photo${heicFailed === 1 ? '' : 's'} — check network and retry`);
+  } else if (heicFailed > 0) {
+    showToast(`Attached ${saved} photo${saved === 1 ? '' : 's'} • ${heicFailed} HEIC failed`);
+  } else {
+    showToast(`Attached ${saved} photo${saved === 1 ? '' : 's'}`);
+  }
+  return saved;
 }
 
 // Single "Import photos" picker — covers Photo Library AND Files app.
