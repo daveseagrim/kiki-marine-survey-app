@@ -287,37 +287,177 @@
     {
       "section": "Hull and rudder(s) impact and resonance testing",
       "rating": "A",
-      "text": "Percussion testing revealed extensive delamination and voids across multiple areas of the hull. The laminate produced hollow, inconsistent tones indicating widespread structural deterioration. Immediate professional assessment and repair is required before the vessel can be considered safe for use."
+      "phase": "observed",
+      "severity": 1,
+      "text": "Impact and resonance testing was carried out across the hull."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
-      "rating": "A - hull and rudder",
-      "text": "Percussion testing of the hull{if-rudder: and {count:rudder|rudders}} revealed severe delamination and saturated core material. The hull produced dull, inconsistent tones across large areas{if-rudder:, and the {count:rudder|rudders} was} soft to percussion throughout. Structural integrity is compromised. Immediate professional repair is critical."
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Percussion testing produced a dull thud across significant areas of the hull."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "A ringing tone was returned in multiple areas, consistent with voids or delamination."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "Hollow-sounding areas were noted in [describe area(s)]."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "These findings were consistent with significant core moisture or delamination."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "The extent of the affected areas represented a structural concern."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "A",
+      "phase": "action",
+      "severity": 4,
+      "text": "A qualified fibreglass technician should carry out exploratory work to confirm the extent of the damage."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "The vessel should not be returned to service until the affected areas are professionally assessed and remediated."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Haul the vessel for exploratory inspection of the laminate in the affected areas."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
       "rating": "B",
-      "text": "Percussion testing of the hull{if-rudder: and {count:rudder|rudders}} showed signs of saturation in [insert number of] localized areas (see photos). To mitigate any spread, these areas should be repaired before the next launch."
+      "phase": "observed",
+      "severity": 1,
+      "text": "Impact and resonance testing was carried out across the hull."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
-      "rating": "B - problematic rudder",
-      "text": "Percussion testing of the hull produced a clear and consistent tone with no signs of delamination or voids. {if-rudder:However, the {count:rudder|rudders} showed signs of saturation in localized areas (see photos).} To mitigate spread, off-season venting or drainage may be attempted. However, foam cores often retain conductivity. Rudder removal and rebuild may be required in future if conditions persist."
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Localized variations in tone were noted in [describe area(s)]."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
-      "rating": "B - One or more problematic areas",
-      "text": "The majority of percussion tests on the hull produced a clear, consistent tone without signs of delamination or voids. However, there was an [insert location] area which produced a \"thud\" indicating saturation and/or rot. This area should be repaired prior to launch."
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "A slight dullness was detected in [describe area(s)]."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
-      "rating": "C - one rudder",
-      "text": "Percussion testing of the hull{if-rudder: and {count:rudder|rudders}} produced a clear and even tone with no indications of delamination or voids."
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Isolated hollow-sounding areas were noted in [describe area(s)]."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
-      "rating": "C - two rudders",
-      "text": "Percussion testing of the hull{if-rudder: and {count:rudder|rudders}} produced a clear and even tone with no indications of delamination or voids."
+      "rating": "B",
+      "phase": "means",
+      "severity": 2,
+      "text": "The findings were localized and did not indicate widespread structural concern."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "These findings warranted further monitoring to rule out core moisture or early delamination."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Monitor the affected areas at the next haul-out."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Recommend moisture testing of the affected areas to confirm the findings."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Recheck with impact testing at the next scheduled haul-out."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Impact and resonance testing was carried out across the hull."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Percussion testing of the hull produced a clear and even tone throughout."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No hollow-sounding or dull areas were detected during impact testing."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The findings were consistent with a sound laminate."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "No indications of delamination or voids were found at the time of survey."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Hull and rudder(s) impact and resonance testing",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",

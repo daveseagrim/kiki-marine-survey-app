@@ -12,6 +12,32 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2179 — 2026-04-14
+
+### Fixed — Picker now renders even with just 1 unique chip
+
+Hull percussion testing C had only one library entry that, after
+rudder-token expansion + dedupe, collapsed to a single sentence.
+Threshold was `_pickerSentences.length >= 2`, so zero chips rendered
+and the surveyor saw only "Change template ▸". Lowered to >= 1 so
+every item with at least one chip shows the picker.
+
+### Rewritten — Hull percussion testing (Hull and rudder(s) impact and resonance testing) A/B/C
+
+Full 3-phase curation:
+- **A (Critical)** — 9 chips. Dull thud across significant areas,
+  ringing tone indicating voids/delamination. Structural-concern means.
+  Immediate haul + professional assessment.
+- **B (Needs Attention)** — 9 chips. Localized variations, slight
+  dullness, isolated hollow spots. Warrant-monitoring means. Monitor +
+  moisture-test follow-up.
+- **C (Serviceable)** — 7 chips. Clear and even tone, no hollow/dull
+  areas. Sound-laminate means. No action / continue seasonal program.
+
+All chips past tense, no "serviceable" verbiage, no `always` flags.
+
+---
+
 ## v2178 — 2026-04-14
 
 ### Changed — Writing conventions enforced: past tense + "program" + no "serviceable" + no auto-included sentence

@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2178';
+const APP_VERSION = 'v2179';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3521,7 +3521,7 @@ function showNotesSheet(itemLabel, categoryName) {
         window._sentencePicker[sanitizedLabel] = _pickerSentences;
 
         let sentencePickerHtml = '';
-        if (_pickerSentences.length >= 2) {
+        if (_pickerSentences.length >= 1) {
           const PHASE_LABELS = {
             observed: 'What was observed',
             means: 'What it means for this vessel',
@@ -10538,11 +10538,19 @@ function renderInspection(survey) {
     'IPS pod drive(s)'
   ];
 
+  // v2180: keel items (external ballast keel, keel bolts) don't exist on
+  // power boats — hide them for any power survey.
+  const SAIL_ONLY_ITEM_LABELS = [
+    'Keel and keel joint',
+    'Keel bolts',
+  ];
+
   // Check if conditional items should be shown
   function shouldShowItem(item) {
     if (isPowerboat && item.sailOnly) return false;
     if (isSailboat && item.powerOnly) return false;
     if (isPowerboat && item.rudderItem && !survey.hasRudder) return false;
+    if (isPowerboat && SAIL_ONLY_ITEM_LABELS.includes(item.label)) return false;
     // Drive type filtering
     if (driveType) {
       if (driveType === 'outdrive') {
@@ -11701,6 +11709,7 @@ async function checkSurvey() {
     if (isPowerboat && item.sailOnly) return false;
     if ((survey.vesselType || '').toLowerCase() === 'sail' && item.powerOnly) return false;
     if (isPowerboat && item.rudderItem && !survey.hasRudder) return false;
+    if (isPowerboat && ['Keel and keel joint', 'Keel bolts'].includes(item.label)) return false;
     if (driveType) {
       if (driveType === 'outdrive' && (SAILDRIVE_ONLY.includes(item.label) || IPS_ONLY.includes(item.label) || SHAFT_ONLY.includes(item.label))) return false;
       if (driveType === 'saildrive' && (OUTDRIVE_ONLY.includes(item.label) || IPS_ONLY.includes(item.label) || SHAFT_ONLY.includes(item.label))) return false;
