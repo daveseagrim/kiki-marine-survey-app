@@ -12,6 +12,28 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2170 — 2026-04-14
+
+### Fixed — Dedupe identical snippet variants on no-rudder vessels + strip "rudder" from rating badges
+
+On outdrive / IPS surveys the library's "C - one rudder" and
+"C - two rudders" variants produce identical cleaned text after rudder
+token expansion, so the surveyor was seeing two apparently identical
+cards with confusing rudder-count badges. Two changes in
+`showNotesSheet`:
+
+1. After token expansion, dedupe any variants whose `.text` collapses
+   to the same string. Keep the first. Card list now shows one card
+   instead of two.
+2. If the remaining variant's `rating` field mentions "rudder"
+   (e.g. "C - one rudder"), collapse the badge to the base rating
+   letter (e.g. "C") when the vessel has no rudder.
+
+Sail / shaft-drive vessels are unaffected — both variants produce
+different expanded text, so both cards continue to show.
+
+---
+
 ## v2169 — 2026-04-14
 
 ### Fixed (urgent) — Snippet card preview now shows expanded text on no-rudder vessels

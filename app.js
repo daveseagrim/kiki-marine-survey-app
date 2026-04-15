@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2169';
+const APP_VERSION = 'v2170';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3305,8 +3305,36 @@ function showNotesSheet(itemLabel, categoryName) {
         const sheetVariantsForDisplay = (typeof window.expandSnippetTokens === 'function')
           ? sheetVariants.map(v => Object.assign({}, v, { text: window.expandSnippetTokens(v.text, _expandCtx) }))
           : sheetVariants;
+        // v2170: dedupe variants that collapse to identical prose after
+        // token expansion. On outdrive / no-rudder vessels a pair of
+        // library entries like "C - one rudder" and "C - two rudders"
+        // produce the same cleaned text — show just one card, relabel
+        // the badge to the base rating letter so it's not misleading.
+        const _seenTexts = new Map();
+        const _keepIndices = [];
+        sheetVariantsForDisplay.forEach((v, i) => {
+          const key = (v.text || '').trim();
+          if (!_seenTexts.has(key)) {
+            _seenTexts.set(key, i);
+            _keepIndices.push(i);
+          }
+        });
+        if (_keepIndices.length < sheetVariants.length) {
+          sheetVariants = _keepIndices.map(i => sheetVariants[i]);
+          const dedupedDisplay = _keepIndices.map(i => {
+            const v = sheetVariantsForDisplay[i];
+            // Collapse the rating badge to the base letter when the variant
+            // label mentions rudder (meaningless on no-rudder vessels).
+            if (v.rating && /rudder/i.test(v.rating)) {
+              return Object.assign({}, v, { rating: baseRating });
+            }
+            return v;
+          });
+          sheetVariantsForDisplay.length = 0;
+          dedupedDisplay.forEach(v => sheetVariantsForDisplay.push(v));
+        }
         // Pre-compute diff-highlighted display texts for bottom sheet (from
-        // the expanded text so the highlighter operates on clean prose).
+        // the expanded, deduped text so the highlighter operates on clean prose).
         const highlightedTexts = highlightSnippetDiffs(sheetVariantsForDisplay);
 
         // Keyed cache lookup — escape the key for use in inline onclick
@@ -3337,7 +3365,13 @@ function showNotesSheet(itemLabel, categoryName) {
           <div id="sheet-snippets-list" style="display:${startCollapsed ? 'none' : 'block'};">
         `;
         sheetVariants.forEach((variant, idx) => {
-          const ratingBadge = variant.rating || baseRating;
+          // v2170: if the rating label mentions rudder and this vessel has
+          // no rudder, collapse the badge to the base letter so it doesn't
+          // read "C - one rudder" on an outdrive.
+          let ratingBadge = variant.rating || baseRating;
+          if (_expandCtx && _expandCtx.hasRudder === false && /rudder/i.test(ratingBadge)) {
+            ratingBadge = baseRating;
+          }
           // B-07 bug fix (v2158): expand rudder-gating tokens ({if-rudder:},
           // {if-no-rudder:}, {count:rudder|rudders}) BEFORE displaying or
           // comparing card text so raw tokens never leak into the card UI
