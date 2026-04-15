@@ -72,6 +72,22 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2195 — 2026-04-14
+
+### Added — Confirm dialog when skipping an item that has saved notes
+
+Tapping ⊘ (exclude from report) on an item with notes now prompts:
+"This item has saved notes. Skipping will mark it excluded from the
+report and clear the text. Continue?" — with **Skip and clear** /
+**Cancel** buttons. Confirming clears the notes text AND marks the
+item excluded in one atomic save. Cancel keeps the notes intact.
+
+Unskipping (toggling exclude OFF) is always safe and doesn't prompt.
+Skipping an item with no notes (nothing to lose) also skips silently
+without a prompt.
+
+---
+
 ## v2194 — 2026-04-14
 
 ### Changed — Conductivity range input now reads "low to high" + yellow pill styling

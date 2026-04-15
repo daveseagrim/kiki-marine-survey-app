@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2194';
+const APP_VERSION = 'v2195';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3678,6 +3678,9 @@ function applyWritingFixups(text, survey) {
   // programme → program (user preference; overrides Canadian-English rule)
   t = t.replace(/\bprogramme\b/g, 'program');
   t = t.replace(/\bProgramme\b/g, 'Program');
+  // v2195: vintage → age (user preference, survey-wide)
+  t = t.replace(/\bvintage\b/g, 'age');
+  t = t.replace(/\bVintage\b/g, 'Age');
   // v2190: strip trial-run references unless the survey header explicitly
   // confirms a limited trial run occurred. Heuristic removals:
   //   "... during the limited trial run."  → drop the "during …" clause
@@ -15581,16 +15584,27 @@ function toggleFlag(itemLabel) {
 }
 
 // Toggle exclude from report on a single item
-function toggleExclude(itemLabel) {
-  getSurvey(currentSurveyId).then(survey => {
-    if (!survey.items[itemLabel]) {
-      survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
-    }
-    survey.items[itemLabel].excluded = !survey.items[itemLabel].excluded;
-    saveSurvey(survey).then(() => {
-      updateItemInPlace(survey, itemLabel);
-    });
-  });
+async function toggleExclude(itemLabel) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey.items[itemLabel]) {
+    survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+  }
+  const item = survey.items[itemLabel];
+  const willSkip = !item.excluded;
+  // v2195: if the surveyor is about to skip an item that has saved notes,
+  // confirm — and clear the notes on confirmation. Prevents accidental
+  // skip-with-stale-text. Unskipping is always safe and doesn't prompt.
+  if (willSkip && item.text && item.text.trim()) {
+    const confirmed = await showConfirm(
+      `This item has saved notes. Skipping will mark it excluded from the report and clear the text. Continue?`,
+      'Skip and clear', 'Cancel'
+    );
+    if (!confirmed) return;
+    item.text = '';
+  }
+  item.excluded = willSkip;
+  await saveSurvey(survey);
+  updateItemInPlace(survey, itemLabel);
 }
 
 // Update a single item in place without re-rendering the entire page
