@@ -72,6 +72,39 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2197 — 2026-04-14
+
+### Removed — Redundant standalone "Conductivity readings were taken" chips
+
+Ticking both "Conductivity readings were taken on a relative 0 to 999
+scale." AND any actual finding chip produced awkward double-
+introduction prose. Deleted 15 of these standalone boilerplate chips
+from conductivity sections across the library. The remaining
+observation chips are self-describing (e.g. "The hull returned
+elevated readings of [low to high]." / "Conductivity testing of the
+cockpit, on a relative 0 to 999 scale, did not detect concerning
+readings.") — ticking one chip yields a clean, complete sentence.
+
+### Rewritten — Cockpit conductivity testing A/B/C self-contained chips
+
+Every chip now works standalone — the 0-to-999 scale reference is
+inlined where it adds context ("Conductivity testing of the cockpit,
+on a relative 0 to 999 scale, did not detect concerning readings.")
+and omitted where it would be verbose. No chip requires a companion
+"readings were taken" chip. 26 chips total across A (6) / B (9) /
+C (8) / Not tested (3).
+
+### Fixed — Bracket placeholder bugs
+
+- `[[insert value]]` (double brackets) → `[insert reading range]`
+  (picker recognizes this form and renders as low-to-high inputs)
+- `[insert reading]` (singular, missing "range") →
+  `[insert reading range]`
+
+Fixed 5 such placeholders across the library.
+
+---
+
 ## v2196 — 2026-04-14
 
 ### Changed — Area photo sections now offer both Take and Import buttons

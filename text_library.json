@@ -469,13 +469,6 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "observed",
-      "text": "Conductivity readings were taken on a relative 0 to 999 scale.",
-      "severity": 1
-    },
-    {
-      "section": "Hull and rudder(s) conductivity testing",
-      "rating": "A",
-      "phase": "observed",
       "text": "The hull returned readings consistently at or near 999 across large areas.",
       "severity": 5
     },
@@ -534,13 +527,6 @@
       "phase": "action",
       "text": "Haul the vessel for exploratory work to confirm the extent of the damage.",
       "severity": 4
-    },
-    {
-      "section": "Hull and rudder(s) conductivity testing",
-      "rating": "B",
-      "phase": "observed",
-      "text": "Conductivity readings were taken on a relative 0 to 999 scale.",
-      "severity": 1
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
@@ -611,13 +597,6 @@
       "phase": "action",
       "text": "Recheck readings at next haul-out to confirm the condition has not progressed.",
       "severity": 2
-    },
-    {
-      "section": "Hull and rudder(s) conductivity testing",
-      "rating": "C",
-      "phase": "observed",
-      "text": "Conductivity readings were taken on a relative 0 to 999 scale.",
-      "severity": 1
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
@@ -4819,13 +4798,6 @@
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "A",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck and coachroof/pilothouse conductivity testing",
-      "rating": "A",
       "text": "The deck and coachroof returned readings between [insert details] and [insert details].",
       "phase": "observed",
       "severity": 3
@@ -4847,14 +4819,7 @@
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "B - some significantly wet places",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck and coachroof/pilothouse conductivity testing",
-      "rating": "B - some significantly wet places",
-      "text": "The deck, and coachroof returned readings between [insert reading] and [insert reading].",
+      "text": "The deck, and coachroof returned readings between [insert reading range] and [insert reading range].",
       "phase": "observed",
       "severity": 3
     },
@@ -4875,14 +4840,7 @@
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "C - some small areas",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Deck and coachroof/pilothouse conductivity testing",
-      "rating": "C - some small areas",
-      "text": "The deck and coachroof returned elevated readings between [insert reading] and [insert reading].",
+      "text": "The deck and coachroof returned elevated readings between [insert reading range] and [insert reading range].",
       "phase": "observed",
       "severity": 3
     },
@@ -5976,13 +5934,6 @@
     {
       "section": "Aft deck conductivity testing",
       "rating": "A",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Aft deck conductivity testing",
-      "rating": "A",
       "text": "The aft deck returned readings of [insert reading range].",
       "phase": "observed",
       "severity": 3
@@ -6006,13 +5957,6 @@
       "rating": "C",
       "text": "Conductivity testing of the aft deck produced readings consistent with proper condition with no elevated conductivity detected.",
       "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Aft deck conductivity testing",
-      "rating": "B",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
-      "phase": "observed",
       "severity": 3
     },
     {
@@ -6319,13 +6263,6 @@
     {
       "section": "Conductivity testing",
       "rating": "A",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Conductivity testing",
-      "rating": "A",
       "text": "The aft deck returned readings consistently at or near 999 across large areas, indicating severe elevated conductivity and likely structural damage.",
       "phase": "observed",
       "severity": 5
@@ -6340,14 +6277,7 @@
     {
       "section": "Conductivity testing",
       "rating": "B",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Conductivity testing",
-      "rating": "B",
-      "text": "The aft deck returned elevated readings between [[insert value]] and [[insert value]].",
+      "text": "The aft deck returned elevated readings between [insert reading range] and [insert reading range].",
       "phase": "observed",
       "severity": 3
     },
@@ -6357,13 +6287,6 @@
       "text": "These areas should be monitored closely for developing softness or delamination.",
       "phase": "means",
       "severity": 5
-    },
-    {
-      "section": "Conductivity testing",
-      "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
-      "phase": "observed",
-      "severity": 3
     },
     {
       "section": "Conductivity testing",
@@ -6737,90 +6660,6 @@
       "section": "Cockpit impact and resonance testing",
       "rating": "Not tested",
       "text": "Impact and resonance testing of the cockpit floor was not possible because the surface was covered with PE or EVA foam material.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Cockpit conductivity testing",
-      "rating": "B",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Cockpit conductivity testing",
-      "rating": "B",
-      "text": "The area at [insert location] exhibited elevated readings of [insert reading range].",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Cockpit conductivity testing",
-      "rating": "B",
-      "text": "Values were high for the location and should be monitored for softness.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Cockpit conductivity testing",
-      "rating": "B",
-      "text": "Removal and replacement of the core in this area should be considered.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Cockpit conductivity testing",
-      "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Cockpit conductivity testing",
-      "rating": "C",
-      "text": "A single area at [insert location] showed an elevated reading of [insert reading].",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Cockpit conductivity testing",
-      "rating": "C",
-      "text": "This was not immediately concerning at the time of inspection and should be monitored.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Cockpit conductivity testing",
-      "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Cockpit conductivity testing",
-      "rating": "C",
-      "text": "A single area at [describe location] showed an elevated reading of [[insert value]].",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Cockpit conductivity testing",
-      "rating": "C",
-      "text": "This was not immediately concerning and should only be monitored.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Cockpit conductivity testing",
-      "rating": "C",
-      "text": "Conductivity testing of the cockpit did not detect concerning readings.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Cockpit conductivity testing",
-      "rating": "Not tested",
-      "text": "Conductivity testing of the cockpit floor was not possible because the surface was covered with PE or EVA foam material.",
       "phase": "observed",
       "severity": 3
     },
@@ -7847,25 +7686,186 @@
       "severity": 5
     },
     {
-      "section": "Cockpit conductivity testing",
       "rating": "A",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
       "phase": "observed",
-      "severity": 3
+      "severity": 5,
+      "text": "Conductivity testing of the cockpit, on a relative 0 to 999 scale, returned readings consistently at or near 999 across large areas.",
+      "section": "Cockpit conductivity testing"
     },
     {
-      "section": "Cockpit conductivity testing",
       "rating": "A",
-      "text": "The cockpit returned readings consistently at or near 999 across large areas, indicating severe elevated conductivity.",
       "phase": "observed",
-      "severity": 5
+      "severity": 5,
+      "text": "The cockpit returned readings at or near 999 in [describe area(s)].",
+      "section": "Cockpit conductivity testing"
     },
     {
-      "section": "Cockpit conductivity testing",
       "rating": "A",
-      "text": "Immediate investigation and remediation is required.",
+      "phase": "means",
+      "severity": 5,
+      "text": "The severely elevated readings indicated significant moisture ingress and possible delamination.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "The extent of the readings suggested structural compromise in the cockpit sole or coamings.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "A",
       "phase": "action",
-      "severity": 5
+      "severity": 5,
+      "text": "Immediate investigation and remediation of the affected areas is required.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Haul the vessel for exploratory work to confirm the extent of the moisture damage.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Conductivity testing of the cockpit, on a relative 0 to 999 scale, returned elevated readings of [insert reading range] in [describe area(s)].",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "A single area at [insert location] returned an elevated reading of [insert reading range] on the 0 to 999 scale.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Multiple localized elevated readings of [insert reading range] were observed across the cockpit.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "The elevated readings warranted monitoring to rule out progressing moisture ingress or early delamination.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "The values were high for the location and should be monitored for developing softness.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "B",
+      "phase": "means",
+      "severity": 2,
+      "text": "No softness or visible damage was detected at the time of survey.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Monitor the affected areas seasonally for signs of softness or delamination.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Recheck the conductivity readings at the next haul-out to confirm the condition has not progressed.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Removal and replacement of the core in the affected area should be considered if readings progress.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing of the cockpit, on a relative 0 to 999 scale, did not detect concerning readings.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The cockpit returned conductivity readings consistent with a sound laminate.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "A single area at [insert location] showed a slightly elevated reading of [insert reading range] on the 0 to 999 scale.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The readings were not considered abnormal for a vessel of this age.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "C",
+      "phase": "means",
+      "severity": 2,
+      "text": "The elevated reading was not immediately concerning and warrants only routine monitoring.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Monitor the photographed areas between seasons.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "Not tested/not verified",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing of the cockpit floor was not possible because the surface was covered with PE or EVA foam material.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "Not tested/not verified",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Conductivity testing of the cockpit was not performed at the time of survey.",
+      "section": "Cockpit conductivity testing"
+    },
+    {
+      "rating": "Not tested/not verified",
+      "phase": "action",
+      "severity": 2,
+      "text": "Recommend conductivity testing of the cockpit at the next haul-out.",
+      "section": "Cockpit conductivity testing"
     }
   ],
   "Gauges and Instrumentation": [
@@ -9211,13 +9211,6 @@
     {
       "section": "Flybridge conductivity testing",
       "rating": "B",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Flybridge conductivity testing",
-      "rating": "B",
       "text": "The area at [insert location] exhibited elevated readings of [insert reading range].",
       "phase": "observed",
       "severity": 3
@@ -9239,14 +9232,7 @@
     {
       "section": "Flybridge conductivity testing",
       "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Flybridge conductivity testing",
-      "rating": "C",
-      "text": "A single area at [insert location] showed an elevated reading of [insert reading].",
+      "text": "A single area at [insert location] showed an elevated reading of [insert reading range].",
       "phase": "observed",
       "severity": 3
     },
@@ -9260,14 +9246,7 @@
     {
       "section": "Flybridge conductivity testing",
       "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Flybridge conductivity testing",
-      "rating": "C",
-      "text": "A single area at [describe location] showed an elevated reading of [[insert value]].",
+      "text": "A single area at [describe location] showed an elevated reading of [insert reading range].",
       "phase": "observed",
       "severity": 3
     },
@@ -10383,13 +10362,6 @@
       "text": "Immediate professional assessment and repair is critical.",
       "phase": "action",
       "severity": 5
-    },
-    {
-      "section": "Flybridge conductivity testing",
-      "rating": "A",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999.",
-      "phase": "observed",
-      "severity": 3
     },
     {
       "section": "Flybridge conductivity testing",
