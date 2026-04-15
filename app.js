@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2182';
+const APP_VERSION = 'v2184';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3238,28 +3238,12 @@ function showNotesSheet(itemLabel, categoryName) {
         const isNotTested = /^Not tested|not verified/i.test(itemData.rating);
 
         if (isNotApplicable) {
-          if (isPlural) {
-            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
-              text: `No ${cleanLower} were fitted on this vessel.` });
-            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
-              text: `This vessel was not equipped with ${cleanLower}.` });
-            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
-              text: `${capFirst} were not applicable to this vessel.` });
-          } else if (isUncountable) {
-            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
-              text: `No ${cleanLower} was fitted on this vessel.` });
-            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
-              text: `This vessel was not equipped with ${cleanLower}.` });
-            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
-              text: `${capFirst} was not applicable to this vessel.` });
-          } else {
-            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
-              text: `No ${cleanLower} was fitted on this vessel.` });
-            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
-              text: `This vessel was not equipped with ${article} ${cleanLower}.` });
-            synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
-              text: `The ${cleanLower} was not applicable to this vessel.` });
-          }
+          // Single canonical phrasing per user preference (v2183):
+          //   "No [item] were fitted on this vessel."  (plural)
+          //   "No [item] was fitted on this vessel."   (singular/uncountable)
+          const verb = isPlural ? 'were' : 'was';
+          synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
+            text: `No ${cleanLower} ${verb} fitted on this vessel.` });
         } else if (isNotTested) {
           const verbWas = isPlural ? 'were' : 'was';
           const theOrEmpty = isUncountable ? '' : 'The ';
@@ -3484,6 +3468,12 @@ function showNotesSheet(itemLabel, categoryName) {
               lastPhase = phase;
             }
             const s = sObj.text;
+            // v2184: inline input placeholders:
+            //   [insert reading range]  → two number inputs (low–high)
+            //   [insert count]          → one small number input
+            //   [insert location(s)]    → text input sized for a phrase
+            //   [insert location]       → text input
+            //   [insert area(s)]        → text input (for damage descriptions)
             let rendered = escSnippet(s).replace(/\[insert reading range\]/gi,
               `<span class="kk-range-slot" style="display:inline-flex;align-items:center;gap:4px;">` +
                 `<input type="number" class="kk-range-low" placeholder="low" min="0" max="999" ` +
@@ -3495,7 +3485,22 @@ function showNotesSheet(itemLabel, categoryName) {
                   `oninput="_kkRebuildFromSentencePicker('${sanitizedLabel}')" ` +
                   `onclick="event.preventDefault();event.stopPropagation();" ` +
                   `style="width:52px;padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">` +
-              `</span>`);
+              `</span>`)
+            .replace(/\[insert count\]/gi,
+              `<input type="number" class="kk-count-input" placeholder="#" min="0" max="99" ` +
+                `oninput="_kkRebuildFromSentencePicker('${sanitizedLabel}')" ` +
+                `onclick="event.preventDefault();event.stopPropagation();" ` +
+                `style="width:48px;padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">`)
+            .replace(/\[insert (location\(s\)|locations|location)\]/gi,
+              `<input type="text" class="kk-location-input" placeholder="location…" ` +
+                `oninput="_kkRebuildFromSentencePicker('${sanitizedLabel}')" ` +
+                `onclick="event.preventDefault();event.stopPropagation();" ` +
+                `style="width:180px;padding:2px 6px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">`)
+            .replace(/\[describe area\(s\)\]/gi,
+              `<input type="text" class="kk-area-input" placeholder="area(s)…" ` +
+                `oninput="_kkRebuildFromSentencePicker('${sanitizedLabel}')" ` +
+                `onclick="event.preventDefault();event.stopPropagation();" ` +
+                `style="width:180px;padding:2px 6px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">`);
             sentencePickerHtml += `
               <label style="display:flex;gap:10px;padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;font-size:13px;line-height:1.45;">
                 <input type="checkbox" class="kk-sentence-chip" data-picker-key="${sanitizedLabel}" data-sentence-idx="${idx}"
@@ -3888,15 +3893,29 @@ window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
     const entry = !isNaN(idx) ? entries[idx] : null;
     if (!entry) return;
     let text = entry.text || '';
-    // Interpolate range numbers into [insert reading range] placeholder
+    // Interpolate values from inline inputs for this chip.
     const low = (lbl.querySelector('.kk-range-low') || {}).value || '';
     const high = (lbl.querySelector('.kk-range-high') || {}).value || '';
     if (/\[insert reading range\]/i.test(text)) {
       let replacement = '[insert reading range]';
-      if (low && high) replacement = `${low}\u2013${high}`; // en-dash
+      if (low && high) replacement = `${low}\u2013${high}`;
       else if (low) replacement = `${low}`;
       else if (high) replacement = `${high}`;
       text = text.replace(/\[insert reading range\]/gi, replacement);
+    }
+    const count = (lbl.querySelector('.kk-count-input') || {}).value || '';
+    if (/\[insert count\]/i.test(text)) {
+      text = text.replace(/\[insert count\]/gi, count || '[insert count]');
+    }
+    const loc = (lbl.querySelector('.kk-location-input') || {}).value || '';
+    if (/\[insert (?:location\(s\)|locations|location)\]/i.test(text)) {
+      text = text.replace(/\[insert (?:location\(s\)|locations|location)\]/gi,
+        loc || '[insert location]');
+    }
+    const area = (lbl.querySelector('.kk-area-input') || {}).value || '';
+    if (/\[describe area\(s\)\]/i.test(text)) {
+      text = text.replace(/\[describe area\(s\)\]/gi,
+        area || '[describe area(s)]');
     }
     parts.push(text);
   });

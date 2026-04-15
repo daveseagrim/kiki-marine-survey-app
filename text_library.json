@@ -719,18 +719,164 @@
     },
     {
       "section": "Hull anodes",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "[insert count] hull anodes were fitted on this vessel, located at [insert location(s)]."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The hull anodes were severely depleted."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The hull anodes were missing entirely."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "Without galvanic protection, corrosion of metallic fasteners and fittings will accelerate."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "Missing or fully consumed anodes expose underwater metals to galvanic attack."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Per ABYC E-2, new anodes must be installed before the vessel is placed in the water."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Replace the hull anodes before relaunching the vessel."
+    },
+    {
+      "section": "Hull anodes",
       "rating": "B",
-      "text": "The transom-mounted hull anode was degraded and should be replaced."
+      "phase": "observed",
+      "severity": 3,
+      "text": "[insert count] hull anodes were fitted on this vessel, located at [insert location(s)]."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The hull anodes were more than 50% depleted."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "One or more hull anodes showed signs of degradation."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "A hull anode at [insert location] was noticeably worn and approaching the end of its service life."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "B",
+      "phase": "means",
+      "severity": 2,
+      "text": "Continued service without replacement will reduce galvanic protection over time."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Replace the depleted hull anodes before relaunching the vessel."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Replace the worn hull anodes at the next scheduled haul-out."
     },
     {
       "section": "Hull anodes",
       "rating": "C",
-      "text": "No hull anodes were fitted. A permanent bonding plate was present and without deficiency."
+      "phase": "observed",
+      "severity": 1,
+      "text": "[insert count] hull anodes were fitted on this vessel, located at [insert location(s)]."
     },
     {
       "section": "Hull anodes",
       "rating": "C",
-      "text": "Hull anodes were securely mounted and did not exhibit undue corrosion."
+      "phase": "observed",
+      "severity": 1,
+      "text": "The hull anodes were securely mounted and did not exhibit undue corrosion."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The hull anodes had more than 50% of their original material remaining."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The hull anodes appeared new or recently replaced."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Although not a hull anode, a bonding plate was present and without deficiency."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The anodes were providing effective galvanic protection to the hull's underwater metals."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Hull anodes",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Monitor the anodes at each haul-out and replace when approximately 50% consumed."
     },
     {
       "section": "Stern tube(s) (external)",
@@ -1587,11 +1733,6 @@
       "section": "Transducers (speed, depth, etc.)",
       "rating": "A",
       "text": "The transducers were damaged, corroded, or non-functional. Replacement is required to restore navigation system capability."
-    },
-    {
-      "section": "Hull anodes",
-      "rating": "A",
-      "text": "The hull anodes were severely depleted or missing entirely. Without galvanic protection, corrosion of metallic fasteners and fittings will accelerate. Install replacement anodes immediately in compliance with ABYC A-28."
     },
     {
       "section": "Underwater lighting",

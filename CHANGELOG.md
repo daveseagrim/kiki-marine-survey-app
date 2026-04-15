@@ -12,6 +12,59 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2184 — 2026-04-14
+
+### Added — Inline count, location, and area inputs on chips
+
+Three new placeholder types supported in library text:
+- `[insert count]` — renders as a small number input (0-99). The
+  picker interpolates the typed number on rebuild.
+- `[insert location(s)]` / `[insert location]` — renders as a text
+  input (~180 px) for typing a location phrase.
+- `[describe area(s)]` — renders as a text input for area descriptions
+  (replaces the hand-fill-after placeholder).
+
+All inputs stop click-propagation so typing doesn't toggle the
+checkbox, and fire `oninput` rebuild so the textarea updates live as
+the surveyor types.
+
+### Rewritten — Hull anodes A/B/C
+
+23 total chips across the three ratings. Each rating's observed phase
+starts with a count + location chip: "[N] hull anodes were fitted on
+this vessel, located at [location(s)]." The surveyor types the
+count + the location freehand.
+
+- **A (Critical)**: severe depletion, missing entirely, galvanic-
+  protection-lost means, per-ABYC-E-2 replacement required.
+- **B (Needs Attention)**: >50% depleted, degradation, approaching
+  end-of-life, replace-before-relaunch or at-next-haul actions.
+  Removed the transom-specific language — B chips now cover any
+  mounting location.
+- **C (Serviceable)**: securely mounted, >50% material remaining, new
+  or recently replaced, **"Although not a hull anode, a bonding
+  plate was present and without deficiency."** for the bonding-plate-
+  instead case.
+
+---
+
+## v2183 — 2026-04-14
+
+### Changed — N/A produces a single canonical chip
+
+Cut the N/A synthesizer from 3 chips per item to 1. The sole chip
+reads "No [item] was/were fitted on this vessel." with verb agreement
+based on the plural detection from v2182. The other two phrasings
+("This vessel was not equipped with …" and "[Item] was not applicable
+to this vessel") were surplus — user preference is a single clean
+statement.
+
+Not-tested ratings still produce 3 chips (observed x2 + action x1)
+since the distinction between "not tested" and "operation not
+verified" carries different nuances.
+
+---
+
 ## v2182 — 2026-04-14
 
 ### Fixed — Grammar for auto-synthesized N/A chips
