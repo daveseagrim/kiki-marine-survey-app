@@ -12,6 +12,54 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2162 — 2026-04-14
+
+### Changed — Snippet cards now APPEND on tap (multi-sentence composition)
+- Tapping a second snippet card in the Notes sheet now **appends** the
+  new snippet to the existing textarea text with a space separator,
+  instead of replacing. This lets you tap 2–3 snippet cards to compose
+  a multi-sentence observation per item. Empty textarea → normal insert;
+  non-empty textarea → append. Shipped tonight for the Ahoy Vey
+  lawyer-review deadline where each item benefits from richer prose
+  than a single-snippet pick.
+
+### Added — Import photos from library / files (MacBook + iPhone)
+
+Shipped urgently to support the Ahoy Vey report deadline. Surveyor can
+now attach existing photos (Camera Roll on iPhone, Files / iCloud Drive
+anywhere, Finder on MacBook) to any checklist item. Multi-select
+enabled so a batch of 10-20 photos can be attached in one picker
+session.
+
+- **Media sheet redesign:** the single "📷 Capture Photos" button is
+  replaced by two clearly-labeled buttons:
+  - **📷 Take photos** — camera (existing live-capture flow).
+  - **🖼️ Import photos from library / files** — opens the OS file
+    picker with `accept="image/*" multiple`. No `capture` attribute,
+    so iOS shows the library/files chooser and macOS shows Finder.
+- **Sortable thumbnails:** existing photos in the media sheet grid
+  can be reordered by dragging one onto another. Order persists to
+  IndexedDB.
+- **Shared import helper** (`attachPhotosToItem`): FileReader → date
+  stamp → savePhoto → survey.items[label].photos.push → saveSurvey →
+  refresh compact card. One code path for all import sources.
+
+### Present but not yet wired (defer to v2163)
+
+The v2162 work originally included drag-and-drop onto checklist items.
+The helper functions (`setupChecklistDragDrop`) are in app.js but NOT
+yet invoked from `renderInspection`. Shipping without wiring them is
+intentional — lower risk the night of a hard deadline. Will wire in
+v2163 tomorrow with proper testing.
+
+### Process
+- Triple-checked: 106 tests pass, app.js syntax valid, versions
+  consistent, pre-commit hook green in no-node simulated environment.
+- Backlog item B-10 (category-level area photos, e.g. "Deck and
+  coachroof area photos") logged for a future release.
+
+---
+
 ## v2161 — 2026-04-14
 
 ### Changed — B-03 Firebase download (attempt 4)

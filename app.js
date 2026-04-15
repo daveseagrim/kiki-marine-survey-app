@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2161';
+const APP_VERSION = 'v2162';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3698,11 +3698,16 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
     if (sideWord) {
       resolved = applySidePrefix(resolved, sideWord);
     }
-    // Replace — tapping a new snippet replaces the previous selection
-    textarea.value = resolved;
-    // Reset collected citations (new snippet starts fresh)
-    setCollectedCitations(textarea, []);
-    // Stash placeholders + template (for live builder) on the textarea
+    // v2162: APPEND behavior — tapping multiple snippet cards composes a
+    // multi-sentence observation. Dave's deadline workflow: pick 2-3 cards
+    // per item to build richer prose for lawyer review. Empty textarea →
+    // insert normally. Non-empty → append with space separator.
+    const existing = (textarea.value || '').trim();
+    textarea.value = existing ? (existing + ' ' + resolved) : resolved;
+    // Reset collected citations (new snippet starts fresh only on first tap)
+    if (!existing) setCollectedCitations(textarea, []);
+    // Stash placeholders + template of the LAST-tapped snippet (chip-strip
+    // builder edits the most recent one).
     textarea.dataset.snippetPlaceholders = placeholdersJson || '';
     textarea.dataset.snippetTemplate = resolved;
     delete textarea.dataset.snippetCount;
@@ -3803,6 +3808,177 @@ function saveNotesFromSheet(itemLabel, categoryName, sanitizedLabel) {
 }
 
 // ── Bottom Sheet: Media / Photos ────────────────────────────────────────────
+// ───────────────────────────────────────────────────────────────────────────
+// Photo import — three paths that share one processing helper:
+//   1. Camera (openBatchCamera) — existing live-capture flow
+//   2. Photo library picker (pickPhotoLibraryForItem) — images from Photos
+//   3. File picker (pickFilesForItem) — images from Files / iCloud Drive
+//   Plus drag-and-drop onto .compact-item-wrapper (setupChecklistDragDrop)
+// All non-camera paths funnel through attachPhotosToItem() so a future
+// change to the save pipeline only needs to happen once.
+// ───────────────────────────────────────────────────────────────────────────
+async function attachPhotosToItem(itemLabel, fileList) {
+  const files = Array.from(fileList || []).filter(f => f && f.type && f.type.startsWith('image/'));
+  if (files.length === 0) {
+    showToast('No image files selected');
+    return 0;
+  }
+  if (files.length > 1) showToast(`Saving ${files.length} photos…`);
+
+  for (const file of files) {
+    await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        try {
+          const stamped = (typeof addDateStampToPhoto === 'function')
+            ? await addDateStampToPhoto(ev.target.result)
+            : ev.target.result;
+          const photoId = `${currentSurveyId}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+          const photo = {
+            id: photoId,
+            surveyId: currentSurveyId,
+            itemLabel: itemLabel,
+            dataUrl: stamped,
+            annotated: false,
+            createdAt: new Date().toISOString()
+          };
+          await savePhoto(photo);
+          const survey = await getSurvey(currentSurveyId);
+          if (!survey.items[itemLabel]) {
+            survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+          }
+          if (!Array.isArray(survey.items[itemLabel].photos)) {
+            survey.items[itemLabel].photos = [];
+          }
+          survey.items[itemLabel].photos.push(photoId);
+          await saveSurvey(survey);
+        } catch (err) {
+          console.error('attachPhotosToItem error:', err);
+        }
+        resolve();
+      };
+      reader.onerror = () => resolve();
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Refresh the compact card so the photo count / thumbnails update
+  try {
+    const survey = await getSurvey(currentSurveyId);
+    updateCompactItem(survey, itemLabel, '');
+  } catch (_) {}
+
+  showToast(`Attached ${files.length} photo${files.length === 1 ? '' : 's'}`);
+  return files.length;
+}
+
+// Single "Import photos" picker — covers Photo Library AND Files app.
+// accept=image/* without capture on iOS opens the library/files chooser.
+// Multi-file select is enabled so Dave can pick a batch at once.
+function importPhotosForItem(itemLabel) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.multiple = true;
+  input.onchange = () => attachPhotosToItem(itemLabel, input.files);
+  if (typeof setCameraActive === 'function') setCameraActive(true);
+  input.click();
+}
+
+// Sortable thumbnails in the media sheet — reorder photos within an item
+// by dragging one thumbnail onto another. Reorder persists in IndexedDB.
+function setupPhotoSortable(gridEl, itemLabel) {
+  if (!gridEl) return;
+  let dragIdx = -1;
+  gridEl.querySelectorAll('[data-photo-idx]').forEach(thumb => {
+    thumb.setAttribute('draggable', 'true');
+    thumb.addEventListener('dragstart', (e) => {
+      dragIdx = parseInt(thumb.getAttribute('data-photo-idx'), 10);
+      thumb.style.opacity = '0.5';
+      try { e.dataTransfer.effectAllowed = 'move'; } catch (_) {}
+    });
+    thumb.addEventListener('dragend', () => { thumb.style.opacity = ''; });
+    thumb.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      try { e.dataTransfer.dropEffect = 'move'; } catch (_) {}
+      thumb.style.outline = '2px solid #006699';
+    });
+    thumb.addEventListener('dragleave', () => { thumb.style.outline = ''; });
+    thumb.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      thumb.style.outline = '';
+      const dropIdx = parseInt(thumb.getAttribute('data-photo-idx'), 10);
+      if (dragIdx < 0 || dragIdx === dropIdx) return;
+      const survey = await getSurvey(currentSurveyId);
+      const arr = (survey.items[itemLabel] && survey.items[itemLabel].photos) || [];
+      if (dragIdx >= arr.length || dropIdx >= arr.length) return;
+      const [moved] = arr.splice(dragIdx, 1);
+      arr.splice(dropIdx, 0, moved);
+      survey.items[itemLabel].photos = arr;
+      await saveSurvey(survey);
+      // Re-render the media sheet to reflect new order
+      const existingSheet = document.getElementById('bottomSheetOverlay');
+      if (existingSheet) existingSheet.remove();
+      showMediaSheet(itemLabel, (existingSheet && existingSheet.dataset && existingSheet.dataset.categoryName) || '');
+    });
+  });
+}
+
+// Attach drag-drop handlers to the inspection app. Uses event delegation
+// so items added after render (hull expansion, drive-line expansion) work
+// without re-wiring.
+function setupChecklistDragDrop() {
+  const app = document.getElementById('app');
+  if (!app || app.dataset.dragDropWired === 'true') return;
+  app.dataset.dragDropWired = 'true';
+
+  let lastTarget = null;
+
+  app.addEventListener('dragover', (e) => {
+    const wrapper = e.target && e.target.closest ? e.target.closest('.compact-item-wrapper') : null;
+    if (!wrapper) return;
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+    if (lastTarget !== wrapper) {
+      if (lastTarget) lastTarget.classList.remove('drag-target');
+      wrapper.classList.add('drag-target');
+      lastTarget = wrapper;
+    }
+  });
+
+  app.addEventListener('dragleave', (e) => {
+    const wrapper = e.target && e.target.closest ? e.target.closest('.compact-item-wrapper') : null;
+    if (!wrapper) return;
+    if (!e.relatedTarget || !wrapper.contains(e.relatedTarget)) {
+      wrapper.classList.remove('drag-target');
+      if (lastTarget === wrapper) lastTarget = null;
+    }
+  });
+
+  app.addEventListener('drop', async (e) => {
+    const wrapper = e.target && e.target.closest ? e.target.closest('.compact-item-wrapper') : null;
+    if (!wrapper) return;
+    e.preventDefault();
+    wrapper.classList.remove('drag-target');
+    lastTarget = null;
+    const itemLabel = wrapper.getAttribute('data-item-label');
+    if (!itemLabel) return;
+    const files = (e.dataTransfer && e.dataTransfer.files) || [];
+    if (files.length === 0) return;
+    await attachPhotosToItem(itemLabel, files);
+  });
+
+  // Prevent the browser from navigating when a file is dropped outside any
+  // valid target (e.g. dragged over a survey but released between cards).
+  window.addEventListener('dragover', (e) => { e.preventDefault(); });
+  window.addEventListener('drop', (e) => {
+    if (!e.target || !e.target.closest || !e.target.closest('.compact-item-wrapper')) {
+      e.preventDefault();
+    }
+  });
+}
+
 function showMediaSheet(itemLabel, categoryName) {
   const existing = document.getElementById('bottomSheetOverlay');
   if (existing) existing.remove();
@@ -3815,31 +3991,42 @@ function showMediaSheet(itemLabel, categoryName) {
 
     let photosHtml = '';
     if (itemData.photos && itemData.photos.length > 0) {
-      photosHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 20px;">';
-      itemData.photos.forEach(photoId => {
+      photosHtml = '<div id="sheet-photo-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 20px;">';
+      (itemData.photos || []).forEach((photoId, idx) => {
         photosHtml += `
-          <img id="sheet-thumb-${photoId}" src=""
+          <img id="sheet-thumb-${photoId}" src="" data-photo-idx="${idx}"
+               title="Drag to reorder \u2022 Tap to edit"
                style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;"
                onclick="showPhotoActionOverlay('${photoId}', '${safeLabel}', '${safeCat}')" />
         `;
       });
       photosHtml += '</div>';
+      if (itemData.photos.length > 1) {
+        photosHtml += '<div style="font-size:11px;color:#9ca3af;padding:0 20px 8px 20px;text-align:center;">Drag a photo onto another to reorder \u2022 Tap a photo to edit</div>';
+      }
     }
 
     const overlay = document.createElement('div');
     overlay.id = 'bottomSheetOverlay';
     overlay.className = 'bottom-sheet-overlay';
+    overlay.dataset.categoryName = categoryName || '';
     overlay.innerHTML = `
       <div class="bottom-sheet" onclick="event.stopPropagation();">
         <div class="bottom-sheet-handle"></div>
-        <div class="bottom-sheet-title">${itemLabel} — Photos (${photoCount})</div>
+        <div class="bottom-sheet-title">${itemLabel} \u2014 Photos (${photoCount})</div>
         ${photosHtml}
-        <div style="padding:12px 20px;">
+        <div style="padding:12px 20px;display:flex;flex-direction:column;gap:10px;">
           <button type="button"
                   onclick="document.getElementById('bottomSheetOverlay').remove(); openBatchCamera('${safeLabel}');"
-                  style="display:block;width:100%;background:white;border:2px dashed #ddd;border-radius:8px;padding:16px;text-align:center;font-size:14px;font-weight:600;color:#006699;cursor:pointer;">
-            📷 Capture Photos
+                  style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#006699;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;">
+            \ud83d\udcf7 Take photos
           </button>
+          <button type="button"
+                  onclick="document.getElementById('bottomSheetOverlay').remove(); importPhotosForItem('${safeLabel}');"
+                  style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:white;color:#006699;border:2px solid #006699;border-radius:10px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;">
+            \ud83d\uddbc\ufe0f Import photos from library / files
+          </button>
+          <div style="font-size:11px;color:#9ca3af;text-align:center;margin-top:-2px;">Both buttons support selecting multiple photos at once. On desktop, you can also drag photo files directly onto this item's card.</div>
         </div>
         <div class="sheet-btn-row">
           <button onclick="document.getElementById('bottomSheetOverlay').remove();" style="background:#006699;color:white;">Done</button>
@@ -3859,6 +4046,9 @@ function showMediaSheet(itemLabel, categoryName) {
           }
         });
       });
+      // Wire drag-to-reorder on the thumbnail grid (v2162)
+      const grid = document.getElementById('sheet-photo-grid');
+      if (grid) setupPhotoSortable(grid, itemLabel);
     }
   });
 }

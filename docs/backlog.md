@@ -14,6 +14,38 @@ When adding an entry, include:
 
 ## Active
 
+### B-11 — Drag-and-drop photos onto checklist items (MacBook)
+
+- **What:** On MacBook Chrome, drag a photo file from Finder onto a
+  checklist-item card and have it attach to that item.
+- **Why:** Dave requested during Ahoy Vey report push 2026-04-14.
+- **Where:** `setupChecklistDragDrop()` already exists in app.js
+  (added in v2162) but is NOT called from `renderInspection`. To
+  activate, add one line to `renderInspection` after the survey
+  renders. Also needs a `.drag-target` CSS class in index.html for
+  visual feedback during dragover.
+- **Priority:** Medium. Dave has the Import Photos button as an
+  alternative right now, so this is UX polish rather than blocking.
+- **Fix sketch:** Add `setupChecklistDragDrop()` call to the start of
+  `renderInspection` (after `currentSurveyId` is set). Add CSS:
+  `.compact-item-wrapper.drag-target { outline: 2px dashed #006699;
+  background: #e0f7fa; }`. Ship as v2163.
+
+### B-10 — Category-level area photos (e.g. "Deck and coachroof area photos")
+
+- **What:** Support photos that belong to a whole category rather than
+  a specific item. SafetyCulture has these — Dave referenced the
+  pattern during Ahoy Vey report push.
+- **Why:** Some observations are area-level (e.g. "deck condition
+  overview") rather than item-level (e.g. "pulpit"). A shared photo
+  container per category avoids forcing every photo to be assigned to
+  one specific item.
+- **Where:** `survey_template.json` needs a new `type: 'area'` item
+  per category, and `survey.items[areaKey]` needs a photos array.
+  `buildCompactItemHTML` and the media sheet need an area-aware path.
+- **Priority:** Medium. B-05 previously removed similar items; this
+  would re-introduce them with the improved UX.
+
 ### B-09 — Auto-derive `hasRudder` from `driveType` for power vessels
 
 - **What:** `{if-rudder:}` token expansion depends on `survey.hasRudder`.
