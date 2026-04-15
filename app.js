@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2170';
+const APP_VERSION = 'v2171';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3337,6 +3337,51 @@ function showNotesSheet(itemLabel, categoryName) {
         // the expanded, deduped text so the highlighter operates on clean prose).
         const highlightedTexts = highlightSnippetDiffs(sheetVariantsForDisplay);
 
+        // v2171: Sentence-level picker. Break each variant into sentences,
+        // dedupe across all variants, render each as a checkbox. Ticking
+        // sentences rebuilds the textarea from the current selection — fast
+        // composition without reading 4 similar paragraphs.
+        const _splitSentences = (s) => (s || '')
+          .split(/(?<=[.!?])\s+/)
+          .map(x => x.trim())
+          .filter(Boolean);
+        const _pickerSentences = [];
+        const _pickerSeen = new Set();
+        sheetVariantsForDisplay.forEach(v => {
+          _splitSentences(v.text).forEach(sent => {
+            // Normalize whitespace for the dedupe check but keep original casing
+            const normKey = sent.replace(/\s+/g, ' ').toLowerCase();
+            if (!_pickerSeen.has(normKey)) {
+              _pickerSeen.add(normKey);
+              _pickerSentences.push(sent);
+            }
+          });
+        });
+        window._sentencePicker = window._sentencePicker || {};
+        window._sentencePicker[sanitizedLabel] = _pickerSentences;
+
+        let sentencePickerHtml = '';
+        if (_pickerSentences.length >= 2) {
+          sentencePickerHtml = `
+            <div class="sheet-section-title" style="padding-top:8px;">
+              Pick sentences
+              <span style="color:#9ca3af;font-weight:400;font-size:11px;margin-left:6px;">tap to add to your observation</span>
+            </div>
+            <div id="sheet-sentence-picker" style="padding:0;">
+          `;
+          _pickerSentences.forEach((s, idx) => {
+            sentencePickerHtml += `
+              <label style="display:flex;gap:10px;padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;font-size:13px;line-height:1.45;">
+                <input type="checkbox" class="kk-sentence-chip" data-picker-key="${sanitizedLabel}" data-sentence-idx="${idx}"
+                  onchange="_kkRebuildFromSentencePicker('${sanitizedLabel}')"
+                  style="margin-top:3px;flex-shrink:0;">
+                <span>${escSnippet(s)}</span>
+              </label>
+            `;
+          });
+          sentencePickerHtml += `</div>`;
+        }
+
         // Keyed cache lookup — escape the key for use in inline onclick
         const cacheKey = itemLabel.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         // Collapse the card list when notes already exist for the item.
@@ -3353,16 +3398,20 @@ function showNotesSheet(itemLabel, categoryName) {
         const toggleLabel = sheetVariants.length === 1
           ? 'Change template'
           : `Change template — ${sheetVariants.length} options`;
-        const headerText = startCollapsed
-          ? `<span style="color:#6b7280;font-weight:500;">${toggleLabel}</span> <span id="sheet-snippet-caret" style="color:#9ca3af;">▸</span>`
+        // v2171: if the sentence picker exists, default the full-template
+        // card list to COLLAPSED. Surveyor uses picker by default; cards
+        // are a disclosure for full-paragraph templates.
+        const cardsStartCollapsed = startCollapsed || _pickerSentences.length >= 2;
+        const headerText = cardsStartCollapsed
+          ? `<span style="color:#6b7280;font-weight:500;">${_pickerSentences.length >= 2 ? 'Full paragraph templates' : toggleLabel}</span> <span id="sheet-snippet-caret" style="color:#9ca3af;">▸</span>`
           : `Quick Insert (${sheetVariants.length} snippet${sheetVariants.length === 1 ? '' : 's'}) <span id="sheet-snippet-caret" style="color:#9ca3af;">▾</span>`;
-        snippetsHtml = `
+        snippetsHtml = sentencePickerHtml + `
           <div class="sheet-section-title" id="sheet-snippets-header"
                style="cursor:pointer;user-select:none;"
                onclick="(function(){var l=document.getElementById('sheet-snippets-list');var c=document.getElementById('sheet-snippet-caret');if(!l||!c)return;var open=l.style.display!=='none';l.style.display=open?'none':'block';c.textContent=open?'▸':'▾';})()">
             ${headerText}
           </div>
-          <div id="sheet-snippets-list" style="display:${startCollapsed ? 'none' : 'block'};">
+          <div id="sheet-snippets-list" style="display:${cardsStartCollapsed ? 'none' : 'block'};">
         `;
         sheetVariants.forEach((variant, idx) => {
           // v2170: if the rating label mentions rudder and this vessel has
@@ -3693,6 +3742,30 @@ function showNotesSheet(itemLabel, categoryName) {
 }
 
 // Global tap handler for bottom-sheet snippet cards. Called from the
+// v2171: rebuild the notes textarea from the checked sentence chips.
+// Each chip references sentences[] in window._sentencePicker keyed by
+// the sanitized item label. Join checked sentences in their original
+// order with a single space.
+window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
+  const ta = document.getElementById(`sheet-text-${sanitizedLabel}`);
+  const sentences = (window._sentencePicker && window._sentencePicker[sanitizedLabel]) || [];
+  if (!ta) return;
+  const picker = document.getElementById('sheet-sentence-picker');
+  if (!picker) return;
+  const checked = [];
+  picker.querySelectorAll('.kk-sentence-chip').forEach(el => {
+    if (el.checked) {
+      const idx = parseInt(el.getAttribute('data-sentence-idx'), 10);
+      if (!isNaN(idx) && sentences[idx]) checked.push(sentences[idx]);
+    }
+  });
+  ta.value = checked.join(' ');
+  ta.style.height = 'auto';
+  ta.style.height = ta.scrollHeight + 'px';
+  // Trigger input so any downstream chip-strip builder can re-render
+  try { ta.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
+};
+
 // overlay's delegated click listener. Reads variants from the cache
 // stashed by showNotesSheet and dispatches to insertSnippetFromSheet.
 window._sheetCardTap = function(itemLabel, idx, cardEl) {

@@ -12,6 +12,34 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2171 — 2026-04-14
+
+### Added — Sentence-level picker ("chips") for fast observation composition
+
+Multi-variant rating cards are pre-written paragraphs; the surveyor had
+to read all of them to pick one. New UI breaks every variant into
+sentences, dedupes across all variants, and renders each unique
+sentence as a checkbox row above the card list. Ticking sentences
+rebuilds the Notes textarea in the original sentence order with a
+single space separator. Untick to remove.
+
+Behaviour:
+- If 2+ unique sentences exist, the picker renders at the top of the
+  Quick Insert area.
+- The full-paragraph card list collapses to "Full paragraph templates ▸"
+  since the picker satisfies the same need faster.
+- Picker is per-item: `window._sentencePicker[sanitizedLabel]` stores
+  the sentence array; `_kkRebuildFromSentencePicker(sanitizedLabel)`
+  is the onchange handler attached to each chip.
+- Downstream chip-strip (`{any:...}`, `{specify:...}` token builder)
+  still works on the rebuilt text via a dispatched `input` event.
+
+For outdrive / IPS surveys this combines with v2169's token expansion
+so the chip picker's sentence options are already rudder-stripped —
+no manual cleanup needed.
+
+---
+
 ## v2170 — 2026-04-14
 
 ### Fixed — Dedupe identical snippet variants on no-rudder vessels + strip "rudder" from rating badges
