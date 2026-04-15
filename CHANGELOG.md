@@ -72,6 +72,86 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2202 — 2026-04-14
+
+### Added (library-wide) — Every section × A/B/C rating now has all 3 phases
+
+The 3-phase format (**observed / means / action**) is now guaranteed
+for every rating in every section that has any chips — no exceptions.
+Before this pass: 785 section-rating combos were missing at least one
+phase (mostly "means" and "action"). Fix: backfill a generic rating-
+appropriate chip for every missing phase.
+
+Backfill defaults (per rating):
+- **A** → observed: "A significant concern was observed with this
+  item." / means: "This represents a significant concern for the
+  vessel's safe or structural operation." / action: "Professional
+  assessment and repair is required before the vessel is returned
+  to service."
+- **B** → observed: "An area warranting attention was noted on this
+  item." / means: "The finding should be monitored and addressed in
+  the near term." / action: "Address this at the next scheduled
+  service."
+- **C** → observed: "This item was inspected and found in acceptable
+  condition." / means: "No immediate concern was noted for continued
+  use." / action: "No action required at this time."
+
+These are deliberately generic — section-specific curation replaces
+them when the surveyor flags any section as needing tailored chips.
+Total chips added: 1,189.
+
+### Added — Every conductivity section has a 0-to-999 scale observed chip on each rating
+
+Every section with "conductivity" in its name (7 sections × up to 3
+active ratings) now guarantees at least one observed chip that
+mentions the 0 to 999 relative scale. Rating-specific phrasing:
+
+- **A**: "Conductivity testing was carried out on a relative 0 to 999
+  scale; readings indicated significant moisture or delamination."
+- **B**: "Conductivity testing was carried out on a relative 0 to 999
+  scale; some readings were elevated."
+- **C**: "Conductivity testing was carried out on a relative 0 to 999
+  scale; readings were consistent with a sound laminate."
+
+Added 18 scale chips total across: Aft deck, Cockpit, Conductivity
+testing (generic), Deck and coachroof/pilothouse, Flybridge, Hull and
+rudder(s), Swim platform.
+
+### Triple-check
+
+Audit passes 2 and 3 both confirm:
+- 838 section-rating combos active, 0 phase gaps.
+- All conductivity section × active ratings have a 0-to-999 chip.
+
+---
+
+## v2201 — 2026-04-14
+
+### Fixed — Three ITEM_SNIPPET_MAP entries were pointing at non-existent sections
+
+After v2199's bowsprit strip, three map entries still redirected
+lookups to "Bowsprit, deck and coachroof/pilothouse impact and
+resonance testing" — a section name that no longer existed. The
+deck-percussion picker showed no chips on any rating because
+`findTextVariants` found zero entries at the stale target.
+
+Redirected all three to the actual curated section
+("Deck and coachroof/pilot percussion testing"):
+- "Bowsprit, deck and coachroof/pilot house impact and resonance testing" → …
+- "Deck and coachroof/pilot house impact and resonance testing" → …
+- "Deck and coachroof/pilot percussion testing" → …
+
+Audit confirms zero remaining bad map entries. Deck percussion A/B/C
+chips now render (the curated 19 from v2199).
+
+### Changed — "in acceptable condition" → "in working condition" on bow roller
+
+The bow roller assembly is a mechanical item ("intact and in working
+condition" reads better than "in acceptable condition"). Rewrote the
+specific entry.
+
+---
+
 ## v2200 — 2026-04-14
 
 ### Fixed — Area photo INITIAL render also shows Take + Import buttons

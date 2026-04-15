@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2200';
+const APP_VERSION = 'v2202';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -906,14 +906,14 @@ const ITEM_SNIPPET_MAP = {
   'Bilge, stringers and ribs (those accessible from cabin)': 'Bilge, stringers and ribs – accessible from cabin',
   'Boom, gooseneck, boomvang, outhaul, cunningham and reefing lines': 'Boom, gooseneck, boomvang, outhaul, and reefing lines',
   'Bowsprit, deck and coachroof/pilot house conductivity testing': 'Deck and coachroof/pilothouse conductivity testing',
-  'Bowsprit, deck and coachroof/pilot house impact and resonance testing': 'Bowsprit, deck and coachroof/pilothouse impact and resonance testing',
+  'Bowsprit, deck and coachroof/pilot house impact and resonance testing': 'Deck and coachroof/pilot percussion testing',
   'Chainplates (exterior) pins and bolts': 'Chainplates (exterior)pins and bolts',
   'Cockpit lockers': 'Cockpit lockers and lazarettes',
   'Cockpit lockers/lazarettes': 'Cockpit lockers and lazarettes',
   'Cockpit sink and drain': 'Sink, faucets and drain',
   'Cockpit sink, faucets and drain': 'Sink, faucets and drain',
   'Deck and coachroof/pilot house conductivity testing': 'Deck and coachroof/pilothouse conductivity testing',
-  'Deck and coachroof/pilot house impact and resonance testing': 'Bowsprit, deck and coachroof/pilothouse impact and resonance testing',
+  'Deck and coachroof/pilot house impact and resonance testing': 'Deck and coachroof/pilot percussion testing',
   'Deck hatch(es), windows and portholes (exterior observations)': 'Deck hatches, windows, and portholes – exterior observations',
   'Deck hatches, windows and portholes (interior observations)': 'Deck hatches, windows and portholes – interior observations',
   'Drive coupling(s), interior propeller shaft(s), stuffing box(es)/packing gland(s)/dripless seal(s), interior stern tube(s)': 'Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)',
@@ -1015,7 +1015,7 @@ const ITEM_SNIPPET_MAP = {
   'Condition': 'Aft deck condition (spider cracks, etc.)',
   'Deck and coachroof/pilot house - other features': 'Deck and coachroof/pilothouse condition',
   'Deck and coachroof/pilot house condition': 'Deck and coachroof/pilothouse condition',
-  'Deck and coachroof/pilot percussion testing': 'Bowsprit, deck and coachroof/pilothouse impact and resonance testing',
+  'Deck and coachroof/pilot percussion testing': 'Deck and coachroof/pilot percussion testing',
   'Electrical, other, additional features': 'Electrical – other features',
   'Engines and drives - other features': 'Oil level and condition',
   'Flybridge - other gauges and instrumentation': 'Engine gauges',
