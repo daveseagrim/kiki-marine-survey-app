@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2192';
+const APP_VERSION = 'v2193';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2749,8 +2749,14 @@ function showNotesSheet(itemLabel, categoryName) {
     // Cache variants on window so the click handler attached after mount can
     // read them by index without needing to round-trip text through HTML
     // attributes. This avoids all the escaping pitfalls of inline onclick.
+    // v2193: "Other" catch-all items get rating + free notes only, no chip
+    // picker. These are meant for miscellaneous observations the structured
+    // picker can't anticipate. Detection: label ends with "- other",
+    // "other features", or "other gauges" (case-insensitive).
+    const isOtherItem = /(^|\s)-\s*other(\s+(features|gauges|additional)\b)?$|other\s+features$|other\s+gauges\s+and\s+instrumentation$|other,\s+additional\s+features$/i.test(itemLabel || '');
+
     let sheetVariants = [];
-    if (itemData.rating) {
+    if (itemData.rating && !isOtherItem) {
       const baseRating = itemData.rating.charAt(0);
       sheetVariants = findTextVariants(categoryName, itemLabel, baseRating);
       // v2180/v2182: synthesize chips for "Not applicable" / "Not tested"

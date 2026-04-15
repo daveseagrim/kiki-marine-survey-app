@@ -103,7 +103,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The hull was suitable for continued use without structural concern."
+      "text": "The hull was suitable without structural concern."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
@@ -1716,7 +1716,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The hull exterior was in sound condition for continued use."
+      "text": "The hull exterior was in sound condition."
     },
     {
       "section": "Hull exterior above the waterline",
@@ -1987,7 +1987,7 @@
     {
       "section": "Transom",
       "rating": "B",
-      "text": "The transom shows signs of elevated conductivity or minor damage.",
+      "text": "The transom shows signs of elevated conductivity with readings of [insert reading range], with readings of [insert reading range], or minor damage.",
       "phase": "observed",
       "severity": 3
     },
@@ -3045,7 +3045,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "No notable areas of elevated conductivity were observed on the swim platform.",
+      "text": "No notable areas of elevated conductivity with readings of [insert reading range] were observed on the swim platform.",
       "section": "Swim platform and ladder"
     },
     {
@@ -3059,7 +3059,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The swim platform and ladder were in sound condition for continued use.",
+      "text": "The swim platform and ladder were in sound condition.",
       "section": "Swim platform and ladder"
     },
     {
@@ -3234,7 +3234,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "No notable areas of elevated conductivity were observed on the swim platform.",
+      "text": "No notable areas of elevated conductivity with readings of [insert reading range] were observed on the swim platform.",
       "section": "Swim platform and ladder - condition and conductivity readings"
     },
     {
@@ -3248,7 +3248,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The swim platform and ladder were in sound condition for continued use.",
+      "text": "The swim platform and ladder were in sound condition.",
       "section": "Swim platform and ladder - condition and conductivity readings"
     },
     {
@@ -3276,7 +3276,7 @@
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "Conductivity readings were generally acceptable but elevated in [describe area(s)].",
+      "text": "Conductivity readings were generally acceptable but elevated in [describe area(s)] with readings of [insert reading range].",
       "section": "Swim platform and ladder"
     },
     {
@@ -3311,7 +3311,7 @@
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "Conductivity readings were generally acceptable but elevated in [describe area(s)].",
+      "text": "Conductivity readings were generally acceptable but elevated in [describe area(s)] with readings of [insert reading range].",
       "section": "Swim platform and ladder - condition and conductivity readings"
     },
     {
@@ -5393,7 +5393,7 @@
     {
       "section": "Deck and coachroof/pilothouse condition",
       "rating": "B",
-      "text": "The deck or pilothouse shows spider cracks or minor signs of elevated conductivity.",
+      "text": "The deck or pilothouse showed spider cracks or minor signs of elevated conductivity with readings of [insert reading range] with readings of [insert reading range].",
       "phase": "observed",
       "severity": 3
     },
@@ -5505,7 +5505,7 @@
     {
       "section": "Anchor locker",
       "rating": "B",
-      "text": "The locker shows corrosion or minor damage with areas of elevated conductivity.",
+      "text": "The locker shows corrosion or minor damage with areas of elevated conductivity with readings of [insert reading range].",
       "phase": "observed",
       "severity": 3
     },
@@ -6967,7 +6967,7 @@
     {
       "section": "Engine locker lid",
       "rating": "B",
-      "text": "Areas of elevated conductivity were present.",
+      "text": "areas of elevated conductivity with readings of [insert reading range] were present with readings of [insert reading range].",
       "phase": "observed",
       "severity": 3
     },
@@ -9659,7 +9659,7 @@
     {
       "section": "Flybridge, floor, seats and coaming (spider cracks, etc.)",
       "rating": "B",
-      "text": "Spider cracks or minor signs of elevated conductivity are visible.",
+      "text": "Spider cracks or minor signs of elevated conductivity with readings of [insert reading range] with readings of [insert reading range] were visible.",
       "phase": "observed",
       "severity": 3
     },
@@ -12078,7 +12078,7 @@
     {
       "section": "Hull deck joint (interior)",
       "rating": "B",
-      "text": "Minor cracking or signs of elevated conductivity are visible.",
+      "text": "Minor cracking or signs of elevated conductivity with readings of [insert reading range] are visible.",
       "phase": "observed",
       "severity": 3
     },
@@ -12512,7 +12512,7 @@
     {
       "section": "Bulkheads",
       "rating": "B",
-      "text": "Minor cracking or elevated conductivity was detected.",
+      "text": "minor cracking or elevated conductivity with readings of [insert reading range] was detected.",
       "phase": "observed",
       "severity": 3
     },

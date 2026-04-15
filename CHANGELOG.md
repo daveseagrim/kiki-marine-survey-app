@@ -72,6 +72,38 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2193 — 2026-04-14
+
+### Changed — "Other" catch-all items get rating + free notes only (no picker)
+
+18 template items labeled "… - other" or "other features" / "other
+gauges and instrumentation" / "other, additional features" are
+miscellaneous-observation fields by design — the structured chip
+picker doesn't fit. `showNotesSheet` now detects these patterns and
+skips the picker rendering entirely. Surveyor gets the rating badge,
+textarea, and Save/Cancel — nothing else.
+
+Applies to: Hull exterior and propulsion - other, Deck and
+coachroof/pilot house - other features, Aft deck - other features,
+Spars and rigging - other, Cockpit - other features, Pilot house -
+other features, Flybridge - other features, Flybridge - other
+gauges and instrumentation, Pilot house - other gauges and
+instrumentation, Cockpit - other gauges and instrumentation, Cabin
+and conveniences - other features, Fuel, water and waste - other
+features, Outboard engine - other features, Engines and drives -
+other features, Steering and trim mechanics - other features,
+Electrical - other features, Electrical, other, additional features,
+Sails - other.
+
+### Changed — Dropped "for continued use" filler phrase
+
+"The X was in sound condition for continued use" → "The X was in
+sound condition." The phrase was redundant filler — the rating +
+surrounding context already imply continued use. Fixed 4 entries
+across the library.
+
+---
+
 ## v2192 — 2026-04-14
 
 ### Rewritten — Swim platform and ladder A/B/C with conductivity chips across all ratings
