@@ -12,6 +12,42 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2181 — 2026-04-14
+
+### Changed — Outdrive now uses the chip picker (retired dropdown builder)
+
+Removed `COMPONENT_BUILDERS['Outdrive(s) - (external), corrosion,
+anodes, propeller(s), boots and bellows']`. This item now uses the
+standard chip picker with curated library entries.
+
+Scope cleanups baked into the rewrite:
+- **Trim tab mentions removed** — trim tabs have their own dedicated
+  item ("Trim tabs (exterior tabs, actuators, mounts and anodes)").
+  The outdrive chips no longer mention trim tab anodes.
+- **Gimbal bearing mentions removed** — belongs in a separate inboard-
+  drive context, not the outdrive external inspection.
+- **0-anode case covered** — new C chip reads "No anodes were fitted
+  on this outdrive." Surveyor can pick this when the vessel has no
+  sacrificial anodes on the drive.
+
+### Rewritten — Outdrive(s) - (external) library (A/B/C)
+
+15 A chips, 19 B chips, 16 C chips — all past tense, 3-phase pattern,
+severity sorted:
+
+- **A**: severe corrosion, impact damage, cracked bellows, active oil
+  leak, significant propeller damage, missing anodes. Sinking-hazard
+  and must-remediate-before-service actions.
+- **B**: moderate corrosion, hardening bellows, minor oil weep, minor
+  prop damage, 50%-depleted anodes, peeling paint, stiff tilt/trim.
+  Service / replace / strip-and-repaint / recondition actions.
+- **C**: no damage / no corrosion / minor surface only, pliable
+  bellows, no leaks, good prop, adequate or recently-replaced anodes,
+  OR no anodes fitted, intact paint, smooth tilt/trim. No action /
+  continue seasonal program / monitor anodes.
+
+---
+
 ## v2180 — 2026-04-14
 
 ### Changed — Primer/barrier/anti-fouling now uses the chip picker (retired dropdown builder)

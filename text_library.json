@@ -843,21 +843,6 @@
       "text": "Despite minor corrosion, the propeller was in satisfactory condition and properly attached with the correct nuts and pin."
     },
     {
-      "section": "Outdrive(s) corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "A",
-      "text": "Corrosion was present on the outdrives. The anodes were degraded well beyond fifty percent and should be replaced before launch."
-    },
-    {
-      "section": "Outdrive(s) corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "B",
-      "text": "Despite minor corrosion, the outdrives, boots, and bellows were serviceable. Both anode sets were at least fifty percent consumed and should be replaced."
-    },
-    {
-      "section": "Outdrive(s) corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "C",
-      "text": "Despite some corrosion, the outdrives, anodes, propellers, boots, and bellows were in acceptable condition."
-    },
-    {
       "section": "Sail drive(s) (external), corrosion, propeller(s), anode(s)",
       "rating": "C",
       "text": "Despite minor corrosion, the sail drive, propeller, and anode were in good working order."
@@ -1194,21 +1179,6 @@
       "text": "The discharge fitting shows corrosion or minor deterioration. Service or replacement should be addressed in the near term."
     },
     {
-      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "A",
-      "text": "The outdrives exhibited severe corrosion throughout. The boots and bellows showed significant deterioration, compromising the seals. Anodes were severely depleted and water ingress is likely. Immediate professional inspection and seal replacement is critical before launch."
-    },
-    {
-      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "B",
-      "text": "Despite moderate corrosion, the outdrives, boots, and bellows remained serviceable. The anodes were noticeably worn and should be replaced before the next launch to prevent further corrosion."
-    },
-    {
-      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "C",
-      "text": "The outdrives, propellers, boots, and bellows were functioning as intended. Anodes showed appropriate wear and remained adequate for continued service."
-    },
-    {
       "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "A",
       "text": "The sail drive exhibited severe corrosion or the seal was compromised. Immediate professional inspection and repair is required before the vessel is launched."
@@ -1222,6 +1192,356 @@
       "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "C",
       "text": "The sail drive, propeller, and anode were found to be in order with minor corrosion not requiring immediate attention."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The outdrive unit was visually inspected."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Severe corrosion was observed on the drive housing."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Impact damage was observed on the drive housing."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The bellows were cracked or deteriorated."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Oil was actively leaking from the lower unit."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The propeller exhibited significant blade damage."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The anodes were severely depleted or missing."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "Cracked bellows are a sinking hazard below the waterline when the drive is lowered."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "A damaged propeller will cause severe vibration that can damage the shaft, bearings, and transmission."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "Without sacrificial anodes, galvanic corrosion will progress rapidly on the drive."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "The bellows must be replaced before the vessel is launched."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "The oil seals must be replaced before the vessel is operated."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "The propeller must be reconditioned or replaced before the vessel is operated."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "New anodes must be installed before the vessel is placed in the water."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "The drive unit requires professional assessment and remediation before the vessel is returned to service."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The outdrive unit was visually inspected."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Minor surface corrosion consistent with normal use was noted on the drive housing."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Moderate corrosion was observed on the drive housing in [describe area(s)]."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The bellows were beginning to harden but remained intact."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "A minor oil weep was visible at the lower seal."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Minor blade damage or edge erosion was noted on the propeller."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The anodes were more than 50% depleted."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The paint on the drive housing was peeling or deteriorated."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The tilt and trim operation of the drive was stiff or slow."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "means",
+      "severity": 2,
+      "text": "The findings are consistent with normal wear for the vessel's age and use."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Bellows failure is a common cause of sinking in sterndrive vessels — hardening bellows should be replaced at the next service."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Clean and treat the affected areas to arrest further corrosion."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Replace the bellows at the next scheduled service."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Service the oil seals at the next haul-out."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Remove and recondition the propeller at a qualified propeller shop."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Replace the depleted anodes before relaunching the vessel."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Strip and repaint the drive housing to protect against corrosion."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Service the tilt and trim hydraulic system."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The outdrive unit was visually inspected."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The drive housing was free of impact damage and corrosion."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The drive housing showed minor surface corrosion consistent with normal use."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The bellows were pliable with no cracking or deterioration."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No oil leaks were observed at the lower unit."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The propeller was in good condition and secure on the shaft."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes had adequate material remaining."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anodes appeared new or recently replaced."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No anodes were fitted on this outdrive."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The paint on the drive housing was intact."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The drive tilted and trimmed smoothly."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The outdrive was in overall sound condition."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The findings were consistent with normal wear for the vessel's age and use."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Continue the regular seasonal inspection program."
+    },
+    {
+      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
+      "rating": "C",
+      "phase": "action",
+      "severity": 2,
+      "text": "Monitor the anode condition at each haul-out."
     },
     {
       "section": "Stern thruster",

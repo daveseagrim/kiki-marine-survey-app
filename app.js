@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2180';
+const APP_VERSION = 'v2181';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -500,124 +500,9 @@ const STANDARDS_BY_CATEGORY = {
 // Each option has: label (shown in dropdown), rating (C/B/A), and fragment (sentence piece).
 // The builder assembles fragments into a coherent finding and picks the worst rating.
 const COMPONENT_BUILDERS = {
-  'Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows': {
-    title: 'Outdrive Condition Builder',
-    intro: 'The outdrive unit was visually inspected.',
-    components: [
-      {
-        name: 'Housing',
-        key: 'housing',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'No damage or corrosion', rating: 'C', fragment: 'The drive housing was free of impact damage and corrosion.' },
-          { label: 'Minor surface corrosion', rating: 'C', fragment: 'The drive housing showed minor surface corrosion consistent with normal use.' },
-          { label: 'Moderate corrosion', rating: 'B', fragment: 'The drive housing showed moderate corrosion that should be addressed.' },
-          { label: 'Impact damage', rating: 'B', fragment: 'The drive housing showed impact damage that should be assessed and repaired.' },
-          { label: 'Severe corrosion or damage', rating: 'A', fragment: 'The drive housing exhibited severe corrosion or impact damage requiring immediate attention.' }
-        ]
-      },
-      {
-        name: 'Bellows',
-        key: 'bellows',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Pliable, no cracking', rating: 'C', fragment: 'The bellows were pliable with no cracking or deterioration.' },
-          { label: 'Beginning to harden', rating: 'B', fragment: 'The bellows were beginning to harden and should be replaced at the next service. Bellows failure is a common cause of sinking in sterndrive vessels.' },
-          { label: 'Cracked or deteriorated', rating: 'A', fragment: 'The bellows were cracked or deteriorated. Per ABYC P-6 and ABYC H-27, drive bellows must be watertight as they are below the waterline when the drive is lowered. Cracked bellows are a sinking hazard and must be replaced before the vessel is launched.' }
-        ]
-      },
-      {
-        name: 'Anode — drive housing',
-        key: 'anodeDriveHousing',
-        quantityPrompt: 'How many?',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Not present on this vessel', rating: null, fragment: '' },
-          { label: 'New or recently replaced', rating: 'C', fragment: 'The drive housing anode appeared new or recently replaced.' },
-          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The drive housing anode had adequate material remaining.' },
-          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: 'The drive housing anode was more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
-          { label: 'Severely depleted or missing', rating: 'A', fragment: 'The drive housing anode was severely depleted or missing. Per ABYC E-2, a new anode must be installed before the vessel is placed in the water.' }
-        ]
-      },
-      {
-        name: 'Anode — cavitation plate',
-        key: 'anodeCavitationPlate',
-        quantityPrompt: 'How many?',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Not present on this vessel', rating: null, fragment: '' },
-          { label: 'New or recently replaced', rating: 'C', fragment: 'The cavitation plate anode appeared new or recently replaced.' },
-          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The cavitation plate anode had adequate material remaining.' },
-          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: 'The cavitation plate anode was more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
-          { label: 'Severely depleted or missing', rating: 'A', fragment: 'The cavitation plate anode was severely depleted or missing. Per ABYC E-2, a new anode must be installed before the vessel is placed in the water.' }
-        ]
-      },
-      {
-        name: 'Anode — trim tab',
-        key: 'anodeTrimTab',
-        quantityPrompt: 'How many?',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Not present on this vessel', rating: null, fragment: '' },
-          { label: 'New or recently replaced', rating: 'C', fragment: 'The trim tab anode appeared new or recently replaced.' },
-          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The trim tab anode had adequate material remaining.' },
-          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: 'The trim tab anode was more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
-          { label: 'Severely depleted or missing', rating: 'A', fragment: 'The trim tab anode was severely depleted or missing. Per ABYC E-2, a new anode must be installed before the vessel is placed in the water.' }
-        ]
-      },
-      {
-        name: 'Propeller',
-        key: 'propeller',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Good condition, secure', rating: 'C', fragment: 'The propeller was in good condition and secure on the shaft.' },
-          { label: 'Minor surface corrosion', rating: 'C', fragment: 'The propeller showed minor surface corrosion consistent with normal use — not a concern at the current level.' },
-          { label: 'Minor blade damage or erosion', rating: 'B', fragment: 'The propeller showed minor blade damage or edge erosion. It should be removed and reconditioned by a propeller shop.' },
-          { label: 'Significant damage', rating: 'A', fragment: 'The propeller exhibited significant blade damage. A damaged propeller will cause severe vibration that can damage the shaft, bearings, and transmission. It must be reconditioned or replaced.' }
-        ]
-      },
-      {
-        name: 'Paint',
-        key: 'paint',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Intact', rating: 'C', fragment: 'The paint on the drive housing was intact.' },
-          { label: 'Peeling or deteriorated', rating: 'B', fragment: 'The paint on the drive housing was peeling or deteriorated and should be stripped and repainted to prevent corrosion.' },
-          { label: 'Bare metal exposed', rating: 'B', fragment: 'The paint on the drive housing had failed with bare metal exposed, accelerating corrosion. The drive should be stripped and repainted.' }
-        ]
-      },
-      {
-        name: 'Oil Seals',
-        key: 'oilSeals',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'No leaks', rating: 'C', fragment: 'No oil leaks were observed.' },
-          { label: 'Minor weep', rating: 'B', fragment: 'A minor oil weep was visible at the lower seal. The seals should be inspected and serviced.' },
-          { label: 'Active leak', rating: 'A', fragment: 'Oil was actively leaking from the lower unit. The seals must be replaced before the vessel is operated.' }
-        ]
-      },
-      {
-        name: 'Tilt / Trim',
-        key: 'tiltTrim',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Smooth operation', rating: 'C', fragment: 'The drive tilted and trimmed smoothly.' },
-          { label: 'Stiff or slow', rating: 'B', fragment: 'The tilt/trim operation was stiff or slow and should be serviced.' },
-          { label: 'Inoperable', rating: 'A', fragment: 'The tilt/trim system was inoperable. The hydraulic system must be inspected and repaired.' }
-        ]
-      },
-      {
-        name: 'Gimbal Bearing',
-        key: 'gimbalBearing',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'No issues', rating: 'C', fragment: '' },
-          { label: 'Stiff or noisy', rating: 'B', fragment: 'The gimbal bearing was stiff or noisy and should be inspected and greased or replaced.' },
-          { label: 'Frozen or seized', rating: 'A', fragment: 'The gimbal bearing was frozen. A seized gimbal bearing must be replaced before the vessel is operated.' }
-        ]
-      }
-    ]
-  },
+  // v2181: Outdrive now uses the standard chip picker with curated
+  // library entries. The old component builder included trim tab and
+  // gimbal bearing sections that belong in other sections — retired.
   // v2180: 'Primer, barrier coat, anti-fouling' now uses the standard
   // chip picker (see curated library entries in text_library.json).
   // The old component builder with dropdowns is retired in favour of
