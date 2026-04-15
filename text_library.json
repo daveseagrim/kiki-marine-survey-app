@@ -9548,6 +9548,13 @@
       "severity": 2,
       "text": "Continue the regular seasonal inspection program.",
       "section": "Engine locker lid"
+    },
+    {
+      "section": "Engine locker lid",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The engine locker lid itself was sound and undamaged."
     }
   ],
   "Gauges and Instrumentation": [

@@ -12,6 +12,40 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2213 — 2026-04-15
+
+### Added — Engine locker lid B rating: positive lid-body chip
+
+The B rating covers two common deficiencies — the seal/gasket is
+deteriorating OR the hydraulic/electric control is not working. In
+either case the lid panel itself may be perfectly fine. Previously the
+only B observation chips described deficiencies, so there was no way to
+affirm "the lid body was good, it's the seal that's the issue" (or the
+control).
+
+New chip at B/observed/sev 1:
+
+> The engine locker lid itself was sound and undamaged.
+
+Appears at the top of the B observed list (ascending severity). Tap it
+alongside the seal-deteriorating or control-not-working chip to compose
+a clean observation that separates the lid body from the failing
+component. Wording avoids "serviceable" per Dave's preference.
+
+Final B observed ordering:
+- sev 1: "The engine locker lid itself was sound and undamaged."
+- sev 2: "Localized wear or cosmetic damage was noted on the engine locker lid."
+- sev 3: "The {specify:hydraulic|electric} engine lid control was not working."
+- sev 3: "The seal or gasket around the engine locker lid was deteriorating."
+
+### Audit
+
+- JSON files parse ✓
+- JavaScript compiles ✓
+- Version strings aligned ✓
+
+---
+
 ## v2212 — 2026-04-15
 
 ### Fixed — ABYC anode recommendation moved from observation chips to action chips
