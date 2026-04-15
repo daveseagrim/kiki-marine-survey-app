@@ -12,6 +12,37 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2175 — 2026-04-14
+
+### Added — Severity-sorted chips within each phase + rating badge in header
+
+Chips within each phase section (Observed / Means / Action) now sort
+by severity ascending — mild findings first, severe last. This
+matches the natural SAMS writing flow where you mention the lightest
+applicable issues before escalating to the most serious.
+
+Library entries can set `severity: 1-5` (1 = mild, 5 = severe). When
+unset, the picker estimates severity from keyword patterns:
+- 5 (severe): "severe", "critical", "structural", "compromise",
+  "delamination", "catastrophic", "replace immediately"
+- 4: "exposed", "gouging", "fairing compound", "epoxy barrier", "haul"
+- 3: "blistering", "cracking", "moisture", "elevated", "sanded to"
+- 2: "worn thin", "cosmetic", "scrape", "ding", "lightly sand"
+- 1 (mild): "serviceable", "no concerns", "no softness", "no signs",
+  "consistent with proper condition", "within normal range"
+
+Applied explicit severity to 47 chips across the three curated sections
+(Hull conductivity A/B/C + Hull condition below-waterline B).
+
+### Changed — Rating letter shown in modal header + picker header
+
+The notes modal title now displays a coloured rating badge (A red,
+B amber, C green, etc.) inline with the item label, so the surveyor
+always sees which rating they're writing for. The "Build observation"
+picker header also shows the same badge.
+
+---
+
 ## v2174 — 2026-04-14
 
 ### Fixed — `{any:opt1|opt2|...}` tokens now decompose into individual chips

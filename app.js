@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2174';
+const APP_VERSION = 'v2175';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3396,10 +3396,27 @@ function showNotesSheet(itemLabel, categoryName) {
           if (/\b(indicates|suggests|consistent|considered|abnormal|warrants|evidences|implies)\b/i.test(sent)) return 'means';
           return 'observed';
         };
-        const _pickerSentences = [];      // { text, always, phase }
+        // v2175: rough severity heuristic for non-curated chips so
+        // less-severe findings sort to the top within each phase.
+        // Lower number = less severe. 1-2 = mild, 3 = default, 4-5 = severe.
+        const _estimateSeverity = (sent) => {
+          const s = sent.toLowerCase();
+          // Severe language
+          if (/\b(severe|critical|immediate|significant|structural|compromise|delamination|catastrophic|unsafe|replace immediately|condemn)\b/.test(s)) return 5;
+          if (/\b(exposed|gouging|fairing compound|epoxy barrier|rebuild|haul|major)\b/.test(s)) return 4;
+          // Moderate
+          if (/\b(blistering|cracking|sanded to (the )?(barrier coat|gelcoat)|moisture|elevated)\b/.test(s)) return 3;
+          // Light
+          if (/\b(worn thin|cosmetic|scrape|ding|scoring|lightly sand|touched up|routine)\b/.test(s)) return 2;
+          // No-concerns / baseline
+          if (/\b(serviceable|no (?:action|concerns|softness|visible)|consistent with proper condition|within (?:normal|the normal) range|no elevated|no signs)\b/.test(s)) return 1;
+          return 3;
+        };
+        const _pickerSentences = [];      // { text, always, phase, severity }
         const _pickerSeen = new Map();    // normKey -> index
         sheetVariantsForDisplay.forEach(v => {
-          const vPhase = v.phase; // optional, set per-variant in library
+          const vPhase = v.phase;
+          const vSeverity = typeof v.severity === 'number' ? v.severity : null;
           _splitSentences(v.text).forEach(sent => {
             const normKey = sent.replace(/\s+/g, ' ').toLowerCase();
             if (!_pickerSeen.has(normKey)) {
@@ -3408,14 +3425,18 @@ function showNotesSheet(itemLabel, categoryName) {
                 text: sent,
                 always: !!v.always,
                 phase: vPhase || _classifyPhase(sent),
+                severity: vSeverity != null ? vSeverity : _estimateSeverity(sent),
               });
             } else if (v.always) {
               _pickerSentences[_pickerSeen.get(normKey)].always = true;
             }
           });
         });
-        // Sort: phase order (observed → means → action), then always first
-        // within each phase, then original order.
+        // v2175: Sort:
+        //   1. Phase order (observed → means → action)
+        //   2. `always` pinned first within its phase (boilerplate)
+        //   3. Severity ASCENDING (less severe first, more severe last)
+        //   4. Original insertion order to break ties
         const _phaseRank = { observed: 0, means: 1, action: 2 };
         _pickerSentences.forEach((p, i) => { p._origIdx = i; });
         _pickerSentences.sort((a, b) => {
@@ -3423,6 +3444,8 @@ function showNotesSheet(itemLabel, categoryName) {
           if (pr) return pr;
           const ar = (b.always ? 1 : 0) - (a.always ? 1 : 0);
           if (ar) return ar;
+          const sr = (a.severity || 3) - (b.severity || 3);
+          if (sr) return sr;
           return a._origIdx - b._origIdx;
         });
         window._sentencePicker = window._sentencePicker || {};
@@ -3435,9 +3458,12 @@ function showNotesSheet(itemLabel, categoryName) {
             means: 'What it means for this vessel',
             action: 'What should be done',
           };
+          const _ratingBadge = itemData.rating
+            ? `<span style="display:inline-block;background:${RATING_COLORS[itemData.rating] || '#6b7280'};color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:5px;margin-right:8px;">${itemData.rating.charAt(0)}</span>`
+            : '';
           sentencePickerHtml = `
             <div class="sheet-section-title" style="padding-top:8px;">
-              Build observation
+              ${_ratingBadge}Build observation
               <span style="color:#9ca3af;font-weight:400;font-size:11px;margin-left:6px;">tick sentences to compose</span>
             </div>
             <div id="sheet-sentence-picker" style="padding:0;">
@@ -3760,7 +3786,7 @@ function showNotesSheet(itemLabel, categoryName) {
     overlay.innerHTML = `
       <div class="bottom-sheet" onclick="event.stopPropagation();">
         <div class="bottom-sheet-handle"></div>
-        <div class="bottom-sheet-title">${displayItemLabel(itemLabel, survey)} — Notes <span style="font-size:10px;color:#9ca3af;font-weight:400;">${APP_VERSION}</span></div>
+        <div class="bottom-sheet-title">${itemData.rating ? `<span style="display:inline-block;background:${RATING_COLORS[itemData.rating] || '#6b7280'};color:#fff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:6px;margin-right:8px;vertical-align:middle;">${itemData.rating.charAt(0)}</span>` : ''}${displayItemLabel(itemLabel, survey)} — Notes <span style="font-size:10px;color:#9ca3af;font-weight:400;">${APP_VERSION}</span></div>
         ${mastOptionsHtml}
         ${outdriveOptionsHtml}
         ${winchOptionsHtml}

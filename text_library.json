@@ -15,109 +15,127 @@
       "rating": "B",
       "phase": "observed",
       "always": true,
-      "text": "Below the waterline, the hull was serviceable overall."
+      "text": "Below the waterline, the hull was serviceable overall.",
+      "severity": 1
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "observed",
-      "text": "The anti-fouling has worn thin in [describe area(s)]."
+      "text": "The anti-fouling has worn thin in [describe area(s)].",
+      "severity": 1
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "observed",
-      "text": "The anti-fouling is worn off in [describe area(s)], exposing the gelcoat."
+      "text": "The anti-fouling is worn off in [describe area(s)], exposing the gelcoat.",
+      "severity": 2
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "observed",
-      "text": "Surface cracking was observed in [describe area(s)]."
+      "text": "Surface cracking was observed in [describe area(s)].",
+      "severity": 2
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "observed",
-      "text": "Blistering was noted in [describe area(s)]."
+      "text": "Blistering was noted in [describe area(s)].",
+      "severity": 3
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "observed",
-      "text": "Gouging was noted in [describe area(s)]."
+      "text": "Gouging was noted in [describe area(s)].",
+      "severity": 4
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "observed",
-      "text": "Scrapes and dings were noted in [describe area(s)]."
+      "text": "Scrapes and dings were noted in [describe area(s)].",
+      "severity": 2
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "observed",
-      "text": "Cosmetic scoring was noted in [describe area(s)]."
+      "text": "Cosmetic scoring was noted in [describe area(s)].",
+      "severity": 1
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "observed",
-      "text": "Exposed fibreglass was noted in [describe area(s)]."
+      "text": "Exposed fibreglass was noted in [describe area(s)].",
+      "severity": 4
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "means",
-      "text": "The damage is cosmetic and not structurally concerning."
+      "text": "The damage is cosmetic and not structurally concerning.",
+      "severity": 1
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "means",
-      "text": "The findings are localized and limited in extent."
+      "text": "The findings are localized and limited in extent.",
+      "severity": 2
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "means",
-      "text": "These findings are consistent with typical wear for the vessel's age and use."
+      "text": "These findings are consistent with typical wear for the vessel's age and use.",
+      "severity": 1
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "action",
-      "text": "The affected areas should be lightly sanded and recoated with anti-fouling before the vessel is relaunched."
+      "text": "The affected areas should be lightly sanded and recoated with anti-fouling before the vessel is relaunched.",
+      "severity": 1
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "action",
-      "text": "The affected areas should be sanded to the gelcoat and recoated with anti-fouling before the vessel is relaunched."
+      "text": "The affected areas should be sanded to the gelcoat and recoated with anti-fouling before the vessel is relaunched.",
+      "severity": 2
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "action",
-      "text": "The affected areas should be sanded to the barrier coat and recoated with gelcoat and anti-fouling before the vessel is relaunched."
+      "text": "The affected areas should be sanded to the barrier coat and recoated with gelcoat and anti-fouling before the vessel is relaunched.",
+      "severity": 3
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "action",
-      "text": "The affected areas should be filled with fairing compound, faired, and recoated with epoxy barrier coat, gelcoat, and anti-fouling before the vessel is relaunched."
+      "text": "The affected areas should be filled with fairing compound, faired, and recoated with epoxy barrier coat, gelcoat, and anti-fouling before the vessel is relaunched.",
+      "severity": 4
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "action",
-      "text": "The affected areas should be touched up with gelcoat and anti-fouling before the vessel is relaunched."
+      "text": "The affected areas should be touched up with gelcoat and anti-fouling before the vessel is relaunched.",
+      "severity": 2
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "action",
-      "text": "The affected areas should be recoated with epoxy barrier coat, gelcoat, and anti-fouling before the vessel is relaunched."
+      "text": "The affected areas should be recoated with epoxy barrier coat, gelcoat, and anti-fouling before the vessel is relaunched.",
+      "severity": 4
     },
     {
       "section": "Hull(s) condition (below the waterline)",
@@ -211,177 +229,206 @@
       "rating": "A",
       "phase": "observed",
       "always": true,
-      "text": "Conductivity readings were taken on a relative 0 to 999 scale."
+      "text": "Conductivity readings were taken on a relative 0 to 999 scale.",
+      "severity": 1
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "observed",
-      "text": "The hull returned readings consistently at or near 999 across large areas."
+      "text": "The hull returned readings consistently at or near 999 across large areas.",
+      "severity": 5
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "observed",
-      "text": "Multiple areas of the hull showed readings in the upper end of the scale, consistent with significant moisture saturation."
+      "text": "Multiple areas of the hull showed readings in the upper end of the scale, consistent with significant moisture saturation.",
+      "severity": 4
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "observed",
-      "text": "Softness and/or visible delamination was detected in the elevated areas."
+      "text": "Softness and/or visible delamination was detected in the elevated areas.",
+      "severity": 5
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "means",
-      "text": "This indicates severe and widespread elevated conductivity."
+      "text": "This indicates severe and widespread elevated conductivity.",
+      "severity": 5
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "means",
-      "text": "The extent of the readings is consistent with structural compromise."
+      "text": "The extent of the readings is consistent with structural compromise.",
+      "severity": 5
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "means",
-      "text": "These findings are consistent with significant moisture ingress and possible delamination."
+      "text": "These findings are consistent with significant moisture ingress and possible delamination.",
+      "severity": 5
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "action",
-      "text": "Immediate professional assessment and remediation is critical prior to returning the vessel to service."
+      "text": "Immediate professional assessment and remediation is critical prior to returning the vessel to service.",
+      "severity": 5
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "action",
-      "text": "Investigation and remediation is required to assess and address the extent of the osmotic damage or delamination."
+      "text": "Investigation and remediation is required to assess and address the extent of the osmotic damage or delamination.",
+      "severity": 4
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "action",
-      "text": "Haul the vessel for exploratory work to confirm the extent of the damage."
+      "text": "Haul the vessel for exploratory work to confirm the extent of the damage.",
+      "severity": 4
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "observed",
       "always": true,
-      "text": "Conductivity readings were taken on a relative 0 to 999 scale."
+      "text": "Conductivity readings were taken on a relative 0 to 999 scale.",
+      "severity": 1
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "observed",
-      "text": "The hull returned elevated readings of [insert reading range]."
+      "text": "The hull returned elevated readings of [insert reading range].",
+      "severity": 3
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "observed",
-      "text": "Localized elevated readings were observed in several areas of the hull."
+      "text": "Localized elevated readings were observed in several areas of the hull.",
+      "severity": 2
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "observed",
-      "text": "Readings above the surrounding baseline were recorded in discrete areas."
+      "text": "Readings above the surrounding baseline were recorded in discrete areas.",
+      "severity": 2
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "means",
-      "text": "These readings warrant monitoring to rule out osmotic blistering or moisture ingress."
+      "text": "These readings warrant monitoring to rule out osmotic blistering or moisture ingress.",
+      "severity": 3
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "means",
-      "text": "These findings suggest early-stage moisture absorption that should be addressed proactively."
+      "text": "These findings suggest early-stage moisture absorption that should be addressed proactively.",
+      "severity": 3
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "means",
-      "text": "No softness or delamination was observed at the time of survey."
+      "text": "No softness or delamination was observed at the time of survey.",
+      "severity": 1
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "action",
-      "text": "Monitor the photographed areas between seasons."
+      "text": "Monitor the photographed areas between seasons.",
+      "severity": 2
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "action",
-      "text": "Monitor the photographed areas between seasons for signs of osmosis or delamination."
+      "text": "Monitor the photographed areas between seasons for signs of osmosis or delamination.",
+      "severity": 3
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "action",
-      "text": "Recommend off-season venting or drainage to mitigate any spread of elevated conductivity."
+      "text": "Recommend off-season venting or drainage to mitigate any spread of elevated conductivity.",
+      "severity": 3
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "action",
-      "text": "Recheck readings at next haul-out to confirm the condition has not progressed."
+      "text": "Recheck readings at next haul-out to confirm the condition has not progressed.",
+      "severity": 2
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
       "phase": "observed",
       "always": true,
-      "text": "Conductivity readings were taken on a relative 0 to 999 scale."
+      "text": "Conductivity readings were taken on a relative 0 to 999 scale.",
+      "severity": 1
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
       "phase": "observed",
-      "text": "The hull returned readings consistent with proper condition, with no elevated conductivity detected."
+      "text": "The hull returned readings consistent with proper condition, with no elevated conductivity detected.",
+      "severity": 1
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
       "phase": "observed",
-      "text": "The hull returned elevated readings of [insert reading range], consistent with vessels of similar age and construction."
+      "text": "The hull returned elevated readings of [insert reading range], consistent with vessels of similar age and construction.",
+      "severity": 2
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
       "phase": "means",
-      "text": "These readings are not considered abnormal for the vessel's age."
+      "text": "These readings are not considered abnormal for the vessel's age.",
+      "severity": 1
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
       "phase": "means",
-      "text": "The readings fall within the normal range for a fibreglass hull of this vintage."
+      "text": "The readings fall within the normal range for a fibreglass hull of this vintage.",
+      "severity": 1
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
       "phase": "action",
-      "text": "No action required at this time."
+      "text": "No action required at this time.",
+      "severity": 1
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
       "phase": "action",
-      "text": "Monitor the photographed areas between seasons as a matter of routine."
+      "text": "Monitor the photographed areas between seasons as a matter of routine.",
+      "severity": 1
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
       "phase": "action",
-      "text": "Recheck seasonally to confirm stability."
+      "text": "Recheck seasonally to confirm stability.",
+      "severity": 2
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
