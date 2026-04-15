@@ -72,6 +72,42 @@ than 50% depleted." Port and starboard still read "The port anodes
 
 ---
 
+## v2194 — 2026-04-14
+
+### Changed — Conductivity range input now reads "low to high" + yellow pill styling
+
+The `[insert reading range]` placeholder previously rendered as two
+number inputs separated by a bare en-dash — when unfilled, output
+looked like "readings of – were noted". Clarified:
+
+- The two inputs now have an explicit "to" label between them (not
+  "–"), each with a tooltip reading "low reading (0–999 scale)" /
+  "high reading (0–999 scale)".
+- Inputs rendered on a soft yellow pill background so the slot is
+  visually distinct from surrounding text.
+- Placeholder when unfilled reads "[low to high]" so the surveyor
+  sees at a glance what the field expects.
+- Output text now reads "readings of 50 to 125" (using "to", not
+  en-dash) for better prose flow in the completed note.
+
+### Added — Missing `[insert reading range]` injected into 11 conductivity chips
+
+Audited every library entry containing "elevated" + "conductivity";
+11 chips described elevated readings without any range input.
+Injected `[insert reading range]` into each so the surveyor can
+specify low-to-high readings every time elevated conductivity is
+mentioned:
+
+- "… elevated in [describe area(s)] with readings of [low to high]."
+- "Areas of elevated conductivity were present with readings of …"
+- "Spider cracks or minor signs of elevated conductivity with readings
+  of … were visible"
+- "minor cracking or elevated conductivity with readings of … was
+  detected"
+- …plus 7 more similar patterns across hull/deck/coaming/locker/etc.
+
+---
+
 ## v2193 — 2026-04-14
 
 ### Changed — "Other" catch-all items get rating + free notes only (no picker)

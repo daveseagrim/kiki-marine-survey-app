@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2193';
+const APP_VERSION = 'v2194';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3036,16 +3036,16 @@ function showNotesSheet(itemLabel, categoryName) {
             //   [insert location]       → text input
             //   [insert area(s)]        → text input (for damage descriptions)
             let rendered = escSnippet(s).replace(/\[insert reading range\]/gi,
-              `<span class="kk-range-slot" style="display:inline-flex;align-items:center;gap:4px;">` +
-                `<input type="number" class="kk-range-low" placeholder="low" min="0" max="999" ` +
+              `<span class="kk-range-slot" style="display:inline-flex;align-items:center;gap:3px;background:#fef9c3;padding:1px 4px;border-radius:4px;">` +
+                `<input type="number" class="kk-range-low" placeholder="low" min="0" max="999" title="low reading (0–999 scale)" ` +
                   `oninput="_kkRebuildFromSentencePicker('${sanitizedLabel}')" ` +
                   `onclick="event.preventDefault();event.stopPropagation();" ` +
-                  `style="width:52px;padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">` +
-                `<span style="color:#6b7280;">–</span>` +
-                `<input type="number" class="kk-range-high" placeholder="high" min="0" max="999" ` +
+                  `style="width:56px;padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">` +
+                `<span style="color:#6b7280;font-size:11px;">to</span>` +
+                `<input type="number" class="kk-range-high" placeholder="high" min="0" max="999" title="high reading (0–999 scale)" ` +
                   `oninput="_kkRebuildFromSentencePicker('${sanitizedLabel}')" ` +
                   `onclick="event.preventDefault();event.stopPropagation();" ` +
-                  `style="width:52px;padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">` +
+                  `style="width:56px;padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">` +
               `</span>`)
             .replace(/\[insert count\]/gi,
               `<input type="number" class="kk-count-input" placeholder="#" min="0" max="99" ` +
@@ -3482,8 +3482,8 @@ window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
     const low = (lbl.querySelector('.kk-range-low') || {}).value || '';
     const high = (lbl.querySelector('.kk-range-high') || {}).value || '';
     if (/\[insert reading range\]/i.test(text)) {
-      let replacement = '[insert reading range]';
-      if (low && high) replacement = `${low}\u2013${high}`;
+      let replacement = '[low to high]';
+      if (low && high) replacement = `${low} to ${high}`;
       else if (low) replacement = `${low}`;
       else if (high) replacement = `${high}`;
       text = text.replace(/\[insert reading range\]/gi, replacement);
