@@ -12,6 +12,91 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2190 — 2026-04-14
+
+### Changed — ALL component builders retired; every item uses the chip picker
+
+The remaining `COMPONENT_BUILDERS` entries (bow thruster, stern
+thruster, sail drive, IPS pod drive, engine general condition,
+generator, bowsprit/deck impact-and-resonance) were still rendering
+the old dropdown-driven UI on Ahoy Vey. `COMPONENT_BUILDERS` is now
+an empty object — every item in the survey falls through to the
+chip picker using the library entries (which v2186 already tagged
+with `phase` + `severity` metadata).
+
+Net ~445-line reduction in app.js. Consistent UX across the entire
+survey. Items without explicit curated chips use the auto-classifier
+output from v2186's batch pass.
+
+### Added — Strip "limited trial run" text when header setting isn't Yes
+
+`applyWritingFixups` now reads `survey.seaTrial` and, when it isn't
+"Yes", drops trial-run-referring sentences from already-saved notes
+on load + save. 16 library entries mention trial run; they get
+scrubbed for any survey where the intro page's Limited Trial Run
+dropdown is blank or "No".
+
+Applies to both the textarea initial value and the save path, so
+existing text containing "…tested under load during the limited trial
+run" becomes "…tested under load" automatically.
+
+### Changed — Cards show FULL saved notes (no 80-char truncation)
+
+Notes preview on the item card is no longer cut off. Font bumped to
+13px, `white-space: pre-wrap` preserves paragraph breaks, content
+HTML-escaped for safety. Tap the card still opens the notes sheet
+for editing.
+
+### Added — Neutral "No trim tab anodes fitted" chip for all A/B/C
+
+Some boats ship without trim-tab anodes by design — it's a
+manufacturer choice, not a deficiency. Added the same observed-phase
+chip to all three trim tab ratings:
+  "No anodes were fitted on the trim tabs — this varies by manufacturer
+   and is not a deficiency."
+
+### Fixed — Component-builder bypass for N/A and Not-tested ratings
+
+Even when a builder existed, rating = Not applicable or Not tested
+now skips the builder and shows the N/A chip ("No bow thruster was
+fitted on this vessel.") or the NT chips. The dropdown builder only
+renders for actual A/B/C ratings on the items that still have
+builders — and after this release, that's zero items.
+
+### Fixed — "The both anodes" grammar (side=both)
+
+`[side]` → "both" now strips the preceding article, so "The [side]
+anodes were more than 50% depleted." becomes "Both anodes were more
+than 50% depleted." Port and starboard still read "The port anodes
+…" / "The starboard anodes …" as before.
+
+---
+
+## v2189 — 2026-04-14
+
+### Changed — Survey cards now display the FULL completed note (no truncation)
+
+The item cards on the survey page were cutting notes off at 80
+characters with "…". Surveyor wants to read the completed notes in
+full from the card view without tapping in. Removed the truncation,
+increased font to 13px, set `white-space: pre-wrap` to preserve
+paragraph breaks, and HTML-escaped the content so punctuation in
+notes can't break card markup.
+
+### Added — Neutral "no trim tab anodes fitted" chip for A/B/C
+
+Some boats have trim tab anodes, others don't — it's a manufacturer
+choice, not a deficiency. Added the same observed-phase chip to all
+three ratings for "Trim tabs (exterior tabs, actuators, mounts and
+anodes)":
+  "No anodes were fitted on the trim tabs — this varies by
+   manufacturer and is not a deficiency."
+
+Surveyor can tick this on any rating (including C Serviceable) when
+documenting the trim tab inspection without implying a finding.
+
+---
+
 ## v2188 — 2026-04-14
 
 ### Fixed — "The both anodes" → "Both anodes" (grammar for side=both)

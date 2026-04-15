@@ -2907,6 +2907,27 @@
       "phase": "action",
       "severity": 2,
       "text": "Continue the regular seasonal inspection program."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No anodes were fitted on the trim tabs — this varies by manufacturer and is not a deficiency."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No anodes were fitted on the trim tabs — this varies by manufacturer and is not a deficiency."
+    },
+    {
+      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No anodes were fitted on the trim tabs — this varies by manufacturer and is not a deficiency."
     }
   ],
   "Spars and rigging": [

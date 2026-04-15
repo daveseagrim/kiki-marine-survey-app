@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2188';
+const APP_VERSION = 'v2190';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -499,453 +499,8 @@ const STANDARDS_BY_CATEGORY = {
 // For multi-component items, defines sub-parts and their condition options.
 // Each option has: label (shown in dropdown), rating (C/B/A), and fragment (sentence piece).
 // The builder assembles fragments into a coherent finding and picks the worst rating.
-const COMPONENT_BUILDERS = {
-  // v2181: Outdrive now uses the standard chip picker with curated
-  // library entries. The old component builder included trim tab and
-  // gimbal bearing sections that belong in other sections — retired.
-  // v2180: 'Primer, barrier coat, anti-fouling' now uses the standard
-  // chip picker (see curated library entries in text_library.json).
-  // The old component builder with dropdowns is retired in favour of
-  // the consistent observed/means/action phased chips.
-  'Sail drive(s) - (external), corrosion, propeller(s), anode(s)': {
-    title: 'Sail Drive Condition Builder',
-    intro: 'The sail drive unit was visually inspected.',
-    components: [
-      {
-        name: 'Housing',
-        key: 'housing',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Intact, no damage', rating: 'C', fragment: 'The housing was intact with no cracking, corrosion, or impact damage.' },
-          { label: 'Minor surface corrosion', rating: 'B', fragment: 'The housing showed minor surface corrosion that should be monitored.' },
-          { label: 'Significant corrosion or cracking', rating: 'A', fragment: 'The housing exhibited significant corrosion or cracking.' }
-        ]
-      },
-      {
-        name: 'Paint',
-        key: 'paint',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Intact', rating: 'C', fragment: 'The paint on the drive housing was intact with no peeling or deterioration.' },
-          { label: 'Peeling or deteriorated', rating: 'B', fragment: 'The paint on the drive housing was peeling or deteriorated and should be stripped and repainted.' }
-        ]
-      },
-      {
-        name: 'Hull Seal',
-        key: 'hullSeal',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Secure, no leakage', rating: 'C', fragment: 'The seal at the hull penetration was secure with no leakage.' },
-          { label: 'Minor weeping', rating: 'B', fragment: 'Minor weeping was observed at the hull seal. The seal should be monitored. Sail drive seals typically require replacement every 5–7 years per manufacturer guidelines.' },
-          { label: 'Leaking or failed', rating: 'A', fragment: 'The hull seal was leaking or had failed. A sail drive hull penetration that leaks is a direct flooding hazard. The drive must be removed and the seal replaced before the vessel is launched.' }
-        ]
-      },
-      {
-        name: 'Anode',
-        key: 'anode',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'New or recently replaced', rating: 'C', fragment: 'The drive anode appeared new or recently replaced.' },
-          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The drive anode had adequate material remaining.' },
-          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: 'The drive anode was more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
-          { label: 'Missing', rating: 'A', fragment: 'The drive anode was missing. Per ABYC E-2, sacrificial anodes must be maintained.' }
-        ]
-      },
-      {
-        name: 'Propeller',
-        key: 'propeller',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Good condition, secure', rating: 'C', fragment: 'The propeller was secure and in good condition.' },
-          { label: 'Minor corrosion', rating: 'C', fragment: 'The propeller showed minor surface corrosion consistent with normal use.' },
-          { label: 'Blade damage', rating: 'B', fragment: 'The propeller showed blade damage and should be reconditioned.' },
-          { label: 'Significant damage', rating: 'A', fragment: 'The propeller exhibited significant damage and must be reconditioned or replaced.' }
-        ]
-      }
-    ]
-  },
-  'Bow thruster': {
-    title: 'Bow Thruster Condition Builder',
-    intro: 'The bow thruster was inspected.',
-    components: [
-      {
-        name: 'Operation',
-        key: 'operation',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Tested — smooth, both directions', rating: 'C', fragment: 'The unit operated smoothly in both port and starboard directions with adequate thrust.' },
-          { label: 'Tested — reduced thrust or noisy', rating: 'B', fragment: 'The unit operated but with reduced thrust or was noisy during operation. It should be serviced and tested under load during the limited trial run.' },
-          { label: 'On land — motor runs both directions', rating: 'NT', fragment: 'The motor was powered up and operated in both directions. As the vessel was on land, thrust output could not be verified. The thruster should be tested under load during the limited trial run.' },
-          { label: 'Did not operate', rating: 'A', fragment: 'The unit did not operate. Depending on the vessel\'s docking requirements, a non-functional bow thruster may constitute a safety concern in confined marina situations. The unit must be repaired or replaced.' },
-          { label: 'Not tested', rating: 'NT', fragment: 'The bow thruster was not tested as the controls were not accessible or the unit was winterized. It should be tested under load during the limited trial run.' }
-        ]
-      },
-      {
-        name: 'Tunnel & Propeller',
-        key: 'tunnel',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Clean, undamaged', rating: 'C', fragment: 'The thruster tunnel was clean and the propeller was intact with no damage.' },
-          { label: 'Fouling or corrosion', rating: 'B', fragment: 'The thruster tunnel showed fouling or corrosion at the opening that should be cleaned.' },
-          { label: 'Cracked tunnel or seized prop', rating: 'A', fragment: 'The thruster tunnel was cracked or the propeller was seized. The unit must be repaired.' }
-        ]
-      },
-      {
-        name: 'Anode',
-        key: 'anode',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Serviceable', rating: 'C', fragment: 'The anode was in serviceable condition.' },
-          { label: 'Depleted', rating: 'B', fragment: 'The thruster anode was depleted and should be replaced.' },
-          { label: 'Missing', rating: 'A', fragment: 'The thruster anode was missing. A new anode must be installed.' }
-        ]
-      },
-      {
-        name: 'Gear Oil',
-        key: 'gearOil',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'OK or N/A', rating: 'C', fragment: '' },
-          { label: 'Discoloured — needs changing', rating: 'B', fragment: 'The gear oil appeared discoloured and should be changed.' }
-        ]
-      }
-    ]
-  },
-  'Stern thruster': {
-    title: 'Stern Thruster Condition Builder',
-    intro: 'The stern thruster was inspected.',
-    components: [
-      {
-        name: 'Operation',
-        key: 'operation',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Tested — smooth, both directions', rating: 'C', fragment: 'The unit operated smoothly in both port and starboard directions.' },
-          { label: 'Tested — reduced thrust or noisy', rating: 'B', fragment: 'The unit operated but with reduced thrust or was noisy. It should be serviced.' },
-          { label: 'On land — motor runs both directions', rating: 'NT', fragment: 'The motor was powered up and operated in both directions. As the vessel was on land, thrust output could not be verified. The thruster should be tested under load during the limited trial run.' },
-          { label: 'Did not operate', rating: 'A', fragment: 'The unit did not operate and must be repaired or replaced.' },
-          { label: 'Not tested', rating: 'NT', fragment: 'The stern thruster was not tested. It should be tested under load during the limited trial run.' }
-        ]
-      },
-      {
-        name: 'Tunnel & Propeller',
-        key: 'tunnel',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Good condition', rating: 'C', fragment: 'The tunnel and propeller were in good condition.' },
-          { label: 'Fouling or corrosion', rating: 'B', fragment: 'The tunnel showed fouling or corrosion that should be cleaned.' },
-          { label: 'Cracked or seized', rating: 'A', fragment: 'The tunnel was cracked or the propeller was seized. Repairs are required.' }
-        ]
-      },
-      {
-        name: 'Anode',
-        key: 'anode',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Serviceable', rating: 'C', fragment: 'The anode was serviceable.' },
-          { label: 'Depleted', rating: 'B', fragment: 'The anode was depleted and should be replaced.' },
-          { label: 'Missing', rating: 'A', fragment: 'The anode was missing and must be replaced.' }
-        ]
-      }
-    ]
-  },
-  'IPS pod drive(s)': {
-    title: 'IPS Pod Drive Condition Builder',
-    intro: 'The IPS pod drive unit was visually inspected.',
-    components: [
-      {
-        name: 'Pod Housing / Leg',
-        key: 'housing',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'No damage or corrosion', rating: 'C', fragment: 'The pod housing was free of impact damage and corrosion.' },
-          { label: 'Minor surface corrosion', rating: 'C', fragment: 'The pod housing showed minor surface corrosion consistent with normal use.' },
-          { label: 'Moderate corrosion', rating: 'B', fragment: 'The pod housing showed moderate corrosion that should be addressed at the next service.' },
-          { label: 'Impact damage', rating: 'B', fragment: 'The pod housing showed impact damage that should be assessed and repaired by an authorised Volvo Penta dealer.' },
-          { label: 'Severe corrosion or damage', rating: 'A', fragment: 'The pod housing exhibited severe corrosion or impact damage requiring immediate attention from an authorised dealer.' }
-        ]
-      },
-      {
-        name: 'Propellers (counter-rotating pair)',
-        key: 'propellers',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Good condition, secure', rating: 'C', fragment: 'The counter-rotating propellers were in good condition and secure.' },
-          { label: 'Minor edge erosion', rating: 'B', fragment: 'The propellers showed minor edge erosion. They should be removed and reconditioned by a propeller shop.' },
-          { label: 'Significant damage', rating: 'A', fragment: 'The propellers exhibited significant blade damage. Damaged propellers will cause vibration that can damage the drive and transmission. They must be reconditioned or replaced.' }
-        ]
-      },
-      {
-        name: 'Anode — pod housing',
-        key: 'anodePodHousing',
-        quantityPrompt: 'How many?',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Not present on this vessel', rating: null, fragment: '' },
-          { label: 'New or recently replaced', rating: 'C', fragment: 'The pod housing anode appeared new or recently replaced.' },
-          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The pod housing anode had adequate material remaining.' },
-          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: 'The pod housing anode was more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
-          { label: 'Severely depleted or missing', rating: 'A', fragment: 'The pod housing anode was severely depleted or missing. Per ABYC E-2, a new anode must be installed before the vessel is placed in the water.' }
-        ]
-      },
-      {
-        name: 'Anode — cavitation plate',
-        key: 'anodeCavitationPlate',
-        quantityPrompt: 'How many?',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Not present on this vessel', rating: null, fragment: '' },
-          { label: 'New or recently replaced', rating: 'C', fragment: 'The cavitation plate anode appeared new or recently replaced.' },
-          { label: 'Adequate (>50% remaining)', rating: 'C', fragment: 'The cavitation plate anode had adequate material remaining.' },
-          { label: 'Depleted (<50% remaining)', rating: 'B', fragment: 'The cavitation plate anode was more than 50% depleted. Per ABYC E-2, sacrificial anodes should be replaced when approximately 50% consumed.' },
-          { label: 'Severely depleted or missing', rating: 'A', fragment: 'The cavitation plate anode was severely depleted or missing. Per ABYC E-2, a new anode must be installed before the vessel is placed in the water.' }
-        ]
-      },
-      {
-        name: 'Hull Seal / Penetration',
-        key: 'hullSeal',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Secure, no leakage', rating: 'C', fragment: 'The seal at the hull penetration was secure with no leakage.' },
-          { label: 'Minor weeping', rating: 'B', fragment: 'Minor weeping was observed at the hull seal. The seal should be inspected and monitored.' },
-          { label: 'Leaking or failed', rating: 'A', fragment: 'The hull seal was leaking or had failed. An IPS hull penetration that leaks is a direct flooding hazard. The drive must be serviced and the seal replaced by an authorised dealer before the vessel is launched.' }
-        ]
-      },
-      {
-        name: 'Steering Actuators',
-        key: 'steering',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Smooth operation', rating: 'C', fragment: 'The pod steering actuators operated smoothly through full range.' },
-          { label: 'Stiff or binding', rating: 'B', fragment: 'The steering actuators were stiff or binding. They should be serviced by an authorised dealer.' },
-          { label: 'Inoperable', rating: 'A', fragment: 'The steering actuators were inoperable. IPS steering is integral to the drive system and must be repaired before the vessel is operated.' }
-        ]
-      },
-      {
-        name: 'Paint / Anti-fouling',
-        key: 'paint',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Intact', rating: 'C', fragment: 'The paint on the pod was intact.' },
-          { label: 'Peeling or deteriorated', rating: 'B', fragment: 'The paint on the pod was peeling or deteriorated and should be stripped and repainted per manufacturer specifications.' },
-          { label: 'Bare metal exposed', rating: 'B', fragment: 'The paint on the pod had failed with bare metal exposed, accelerating corrosion. The pod should be stripped and repainted per Volvo Penta specifications.' }
-        ]
-      }
-    ]
-  },
-  'Engine, general condition/impression': {
-    title: 'Engine Condition Builder',
-    intro: 'The engine and engine space were visually inspected.',
-    components: [
-      {
-        name: 'Overall Appearance',
-        key: 'appearance',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Clean and well-maintained', rating: 'C', fragment: 'The engine appeared clean and well-maintained with no signs of neglect.' },
-          { label: 'Normal wear for age', rating: 'C', fragment: 'The engine showed normal wear consistent with age and use.' },
-          { label: 'Dirty but serviceable', rating: 'B', fragment: 'The engine was dirty with accumulated grime, indicating deferred maintenance. A thorough cleaning and service is recommended.' },
-          { label: 'Poorly maintained', rating: 'A', fragment: 'The engine showed signs of poor maintenance and neglect. A comprehensive service by a qualified marine mechanic is required.' }
-        ]
-      },
-      {
-        name: 'Fluid Leaks',
-        key: 'leaks',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'None observed', rating: 'C', fragment: 'No fluid leaks were observed.' },
-          { label: 'Minor oil weep', rating: 'B', fragment: 'A minor oil weep was observed. This should be monitored and the source identified during the next service.' },
-          { label: 'Active oil leak', rating: 'A', fragment: 'An active oil leak was observed. The source must be identified and repaired to prevent loss of lubricant and potential fire hazard per ABYC P-1.' },
-          { label: 'Coolant leak', rating: 'A', fragment: 'A coolant leak was observed. The source must be identified and repaired to prevent overheating and potential engine damage.' },
-          { label: 'Multiple leaks', rating: 'A', fragment: 'Multiple fluid leaks (oil and/or coolant) were observed. A full service and repair of all leak sources is required.' }
-        ]
-      },
-      {
-        name: 'Corrosion',
-        key: 'corrosion',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Minimal or none', rating: 'C', fragment: '' },
-          { label: 'Surface rust on fittings', rating: 'B', fragment: 'Surface rust was noted on some fittings and fasteners. These should be treated or replaced during the next service.' },
-          { label: 'Significant corrosion', rating: 'A', fragment: 'Significant corrosion was present on the engine and surrounding fittings. The engine space environment should be assessed and all corroded components replaced.' }
-        ]
-      },
-      {
-        name: 'Wiring',
-        key: 'wiring',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Good condition', rating: 'C', fragment: 'Engine wiring and connections appeared in good condition.' },
-          { label: 'Minor corrosion at terminals', rating: 'B', fragment: 'Minor corrosion was noted at some wiring terminals. Per ABYC E-11, all connections should be clean and tight. The terminals should be cleaned and treated with a corrosion inhibitor.' },
-          { label: 'Deteriorated or jury-rigged', rating: 'A', fragment: 'Engine wiring was deteriorated or showed signs of improper modifications. Per ABYC E-11, all wiring must be marine-grade and properly terminated. The engine wiring must be assessed and brought to standard.' }
-        ]
-      },
-      {
-        name: 'Engine Space',
-        key: 'engineSpace',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Clean, well-organised', rating: 'C', fragment: 'The engine space was clean and well-organised with adequate access for service.' },
-          { label: 'Cluttered but accessible', rating: 'C', fragment: 'The engine space was somewhat cluttered but the engine remained accessible for routine service.' },
-          { label: 'Dirty, oil in bilge', rating: 'B', fragment: 'The engine space was dirty with oil residue in the bilge. The bilge should be cleaned and degreased, and the source of any oil identified.' },
-          { label: 'Poor access, safety concern', rating: 'A', fragment: 'Access to the engine for service was severely restricted. Adequate engine access is required for safe operation and emergency situations.' }
-        ]
-      }
-    ]
-  },
-  'Generator (if installed)': {
-    title: 'Generator Condition Builder',
-    intro: 'The generator was visually inspected.',
-    components: [
-      {
-        name: 'Overall Condition',
-        key: 'condition',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Clean, well-maintained', rating: 'C', fragment: 'The generator appeared clean and well-maintained.' },
-          { label: 'Normal wear for age', rating: 'C', fragment: 'The generator showed normal wear consistent with age and use.' },
-          { label: 'Dirty, needs service', rating: 'B', fragment: 'The generator was dirty with accumulated grime, indicating deferred maintenance. A full service is recommended.' },
-          { label: 'Poorly maintained', rating: 'A', fragment: 'The generator showed signs of poor maintenance and neglect requiring immediate service.' }
-        ]
-      },
-      {
-        name: 'Operation',
-        key: 'operation',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Started and ran smoothly', rating: 'C', fragment: 'The generator started promptly and ran smoothly under load.' },
-          { label: 'Ran rough or with smoke', rating: 'B', fragment: 'The generator ran rough or produced excessive smoke. It should be serviced and load-tested by a qualified technician.' },
-          { label: 'Would not start', rating: 'A', fragment: 'The generator would not start. It must be repaired and load-tested by a qualified technician.' },
-          { label: 'Not tested — winterized', rating: 'NT', fragment: 'The generator was not tested as the vessel was winterized. It should be commissioned and load-tested during spring service.' },
-          { label: 'Not tested — other reason', rating: 'NT', fragment: 'The generator was not tested at the time of survey. It should be load-tested before the vessel is used.' }
-        ]
-      },
-      {
-        name: 'Fluid Leaks',
-        key: 'leaks',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'None observed', rating: 'C', fragment: 'No fluid leaks were observed.' },
-          { label: 'Minor oil weep', rating: 'B', fragment: 'A minor oil weep was noted. The source should be identified and monitored.' },
-          { label: 'Active leak', rating: 'A', fragment: 'An active fluid leak was observed. The source must be identified and repaired.' }
-        ]
-      },
-      {
-        name: 'Exhaust System',
-        key: 'exhaust',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Good condition', rating: 'C', fragment: 'The generator exhaust system was in good condition with no leaks.' },
-          { label: 'Rust or deterioration', rating: 'B', fragment: 'The generator exhaust showed rust or deterioration. Per ABYC P-1, the exhaust system must be gas-tight. It should be inspected and repaired.' },
-          { label: 'Leaking or failed', rating: 'A', fragment: 'The generator exhaust was leaking. Per ABYC P-1, exhaust leaks are a carbon monoxide hazard and must be repaired immediately.' }
-        ]
-      },
-      {
-        name: 'Sound Shield',
-        key: 'soundShield',
-        options: [
-          { label: 'Not inspected', rating: null, fragment: '' },
-          { label: 'Intact', rating: 'C', fragment: '' },
-          { label: 'Damaged or missing panels', rating: 'B', fragment: 'The generator sound shield was damaged or had missing panels. The shield should be repaired or replaced to reduce noise and contain heat.' }
-        ]
-      }
-    ]
-  },
+const COMPONENT_BUILDERS = {};  // v2190: all builders retired — every item uses the chip picker
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // DECK / COACHROOF PERCUSSION TESTING — checkbox-driven builder.
-  // Surveyor first rates the item (A/B/C/NT), then ticks the observations
-  // that apply for that rating. The "Areas tested" and "Method" components
-  // are always visible and contribute context sentences; "Findings" options
-  // are filtered by rating so only the relevant granular choices appear.
-  // Add / edit / reorder options freely — schema ships as a starter set.
-  // ═══════════════════════════════════════════════════════════════════════
-  'Bowsprit, deck and coachroof/pilothouse impact and resonance testing': {
-    title: 'Deck & Coachroof Percussion Testing',
-    intro: '',
-    components: [
-      {
-        name: 'Areas tested',
-        key: 'areas',
-        multiSelect: true,
-        join: 'list',
-        prefix: 'Percussion testing was performed on ',
-        suffix: '.',
-        options: [
-          { label: 'Deck', rating: null, alwaysInclude: true, fragment: 'the deck' },
-          { label: 'Coachroof', rating: null, alwaysInclude: true, fragment: 'the coachroof' },
-          { label: 'Cockpit sole', rating: null, alwaysInclude: true, fragment: 'the cockpit sole' },
-          { label: 'Side decks', rating: null, alwaysInclude: true, fragment: 'the side decks' },
-          { label: 'Foredeck', rating: null, alwaysInclude: true, fragment: 'the foredeck' },
-          { label: 'Bowsprit', rating: null, alwaysInclude: true, fragment: 'the bowsprit' },
-          { label: 'Pilothouse', rating: null, alwaysInclude: true, fragment: 'the pilothouse' },
-          { label: 'Flybridge', rating: null, alwaysInclude: true, fragment: 'the flybridge' },
-          { label: 'Transom (exterior)', rating: null, alwaysInclude: true, fragment: 'the transom exterior' }
-        ]
-      },
-      {
-        name: 'Method',
-        key: 'method',
-        multiSelect: true,
-        join: 'list',
-        prefix: 'Testing was conducted using ',
-        suffix: '.',
-        options: [
-          { label: 'Phenolic hammer', rating: null, alwaysInclude: true, fragment: 'a phenolic hammer' }
-        ]
-      },
-      {
-        // Findings are filtered by the item's rating (A/B/C/NT). Each rating
-        // tier has multiple granular options; tick any that apply.
-        // allowLocationPerOption: every ticked option reveals a free-text
-        // Location field so the surveyor can pinpoint where. Options that use
-        // {location} in their fragment substitute the typed text inline; the
-        // rest get the location appended in parentheses.
-        name: 'Findings',
-        key: 'findings',
-        multiSelect: true,
-        filterByRating: true,
-        allowLocationPerOption: true,
-        options: [
-          // ── A — Critical (immediate safety / structural) ────────────────
-          // SAMS vocabulary per Dave: "dull thud" → possible moisture in core;
-          // "ringing" → may indicate delamination / core separation / lack of
-          // resin / void beneath the skin.
-          { label: 'Extensive dull thuds across large areas', rating: 'A', fragment: 'Extensive areas of the deck sounded as dull thuds, indicating substantial and widespread moisture in the core. Immediate professional assessment and repair is required before the vessel can be considered safe for use.' },
-          { label: 'Widespread ringing across large areas', rating: 'A', fragment: 'Multiple areas of the deck sounded ringing, indicating widespread delamination, core separation, lack of resin, or void areas beneath the skin. Immediate professional repair is critical.' },
-          { label: 'Structural separation at high-load fitting', rating: 'A', fragment: 'Percussion indicated structural separation beneath the skin at a high-load fitting at {location}. Load paths are compromised; immediate repair is required before the vessel is sailed or loaded.' },
-          { label: 'Combined dull thud + ringing throughout', rating: 'A', fragment: 'The deck produced a mixture of dull thuds and ringing tones throughout, indicating both core moisture and internal separation/voids. Structural integrity is compromised; immediate professional evaluation is required.' },
-
-          // ── B — Needs attention (should be addressed) ──────────────────
-          { label: 'Dull thud (possible moisture in core)', rating: 'B', fragment: 'An area at {location} sounded as a dull thud, indicating possible moisture in the core.' },
-          { label: 'Ringing (possible delamination / void / lack of resin)', rating: 'B', fragment: 'An area at {location} sounded ringing, which may indicate delamination, core separation, lack of resin, or a void beneath the skin.' },
-          { label: 'Tonal change at hardware mount', rating: 'B', fragment: 'A tonal change was noted around a hardware mount at {location}, consistent with water ingress at the fastener penetration. Rebed the fitting and investigate core condition during removal.' },
-          { label: 'Inconsistent tone at hatch cutout', rating: 'B', fragment: 'Inconsistent tone was detected at a hatch cutout at {location}. Water is likely tracking into the core at the cutout edge; seal and repair as part of regular maintenance.' },
-          { label: 'Tone consistent with prior repair', rating: 'B', fragment: 'A tonal change consistent with a prior repair was noted at {location}. The repair appeared sound at the time of survey but warrants monitoring.' },
-          { label: 'Dull thud near coachroof corner', rating: 'B', fragment: 'A dull thud was noted near a coachroof corner at {location}, indicating possible moisture tracking along the coachroof-to-deck seam.' },
-          { label: 'Tonal change around stanchion base', rating: 'B', fragment: 'A tonal change was noted around a stanchion base at {location}. Rebed the stanchion and inspect for core moisture during removal.' },
-          { label: 'Dull thud at high-traffic area', rating: 'B', fragment: 'A dull thud was detected at {location}, a high-traffic area of the deck. Monitor and plan localised repair before the next major season.' },
-
-          // ── C — Serviceable (no repair needed) ─────────────────────────
-          { label: 'Consistent, solid tone throughout', rating: 'C', fragment: 'Percussion testing produced a consistent, solid tone throughout the tested areas. No dull thuds or ringing tones were detected.' },
-          { label: 'No tonal anomalies detected', rating: 'C', fragment: 'No tonal anomalies suggestive of core moisture, delamination, or voids were detected.' },
-          { label: 'Expected variation at known layup changes', rating: 'C', fragment: 'Minor tonal variation was observed at known layup changes (reinforcement pads, hardware backing plates). This is consistent with the original construction and is not indicative of damage.' },
-          { label: 'Solid response around all fittings', rating: 'C', fragment: 'A solid, consistent response was obtained around all inspected deck fittings and hardware mounts.' },
-
-          // ── Not tested (limitations) ───────────────────────────────────
-          { label: 'Covered by non-skid / overlay — access limited', rating: 'Not tested', fragment: 'Portions of the deck were covered by non-skid or an overlay (teak, cork, synthetic) that prevented direct percussion testing of the underlying laminate.' },
-          { label: 'Weather / water on deck — testing deferred', rating: 'Not tested', fragment: 'Testing of portions of the deck was deferred because of weather conditions or water on the surface at the time of survey. Retest is recommended.' },
-          { label: 'Obstructed by gear / canvas', rating: 'Not tested', fragment: 'Portions of the deck were obstructed by gear or canvas covers at the time of survey and were not accessible for percussion testing.' },
-
-          // ── Always-available context add-ons ───────────────────────────
-          { label: 'Add: limited by thick coatings', rating: null, alwaysInclude: true, fragment: 'Testing was limited in some areas due to thick coatings.' },
-          { label: 'Add: some areas not accessible', rating: null, alwaysInclude: true, fragment: 'Portions of the deck were not accessible for percussion testing.' },
-          { label: 'Add: further investigation recommended', rating: null, alwaysInclude: true, fragment: 'Further investigation (moisture probe, core sampling) is recommended to confirm findings.' }
-        ]
-      }
-    ]
-  }
-};
 
 // Rating priority for component builder: worst rating wins
 const RATING_PRIORITY = { 'A': 3, 'B': 2, 'NT': 1, 'C': 0 };
@@ -1389,7 +944,7 @@ const ITEM_SNIPPET_MAP = {
   'Evident damage or repairs to hull and rudder below the waterline': 'Hull(s) condition (below the waterline)',
   'Evident damage or repairs to hull and rudder(s) (if applicable) below the waterline': 'Hull(s) condition (below the waterline)',
   'Hydraulic steering (hoses, fittings, steering cylinder, tiller arm / tiller bolt or tie-bar, rudder post and stuffing box, etc.)': 'Hydraulic steering (hoses, fittings, steering cylinder, tiller arm or tie bar, rudder post and stuffing box, etc.)',
-  'Hull exterior above the waterline': 'Hull(s) condition (above the waterline)',
+  'Hull exterior above the waterline': 'Hull exterior above the waterline',
   'Hull and rudder(s) (if applicable) percussion testing': 'Hull and rudder(s) impact and resonance testing',
   'Rudder(s) condition': 'Rudder(s) condition',
   'Rudder condition': 'Rudder(s) condition',
@@ -3792,10 +3347,17 @@ function showNotesSheet(itemLabel, categoryName) {
       });
     }
     if (builderKey) {
-      const savedSelections = itemData.componentSelections || {};
-      componentBuilderHtml = renderComponentBuilder(builderKey, itemLabel, savedSelections, categoryName, itemData.rating);
-      // When a builder is present, hide the quick-insert snippets — the builder replaces them
-      snippetsHtml = '';
+      // v2190: suppress the component builder when the rating is
+      // "Not applicable" / "Not tested" — the chip picker's synthesized
+      // N/A or NT chips are the right UX. Builder would show
+      // sub-component dropdowns that make no sense for a missing item.
+      const isNotRating = /^Not\b/i.test(itemData.rating || '');
+      if (!isNotRating) {
+        const savedSelections = itemData.componentSelections || {};
+        componentBuilderHtml = renderComponentBuilder(builderKey, itemLabel, savedSelections, categoryName, itemData.rating);
+        // When a builder is present, hide the quick-insert snippets — the builder replaces them
+        snippetsHtml = '';
+      }
     }
 
     const overlay = document.createElement('div');
@@ -4104,12 +3666,30 @@ window.closeNotesSheet = closeNotesSheet;
 // v2178: on-save text fixups so already-saved observations get cleaned
 // up next time the surveyor saves them. Keeps the whole-file migration
 // non-destructive — the surveyor has to open and re-save the item.
-function applyWritingFixups(text) {
+function applyWritingFixups(text, survey) {
   if (!text) return text;
   let t = text;
   // programme → program (user preference; overrides Canadian-English rule)
   t = t.replace(/\bprogramme\b/g, 'program');
   t = t.replace(/\bProgramme\b/g, 'Program');
+  // v2190: strip trial-run references unless the survey header explicitly
+  // confirms a limited trial run occurred. Heuristic removals:
+  //   "... during the limited trial run."  → drop the "during …" clause
+  //   "... under load during the limited trial run."  → "... under load."
+  //   Whole sentence "It should be tested under load during the limited
+  //   trial run." → drop the sentence (nothing to recommend otherwise).
+  // Surveyor can hand-add trial-run text if a trial was done but header
+  // setting hasn't been saved yet.
+  const seaTrial = survey && String(survey.seaTrial || '').toLowerCase();
+  if (seaTrial !== 'yes') {
+    // Drop whole sentences that are entirely about trial-run testing
+    t = t.replace(/[^.!?]*\bduring (?:the )?(?:limited )?trial run[^.!?]*[.!?]\s*/gi, '');
+    // In-sentence cleanups for cases the regex above didn't catch
+    t = t.replace(/\s+during (?:the )?(?:limited )?trial run/gi, '');
+    t = t.replace(/\s+on (?:the )?(?:limited )?trial run/gi, '');
+    // Collapse any doubled spaces left behind
+    t = t.replace(/\s{2,}/g, ' ').replace(/\s+([.,;:])/g, '$1').trim();
+  }
   // Present-tense → past-tense phrases from the curated library rewrite.
   // These ONLY match literal sentence fragments used in snippets, so they
   // don't false-match free-typed prose.
@@ -15262,8 +14842,13 @@ function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
   const photoCount = (itemData.photos || []).length;
   const optionsAttr = options.map(o => o.replace(/"/g, '&quot;')).join('|||');
 
-  // Notes preview (truncated)
-  const notePreview = hasNotes ? (itemData.text.trim().length > 80 ? itemData.text.trim().substring(0, 80) + '…' : itemData.text.trim()) : '';
+  // v2189: show the FULL note on the survey page (no 80-char truncation).
+  // Surveyor requested to read completed notes in full from the card view.
+  // HTML-escape to prevent content from breaking the card markup.
+  const escapeHtml = (s) => String(s || '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  const notePreview = hasNotes ? escapeHtml(itemData.text.trim()) : '';
 
   // Compact card row: label + photo count badge + rating badge
   const photoBadge = photoCount > 0 ? `<span style="display:inline-flex;align-items:center;gap:2px;background:#e0f2fe;color:#0369a1;font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;white-space:nowrap;vertical-align:middle;margin-left:4px;">📷${photoCount}</span>` : '';
@@ -15281,11 +14866,12 @@ function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
     </div>
   `;
 
-  // Notes preview under the rating
+  // Full note under the rating (v2189: no truncation, preserves paragraph
+  // breaks via pre-wrap whitespace so long observations are readable).
   if (notePreview) {
     html += `
       <div style="padding:0 12px 4px 12px;cursor:pointer;" onclick="showNotesSheet('${safeLabel}', '${safeCat}')">
-        <div style="font-size:12px;color:#6b7280;line-height:1.3;background:#f9fafb;padding:6px 10px;border-radius:6px;border-left:3px solid ${ratingColor};">${notePreview}</div>
+        <div style="font-size:13px;color:#374151;line-height:1.4;background:#f9fafb;padding:8px 12px;border-radius:6px;border-left:3px solid ${ratingColor};white-space:pre-wrap;">${notePreview}</div>
       </div>
     `;
   }
