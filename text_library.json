@@ -7712,6 +7712,90 @@
       "phase": "action",
       "severity": 5,
       "text": "It is recommended by the ABYC that anodes should be changed at fifty percent degradation."
+    },
+    {
+      "section": "Engine mount",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Engine mount",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Engine mount",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Outboard anodes",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Outboard oil",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Outboard oil",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Outboard oil",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Outboard propeller",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Outboard propeller",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Outboard propeller",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
     }
   ],
   "Cockpit": [
@@ -18814,90 +18898,6 @@
       "severity": 3
     },
     {
-      "section": "Exhaust condition",
-      "rating": "A",
-      "text": "The exhaust system was generally serviceable and conformed to SAE J2006 with double hose clamps used at most connections.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "A",
-      "text": "One hose clamp was missing at the muffler connection which does not comply with ABYC P-1.7.2.5.3 requiring two all stainless clamps on each end of every flexible wet exhaust hose.",
-      "phase": "observed",
-      "severity": 4
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "A",
-      "text": "Install a second clamp at the muffler.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "A",
-      "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, full inspection by a licensed marine mechanic is recommended.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "C - no rust",
-      "text": "The exhaust was in proper working condition and conformed to SAE J2006.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "C - no rust",
-      "text": "Two hose clamps were used at all connections.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "C - no rust",
-      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "C - expected rust",
-      "text": "Despite expected rust at the mixing elbow, the exhaust appeared in good order.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "C - expected rust",
-      "text": "The exhaust hose conformed to SAE J2006, and two hose clamps were used at all connections.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "Not tested - covered in insulation",
-      "text": "Despite expected rust at the mixing elbow, the exhaust appeared serviceable.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "Not tested - covered in insulation",
-      "text": "However, because the exhaust pipe was insulated, it could not be confirmed whether the hose was double-clamped or conformed to SAE J2006.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "Not tested - covered in insulation",
-      "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, full inspection by a licensed marine mechanic is recommended.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
       "section": "Manual fuel pump(s)",
       "rating": "B",
       "text": "The manual fuel pump did not work and should be replaced.",
@@ -19104,13 +19104,6 @@
       "section": "Anti-vibration mounts",
       "rating": "C - just changed",
       "text": "They showed virtually no corrosion or cracking and appeared in satisfactory condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Anti vibration mounts",
-      "rating": "Not tested",
-      "text": "Not tested.",
       "phase": "observed",
       "severity": 3
     },
@@ -19731,20 +19724,6 @@
       "severity": 3
     },
     {
-      "section": "Exhaust condition",
-      "rating": "B",
-      "text": "The exhaust system was functional but showed signs of corrosion or minor leaking at connection points.",
-      "phase": "observed",
-      "severity": 2
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "B",
-      "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, service and confirmation by a licensed marine mechanic is recommended.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
       "section": "Oil level and condition",
       "rating": "A",
       "text": "The engine oil was at critically low level or exhibited signs of significant contamination or degradation.",
@@ -19773,14 +19752,14 @@
       "severity": 5
     },
     {
-      "section": "Anti vibration mounts",
+      "section": "Anti-vibration mounts",
       "rating": "A",
       "text": "The engine anti-vibration mounts were degraded, cracked, or missing.",
       "phase": "observed",
       "severity": 4
     },
     {
-      "section": "Anti vibration mounts",
+      "section": "Anti-vibration mounts",
       "rating": "A",
       "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, inspection and replacement by a licensed marine mechanic is required.",
       "phase": "observed",
@@ -19934,41 +19913,6 @@
       "text": "No action required at this time."
     },
     {
-      "section": "Exhaust condition",
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "This represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "The finding should be monitored and addressed in the near term."
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Address this at the next scheduled service."
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No immediate concern was noted."
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No action required at this time."
-    },
-    {
       "section": "Manual fuel pump(s)",
       "rating": "B",
       "phase": "observed",
@@ -20410,14 +20354,14 @@
       "text": "No action required at this time."
     },
     {
-      "section": "Anti vibration mounts",
+      "section": "Anti-vibration mounts",
       "rating": "A",
       "phase": "means",
       "severity": 5,
       "text": "This represents a significant concern for the vessel's safe or structural operation."
     },
     {
-      "section": "Anti vibration mounts",
+      "section": "Anti-vibration mounts",
       "rating": "A",
       "phase": "action",
       "severity": 5,
@@ -20485,6 +20429,580 @@
       "phase": "observed",
       "severity": 3,
       "text": "The engines were damaged or non-functional."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "One or more hose clamps were missing at exhaust connections, in violation of ABYC P-1.7.2.5.3 which requires two all-stainless clamps on each end of every flexible wet exhaust hose."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The exhaust hose did not conform to SAE J2006."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The exhaust system exhibited a significant leak, heavy corrosion, or cracking that compromised safe operation."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Evidence of exhaust gas leakage was detected in the engine compartment."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, full inspection by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "Exhaust leaks can introduce carbon monoxide into the accommodation and represent a life-safety concern."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "A",
+      "phase": "action",
+      "severity": 4,
+      "text": "Install the missing hose clamp(s) and re-inspect the exhaust system before returning the vessel to service."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Full inspection and remediation by a licensed marine mechanic is required before the vessel is returned to service."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Minor surface corrosion was noted at exhaust connection points."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The exhaust system was functional but showed signs of corrosion or minor leaking at connection points."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "The finding should be monitored and addressed in the near term."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, service and confirmation by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Address this at the next scheduled service."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The exhaust was in proper working condition and conformed to SAE J2006."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Two hose clamps were used at all connections."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Despite expected rust at the mixing elbow, the exhaust appeared in good order."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "No immediate concern was noted."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "C",
+      "phase": "means",
+      "severity": 2,
+      "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No action required at this time."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "Not tested - covered in insulation",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Despite expected rust at the mixing elbow, the exhaust appeared serviceable."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "Not tested - covered in insulation",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Because the exhaust pipe was insulated, it could not be confirmed whether the hose was double-clamped or conformed to SAE J2006."
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "Not tested - covered in insulation",
+      "phase": "means",
+      "severity": 3,
+      "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, full inspection by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Anti-vibration mounts",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Anti-vibration mounts",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Anti-vibration mounts",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Automatic engine compartment fire extinguishing system",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Automatic engine compartment fire extinguishing system",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Automatic engine compartment fire extinguishing system",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Belts and pulleys",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Belts and pulleys",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Belts and pulleys",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Bilge, stringers and ribs – accessible from engine bay",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Bilge, stringers and ribs – accessible from engine bay",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Bilge, stringers and ribs – accessible from engine bay",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Coolant level and quality",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Coolant level and quality",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Coolant level and quality",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Cooling water intake seacock(s) and strainer(s)",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Cooling water intake seacock(s) and strainer(s)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Cooling water intake seacock(s) and strainer(s)",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Drive coupling",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Drive coupling",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Drive coupling",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Engine condition",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Engine condition",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Engine condition",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Gearbox general condition and impressions",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Gearbox general condition and impressions",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Gearbox general condition and impressions",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Gearbox oil",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Gearbox oil",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Gearbox oil",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Generator (if installed)",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Generator (if installed)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Generator (if installed)",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Generator valve and sea strainer",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Generator valve and sea strainer",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Generator valve and sea strainer",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Hoses",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Hoses",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Hoses",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Manifolds and risers",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Manifolds and risers",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Manifolds and risers",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Manual fuel pump(s)",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Manual fuel pump(s)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Manual fuel pump(s)",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Oil level and condition",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Oil level and condition",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Oil level and condition",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "A",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "C",
+      "phase": "means",
+      "severity": 3,
+      "text": "As this is a visual observation only and does not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
+    },
+    {
+      "section": "Automatic engine compartment fire extinguishing system",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 1,
+      "text": "A manual controller was fitted at the helm."
+    },
+    {
+      "section": "Automatic engine compartment fire extinguishing system",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 1,
+      "text": "A manual controller was fitted at the helm."
+    },
+    {
+      "section": "Automatic engine compartment fire extinguishing system",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "A manual controller was fitted at the helm."
+    },
+    {
+      "section": "Automatic engine compartment fire extinguishing system",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 2,
+      "text": "No manual controller was fitted at the helm."
+    },
+    {
+      "section": "Automatic engine compartment fire extinguishing system",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "No manual controller was fitted at the helm."
+    },
+    {
+      "section": "Automatic engine compartment fire extinguishing system",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "No manual controller was fitted at the helm."
     }
   ],
   "Steering & Hydraulics": [

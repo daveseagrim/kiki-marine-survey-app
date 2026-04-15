@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2219';
+const APP_VERSION = 'v2220';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -900,7 +900,7 @@ const SHEET_MAPPING = {
 // Maps template item labels to their exact text library section names
 // Only includes entries where the names differ
 const ITEM_SNIPPET_MAP = {
-  'Anti-vibration mounts': 'Anti vibration mounts',
+  'Anti-vibration mounts': 'Anti-vibration mounts',
   'Arch - cockpit (interior condition)': 'Arch',
   'Arch - external condition and equipment': 'Arch – external condition and equipment',
   'Bilge, stringers and ribs (those accessible from cabin)': 'Bilge, stringers and ribs – accessible from cabin',

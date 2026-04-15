@@ -12,6 +12,112 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2220 — 2026-04-15
+
+### Rewritten — Exhaust condition A/B/C cleaned up (redundancies removed, disclaimers relocated)
+
+Dave flagged C-rating redundancies and asked for a matching audit of
+A and B. Rebuilt the whole `Exhaust condition` section.
+
+**C rating — redundancy removed.** The two atomic chips ("The exhaust
+was in proper working condition and conformed to SAE J2006." + "Two
+hose clamps were used at all connections.") were duplicated by a
+combined chip ("The exhaust hose conformed to SAE J2006, and two hose
+clamps were used at all connections."). Dropped the combined chip;
+kept the atomic form so the surveyor composes observations by tapping
+what applies. Also moved the "visual only, mechanical assessment"
+disclaimer out of observed and into the means phase where it belongs.
+
+**B rating — disclaimer relocated.** Same issue: the "visual only,
+mechanical assessment" disclaimer was sitting in observed. Moved to
+means. Added a second observed chip ("Minor surface corrosion was
+noted at exhaust connection points.") for the lighter case.
+
+**A rating — tightened.** Removed a stray "generally serviceable…
+double hose clamps used at most connections" observation that read
+as a C-level statement despite being under A. Moved the visual-only
+disclaimer to means. Added three genuine A-level observations
+covering critical scenarios: non-conforming SAE J2006 hose, heavy
+corrosion / cracking / leaks, and exhaust gas in the engine
+compartment. Added a life-safety-framed means chip ("Exhaust leaks
+can introduce carbon monoxide into the accommodation and represent a
+life-safety concern.") and bumped the action severities up to match.
+
+**Ordering.** All three ratings now list chips in ascending severity
+within each phase (least→worst), per the established v2210 rule.
+
+**Not tested - covered in insulation** subclass preserved (the case
+where the exhaust is wrapped in insulation and the hose can't be
+visually inspected).
+
+### Fixed — Anti-vibration mounts B/C chips now surface
+
+`ITEM_SNIPPET_MAP['Anti-vibration mounts']` was redirecting to library
+section `Anti vibration mounts` (no hyphen). The A rating chips lived
+there, but the B/C rating chips lived in a parallel `Anti-vibration
+mounts` (hyphenated) section — which was orphaned and never matched.
+Dave reported "no options for B or C regarding anti-vibration mounts."
+
+Fix:
+- Updated the map to `'Anti-vibration mounts': 'Anti-vibration mounts'`
+  (identity match, canonical hyphenated form).
+- Merged the 5 no-hyphen chips into the hyphenated section; deduped.
+
+Dave now sees the full A/B/C/Not-tested chip set (including the
+`C - just changed` subclass) on that item.
+
+### Added — Visual-observation disclaimer as a chip option on every engine-related section
+
+Dave's rule: for any engine-related item, the surveyor should be able
+to tap a standard disclaimer chip:
+
+> As this is a visual observation only and does not constitute a
+> mechanical assessment, confirmation of serviceability by a licensed
+> marine mechanic is recommended.
+
+Added to the **means phase** under every rating (A, B, C) across all
+23 engine-related library sections:
+
+- Engine & Powertrain sheet (20 sections) — Anti-vibration mounts,
+  Automatic engine compartment fire extinguishing system, Belts and
+  pulleys, Bilge/stringers/ribs, Coolant level and quality, Cooling
+  water intake seacock(s) and strainer(s), Drive coupling (both
+  variants), Engine condition, Exhaust condition, Gearbox general
+  condition, Gearbox oil, Generator (if installed), Generator valve
+  and sea strainer, Hoses, Manifolds and risers, Manual fuel pump(s),
+  Oil level and condition, Stuffing box/packing gland/dripless seal.
+- Outboard sheet (3 additional sections) — Engine mount, Outboard
+  anodes, Outboard oil, Outboard propeller.
+
+69 new chip instances total (23 sections × 3 ratings). Where a
+section already carried a near-duplicate rating-specific variant
+(Exhaust A/B/C had nuanced "full inspection" / "service and
+confirmation" / "confirmation of serviceability" wordings), the
+canonical text was skipped to avoid near-duplicate chips.
+
+### Added — Automatic engine compartment fire extinguishing system: manual controller chips at all ratings
+
+Dave: "may or may not have a manual controller at the helm — make it
+pickable at all ratings." Added two observation chips at A/B/C:
+
+- observed/sev 1: "A manual controller was fitted at the helm."
+- observed/sev 2: "No manual controller was fitted at the helm."
+
+6 new chips (2 options × 3 ratings).
+
+### Audit
+
+- JSON parses ✓
+- JavaScript compiles ✓
+- Exhaust condition A/B/C have observed / means / action coverage ✓
+- Every phase ordered ascending severity ✓
+- Anti-vibration mounts orphan count: 0 ✓
+- Disclaimer coverage: A/B/C present on all 23 engine-related sections ✓
+- Automatic engine fire system: manual-controller chips present at A/B/C ✓
+- Version strings aligned ✓
+
+---
+
 ## v2219 — 2026-04-15
 
 ### Added — Skip option for area-photo sections (and category skip now covers them)
