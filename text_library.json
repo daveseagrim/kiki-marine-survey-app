@@ -9676,7 +9676,7 @@
     {
       "section": "Blower",
       "rating": "A",
-      "text": "Verification should include an operational test of the motor, inspection of ducting for obstructions or damage, and confirmation of a properly labelled overboard exhaust outlet.",
+      "text": "Verification should include an operational test of the motor, inspection of ducting for obstructions or damage, and confirmation of a properly labeled overboard exhaust outlet.",
       "phase": "observed",
       "severity": 3
     },
@@ -13474,7 +13474,7 @@
     {
       "section": "Blower",
       "rating": "A",
-      "text": "Verification should include an operational test of the motor, inspection of ducting for obstructions or damage, and confirmation of a properly labelled overboard exhaust outlet.",
+      "text": "Verification should include an operational test of the motor, inspection of ducting for obstructions or damage, and confirmation of a properly labeled overboard exhaust outlet.",
       "phase": "observed",
       "severity": 3
     },
@@ -21409,91 +21409,77 @@
       "severity": 3
     },
     {
-      "section": "Inverter and grounding",
-      "rating": "A",
-      "text": "The inverter’s metallic case was not bonded to the vessel’s grounding and bonding system.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Inverter and grounding",
-      "rating": "A",
-      "text": "Bond the case per best practice to improve corrosion protection and safety.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Inverter and grounding",
+      "section": "Inverter",
       "rating": "C",
-      "text": "A Xantrex DC to AC inverter was installed, properly grounded, and in acceptable condition.",
+      "text": "A Xantrex DC to AC inverter was installed in acceptable condition.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Inverter and grounding",
+      "section": "Inverter",
       "rating": "Not tested",
       "text": "Not tested.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Inverter/charger and grounding",
+      "section": "Inverter/charger",
       "rating": "C",
       "text": "An inverter/charger was installed in (location here).",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Inverter/charger and grounding",
+      "section": "Inverter/charger",
       "rating": "C",
       "text": "The unit was tested under shore power and operated as expected, charging the vessel’s batteries and switching cleanly between inverter and charger modes.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Inverter/charger and grounding",
+      "section": "Inverter/charger",
       "rating": "C",
       "text": "No abnormal sounds, overheating, or wiring issues were observed, and the system appeared in satisfactory condition.",
       "phase": "means",
       "severity": 3
     },
     {
-      "section": "Inverter/charger and grounding",
+      "section": "Inverter/charger",
       "rating": "Not tested",
       "text": "An inverter/charger was installed in (location here).",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Inverter/charger and grounding",
+      "section": "Inverter/charger",
       "rating": "Not tested",
       "text": "However, because the boat was not plugged into shore power, it was not tested.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Battery charger and grounding",
+      "section": "Battery charger",
       "rating": "C",
       "text": "The battery charger appeared to function properly.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Battery charger and grounding",
+      "section": "Battery charger",
       "rating": "Not tested",
       "text": "The battery charger was not tested because the vessel was not connected to AC power.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Battery charger and grounding",
+      "section": "Battery charger",
       "rating": "Not tested - older non-3 stage charger",
       "text": "A converter/charger was fitted, but could not be tested without AC power.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Battery charger and grounding",
+      "section": "Battery charger",
       "rating": "Not tested - older non-3 stage charger",
       "text": "As this is an older charger design, a future upgrade to a modern smart charger could be considered to enhance battery performance.",
       "phase": "means",
@@ -21516,7 +21502,7 @@
     {
       "section": "Battery selector switch, combiner, VSR",
       "rating": "C - two switches",
-      "text": "Both appeared to function properly and were clearly labelled.",
+      "text": "Both appeared to function properly and were clearly labeled.",
       "phase": "observed",
       "severity": 3
     },
@@ -21530,7 +21516,7 @@
     {
       "section": "Battery selector switch, combiner, VSR",
       "rating": "C - three switches",
-      "text": "All appeared to function properly and were clearly labelled.",
+      "text": "All appeared to function properly and were clearly labeled.",
       "phase": "observed",
       "severity": 3
     },
@@ -21985,7 +21971,7 @@
     {
       "section": "Distribution panel 12V",
       "rating": "C",
-      "text": "The 12V distribution panel was clearly labelled, and all switches and indicator lights appeared to function properly.",
+      "text": "The 12V distribution panel was clearly labeled, and all switches and indicator lights appeared to function properly.",
       "phase": "observed",
       "severity": 3
     },
@@ -21999,7 +21985,7 @@
     {
       "section": "Distribution panel 110V",
       "rating": "A",
-      "text": "The 110V distribution panel was clearly labelled, and all switches appeared to function properly.",
+      "text": "The 110V distribution panel was clearly labeled, and all switches appeared to function properly.",
       "phase": "observed",
       "severity": 3
     },
@@ -22020,7 +22006,7 @@
     {
       "section": "Distribution panel 110V",
       "rating": "C",
-      "text": "The 110V distribution panel was clearly labelled, and all appeared to function properly.",
+      "text": "The 110V distribution panel was clearly labeled, and all appeared to function properly.",
       "phase": "observed",
       "severity": 3
     },
@@ -22034,7 +22020,7 @@
     {
       "section": "Distribution panel 110V",
       "rating": "Not tested",
-      "text": "The 110V distribution panel was clearly labelled, and all switches appeared to function properly.",
+      "text": "The 110V distribution panel was clearly labeled, and all switches appeared to function properly.",
       "phase": "observed",
       "severity": 3
     },
@@ -22438,56 +22424,56 @@
       "severity": 3
     },
     {
-      "section": "Inverter/charger and grounding",
+      "section": "Inverter/charger",
       "rating": "A",
       "text": "The system is non-functional or poses a safety hazard.",
       "phase": "observed",
       "severity": 5
     },
     {
-      "section": "Inverter/charger and grounding",
+      "section": "Inverter/charger",
       "rating": "A",
       "text": "Repair or replacement is required.",
       "phase": "action",
       "severity": 3
     },
     {
-      "section": "Inverter/charger and grounding",
+      "section": "Inverter/charger",
       "rating": "B",
       "text": "The system operates but shows signs of wear.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Inverter/charger and grounding",
+      "section": "Inverter/charger",
       "rating": "B",
       "text": "Service is recommended.",
       "phase": "action",
       "severity": 3
     },
     {
-      "section": "Battery charger and grounding",
+      "section": "Battery charger",
       "rating": "A",
       "text": "The charger is non-functional or poses a safety hazard.",
       "phase": "observed",
       "severity": 5
     },
     {
-      "section": "Battery charger and grounding",
+      "section": "Battery charger",
       "rating": "A",
       "text": "Repair or replacement is required.",
       "phase": "action",
       "severity": 3
     },
     {
-      "section": "Battery charger and grounding",
+      "section": "Battery charger",
       "rating": "B",
       "text": "The charger operates but shows signs of age.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Battery charger and grounding",
+      "section": "Battery charger",
       "rating": "B",
       "text": "Service is recommended.",
       "phase": "action",
@@ -23040,77 +23026,77 @@
       "text": "No action required at this time."
     },
     {
-      "section": "Inverter and grounding",
+      "section": "Inverter",
       "rating": "A",
       "phase": "means",
       "severity": 5,
       "text": "This represents a significant concern for the vessel's safe or structural operation."
     },
     {
-      "section": "Inverter and grounding",
+      "section": "Inverter",
       "rating": "A",
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair is required before the vessel is returned to service."
     },
     {
-      "section": "Inverter and grounding",
+      "section": "Inverter",
       "rating": "C",
       "phase": "means",
       "severity": 1,
       "text": "No immediate concern was noted."
     },
     {
-      "section": "Inverter and grounding",
+      "section": "Inverter",
       "rating": "C",
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
     },
     {
-      "section": "Inverter/charger and grounding",
+      "section": "Inverter/charger",
       "rating": "A",
       "phase": "means",
       "severity": 5,
       "text": "This represents a significant concern for the vessel's safe or structural operation."
     },
     {
-      "section": "Inverter/charger and grounding",
+      "section": "Inverter/charger",
       "rating": "B",
       "phase": "means",
       "severity": 3,
       "text": "The finding should be monitored and addressed in the near term."
     },
     {
-      "section": "Inverter/charger and grounding",
+      "section": "Inverter/charger",
       "rating": "C",
       "phase": "action",
       "severity": 1,
       "text": "No action required at this time."
     },
     {
-      "section": "Battery charger and grounding",
+      "section": "Battery charger",
       "rating": "A",
       "phase": "means",
       "severity": 5,
       "text": "This represents a significant concern for the vessel's safe or structural operation."
     },
     {
-      "section": "Battery charger and grounding",
+      "section": "Battery charger",
       "rating": "B",
       "phase": "means",
       "severity": 3,
       "text": "The finding should be monitored and addressed in the near term."
     },
     {
-      "section": "Battery charger and grounding",
+      "section": "Battery charger",
       "rating": "C",
       "phase": "means",
       "severity": 1,
       "text": "No immediate concern was noted."
     },
     {
-      "section": "Battery charger and grounding",
+      "section": "Battery charger",
       "rating": "C",
       "phase": "action",
       "severity": 1,

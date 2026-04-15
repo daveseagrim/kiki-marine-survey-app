@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2220';
+const APP_VERSION = 'v2221';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -10385,13 +10385,21 @@ function renderInspection(survey) {
       badges += `<span style="color:#6b7280;font-size:11px;background:#f3f4f6;padding:1px 6px;border-radius:4px;margin-left:4px;">${excludedCount} skipped</span>`;
     }
 
+    // Progress text: when items remain, render as a tappable button that
+    // expands an inline list of remaining (unrated, non-skipped) items with
+    // tap-to-jump links. When the category is Done or fully Skipped, render
+    // a plain span. stopPropagation prevents the accordion from toggling.
+    const progressHtml = (allExcluded || isComplete)
+      ? `<span class="category-progress" style="color:${progressColor};font-weight:700;">${progressText}</span>`
+      : `<button type="button" class="category-progress remaining-btn" onclick="event.stopPropagation(); toggleRemainingList(this);" title="Show items left to rate" style="color:${progressColor};font-weight:700;background:transparent;border:none;cursor:pointer;padding:0;margin-left:12px;font:inherit;font-size:12px;text-decoration:underline dotted;">${progressText} ▾</button>`;
+
     html += `
       <div class="category-accordion" data-category-name="${categoryName.replace(/"/g, '&quot;')}">
         <button class="accordion-header" onclick="toggleAccordion(this)">
           <span class="accordion-chevron" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;font-size:22px;color:#64748b;flex-shrink:0;margin-left:-12px;transition:transform 0.2s;">▾</span>
           ${incompleteDot}
           <span class="category-title">${categoryName}${badges}</span>
-          <span class="category-progress" style="color:${progressColor};font-weight:700;">${progressText}</span>
+          ${progressHtml}
         </button>
         ${flaggedCount > 0 ? `<div class="flagged-summary" style="padding:4px 12px 6px 28px;font-size:12px;color:#92400e;background:#fffbeb;border-bottom:1px solid #fcd34d;">🚩 ${flaggedCount} flagged: ${flaggedItems.map(i => i.label).join(', ')}</div>` : ''}
         <div class="accordion-content" style="display: none;">
@@ -12511,6 +12519,104 @@ function _csExpandAccordionAndScroll(el) {
     el.style.boxShadow = '0 0 0 3px #f59e0b';
     setTimeout(() => { el.style.background = ''; el.style.boxShadow = ''; }, 3000);
   }, 50);
+}
+
+// ─── "Items left" inline popover ─────────────────────────────────────────
+// Tapping the "N left" progress text in a category header toggles an
+// inline list of the items that are still unrated (and not skipped) for
+// that category. Each label is a tappable link that expands the accordion
+// and scrolls to the item with the same highlight animation used by the
+// Check function, so the surveyor can fill it out.
+async function toggleRemainingList(btn) {
+  try {
+    const accordion = btn.closest('.category-accordion');
+    if (!accordion) return;
+
+    // Toggle: if popover already open, close it
+    const existing = accordion.querySelector('.remaining-list-popover');
+    if (existing) {
+      const trigger = accordion.querySelector('.remaining-btn');
+      if (trigger) trigger.innerHTML = trigger.innerHTML.replace(/▴/, '▾');
+      existing.remove();
+      return;
+    }
+
+    // Close any other open popovers first (one-at-a-time UX)
+    document.querySelectorAll('.remaining-list-popover').forEach(p => p.remove());
+    document.querySelectorAll('.remaining-btn').forEach(b => {
+      b.innerHTML = b.innerHTML.replace(/▴/, '▾');
+    });
+
+    // Collect unrated (and non-skipped) items from the accordion's wrappers
+    const survey = await getSurvey(currentSurveyId);
+    if (!survey || !survey.items) return;
+    const wrappers = accordion.querySelectorAll('.compact-item-wrapper');
+    const remainingLabels = [];
+    wrappers.forEach(w => {
+      const lbl = w.getAttribute('data-item-label');
+      if (!lbl) return;
+      const data = survey.items[lbl];
+      const isRated = !!(data && data.rating);
+      const isExcluded = !!(data && data.excluded);
+      if (!isRated && !isExcluded) {
+        remainingLabels.push(lbl);
+      }
+    });
+    if (remainingLabels.length === 0) return;
+
+    // Build the popover
+    const popover = document.createElement('div');
+    popover.className = 'remaining-list-popover';
+    popover.style.cssText = 'padding:8px 14px 10px 28px;background:#fef9f9;border-top:1px solid #fecaca;border-bottom:1px solid #fecaca;font-size:13px;';
+    const linksHtml = remainingLabels.map(lbl => {
+      const safe = String(lbl).replace(/"/g, '&quot;');
+      const display = String(lbl).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `<a href="#" role="button"
+                 onclick="event.preventDefault(); event.stopPropagation(); jumpToChecklistItem(this.getAttribute('data-item-label')); return false;"
+                 data-item-label="${safe}"
+                 style="display:block;color:#006699;text-decoration:underline;padding:6px 0;min-height:32px;line-height:20px;">• ${display}</a>`;
+    }).join('');
+    popover.innerHTML = `
+      <div style="color:#991b1b;font-weight:600;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:0.4px;">
+        Items left — tap to fill out
+      </div>
+      <div>${linksHtml}</div>
+    `;
+    // Flip caret on the trigger
+    btn.innerHTML = btn.innerHTML.replace(/▾/, '▴');
+
+    // Insert just after the accordion header so it stays visible even
+    // when the accordion content is collapsed.
+    const header = accordion.querySelector('.accordion-header');
+    if (header) {
+      header.insertAdjacentElement('afterend', popover);
+    }
+  } catch (err) {
+    console.error('toggleRemainingList failed', err);
+  }
+}
+
+function jumpToChecklistItem(itemLabel) {
+  if (!itemLabel) return;
+  // Close any open popover first
+  document.querySelectorAll('.remaining-list-popover').forEach(p => p.remove());
+  document.querySelectorAll('.remaining-btn').forEach(b => {
+    b.innerHTML = b.innerHTML.replace(/▴/, '▾');
+  });
+  // Locate the target wrapper
+  let el = null;
+  const wrappers = document.querySelectorAll('.compact-item-wrapper');
+  for (const w of wrappers) {
+    if (w.getAttribute('data-item-label') === itemLabel) { el = w; break; }
+  }
+  if (!el) {
+    // Fallback: try rated-item (safety equipment etc.)
+    const rated = document.querySelectorAll('.rated-item');
+    for (const w of rated) {
+      if (w.getAttribute('data-item-label') === itemLabel) { el = w; break; }
+    }
+  }
+  if (el) _csExpandAccordionAndScroll(el);
 }
 
 // ─── Evaluate fix and return to Check Survey ──────────────────────────────
@@ -15488,12 +15594,18 @@ function updateCategoryHeader(survey, categoryName) {
     dot.style.background = isComplete ? '#16a34a' : '#dc2626';
   }
 
-  // Update the progress text
+  // Update the progress text. When items remain, we want a clickable
+  // button that opens the "items left" list. When Done or fully Skipped,
+  // a plain span is enough. Because we swap element types, replace
+  // outerHTML rather than just setting textContent.
   const remaining = categoryItems.length - completionCount;
+  const progressText = allExcluded ? 'Skipped' : (isComplete ? 'Done' : `${remaining} left`);
+  const progressHtml = (allExcluded || isComplete)
+    ? `<span class="category-progress" style="color:${progressColor};font-weight:700;">${progressText}</span>`
+    : `<button type="button" class="category-progress remaining-btn" onclick="event.stopPropagation(); toggleRemainingList(this);" title="Show items left to rate" style="color:${progressColor};font-weight:700;background:transparent;border:none;cursor:pointer;padding:0;margin-left:12px;font:inherit;font-size:12px;text-decoration:underline dotted;">${progressText} ▾</button>`;
   const progressEl = header.querySelector('.category-progress');
   if (progressEl) {
-    progressEl.textContent = allExcluded ? 'Skipped' : (isComplete ? 'Done' : `${remaining} left`);
-    progressEl.style.color = progressColor;
+    progressEl.outerHTML = progressHtml;
   }
 
   // Update flagged/excluded badges in title
@@ -15508,6 +15620,9 @@ function updateCategoryHeader(survey, categoryName) {
   if (titleEl) {
     titleEl.innerHTML = `${categoryName}${badges}`;
   }
+  // Clear any open popover since item counts may have changed
+  const stalePopover = accordion.querySelector('.remaining-list-popover');
+  if (stalePopover) stalePopover.remove();
 
   // Update flagged summary below header
   let summaryEl = accordion.querySelector('.flagged-summary');

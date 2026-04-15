@@ -76,7 +76,7 @@ Open the iPhone Safari PWA unless a specific browser is called out.
 ### 8. Rate an item via compact badge
 - **Setup:** Inspection view, category expanded.
 - **Action:** Tap the small rating badge on a checklist item.
-- **Expected:** Bottom sheet opens with all rating options labelled
+- **Expected:** Bottom sheet opens with all rating options labeled
   (A / B / C / NA / NT / PO). Tapping one closes sheet and rating shows
   as short label on the item.
 - [ ] Pass

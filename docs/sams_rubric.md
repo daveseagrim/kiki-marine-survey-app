@@ -166,7 +166,7 @@ Status legend:
 - **Requirement:** Statement on type and condition of all below-the-waterline
   or below-the-maximum-heeled-waterline through-hulls.
 - **Where:** Hull section or dedicated Through-Hulls section of findings.
-- **Test:** Report has a clearly-labelled section or paragraph specifically
+- **Test:** Report has a clearly-labeled section or paragraph specifically
   addressing below-waterline fittings, enumerated.
 - **MY Bad result:** ❌ "Poor statements regarding type and condition below
   the waterline."

@@ -12,6 +12,65 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2221 — 2026-04-15
+
+### Added — Tap "N left" in a category header to jump to remaining items
+
+The grey `N skipped` pill in each category header stays as a plain,
+non-interactive badge — skipped items should remain skipped and don't
+need a jump list. The `N left` progress text next to it is now a
+dotted-underlined button. Tapping it opens a red-tinted inline panel
+under the header titled "Items left — tap to fill out", listing each
+unrated non-skipped item by its full name. Tapping an item name closes
+the panel, expands the accordion if collapsed, scrolls the item into
+view, and flashes the yellow highlight so the surveyor can start
+rating it. Reuses the existing `_csExpandAccordionAndScroll()` helper
+from the Check function.
+
+`event.stopPropagation()` on the button prevents the surrounding
+accordion from toggling when the badge is tapped. Only one popover is
+open at a time (opening one closes any other). When the category
+state shifts to Done or fully Skipped, the button reverts to a plain
+`<span>` via `outerHTML` swap, and `updateCategoryHeader()` clears any
+open popover so it can't go stale after item edits.
+
+### Changed — Dropped "and grounding" from three electrical sections
+
+Three checklist labels renamed:
+
+- `Battery charger and grounding` → `Battery charger`
+- `Inverter and grounding` → `Inverter`
+- `Inverter/charger and grounding` → `Inverter/charger`
+
+Labels updated in `survey_template.json` and
+`insurance_survey_template.json`. All matching `"section"` fields in
+`text_library.json` (30 snippets across the three sections) were
+renamed in lock-step so snippet lookup still resolves. Grounding-only
+content was scrubbed from the Inverter A-rating: the two A snippets
+about bonding the inverter case to the grounding system were deleted,
+and the C snippet "A Xantrex DC to AC inverter was installed,
+properly grounded, and in acceptable condition." was edited to "A
+Xantrex DC to AC inverter was installed in acceptable condition."
+The other two sections' body text never mentioned grounding, so no
+further snippet edits were needed.
+
+### Changed — "labelled" → "labeled" library-wide
+
+Every occurrence of `labelled` replaced with `labeled` (lowercase,
+American spelling). This is an explicit exception to the project's
+Canadian English convention (the rest of the project still uses
+fibreglass, colour, centre, etc.). Affected:
+
+- `text_library.json` — 8 snippet bodies (exhaust outlet and the
+  various "clearly labeled" panel/switch descriptions)
+- `docs/sams_rubric.md`, `docs/manual_regression.md`,
+  `reference-docs/REPORT_IMPROVEMENT_SUGGESTIONS.md` — one each
+
+All instances were mid-sentence, so no capitalization adjustments
+were required.
+
+---
+
 ## v2220 — 2026-04-15
 
 ### Rewritten — Exhaust condition A/B/C cleaned up (redundancies removed, disclaimers relocated)

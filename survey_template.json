@@ -2285,7 +2285,7 @@
           },
           {
             "type": "list",
-            "label": "Battery charger and grounding",
+            "label": "Battery charger",
             "options": [
               "A - Critical",
               "B - Needs Attention",

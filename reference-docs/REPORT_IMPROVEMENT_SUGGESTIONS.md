@@ -170,7 +170,7 @@ Your hull CSV has 121 rows across 27 sections. The text is generally good — pr
 
 **Norm's comment:** "Do not have photos of four corners of the vessel."
 
-Behring's report ends with a dedicated photo page showing the vessel from all four corners (port bow, starboard bow, port stern, starboard stern) plus key detail shots. Your app should prompt for these four photos as mandatory items, separate from the per-section photos. Consider adding a "Vessel Overview Photos" section at the start of the survey with four labelled photo slots: "Port Bow," "Starboard Bow," "Port Stern," "Starboard Stern."
+Behring's report ends with a dedicated photo page showing the vessel from all four corners (port bow, starboard bow, port stern, starboard stern) plus key detail shots. Your app should prompt for these four photos as mandatory items, separate from the per-section photos. Consider adding a "Vessel Overview Photos" section at the start of the survey with four labeled photo slots: "Port Bow," "Starboard Bow," "Port Stern," "Starboard Stern."
 
 ### Photo annotations
 

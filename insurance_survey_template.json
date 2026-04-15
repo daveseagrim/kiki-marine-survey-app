@@ -2787,7 +2787,7 @@
           },
           {
             "type": "list",
-            "label": "Inverter and grounding",
+            "label": "Inverter",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2799,7 +2799,7 @@
           },
           {
             "type": "list",
-            "label": "Inverter/charger and grounding",
+            "label": "Inverter/charger",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2811,7 +2811,7 @@
           },
           {
             "type": "list",
-            "label": "Battery charger and grounding",
+            "label": "Battery charger",
             "options": [
               "A - Critical",
               "B - Needs Attention",
