@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2179';
+const APP_VERSION = 'v2180';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -618,43 +618,10 @@ const COMPONENT_BUILDERS = {
       }
     ]
   },
-  'Primer, barrier coat, anti-fouling': {
-    title: 'Anti-fouling Condition Builder',
-    intro: 'The bottom paint system was inspected.',
-    components: [
-      {
-        name: 'Anti-fouling Coverage',
-        key: 'coverage',
-        options: [
-          { label: 'Recently applied, good condition', rating: 'C', fragment: 'The anti-fouling coat appeared recently applied and was in good condition with consistent coverage.' },
-          { label: 'Adequate, normal wear', rating: 'C', fragment: 'The anti-fouling paint was present and provided adequate coverage, showing normal wear consistent with use.' },
-          { label: 'Significant wear, thinning', rating: 'B', fragment: 'The anti-fouling paint showed significant wear and thinning in several areas.' },
-          { label: 'Excessive coats, chipping/flaking', rating: 'B', fragment: 'The hull had excessive coats of anti-fouling paint that were chipping and flaking. The hull should be sanded until all loose and failing anti-fouling is removed.' },
-          { label: 'Failed — bare gelcoat exposed', rating: 'A', fragment: 'The anti-fouling system had failed extensively with large areas of bare gelcoat exposed and no protective coating remaining.' }
-        ]
-      },
-      {
-        name: 'Barrier Coat',
-        key: 'barrierCoat',
-        options: [
-          { label: 'Intact', rating: 'C', fragment: 'The barrier coat was intact where visible.' },
-          { label: 'Exposed in places', rating: 'B', fragment: 'The epoxy barrier coat was exposed in several areas where the anti-fouling had separated. The barrier coat should be inspected and repaired as necessary before fresh anti-fouling is applied.' },
-          { label: 'Crazing, chalking, or peeling', rating: 'B', fragment: 'The barrier coat showed crazing, chalking, or peeling. It should be stripped, the gelcoat inspected, and a new barrier coat system applied before bottom painting.' },
-          { label: 'Failed or missing', rating: 'A', fragment: 'The barrier coat had failed or was missing in large areas. The hull must be stripped, dried, inspected for osmotic damage, and a proper epoxy barrier coat applied before launching.' }
-        ]
-      },
-      {
-        name: 'Rudder Anti-fouling',
-        key: 'rudderAF',
-        options: [
-          { label: 'Same condition as hull', rating: 'C', fragment: '' },
-          { label: 'Chipping, needs sanding', rating: 'B', fragment: 'The rudder anti-fouling was also chipping and should be sanded and repainted in the same manner as the hull.' },
-          { label: 'Barrier coat exposed on rudder', rating: 'B', fragment: 'The rudder barrier coat was exposed in places. The rudder should be sanded, the barrier coat repaired, and fresh anti-fouling applied.' },
-          { label: 'Not applicable', rating: 'C', fragment: '' }
-        ]
-      }
-    ]
-  },
+  // v2180: 'Primer, barrier coat, anti-fouling' now uses the standard
+  // chip picker (see curated library entries in text_library.json).
+  // The old component builder with dropdowns is retired in favour of
+  // the consistent observed/means/action phased chips.
   'Sail drive(s) - (external), corrosion, propeller(s), anode(s)': {
     title: 'Sail Drive Condition Builder',
     intro: 'The sail drive unit was visually inspected.',
@@ -3346,6 +3313,33 @@ function showNotesSheet(itemLabel, categoryName) {
     if (itemData.rating) {
       const baseRating = itemData.rating.charAt(0);
       sheetVariants = findTextVariants(categoryName, itemLabel, baseRating);
+      // v2180: synthesize chips for "Not applicable" / "Not tested/not verified"
+      // ratings. The library has no entries for these, but the surveyor still
+      // needs a sentence saying the item wasn't fitted / wasn't tested.
+      if (sheetVariants.length === 0 && /^Not\b/i.test(itemData.rating)) {
+        const displayLabel = (typeof displayItemLabel === 'function')
+          ? displayItemLabel(itemLabel, survey)
+          : itemLabel;
+        const isNotApplicable = /^Not applicable/i.test(itemData.rating);
+        const isNotTested = /^Not tested|not verified/i.test(itemData.rating);
+        const synth = [];
+        if (isNotApplicable) {
+          synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
+            text: `A ${displayLabel.toLowerCase()} was not fitted on this vessel.` });
+          synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
+            text: `This vessel was not equipped with a ${displayLabel.toLowerCase()}.` });
+          synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
+            text: `The ${displayLabel.toLowerCase()} was not applicable to this vessel.` });
+        } else if (isNotTested) {
+          synth.push({ rating: 'NT', phase: 'observed', severity: 1,
+            text: `The ${displayLabel.toLowerCase()} was not tested at the time of survey.` });
+          synth.push({ rating: 'NT', phase: 'observed', severity: 1,
+            text: `Operation of the ${displayLabel.toLowerCase()} was not verified at the time of survey.` });
+          synth.push({ rating: 'NT', phase: 'action', severity: 2,
+            text: `Recommend testing the ${displayLabel.toLowerCase()} under operational conditions.` });
+        }
+        if (synth.length) sheetVariants = synth;
+      }
       if (sheetVariants.length > 0) {
         // v2169: expand rudder-gating tokens on a CLONE of each variant
         // BEFORE computing diff highlights. Without this pre-pass, raw
@@ -15680,6 +15674,7 @@ function updateCategoryHeader(survey, categoryName) {
     if (isPowerboat && item.sailOnly) return false;
     if (isSailboat && item.powerOnly) return false;
     if (isPowerboat && item.rudderItem && !survey.hasRudder) return false;
+    if (isPowerboat && ['Keel and keel joint', 'Keel bolts'].includes(item.label)) return false;
     // Drive type filtering
     if (driveType) {
       if (driveType === 'outdrive') {

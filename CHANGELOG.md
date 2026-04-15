@@ -12,6 +12,52 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2180 — 2026-04-14
+
+### Changed — Primer/barrier/anti-fouling now uses the chip picker (retired dropdown builder)
+
+Removed the `COMPONENT_BUILDERS['Primer, barrier coat, anti-fouling']`
+entry. This item now falls through to the standard sentence picker
+powered by v2177's curated library entries (A/B/C with phase
+structure, severity sort, no "Rudder Anti-fouling" dropdown that
+didn't apply to outdrive boats). UX is now consistent with every
+other curated item.
+
+### Hidden — "Keel and keel joint" + "Keel bolts" on power boats
+
+Power vessels don't have external ballast keels or keel bolts.
+Added the two items to a `SAIL_ONLY_ITEM_LABELS` filter in the three
+`shouldShowItem` / `itemApplies` / `shouldShowHeaderItem` hooks so
+they're hidden from any survey with `vesselType === 'power'`.
+
+### Added — Auto-synthesized chips for "Not applicable" / "Not tested" ratings
+
+The library has no entries for non-A/B/C ratings, so setting an item
+to "Not applicable" previously showed an empty picker. v2180
+synthesizes phase-structured chips on the fly using the item's
+transformed display label:
+
+- **Not applicable** → 3 observed-phase chips:
+  - "A [item] was not fitted on this vessel."
+  - "This vessel was not equipped with a [item]."
+  - "The [item] was not applicable to this vessel."
+- **Not tested / Not verified** → 2 observed + 1 action chip:
+  - "The [item] was not tested at the time of survey."
+  - "Operation of the [item] was not verified at the time of survey."
+  - "Recommend testing the [item] under operational conditions."
+
+All sentences past tense, grammatically sensible, and use
+`displayItemLabel` so rudder-stripped labels flow through correctly
+on no-rudder vessels.
+
+### Fixed — Picker renders with 1 or more chips
+
+Lowered the threshold from `>= 2` to `>= 1` so every item with at
+least one chip shows the picker (was blocking Hull percussion C
+which collapsed to a single chip after dedupe).
+
+---
+
 ## v2179 — 2026-04-14
 
 ### Fixed — Picker now renders even with just 1 unique chip
