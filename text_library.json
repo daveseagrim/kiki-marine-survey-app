@@ -110,47 +110,100 @@
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned readings consistently at or near 999 across large areas, indicating severe and widespread elevated conductivity. Immediate investigation and remediation is required to assess the extent of osmotic damage or delamination."
+      "always": true,
+      "text": "Conductivity readings were taken on a relative 0 to 999 scale."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
-      "rating": "A - hull and rudder",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull{if-rudder: and {count:rudder|rudders}} returned readings consistently at or near 999, indicating severe elevated conductivity throughout. The extent of the readings suggests structural compromise. Professional assessment and remediation is critical."
+      "rating": "A",
+      "text": "The hull returned readings consistently at or near 999 across large areas, indicating severe and widespread elevated conductivity."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
-      "rating": "B - hull ok. Rudder needs help.",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [insert reading range], which are not considered abnormal for the vessel’s age. Suggest monitoring the photographed areas between seasons. {if-rudder:However, the {count:rudder|rudders} displayed numerous saturated spots, many at 999, suggesting internal conductivity accumulation.} To mitigate any spread, off-season venting or drainage may be attempted. However, foam cores often retain conductivity. Rudder removal and rebuild may be required in future if conditions persist"
+      "rating": "A",
+      "text": "The hull returned readings consistently at or near 999, indicating severe elevated conductivity throughout."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
-      "rating": "B - Both elevated. No action required.",
-      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull returned elevated yet expected readings of [insert reading range].{if-rudder: The {count:rudder|rudders} returned} readings of [insert reading range]. No softness or delamination was observed. Monitor the higher-reading areas seasonally for signs of osmosis or delamination."
+      "rating": "A",
+      "text": "The extent of the readings suggests structural compromise."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
-      "rating": "C - Rudder issue not high",
-      "text": "Conductivity readings were taken on a relative 0 to 999 scale. The hull presented no areas of concern.{if-rudder: The {count:rudder|rudders} showed} elevated readings of [insert reading range] that are not unusual for the vessel’s age. Recheck seasonally to confirm stability."
+      "rating": "A",
+      "text": "Immediate investigation and remediation is required to assess the extent of osmotic damage or delamination."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
-      "rating": "C - Hull and rudder not high",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [insert reading range].{if-rudder: The {count:rudder|rudders} returned} readings of [insert reading range]. These values are not considered abnormal or concerning for a vessel of this age. Monitor the photographed areas between seasons for signs of osmosis or delamination."
+      "rating": "A",
+      "text": "Professional assessment and remediation is critical."
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "B",
+      "always": true,
+      "text": "Conductivity readings were taken on a relative 0 to 999 scale."
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "B",
+      "text": "The hull returned elevated readings of [insert reading range], which are not considered abnormal for the vessel's age."
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "B",
+      "text": "The hull returned elevated yet expected readings of [insert reading range]."
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "B",
+      "text": "No softness or delamination was observed."
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "B",
+      "text": "Monitor the photographed areas between seasons for signs of osmosis or delamination."
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "B",
+      "text": "Monitor the higher-reading areas seasonally."
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "B",
+      "text": "Recommend off-season venting or drainage to mitigate any spread of elevated conductivity."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. The hull returned elevated readings of [insert reading range] that are not considered abnormal for the vessel’s age. Monitor the photographed areas between seasons.{if-rudder: The {count:rudder|rudders} were} bronze and not prone to conductivity uptake."
+      "always": true,
+      "text": "Conductivity readings were taken on a relative 0 to 999 scale."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
-      "text": "Conductivity readings were taken on a relative scale of 0 to 999. Conductivity testing of the hull{if-rudder: and {count:rudder|rudders}} returned readings consistent with proper condition, with no elevated conductivity detected."
+      "text": "The hull returned readings consistent with proper condition, with no elevated conductivity detected."
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
-      "rating": "Not tested",
-      "text": "Because the boat had just been lifted from the water, it retained water in the anti-fouling and barrier coat, which produced misleading readings. However, there was no indication of osmosis or delamination. Additionally, as indicated in other sections, the hull was inspected for barrier coat integrity and was percussion-sounded."
+      "rating": "C",
+      "text": "The hull returned elevated readings of [insert reading range] that are not considered abnormal for the vessel's age."
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "C",
+      "text": "Monitor the photographed areas between seasons."
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "C",
+      "text": "Monitor the photographed areas between seasons for signs of osmosis or delamination."
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "C",
+      "text": "Recheck seasonally to confirm stability."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",

@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2171';
+const APP_VERSION = 'v2172';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -3337,26 +3337,38 @@ function showNotesSheet(itemLabel, categoryName) {
         // the expanded, deduped text so the highlighter operates on clean prose).
         const highlightedTexts = highlightSnippetDiffs(sheetVariantsForDisplay);
 
-        // v2171: Sentence-level picker. Break each variant into sentences,
-        // dedupe across all variants, render each as a checkbox. Ticking
-        // sentences rebuilds the textarea from the current selection — fast
-        // composition without reading 4 similar paragraphs.
+        // v2171/v2172: Sentence-level picker. Break each variant into
+        // sentences, dedupe across all variants, render each as a checkbox.
+        // Ticking sentences rebuilds the textarea from the current selection.
+        // v2172 adds two pieces:
+        //   - An `always: true` flag on a variant auto-checks its sentence
+        //     and locks it on (no uncheck) so boilerplate ("readings taken
+        //     on a 0-999 scale") is always part of the output.
+        //   - Any "[insert reading range]" placeholder in a sentence is
+        //     replaced with a pair of inline number inputs; the picker
+        //     rebuild interpolates the numbers into the chip's text.
         const _splitSentences = (s) => (s || '')
           .split(/(?<=[.!?])\s+/)
           .map(x => x.trim())
           .filter(Boolean);
-        const _pickerSentences = [];
-        const _pickerSeen = new Set();
+        const _pickerSentences = [];      // { text, always }
+        const _pickerSeen = new Map();    // normKey -> index
         sheetVariantsForDisplay.forEach(v => {
           _splitSentences(v.text).forEach(sent => {
-            // Normalize whitespace for the dedupe check but keep original casing
             const normKey = sent.replace(/\s+/g, ' ').toLowerCase();
             if (!_pickerSeen.has(normKey)) {
-              _pickerSeen.add(normKey);
-              _pickerSentences.push(sent);
+              _pickerSeen.set(normKey, _pickerSentences.length);
+              _pickerSentences.push({ text: sent, always: !!v.always });
+            } else if (v.always) {
+              // If a later variant with the same sentence is flagged always,
+              // upgrade the existing entry.
+              _pickerSentences[_pickerSeen.get(normKey)].always = true;
             }
           });
         });
+        // Put any `always` sentences at the top of the picker list so the
+        // surveyor sees them first.
+        _pickerSentences.sort((a, b) => (b.always ? 1 : 0) - (a.always ? 1 : 0));
         window._sentencePicker = window._sentencePicker || {};
         window._sentencePicker[sanitizedLabel] = _pickerSentences;
 
@@ -3369,13 +3381,30 @@ function showNotesSheet(itemLabel, categoryName) {
             </div>
             <div id="sheet-sentence-picker" style="padding:0;">
           `;
-          _pickerSentences.forEach((s, idx) => {
+          _pickerSentences.forEach((sObj, idx) => {
+            const s = sObj.text;
+            // Render [insert reading range] as two inline number inputs.
+            // After render the chip handler joins both numbers as "N-M".
+            let rendered = escSnippet(s).replace(/\[insert reading range\]/gi,
+              `<span class="kk-range-slot" style="display:inline-flex;align-items:center;gap:4px;">` +
+                `<input type="number" class="kk-range-low" placeholder="low" min="0" max="999" ` +
+                  `oninput="_kkRebuildFromSentencePicker('${sanitizedLabel}')" ` +
+                  `onclick="event.preventDefault();event.stopPropagation();" ` +
+                  `style="width:52px;padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">` +
+                `<span style="color:#6b7280;">–</span>` +
+                `<input type="number" class="kk-range-high" placeholder="high" min="0" max="999" ` +
+                  `oninput="_kkRebuildFromSentencePicker('${sanitizedLabel}')" ` +
+                  `onclick="event.preventDefault();event.stopPropagation();" ` +
+                  `style="width:52px;padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">` +
+              `</span>`);
+            const isAlways = sObj.always ? 'checked disabled' : '';
+            const alwaysBadge = sObj.always ? `<span style="font-size:10px;background:#dcfce7;color:#166534;padding:1px 5px;border-radius:4px;margin-left:6px;">always</span>` : '';
             sentencePickerHtml += `
-              <label style="display:flex;gap:10px;padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;font-size:13px;line-height:1.45;">
-                <input type="checkbox" class="kk-sentence-chip" data-picker-key="${sanitizedLabel}" data-sentence-idx="${idx}"
+              <label style="display:flex;gap:10px;padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;font-size:13px;line-height:1.45;${sObj.always ? 'background:#f0fdf4;' : ''}">
+                <input type="checkbox" class="kk-sentence-chip" data-picker-key="${sanitizedLabel}" data-sentence-idx="${idx}" ${isAlways}
                   onchange="_kkRebuildFromSentencePicker('${sanitizedLabel}')"
                   style="margin-top:3px;flex-shrink:0;">
-                <span>${escSnippet(s)}</span>
+                <span>${rendered}${alwaysBadge}</span>
               </label>
             `;
           });
@@ -3742,27 +3771,41 @@ function showNotesSheet(itemLabel, categoryName) {
 }
 
 // Global tap handler for bottom-sheet snippet cards. Called from the
-// v2171: rebuild the notes textarea from the checked sentence chips.
+// v2171/v2172: rebuild the notes textarea from the checked sentence chips.
 // Each chip references sentences[] in window._sentencePicker keyed by
 // the sanitized item label. Join checked sentences in their original
-// order with a single space.
+// order with a single space. Disabled+checked chips (the `always`
+// boilerplate) are always included. [insert reading range] placeholders
+// are replaced with the number pair typed into the chip's inline inputs.
 window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
   const ta = document.getElementById(`sheet-text-${sanitizedLabel}`);
-  const sentences = (window._sentencePicker && window._sentencePicker[sanitizedLabel]) || [];
+  const entries = (window._sentencePicker && window._sentencePicker[sanitizedLabel]) || [];
   if (!ta) return;
   const picker = document.getElementById('sheet-sentence-picker');
   if (!picker) return;
-  const checked = [];
-  picker.querySelectorAll('.kk-sentence-chip').forEach(el => {
-    if (el.checked) {
-      const idx = parseInt(el.getAttribute('data-sentence-idx'), 10);
-      if (!isNaN(idx) && sentences[idx]) checked.push(sentences[idx]);
+  const parts = [];
+  picker.querySelectorAll('label').forEach(lbl => {
+    const chip = lbl.querySelector('.kk-sentence-chip');
+    if (!chip || !chip.checked) return;
+    const idx = parseInt(chip.getAttribute('data-sentence-idx'), 10);
+    const entry = !isNaN(idx) ? entries[idx] : null;
+    if (!entry) return;
+    let text = entry.text || '';
+    // Interpolate range numbers into [insert reading range] placeholder
+    const low = (lbl.querySelector('.kk-range-low') || {}).value || '';
+    const high = (lbl.querySelector('.kk-range-high') || {}).value || '';
+    if (/\[insert reading range\]/i.test(text)) {
+      let replacement = '[insert reading range]';
+      if (low && high) replacement = `${low}\u2013${high}`; // en-dash
+      else if (low) replacement = `${low}`;
+      else if (high) replacement = `${high}`;
+      text = text.replace(/\[insert reading range\]/gi, replacement);
     }
+    parts.push(text);
   });
-  ta.value = checked.join(' ');
+  ta.value = parts.join(' ');
   ta.style.height = 'auto';
   ta.style.height = ta.scrollHeight + 'px';
-  // Trigger input so any downstream chip-strip builder can re-render
   try { ta.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
 };
 

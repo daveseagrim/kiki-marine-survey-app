@@ -12,6 +12,46 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2172 — 2026-04-14
+
+### Added — "always" boilerplate + inline range inputs in sentence picker
+
+Two picker upgrades driven by the Ahoy Vey conductivity workflow:
+
+1. Library entries can set `"always": true`. Those sentences render
+   pre-checked and disabled at the top of the picker with a green
+   "always" badge, and always appear in the rebuilt textarea. Used for
+   the "Conductivity readings were taken on a relative 0 to 999 scale"
+   boilerplate that the surveyor said is always part of the sentence.
+
+2. Any `[insert reading range]` placeholder in a chip renders as two
+   inline number inputs (low–high, 0-999). Typing numbers triggers the
+   rebuild and interpolates them as an en-dash pair (e.g., "150–275")
+   into the output sentence. Click events on the inputs don't bubble
+   up to the label, so typing doesn't toggle the checkbox.
+
+### Rewritten — Hull and rudder(s) conductivity testing library (A/B/C)
+
+Replaced the 6 existing pre-written paragraph variants with 19
+single-sentence entries across A, B, and C ratings. Each rating now
+has one `always` boilerplate sentence + a curated set of distinct
+follow-ups the surveyor can tick:
+
+- A (Critical): 5 chips covering severity descriptors + remediation asks
+- B (Needs Attention): 6 chips covering range readings, findings,
+  monitoring recommendations
+- C (Serviceable): 5 chips covering clean readings, elevated-but-normal
+  readings, and monitor/recheck follow-ups
+
+All rudder verbiage stripped — the rudder/bronze/saildrive branches
+don't apply to Ahoy Vey (outdrive) and would have been token-scrubbed
+anyway, so they're removed from the source for cleaner chips.
+
+This pattern (always + tickable sentences, optional inline inputs)
+should be extended to other sections as the surveyor encounters them.
+
+---
+
 ## v2171 — 2026-04-14
 
 ### Added — Sentence-level picker ("chips") for fast observation composition
