@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2229';
+const APP_VERSION = 'v2230';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9396,19 +9396,8 @@ async function generateVesselDescription() {
   const driveLineCount = survey?.driveLineCount || 1;
   const hasRudder = survey?.hasRudder !== false;
 
-  // Build propeller/shaft description from survey items
-  let propDesc = '';
-  if (survey?.items) {
-    const propellerItems = Object.keys(survey.items).filter(k => k.toLowerCase().includes('propeller') && survey.items[k].text);
-    const shaftItems = Object.keys(survey.items).filter(k => (k.toLowerCase().includes('shaft') || k.toLowerCase().includes('stern tube')) && survey.items[k].text);
-    const cutlassItems = Object.keys(survey.items).filter(k => k.toLowerCase().includes('cutlass') && survey.items[k].text);
-    if (propellerItems.length > 0 || shaftItems.length > 0) {
-      propDesc = '\n\n';
-      if (shaftItems.length > 0) propDesc += shaftItems.map(k => survey.items[k].text).join(' ') + ' ';
-      if (cutlassItems.length > 0) propDesc += cutlassItems.map(k => survey.items[k].text).join(' ') + ' ';
-      if (propellerItems.length > 0) propDesc += propellerItems.map(k => survey.items[k].text).join(' ');
-    }
-  }
+  // v2230: Propeller/shaft/cutlass/outdrive observations removed — those
+  // belong in the Engine(s) and drive(s) propulsion narrative.
 
   // v2228: parity with buildDescriptionFromSurvey() — broadened from C-only
   // to any rating that means "installed and at least functional"
@@ -9485,7 +9474,6 @@ async function generateVesselDescription() {
   desc += rigDesc;
   desc += `\n\n`;
   desc += engineDesc;
-  desc += propDesc;
   desc += `\n\n`;
   desc += `The hull is [COLOUR] with a [COLOUR] boot stripe. The deck is [COLOUR] with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
   // v2228: resolve head count from survey.headCount (set on the Head(s)
@@ -9606,19 +9594,8 @@ async function regenerateDescriptionFromInspection() {
     engineDesc = `Power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING] [3/4]-blade propeller through a [SHAFT DRIVE/STERNDRIVE].`;
   }
 
-  // Pull propeller/shaft data from survey items
-  let propDesc = '';
-  if (survey.items) {
-    const propellerItems = Object.keys(survey.items).filter(k => k.toLowerCase().includes('propeller') && survey.items[k].text);
-    const shaftItems = Object.keys(survey.items).filter(k => (k.toLowerCase().includes('shaft') || k.toLowerCase().includes('stern tube')) && survey.items[k].text);
-    const cutlassItems = Object.keys(survey.items).filter(k => k.toLowerCase().includes('cutlass') && survey.items[k].text);
-    if (propellerItems.length > 0 || shaftItems.length > 0) {
-      propDesc = '\n\n';
-      if (shaftItems.length > 0) propDesc += shaftItems.map(k => survey.items[k].text).join(' ') + ' ';
-      if (cutlassItems.length > 0) propDesc += cutlassItems.map(k => survey.items[k].text).join(' ') + ' ';
-      if (propellerItems.length > 0) propDesc += propellerItems.map(k => survey.items[k].text).join(' ');
-    }
-  }
+  // v2230: Propeller/shaft/cutlass/outdrive observations removed — those
+  // belong in the Engine(s) and drive(s) propulsion narrative.
 
   // Electronics from survey items — v2228: broadened from C-only to any
   // rating that means "installed and at least functional" (A/B/C/Powered-up).
@@ -9695,7 +9672,6 @@ async function regenerateDescriptionFromInspection() {
   desc += rigDesc;
   desc += `\n\n`;
   desc += engineDesc;
-  desc += propDesc;
   desc += `\n\n`;
   desc += `The hull is [COLOUR] with a [COLOUR] boot stripe. The deck is [COLOUR] with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
   // v2228: resolve head count from survey.headCount (set on the Head(s)
@@ -9816,19 +9792,9 @@ function buildDescriptionFromSurvey(survey) {
     engineDesc = `Power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING] [3/4]-blade propeller through a ${drivePhrase}.`;
   }
 
-  // Propeller/shaft data from survey items
-  let propDesc = '';
-  if (survey.items) {
-    const propellerItems = Object.keys(survey.items).filter(k => k.toLowerCase().includes('propeller') && survey.items[k].text);
-    const shaftItems = Object.keys(survey.items).filter(k => (k.toLowerCase().includes('shaft') || k.toLowerCase().includes('stern tube')) && survey.items[k].text);
-    const cutlassItems = Object.keys(survey.items).filter(k => k.toLowerCase().includes('cutlass') && survey.items[k].text);
-    if (propellerItems.length > 0 || shaftItems.length > 0) {
-      propDesc = '\n\n';
-      if (shaftItems.length > 0) propDesc += shaftItems.map(k => survey.items[k].text).join(' ') + ' ';
-      if (cutlassItems.length > 0) propDesc += cutlassItems.map(k => survey.items[k].text).join(' ') + ' ';
-      if (propellerItems.length > 0) propDesc += propellerItems.map(k => survey.items[k].text).join(' ');
-    }
-  }
+  // v2230: Propeller/shaft/cutlass/outdrive observations removed from the
+  // vessel description. Those findings belong in the Engine(s) and drive(s)
+  // section (propulsion narrative), not the general vessel description.
 
   // Electronics from survey items — v2228: broadened from C-only to any
   // rating that means "installed and at least functional" (A/B/C/Powered-up).
@@ -9905,7 +9871,6 @@ function buildDescriptionFromSurvey(survey) {
   desc += rigDesc;
   desc += `\n\n`;
   desc += engineDesc;
-  desc += propDesc;
   desc += `\n\n`;
   desc += `The hull is [COLOUR] with a [COLOUR] boot stripe. The deck is [COLOUR] with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
   // v2228: resolve head count from survey.headCount (set on the Head(s)

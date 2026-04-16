@@ -12,6 +12,23 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2230 — 2026-04-15
+
+### Fixed — Propeller/shaft/outdrive observations removed from Vessel Description
+
+The auto-generated Vessel Description was pulling propeller, shaft, stern
+tube, cutlass bearing, and outdrive inspection text from rated checklist
+items into the description paragraph. These engine-section observations
+(e.g. "Both anodes were more than 50% depleted…") do not belong in the
+general vessel description — they already appear in the Engine(s) and
+drive(s) Detailed Survey Findings and propulsion narrative.
+
+Removed the `propDesc` block from all three description-builder functions:
+`generateVesselDescription()`, `regenerateDescriptionFromInspection()`, and
+`buildDescriptionFromSurvey()`.
+
+---
+
 ## v2229 — 2026-04-15
 
 ### Changed — Consolidated Rating & Valuation into a single report section
