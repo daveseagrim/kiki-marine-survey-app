@@ -12,6 +12,20 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2252 — 2026-04-16
+
+### Condition sentence uses surveyor's BUC grade
+- Extracted `_buildConditionSentence(survey)` as a shared function used by all three vessel description builders (sail, power, human-powered).
+- When the surveyor sets an overall condition (Excellent/Bristol, Above Average, Average, Fair, Poor, Restorable), the description now uses a tailored sentence matching that grade instead of inferring from A/B/C rating distribution.
+- Rating-distribution heuristic retained as fallback when no BUC grade is set.
+- Fixed "her size" → "its size" in the Average condition sentence.
+- One-time migration updates existing surveys whose saved vessel description had a heuristic sentence that doesn't match the BUC grade.
+
+### F&R explanatory text removed
+- Removed the 5-paragraph explanatory block under the Findings & Recommendations heading (rating definitions, repair advisory). This was a duplicate of the "Use of Ratings" section near the top of the report.
+
+---
+
 ## v2251 — 2026-04-16
 
 ### Survey Checklist Summary removed from report
@@ -32,6 +46,11 @@ lets you roll back to a specific version with confidence.
 - **One-time migration** — on first load, all existing surveys are patched: old personsInAttendance formats replaced with the correct string, and "She has/is" in saved vessel descriptions replaced with the quoted vessel name.
 - **Tax Status / Compliance Plate** — these fields are now omitted from the Vessel Documentation section of the report when left blank, instead of showing "N/A". Compliance plate row also omitted when no photo is captured.
 - **SaveStatus pill repositioned** — moved from `top: 8px` (overlapping header) to `top: 60px` (just below the header bar) so it no longer covers navigation buttons or content.
+
+### Report section reorder
+
+- **Safety Equipment and Instruments moved after Detailed Survey Findings** — previously sat before it. New order: Findings Overview → Detailed Survey Findings → Safety Equipment → Instruments & Electronics → Findings & Recommendations → Rating & Valuation → Surveyor's Certification.
+- **TOC updated** — now 16 entries (Instruments & Electronics added to TOC; order matches report body).
 
 ---
 

@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2251';
+const APP_VERSION = 'v2252';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -9413,6 +9413,51 @@ function lookupEngineType(makeName, modelName) {
   return mdl ? (mdl.engineType || '') : '';
 }
 
+// v2252: Shared condition-sentence builder used by all three vessel-
+// description generators. Reads the surveyor's BUC grade first; falls
+// back to a rating-distribution heuristic when no grade is set.
+function _buildConditionSentence(survey) {
+  const _oc = (survey.overallCondition || document.getElementById('overallCondition')?.value || '').trim().toLowerCase();
+  if (_oc) {
+    if (_oc.includes('excellent') || _oc.includes('bristol')) {
+      return ` At the time of the survey the vessel was in excellent overall condition, consistent with a vessel that has been meticulously maintained and well equipped.`;
+    } else if (_oc.includes('above average')) {
+      return ` At the time of the survey the vessel was in above average overall condition, having received above average care. Any items noted in the findings section are minor and typical for a vessel of this age and type.`;
+    } else if (_oc.includes('average')) {
+      return ` At the time of the survey the vessel was in average overall condition, ready for use and normally equipped for its size. The reader is directed to the Findings and Recommendations section for items requiring attention.`;
+    } else if (_oc.includes('fair')) {
+      return ` At the time of the survey the vessel was in fair overall condition with deficiencies noted. Corrective action is recommended before the vessel is placed into regular service.`;
+    } else if (_oc.includes('poor')) {
+      return ` At the time of the survey the vessel was in poor overall condition with substantial work required. The reader is directed to the Findings and Recommendations section of this report for details.`;
+    } else if (_oc.includes('restorable')) {
+      return ` At the time of the survey the vessel was in restorable condition, requiring significant restoration work before it can be returned to service.`;
+    } else {
+      // Custom text entered — use it verbatim
+      return ` At the time of the survey the vessel's overall condition was assessed as "${survey.overallCondition || document.getElementById('overallCondition')?.value || ''}".`;
+    }
+  } else if (survey.items) {
+    // Fallback: derive from ratings distribution when no grade is set
+    const _ratings = Object.values(survey.items).map(d => (d.rating || '').charAt(0)).filter(Boolean);
+    const _aCount = _ratings.filter(r => r === 'A').length;
+    const _bCount = _ratings.filter(r => r === 'B').length;
+    const _cCount = _ratings.filter(r => r === 'C').length;
+    const _total = _aCount + _bCount + _cCount;
+    if (_total > 0) {
+      const _cPct = Math.round((_cCount / _total) * 100);
+      if (_aCount === 0 && _bCount <= 2 && _cPct >= 85) {
+        return ` At the time of the survey the vessel was in good overall condition, consistent with its age and use, and appeared to have been well maintained.`;
+      } else if (_aCount === 0 && _cPct >= 65) {
+        return ` At the time of the survey the vessel was in fair to good overall condition with a number of items requiring attention, as detailed in the body of this report.`;
+      } else if (_aCount <= 2 && _cPct >= 50) {
+        return ` At the time of the survey the vessel was in fair overall condition with deficiencies noted. Corrective action is recommended before the vessel is placed into regular service.`;
+      } else {
+        return ` At the time of the survey the vessel exhibited significant deficiencies. The reader is directed to the Findings and Recommendations section of this report for details.`;
+      }
+    }
+  }
+  return `\n\nThe vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained.`;
+}
+
 // Generate a vessel description template from filled-in form fields
 async function generateVesselDescription() {
   const ymm = document.getElementById('yearMakeModel')?.value || '';
@@ -9629,28 +9674,11 @@ async function generateVesselDescription() {
   // ── Para 4: Safety equipment and overall condition ──
   desc += '\n\n';
   desc += safetyDesc || `Safety equipment included [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
-  // v2244: auto-derive condition from ratings distribution
-  let _conditionSentence = '';
-  if (survey.items) {
-    const _ratings = Object.values(survey.items).map(d => (d.rating || '').charAt(0)).filter(Boolean);
-    const _aCount = _ratings.filter(r => r === 'A').length;
-    const _bCount = _ratings.filter(r => r === 'B').length;
-    const _cCount = _ratings.filter(r => r === 'C').length;
-    const _total = _aCount + _bCount + _cCount;
-    if (_total > 0) {
-      const _cPct = Math.round((_cCount / _total) * 100);
-      if (_aCount === 0 && _bCount <= 2 && _cPct >= 85) {
-        _conditionSentence = ` At the time of the survey the vessel was in good overall condition, consistent with her age and use, and appeared to have been well maintained.`;
-      } else if (_aCount === 0 && _cPct >= 65) {
-        _conditionSentence = ` At the time of the survey the vessel was in fair to good overall condition with a number of items requiring attention, as detailed in the body of this report.`;
-      } else if (_aCount <= 2 && _cPct >= 50) {
-        _conditionSentence = ` At the time of the survey the vessel was in fair overall condition with deficiencies noted. Corrective action is recommended before the vessel is placed into regular service.`;
-      } else {
-        _conditionSentence = ` At the time of the survey the vessel exhibited significant deficiencies. The reader is directed to the Findings and Recommendations section of this report for details.`;
-      }
-    }
-  }
-  desc += _conditionSentence || `\n\nThe vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained.`;
+  // v2252: condition sentence now uses shared _buildConditionSentence()
+  // Builder 1 works from DOM fields, not a survey object — fetch the
+  // saved survey so the function can read overallCondition and items.
+  const _surveyForCond = currentSurveyId ? (await getSurvey(currentSurveyId) || {}) : {};
+  desc += _buildConditionSentence(_surveyForCond);
 
   const textarea = document.getElementById('vesselDescription');
   if (textarea) {
@@ -9865,28 +9893,8 @@ async function regenerateDescriptionFromInspection() {
   }
   desc += '\n\n';
   desc += safetyDesc || `Safety equipment included [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
-  // v2244: auto-derive condition from ratings distribution
-  let _conditionSentence2 = '';
-  if (survey.items) {
-    const _ratings2 = Object.values(survey.items).map(d => (d.rating || '').charAt(0)).filter(Boolean);
-    const _a2 = _ratings2.filter(r => r === 'A').length;
-    const _b2 = _ratings2.filter(r => r === 'B').length;
-    const _c2 = _ratings2.filter(r => r === 'C').length;
-    const _t2 = _a2 + _b2 + _c2;
-    if (_t2 > 0) {
-      const _cp2 = Math.round((_c2 / _t2) * 100);
-      if (_a2 === 0 && _b2 <= 2 && _cp2 >= 85) {
-        _conditionSentence2 = ` At the time of the survey the vessel was in good overall condition, consistent with her age and use, and appeared to have been well maintained.`;
-      } else if (_a2 === 0 && _cp2 >= 65) {
-        _conditionSentence2 = ` At the time of the survey the vessel was in fair to good overall condition with a number of items requiring attention, as detailed in the body of this report.`;
-      } else if (_a2 <= 2 && _cp2 >= 50) {
-        _conditionSentence2 = ` At the time of the survey the vessel was in fair overall condition with deficiencies noted. Corrective action is recommended before the vessel is placed into regular service.`;
-      } else {
-        _conditionSentence2 = ` At the time of the survey the vessel exhibited significant deficiencies. The reader is directed to the Findings and Recommendations section of this report for details.`;
-      }
-    }
-  }
-  desc += _conditionSentence2 || `\n\nThe vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained.`;
+  // v2251: condition sentence driven by overallCondition (same logic as generateVesselDescription)
+  desc += _buildConditionSentence(survey);
 
   // Confirm before overwriting
   if (survey.vesselDescription && survey.vesselDescription.trim()) {
@@ -10094,28 +10102,8 @@ function buildDescriptionFromSurvey(survey) {
   }
   desc += '\n\n';
   desc += safetyDesc || `Safety equipment included [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
-  // v2244: auto-derive condition from ratings distribution
-  let _conditionSentence3 = '';
-  if (survey.items) {
-    const _ratings3 = Object.values(survey.items).map(d => (d.rating || '').charAt(0)).filter(Boolean);
-    const _a3 = _ratings3.filter(r => r === 'A').length;
-    const _b3 = _ratings3.filter(r => r === 'B').length;
-    const _c3 = _ratings3.filter(r => r === 'C').length;
-    const _t3 = _a3 + _b3 + _c3;
-    if (_t3 > 0) {
-      const _cp3 = Math.round((_c3 / _t3) * 100);
-      if (_a3 === 0 && _b3 <= 2 && _cp3 >= 85) {
-        _conditionSentence3 = ` At the time of the survey the vessel was in good overall condition, consistent with her age and use, and appeared to have been well maintained.`;
-      } else if (_a3 === 0 && _cp3 >= 65) {
-        _conditionSentence3 = ` At the time of the survey the vessel was in fair to good overall condition with a number of items requiring attention, as detailed in the body of this report.`;
-      } else if (_a3 <= 2 && _cp3 >= 50) {
-        _conditionSentence3 = ` At the time of the survey the vessel was in fair overall condition with deficiencies noted. Corrective action is recommended before the vessel is placed into regular service.`;
-      } else {
-        _conditionSentence3 = ` At the time of the survey the vessel exhibited significant deficiencies. The reader is directed to the Findings and Recommendations section of this report for details.`;
-      }
-    }
-  }
-  desc += _conditionSentence3 || `\n\nThe vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained.`;
+  // v2251: condition sentence driven by overallCondition (same logic as generateVesselDescription)
+  desc += _buildConditionSentence(survey);
 
   return desc;
 }
@@ -19653,13 +19641,8 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
   html += `<div class="page-break"></div>`;
   html += `<h2 style="background: #dc2626; font-size: 14pt;">FINDINGS &amp; RECOMMENDATIONS</h2>`;
 
-  html += `<div class="scope-text">
-    <p>The Findings &amp; Recommendations section is only one section of this Survey Report. If received on its own, this section should not be mistaken as this vessel's full Survey Report. PLEASE BE ADVISED THAT SOME DEFICIENCIES, OBSERVATIONS AND SUGGESTIONS MAY ALSO BE CONTAINED IN THE BODY OF THE REPORT.</p>
-    <p>Deficiencies noted under <strong>"A — FIRST PRIORITY/SAFETY FINDINGS"</strong> should be addressed before the vessel is next underway. These findings could represent an endangerment to personnel and/or the vessel's safe operating condition.</p>
-    <p>Deficiencies noted under <strong>"B — SECONDARY PRIORITY/FINDINGS NEEDING TIMELY ATTENTION"</strong> should be corrected in the near future so as to maintain and adhere to certain codes, regulations, standards or recommended practices.</p>
-    <p>Deficiencies noted under <strong>"C — SURVEYOR'S GENERAL FINDINGS, NOTES AND OBSERVATIONS"</strong> are lower priority or cosmetic findings, which should be addressed in keeping with good marine maintenance practices.</p>
-    <p><em>When performing repairs, diagnosing, adjustments, and/or replacements of any component; always follow proper marine mechanical and/or electrical repair and safety practices. Consult and/or hire a certified marine technician, if required.</em></p>
-  </div>`;
+  // v2252: explanatory text removed — rating definitions already appear
+  // in the "Use of Ratings" section near the top of the report.
 
   // v2228: findingPhotos() helper removed — Findings & Recommendations no
   // longer renders photos. Photos now appear only in Detailed Survey
@@ -20477,6 +20460,43 @@ async function initApp() {
       }
     } catch (migErr) {
       console.warn('v2251 migration error (non-fatal):', migErr);
+    }
+
+    // ── v2252 one-time migration: re-generate condition sentence in
+    // existing vessel descriptions so it matches the BUC grade ─────────
+    try {
+      const _migKey2 = '_v2252_condition_sentence_migrated';
+      if (!localStorage.getItem(_migKey2)) {
+        const _allSurveys2 = await getAllSurveys();
+        // Old heuristic phrases that should be replaced when a BUC grade is set
+        const _oldCondPhrases = [
+          'in good overall condition, consistent with its age',
+          'in fair to good overall condition with a number of items',
+          'in fair overall condition with deficiencies noted',
+          'exhibited significant deficiencies',
+          'equipped for her size',
+          'appeared to have been well maintained'
+        ];
+        for (const s of _allSurveys2) {
+          if (!s.vesselDescription || !s.overallCondition) continue;
+          // Check if the description contains an old heuristic phrase
+          const hasOld = _oldCondPhrases.some(p => s.vesselDescription.includes(p));
+          if (!hasOld) continue;
+          // Build the correct sentence from the BUC grade
+          const newSentence = _buildConditionSentence(s).trim();
+          if (!newSentence || newSentence.includes('[GOOD/FAIR/POOR]')) continue;
+          // Replace the old sentence (starts with "At the time of the survey")
+          s.vesselDescription = s.vesselDescription.replace(
+            /At the time of the survey the vessel (?:was in |exhibited )[^.]+\.[^.]*(?:detailed in the body of this report\.|as detailed in the body of this report\.|requiring attention\.|regular service\.|for details\.)?/,
+            newSentence
+          );
+          await saveSurvey(s);
+        }
+        localStorage.setItem(_migKey2, '1');
+        console.log('v2252 migration: condition sentences fixed');
+      }
+    } catch (migErr2) {
+      console.warn('v2252 migration error (non-fatal):', migErr2);
     }
 
     // Kick off dictionary load in the background — no await, so startup
