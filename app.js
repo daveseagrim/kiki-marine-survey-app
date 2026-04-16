@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2237';
+const APP_VERSION = 'v2238';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -6535,6 +6535,9 @@ function createNewSurvey(formData) {
     overallCondition: formData.overallCondition,
     skipComparables: formData.skipComparables || false,
 
+    // v2238: per-field exclude from report (intro page fields)
+    excludedIntroFields: formData.excludedIntroFields || [],
+
     // Safety equipment checklist (auto-generated from TP 511)
     safetyEquipment: [],
 
@@ -7650,6 +7653,9 @@ function renderNewSurveyForm() {
 
   // Populate engine and transmission dropdowns
   populateEngineMakes();
+
+  // v2238: add exclude toggles (new survey — no excludes yet)
+  initExcludeToggles([]);
 }
 
 // ─── Engine & Transmission Dropdown Population ──────────────────────────────
@@ -8463,7 +8469,8 @@ function saveSurveyDetails(surveyId) {
       replacementCost: document.getElementById('replacementCost')?.value || '',
       overallCondition: document.getElementById('overallCondition')?.value || '',
       comparables: collectComparables(),
-      skipComparables: document.getElementById('skipComparables')?.checked || false
+      skipComparables: document.getElementById('skipComparables')?.checked || false,
+      excludedIntroFields: collectExcludedIntroFields()
     };
 
     // Merge updates into existing survey (preserving items, photos, etc.)
@@ -8539,6 +8546,7 @@ async function saveEditFormSilently() {
   }
   try { survey.comparables = collectComparables(); } catch(e) {}
   try { survey.skipComparables = document.getElementById('skipComparables')?.checked || false; } catch(e) {}
+  try { survey.excludedIntroFields = collectExcludedIntroFields(); } catch(e) {}
 
   await saveSurvey(survey);
 }
@@ -10382,6 +10390,7 @@ function startNewSurvey() {
     bilgePumps: collectBilgePumps(),
     comparables: collectComparables(),
     skipComparables: document.getElementById('skipComparables')?.checked || false,
+    excludedIntroFields: collectExcludedIntroFields(),
 
     vesselDescription: document.getElementById('vesselDescription')?.value || '',
 
@@ -10546,6 +10555,56 @@ function collectComparables() {
 }
 
 // v2231: toggle comparables section visibility and persist the flag
+// ─── Skip / Exclude intro fields from report ─────────────────────────────
+// v2238: Each intro-page field can be individually excluded from the
+// generated report. The exclude state is stored as an array of field IDs
+// in survey.excludedIntroFields.
+
+// Fields that should NOT be excludable (essential for cover page / report)
+const NON_EXCLUDABLE_FIELDS = new Set([
+  'vesselName', 'yearMakeModel'
+]);
+
+function collectExcludedIntroFields() {
+  const toggles = document.querySelectorAll('.excl-toggle.active');
+  return Array.from(toggles).map(el => el.dataset.exclField).filter(Boolean);
+}
+
+function initExcludeToggles(excludedFields) {
+  const excluded = new Set(excludedFields || []);
+  // Find all form-groups that contain a labeled input/select/textarea
+  document.querySelectorAll('.form-group').forEach(fg => {
+    const input = fg.querySelector('input[id], select[id], textarea[id]');
+    if (!input || NON_EXCLUDABLE_FIELDS.has(input.id)) return;
+    // Don't double-add if already initialized
+    if (fg.querySelector('.excl-toggle')) return;
+    const fieldId = input.id;
+    const label = fg.querySelector('.form-label');
+    if (!label) return;
+    // Create toggle button
+    const btn = document.createElement('span');
+    btn.className = 'excl-toggle' + (excluded.has(fieldId) ? ' active' : '');
+    btn.dataset.exclField = fieldId;
+    btn.textContent = '\u2298'; // ⊘
+    btn.title = 'Exclude from report';
+    btn.style.cssText = 'cursor:pointer;font-size:16px;margin-left:6px;opacity:0.35;user-select:none;-webkit-tap-highlight-color:transparent;vertical-align:middle;';
+    if (excluded.has(fieldId)) {
+      btn.style.opacity = '1';
+      btn.style.color = '#dc2626';
+      fg.style.opacity = '0.45';
+    }
+    btn.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const isActive = btn.classList.toggle('active');
+      btn.style.opacity = isActive ? '1' : '0.35';
+      btn.style.color = isActive ? '#dc2626' : '';
+      fg.style.opacity = isActive ? '0.45' : '';
+    };
+    label.appendChild(btn);
+  });
+}
+
 function toggleComparablesSection() {
   const cb = document.getElementById('skipComparables');
   const section = document.getElementById('comparablesSection');
@@ -11495,6 +11554,9 @@ function renderInspection(survey) {
     }
   } catch (e) { console.error('Error restoring skipComparables:', e); }
 
+  // v2238: restore exclude toggles on intro fields
+  try { initExcludeToggles(survey.excludedIntroFields); } catch (e) { console.error('Error restoring exclude toggles:', e); }
+
   // Auto-fill single variants
   try {
     document.querySelectorAll('[data-auto-fill-item]').forEach(el => {
@@ -11791,6 +11853,16 @@ function ensureReportButton() {
     }
   };
   overflowMenu.appendChild(recoverOpt);
+
+  // Remove Date Stamps option
+  const dateStampOpt = document.createElement('button');
+  dateStampOpt.style.cssText = 'border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#b45309;';
+  dateStampOpt.innerHTML = '🗓 Remove Date Stamps';
+  dateStampOpt.onclick = async () => {
+    overflowMenu.style.display = 'none';
+    await removeAllDateStamps();
+  };
+  overflowMenu.appendChild(dateStampOpt);
 
   // Force Update option
   const updateOpt = document.createElement('button');
@@ -15042,6 +15114,137 @@ async function addDateStampToPhoto(dataUrl, maxResolution) {
   });
 }
 
+// ─── Remove date stamp from photo ─────────────────────────────────────
+// v2238: Reverses the stamp added by addDateStampToPhoto(). Because we
+// know the exact stamp geometry (bottom-right corner, dark rect + white
+// text, font size = width/40, padding 12px, date format YYYY-MM-DD), we
+// can calculate the stamp region precisely and fill it by sampling from
+// the row of pixels just above the stamp (stretched downward). This
+// produces a seamless result on typical boat/sky/water backgrounds.
+async function removeDateStampFromPhoto(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const w = img.width, h = img.height;
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+
+        // Calculate stamp region using same formula as addDateStampToPhoto
+        const fontSize = Math.max(20, Math.round(w / 40));
+        const padding = 12;
+        ctx.font = fontSize + 'px Arial, sans-serif';
+        // Measure the widest plausible date string
+        const metrics = ctx.measureText('2026-04-16');
+        const rectWidth = Math.ceil(metrics.width + padding * 2) + 4; // +4 safety margin
+        const rectHeight = fontSize + padding + 4;
+
+        const stampX = w - rectWidth;
+        const stampY = h - rectHeight;
+
+        // Sample a thin strip just above the stamp region (2px high)
+        const sampleY = Math.max(0, stampY - 2);
+        const strip = ctx.getImageData(stampX, sampleY, rectWidth, 2);
+
+        // Fill the stamp region by tiling the sampled strip
+        for (let row = 0; row < rectHeight; row++) {
+          ctx.putImageData(strip, stampX, stampY + row, 0, 0, rectWidth, 1);
+        }
+
+        // Smooth the seam with a slight blur via a second pass
+        // Draw the patched region onto itself with reduced alpha for blending
+        const patchData = ctx.getImageData(stampX, Math.max(0, stampY - 4), rectWidth, rectHeight + 8);
+        ctx.putImageData(patchData, stampX, Math.max(0, stampY - 4));
+
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      } catch (err) {
+        console.error('removeDateStampFromPhoto error:', err);
+        resolve(dataUrl);
+      }
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+// Batch remove date stamps from all photos in a survey
+async function removeAllDateStamps() {
+  if (!currentSurveyId) return;
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+
+  // Get all photo IDs from this survey
+  const photoIds = new Set();
+
+  // Doc photos
+  const docPhotoFields = [
+    'coverPhoto', 'hinPhoto', 'compliancePhoto', 'licencePhoto', 'tcPaperLicencePhoto',
+    'enginePhoto', 'enginePlatePhoto', 'transmissionPhoto', 'transmissionPlatePhoto',
+    'engine2Photo', 'engine2PlatePhoto', 'transmission2Photo', 'transmission2PlatePhoto',
+    'fourCornerPortBow', 'fourCornerStbdBow', 'fourCornerPortStern', 'fourCornerStbdStern'
+  ];
+  docPhotoFields.forEach(f => { if (survey[f]) photoIds.add(survey[f]); });
+
+  // Item photos
+  if (survey.items) {
+    Object.values(survey.items).forEach(item => {
+      if (item.photos) item.photos.forEach(pid => photoIds.add(pid));
+    });
+  }
+
+  // Safety equipment photos
+  if (survey.safetyEquipment) {
+    survey.safetyEquipment.forEach(eq => {
+      if (eq.photos) eq.photos.forEach(pid => photoIds.add(pid));
+    });
+  }
+
+  const total = photoIds.size;
+  if (total === 0) { showToast('No photos found in this survey.'); return; }
+
+  const confirmed = await showConfirm(
+    'This will remove the date stamp from all ' + total + ' photos in this survey. This cannot be undone. Continue?',
+    'Remove', 'Cancel'
+  );
+  if (!confirmed) return;
+
+  showToast('Removing date stamps from ' + total + ' photos...');
+
+  let processed = 0;
+  const db = await openDatabase();
+  for (const pid of photoIds) {
+    try {
+      // Open a fresh transaction per photo — IDB transactions expire after
+      // async work (canvas processing) so we cannot reuse one transaction.
+      const tx = db.transaction('photos', 'readwrite');
+      const store = tx.objectStore('photos');
+      const photo = await new Promise((res, rej) => {
+        const req = store.get(pid);
+        req.onsuccess = () => res(req.result);
+        req.onerror = () => rej(req.error);
+      });
+      if (photo && photo.data) {
+        const cleaned = await removeDateStampFromPhoto(photo.data);
+        photo.data = cleaned;
+        const tx2 = db.transaction('photos', 'readwrite');
+        const store2 = tx2.objectStore('photos');
+        await new Promise((res, rej) => {
+          const put = store2.put(photo);
+          put.onsuccess = () => res();
+          put.onerror = () => rej(put.error);
+        });
+        processed++;
+      }
+    } catch (err) {
+      console.error('Error processing photo', pid, err);
+    }
+  }
+
+  showToast('Date stamps removed from ' + processed + ' of ' + total + ' photos.');
+}
+
 async function captureDocPhoto(fieldKey, label, event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -18094,6 +18297,11 @@ async function generateReport() {
 
   const activeTemplate = getTemplateForSurvey(survey);
   const esc = (s) => (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  // v2238: field-level exclude from report
+  const _exclSet = new Set(survey.excludedIntroFields || []);
+  const _excl = (field) => _exclSet.has(field);
+  // Render a table row only if the field is not excluded
+  const _row = (field, label, value) => _excl(field) ? '' : `<tr><td><strong>${label}</strong></td><td>${value}</td></tr>`;
   // Remove consecutive duplicate sentences from item text (e.g. disclaimer pasted twice)
   const dedup = (s) => {
     if (!s) return s;
@@ -18340,7 +18548,7 @@ async function generateReport() {
         font-family: Arial, Helvetica, sans-serif;
       }
       @bottom-left {
-        content: "Kiki Marine  ·  (647) 289-7876  ·  kikimarine.ca";
+        content: "Kiki Marine  ·  (647) 289-7876  ·  dave@kikimarine.ca  ·  kikimarine.ca";
         font-size: 7.5pt;
         color: #066aab;
         font-family: Arial, Helvetica, sans-serif;
@@ -18458,7 +18666,7 @@ async function generateReport() {
 
   <div style="text-align:center;margin-top:28px;padding-top:14px;border-top:2px solid #066aab;">
     <span style="font-size:10pt;color:#066aab;letter-spacing:0.5px;">KIKI MARINE &nbsp;&bull;&nbsp; (647) 289-7876 &nbsp;&bull;&nbsp; dave@kikimarine.ca &nbsp;&bull;&nbsp; kikimarine.ca</span>
-    <p style="font-size:9pt;color:#6b7280;margin:6px 0 0 0;font-style:italic;">Professional Marine Survey Services &mdash; Greater Toronto Area &amp; Ontario</p>
+    <p style="font-size:9pt;color:#6b7280;margin:6px 0 0 0;font-style:italic;">Based in Toronto serving marinas and boatyards from Niagara to Pickering, Muskokas, Simcoe and the Kawarthas.</p>
   </div>
   <p style="text-align:center; font-size:10pt; color:#6b7280; margin-top:6px; font-style:italic;">Comprehensive Marine Surveying &amp; Consulting — Serving the Great Lakes, Georgian Bay and beyond.</p>
 
@@ -18907,10 +19115,10 @@ async function generateReport() {
     <tr><td><strong>Date of Report</strong></td><td>${reportDateLong}</td></tr>
     <tr><td><strong>Vessel Name</strong></td><td>${esc(survey.vesselName) || 'N/A'}</td></tr>
     <tr><td><strong>Year / Make / Model</strong></td><td>${esc(survey.yearMakeModel) || 'N/A'}</td></tr>
-    <tr><td><strong>Location of Survey Inspection</strong></td><td>${esc(survey.location) || 'N/A'}</td></tr>
-    <tr><td><strong>Client / Purchaser</strong></td><td>${esc(survey.clientName) || 'N/A'}</td></tr>
-    <tr><td><strong>Persons in Attendance</strong></td><td>${esc(survey.personsInAttendance) || 'N/A'}</td></tr>
-    <tr><td><strong>Independent Surveys</strong></td><td>${esc(survey.independentSurveys) || 'No independent surveys (engine, electrical, ultrasonic gauging, etc.) were conducted in conjunction with this inspection.'}</td></tr>
+    ${_row('location', 'Location of Survey Inspection', esc(survey.location) || 'N/A')}
+    ${_row('clientName', 'Client / Purchaser', esc(survey.clientName) || 'N/A')}
+    ${_row('personsInAttendance', 'Persons in Attendance', esc(survey.personsInAttendance) || 'N/A')}
+    ${_row('independentSurveys', 'Independent Surveys', esc(survey.independentSurveys) || 'No independent surveys (engine, electrical, ultrasonic gauging, etc.) were conducted in conjunction with this inspection.')}
     <tr><td><strong>Surveyor</strong></td><td>Dave Seagrim, SAMS Surveyor Associate, ABYC Master Advisor</td></tr>
   </table>
 
@@ -18932,44 +19140,44 @@ ${survey.locationLat && survey.locationLon ? `
   html += `
   <h2>VESSEL SPECIFICATIONS</h2>
   <table>
-    <tr><td style="width:40%;"><strong>Boat Style</strong></td><td>${esc(survey.boatStyle) || 'N/A'}</td></tr>
-    <tr><td><strong>Construction</strong></td><td>${esc(survey.construction) || 'N/A'}</td></tr>
-    <tr><td><strong>Hull Type</strong></td><td>${esc(survey.hullType) || 'N/A'}</td></tr>
-    ${isSail ? `<tr><td><strong>Keel Type</strong></td><td>${esc(survey.keelType) || 'N/A'}</td></tr>` : ''}
-    <tr><td><strong>LOA</strong></td><td>${esc(survey.loa) || 'N/A'}</td></tr>
-    <tr><td><strong>LWL</strong></td><td>${esc(survey.lwl) || 'N/A'}</td></tr>
-    <tr><td><strong>Beam</strong></td><td>${esc(survey.beam) || 'N/A'}</td></tr>
-    <tr><td><strong>Displacement</strong></td><td>${esc(survey.displacement) || 'N/A'}</td></tr>
-    ${isSail ? `<tr><td><strong>Ballast</strong></td><td>${esc(survey.ballast) || 'N/A'}</td></tr>` : ''}
-    ${isSail ? `<tr><td><strong>Max Draft</strong></td><td>${esc(survey.maxDraft) || 'N/A'}</td></tr>` : ''}
-    ${isSail ? `<tr><td><strong>Total Sail Area</strong></td><td>${esc(survey.totalSailArea) || 'N/A'}</td></tr>` : ''}
-    <tr><td><strong>Number of Cabins</strong></td><td>${esc(survey.numberCabins) || 'N/A'}</td></tr>
-    <tr><td><strong>Electrical System</strong></td><td>${esc(survey.electricalSystem) || 'N/A'}</td></tr>
-    <tr><td><strong>Changes to Original Plan</strong></td><td>${esc(survey.changesToPlan) || 'None noted'}</td></tr>
+    ${_row('boatStyle', 'Boat Style', esc(survey.boatStyle) || 'N/A')}
+    ${_row('construction', 'Construction', esc(survey.construction) || 'N/A')}
+    ${_row('hullType', 'Hull Type', esc(survey.hullType) || 'N/A')}
+    ${isSail && !_excl('keelType') ? `<tr><td><strong>Keel Type</strong></td><td>${esc(survey.keelType) || 'N/A'}</td></tr>` : ''}
+    ${_row('loa', 'LOA', esc(survey.loa) || 'N/A')}
+    ${_row('lwl', 'LWL', esc(survey.lwl) || 'N/A')}
+    ${_row('beam', 'Beam', esc(survey.beam) || 'N/A')}
+    ${_row('displacement', 'Displacement', esc(survey.displacement) || 'N/A')}
+    ${isSail && !_excl('ballast') ? `<tr><td><strong>Ballast</strong></td><td>${esc(survey.ballast) || 'N/A'}</td></tr>` : ''}
+    ${isSail && !_excl('maxDraft') ? `<tr><td><strong>Max Draft</strong></td><td>${esc(survey.maxDraft) || 'N/A'}</td></tr>` : ''}
+    ${isSail && !_excl('totalSailArea') ? `<tr><td><strong>Total Sail Area</strong></td><td>${esc(survey.totalSailArea) || 'N/A'}</td></tr>` : ''}
+    ${_row('numberCabins', 'Number of Cabins', esc(survey.numberCabins) || 'N/A')}
+    ${_row('electricalSystem', 'Electrical System', esc(survey.electricalSystem) || 'N/A')}
+    ${_row('changesToPlan', 'Changes to Original Plan', esc(survey.changesToPlan) || 'None noted')}
   </table>
   <p style="font-size:9pt;color:#555;margin:4px 0 0;"><em>Engine, transmission, and drive details — including make, model, serial numbers, power rating, engine hours, fuel type, data-plate photos, and condition — appear together in the Propulsion section of the Detailed Survey Findings.</em></p>
 
   <!-- ═══ SURVEY CONDITIONS ═══ -->
   <h2>SURVEY CONDITIONS</h2>
   <table>
-    <tr><td style="width:40%;"><strong>Weather</strong></td><td>${esc(survey.weather) || 'N/A'}</td></tr>
-    <tr><td><strong>On Land or In Water</strong></td><td>${esc(survey.onLandOrWater) || 'N/A'}</td></tr>
-    ${survey.storageDetails ? `<tr><td><strong>Storage / Observation Details</strong></td><td>${esc(survey.storageDetails)}</td></tr>` : ''}
-    <tr><td><strong>Limited Trial Run</strong></td><td>${esc(survey.seaTrial) || 'N/A'}</td></tr>
-    <tr><td><strong>Power at Time of Survey</strong></td><td>${esc(survey.powerAtTime) || 'N/A'}</td></tr>
-    <tr><td><strong>Water at Time of Survey</strong></td><td>${esc(survey.waterAtTime) || 'N/A'}</td></tr>
+    ${_row('weather', 'Weather', esc(survey.weather) || 'N/A')}
+    ${_row('onLandOrWater', 'On Land or In Water', esc(survey.onLandOrWater) || 'N/A')}
+    ${survey.storageDetails && !_excl('storageDetails') ? `<tr><td><strong>Storage / Observation Details</strong></td><td>${esc(survey.storageDetails)}</td></tr>` : ''}
+    ${_row('seaTrial', 'Limited Trial Run', esc(survey.seaTrial) || 'N/A')}
+    ${_row('powerAtTime', 'Power at Time of Survey', esc(survey.powerAtTime) || 'N/A')}
+    ${_row('waterAtTime', 'Water at Time of Survey', esc(survey.waterAtTime) || 'N/A')}
   </table>
 
   <!-- ═══ VESSEL DOCUMENTATION ═══ -->
   <h2>VESSEL DOCUMENTATION DATA</h2>
   <table>
-    <tr><td style="width:40%;"><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>
-    ${(survey.tcLicense || survey.tcLicenseType || licencePhotoDataUrl || tcPaperLicencePhotoDataUrl) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${survey.tcLicenseExpiry ? ' (expires ' + esc(survey.tcLicenseExpiry) + ')' : ''}${licencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Licence number on hull:</em><br><img src="' + licencePhotoDataUrl + '" alt="Licence Number on Hull" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}${tcPaperLicencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Transport Canada paper licence:</em><br><img src="' + tcPaperLicencePhotoDataUrl + '" alt="TC Paper Licence" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>` : ''}
-    <tr><td><strong>Tax Status (Duties Paid)</strong></td><td>${esc(survey.taxStatus) || 'N/A'}</td></tr>
-    <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>
+    ${!_excl('hinNumber') ? `<tr><td style="width:40%;"><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>` : ''}
+    ${!_excl('tcLicense') && (survey.tcLicense || survey.tcLicenseType || licencePhotoDataUrl || tcPaperLicencePhotoDataUrl) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${survey.tcLicenseExpiry ? ' (expires ' + esc(survey.tcLicenseExpiry) + ')' : ''}${licencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Licence number on hull:</em><br><img src="' + licencePhotoDataUrl + '" alt="Licence Number on Hull" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}${tcPaperLicencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Transport Canada paper licence:</em><br><img src="' + tcPaperLicencePhotoDataUrl + '" alt="TC Paper Licence" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>` : ''}
+    ${_row('taxStatus', 'Tax Status (Duties Paid)', esc(survey.taxStatus) || 'N/A')}
+    ${!_excl('compliancePlate') ? `<tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>` : ''}
   </table>
 
-${survey.vesselDescription ? `
+${survey.vesselDescription && !_excl('vesselDescription') ? `
   <!-- ═══ VESSEL DESCRIPTION ═══ -->
   <h2>VESSEL DESCRIPTION</h2>
   <div class="scope-text">
@@ -19540,7 +19748,8 @@ ${survey.vesselDescription ? `
       </div>
     </div>
     <div style="margin-top:16px;padding:10px 0;border-top:2px solid #066aab;text-align:center;">
-      <span style="font-size:8.5pt;color:#066aab;letter-spacing:0.5px;">KIKI MARINE &nbsp;&bull;&nbsp; SAMS&reg; Surveyor Associate &nbsp;&bull;&nbsp; ABYC Master Advisor &nbsp;&bull;&nbsp; (647) 289-7876 &nbsp;&bull;&nbsp; kikimarine.ca</span>
+      <span style="font-size:8.5pt;color:#066aab;letter-spacing:0.5px;">KIKI MARINE &nbsp;&bull;&nbsp; (647) 289-7876 &nbsp;&bull;&nbsp; dave@kikimarine.ca &nbsp;&bull;&nbsp; kikimarine.ca</span>
+      <div style="font-size:8pt;color:#6b7280;margin-top:4px;font-style:italic;">Based in Toronto serving marinas and boatyards from Niagara to Pickering, Muskokas, Simcoe and the Kawarthas.</div>
     </div>
   </div>
   `;

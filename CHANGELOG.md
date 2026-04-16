@@ -12,6 +12,36 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2238 — 2026-04-16
+
+### Added — Field-level exclude from report
+
+Every intro-page form field (except Vessel Name and Year/Make/Model) now has a
+⊘ toggle that excludes it from the generated report. Toggled fields dim to 45%
+opacity with a red ⊘ indicator. Exclusions are saved per survey in
+`excludedIntroFields[]` and checked via `_excl()` / `_row()` helpers in report
+generation. Applies to General Vessel Info, Vessel Specs, Survey Conditions,
+Vessel Documentation, and Vessel Description tables.
+
+### Added — Photo date stamp removal tool
+
+New "Remove Date Stamps" option in the inspection overflow menu (⋯ → 🗓 Remove
+Date Stamps). Processes every photo in the current survey — doc photos, checklist
+item photos, and safety equipment photos — using canvas pixel sampling to paint
+over the bottom-right date overlay added by `addDateStampToPhoto()`. Each photo
+gets a fresh IndexedDB transaction to avoid IDB auto-close during async canvas
+work.
+
+### Fixed — Report footer redundancy
+
+Footer branding consolidated per Dave's exact wording: top line reads
+"KIKI MARINE · (647) 289-7876 · dave@kikimarine.ca · kikimarine.ca"; bottom line
+reads "Based in Toronto serving marinas and boatyards from Niagara to Pickering,
+Muskokas, Simcoe and the Kawarthas." Applied to running page footer, cover page,
+and Surveyor's Certificate.
+
+---
+
 ## v2237 — 2026-04-16
 
 ### Added — Executive Summary page
