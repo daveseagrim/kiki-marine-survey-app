@@ -3701,28 +3701,28 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes were new with no visible degradation."
+      "text": "The {drives:anode was|anodes were} new with no visible degradation."
     },
     {
       "section": "Propeller/drive anode(s)",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes were approximately twenty-five percent degraded and retained adequate sacrificial material."
+      "text": "The {drives:anode was|anodes were} approximately twenty-five percent degraded and retained adequate sacrificial material."
     },
     {
       "section": "Propeller/drive anode(s)",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anodes were securely mounted and did not exhibit undue corrosion."
+      "text": "The {drives:anode was|anodes were} securely mounted and did not exhibit undue corrosion."
     },
     {
       "section": "Propeller/drive anode(s)",
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The anodes were providing effective galvanic protection at the time of survey."
+      "text": "The {drives:anode was|anodes were} providing effective galvanic protection at the time of survey."
     },
     {
       "section": "Propeller/drive anode(s)",
@@ -3736,21 +3736,21 @@
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "The anodes were approximately fifty percent degraded."
+      "text": "The {drives:anode was|anodes were} approximately fifty percent degraded."
     },
     {
       "section": "Propeller/drive anode(s)",
       "rating": "B",
       "phase": "observed",
       "severity": 4,
-      "text": "The anodes were approximately seventy-five percent degraded."
+      "text": "The {drives:anode was|anodes were} approximately seventy-five percent degraded."
     },
     {
       "section": "Propeller/drive anode(s)",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "One or more anodes at [insert location] were approaching the end of their service life."
+      "text": "The {drives:anode|anodes} at [insert location] {drives:was|were} approaching the end of {drives:its|their} service life."
     },
     {
       "section": "Propeller/drive anode(s)",
@@ -3764,14 +3764,14 @@
       "rating": "B",
       "phase": "action",
       "severity": 3,
-      "text": "Replace the anodes at the next scheduled service."
+      "text": "Replace the {drives:anode|anodes} at the next scheduled service."
     },
     {
       "section": "Propeller/drive anode(s)",
       "rating": "B",
       "phase": "action",
       "severity": 4,
-      "text": "Replace the anodes before the vessel is relaunched."
+      "text": "Replace the {drives:anode|anodes} before the vessel is relaunched."
     },
     {
       "section": "Propeller/drive anode(s)",
@@ -3792,14 +3792,14 @@
       "rating": "A",
       "phase": "observed",
       "severity": 5,
-      "text": "The anodes were fully consumed and provided no effective galvanic protection."
+      "text": "The {drives:anode was|anodes were} fully consumed and provided no effective galvanic protection."
     },
     {
       "section": "Propeller/drive anode(s)",
       "rating": "A",
       "phase": "observed",
       "severity": 5,
-      "text": "The anodes were missing entirely."
+      "text": "The {drives:anode was|anodes were} missing entirely."
     },
     {
       "section": "Propeller/drive anode(s)",
@@ -3813,7 +3813,7 @@
       "rating": "A",
       "phase": "action",
       "severity": 5,
-      "text": "New anodes must be installed before the vessel is placed in the water, per ABYC E-2 (Cathodic Protection)."
+      "text": "New {drives:anode must|anodes must} be installed before the vessel is placed in the water, per ABYC E-2 (Cathodic Protection)."
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",

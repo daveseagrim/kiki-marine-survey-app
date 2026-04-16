@@ -18,6 +18,15 @@ lets you roll back to a specific version with confidence.
 
 - **Portrait shutter crash fixed**: The `getUserMedia` constraints requested `width: 1920, height: 1080` (landscape). On iOS Safari in portrait, the browser couldn't match those constraints and fell back to the full native sensor resolution (4032×3024). When `snapStagedPhoto` created a canvas at that size (~48 MB) and called `toDataURL`, iOS killed the tab. Two fixes applied: (1) `getUserMedia` now requests `width: 1920, height: 1920` — same ideal on both axes lets the browser pick the natural orientation without implying landscape; (2) `snapStagedPhoto` caps the canvas at 2048 px on the long edge before drawing, preventing memory-pressure crashes regardless of what resolution the stream provides.
 
+### Propeller/drive anode singular/plural
+
+- **Anode snippets now adapt to drive line count**: All 18 "Propeller/drive anode(s)" text library snippets tokenized with `{drives:singular|plural}`. Single-shaft vessels now produce "The anode was…" / "Replace the anode…"; twin-shaft vessels produce "The anodes were…" / "Replace the anodes…".
+
+### Header navigation improvements
+
+- **Save status pill no longer blocks header buttons**: The `.header` CSS now sets `position:relative;z-index:1600`, above the SaveStatus pill's `z-index:1500`. The ← back button is always tappable regardless of pill width.
+- **Logo taps navigate home**: On the New Survey, Edit Intro, and Inspection screens, tapping the Kiki Marine logo navigates to the home screen (with appropriate save/abandon confirmation where needed).
+
 ---
 
 ## v2247 — 2026-04-16

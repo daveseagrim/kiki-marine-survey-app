@@ -60,6 +60,10 @@
             align-items: center;
             box-shadow: 0 1px 6px rgba(6,106,171,0.08);
             border-bottom: 1px solid #e2e8f0;
+            /* v2248: ensure header buttons (← back, logo) sit above the
+               SaveStatus pill (z-index 1500) so taps always reach them. */
+            position: relative;
+            z-index: 1600;
         }
 
         .header-title {

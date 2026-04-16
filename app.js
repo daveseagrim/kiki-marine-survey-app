@@ -6936,7 +6936,8 @@ function renderNewSurveyForm() {
   app.innerHTML = `
     <div class="header" style="display:flex;align-items:center;gap:10px;">
       <img src="new_logo.png"
-           alt="Kiki Marine" style="height:36px;width:auto;flex-shrink:0;"
+           alt="Kiki Marine" style="height:36px;width:auto;flex-shrink:0;cursor:pointer;"
+           onclick="confirmAbandonNewSurvey()"
            onerror="this.style.display='none'">
       <button class="header-back" onclick="confirmAbandonNewSurvey()" style="flex-shrink:0;">←</button>
       <div style="flex:1;min-width:0;">
@@ -8154,7 +8155,8 @@ function editSurveyDetails(surveyId) {
       header.style.cssText = 'display:flex;align-items:center;gap:10px;';
       header.innerHTML = `
         <img src="new_logo.png"
-             alt="Kiki Marine" style="height:36px;width:auto;flex-shrink:0;"
+             alt="Kiki Marine" style="height:36px;width:auto;flex-shrink:0;cursor:pointer;"
+             onclick="backToHome()"
              onerror="this.style.display='none'">
         <button class="header-back" onclick="returnToInspection('${survey.id}')" style="flex-shrink:0;">←</button>
         <div style="flex:1;min-width:0;">
@@ -10854,7 +10856,8 @@ function renderInspection(survey) {
   app.innerHTML = `
     <div class="header" style="display:flex;align-items:center;gap:10px;">
       <img src="new_logo.png"
-           alt="Kiki Marine" style="height:36px;width:auto;flex-shrink:0;"
+           alt="Kiki Marine" style="height:36px;width:auto;flex-shrink:0;cursor:pointer;"
+           onclick="backToHome()"
            onerror="this.style.display='none'">
       <button class="header-back" onclick="backToHome()" style="flex-shrink:0;">←</button>
       <div style="flex:1;min-width:0;">
