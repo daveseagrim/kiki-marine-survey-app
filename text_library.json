@@ -21467,7 +21467,7 @@
     {
       "section": "Battery charger",
       "rating": "Not tested",
-      "text": "The battery charger was not tested because the vessel was not connected to AC power.",
+      "text": "Because the vessel was not connected to AC power, operation of the battery charger was not verified at the time of survey.",
       "phase": "observed",
       "severity": 3
     },

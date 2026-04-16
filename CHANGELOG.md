@@ -12,6 +12,157 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2225 — 2026-04-15
+
+### Changed — Propulsion narrative triple-checked + Check Report audits added + report aligned to Kiki Marine brand
+
+After the v2224 Propulsion work shipped as a draft, this version does a
+full pass addressing the SAMS review of the MY Bad / Quigley surveys
+and matches the generated report to the kikimarinesurveyor.ca brand.
+
+**Triple-check fixes in `buildPropulsionNarrative()`:**
+
+- "A Evinrude" → "An Evinrude" — vowel-sensitive article selection on
+  the engine phrase opener.
+- Twin-engine coupling sentence was dropping the article. Rewritten to
+  use "Each engine is coupled to a … transmission driving through a
+  …" so both singular and twin configurations read cleanly.
+- Removed a redundant tautology (`!findC(['exhaust', 'type'])`) and
+  replaced it with a direct match on "exhaust condition".
+- Propulsion block now renders in the report even when no rated items
+  are completed yet, so identity + narrative + spec table still show
+  if the surveyor is mid-inspection.
+
+**Check Report audits for the SAMS review items.** The Check Report
+now surfaces:
+
+- Missing Date of Report (SAMS: "Date that report completed not
+  shown").
+- Missing or too-generic Parties Present (SAMS: "No statement of who
+  was present at time of the inspection"). Flags when only the
+  default surveyor entry is listed.
+- Missing How Observed + optional Storage Details (SAMS: "Clear
+  statement that vessel was laid up for winter storage not
+  provided").
+- Missing Independent Surveys listing.
+- TC licence number entered but no expiry date.
+- Every missing Propulsion spec: engine make, model, serial, HP,
+  hours, fuel — plus each Narrative-chip field (location, access,
+  gauges, controls).
+- Missing engine / gearbox nameplate photos (SAMS: plate photos
+  unreadable).
+- Thin valuation rationale or no valuation sources selected (SAMS:
+  "Statement of method used, however, on used BUC. Not sufficient to
+  provide a reasonable valuation").
+
+**Report aligned to Kiki Marine brand.** The report's scoped CSS (and
+the matching Word-export styles) now use the site's primary `#066aab`
+in place of the previous `#006699`. Covers, headings, h2/h3 rules,
+item border-lefts, checklist-table header, footer border — all
+consistent. Cover contact line now points to `kikimarinesurveyor.ca`
+(previously truncated to `kikimarine.ca`) and carries the tagline
+"Comprehensive Marine Surveying & Consulting". Surveyor's Certificate
+footer now shows a formatted "Signed: April 15, 2026" date and a
+centered brand line (`Kiki Marine • SAMS® Surveyor Associate • ABYC
+Master Advisor • kikimarinesurveyor.ca • 647-289-7876`).
+
+Date formatting helper `formatLongDate()` turns ISO dates into reader-
+friendly long form ("2026-04-15" → "April 15, 2026") for Date of
+Inspection, Date of Report, and the signature.
+
+App UI colours (navy `#006699`) are intentionally untouched — only
+the report output was rebranded.
+
+---
+
+## v2224 — 2026-04-15
+
+### Added — Auto-assembled "Propulsion" narrative (Norm Behring style)
+
+Addresses the SAMS review feedback on the MY Bad / Quigley surveys
+("engine serial numbers insufficient, plate photos too small to read,
+details on each system missing — what is it, does it work, what is
+condition"). The engine write-up is now a single cohesive Propulsion
+block that identity, narrative, and condition all share.
+
+**Chip panel at the top of Engine(s) and drive(s) (inspection view).**
+Four fields — Engine bay location, Engine access, Engine gauges
+location, Engine controls location — each with a datalist of common
+options and free-text for anything custom. Any edit saves
+immediately and triggers an auto-regen.
+
+**`buildPropulsionNarrative(survey)`** — pure function that assembles
+a Behring-style paragraph: "A Volvo D6-370 diesel engine was located
+aft under the cockpit deck, accessed through a cockpit engine hatch.
+The engine is coupled to a ZF 63A transmission driving through an
+IPS pod drive. Engine gauges were located at the flybridge helm —
+operated smoothly. Engine controls were located at the helm —
+operated smoothly." Followed by a short observations paragraph
+derived from existing rated items (anti-vibration mounts, cooling
+seacock, belts, manifolds, oil, exhaust — each sentence only surfaces
+when that item is rated C, so A/B findings stay in the Findings &
+Recommendations block instead of being buried in prose). Twin-engine
+vessels get one combined paragraph.
+
+**Auto-regen hook in `saveSurvey()`** — mirrors the vessel description
+pattern. Rebuilds whenever any contributing field is saved, unless
+the surveyor is mid-edit in the textarea (activeElement check plus a
+sticky `window._propNarrUserEditing` flag set on input). Manual edits
+survive; an explicit ✨ Regenerate click clears the flag and resumes
+auto-updates.
+
+**Merged Propulsion section in the generated report.** The top of the
+Engine(s) and drive(s) body now renders, in order: the auto-
+generated narrative, a compact spec block (Engine 1 / Engine 2 /
+Transmission 1 / Transmission 2 with Make/Model/Serial/HP/Hours/Fuel
+and data-plate photos at 600×480 max — SAMS reviewer noted the
+previous 350×280 photos were unreadable), then the existing rated
+items below. Engine/transmission rows were removed from Vessel
+Specifications to avoid duplication; a pointer note replaces them.
+
+**Template cleanup.** Removed the redundant text echoes from both
+`survey_template.json` and `insurance_survey_template.json` that
+duplicated what the spec block now shows: "Engine(s) manufacturer,
+model # and serial number (if available)", "Fuel type", "Horsepower",
+"Gearbox manufacturer, model # and serial # (if available)", and
+"Sail drive manufacturer and model #". The rated condition items and
+all nameplate media items remain untouched.
+
+---
+
+## v2223 — 2026-04-15
+
+### Added — "No AC power" option on the Battery charger Not-tested chip set
+
+The Notes sheet for Battery charger rated "Not tested/not verified"
+previously offered only generic chips ("The battery charger was not
+tested at the time of survey.", "Operation of the battery charger was
+not verified at the time of survey.", plus the standard action). The
+common real-world reason — the vessel wasn't plugged into shore/AC
+power during the survey — now has a dedicated observed chip:
+
+> Because the vessel was not connected to AC power, operation of the
+> battery charger was not verified at the time of survey.
+
+Two-layer delivery so this chip surfaces no matter the cache state:
+
+- `text_library.json` — the existing Battery charger / Not tested /
+  observed entry was rephrased to the above text (it previously read
+  "The battery charger was not tested because the vessel was not
+  connected to AC power."). Matches the prose style of the other
+  synthesized NT chips.
+- `app.js` — `showNotesSheet()` now injects the same chip into
+  `sheetVariants` after the library lookup returns, specifically for
+  label `Battery charger` with a Not-tested rating. A regex dedupe on
+  "not connected to AC power" / "no AC power available" prevents
+  double-adding when the library already surfaced the entry.
+
+The existing generic chips keep showing too (they come from the synth
+fallback when library returns empty), so the surveyor has the full
+set when they open the sheet.
+
+---
+
 ## v2222 — 2026-04-15
 
 ### Changed — Overall Description of Vessel auto-updates as variables are entered anywhere in the survey

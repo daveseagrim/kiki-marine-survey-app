@@ -1971,10 +1971,6 @@
             "label": "Engine hours"
           },
           {
-            "type": "textsingle",
-            "label": "Engine(s) manufacturer, model # and serial number (if available)"
-          },
-          {
             "type": "media",
             "label": "Engine name plate(s)"
           },
@@ -2140,10 +2136,6 @@
           {
             "type": "media",
             "label": "Gearbox nameplate(s)"
-          },
-          {
-            "type": "textsingle",
-            "label": "Gearbox manufacturer, model # and serial # (if available)"
           },
           {
             "type": "list",

@@ -2427,10 +2427,6 @@
             "label": "Engine(s) and drive(s) photos"
           },
           {
-            "type": "textsingle",
-            "label": "Engine(s) manufacturer, model # and serial number (if available)"
-          },
-          {
             "type": "media",
             "label": "Engine name plate(s)"
           },
@@ -2445,14 +2441,6 @@
               "Not applicable",
               "Not tested/not verified"
             ]
-          },
-          {
-            "type": "question",
-            "label": "Fuel type"
-          },
-          {
-            "type": "textsingle",
-            "label": "Horsepower"
           },
           {
             "type": "textsingle",
@@ -2599,10 +2587,6 @@
             "label": "Gearbox nameplate(s)"
           },
           {
-            "type": "textsingle",
-            "label": "Gearbox manufacturer, model # and serial # (if available)"
-          },
-          {
             "type": "list",
             "label": "Gearbox general condition/impressions",
             "options": [
@@ -2641,11 +2625,6 @@
           {
             "type": "media",
             "label": "Sail drive name plate(s)",
-            "sailOnly": true
-          },
-          {
-            "type": "textsingle",
-            "label": "Sail drive manufacturer and model #",
             "sailOnly": true
           },
           {
