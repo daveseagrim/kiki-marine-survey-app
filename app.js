@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2228';
+const APP_VERSION = 'v2229';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -18466,10 +18466,9 @@ async function generateReport() {
       <li><strong>Vessel Description</strong> — A narrative description of the vessel.</li>
       <li><strong>Survey Checklist Summary</strong> — An at-a-glance table of all inspected items showing rating, violation status, finding code, and applicable standards.</li>
       <li><strong>Safety Equipment — TC TP 511</strong> — Required safety equipment per Transport Canada regulations, with on-board verification status.</li>
+      <li><strong>Rating &amp; Valuation</strong> — Overall condition rating (BUC Marine Grading System), Fair Market Value, Estimated Replacement Cost, and Valuation Worksheet with comparables.</li>
       <li><strong>Detailed Survey Findings</strong> — The full, itemised survey observations by category.</li>
       <li><strong>Findings &amp; Recommendations</strong> — All items rated "A" (Critical), "B" (Needs Attention), "C" (Serviceable), and "Not tested/not verified" are compiled here for quick reference.</li>
-      <li><strong>Summary of Vessel Condition</strong> — Overall condition rating using the BUC Marine Grading System.</li>
-      <li><strong>Statement of Valuation</strong> — Fair Market Value and Estimated Replacement Cost.</li>
       <li><strong>Surveyor's Certificate</strong></li>
     </ol>
   </div>
@@ -18491,11 +18490,9 @@ async function generateReport() {
       <li>Vessel Description</li>
       <li>Survey Checklist Summary</li>
       <li>Safety Equipment — TC TP 511</li>
+      <li>Rating &amp; Valuation</li>
       <li>Detailed Survey Findings</li>
       <li>Findings &amp; Recommendations</li>
-      <li>Summary of Vessel Condition</li>
-      <li>Statement of Valuation</li>
-      <li>Valuation Worksheet</li>
       <li>Surveyor's Certificate</li>
     </ol>
   </div>
@@ -18531,49 +18528,6 @@ ${survey.locationLat && survey.locationLon ? `
     <div style="color:#6b7280;${survey.location ? 'margin-top:3px;font-size:9pt;' : ''}"><strong>GPS:</strong> ${parseFloat(survey.locationLat).toFixed(5)}, ${parseFloat(survey.locationLon).toFixed(5)}</div>
   </div>
 ` : ''}
-
-  <!-- ═══ RATING & VALUATION (early summary) ═══ -->
-  <!-- v2228: CAD value emphasised. USD is the source of record (BUC guides
-       publish in USD) but Kiki Marine's Canadian clients and insurers
-       settle in CAD. Rendering the CAD equivalent in a visually louder
-       treatment — larger font, brand colour — so no insurer mistakes the
-       currency. Exchange rate shown inline so the reader can reproduce
-       the math. -->
-  ${(() => {
-    const _lowUsd = parseInt(survey.valuationLow || 0);
-    const _highUsd = parseInt(survey.valuationHigh || 0);
-    const _replUsd = parseInt(survey.replacementCost || 0);
-    const _xr = parseFloat(survey.exchangeRate) || 0;
-    const _lowCad = _xr ? Math.round(_lowUsd * _xr) : 0;
-    const _highCad = _xr ? Math.round(_highUsd * _xr) : 0;
-    const _replCad = _xr ? Math.round(_replUsd * _xr) : 0;
-    const _fmt = n => n.toLocaleString();
-    const _xrNote = _xr ? `<span style="font-size:9pt;font-weight:normal;color:#6b7280;margin-left:4px;">(USD→CAD @ ${_xr.toFixed(4)})</span>` : '';
-    return `
-  <div style="border:2px solid #066aab;padding:12px 16px;margin:16px 0;background:#f8f9fb;">
-    <h3 style="margin:0 0 8px 0;color:#066aab;border-bottom:1px solid #066aab;padding-bottom:4px;font-size:12pt;">RATING &amp; VALUATION</h3>
-    <table style="border:none;margin:0;">
-      <tr><td style="width:45%;border:none;padding:3px 8px;"><strong>Vessel Overall Rating:</strong></td><td style="border:none;padding:3px 8px;font-weight:bold;font-size:11pt;">${esc(survey.overallCondition) || 'Not yet assessed'}</td></tr>
-      <tr>
-        <td style="border:none;padding:3px 8px;vertical-align:top;"><strong>Estimated Fair Market Value:</strong></td>
-        <td style="border:none;padding:3px 8px;">
-          ${_xr ? `<div style="font-size:14pt;font-weight:800;color:#066aab;line-height:1.2;">CAD $${_fmt(_lowCad)} &ndash; $${_fmt(_highCad)}</div>` : ''}
-          <div style="font-size:10pt;color:#4b5563;margin-top:2px;">USD $${_fmt(_lowUsd)} &ndash; $${_fmt(_highUsd)}${_xrNote}</div>
-          <div style="font-size:9pt;color:#6b7280;margin-top:1px;font-style:italic;">Tax not included.</div>
-        </td>
-      </tr>
-      ${survey.replacementCost ? `
-      <tr>
-        <td style="border:none;padding:3px 8px;vertical-align:top;"><strong>Estimated Replacement Cost:</strong></td>
-        <td style="border:none;padding:3px 8px;">
-          ${_xr ? `<div style="font-size:13pt;font-weight:800;color:#066aab;line-height:1.2;">CAD $${_fmt(_replCad)}</div>` : ''}
-          <div style="font-size:10pt;color:#4b5563;margin-top:2px;">USD $${_fmt(_replUsd)}</div>
-          <div style="font-size:9pt;color:#6b7280;margin-top:1px;font-style:italic;">Tax not included.</div>
-        </td>
-      </tr>` : ''}
-    </table>
-  </div>`;
-  })()}
 
   <!-- ═══ VESSEL SPECIFICATIONS ═══ -->`;
   const isSail = (survey.vesselType || '').toLowerCase() === 'sail';
@@ -18833,6 +18787,160 @@ ${survey.vesselDescription ? `
     <div class="page-break"></div>
     `;
   }
+
+  // ── RATING & VALUATION (consolidated) ──────────────────────────────
+  // v2229: All rating and valuation content consolidated into a single
+  // section positioned just before Detailed Survey Findings. Previously
+  // this content was split across 4 locations: an early summary box
+  // (after General Vessel Info), Summary of Vessel Condition, Statement
+  // of Valuation, and Valuation Worksheet (all at the bottom after F&R).
+  // Now the reader gets the full verdict — grading system, condition
+  // rating, FMV definition, values, methodology, and comparables — in
+  // one place, right before the evidence that supports it.
+  html += `<div class="page-break"></div>`;
+  html += (() => {
+    const _lowU = parseInt(survey.valuationLow || 0);
+    const _highU = parseInt(survey.valuationHigh || 0);
+    const _replU = parseInt(survey.replacementCost || 0);
+    const _xr = parseFloat(survey.exchangeRate) || 0;
+    const _lowC = _xr ? Math.round(_lowU * _xr) : 0;
+    const _highC = _xr ? Math.round(_highU * _xr) : 0;
+    const _replC = _xr ? Math.round(_replU * _xr) : 0;
+    const _f = n => n.toLocaleString();
+    const _xrNote = _xr ? '(USD\u2192CAD @ ' + _xr.toFixed(4) + ')' : '';
+
+    // Build valuation sources rows
+    const _srcCell = (survey.valuationSources && survey.valuationSources.length > 0)
+      ? survey.valuationSources.map(s => esc(s)).join('<br>')
+      : (esc(survey.valuationSource) || 'N/A');
+
+    // Build replacement cost row (used in both tables)
+    const _replRow = survey.replacementCost
+      ? '<tr><td><strong>Estimated Replacement Cost</strong></td><td>'
+        + (_xr ? '<div style="font-size:13pt;font-weight:800;color:#066aab;">CAD $' + _f(_replC) + '</div>' : '')
+        + '<div' + (_xr ? ' style="font-size:10pt;color:#4b5563;margin-top:2px;"' : '') + '>USD $' + _f(_replU) + '</div>'
+        + '<div style="font-size:9pt;color:#6b7280;font-style:italic;">Tax not included.</div>'
+        + '</td></tr>'
+      : '';
+
+    const _xrRow = _xr
+      ? '<tr><td><strong>Exchange Rate (USD\u2192CAD)</strong></td><td>' + _xr.toFixed(4) + '</td></tr>'
+      : '';
+
+    // Build the BUC value range cell for the worksheet table
+    const _bucRangeCell = 'USD $' + _lowU.toLocaleString() + ' \u2013 $' + _highU.toLocaleString()
+      + (_xr ? ' &nbsp;/&nbsp; <strong style="color:#066aab;">CAD $' + _lowC.toLocaleString() + ' \u2013 $' + _highC.toLocaleString() + '</strong>' : '');
+
+    // Build worksheet replacement cost row
+    const _wsReplRow = survey.replacementCost
+      ? '<tr><td><strong>Estimated Replacement Cost</strong></td><td>USD $' + _replU.toLocaleString()
+        + (_xr ? ' &nbsp;/&nbsp; <strong style="color:#066aab;">CAD $' + _replC.toLocaleString() + '</strong>' : '')
+        + '</td></tr>'
+      : '';
+
+    // Build worksheet sources cell
+    const _wsSrcCell = (survey.valuationSources && survey.valuationSources.length > 0)
+      ? survey.valuationSources.map(s => '\u2022 ' + esc(s)).join('<br>')
+      : (esc(survey.valuationSource) || 'N/A');
+
+    // Build comparables rows
+    let _compRows;
+    if (survey.comparables && survey.comparables.length > 0) {
+      _compRows = survey.comparables.map(function(c) {
+        return '<tr>'
+          + '<td>' + esc(c.source) + '</td>'
+          + '<td>' + esc(c.vessel) + '</td>'
+          + '<td>' + esc(c.price) + '</td>'
+          + '<td>' + esc(c.location || '') + '</td>'
+          + '<td>' + esc(c.date || '') + '</td>'
+          + '<td>' + esc(c.notes) + (c.water ? ' (' + esc(c.water) + ')' : '') + '</td>'
+          + '</tr>';
+      }).join('');
+    } else {
+      _compRows = '<tr><td colspan="6" style="text-align:center;color:#666;font-style:italic;">No comparables recorded. Check BUCValu, soldboats.com, and yachtworld.com for comparable sales and current listings.</td></tr>';
+    }
+
+    // Build the appraisal methodology text
+    const _methodology = esc(survey.valuationRationale) || 'The following method of valuation was used to obtain the Fair Market Value: similarly equipped, same or similar model vessels as shown as sold on soldboats.com, buc.com, and listings on yachtworld.com (and/or other websites) in the last two years were identified, adjusted for model year, condition, equipment, and date of sale, and averaged together. The vessel\'s overall condition rating using the BUC Marine Grading System has been factored into the final valuation range.';
+
+    const _overallCond = esc(survey.overallCondition) || 'Not yet assessed';
+
+    return '<h2 style="background:#066aab;font-size:14pt;">RATING &amp; VALUATION</h2>'
+
+    // ── BUC Grading System ──
+    + '<div class="scope-text">'
+    + '<p>It is the Surveyor\u2019s experience that develops an opinion of the OVERALL VESSEL RATING OF CONDITION after the Survey has been completed and the findings have been organised in a logical manner.</p>'
+    + '<p>The grading of condition developed by BUC RESEARCH and accepted in the marine industry for a vessel at the time of Survey determines the adjustment to the range of base values in the BUC USED BOAT PRICE GUIDE for a similar vessel sold within a given time period, as a consideration to determine the Market Value.</p>'
+    + '<p><strong>The following is the accepted Marine Grading System of Condition:</strong></p>'
+    + '<div class="buc-grades">'
+    + '<p><strong>\u201cEXCELLENT (BRISTOL) CONDITION\u201d</strong> \u2014 A vessel that is maintained in mint or Bristol fashion (usually better than factory new, loaded with extras, a rarity).</p>'
+    + '<p><strong>\u201cABOVE AVERAGE CONDITION\u201d</strong> \u2014 Has had above average care and is equipped with extra electrical and electronic gear.</p>'
+    + '<p><strong>\u201cAVERAGE CONDITION\u201d</strong> \u2014 Ready for sale requiring no additional work and normally equipped for her size.</p>'
+    + '<p><strong>\u201cFAIR CONDITION\u201d</strong> \u2014 Requires usual maintenance to prepare for sale.</p>'
+    + '<p><strong>\u201cPOOR CONDITION\u201d</strong> \u2014 Substantial yard work required and devoid of extras.</p>'
+    + '<p><strong>\u201cRESTORABLE CONDITION\u201d</strong> \u2014 Enough of the hull and engine exists to restore the boat to usable condition.</p>'
+    + '</div>'
+    + '<p>As a result of the Survey, as shown in the REPORT OF MARINE SURVEY &amp; FINDINGS AND RECOMMENDATIONS sections of this report and by virtue of my experience, my opinion is:</p>'
+    + '<p style="font-size:14pt;font-weight:bold;text-align:center;padding:12px;border:2px solid #066aab;color:#066aab;">Overall Vessel Rating is: \u201c' + _overallCond + '\u201d</p>'
+    + '</div>'
+
+    // ── Statement of Valuation ──
+    + '<h3 style="margin:20px 0 8px 0;color:#066aab;font-size:11pt;">STATEMENT OF VALUATION</h3>'
+    + '<div class="scope-text">'
+    + '<p>The \u201cFAIR MARKET VALUE\u201d is the most probable price in terms of money which a vessel should bring in a competitive and open market under all conditions requisite to a fair sale, the buyer and seller each acting prudently, knowledgeably and assuming the price is not affected by undue stimulus. Implicit in this definition is the consummation of a sale as of a specified date and the passing of title from seller to buyer under conditions whereby:</p>'
+    + '<ul>'
+    + '<li>Buyer and seller are typically motivated.</li>'
+    + '<li>Both parties are well informed or well advised, and each acts in what they consider their own best interest.</li>'
+    + '<li>A reasonable time is allowed for exposure in the open market.</li>'
+    + '<li>Payment is made in terms of cash in U.S. dollars or in terms of financial arrangements comparable thereto.</li>'
+    + '<li>The price represents a normal consideration for the vessel sold, unaffected by special or creative financing or sales concessions granted by anyone associated with the sale.</li>'
+    + '</ul>'
+    + '</div>'
+
+    // ── Valuation figures table ──
+    + '<table>'
+    + '<tr><td style="width:40%;"><strong>Valuation Sources</strong></td><td>' + _srcCell + '</td></tr>'
+    + '<tr><td><strong>Fair Market Value</strong></td><td>'
+    + (_xr ? '<div style="font-size:14pt;font-weight:800;color:#066aab;">CAD $' + _f(_lowC) + ' &ndash; $' + _f(_highC) + '</div>' : '')
+    + '<div' + (_xr ? ' style="font-size:10pt;color:#4b5563;margin-top:2px;"' : '') + '>USD $' + _f(_lowU) + ' &ndash; $' + _f(_highU) + ' ' + _xrNote + '</div>'
+    + '<div style="font-size:9pt;color:#6b7280;font-style:italic;">Tax not included.</div>'
+    + '</td></tr>'
+    + _replRow
+    + _xrRow
+    + '</table>'
+
+    // ── Appraisal methodology + summary ──
+    + '<p><strong>Appraisal Methodology:</strong></p>'
+    + '<p class="scope-text">' + _methodology + '</p>'
+    + '<p class="scope-text"><strong>Summary:</strong> In accordance with the request for a Marine Survey of the \u201c' + esc(survey.vesselName) + '\u201d, for the purpose of evaluating its present condition and estimating its Fair Market Value and Replacement Cost, I herewith submit my conclusion based on the preceding report. The subject vessel was personally inspected by the undersigned on <strong>' + (survey.surveyDate || 'N/A') + '</strong>. Subject to correction of deficiencies listed in sections A and B, the vessel is considered to be reasonably suitable for its intended use. Other deficiencies listed should be attended to in keeping with good maintenance practices or as upgrades.</p>'
+    + '<p><strong>Condition Adjustment:</strong> The vessel\u2019s overall condition rating of \u201c' + _overallCond + '\u201d has been factored into the final valuation range using the BUC Marine Grading System.</p>'
+
+    // ── Valuation Worksheet ──
+    + '<h3 style="margin:20px 0 8px 0;color:#066aab;font-size:11pt;">VALUATION WORKSHEET</h3>'
+    + '<div class="scope-text"><p>The following data sources and comparables were used in determining the Fair Market Value and Estimated Replacement Cost of the subject vessel.</p></div>'
+    + '<table>'
+    + '<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Subject Vessel</td></tr>'
+    + '<tr><td style="width:40%;"><strong>Vessel</strong></td><td>' + (esc(survey.yearMakeModel) || 'N/A') + '</td></tr>'
+    + '<tr><td><strong>Vessel Name</strong></td><td>' + (esc(survey.vesselName) || 'N/A') + '</td></tr>'
+    + '<tr><td><strong>HIN</strong></td><td>' + (esc(survey.hinNumber) || 'N/A') + '</td></tr>'
+    + '<tr><td><strong>Overall Condition Rating</strong></td><td>' + _overallCond + '</td></tr>'
+    + '<tr><td><strong>Date of Survey</strong></td><td>' + (survey.surveyDate || 'N/A') + '</td></tr>'
+    + '</table>'
+
+    + '<table style="margin-top:12px;">'
+    + '<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Valuation Sources Consulted</td></tr>'
+    + '<tr><td style="width:40%;"><strong>Sources</strong></td><td>' + _wsSrcCell + '</td></tr>'
+    + '<tr><td><strong>BUC Value Range</strong></td><td>' + _bucRangeCell + '</td></tr>'
+    + _xrRow
+    + _wsReplRow
+    + '</table>'
+
+    + '<table style="margin-top:12px;">'
+    + '<tr><td colspan="6" style="background:#e8edf2;font-weight:bold;">Comparable Vessels / Market Research</td></tr>'
+    + '<tr><th>Source</th><th>Vessel</th><th>Price (USD)</th><th>Location</th><th>Date</th><th>Notes</th></tr>'
+    + _compRows
+    + '</table>';
+  })();
 
   // ── DETAILED SURVEY FINDINGS (body sections) ──────────────────────
   html += `<h2 style="background:#066aab;font-size:14pt;">DETAILED SURVEY FINDINGS</h2>`;
@@ -19119,136 +19227,6 @@ ${survey.vesselDescription ? `
       </div>`;
     });
   }
-
-  // ── SUMMARY OF VESSEL CONDITION ───────────────────────────────────
-  html += `<div class="page-break"></div>`;
-  html += `
-  <h2>SUMMARY OF VESSEL CONDITION</h2>
-  <div class="scope-text">
-    <p>It is the Surveyor's experience that develops an opinion of the OVERALL VESSEL RATING OF CONDITION after the Survey has been completed and the findings have been organised in a logical manner.</p>
-    <p>The grading of condition developed by BUC RESEARCH and accepted in the marine industry for a vessel at the time of Survey determines the adjustment to the range of base values in the BUC USED BOAT PRICE GUIDE for a similar vessel sold within a given time period, as a consideration to determine the Market Value.</p>
-
-    <p><strong>The following is the accepted Marine Grading System of Condition:</strong></p>
-    <div class="buc-grades">
-      <p><strong>"EXCELLENT (BRISTOL) CONDITION"</strong> — A vessel that is maintained in mint or Bristol fashion (usually better than factory new, loaded with extras, a rarity).</p>
-      <p><strong>"ABOVE AVERAGE CONDITION"</strong> — Has had above average care and is equipped with extra electrical and electronic gear.</p>
-      <p><strong>"AVERAGE CONDITION"</strong> — Ready for sale requiring no additional work and normally equipped for her size.</p>
-      <p><strong>"FAIR CONDITION"</strong> — Requires usual maintenance to prepare for sale.</p>
-      <p><strong>"POOR CONDITION"</strong> — Substantial yard work required and devoid of extras.</p>
-      <p><strong>"RESTORABLE CONDITION"</strong> — Enough of the hull and engine exists to restore the boat to usable condition.</p>
-    </div>
-
-    <p>As a result of the Survey, as shown in the REPORT OF MARINE SURVEY &amp; FINDINGS AND RECOMMENDATIONS sections of this report and by virtue of my experience, my opinion is:</p>
-    <p style="font-size:14pt;font-weight:bold;text-align:center;padding:12px;border:2px solid #006699;">Overall Vessel Rating is: "${esc(survey.overallCondition) || 'Not yet assessed'}"</p>
-  </div>
-  `;
-
-  // ── STATEMENT OF VALUATION ────────────────────────────────────────
-  html += `
-  <h2>STATEMENT OF VALUATION</h2>
-  <div class="scope-text">
-    <p>The "FAIR MARKET VALUE" is the most probable price in terms of money which a vessel should bring in a competitive and open market under all conditions requisite to a fair sale, the buyer and seller each acting prudently, knowledgeably and assuming the price is not affected by undue stimulus. Implicit in this definition is the consummation of a sale as of a specified date and the passing of title from seller to buyer under conditions whereby:</p>
-    <ul>
-      <li>Buyer and seller are typically motivated.</li>
-      <li>Both parties are well informed or well advised, and each acts in what they consider their own best interest.</li>
-      <li>A reasonable time is allowed for exposure in the open market.</li>
-      <li>Payment is made in terms of cash in U.S. dollars or in terms of financial arrangements comparable thereto.</li>
-      <li>The price represents a normal consideration for the vessel sold, unaffected by special or creative financing or sales concessions granted by anyone associated with the sale.</li>
-    </ul>
-  </div>
-  <!-- v2228: CAD prominently displayed alongside USD in every valuation
-       row, with the CAD value emphasised in larger/brand-colour type so
-       Canadian insurers read the correct currency at a glance. -->
-  ${(() => {
-    const _lowU2 = parseInt(survey.valuationLow || 0);
-    const _highU2 = parseInt(survey.valuationHigh || 0);
-    const _replU2 = parseInt(survey.replacementCost || 0);
-    const _xr2 = parseFloat(survey.exchangeRate) || 0;
-    const _lowC2 = _xr2 ? Math.round(_lowU2 * _xr2) : 0;
-    const _highC2 = _xr2 ? Math.round(_highU2 * _xr2) : 0;
-    const _replC2 = _xr2 ? Math.round(_replU2 * _xr2) : 0;
-    const _f2 = n => n.toLocaleString();
-    const _xrNote2 = _xr2 ? `(USD→CAD @ ${_xr2.toFixed(4)})` : '';
-    return `
-  <table>
-    <tr><td style="width:40%;"><strong>Valuation Sources</strong></td><td>${survey.valuationSources && survey.valuationSources.length > 0 ? survey.valuationSources.map(s => esc(s)).join('<br>') : esc(survey.valuationSource) || 'N/A'}</td></tr>
-    <tr>
-      <td><strong>Fair Market Value</strong></td>
-      <td>
-        ${_xr2 ? `<div style="font-size:13pt;font-weight:800;color:#066aab;">CAD $${_f2(_lowC2)} &ndash; $${_f2(_highC2)}</div>` : ''}
-        <div>USD $${_f2(_lowU2)} &ndash; $${_f2(_highU2)} ${_xrNote2}</div>
-        <div style="font-size:9pt;color:#6b7280;font-style:italic;">Tax not included.</div>
-      </td>
-    </tr>
-    ${survey.replacementCost ? `
-    <tr>
-      <td><strong>Estimated Replacement Cost</strong></td>
-      <td>
-        ${_xr2 ? `<div style="font-size:13pt;font-weight:800;color:#066aab;">CAD $${_f2(_replC2)}</div>` : ''}
-        <div>USD $${_f2(_replU2)}</div>
-        <div style="font-size:9pt;color:#6b7280;font-style:italic;">Tax not included.</div>
-      </td>
-    </tr>` : ''}
-  </table>`;
-  })()}
-
-  <p><strong>Appraisal Methodology:</strong></p>
-  <p class="scope-text">${esc(survey.valuationRationale) || 'The following method of valuation was used to obtain the Fair Market Value: similarly equipped, same or similar model vessels as shown as sold on soldboats.com, buc.com, and listings on yachtworld.com (and/or other websites) in the last two years were identified, adjusted for model year, condition, equipment, and date of sale, and averaged together. The vessel\'s overall condition rating using the BUC Marine Grading System has been factored into the final valuation range.'}</p>
-
-  <p class="scope-text"><strong>Summary:</strong> In accordance with the request for a Marine Survey of the "${esc(survey.vesselName)}", for the purpose of evaluating its present condition and estimating its Fair Market Value and Replacement Cost, I herewith submit my conclusion based on the preceding report. The subject vessel was personally inspected by the undersigned on <strong>${survey.surveyDate || 'N/A'}</strong>. Subject to correction of deficiencies listed in sections A and B, the vessel is considered to be reasonably suitable for its intended use. Other deficiencies listed should be attended to in keeping with good maintenance practices or as upgrades.</p>
-  `;
-
-  // ── VALUATION WORKSHEET ────────────────────────────────────────────
-  html += `<div class="page-break"></div>`;
-  html += `
-  <h2>VALUATION WORKSHEET</h2>
-  <div class="scope-text">
-    <p>The following data sources and comparables were used in determining the Fair Market Value and Estimated Replacement Cost of the subject vessel.</p>
-  </div>
-  <table>
-    <tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Subject Vessel</td></tr>
-    <tr><td style="width:40%;"><strong>Vessel</strong></td><td>${esc(survey.yearMakeModel) || 'N/A'}</td></tr>
-    <tr><td><strong>Vessel Name</strong></td><td>${esc(survey.vesselName) || 'N/A'}</td></tr>
-    <tr><td><strong>HIN</strong></td><td>${esc(survey.hinNumber) || 'N/A'}</td></tr>
-    <tr><td><strong>Overall Condition Rating</strong></td><td>${esc(survey.overallCondition) || 'Not yet assessed'}</td></tr>
-    <tr><td><strong>Date of Survey</strong></td><td>${survey.surveyDate || 'N/A'}</td></tr>
-  </table>
-
-  <table style="margin-top:12px;">
-    <tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Valuation Sources Consulted</td></tr>
-    <tr><td style="width:40%;"><strong>Sources</strong></td><td>${survey.valuationSources && survey.valuationSources.length > 0 ? survey.valuationSources.map(s => '• ' + esc(s)).join('<br>') : esc(survey.valuationSource) || 'N/A'}</td></tr>
-    <tr><td><strong>BUC Value Range</strong></td><td>USD $${parseInt(survey.valuationLow || 0).toLocaleString()} – $${parseInt(survey.valuationHigh || 0).toLocaleString()}${survey.exchangeRate ? ` &nbsp;/&nbsp; <strong style="color:#066aab;">CAD $${Math.round(parseInt(survey.valuationLow || 0) * parseFloat(survey.exchangeRate)).toLocaleString()} – $${Math.round(parseInt(survey.valuationHigh || 0) * parseFloat(survey.exchangeRate)).toLocaleString()}</strong>` : ''}</td></tr>
-    ${survey.exchangeRate ? `<tr><td><strong>Exchange Rate (USD→CAD)</strong></td><td>${parseFloat(survey.exchangeRate).toFixed(4)}</td></tr>` : ''}
-    ${survey.replacementCost ? `<tr><td><strong>Estimated Replacement Cost</strong></td><td>USD $${parseInt(survey.replacementCost).toLocaleString()}${survey.exchangeRate ? ` &nbsp;/&nbsp; <strong style="color:#066aab;">CAD $${Math.round(parseInt(survey.replacementCost) * parseFloat(survey.exchangeRate)).toLocaleString()}</strong>` : ''}</td></tr>` : ''}
-  </table>
-
-  <table style="margin-top:12px;">
-    <tr><td colspan="6" style="background:#e8edf2;font-weight:bold;">Comparable Vessels / Market Research</td></tr>
-    <tr>
-      <th>Source</th>
-      <th>Vessel</th>
-      <th>Price (USD)</th>
-      <th>Location</th>
-      <th>Date</th>
-      <th>Notes</th>
-    </tr>
-    ${(survey.comparables && survey.comparables.length > 0) ? survey.comparables.map(c => `
-    <tr>
-      <td>${esc(c.source)}</td>
-      <td>${esc(c.vessel)}</td>
-      <td>${esc(c.price)}</td>
-      <td>${esc(c.location || '')}</td>
-      <td>${esc(c.date || '')}</td>
-      <td>${esc(c.notes)}${c.water ? ' (' + esc(c.water) + ')' : ''}</td>
-    </tr>`).join('') : `
-    <tr><td colspan="6" style="text-align:center;color:#666;font-style:italic;">No comparables recorded. Check BUCValu, soldboats.com, and yachtworld.com for comparable sales and current listings.</td></tr>`}
-  </table>
-
-  <div class="scope-text" style="margin-top:12px;">
-    <p><strong>Appraisal Methodology:</strong> ${esc(survey.valuationRationale) || 'The following method of valuation was used to obtain the Fair Market Value: similarly equipped, same or similar model vessels as shown as sold on soldboats.com, buc.com, and listings on yachtworld.com (and/or other websites) in the last two years were identified, adjusted for model year, condition, equipment, and date of sale, and averaged together. The vessel\'s overall condition rating using the BUC Marine Grading System has been factored into the final valuation range.'}</p>
-    <p><strong>Condition Adjustment:</strong> The vessel's overall condition rating of "${esc(survey.overallCondition) || 'Not yet assessed'}" has been factored into the final valuation range using the BUC Marine Grading System.</p>
-  </div>
-  `;
 
   // ── SURVEYOR'S CERTIFICATE ────────────────────────────────────────
   html += `

@@ -12,6 +12,38 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2229 — 2026-04-15
+
+### Changed — Consolidated Rating & Valuation into a single report section
+
+Previously, rating and valuation content was scattered across four
+locations in the generated report:
+
+1. An early "Rating & Valuation" summary box (after General Vessel Info)
+2. "Summary of Vessel Condition" (after Findings & Recommendations)
+3. "Statement of Valuation" (after Summary of Vessel Condition)
+4. "Valuation Worksheet" (final section before Surveyor's Certificate)
+
+All four have been merged into one comprehensive **RATING & VALUATION**
+section positioned immediately before Detailed Survey Findings. The
+consolidated block contains:
+
+- BUC Marine Grading System definitions
+- Overall Vessel Condition rating (highlighted in brand colour)
+- Statement of Valuation (FMV legal definition)
+- Valuation figures table (CAD emphasised, USD as source of record)
+- Appraisal methodology and summary
+- Condition adjustment statement
+- Valuation Worksheet (subject vessel, sources, comparables table)
+
+This gives the reader the full verdict in one place, right before the
+evidence that supports it — matching the Norm Behring J100 report flow.
+
+Updated the "Notes Regarding Report Format" and Table of Contents to
+reflect the new section ordering.
+
+---
+
 ## v2228 — 2026-04-15
 
 Report-only pass addressing SAMS-style feedback and a stack of small
