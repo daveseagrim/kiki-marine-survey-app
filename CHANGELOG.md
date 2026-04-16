@@ -12,6 +12,26 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2231 — 2026-04-15
+
+### Added — Skip Comparables toggle and Final Concluded Value field
+
+**Skip Comparables:** A "Skip" checkbox next to the "Comparable Vessels"
+heading on the Vessel Info form hides the comparables entry section. When
+skipped, the Comparable Vessels / Market Research table is omitted from
+the generated report. The Check Report audit suppresses the "No comparable
+vessels entered" warning when comparables are skipped. Flag persists via
+`survey.skipComparables`.
+
+**Final Concluded Fair Market Value:** A new USD input field between the
+FMV range and Replacement Cost. This is the surveyor's single concluded
+figure after weighing all sources and condition — matching the Norm Behring
+report style. Appears prominently in the Rating & Valuation report section
+with CAD conversion emphasised in brand colour, and is also shown in the
+Valuation Worksheet. Check Report warns if the field is empty.
+
+---
+
 ## v2230 — 2026-04-15
 
 ### Fixed — Propeller/shaft/outdrive observations removed from Vessel Description

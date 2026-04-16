@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2230';
+const APP_VERSION = 'v2231';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -6527,8 +6527,10 @@ function createNewSurvey(formData) {
     valuationSources: formData.valuationSources || [],
     valuationSource: formData.valuationSource, // backward compat
     valuationRationale: formData.valuationRationale,
+    concludedValue: formData.concludedValue,
     replacementCost: formData.replacementCost,
     overallCondition: formData.overallCondition,
+    skipComparables: formData.skipComparables || false,
 
     // Safety equipment checklist (auto-generated from TP 511)
     safetyEquipment: [],
@@ -7583,6 +7585,12 @@ function renderNewSurveyForm() {
       </div>
 
       <div class="form-group">
+        <label class="form-label">Final Concluded Fair Market Value (USD)</label>
+        <div style="font-size:12px;color:#6b7280;margin-bottom:4px;">Your single concluded value after weighing all sources and condition.</div>
+        <input type="text" id="concludedValue" placeholder="e.g., 165000" inputmode="numeric" pattern="[0-9]*">
+      </div>
+
+      <div class="form-group">
         <label class="form-label">Estimated Replacement Cost (USD)</label>
         <input type="text" id="replacementCost" placeholder="e.g., 350000">
       </div>
@@ -7600,10 +7608,17 @@ function renderNewSurveyForm() {
         </select>
       </div>
 
-      <h3 style="margin-top:16px;color:#006699;">Comparable Vessels</h3>
-      <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Add comparable sales from BUCValu, Soldboats.com, YachtWorld, and current listings to support your valuation.</div>
-      <div id="comparablesEntries"></div>
-      <button class="btn-secondary" style="font-size:12px;padding:6px 12px;margin-top:8px;" onclick="addComparableEntry()">+ Add Comparable</button>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+        <h3 style="margin:0;color:#006699;">Comparable Vessels</h3>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#6b7280;cursor:pointer;margin-left:auto;">
+          <input type="checkbox" id="skipComparables" onchange="toggleComparablesSection()"> Skip
+        </label>
+      </div>
+      <div id="comparablesSection">
+        <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Add comparable sales from BUCValu, Soldboats.com, YachtWorld, and current listings to support your valuation.</div>
+        <div id="comparablesEntries"></div>
+        <button class="btn-secondary" style="font-size:12px;padding:6px 12px;margin-top:8px;" onclick="addComparableEntry()">+ Add Comparable</button>
+      </div>
 
       <div class="form-actions">
         <button class="btn-secondary" onclick="confirmAbandonNewSurvey()">Cancel</button>
@@ -8150,6 +8165,7 @@ function editSurveyDetails(surveyId) {
         valuationHigh: survey.valuationHigh,
         exchangeRate: survey.exchangeRate,
         valuationRationale: survey.valuationRationale,
+        concludedValue: survey.concludedValue,
         replacementCost: survey.replacementCost,
         overallCondition: survey.overallCondition
       };
@@ -8422,9 +8438,11 @@ function saveSurveyDetails(surveyId) {
       valuationSources: Array.from(document.querySelectorAll('.val-source:checked')).map(cb => cb.value),
       valuationSource: Array.from(document.querySelectorAll('.val-source:checked')).map(cb => cb.value).join(', '),
       valuationRationale: document.getElementById('valuationRationale')?.value || '',
+      concludedValue: document.getElementById('concludedValue')?.value || '',
       replacementCost: document.getElementById('replacementCost')?.value || '',
       overallCondition: document.getElementById('overallCondition')?.value || '',
-      comparables: collectComparables()
+      comparables: collectComparables(),
+      skipComparables: document.getElementById('skipComparables')?.checked || false
     };
 
     // Merge updates into existing survey (preserving items, photos, etc.)
@@ -8480,7 +8498,7 @@ async function saveEditFormSilently() {
     'engine2Make','engine2Model','engine2Serial','engine2Hours','engine2HP','fuelType2',
     'transmission2Make','transmission2Model','transmission2Serial',
     'vesselDescription','hinNumber','tcLicenseType','tcLicense','tcLicenseExpiry','taxStatus','compliancePlate',
-    'valuationLow','valuationHigh','valuationRationale','replacementCost','overallCondition'
+    'valuationLow','valuationHigh','valuationRationale','concludedValue','replacementCost','overallCondition'
   ];
   for (const f of fields) {
     const el = document.getElementById(f);
@@ -8496,6 +8514,7 @@ async function saveEditFormSilently() {
     survey.valuationSource = survey.valuationSources.join(', ');
   }
   try { survey.comparables = collectComparables(); } catch(e) {}
+  try { survey.skipComparables = document.getElementById('skipComparables')?.checked || false; } catch(e) {}
 
   await saveSurvey(survey);
 }
@@ -10311,6 +10330,7 @@ function startNewSurvey() {
 
     bilgePumps: collectBilgePumps(),
     comparables: collectComparables(),
+    skipComparables: document.getElementById('skipComparables')?.checked || false,
 
     vesselDescription: document.getElementById('vesselDescription')?.value || '',
 
@@ -10327,6 +10347,7 @@ function startNewSurvey() {
     valuationSources: Array.from(document.querySelectorAll('.val-source:checked')).map(cb => cb.value),
     valuationSource: Array.from(document.querySelectorAll('.val-source:checked')).map(cb => cb.value).join(', '),
     valuationRationale: document.getElementById('valuationRationale')?.value || '',
+    concludedValue: document.getElementById('concludedValue')?.value || '',
     replacementCost: document.getElementById('replacementCost')?.value || '',
     overallCondition: document.getElementById('overallCondition')?.value || ''
   };
@@ -10471,6 +10492,14 @@ function collectComparables() {
     });
   });
   return comps;
+}
+
+// v2231: toggle comparables section visibility and persist the flag
+function toggleComparablesSection() {
+  const cb = document.getElementById('skipComparables');
+  const section = document.getElementById('comparablesSection');
+  if (!cb || !section) return;
+  section.style.display = cb.checked ? 'none' : '';
 }
 
 function renderInspection(survey) {
@@ -11403,6 +11432,15 @@ function renderInspection(survey) {
     }
   } catch (e) { console.error('Error repopulating comparables:', e); }
 
+  // v2231: restore skipComparables checkbox state
+  try {
+    const skipCb = document.getElementById('skipComparables');
+    if (skipCb && survey.skipComparables) {
+      skipCb.checked = true;
+      toggleComparablesSection();
+    }
+  } catch (e) { console.error('Error restoring skipComparables:', e); }
+
   // Auto-fill single variants
   try {
     document.querySelectorAll('[data-auto-fill-item]').forEach(el => {
@@ -12163,12 +12201,13 @@ async function checkSurvey() {
     if (!survey.valuationLow) add('warning', 'Valuation', 'Missing: Low value estimate', null, 'valuationLow');
     if (!survey.valuationHigh) add('warning', 'Valuation', 'Missing: High value estimate', null, 'valuationHigh');
   }
+  if (!survey.concludedValue) add('warning', 'Valuation', 'Missing: Final concluded Fair Market Value', null, 'concludedValue');
   if (!survey.overallCondition) add('critical', 'Valuation', 'Missing: Overall condition rating (BUC grade)', null, 'overallCondition');
   if (!survey.valuationRationale && !survey.valuationSource) {
     add('warning', 'Valuation', 'Missing: Valuation rationale or source', null, 'valuationRationale');
   }
-  if ((!survey.comparables || survey.comparables.length === 0) || survey.comparables.every(c => !c.vessel)) {
-    add('warning', 'Valuation', 'No comparable vessels entered', null, 'valuationLow');
+  if (!survey.skipComparables && ((!survey.comparables || survey.comparables.length === 0) || survey.comparables.every(c => !c.vessel))) {
+    add('warning', 'Valuation', 'No comparable vessels entered (or skip comparables on the Vessel Info form)', null, 'valuationLow');
   }
   if (!survey.replacementCost) add('info', 'Valuation', 'Missing: Replacement cost estimate', null, 'replacementCost');
 
@@ -18771,6 +18810,8 @@ ${survey.vesselDescription ? `
     const _lowC = _xr ? Math.round(_lowU * _xr) : 0;
     const _highC = _xr ? Math.round(_highU * _xr) : 0;
     const _replC = _xr ? Math.round(_replU * _xr) : 0;
+    const _concU = parseInt(survey.concludedValue || 0);
+    const _concC = _xr ? Math.round(_concU * _xr) : 0;
     const _f = n => n.toLocaleString();
     const _xrNote = _xr ? '(USD\u2192CAD @ ' + _xr.toFixed(4) + ')' : '';
 
@@ -18871,6 +18912,11 @@ ${survey.vesselDescription ? `
     + '<div style="font-size:9pt;color:#6b7280;font-style:italic;">Tax not included.</div>'
     + '</td></tr>'
     + _replRow
+    + (_concU ? '<tr style="border-top:2px solid #066aab;"><td><strong style="font-size:11pt;">Final Concluded Fair Market Value</strong></td><td>'
+      + (_xr ? '<div style="font-size:16pt;font-weight:800;color:#066aab;line-height:1.3;">CAD $' + _f(_concC) + '</div>' : '')
+      + '<div style="font-size:11pt;' + (_xr ? 'color:#4b5563;margin-top:2px;' : 'font-weight:800;color:#066aab;') + '">USD $' + _f(_concU) + ' ' + _xrNote + '</div>'
+      + '<div style="font-size:9pt;color:#6b7280;font-style:italic;">Tax not included.</div>'
+      + '</td></tr>' : '')
     + _xrRow
     + '</table>'
 
@@ -18898,13 +18944,16 @@ ${survey.vesselDescription ? `
     + '<tr><td><strong>BUC Value Range</strong></td><td>' + _bucRangeCell + '</td></tr>'
     + _xrRow
     + _wsReplRow
+    + (_concU ? '<tr style="border-top:2px solid #066aab;"><td><strong>Final Concluded FMV</strong></td><td><strong style="color:#066aab;">USD $' + _concU.toLocaleString() + (_xr ? ' &nbsp;/&nbsp; CAD $' + _concC.toLocaleString() : '') + '</strong></td></tr>' : '')
     + '</table>'
 
-    + '<table style="margin-top:12px;">'
-    + '<tr><td colspan="6" style="background:#e8edf2;font-weight:bold;">Comparable Vessels / Market Research</td></tr>'
-    + '<tr><th>Source</th><th>Vessel</th><th>Price (USD)</th><th>Location</th><th>Date</th><th>Notes</th></tr>'
-    + _compRows
-    + '</table>';
+    // v2231: comparables table hidden when skipComparables is true
+    + (survey.skipComparables ? '' :
+      '<table style="margin-top:12px;">'
+      + '<tr><td colspan="6" style="background:#e8edf2;font-weight:bold;">Comparable Vessels / Market Research</td></tr>'
+      + '<tr><th>Source</th><th>Vessel</th><th>Price (USD)</th><th>Location</th><th>Date</th><th>Notes</th></tr>'
+      + _compRows
+      + '</table>');
   })();
 
   // ── DETAILED SURVEY FINDINGS (body sections) ──────────────────────
