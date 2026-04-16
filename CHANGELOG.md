@@ -12,6 +12,16 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2251 — 2026-04-16
+
+### Survey Checklist Summary removed from report
+
+- **Entire section removed** — the Survey Checklist Summary showed every inspected item in a table (rating, finding code, truncated notes, standards) in the same category order as Detailed Survey Findings, just without photos. The Findings Overview count table provides the at-a-glance numbers, Detailed Survey Findings carries the full observations + photos, and Findings & Recommendations groups items by severity. The checklist summary added a full page+ without unique value.
+- **TOC updated** — "Survey Checklist Summary" entry removed. Report now has 15 sections in the Table of Contents.
+- **Dead code cleaned** — `tableRow` counter and all checklist summary rendering logic removed.
+
+---
+
 ## v2250 — 2026-04-16
 
 ### Report redundancy reduction

@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2250';
+const APP_VERSION = 'v2251';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -19162,7 +19162,6 @@ async function generateReport() {
       <li>Vessel Description</li>
       <li>Use of Ratings</li>
       <li>Findings Overview</li>
-      <li>Survey Checklist Summary</li>
       <li>Safety Equipment — TC TP 511</li>
       <li>Detailed Survey Findings</li>
       <li>Findings &amp; Recommendations</li>
@@ -19297,94 +19296,17 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     <tr><td><strong>Safety Equipment (TC TP 511)</strong></td><td>${_foSafe.length > 0 ? _foChecked + ' of ' + _foSafe.length + ' verified' + (_foMissing > 0 ? ' — <strong style="color:#dc2626;">' + _foMissing + ' missing</strong>' : ' — <strong style="color:#16a34a;">all present</strong>') : '<span style="color:#6b7280;">Not yet assessed</span>'}</td></tr>
   </table>
 
-  <!-- v2250: A and B bullet lists removed from Findings Overview — they
-       duplicated the Findings & Recommendations section verbatim. The
-       count table above is sufficient as an at-a-glance summary. -->
+  <!-- v2250: A and B bullet lists removed from Findings Overview. -->
 
-  <!-- ═══ SURVEY CHECKLIST SUMMARY ═══ -->
-  <h2>SURVEY CHECKLIST SUMMARY</h2>
-  <p style="font-size:9pt;color:#666;margin-bottom:8px;">The following table provides an at-a-glance overview of every inspected item — its surveyor notes, rating, finding code where applicable, and the relevant standards. Detailed observations follow in the body of the report.</p>
-  <table class="checklist-table">
-    <thead>
-      <tr>
-        <th style="width:3%;">#</th>
-        <th style="width:18%;">Item</th>
-        <th style="width:42%;">Surveyor Notes</th>
-        <th style="width:11%;">Rating</th>
-        <th style="width:6%;">Finding</th>
-        <th style="width:20%;">Applicable Standard(s)</th>
-      </tr>
-    </thead>
-    <tbody>
-`;
-
-  let tableRow = 0;
-  activeTemplate.forEach(section => {
-    if (section.name === 'Kiki Marine Survey' && section.categories) {
-      section.categories.forEach(category => {
-        if (!category.items || category.name === 'Survey Specifications' || category.name === 'Vessel Specifications') return;
-        const ratedItems = category.items.filter(i => i.type === 'list');
-        // Only include items with ratings in the checklist summary
-        // v2228: Not-applicable items are dropped entirely from the
-        // report (checklist summary AND detailed findings) — they just
-        // clutter the reader's view with "item doesn't exist on this
-        // vessel" rows. Not-tested items all stay in. A/B/C always stay.
-        const answeredItems = ratedItems.filter(i => {
-          const d = survey.items[i.label];
-          if (!d || !d.rating || d.excluded) return false;
-          const _clsRow = classifyRatingForReport(d.rating);
-          if (_clsRow.code === 'NA') return false;
-          return true;
-        });
-        if (answeredItems.length === 0) return;
-
-        // Category header row
-        html += `<tr><td colspan="6" style="background:#e8edf2;font-weight:bold;padding:5px 8px;font-size:9pt;border-top:2px solid #066aab;">${esc(category.name)}</td></tr>`;
-
-        answeredItems.forEach(item => {
-          tableRow++;
-          const d = survey.items[item.label];
-          const rating = d.rating;
-          const code = findingCodeMap[item.label] || '';
-          const isViolation = rating.startsWith('A') || rating.startsWith('B');
-          // v2242: ALL items (including A/B) truncate to first sentence
-          // in the checklist summary. Full text is in Detailed Survey
-          // Findings — the summary table is an at-a-glance view only.
-          // This eliminates the triplication that was bloating the report.
-          let notesText = '—';
-          if (d.text) {
-            const _cleaned = cleanupTypos(d.text);
-            const _m = _cleaned.trim().match(/^(.+?[.!?])(?:\s|$)/);
-            notesText = _m ? _m[1] : _cleaned;
-            if (notesText.length < _cleaned.trim().length) notesText += ' …';
-          }
-          const _mergedStd = isViolation ? mergeTextStandards(d.standards, d.text) : [];
-          const stdText = _mergedStd.length > 0 ? _mergedStd.join('; ') : '—';
-          // v2228: classify via helper — the previous fallthrough chain
-          // mislabelled "Not applicable" and "Powered up only" as "NT —
-          // Not Tested" in the summary table. NA and PO now render with
-          // their own codes and labels.
-          const _cls = classifyRatingForReport(rating);
-
-          html += `<tr>
-            <td style="text-align:center;">${tableRow}</td>
-            <td>${esc(displayItemLabel(item.label, survey))}</td>
-            <td class="text-snippet">${esc(notesText)}</td>
-            <td><span class="rating-pill" style="background:${_cls.color};">${_cls.code} — ${_cls.label}</span></td>
-            <td style="text-align:center;font-weight:bold;color:${_cls.color};">${code}</td>
-            <td style="font-size:8pt;">${esc(stdText)}</td>
-          </tr>`;
-        });
-      });
-    }
-  });
-
-  // v2250: post-checklist summary count line removed — same counts
-  // already appear in the Findings Overview table above.
-  html += `</tbody></table>
-
-  <div class="page-break"></div>
-
+  <!-- v2251: Survey Checklist Summary section removed entirely.
+       It showed every inspected item in a table (rating, finding code,
+       truncated notes, standards) — the same items in the same category
+       order as Detailed Survey Findings, just without photos. The
+       Findings Overview count table provides the at-a-glance numbers,
+       Detailed Survey Findings carries the full observations + photos,
+       and Findings & Recommendations groups items by severity.
+       The checklist summary was the weakest of the three — an awkward
+       middle ground that added a full page+ without unique value. -->
 `;
 
   // ── SAFETY EQUIPMENT (TC TP 511) ──────────────────────────────────
