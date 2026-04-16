@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2248';
+const APP_VERSION = 'v2249';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -18043,7 +18043,11 @@ function restoreAccordionState() {
     if (titleSpan) {
       const title = titleSpan.textContent.replace(/^[^\w]*/, '').trim();
       if (title === _openAccordionCategory) {
-        const content = header.nextElementSibling;
+        // v2248: use parentElement.querySelector instead of nextElementSibling.
+        // A flagged-summary div can sit between the header button and the
+        // accordion-content div, so nextElementSibling sometimes returns the
+        // wrong element — causing the section to stay collapsed after re-render.
+        const content = header.parentElement.querySelector('.accordion-content');
         if (content) {
           content.style.display = 'block';
           const chevron = header.querySelector('.accordion-chevron');
@@ -20669,6 +20673,9 @@ async function initApp() {
     // Initialize Firebase real-time sync (non-blocking)
     try { FirebaseSync.init(); } catch (syncErr) { console.warn('Sync init error:', syncErr); }
 
+    // v2248: pick up Google Drive redirect result (iOS/PWA sign-in flow)
+    try { DriveBackup.checkRedirectResult(); } catch (e) { console.warn('Drive redirect check:', e); }
+
     // Run photo integrity check in background (non-blocking)
     validatePhotoIntegrity().catch(err => console.warn('Photo integrity check failed:', err));
 
@@ -20896,6 +20903,15 @@ const DriveBackup = (() => {
     return !!_accessToken;
   }
 
+  // v2248: detect iOS / standalone PWA where popups are blocked.
+  // signInWithRedirect works everywhere; signInWithPopup is faster on
+  // desktop but unusable in PWA home-screen mode on iOS.
+  const _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const _isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+  const _useRedirect = _isIOS || _isStandalone;
+
   // Sign in with Google via Firebase Auth, requesting Drive file scope
   async function signIn() {
     if (!firebase || !firebase.auth) {
@@ -20903,13 +20919,49 @@ const DriveBackup = (() => {
     }
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.addScope(DRIVE_SCOPE);
-    // Set custom parameter to skip account chooser if already signed in
     provider.setCustomParameters({ prompt: 'consent', login_hint: 'daveseagrim@gmail.com' });
+
+    if (_useRedirect) {
+      // Redirect flow — page navigates to Google, returns after auth.
+      // The token is picked up by checkRedirectResult() on reload.
+      sessionStorage.setItem('_driveRedirectPending', '1');
+      await firebase.auth().signInWithRedirect(provider);
+      // Execution stops here — page unloads for the redirect.
+      return null;
+    }
+    // Desktop popup flow (unchanged)
     const result = await firebase.auth().signInWithPopup(provider);
     _accessToken = result.credential.accessToken;
     window._driveTokenTime = Date.now();
     console.log('[Drive] Signed in, token obtained');
     return _accessToken;
+  }
+
+  // Called once at app startup to pick up a redirect result (if any)
+  async function checkRedirectResult() {
+    if (!firebase || !firebase.auth) return;
+    try {
+      const result = await firebase.auth().getRedirectResult();
+      if (result && result.credential && result.credential.accessToken) {
+        _accessToken = result.credential.accessToken;
+        window._driveTokenTime = Date.now();
+        sessionStorage.removeItem('_driveRedirectPending');
+        console.log('[Drive] Redirect sign-in completed, token obtained');
+        showToast('Google Drive connected ✓');
+        // Re-render home to show the updated Drive button state
+        if (!currentSurveyId) renderHome();
+      } else if (sessionStorage.getItem('_driveRedirectPending')) {
+        // Redirect was initiated but no credential came back — clear the flag
+        sessionStorage.removeItem('_driveRedirectPending');
+        console.warn('[Drive] Redirect returned without credential');
+      }
+    } catch (e) {
+      sessionStorage.removeItem('_driveRedirectPending');
+      console.error('[Drive] getRedirectResult error:', e);
+      if (e.code !== 'auth/popup-closed-by-user') {
+        showToast('Drive sign-in failed: ' + (e.message || 'unknown error'));
+      }
+    }
   }
 
   // Refresh token if expired (tokens last ~1 hour)
@@ -20918,20 +20970,32 @@ const DriveBackup = (() => {
       return _accessToken; // Still valid
     }
     console.log('[Drive] Token expired or missing, refreshing...');
-    // Use signInWithPopup with login_hint to auto-select account
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.addScope(DRIVE_SCOPE);
-    provider.setCustomParameters({ prompt: 'none', login_hint: 'daveseagrim@gmail.com' });
-    try {
-      const result = await firebase.auth().signInWithPopup(provider);
-      _accessToken = result.credential.accessToken;
-      window._driveTokenTime = Date.now();
-      console.log('[Drive] Token refreshed');
-    } catch (e) {
-      console.warn('[Drive] Silent refresh failed, trying full sign-in:', e.message);
-      // Fall back to full sign-in
-      await signIn();
+
+    // If the user is already signed in to Firebase Auth, try to get a
+    // fresh Google credential without a full sign-in flow.
+    const user = firebase.auth().currentUser;
+    if (user) {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.addScope(DRIVE_SCOPE);
+      provider.setCustomParameters({ prompt: 'none', login_hint: user.email || 'daveseagrim@gmail.com' });
+      try {
+        if (_useRedirect) {
+          // On iOS we can't silently refresh via popup — trigger redirect
+          sessionStorage.setItem('_driveRedirectPending', '1');
+          await firebase.auth().signInWithRedirect(provider);
+          return null;
+        }
+        const result = await firebase.auth().signInWithPopup(provider);
+        _accessToken = result.credential.accessToken;
+        window._driveTokenTime = Date.now();
+        console.log('[Drive] Token refreshed');
+        return _accessToken;
+      } catch (e) {
+        console.warn('[Drive] Silent refresh failed:', e.message);
+      }
     }
+    // Fall back to full sign-in
+    await signIn();
     return _accessToken;
   }
 
@@ -21294,7 +21358,7 @@ const DriveBackup = (() => {
     }
   }
 
-  return { isSignedIn, signIn, backupSurvey, backupOnePhoto, backupAll, ensureToken };
+  return { isSignedIn, signIn, checkRedirectResult, backupSurvey, backupOnePhoto, backupAll, ensureToken };
 })();
 
 const FirebaseSync = (() => {

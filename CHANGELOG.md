@@ -12,6 +12,19 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2249 — 2026-04-16
+
+### Google Drive sign-in fix for iPhone / PWA
+
+- **Redirect-based auth for iOS**: `signInWithPopup` is broken on iOS Safari and in PWA standalone mode (popups are blocked or can't return credentials). Drive sign-in now detects iOS and standalone mode and uses `signInWithRedirect` + `getRedirectResult` instead. On page reload after the redirect, the Drive access token is captured automatically and the home screen re-renders to reflect the signed-in state.
+- **Startup redirect check**: `DriveBackup.checkRedirectResult()` is called during `initApp()` to pick up any pending redirect result.
+
+### Accordion restore fix (section collapse on drive line change)
+
+- **Section stays open after config changes**: `restoreAccordionState()` was using `header.nextElementSibling` to find the accordion content div, but a `flagged-summary` div between the header and the content div caused it to find the wrong element. Now uses `header.parentElement.querySelector('.accordion-content')`, matching the same pattern `toggleAccordion()` already uses. Hull exterior (and all other sections) now stays open after changing drive line count, drive type, or rudder settings.
+
+---
+
 ## v2248 — 2026-04-16
 
 ### Batch camera portrait crash fix
