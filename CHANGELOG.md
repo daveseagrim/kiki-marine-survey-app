@@ -53,6 +53,16 @@ Captures several v2239 changes that were made iteratively but not logged:
 - Comparables table: suppressed when no comparable vessels are listed
 - GPS location block: removed from below Survey Conditions table
 
+### Changed — Report section reorder: Rating Definitions + Findings Overview
+
+The Rating Definitions ("Use of Ratings") section moved from before the
+Table of Contents to immediately after Vessel Description — right before
+the Checklist Summary, where the ratings first appear. The Findings
+Overview table and Key Items lists (formerly the Executive Summary) now
+follow the Rating Definitions. The Executive Summary section has been
+removed entirely. The TOC, Notes Regarding Report Format, and section
+numbering all updated to match. Cover page footer tagline removed.
+
 ---
 
 ## v2239 — 2026-04-16

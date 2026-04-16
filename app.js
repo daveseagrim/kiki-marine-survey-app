@@ -18779,64 +18779,8 @@ async function generateReport() {
   </div>
   ` : ''}
 
-  <!-- ═══ EXECUTIVE SUMMARY (v2237) ═══ -->
-  ${(() => {
-    const _esCond = esc(survey.overallCondition) || 'Not yet assessed';
-    const _esStrip = s => String(s || '0').replace(/[^0-9.]/g, '');
-    const _esConc = parseInt(_esStrip(survey.concludedValue));
-    const _esXr = parseFloat(survey.exchangeRate) || 0;
-    const _esConcC = _esXr ? Math.round(_esConc * _esXr) : 0;
-    const _esLow = parseInt(_esStrip(survey.valuationLow));
-    const _esHigh = parseInt(_esStrip(survey.valuationHigh));
-    const _esLowC = _esXr ? Math.round(_esLow * _esXr) : 0;
-    const _esHighC = _esXr ? Math.round(_esHigh * _esXr) : 0;
-    const _f = n => n.toLocaleString();
-
-    // Safety equipment summary (exclude skipped items)
-    const _esSafeRaw = survey.safetyEquipment || [];
-    const _esSkipCats = survey.safetySubcategoriesSkipped || {};
-    const _esSafe = _esSafeRaw.filter(e => !e.skipped && !_esSkipCats[e.category]);
-    const _esChecked = _esSafe.filter(e => e.checked).length;
-    const _esMissing = _esSafe.length - _esChecked;
-
-    // Value display
-    let _esValueHtml = '';
-    if (_esConc) {
-      _esValueHtml = (_esXr ? '<strong style="color:#066aab;font-size:13pt;">CAD $' + _f(_esConcC) + '</strong> / ' : '') + 'USD $' + _f(_esConc);
-    } else if (_esLow || _esHigh) {
-      _esValueHtml = (_esXr ? '<strong style="color:#066aab;">CAD $' + _f(_esLowC) + ' – $' + _f(_esHighC) + '</strong> / ' : '') + 'USD $' + _f(_esLow) + ' – $' + _f(_esHigh);
-    } else {
-      _esValueHtml = '<span style="color:#6b7280;font-style:italic;">Not yet assessed</span>';
-    }
-
-    // v2239: list ALL A and B findings — this is printed on paper,
-    // the reader needs the complete picture without flipping pages.
-    const _allA = findings.A.map(f =>
-      '<li style="margin-bottom:4px;"><strong style="color:#dc2626;">' + esc(f.code) + '</strong> — ' + esc(displayItemLabel(f.label, survey)) + '</li>'
-    ).join('');
-    const _allB = findings.B.map(f =>
-      '<li style="margin-bottom:4px;"><strong style="color:#d97706;">' + esc(f.code) + '</strong> — ' + esc(displayItemLabel(f.label, survey)) + '</li>'
-    ).join('');
-
-    return `
-  <div class="page-break"></div>
-  <h2 style="background:#066aab;font-size:14pt;">EXECUTIVE SUMMARY</h2>
-  <!-- v2239: vessel info table removed — redundant with cover page + General Vessel Info -->
-  <table>
-    <tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Findings Overview</td></tr>
-    <tr><td style="width:40%;"><strong><span style="color:#dc2626;">&#9632;</span> Critical (A)</strong></td><td>${findings.A.length} finding${findings.A.length !== 1 ? 's' : ''}</td></tr>
-    <tr><td><strong><span style="color:#d97706;">&#9632;</span> Needs Attention (B)</strong></td><td>${findings.B.length} finding${findings.B.length !== 1 ? 's' : ''}</td></tr>
-    <tr><td><strong><span style="color:#16a34a;">&#9632;</span> Serviceable (C)</strong></td><td>${findings.C.length} finding${findings.C.length !== 1 ? 's' : ''}</td></tr>
-    <tr><td><strong><span style="color:#6b7280;">&#9632;</span> Not Tested</strong></td><td>${findings.NT.length} item${findings.NT.length !== 1 ? 's' : ''}</td></tr>
-    ${findings.PO.length > 0 ? '<tr><td><strong><span style="color:#6b7280;">&#9632;</span> Powered Up Only</strong></td><td>' + findings.PO.length + ' item' + (findings.PO.length !== 1 ? 's' : '') + '</td></tr>' : ''}
-    <tr><td><strong>Safety Equipment (TC TP 511)</strong></td><td>${_esSafe.length > 0 ? _esChecked + ' of ' + _esSafe.length + ' verified' + (_esMissing > 0 ? ' — <strong style="color:#dc2626;">' + _esMissing + ' missing</strong>' : ' — <strong style="color:#16a34a;">all present</strong>') : '<span style="color:#6b7280;">Not yet assessed</span>'}</td></tr>
-  </table>
-
-  ${findings.A.length > 0 ? '<div style="margin-top:12px;"><strong style="color:#dc2626;">Priority Safety Findings:</strong><ul style="margin-top:4px;">' + _allA + '</ul></div>' : ''}
-
-  ${findings.B.length > 0 ? '<div style="margin-top:8px;"><strong style="color:#d97706;">Key Items Needing Attention:</strong><ul style="margin-top:4px;">' + _allB + '</ul></div>' : ''}
-  `;
-  })()}
+  <!-- v2240: Executive Summary removed — Findings Overview + Key Items
+       relocated to after Rating Definitions / Vessel Description. -->
 
   <!-- ═══ RATING & VALUATION ═══ -->
   <div class="page-break"></div>
@@ -19126,40 +19070,22 @@ async function generateReport() {
   </div>`;
   })()}
 
-  <!-- ═══ USE OF RATINGS ═══ -->
-  <h2>USE OF "A", "B", "C", "NOT TESTED" AND "SAFETY EQUIPMENT" RATINGS</h2>
-  <div class="scope-text">
-    <ul class="def-list">
-      <li><span style="background:#dc2626;color:white;padding:2px 8px;font-weight:bold;">A — Critical</span><br/>
-        <em>Definition:</em> Direct safety, environmental risk, or ABYC/Transport Canada code violation.<br/>
-        <em>Action:</em> Immediate correction required.</li>
-      <li><span style="background:#d97706;color:white;padding:2px 8px;font-weight:bold;">B — Needs Attention (Moderate)</span><br/>
-        <em>Definition:</em> Moderate deficiencies; not immediately hazardous but should be addressed.<br/>
-        <em>Action:</em> Schedule repairs.</li>
-      <li><span style="background:#16a34a;color:white;padding:2px 8px;font-weight:bold;">C — Serviceable</span><br/>
-        <em>Definition:</em> Currently meets all applicable safety and performance standards.<br/>
-        <em>Action:</em> No corrective work required.</li>
-      <li><span style="background:#6b7280;color:white;padding:2px 8px;font-weight:bold;">Not tested / not verified</span><br/>
-        <em>Definition:</em> A comprehensive inspection was attempted, but was not possible due to constraints imposed upon the surveyor (e.g., no power available, inability to remove panels, requirements not to conduct destructive tests, or limitations on the inspection time).</li>
-      <li><span style="background:#2563eb;color:white;padding:2px 8px;font-weight:bold;">Safety Equipment (TC TP 511)</span><br/>
-        <em>Definition:</em> Required safety equipment per Transport Canada TP 511E Safe Boating Guide and Small Vessel Regulations (SOR/2010-91), verified as present on board.<br/>
-        <em>Action:</em> Missing items must be acquired before the vessel is next underway.</li>
-    </ul>
-  </div>
+  <!-- v2240: Rating Definitions moved to after Vessel Description -->
 
   <!-- ═══ NOTES REGARDING REPORT FORMAT ═══ -->
   <h2>NOTES REGARDING REPORT FORMAT</h2>
   <div class="scope-text">
     <p>This report is presented in the following order:</p>
     <ol>
-      <li><strong>Executive Summary</strong> — Headline findings, condition rating, and Fair Market Value at a glance.</li>
-      <li><strong>Rating &amp; Valuation</strong> — Overall condition rating (BUC Marine Grading System), Fair Market Value, Estimated Replacement Cost, and Valuation Worksheet with comparables.</li>
+      <li><strong>Rating &amp; Valuation</strong> — Overall condition rating (BUC Marine Grading System), Fair Market Value, Estimated Replacement Cost, and Valuation Worksheet.</li>
       <li><strong>General Vessel Information &amp; Specifications</strong></li>
       <li><strong>Vessel Description</strong> — A narrative description of the vessel.</li>
-      <li><strong>Survey Checklist Summary</strong> — An at-a-glance table of all inspected items showing rating, violation status, finding code, and applicable standards.</li>
+      <li><strong>Use of Ratings</strong> — Definitions of the A/B/C/NT/Safety rating categories.</li>
+      <li><strong>Findings Overview</strong> — At-a-glance summary of finding counts and key items needing attention.</li>
+      <li><strong>Survey Checklist Summary</strong> — A table of all inspected items showing rating, violation status, finding code, and applicable standards.</li>
       <li><strong>Safety Equipment — TC TP 511</strong> — Required safety equipment per Transport Canada regulations, with on-board verification status.</li>
       <li><strong>Detailed Survey Findings</strong> — The full, itemised survey observations by category.</li>
-      <li><strong>Findings &amp; Recommendations</strong> — All items rated "A" (Critical), "B" (Needs Attention), "C" (Serviceable), "Not tested/not verified", and "Powered up only" are compiled here for quick reference.</li>
+      <li><strong>Findings &amp; Recommendations</strong> — All items rated "A" (Critical), "B" (Needs Attention), "C" (Serviceable), "Not tested/not verified", and "Powered up only" compiled for quick reference.</li>
       <li><strong>Surveyor's Certificate</strong></li>
     </ol>
   </div>
@@ -19168,19 +19094,19 @@ async function generateReport() {
   <h2>TABLE OF CONTENTS</h2>
   <div class="scope-text" style="columns:2;column-gap:30px;">
     <ol style="font-size:10pt;line-height:2.0;padding-left:20px;">
-      <li>Executive Summary</li>
       <li>Rating &amp; Valuation</li>
       <li>Purpose and Scope of Survey</li>
       <li>Methodology and Limitations</li>
       <li>Conduct of Survey</li>
       <li>Definitions of Terms</li>
-      <li>Use of Ratings</li>
       <li>Notes Regarding Report Format</li>
       <li>General Vessel Information</li>
       <li>Vessel Specifications</li>
       <li>Survey Conditions</li>
       <li>Vessel Documentation Data</li>
       <li>Vessel Description</li>
+      <li>Use of Ratings</li>
+      <li>Findings Overview</li>
       <li>Survey Checklist Summary</li>
       <li>Safety Equipment — TC TP 511</li>
       <li>Detailed Survey Findings</li>
@@ -19268,6 +19194,58 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     <p>${esc(cleanupPlaceholders(survey.vesselDescription)).replace(/\n/g, '</p><p>')}</p>
   </div>
 ` : ''}
+
+  <!-- ═══ USE OF RATINGS (v2240: moved here from before TOC) ═══ -->
+  <h2>USE OF "A", "B", "C", "NOT TESTED" AND "SAFETY EQUIPMENT" RATINGS</h2>
+  <div class="scope-text">
+    <ul class="def-list">
+      <li><span style="background:#dc2626;color:white;padding:2px 8px;font-weight:bold;">A — Critical</span><br/>
+        <em>Definition:</em> Direct safety, environmental risk, or ABYC/Transport Canada code violation.<br/>
+        <em>Action:</em> Immediate correction required.</li>
+      <li><span style="background:#d97706;color:white;padding:2px 8px;font-weight:bold;">B — Needs Attention (Moderate)</span><br/>
+        <em>Definition:</em> Moderate deficiencies; not immediately hazardous but should be addressed.<br/>
+        <em>Action:</em> Schedule repairs.</li>
+      <li><span style="background:#16a34a;color:white;padding:2px 8px;font-weight:bold;">C — Serviceable</span><br/>
+        <em>Definition:</em> Currently meets all applicable safety and performance standards.<br/>
+        <em>Action:</em> No corrective work required.</li>
+      <li><span style="background:#6b7280;color:white;padding:2px 8px;font-weight:bold;">Not tested / not verified</span><br/>
+        <em>Definition:</em> A comprehensive inspection was attempted, but was not possible due to constraints imposed upon the surveyor (e.g., no power available, inability to remove panels, requirements not to conduct destructive tests, or limitations on the inspection time).</li>
+      <li><span style="background:#2563eb;color:white;padding:2px 8px;font-weight:bold;">Safety Equipment (TC TP 511)</span><br/>
+        <em>Definition:</em> Required safety equipment per Transport Canada TP 511E Safe Boating Guide and Small Vessel Regulations (SOR/2010-91), verified as present on board.<br/>
+        <em>Action:</em> Missing items must be acquired before the vessel is next underway.</li>
+    </ul>
+  </div>
+
+  <!-- ═══ FINDINGS OVERVIEW (v2240: moved here from Executive Summary) ═══ -->
+  <h2>FINDINGS OVERVIEW</h2>
+  `;
+
+  // Safety equipment summary for Findings Overview (previously inside Executive Summary IIFE)
+  const _foSafeRaw = survey.safetyEquipment || [];
+  const _foSkipCats = survey.safetySubcategoriesSkipped || {};
+  const _foSafe = _foSafeRaw.filter(e => !e.skipped && !_foSkipCats[e.category]);
+  const _foChecked = _foSafe.filter(e => e.checked).length;
+  const _foMissing = _foSafe.length - _foChecked;
+
+  const _foAllA = findings.A.map(f =>
+    '<li style="margin-bottom:4px;"><strong style="color:#dc2626;">' + esc(f.code) + '</strong> — ' + esc(displayItemLabel(f.label, survey)) + '</li>'
+  ).join('');
+  const _foAllB = findings.B.map(f =>
+    '<li style="margin-bottom:4px;"><strong style="color:#d97706;">' + esc(f.code) + '</strong> — ' + esc(displayItemLabel(f.label, survey)) + '</li>'
+  ).join('');
+
+  html += `
+  <table>
+    <tr><td style="width:40%;"><strong><span style="color:#dc2626;">&#9632;</span> Critical (A)</strong></td><td>${findings.A.length} finding${findings.A.length !== 1 ? 's' : ''}</td></tr>
+    <tr><td><strong><span style="color:#d97706;">&#9632;</span> Needs Attention (B)</strong></td><td>${findings.B.length} finding${findings.B.length !== 1 ? 's' : ''}</td></tr>
+    <tr><td><strong><span style="color:#16a34a;">&#9632;</span> Serviceable (C)</strong></td><td>${findings.C.length} finding${findings.C.length !== 1 ? 's' : ''}</td></tr>
+    <tr><td><strong><span style="color:#6b7280;">&#9632;</span> Not Tested</strong></td><td>${findings.NT.length} item${findings.NT.length !== 1 ? 's' : ''}</td></tr>
+    ${findings.PO.length > 0 ? '<tr><td><strong><span style="color:#6b7280;">&#9632;</span> Powered Up Only</strong></td><td>' + findings.PO.length + ' item' + (findings.PO.length !== 1 ? 's' : '') + '</td></tr>' : ''}
+    <tr><td><strong>Safety Equipment (TC TP 511)</strong></td><td>${_foSafe.length > 0 ? _foChecked + ' of ' + _foSafe.length + ' verified' + (_foMissing > 0 ? ' — <strong style="color:#dc2626;">' + _foMissing + ' missing</strong>' : ' — <strong style="color:#16a34a;">all present</strong>') : '<span style="color:#6b7280;">Not yet assessed</span>'}</td></tr>
+  </table>
+
+  ${findings.A.length > 0 ? '<div style="margin-top:12px;"><strong style="color:#dc2626;">Priority Safety Findings:</strong><ul style="margin-top:4px;">' + _foAllA + '</ul></div>' : ''}
+  ${findings.B.length > 0 ? '<div style="margin-top:8px;"><strong style="color:#d97706;">Key Items Needing Attention:</strong><ul style="margin-top:4px;">' + _foAllB + '</ul></div>' : ''}
 
   <!-- ═══ SURVEY CHECKLIST SUMMARY ═══ -->
   <h2>SURVEY CHECKLIST SUMMARY</h2>
