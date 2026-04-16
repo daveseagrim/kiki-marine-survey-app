@@ -12,6 +12,55 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2234 — 2026-04-15
+
+### Added — Check Report warns on C-rated items with blank notes
+
+Previously only A/B items without notes triggered a warning. C-rated items
+also appear in the report body and Findings & Recommendations — blank notes
+look incomplete to the reader. Now flagged as a warning-level issue.
+
+### Fixed — Grammar errors in text library snippets
+
+Corrected 5 instances of "in without deficiencies" → "in serviceable condition
+without deficiencies" across forestay, sails, flybridge, table/support, and
+shore power cable snippets.
+
+### Fixed — PO (Powered Up Only) rating in report totals
+
+"Powered up only" items were silently dropped from the report findings because
+they had no bucket in the classification loop. Now:
+
+- Added `PO` bucket to `findings` and `findingCount` objects
+- PO items classified with `startsWith('Powered')` — appears between C and NT
+  in the priority chain
+- Checklist Summary totals now show PO count (conditionally, only when > 0)
+- Findings & Recommendations includes a "Powered Up Only" sub-section
+- Finding codes use `PO-1`, `PO-2`, etc.
+- F&R intro text updated to mention "Powered up only"
+
+### Fixed — TP 511 safety bracket auto-update on LOA change
+
+The TC TP 511 safety equipment checklist was generated once when the
+inspection view first rendered. If LOA was empty at that point (common when
+creating a survey before specs auto-fill), the bracket defaulted to "Not
+over 6 metres" and was never corrected — even after LOA was filled in. A
+33-foot vessel could end up with under-6m safety requirements.
+
+- Added `autoUpdateSafetyBracket(survey)` — detects when the current LOA or
+  vessel type produces a different bracket than the stored one, regenerates
+  the checklist (preserving existing checked/notes/photos/skipped state), and
+  shows a toast like "Safety bracket updated: Not over 6m → 9m to 12m"
+- Hooked into `saveSurveyDetails()` — fires every time the intro form is saved
+- Hooked into `renderInspection()` — fires on inspection entry (catches
+  bracket mismatches from previous sessions)
+- Added Check Report warning: if the stored bracket doesn't match the current
+  LOA, a critical-level issue is raised with specific bracket names
+- Guard: skips regeneration if LOA is still empty (would just produce under6
+  again)
+
+---
+
 ## v2233 — 2026-04-15
 
 ### Changed — Unified refined aesthetic across all pages

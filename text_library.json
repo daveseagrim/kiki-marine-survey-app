@@ -4338,7 +4338,7 @@
     {
       "section": "Forestay (as inspected from the deck)",
       "rating": "C",
-      "text": "As seen from the deck, the forestay appeared in without deficiencies.",
+      "text": "As seen from the deck, the forestay appeared in serviceable condition without deficiencies.",
       "phase": "observed",
       "severity": 3
     },
@@ -5199,7 +5199,7 @@
     {
       "section": "Staysail",
       "rating": "C",
-      "text": "The sail is in without deficiencies and safe for use.",
+      "text": "The sail is in serviceable condition without deficiencies and safe for use.",
       "phase": "observed",
       "severity": 3
     },
@@ -12296,7 +12296,7 @@
     {
       "section": "Flybridge splash shield/windshield",
       "rating": "C",
-      "text": "The Flybridge splash shield or windshield is in without deficiencies with no cracks or crazing.",
+      "text": "The Flybridge splash shield or windshield is in serviceable condition without deficiencies with no cracks or crazing.",
       "phase": "observed",
       "severity": 3
     },
@@ -15198,7 +15198,7 @@
     {
       "section": "Table",
       "rating": "C",
-      "text": "The table and support were solid and in without deficiencies.",
+      "text": "The table and support were solid and in serviceable condition without deficiencies.",
       "phase": "observed",
       "severity": 3
     },
@@ -22216,7 +22216,7 @@
     {
       "section": "Shore power cable(s)",
       "rating": "C",
-      "text": "The shore power cable appeared to be in without deficiencies with no signs of overheating or burning.",
+      "text": "The shore power cable appeared to be in serviceable condition without deficiencies with no signs of overheating or burning.",
       "phase": "observed",
       "severity": 1
     },
