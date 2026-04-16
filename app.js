@@ -7364,7 +7364,7 @@ function renderNewSurveyForm() {
         <div style="border:1px solid #e5e7eb;border-radius:8px;padding:10px;background:#f9fafb;margin-bottom:8px;">
           <div id="attendeesList" style="margin-bottom:8px;">
             <div style="display:flex;justify-content:space-between;align-items:center;background:#dcfce7;border:1px solid #86efac;border-radius:6px;padding:8px 10px;margin-bottom:6px;">
-              <span style="font-size:13px;"><strong>Dave Seagrim</strong> SAMS Surveyor Associate, ABYC Master Advisor</span>
+              <span style="font-size:13px;"><strong>Dave Seagrim</strong>, SAMS Surveyor Associate, ABYC Master Advisor</span>
               <span style="font-size:12px;color:#6b7280;">Primary</span>
             </div>
           </div>
@@ -7372,7 +7372,7 @@ function renderNewSurveyForm() {
             <button class="btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="addAttendeeField()">+ Add Person</button>
           </div>
         </div>
-        <input type="hidden" id="personsInAttendance" value="Dave Seagrim SAMS Surveyor Associate, ABYC Master Advisor">
+        <input type="hidden" id="personsInAttendance" value="Dave Seagrim, SAMS Surveyor Associate, ABYC Master Advisor">
       </div>
 
       <div class="form-group">
@@ -10508,7 +10508,7 @@ function updateAttendeesList() {
   const field = document.getElementById('personsInAttendance');
   if (!list || !field) return;
 
-  const attendees = ['Dave Seagrim SAMS Surveyor Associate, ABYC Master Advisor'];
+  const attendees = ['Dave Seagrim, SAMS Surveyor Associate, ABYC Master Advisor'];
   const extras = list.querySelectorAll('[data-attendee-extra] input');
   extras.forEach(input => {
     const val = input.value.trim();
@@ -19164,8 +19164,9 @@ async function generateReport() {
       <li>Vessel Description</li>
       <li>Use of Ratings</li>
       <li>Findings Overview</li>
-      <li>Safety Equipment — TC TP 511</li>
       <li>Detailed Survey Findings</li>
+      <li>Safety Equipment — TC TP 511</li>
+      <li>Instruments &amp; Electronics Inventory</li>
       <li>Findings &amp; Recommendations</li>
       <li>Rating &amp; Valuation</li>
       <li>Surveyor's Certification</li>
@@ -19311,150 +19312,8 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
        middle ground that added a full page+ without unique value. -->
 `;
 
-  // ── SAFETY EQUIPMENT (TC TP 511) ──────────────────────────────────
-  if (survey.safetyEquipment && survey.safetyEquipment.length > 0) {
-    const safeBracket = TC_SAFETY_EQUIPMENT.brackets.find(b => b.id === (survey.safetyBracket || getLengthBracket(survey.loa)));
-    const safeTypeLabel = (survey.safetyVesselType || survey.vesselType || 'power').replace('-', ' ');
-    const _safeSkipCats = survey.safetySubcategoriesSkipped || {};
-    const activeSafetyEq = survey.safetyEquipment.filter(e => !e.skipped && !_safeSkipCats[e.category]);
-    const onBoard = activeSafetyEq.filter(e => e.checked).length;
-    const missing = activeSafetyEq.length - onBoard;
-
-    // v2251: Safety Equipment rendered as individual finding blocks
-    // matching the Detailed Survey Findings style — colored left border,
-    // bold item name, status pill, notes text, and photos beneath.
-    // Previously rendered as a table.
-    html += `
-  <h2 style="background:#2563eb;">SAFETY EQUIPMENT — TRANSPORT CANADA TP 511</h2>
-  <div class="scope-text">
-    <p>Vessel class: <strong>${safeTypeLabel}</strong> — Length bracket: <strong>${safeBracket ? safeBracket.label : 'N/A'}</strong><br/>
-    Per Transport Canada TP 511E Safe Boating Guide &amp; Small Vessel Regulations (SOR/2010-91).</p>
-    <p style="font-size:10pt;">
-      <span style="color:#16a34a;">&#9632;</span> On board: <strong>${onBoard}</strong> &nbsp;
-      <span style="color:#dc2626;">&#9632;</span> Missing/not verified: <strong>${missing}</strong> &nbsp;
-      | &nbsp; Total required items: <strong>${activeSafetyEq.length}</strong>
-    </p>
-    ${missing > 0 ? '<p style="color:#dc2626;font-weight:bold;font-size:10pt;">⚠ Vessel does not carry all required safety equipment per Transport Canada regulations.</p>' : '<p style="color:#16a34a;font-weight:bold;font-size:10pt;">✓ Vessel carries all required safety equipment per Transport Canada regulations.</p>'}
-  </div>
-  `;
-
-    // Group by category for sub-headers (like Detailed Findings groups by category)
-    const _safeCats = {};
-    activeSafetyEq.forEach(eq => {
-      const cat = eq.category || 'General';
-      if (!_safeCats[cat]) _safeCats[cat] = [];
-      _safeCats[cat].push(eq);
-    });
-
-    Object.keys(_safeCats).forEach(catName => {
-      html += `<h3 style="margin:14px 0 6px;color:#2563eb;font-size:10pt;border-bottom:1px solid #2563eb;padding-bottom:3px;">${esc(catName)}</h3>`;
-
-      _safeCats[catName].forEach(eq => {
-        const statusColor = eq.checked ? '#16a34a' : '#dc2626';
-        const statusText = eq.checked ? '✓ On Board' : '✗ MISSING';
-        const statusBg = eq.checked ? '#dcfce7' : '#fee2e2';
-
-        // Build photo block matching Detailed Survey Findings style
-        let safetyPhotosHtml = '';
-        if (eq.photos && eq.photos.length > 0) {
-          const validPhotos = eq.photos.filter(pid => itemPhotoCache[pid]);
-          const total = validPhotos.length;
-          const imgs = validPhotos.map((pid, idx) => {
-            const cap = total === 1
-              ? eq.name
-              : (idx === 0 ? eq.name : `${eq.name} — photo ${idx + 1} of ${total}`);
-            return `<div class="report-photo-card">
-              <img src="${itemPhotoCache[pid]}" alt="${esc(cap)}" class="report-photo" />
-              <div class="caption">${esc(cap)}</div>
-            </div>`;
-          }).join('');
-          if (imgs) {
-            safetyPhotosHtml = `<div class="report-photo-row">${imgs}</div>`;
-          }
-        }
-
-        html += `
-  <div class="item" style="border-left-color: ${statusColor};">
-    <p><strong>${esc(eq.name)}</strong> — <span style="display:inline-block;padding:1px 8px;border-radius:3px;color:${statusColor};background:${statusBg};font-weight:bold;font-size:9pt;">${statusText}</span></p>
-    ${eq.requirement ? `<p style="font-size:9pt;color:#555;"><em>Requirement: ${esc(eq.requirement)}</em></p>` : ''}
-    ${eq.notes ? `<p>${esc(eq.notes)}</p>` : ''}
-    ${safetyPhotosHtml}
-  </div>`;
-      });
-    });
-
-    html += `<div class="page-break"></div>
-    `;
-  }
-
-  // ── INSTRUMENTS & ELECTRONICS INVENTORY ────────────────────────────
-  if (survey.instrumentsElectronics && survey.instrumentsElectronics.length > 0) {
-    const ieWorking = survey.instrumentsElectronics.filter(e => e.working === true).length;
-    const ieNotWorking = survey.instrumentsElectronics.filter(e => e.working === false).length;
-    const ieNotTested = survey.instrumentsElectronics.filter(e => e.working === null || e.working === undefined).length;
-
-    // v2251: Instruments & Electronics rendered as individual finding
-    // blocks matching the Detailed Survey Findings style.
-    html += `
-  <h2 style="background:#7c3aed;">INSTRUMENTS &amp; ELECTRONICS INVENTORY</h2>
-  <div class="scope-text">
-    <p style="font-size:10pt;">
-      <span style="color:#16a34a;">&#9632;</span> Working: <strong>${ieWorking}</strong> &nbsp;
-      <span style="color:#dc2626;">&#9632;</span> Not working: <strong>${ieNotWorking}</strong> &nbsp;
-      <span style="color:#6b7280;">&#9632;</span> Not tested: <strong>${ieNotTested}</strong> &nbsp;
-      | &nbsp; Total instruments: <strong>${survey.instrumentsElectronics.length}</strong>
-    </p>
-    ${ieNotWorking > 0 ? `<p style="color:#dc2626;font-weight:bold;font-size:10pt;">⚠ ${ieNotWorking} instrument${ieNotWorking > 1 ? 's' : ''} found to be non-operational.</p>` : ''}
-  </div>
-  `;
-
-    survey.instrumentsElectronics.forEach(item => {
-      const statusColor = item.working === true ? '#16a34a' : item.working === false ? '#dc2626' : '#6b7280';
-      const statusText = item.working === true ? '✓ Working' : item.working === false ? '✗ Not working' : '— Not tested';
-      const statusBg = item.working === true ? '#dcfce7' : item.working === false ? '#fee2e2' : '#f3f4f6';
-
-      // Spec line — make / model / year on one line
-      const specParts = [];
-      if (item.make) specParts.push(item.make);
-      if (item.model) specParts.push(item.model);
-      if (item.year) specParts.push(`(${item.year})`);
-      const specLine = specParts.length > 0 ? specParts.join(' ') : '';
-
-      // Build photo block matching Detailed Survey Findings style
-      let iePhotosHtml = '';
-      if (item.photos && item.photos.length > 0) {
-        const validPhotos = item.photos.filter(pid => itemPhotoCache[pid]);
-        const total = validPhotos.length;
-        const imgs = validPhotos.map((pid, idx) => {
-          const cap = total === 1
-            ? (item.name || 'Instrument')
-            : (idx === 0 ? (item.name || 'Instrument') : `${item.name || 'Instrument'} — photo ${idx + 1} of ${total}`);
-          return `<div class="report-photo-card">
-            <img src="${itemPhotoCache[pid]}" alt="${esc(cap)}" class="report-photo" />
-            <div class="caption">${esc(cap)}</div>
-          </div>`;
-        }).join('');
-        if (imgs) {
-          iePhotosHtml = `<div class="report-photo-row">${imgs}</div>`;
-        }
-      }
-
-      html += `
-  <div class="item" style="border-left-color: ${statusColor};">
-    <p><strong>${esc(item.name || 'Unidentified')}</strong> — <span style="display:inline-block;padding:1px 8px;border-radius:3px;color:${statusColor};background:${statusBg};font-weight:bold;font-size:9pt;">${statusText}</span></p>
-    ${specLine ? `<p style="font-size:9pt;color:#555;"><em>${esc(specLine)}</em></p>` : ''}
-    ${item.aiDetails ? `<p style="font-size:9pt;color:#555;">${esc(item.aiDetails)}</p>` : ''}
-    ${item.notes ? `<p>${esc(item.notes)}</p>` : ''}
-    ${iePhotosHtml}
-  </div>`;
-    });
-
-    html += `<div class="page-break"></div>
-    `;
-  }
-
-  // v2237: Rating & Valuation moved to after Executive Summary (near
-  // the top of the report, before Purpose and Scope).
+  // v2251: Safety Equipment and Instruments moved to after Detailed
+  // Survey Findings (previously sat before it).
 
   // ── DETAILED SURVEY FINDINGS (body sections) ──────────────────────
   html += `<h2 style="background:#066aab;font-size:14pt;">DETAILED SURVEY FINDINGS</h2>`;
@@ -19656,6 +19515,139 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
       });
     }
   });
+
+  // ── SAFETY EQUIPMENT (TC TP 511) ──────────────────────────────────
+  // v2251: moved to immediately after Detailed Survey Findings
+  if (survey.safetyEquipment && survey.safetyEquipment.length > 0) {
+    const safeBracket = TC_SAFETY_EQUIPMENT.brackets.find(b => b.id === (survey.safetyBracket || getLengthBracket(survey.loa)));
+    const safeTypeLabel = (survey.safetyVesselType || survey.vesselType || 'power').replace('-', ' ');
+    const _safeSkipCats = survey.safetySubcategoriesSkipped || {};
+    const activeSafetyEq = survey.safetyEquipment.filter(e => !e.skipped && !_safeSkipCats[e.category]);
+    const onBoard = activeSafetyEq.filter(e => e.checked).length;
+    const missing = activeSafetyEq.length - onBoard;
+
+    html += `
+  <h2 style="background:#2563eb;">SAFETY EQUIPMENT — TRANSPORT CANADA TP 511</h2>
+  <div class="scope-text">
+    <p>Vessel class: <strong>${safeTypeLabel}</strong> — Length bracket: <strong>${safeBracket ? safeBracket.label : 'N/A'}</strong><br/>
+    Per Transport Canada TP 511E Safe Boating Guide &amp; Small Vessel Regulations (SOR/2010-91).</p>
+    <p style="font-size:10pt;">
+      <span style="color:#16a34a;">&#9632;</span> On board: <strong>${onBoard}</strong> &nbsp;
+      <span style="color:#dc2626;">&#9632;</span> Missing/not verified: <strong>${missing}</strong> &nbsp;
+      | &nbsp; Total required items: <strong>${activeSafetyEq.length}</strong>
+    </p>
+    ${missing > 0 ? '<p style="color:#dc2626;font-weight:bold;font-size:10pt;">⚠ Vessel does not carry all required safety equipment per Transport Canada regulations.</p>' : '<p style="color:#16a34a;font-weight:bold;font-size:10pt;">✓ Vessel carries all required safety equipment per Transport Canada regulations.</p>'}
+  </div>
+  `;
+
+    const _safeCats = {};
+    activeSafetyEq.forEach(eq => {
+      const cat = eq.category || 'General';
+      if (!_safeCats[cat]) _safeCats[cat] = [];
+      _safeCats[cat].push(eq);
+    });
+
+    Object.keys(_safeCats).forEach(catName => {
+      html += `<h3 style="margin:14px 0 6px;color:#2563eb;font-size:10pt;border-bottom:1px solid #2563eb;padding-bottom:3px;">${esc(catName)}</h3>`;
+
+      _safeCats[catName].forEach(eq => {
+        const statusColor = eq.checked ? '#16a34a' : '#dc2626';
+        const statusText = eq.checked ? '✓ On Board' : '✗ MISSING';
+        const statusBg = eq.checked ? '#dcfce7' : '#fee2e2';
+
+        let safetyPhotosHtml = '';
+        if (eq.photos && eq.photos.length > 0) {
+          const validPhotos = eq.photos.filter(pid => itemPhotoCache[pid]);
+          const total = validPhotos.length;
+          const imgs = validPhotos.map((pid, idx) => {
+            const cap = total === 1
+              ? eq.name
+              : (idx === 0 ? eq.name : `${eq.name} — photo ${idx + 1} of ${total}`);
+            return `<div class="report-photo-card">
+              <img src="${itemPhotoCache[pid]}" alt="${esc(cap)}" class="report-photo" />
+              <div class="caption">${esc(cap)}</div>
+            </div>`;
+          }).join('');
+          if (imgs) {
+            safetyPhotosHtml = `<div class="report-photo-row">${imgs}</div>`;
+          }
+        }
+
+        html += `
+  <div class="item" style="border-left-color: ${statusColor};">
+    <p><strong>${esc(eq.name)}</strong> — <span style="display:inline-block;padding:1px 8px;border-radius:3px;color:${statusColor};background:${statusBg};font-weight:bold;font-size:9pt;">${statusText}</span></p>
+    ${eq.requirement ? `<p style="font-size:9pt;color:#555;"><em>Requirement: ${esc(eq.requirement)}</em></p>` : ''}
+    ${eq.notes ? `<p>${esc(eq.notes)}</p>` : ''}
+    ${safetyPhotosHtml}
+  </div>`;
+      });
+    });
+
+    html += `<div class="page-break"></div>
+    `;
+  }
+
+  // ── INSTRUMENTS & ELECTRONICS INVENTORY ────────────────────────────
+  if (survey.instrumentsElectronics && survey.instrumentsElectronics.length > 0) {
+    const ieWorking = survey.instrumentsElectronics.filter(e => e.working === true).length;
+    const ieNotWorking = survey.instrumentsElectronics.filter(e => e.working === false).length;
+    const ieNotTested = survey.instrumentsElectronics.filter(e => e.working === null || e.working === undefined).length;
+
+    html += `
+  <h2 style="background:#7c3aed;">INSTRUMENTS &amp; ELECTRONICS INVENTORY</h2>
+  <div class="scope-text">
+    <p style="font-size:10pt;">
+      <span style="color:#16a34a;">&#9632;</span> Working: <strong>${ieWorking}</strong> &nbsp;
+      <span style="color:#dc2626;">&#9632;</span> Not working: <strong>${ieNotWorking}</strong> &nbsp;
+      <span style="color:#6b7280;">&#9632;</span> Not tested: <strong>${ieNotTested}</strong> &nbsp;
+      | &nbsp; Total instruments: <strong>${survey.instrumentsElectronics.length}</strong>
+    </p>
+    ${ieNotWorking > 0 ? `<p style="color:#dc2626;font-weight:bold;font-size:10pt;">⚠ ${ieNotWorking} instrument${ieNotWorking > 1 ? 's' : ''} found to be non-operational.</p>` : ''}
+  </div>
+  `;
+
+    survey.instrumentsElectronics.forEach(item => {
+      const statusColor = item.working === true ? '#16a34a' : item.working === false ? '#dc2626' : '#6b7280';
+      const statusText = item.working === true ? '✓ Working' : item.working === false ? '✗ Not working' : '— Not tested';
+      const statusBg = item.working === true ? '#dcfce7' : item.working === false ? '#fee2e2' : '#f3f4f6';
+
+      const specParts = [];
+      if (item.make) specParts.push(item.make);
+      if (item.model) specParts.push(item.model);
+      if (item.year) specParts.push(`(${item.year})`);
+      const specLine = specParts.length > 0 ? specParts.join(' ') : '';
+
+      let iePhotosHtml = '';
+      if (item.photos && item.photos.length > 0) {
+        const validPhotos = item.photos.filter(pid => itemPhotoCache[pid]);
+        const total = validPhotos.length;
+        const imgs = validPhotos.map((pid, idx) => {
+          const cap = total === 1
+            ? (item.name || 'Instrument')
+            : (idx === 0 ? (item.name || 'Instrument') : `${item.name || 'Instrument'} — photo ${idx + 1} of ${total}`);
+          return `<div class="report-photo-card">
+            <img src="${itemPhotoCache[pid]}" alt="${esc(cap)}" class="report-photo" />
+            <div class="caption">${esc(cap)}</div>
+          </div>`;
+        }).join('');
+        if (imgs) {
+          iePhotosHtml = `<div class="report-photo-row">${imgs}</div>`;
+        }
+      }
+
+      html += `
+  <div class="item" style="border-left-color: ${statusColor};">
+    <p><strong>${esc(item.name || 'Unidentified')}</strong> — <span style="display:inline-block;padding:1px 8px;border-radius:3px;color:${statusColor};background:${statusBg};font-weight:bold;font-size:9pt;">${statusText}</span></p>
+    ${specLine ? `<p style="font-size:9pt;color:#555;"><em>${esc(specLine)}</em></p>` : ''}
+    ${item.aiDetails ? `<p style="font-size:9pt;color:#555;">${esc(item.aiDetails)}</p>` : ''}
+    ${item.notes ? `<p>${esc(item.notes)}</p>` : ''}
+    ${iePhotosHtml}
+  </div>`;
+    });
+
+    html += `<div class="page-break"></div>
+    `;
+  }
 
   // ── FINDINGS & RECOMMENDATIONS ────────────────────────────────────
   html += `<div class="page-break"></div>`;
@@ -20443,6 +20435,50 @@ async function initApp() {
 
     await initDB();
     await fetchDataFiles();
+
+    // ── v2251 one-time migration: fix personsInAttendance and vessel
+    // description "She" → vessel name on all existing surveys ──────────
+    try {
+      const _migKey = '_v2251_attendee_she_migrated';
+      if (!localStorage.getItem(_migKey)) {
+        const _allSurveys = await getAllSurveys();
+        const _correctAttendee = 'Dave Seagrim, SAMS Surveyor Associate, ABYC Master Advisor';
+        const _oldPatterns = [
+          'Dave Seagrim (SAMS Surveyor Associate)',
+          'Dave Seagrim SAMS Surveyor Associate, ABYC Master Advisor'
+        ];
+        for (const s of _allSurveys) {
+          let changed = false;
+          // Fix personsInAttendance
+          if (s.personsInAttendance) {
+            for (const old of _oldPatterns) {
+              if (s.personsInAttendance.includes(old)) {
+                s.personsInAttendance = s.personsInAttendance.replace(old, _correctAttendee);
+                changed = true;
+              }
+            }
+          }
+          // Fix "She has" / "She is" in vessel description
+          if (s.vesselDescription && s.vesselName) {
+            const _quoted = '"' + s.vesselName + '"';
+            if (s.vesselDescription.includes('She has an overall length')) {
+              s.vesselDescription = s.vesselDescription.replace(/She has an overall length/g, _quoted + ' has an overall length');
+              changed = true;
+            }
+            if (s.vesselDescription.includes('She is ')) {
+              s.vesselDescription = s.vesselDescription.replace(/She is /g, _quoted + ' is ');
+              changed = true;
+            }
+          }
+          if (changed) await saveSurvey(s);
+        }
+        localStorage.setItem(_migKey, '1');
+        console.log('v2251 migration: attendee + vessel description fixed on', _allSurveys.length, 'surveys');
+      }
+    } catch (migErr) {
+      console.warn('v2251 migration error (non-fatal):', migErr);
+    }
+
     // Kick off dictionary load in the background — no await, so startup
     // isn't blocked by the 1.5MB file. Spell-check warnings will begin
     // firing as soon as it finishes loading.

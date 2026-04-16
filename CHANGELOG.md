@@ -27,8 +27,9 @@ lets you roll back to a specific version with confidence.
 
 ### Additional fixes
 
-- **Persons in Attendance** default updated from "Dave Seagrim (SAMS Surveyor Associate)" to "Dave Seagrim SAMS Surveyor Associate, ABYC Master Advisor" — all three instances (display, hidden input, attendee list builder).
+- **Persons in Attendance** default corrected to "Dave Seagrim, SAMS Surveyor Associate, ABYC Master Advisor" (with comma after name) — all three instances (display, hidden input, attendee list builder).
 - **Vessel description "She" → vessel name** — all six instances of "She has an overall length" and "She is [rig]-rigged" in the three description builders (sail/power/human-powered) now use `"${vesselName}"` instead.
+- **One-time migration** — on first load, all existing surveys are patched: old personsInAttendance formats replaced with the correct string, and "She has/is" in saved vessel descriptions replaced with the quoted vessel name.
 - **Tax Status / Compliance Plate** — these fields are now omitted from the Vessel Documentation section of the report when left blank, instead of showing "N/A". Compliance plate row also omitted when no photo is captured.
 - **SaveStatus pill repositioned** — moved from `top: 8px` (overlapping header) to `top: 60px` (just below the header bar) so it no longer covers navigation buttons or content.
 
