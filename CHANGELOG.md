@@ -12,6 +12,17 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2246 — 2026-04-16
+
+### Critical bounce-back fix, local logo, view-restore fix
+
+- **Firebase sync bounce-back fix (CRITICAL)**: `renderHome()` called unconditionally after Firebase initial sync completes is now guarded with `if (currentView === 'surveys')`. Previously, if the user navigated to the new-survey form before sync finished, the async callback would fire `renderHome()` and bounce them back to the home screen.
+- **Photo download bounce-back fix**: Same guard applied to the photo-download completion callback — `renderHome()` only fires if the user is still on the surveys list.
+- **View-restore fix**: Session restore for `edit-survey` view was calling non-existent `editSurvey()` — corrected to `editSurveyDetails()`.
+- **Local logo**: `new_logo.png` downloaded locally into the app directory. All six references in `app.js` and the service worker cache list in `sw.js` updated from the cross-origin URL (`kikimarinesurveyor.ca`) to the local file. Eliminates the CORS error on GitHub Pages.
+
+---
+
 ## v2245 — 2026-04-16
 
 ### Date integrity, richer description, photo cleanup, audit fixes

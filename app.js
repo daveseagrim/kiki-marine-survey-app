@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2245';
+const APP_VERSION = 'v2246';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -196,7 +196,7 @@ function compressPhotoForReport(dataUrl, maxDim = 1200, quality = 0.7) {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
 
-      // v2244→v2245: auto-strip date stamp from report photos.
+      // v2244→v2246: auto-strip date stamp from report photos.
       // The stamp added by addDateStampToPhoto() sits in the bottom-right
       // corner — dark rect with white YYYY-MM-DD text, font = width/40,
       // padding 12 px. We paint over it by sampling pixels just above the
@@ -2100,7 +2100,7 @@ async function pullPhotosFromFirebase() {
   }
 
   window._photoWarnDismissed = true;
-  if (downloaded > 0) renderHome();
+  if (downloaded > 0 && currentView === 'surveys') renderHome();  // v2246: guard against bouncing user off non-home views
 }
 
 // ============================================================================
@@ -6715,7 +6715,7 @@ function renderHome() {
 
   app.innerHTML = `
     <div class="header" style="display:flex;align-items:center;gap:10px;">
-      <img src="https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png"
+      <img src="new_logo.png"
            alt="Kiki Marine" style="height:36px;width:auto;flex-shrink:0;"
            onerror="this.style.display='none'">
       <div style="flex:1;min-width:0;">
@@ -6935,7 +6935,7 @@ function renderNewSurveyForm() {
   // v2228: New Survey header matches Home-page branding.
   app.innerHTML = `
     <div class="header" style="display:flex;align-items:center;gap:10px;">
-      <img src="https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png"
+      <img src="new_logo.png"
            alt="Kiki Marine" style="height:36px;width:auto;flex-shrink:0;"
            onerror="this.style.display='none'">
       <button class="header-back" onclick="confirmAbandonNewSurvey()" style="flex-shrink:0;">←</button>
@@ -8153,7 +8153,7 @@ function editSurveyDetails(surveyId) {
       // logo on the left, back button + vessel name in the centre.
       header.style.cssText = 'display:flex;align-items:center;gap:10px;';
       header.innerHTML = `
-        <img src="https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png"
+        <img src="new_logo.png"
              alt="Kiki Marine" style="height:36px;width:auto;flex-shrink:0;"
              onerror="this.style.display='none'">
         <button class="header-back" onclick="returnToInspection('${survey.id}')" style="flex-shrink:0;">←</button>
@@ -9474,7 +9474,7 @@ async function generateVesselDescription() {
   const eng2Section = document.getElementById('engine2Section');
   const hasEngine2 = eng2Section && eng2Section.style.display !== 'none';
 
-  // v2245: resolve drive type from saved survey so the description auto-fills
+  // v2246: resolve drive type from saved survey so the description auto-fills
   // instead of emitting placeholder text. Ported from Copy 3 for parity.
   const _survey1 = currentSurveyId ? await getSurvey(currentSurveyId) : null;
   const driveTypeLower1 = (_survey1?.driveType || '').toLowerCase();
@@ -9503,7 +9503,7 @@ async function generateVesselDescription() {
   }
 
   // Pull survey data for propellers, shafts, electronics, and safety
-  // v2245: reuse _survey1 loaded above for driveType resolution
+  // v2246: reuse _survey1 loaded above for driveType resolution
   const survey = _survey1 || (currentSurveyId ? await getSurvey(currentSurveyId) : null);
   const driveLineCount = survey?.driveLineCount || 1;
   const hasRudder = survey?.hasRudder !== false;
@@ -9728,7 +9728,7 @@ async function regenerateDescriptionFromInspection() {
 
   const hasEngine2 = !!survey.engine2Make;
 
-  // v2245: resolve drive type from survey.driveType (ported from Copy 3)
+  // v2246: resolve drive type from survey.driveType (ported from Copy 3)
   const driveTypeLower2 = (survey.driveType || '').toLowerCase();
   const _driveLabelMap2 = { 'shaft': 'shaft drive', 'outdrive': 'sterndrive', 'ips': 'IPS pod drive', 'saildrive': 'saildrive' };
   const _driveSingular2 = _driveLabelMap2[driveTypeLower2] || '';
@@ -10853,7 +10853,7 @@ function renderInspection(survey) {
   // see on the surveys list screen, for brand continuity.
   app.innerHTML = `
     <div class="header" style="display:flex;align-items:center;gap:10px;">
-      <img src="https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png"
+      <img src="new_logo.png"
            alt="Kiki Marine" style="height:36px;width:auto;flex-shrink:0;"
            onerror="this.style.display='none'">
       <button class="header-back" onclick="backToHome()" style="flex-shrink:0;">←</button>
@@ -18841,7 +18841,7 @@ async function generateReport() {
           else if (r.startsWith('B')) { findingCount.B++; bucket = 'B'; }
           else if (r.startsWith('C')) { findingCount.C++; bucket = 'C'; }
           else if (r.startsWith('Powered')) { findingCount.PO++; bucket = 'PO'; }
-          // v2245: align with classifyRatingForReport — also catch 'Not verified' and standalone 'NT'
+          // v2246: align with classifyRatingForReport — also catch 'Not verified' and standalone 'NT'
           else if (r.startsWith('Not tested') || r.startsWith('Not verified') || r === 'NT') { findingCount.NT++; bucket = 'NT'; }
           if (bucket) {
             const code = (bucket === 'NT' || bucket === 'PO') ? `${bucket}-${findingCount[bucket]}` : `${bucket}-${findingCount[bucket]}`;
@@ -18969,7 +18969,7 @@ async function generateReport() {
 
   <!-- ═══ COVER PAGE ═══ -->
   <div style="text-align:center; padding-top: 20px;">
-    <img src="https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png"
+    <img src="new_logo.png"
          alt="Kiki Marine Logo" style="max-width: 300px; width: 80%; height: auto;"
          onerror="this.style.display='none'">
     <h1 style="font-size: 15pt; border: none; margin-top: 16px; margin-bottom: 8px;">${survey.surveyType === 'Insurance survey' ? 'Insurance Marine Survey' : 'Report of Condition &amp; Value Marine Survey'}</h1>
@@ -20057,7 +20057,7 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
       <p>This report is submitted without prejudice and for the benefit of all concerned parties.</p>
     </div>
     <div style="margin-top:20px;display:flex;align-items:center;gap:24px;">
-      <img src="https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png"
+      <img src="new_logo.png"
            alt="Kiki Marine Logo" style="max-width:180px;height:auto;"
            onerror="this.style.display='none'">
       <div style="flex:1;">
@@ -20649,7 +20649,7 @@ async function initApp() {
             renderInspection(survey);
             restored = true;
           } else if (savedView === 'edit-survey') {
-            editSurvey(savedSurveyId);
+            editSurveyDetails(savedSurveyId);
             restored = true;
           }
           // For 'new-survey' or 'report', fall through to home
@@ -21591,7 +21591,7 @@ const FirebaseSync = (() => {
       }
 
       updateSyncStatusUI('synced', 'Initial sync complete');
-      renderHome();  // Refresh to show any new surveys
+      if (currentView === 'surveys') renderHome();  // v2246: only refresh if user is still on home
     } catch (err) {
       console.error('Initial sync error:', err);
       updateSyncStatusUI('error', err.message);
@@ -21777,7 +21777,7 @@ async function openBatchCamera(itemLabel, opts) {
   overlay.id = 'batchCamOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:#000;z-index:99999;display:flex;flex-direction:column;';
 
-  // v2245: inject a <style> block for landscape-responsive camera layout.
+  // v2246: inject a <style> block for landscape-responsive camera layout.
   // In landscape the fixed header, strip, and buttons ate all the vertical
   // space, leaving the viewfinder a narrow slit. Now in landscape the
   // layout switches to row: video fills the left side, controls sit on the
@@ -21822,7 +21822,7 @@ async function openBatchCamera(itemLabel, opts) {
   `;
   document.body.appendChild(overlay);
 
-  // v2245: landscape close button — since the header is hidden in landscape,
+  // v2246: landscape close button — since the header is hidden in landscape,
   // provide an alternative close target on the video overlay.
   const _lsClose = document.getElementById('batchCamCloseLandscape');
   if (_lsClose) {
