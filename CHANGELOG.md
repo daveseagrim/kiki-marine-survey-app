@@ -63,6 +63,24 @@ follow the Rating Definitions. The Executive Summary section has been
 removed entirely. The TOC, Notes Regarding Report Format, and section
 numbering all updated to match. Cover page footer tagline removed.
 
+### Changed — Rating & Valuation moved to end of report
+
+The Rating & Valuation section (BUC grading, Statement of Valuation,
+valuation figures, methodology, and Valuation Worksheet) moved from
+near the top of the report to just before the Surveyor's Certification.
+The reader now sees all evidence (checklist, detailed findings, F&R)
+before the valuation conclusion.
+
+### Changed — "Surveyor's Certificate" renamed to "Surveyor's Certification"
+
+All references in the report body, TOC, and Notes Regarding Report Format
+updated.
+
+### Changed — Signature image repositioned above name, reduced to 140px
+
+The surveyor's signature now appears above "Dave Seagrim" (not below
+the contact details) and is 30% smaller (140px vs 200px).
+
 ---
 
 ## v2239 — 2026-04-16
