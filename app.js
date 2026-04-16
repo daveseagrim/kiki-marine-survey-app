@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2242';
+const APP_VERSION = 'v2243';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -19148,23 +19148,16 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
           const rating = d.rating;
           const code = findingCodeMap[item.label] || '';
           const isViolation = rating.startsWith('A') || rating.startsWith('B');
-          // v2239: A/B findings keep full text in the checklist summary;
-          // C and lower-severity items truncate to the first sentence to
-          // reduce redundancy (full text is in Detailed Survey Findings).
-          // v2241: cleanupTypos applied to checklist summary text too
-          // (previously only ran on Detailed Findings and F&R, so "th
-          // operation" etc. slipped through in the summary table).
+          // v2242: ALL items (including A/B) truncate to first sentence
+          // in the checklist summary. Full text is in Detailed Survey
+          // Findings — the summary table is an at-a-glance view only.
+          // This eliminates the triplication that was bloating the report.
           let notesText = '—';
           if (d.text) {
-            if (isViolation) {
-              notesText = cleanupTypos(d.text);
-            } else {
-              // First sentence only for C / NT / PO items
-              const _cleaned = cleanupTypos(d.text);
-              const _m = _cleaned.trim().match(/^(.+?[.!?])(?:\s|$)/);
-              notesText = _m ? _m[1] : _cleaned;
-              if (notesText.length < _cleaned.trim().length) notesText += ' …';
-            }
+            const _cleaned = cleanupTypos(d.text);
+            const _m = _cleaned.trim().match(/^(.+?[.!?])(?:\s|$)/);
+            notesText = _m ? _m[1] : _cleaned;
+            if (notesText.length < _cleaned.trim().length) notesText += ' …';
           }
           const _mergedStd = isViolation ? mergeTextStandards(d.standards, d.text) : [];
           const stdText = _mergedStd.length > 0 ? _mergedStd.join('; ') : '—';
@@ -19635,45 +19628,56 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     findings.B.forEach(f => { html += renderFinding(f, '#d97706', 'B'); });
   }
 
-  // Type C findings
+  // v2242: Type C findings rendered as a compact table instead of
+  // individual blocks. These are all "serviceable / no action required"
+  // items — the full observation text is in Detailed Survey Findings.
+  // Listing them individually with first-sentence excerpts was adding
+  // 5+ pages of redundant text to the report.
   html += `<h3 style="color:#16a34a;">Findings &amp; Recommendations (Type C — Serviceable / General Notes)</h3>`;
   if (findings.C.length === 0) {
     html += `<p>No Type C findings.</p>`;
   } else {
-    findings.C.forEach(f => { html += renderFinding(f, '#16a34a', 'C'); });
+    html += `<p style="font-size:9pt;color:#555;margin-bottom:8px;">The following ${findings.C.length} items were found to be in serviceable condition. Full observations appear in the Detailed Survey Findings section.</p>`;
+    html += `<table style="font-size:9pt;"><tr><th style="width:60px;">Finding</th><th>Item</th><th>Summary</th></tr>`;
+    findings.C.forEach(f => {
+      const _cBrief = truncateForFR(cleanupTypos(depersonalise(dedup(f.text || ''))));
+      html += `<tr>
+        <td style="font-weight:bold;color:#16a34a;">${f.code}</td>
+        <td>${esc(displayItemLabel(f.label, survey))}</td>
+        <td>${_cBrief ? esc(_cBrief) : '—'}</td>
+      </tr>`;
+    });
+    html += `</table>`;
   }
 
-  // Not tested items
+  // v2242: NT and PO findings as compact tables (same rationale as C above)
   if (findings.NT.length > 0) {
     html += `<h3 style="color:#6b7280;">Not Tested / Not Verified</h3>`;
+    html += `<p style="font-size:9pt;color:#555;margin-bottom:8px;">The following ${findings.NT.length} items could not be fully tested or verified. Full details appear in the Detailed Survey Findings section.</p>`;
+    html += `<table style="font-size:9pt;"><tr><th style="width:60px;">Finding</th><th>Item</th><th>Reason</th></tr>`;
     findings.NT.forEach(f => {
-      // v2227: the blanket "Note: A comprehensive inspection was attempted…"
-      // line was auto-appended to every NT finding, producing the same
-      // sentence 20+ times in the report. Removed — the same disclaimer
-      // already appears once in Purpose and Scope / Methodology, which is
-      // sufficient. Each NT finding's own note text (from the surveyor's
-      // chip selection) carries the specific reason.
-      // v2228: photos removed from F&R; cross-reference points readers to
-      // the Detailed Survey Findings section where the photo + full
-      // observation already live.
       const _ntBrief = truncateForFR(cleanupTypos(depersonalise(dedup(f.text || ''))));
-      html += `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid #6b7280;">
-        <strong style="color:#6b7280;">Finding ${f.code}</strong> — ${esc(f.label)}
-        ${_ntBrief ? `<p style="margin:3px 0;">${esc(_ntBrief)}</p>` : ''}
-      </div>`;
+      html += `<tr>
+        <td style="font-weight:bold;color:#6b7280;">${f.code}</td>
+        <td>${esc(displayItemLabel(f.label, survey))}</td>
+        <td>${_ntBrief ? esc(_ntBrief) : '—'}</td>
+      </tr>`;
     });
+    html += `</table>`;
   }
 
-  // Powered-up only items
   if (findings.PO.length > 0) {
     html += `<h3 style="color:#6b7280;">Powered Up Only</h3>`;
+    html += `<table style="font-size:9pt;"><tr><th style="width:60px;">Finding</th><th>Item</th><th>Notes</th></tr>`;
     findings.PO.forEach(f => {
       const _poBrief = truncateForFR(cleanupTypos(depersonalise(dedup(f.text || ''))));
-      html += `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid #6b7280;">
-        <strong style="color:#6b7280;">Finding ${f.code}</strong> — ${esc(f.label)}
-        ${_poBrief ? `<p style="margin:3px 0;">${esc(_poBrief)}</p>` : ''}
-      </div>`;
+      html += `<tr>
+        <td style="font-weight:bold;color:#6b7280;">${f.code}</td>
+        <td>${esc(displayItemLabel(f.label, survey))}</td>
+        <td>${_poBrief ? esc(_poBrief) : '—'}</td>
+      </tr>`;
     });
+    html += `</table>`;
   }
 
   // ── RATING & VALUATION (v2240: moved here from near top of report) ──

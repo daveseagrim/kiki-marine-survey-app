@@ -12,10 +12,12 @@ lets you roll back to a specific version with confidence.
 
 ---
 
-## v2242 — 2026-04-16
+## v2243 — 2026-04-16
 
-### Standards auto-detection and comparables language fix
+### Report concision, standards auto-detection, and comparables fix
 
+- **Checklist summary truncation**: ALL items (including A/B) now show first sentence only in the at-a-glance summary table. Full text remains in Detailed Survey Findings.
+- **F&R compact tables**: C, NT, and PO findings in Findings & Recommendations rendered as compact three-column tables (Finding / Item / Summary) instead of individual blocks with border-left styling. A/B findings retain the full block format with recommendations. Estimated page reduction: 8–10 pages.
 - **Standards auto-merge**: New `mergeTextStandards()` helper scans observation text for ABYC, TC/TP, SAE, NFPA references and merges any not already in the checked standards list. Applied to Detailed Findings, Checklist Summary, and F&R citations. Fixes the outdrive item citing ABYC E-2 in text while only showing P-4 in Applicable Standards.
 - **Comparables language**: The Valuation Worksheet preamble now says "source was used" instead of "source and comparable were used" when no comparables are recorded.
 
