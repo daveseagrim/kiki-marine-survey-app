@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2234';
+const APP_VERSION = 'v2235';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -18585,6 +18585,46 @@ async function generateReport() {
     <tr><td><strong>Independent Surveys</strong></td><td>${esc(survey.independentSurveys) || 'No independent surveys (engine, electrical, ultrasonic gauging, etc.) were conducted in conjunction with this inspection.'}</td></tr>
     <tr><td><strong>Surveyor</strong></td><td>Dave Seagrim, SAMS Surveyor Associate, ABYC Master Advisor</td></tr>
   </table>
+
+  <!-- v2235: Compact R&V summary — mirrors Norm Behring's page 6 format.
+       Three bold lines immediately after General Vessel Information so the
+       reader gets the headline verdict without scrolling to the full
+       Rating & Valuation section later in the report. -->
+  ${(() => {
+    const _rvLow = parseInt(survey.valuationLow || 0);
+    const _rvHigh = parseInt(survey.valuationHigh || 0);
+    const _rvRepl = parseInt(survey.replacementCost || 0);
+    const _rvConc = parseInt(survey.concludedValue || 0);
+    const _rvXr = parseFloat(survey.exchangeRate) || 0;
+    const _rvCond = survey.overallCondition || '';
+    const _rvFmt = n => n.toLocaleString();
+    // Only render if at least one valuation field is filled
+    if (!_rvCond && !_rvLow && !_rvHigh && !_rvConc) return '';
+    let _rvBlock = '<table style="margin-top:12px;border:2px solid #066aab;">';
+    if (_rvCond) {
+      _rvBlock += '<tr><td style="width:40%;background:#e8edf2;"><strong>VESSEL OVERALL RATING</strong></td><td style="background:#e8edf2;"><strong style="color:#066aab;font-size:11pt;">' + esc(_rvCond).toUpperCase() + '</strong></td></tr>';
+    }
+    if (_rvConc) {
+      const _rvConcC = _rvXr ? Math.round(_rvConc * _rvXr) : 0;
+      _rvBlock += '<tr><td><strong>ESTIMATED MARKET VALUE</strong></td><td><strong>'
+        + (_rvXr && _rvConcC ? 'CAD $' + _rvFmt(_rvConcC) + ' / ' : '')
+        + 'USD $' + _rvFmt(_rvConc) + ' \u2013 tax not included</strong></td></tr>';
+    } else if (_rvLow || _rvHigh) {
+      const _rvLowC = _rvXr ? Math.round(_rvLow * _rvXr) : 0;
+      const _rvHighC = _rvXr ? Math.round(_rvHigh * _rvXr) : 0;
+      _rvBlock += '<tr><td><strong>ESTIMATED MARKET VALUE</strong></td><td><strong>'
+        + (_rvXr && _rvLowC ? 'CAD $' + _rvFmt(_rvLowC) + ' \u2013 $' + _rvFmt(_rvHighC) + ' / ' : '')
+        + 'USD $' + _rvFmt(_rvLow) + ' \u2013 $' + _rvFmt(_rvHigh) + ' \u2013 tax not included</strong></td></tr>';
+    }
+    if (_rvRepl) {
+      const _rvReplC = _rvXr ? Math.round(_rvRepl * _rvXr) : 0;
+      _rvBlock += '<tr><td><strong>ESTIMATED REPLACEMENT COST</strong></td><td><strong>'
+        + (_rvXr && _rvReplC ? 'CAD $' + _rvFmt(_rvReplC) + ' / ' : '')
+        + 'USD $' + _rvFmt(_rvRepl) + ' \u2013 tax not included</strong></td></tr>';
+    }
+    _rvBlock += '</table>';
+    return _rvBlock;
+  })()}
 
 ${survey.locationLat && survey.locationLon ? `
   <!-- v2228: show the survey location address + GPS coordinates.

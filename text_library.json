@@ -17841,7 +17841,7 @@
     {
       "section": "Fuel tank(s)",
       "rating": "B",
-      "text": "The fuel tank was located [insert location].",
+      "text": "The fuel tank was located in the [insert location].",
       "phase": "observed",
       "severity": 3
     },
@@ -17897,7 +17897,7 @@
     {
       "section": "Fuel tank(s)",
       "rating": "C - singular",
-      "text": "The fuel tank was located [insert location].",
+      "text": "The fuel tank was located in the [insert location].",
       "phase": "observed",
       "severity": 3
     },
@@ -17981,7 +17981,7 @@
     {
       "section": "Black water tank(s) and plumbing",
       "rating": "C - not visible but looks right",
-      "text": "The black water tank was located [insert location] and not visible.",
+      "text": "The black water tank was located in the [insert location] and not visible.",
       "phase": "observed",
       "severity": 3
     },
@@ -18051,7 +18051,7 @@
     {
       "section": "Freshwater tank and plumbing",
       "rating": "C - single",
-      "text": "The freshwater tank was located [insert location].",
+      "text": "The freshwater tank was located in the [insert location].",
       "phase": "observed",
       "severity": 3
     },
@@ -18072,7 +18072,7 @@
     {
       "section": "Freshwater tank and plumbing",
       "rating": "Not tested",
-      "text": "The freshwater tank was located [insert location].",
+      "text": "The freshwater tank was located in the [insert location].",
       "phase": "observed",
       "severity": 3
     },

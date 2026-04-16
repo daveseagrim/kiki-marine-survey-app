@@ -12,6 +12,24 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2235 — 2026-04-15
+
+### Added — Compact R&V summary after General Vessel Information
+
+Matches the layout from Norm Behring's reference report (page 6). A bordered
+3-line table showing Vessel Overall Rating, Estimated Market Value, and
+Estimated Replacement Cost appears immediately after the General Vessel
+Information table — only when at least one valuation field is filled. Shows
+CAD/USD when exchange rate is available.
+
+### Fixed — "was located [insert location]" preposition gap
+
+Changed 4 text library snippets from "was located [insert location]" to
+"was located in the [insert location]" so surveyors typing a bare noun
+(e.g., "engine compartment") don't produce "located engine compartment".
+
+---
+
 ## v2234 — 2026-04-15
 
 ### Added — Check Report warns on C-rated items with blank notes
