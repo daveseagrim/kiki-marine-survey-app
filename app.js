@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2238';
+const APP_VERSION = 'v2239';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -7656,6 +7656,8 @@ function renderNewSurveyForm() {
 
   // v2238: add exclude toggles (new survey — no excludes yet)
   initExcludeToggles([]);
+  // v2239: auto-format currency inputs with commas + sanity warnings
+  initCurrencyInputs();
 }
 
 // ─── Engine & Transmission Dropdown Population ──────────────────────────────
@@ -10197,6 +10199,53 @@ function applyValuationSuggestion(low, high, modelName) {
   document.getElementById('valuationSuggestionCard')?.remove();
 }
 
+// ── Currency input formatting ────────────────────────────────────────
+// Auto-format valuation inputs with commas and show inline sanity
+// warnings for suspiciously low values (e.g. "$18" instead of "$18,000").
+function formatCurrencyInput(input) {
+  if (!input) return;
+  input.addEventListener('input', function() {
+    const raw = this.value.replace(/[^0-9]/g, '');
+    if (!raw) { this.value = ''; removeCurrencyWarning(this); return; }
+    this.value = parseInt(raw, 10).toLocaleString();
+    checkCurrencyValue(this, parseInt(raw, 10));
+  });
+  // Format on load if value already present
+  const raw = input.value.replace(/[^0-9]/g, '');
+  if (raw) {
+    input.value = parseInt(raw, 10).toLocaleString();
+    checkCurrencyValue(input, parseInt(raw, 10));
+  }
+}
+
+function checkCurrencyValue(input, num) {
+  const warnId = input.id + '_warn';
+  let warn = document.getElementById(warnId);
+  if (num > 0 && num < 500) {
+    if (!warn) {
+      warn = document.createElement('div');
+      warn.id = warnId;
+      warn.style.cssText = 'color:#dc2626;font-size:12px;font-weight:600;margin-top:4px;';
+      input.parentElement.appendChild(warn);
+    }
+    warn.textContent = '\u26a0 This looks like a data-entry error ($' + num.toLocaleString() + '). Did you mean $' + (num * 1000).toLocaleString() + '?';
+  } else {
+    removeCurrencyWarning(input);
+  }
+}
+
+function removeCurrencyWarning(input) {
+  const warn = document.getElementById(input.id + '_warn');
+  if (warn) warn.remove();
+}
+
+// Attach currency formatting to valuation fields once the form is rendered
+function initCurrencyInputs() {
+  ['valuationLow', 'valuationHigh', 'concludedValue', 'replacementCost'].forEach(id => {
+    formatCurrencyInput(document.getElementById(id));
+  });
+}
+
 // Called by the Regenerate button — always overwrites the rationale
 function regenerateValuationRationale() {
   const rationaleEl = document.getElementById('valuationRationale');
@@ -11556,6 +11605,8 @@ function renderInspection(survey) {
 
   // v2238: restore exclude toggles on intro fields
   try { initExcludeToggles(survey.excludedIntroFields); } catch (e) { console.error('Error restoring exclude toggles:', e); }
+  // v2239: auto-format currency inputs with commas + sanity warnings
+  try { initCurrencyInputs(); } catch (e) { console.error('Error initialising currency inputs:', e); }
 
   // Auto-fill single variants
   try {
@@ -18340,6 +18391,40 @@ async function generateReport() {
       .replace(/\bmy findings\b/gi, 'the surveyor\'s findings')
       .replace(/\bmy experience\b/gi, 'the surveyor\'s experience');
   };
+  // v2239: Strip sentences that still contain unfilled [BRACKETED]
+  // placeholders from the vessel description so the report never shows
+  // "[XX] horsepower" or "[COLOUR]" template artefacts to the reader.
+  const cleanupPlaceholders = (s) => {
+    if (!s) return s;
+    // Split into sentences, drop any containing a [BRACKET] placeholder
+    const sentences = s.match(/[^.!?\n]+[.!?]*/g);
+    if (!sentences) return s;
+    return sentences
+      .filter(sent => !/\[[A-Z][A-Z/\s'"\d&,.-]*\]/.test(sent))
+      .join('')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  };
+  // v2239: Fix common typos and grammar issues that arise from snippet
+  // assembly (e.g. tapping multiple snippets that don't quite join).
+  const cleanupTypos = (s) => {
+    if (!s) return s;
+    return s
+      // "th operation" → "the operation"
+      .replace(/\bth\s+operation\b/gi, 'the operation')
+      // "located engine compartment" → "located in the engine compartment"
+      .replace(/\blocated\s+engine\s+compartment\b/gi, 'located in the engine compartment')
+      // "located engine room" → "located in the engine room"
+      .replace(/\blocated\s+engine\s+room\b/gi, 'located in the engine room')
+      // "appeared to be in without" → "appeared to be without"
+      .replace(/\bappeared to be in without\b/gi, 'appeared to be without')
+      // "the the" → "the"
+      .replace(/\bthe\s+the\b/gi, 'the')
+      // "was was" → "was"
+      .replace(/\bwas\s+was\b/gi, 'was')
+      // double spaces → single
+      .replace(/  +/g, ' ');
+  };
   const reportDate = survey.reportDate || new Date().toISOString().split('T')[0];
   // Format a YYYY-MM-DD date as "April 15, 2026" for reader-facing display
   // (the ISO value is still kept for storage/inputs).
@@ -18684,11 +18769,12 @@ async function generateReport() {
   <!-- ═══ EXECUTIVE SUMMARY (v2237) ═══ -->
   ${(() => {
     const _esCond = esc(survey.overallCondition) || 'Not yet assessed';
-    const _esConc = parseInt(survey.concludedValue || 0);
+    const _esStrip = s => String(s || '0').replace(/[^0-9.]/g, '');
+    const _esConc = parseInt(_esStrip(survey.concludedValue));
     const _esXr = parseFloat(survey.exchangeRate) || 0;
     const _esConcC = _esXr ? Math.round(_esConc * _esXr) : 0;
-    const _esLow = parseInt(survey.valuationLow || 0);
-    const _esHigh = parseInt(survey.valuationHigh || 0);
+    const _esLow = parseInt(_esStrip(survey.valuationLow));
+    const _esHigh = parseInt(_esStrip(survey.valuationHigh));
     const _esLowC = _esXr ? Math.round(_esLow * _esXr) : 0;
     const _esHighC = _esXr ? Math.round(_esHigh * _esXr) : 0;
     const _f = n => n.toLocaleString();
@@ -18757,14 +18843,16 @@ async function generateReport() {
   // rating, FMV definition, values, methodology, and comparables — in
   // one place, before the detailed evidence that supports it.
   html += (() => {
-    const _lowU = parseInt(survey.valuationLow || 0);
-    const _highU = parseInt(survey.valuationHigh || 0);
-    const _replU = parseInt(survey.replacementCost || 0);
+    // v2239: strip commas before parsing — parseInt('18,000') returns 18
+    const _strip = s => String(s || '0').replace(/[^0-9.]/g, '');
+    const _lowU = parseInt(_strip(survey.valuationLow));
+    const _highU = parseInt(_strip(survey.valuationHigh));
+    const _replU = parseInt(_strip(survey.replacementCost));
     const _xr = parseFloat(survey.exchangeRate) || 0;
     const _lowC = _xr ? Math.round(_lowU * _xr) : 0;
     const _highC = _xr ? Math.round(_highU * _xr) : 0;
     const _replC = _xr ? Math.round(_replU * _xr) : 0;
-    const _concU = parseInt(survey.concludedValue || 0);
+    const _concU = parseInt(_strip(survey.concludedValue));
     const _concC = _xr ? Math.round(_concU * _xr) : 0;
     const _f = n => n.toLocaleString();
     const _xrNote = _xr ? '(USD\u2192CAD @ ' + _xr.toFixed(4) + ')' : '';
@@ -19181,7 +19269,7 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
   <!-- ═══ VESSEL DESCRIPTION ═══ -->
   <h2>VESSEL DESCRIPTION</h2>
   <div class="scope-text">
-    <p>${esc(survey.vesselDescription).replace(/\[([A-Z][A-Z\/\s'"\d&amp;,.\-]*)\]/g, '<span style="background:#fef3c7;color:#92400e;padding:1px 4px;border-radius:3px;font-weight:600;">[$1]</span>')}</p>
+    <p>${esc(cleanupPlaceholders(survey.vesselDescription)).replace(/\n/g, '</p><p>')}</p>
   </div>
 ` : ''}
 
@@ -19231,10 +19319,20 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
           const rating = d.rating;
           const code = findingCodeMap[item.label] || '';
           const isViolation = rating.startsWith('A') || rating.startsWith('B');
-          // v2227: surface the FULL surveyor-entered note. The checklist
-          // summary is the surveyor's complete record — readers need
-          // the untruncated prose here.
-          const notesText = d.text ? d.text : '—';
+          // v2239: A/B findings keep full text in the checklist summary;
+          // C and lower-severity items truncate to the first sentence to
+          // reduce redundancy (full text is in Detailed Survey Findings).
+          let notesText = '—';
+          if (d.text) {
+            if (isViolation) {
+              notesText = d.text;
+            } else {
+              // First sentence only for C / NT / PO items
+              const _m = d.text.trim().match(/^(.+?[.!?])(?:\s|$)/);
+              notesText = _m ? _m[1] : d.text;
+              if (notesText.length < d.text.trim().length) notesText += ' …';
+            }
+          }
           const stdText = isViolation && d.standards && d.standards.length > 0 ? d.standards.join('; ') : '—';
           // v2228: classify via helper — the previous fallthrough chain
           // mislabelled "Not applicable" and "Powered up only" as "NT —
@@ -19579,7 +19677,7 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     ${outdriveInfoHtml}
     ${winchInfoHtml}
     ${mastOptionsHtml}
-    ${itemData.text ? `<p>${esc(depersonalise(dedup(itemData.text)))}</p>` : ''}
+    ${itemData.text ? `<p>${esc(cleanupTypos(depersonalise(dedup(itemData.text))))}</p>` : ''}
     ${(ratingLabel.startsWith('A') || ratingLabel.startsWith('B')) && itemData.standards && itemData.standards.length > 0 ? `<p class="standards"><strong>Applicable Standards:</strong> ${itemData.standards.join(', ')}</p>` : ''}
     ${itemPhotosHtml}
   </div>`;
@@ -19643,7 +19741,7 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     const crossRef = f.category
       ? `<p style="font-size:9pt;color:#6b7280;margin:4px 0 0 0;"><em>See full observation${photoCount > 0 ? ` and ${photoCount} photo${photoCount === 1 ? '' : 's'}` : ''} in <strong>Detailed Survey Findings → ${esc(f.category)}</strong>.</em></p>`
       : '';
-    const briefText = truncateForFR(depersonalise(dedup(f.text || '')));
+    const briefText = truncateForFR(cleanupTypos(depersonalise(dedup(f.text || ''))));
     return `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid ${color};">
       <strong style="color:${color};">Finding ${f.code}</strong> — ${esc(displayItemLabel(f.label, survey))}
       ${briefText ? `<p style="margin:3px 0;">${esc(briefText)}</p>` : ''}
@@ -19693,7 +19791,7 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
       const _ntCrossRef = f.category
         ? `<p style="font-size:9pt;color:#6b7280;margin:4px 0 0 0;"><em>See full observation${_ntPhotoCount > 0 ? ` and ${_ntPhotoCount} photo${_ntPhotoCount === 1 ? '' : 's'}` : ''} in <strong>Detailed Survey Findings → ${esc(f.category)}</strong>.</em></p>`
         : '';
-      const _ntBrief = truncateForFR(depersonalise(dedup(f.text || '')));
+      const _ntBrief = truncateForFR(cleanupTypos(depersonalise(dedup(f.text || ''))));
       html += `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid #6b7280;">
         <strong style="color:#6b7280;">Finding ${f.code}</strong> — ${esc(f.label)}
         ${_ntBrief ? `<p style="margin:3px 0;">${esc(_ntBrief)}</p>` : ''}
@@ -19710,7 +19808,7 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
       const _poCrossRef = f.category
         ? `<p style="font-size:9pt;color:#6b7280;margin:4px 0 0 0;"><em>See full observation${_poPhotoCount > 0 ? ` and ${_poPhotoCount} photo${_poPhotoCount === 1 ? '' : 's'}` : ''} in <strong>Detailed Survey Findings → ${esc(f.category)}</strong>.</em></p>`
         : '';
-      const _poBrief = truncateForFR(depersonalise(dedup(f.text || '')));
+      const _poBrief = truncateForFR(cleanupTypos(depersonalise(dedup(f.text || ''))));
       html += `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid #6b7280;">
         <strong style="color:#6b7280;">Finding ${f.code}</strong> — ${esc(f.label)}
         ${_poBrief ? `<p style="margin:3px 0;">${esc(_poBrief)}</p>` : ''}

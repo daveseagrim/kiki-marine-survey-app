@@ -12,6 +12,42 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2239 — 2026-04-16
+
+### Fixed — FMV formatting bug ($18 instead of $18,000)
+
+Root cause: `parseInt('18,000')` stops at the comma and returns 18. All
+valuation fields in the report (Executive Summary + R&V IIFE) now strip
+non-numeric characters before parsing. Additionally, valuation input fields
+now auto-format with commas as the user types and show an inline red warning
+when the entered value is suspiciously low (< $500).
+
+### Fixed — Vessel Description placeholders appearing in report
+
+The auto-generated vessel description contained bracketed placeholders like
+`[XX] horsepower` and `[COLOUR]` that were never filled. A new
+`cleanupPlaceholders()` function runs at report time and strips any sentence
+still containing `[BRACKETED]` template artefacts, so the printed report
+only shows finalised prose.
+
+### Changed — Checklist Summary truncation for C-rated items
+
+To reduce redundancy between the three report sections (Checklist Summary,
+Detailed Survey Findings, Findings & Recommendations), C-rated and
+lower-severity items in the Checklist Summary table now show only the first
+sentence of the surveyor's notes, with an ellipsis. A/B findings keep the
+full text since they require the reader's immediate attention.
+
+### Added — Common typo auto-correction at report time
+
+New `cleanupTypos()` function runs on all item text during report generation,
+fixing patterns like "th operation" → "the operation", "located engine
+compartment" → "located in the engine compartment", "appeared to be in
+without deficiencies" → "appeared to be without deficiencies", and collapsed
+double words ("the the" → "the", "was was" → "was").
+
+---
+
 ## v2238 — 2026-04-16
 
 ### Added — Field-level exclude from report
