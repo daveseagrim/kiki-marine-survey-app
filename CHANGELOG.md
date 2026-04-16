@@ -179,6 +179,36 @@ should keep refreshing as fields fill in. Once every placeholder is
 resolved and the surveyor edits the prose, the flag alone gates
 regen — so finalised descriptions are never clobbered.
 
+### Changed — Evaluation sentences in Vessel Description now use past tense
+
+Identity / specification facts about the vessel (e.g. "is a 2006
+Formula 27 PC", "has an overall length of 33'1\"", "features 2 cabins")
+stay in present tense because they describe the vessel's design, not
+the surveyor's observations. Evaluation statements — what the surveyor
+saw, tested, or verified at the time of the inspection — now use past
+tense: "The vessel was in [GOOD] overall cosmetic condition and
+appeared to have been [WELL] maintained", "Navigation and communication
+equipment included VHF radio, GPS/chartplotter, and depth sounder.
+No radar or autopilot was installed.", "Safety equipment included…".
+
+### Changed — CAD value emphasised alongside USD in all valuation displays
+
+BUC publishes values in USD, but Kiki Marine's Canadian clients and
+insurers settle in CAD. The CAD equivalent (auto-computed from the
+exchange rate already captured in the Edit Details form) now renders
+prominently in every place a dollar amount appears in the report:
+
+- **Rating & Valuation summary box** — CAD in 14pt bold brand-colour
+  type above the smaller USD line, with exchange rate shown inline.
+- **Statement of Valuation table** — CAD in 13pt brand-colour, USD
+  below, "Tax not included" sub-line.
+- **Valuation Worksheet** — BUC range and replacement cost rows now
+  show "USD $X / **CAD $Y**" side-by-side.
+
+Exchange rate is displayed to four decimal places so the reader can
+reproduce the math. If no exchange rate is set on the survey, the
+CAD line is simply omitted and the USD value renders alone.
+
 ### Changed — Inspection, Edit Intro, and New Survey pages now carry the Kiki Marine wordmark header
 
 The Home page shows the KIKI MARINE logo + "Marine Vessel Surveys —

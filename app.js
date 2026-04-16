@@ -18524,30 +18524,56 @@ async function generateReport() {
   </table>
 
 ${survey.locationLat && survey.locationLon ? `
-  <!-- v2228: replaced broken staticmap.openstreetmap.de image (the
-       provider has been unreliable and was rendering as a broken-image
-       icon on shipped reports) with a compact GPS block + clickable
-       OpenStreetMap and Google Maps links. No external image dependency,
-       no API key required, survives the Word export. -->
+  <!-- v2228: show the survey location address + GPS coordinates.
+       No links — the report is typically viewed on paper. -->
   <div style="margin: 10px 0; padding: 10px 14px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:4px; font-size:10pt;">
-    <div style="color:#1f2937;"><strong>GPS Coordinates:</strong> ${parseFloat(survey.locationLat).toFixed(5)}, ${parseFloat(survey.locationLon).toFixed(5)}</div>
-    <div style="margin-top:4px;color:#4b5563;">
-      <a href="https://www.openstreetmap.org/?mlat=${survey.locationLat}&amp;mlon=${survey.locationLon}&amp;zoom=14#map=14/${survey.locationLat}/${survey.locationLon}" style="color:#066aab;text-decoration:none;">View on OpenStreetMap</a>
-      &nbsp;&middot;&nbsp;
-      <a href="https://www.google.com/maps?q=${survey.locationLat},${survey.locationLon}" style="color:#066aab;text-decoration:none;">View on Google Maps</a>
-    </div>
+    ${survey.location ? `<div style="color:#1f2937;"><strong>Survey Location:</strong> ${esc(survey.location)}</div>` : ''}
+    <div style="color:#6b7280;${survey.location ? 'margin-top:3px;font-size:9pt;' : ''}"><strong>GPS:</strong> ${parseFloat(survey.locationLat).toFixed(5)}, ${parseFloat(survey.locationLon).toFixed(5)}</div>
   </div>
 ` : ''}
 
   <!-- ═══ RATING & VALUATION (early summary) ═══ -->
-  <div style="border:2px solid #006699;padding:12px 16px;margin:16px 0;background:#f8f9fb;">
-    <h3 style="margin:0 0 8px 0;color:#006699;border-bottom:1px solid #006699;padding-bottom:4px;font-size:12pt;">RATING &amp; VALUATION</h3>
+  <!-- v2228: CAD value emphasised. USD is the source of record (BUC guides
+       publish in USD) but Kiki Marine's Canadian clients and insurers
+       settle in CAD. Rendering the CAD equivalent in a visually louder
+       treatment — larger font, brand colour — so no insurer mistakes the
+       currency. Exchange rate shown inline so the reader can reproduce
+       the math. -->
+  ${(() => {
+    const _lowUsd = parseInt(survey.valuationLow || 0);
+    const _highUsd = parseInt(survey.valuationHigh || 0);
+    const _replUsd = parseInt(survey.replacementCost || 0);
+    const _xr = parseFloat(survey.exchangeRate) || 0;
+    const _lowCad = _xr ? Math.round(_lowUsd * _xr) : 0;
+    const _highCad = _xr ? Math.round(_highUsd * _xr) : 0;
+    const _replCad = _xr ? Math.round(_replUsd * _xr) : 0;
+    const _fmt = n => n.toLocaleString();
+    const _xrNote = _xr ? `<span style="font-size:9pt;font-weight:normal;color:#6b7280;margin-left:4px;">(USD→CAD @ ${_xr.toFixed(4)})</span>` : '';
+    return `
+  <div style="border:2px solid #066aab;padding:12px 16px;margin:16px 0;background:#f8f9fb;">
+    <h3 style="margin:0 0 8px 0;color:#066aab;border-bottom:1px solid #066aab;padding-bottom:4px;font-size:12pt;">RATING &amp; VALUATION</h3>
     <table style="border:none;margin:0;">
       <tr><td style="width:45%;border:none;padding:3px 8px;"><strong>Vessel Overall Rating:</strong></td><td style="border:none;padding:3px 8px;font-weight:bold;font-size:11pt;">${esc(survey.overallCondition) || 'Not yet assessed'}</td></tr>
-      <tr><td style="border:none;padding:3px 8px;"><strong>Estimated Market Value:</strong></td><td style="border:none;padding:3px 8px;font-weight:bold;">$${parseInt(survey.valuationLow || 0).toLocaleString()} – $${parseInt(survey.valuationHigh || 0).toLocaleString()} USD${survey.exchangeRate ? ` / $${Math.round(parseInt(survey.valuationLow || 0) * survey.exchangeRate).toLocaleString()} – $${Math.round(parseInt(survey.valuationHigh || 0) * survey.exchangeRate).toLocaleString()} CAD` : ''} – tax not included</td></tr>
-      ${survey.replacementCost ? `<tr><td style="border:none;padding:3px 8px;"><strong>Estimated Replacement Cost:</strong></td><td style="border:none;padding:3px 8px;font-weight:bold;">$${parseInt(survey.replacementCost).toLocaleString()} USD – tax not included</td></tr>` : ''}
+      <tr>
+        <td style="border:none;padding:3px 8px;vertical-align:top;"><strong>Estimated Fair Market Value:</strong></td>
+        <td style="border:none;padding:3px 8px;">
+          ${_xr ? `<div style="font-size:14pt;font-weight:800;color:#066aab;line-height:1.2;">CAD $${_fmt(_lowCad)} &ndash; $${_fmt(_highCad)}</div>` : ''}
+          <div style="font-size:10pt;color:#4b5563;margin-top:2px;">USD $${_fmt(_lowUsd)} &ndash; $${_fmt(_highUsd)}${_xrNote}</div>
+          <div style="font-size:9pt;color:#6b7280;margin-top:1px;font-style:italic;">Tax not included.</div>
+        </td>
+      </tr>
+      ${survey.replacementCost ? `
+      <tr>
+        <td style="border:none;padding:3px 8px;vertical-align:top;"><strong>Estimated Replacement Cost:</strong></td>
+        <td style="border:none;padding:3px 8px;">
+          ${_xr ? `<div style="font-size:13pt;font-weight:800;color:#066aab;line-height:1.2;">CAD $${_fmt(_replCad)}</div>` : ''}
+          <div style="font-size:10pt;color:#4b5563;margin-top:2px;">USD $${_fmt(_replUsd)}</div>
+          <div style="font-size:9pt;color:#6b7280;margin-top:1px;font-style:italic;">Tax not included.</div>
+        </td>
+      </tr>` : ''}
     </table>
-  </div>
+  </div>`;
+  })()}
 
   <!-- ═══ VESSEL SPECIFICATIONS ═══ -->`;
   const isSail = (survey.vesselType || '').toLowerCase() === 'sail';
@@ -19130,22 +19156,41 @@ ${survey.vesselDescription ? `
       <li>The price represents a normal consideration for the vessel sold, unaffected by special or creative financing or sales concessions granted by anyone associated with the sale.</li>
     </ul>
   </div>
+  <!-- v2228: CAD prominently displayed alongside USD in every valuation
+       row, with the CAD value emphasised in larger/brand-colour type so
+       Canadian insurers read the correct currency at a glance. -->
+  ${(() => {
+    const _lowU2 = parseInt(survey.valuationLow || 0);
+    const _highU2 = parseInt(survey.valuationHigh || 0);
+    const _replU2 = parseInt(survey.replacementCost || 0);
+    const _xr2 = parseFloat(survey.exchangeRate) || 0;
+    const _lowC2 = _xr2 ? Math.round(_lowU2 * _xr2) : 0;
+    const _highC2 = _xr2 ? Math.round(_highU2 * _xr2) : 0;
+    const _replC2 = _xr2 ? Math.round(_replU2 * _xr2) : 0;
+    const _f2 = n => n.toLocaleString();
+    const _xrNote2 = _xr2 ? `(USD→CAD @ ${_xr2.toFixed(4)})` : '';
+    return `
   <table>
     <tr><td style="width:40%;"><strong>Valuation Sources</strong></td><td>${survey.valuationSources && survey.valuationSources.length > 0 ? survey.valuationSources.map(s => esc(s)).join('<br>') : esc(survey.valuationSource) || 'N/A'}</td></tr>
-    <tr><td><strong>Fair Market Value (USD)</strong></td><td><strong>$${parseInt(survey.valuationLow || 0).toLocaleString()} – $${parseInt(survey.valuationHigh || 0).toLocaleString()} USD</strong></td></tr>
-`;
-
-  if (survey.exchangeRate) {
-    const lowCAD = parseInt(survey.valuationLow || 0) * survey.exchangeRate;
-    const highCAD = parseInt(survey.valuationHigh || 0) * survey.exchangeRate;
-    html += `<tr><td><strong>Fair Market Value (CAD)</strong></td><td><strong>$${Math.round(lowCAD).toLocaleString()} – $${Math.round(highCAD).toLocaleString()} CAD</strong> (@ ${parseFloat(survey.exchangeRate).toFixed(2)})</td></tr>`;
-  }
-
-  if (survey.replacementCost) {
-    html += `<tr><td><strong>Estimated Replacement Cost (USD)</strong></td><td><strong>$${parseInt(survey.replacementCost).toLocaleString()} USD</strong> — tax not included</td></tr>`;
-  }
-
-  html += `</table>
+    <tr>
+      <td><strong>Fair Market Value</strong></td>
+      <td>
+        ${_xr2 ? `<div style="font-size:13pt;font-weight:800;color:#066aab;">CAD $${_f2(_lowC2)} &ndash; $${_f2(_highC2)}</div>` : ''}
+        <div>USD $${_f2(_lowU2)} &ndash; $${_f2(_highU2)} ${_xrNote2}</div>
+        <div style="font-size:9pt;color:#6b7280;font-style:italic;">Tax not included.</div>
+      </td>
+    </tr>
+    ${survey.replacementCost ? `
+    <tr>
+      <td><strong>Estimated Replacement Cost</strong></td>
+      <td>
+        ${_xr2 ? `<div style="font-size:13pt;font-weight:800;color:#066aab;">CAD $${_f2(_replC2)}</div>` : ''}
+        <div>USD $${_f2(_replU2)}</div>
+        <div style="font-size:9pt;color:#6b7280;font-style:italic;">Tax not included.</div>
+      </td>
+    </tr>` : ''}
+  </table>`;
+  })()}
 
   <p><strong>Appraisal Methodology:</strong></p>
   <p class="scope-text">${esc(survey.valuationRationale) || 'The following method of valuation was used to obtain the Fair Market Value: similarly equipped, same or similar model vessels as shown as sold on soldboats.com, buc.com, and listings on yachtworld.com (and/or other websites) in the last two years were identified, adjusted for model year, condition, equipment, and date of sale, and averaged together. The vessel\'s overall condition rating using the BUC Marine Grading System has been factored into the final valuation range.'}</p>
@@ -19172,9 +19217,9 @@ ${survey.vesselDescription ? `
   <table style="margin-top:12px;">
     <tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Valuation Sources Consulted</td></tr>
     <tr><td style="width:40%;"><strong>Sources</strong></td><td>${survey.valuationSources && survey.valuationSources.length > 0 ? survey.valuationSources.map(s => '• ' + esc(s)).join('<br>') : esc(survey.valuationSource) || 'N/A'}</td></tr>
-    <tr><td><strong>BUC Value Range (USD)</strong></td><td>$${parseInt(survey.valuationLow || 0).toLocaleString()} – $${parseInt(survey.valuationHigh || 0).toLocaleString()}</td></tr>
+    <tr><td><strong>BUC Value Range</strong></td><td>USD $${parseInt(survey.valuationLow || 0).toLocaleString()} – $${parseInt(survey.valuationHigh || 0).toLocaleString()}${survey.exchangeRate ? ` &nbsp;/&nbsp; <strong style="color:#066aab;">CAD $${Math.round(parseInt(survey.valuationLow || 0) * parseFloat(survey.exchangeRate)).toLocaleString()} – $${Math.round(parseInt(survey.valuationHigh || 0) * parseFloat(survey.exchangeRate)).toLocaleString()}</strong>` : ''}</td></tr>
     ${survey.exchangeRate ? `<tr><td><strong>Exchange Rate (USD→CAD)</strong></td><td>${parseFloat(survey.exchangeRate).toFixed(4)}</td></tr>` : ''}
-    ${survey.replacementCost ? `<tr><td><strong>Estimated Replacement Cost (USD)</strong></td><td>$${parseInt(survey.replacementCost).toLocaleString()}</td></tr>` : ''}
+    ${survey.replacementCost ? `<tr><td><strong>Estimated Replacement Cost</strong></td><td>USD $${parseInt(survey.replacementCost).toLocaleString()}${survey.exchangeRate ? ` &nbsp;/&nbsp; <strong style="color:#066aab;">CAD $${Math.round(parseInt(survey.replacementCost) * parseFloat(survey.exchangeRate)).toLocaleString()}</strong>` : ''}</td></tr>` : ''}
   </table>
 
   <table style="margin-top:12px;">
