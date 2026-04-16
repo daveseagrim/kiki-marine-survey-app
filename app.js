@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2243';
+const APP_VERSION = 'v2244';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -195,6 +195,34 @@ function compressPhotoForReport(dataUrl, maxDim = 1200, quality = 0.7) {
       canvas.height = h;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
+
+      // v2244: auto-strip date stamp from report photos.
+      // The stamp added by addDateStampToPhoto() sits in the bottom-right
+      // corner — dark rect with white YYYY-MM-DD text, font = width/40,
+      // padding 12 px. We paint over it by sampling pixels just above the
+      // stamp region and tiling them down. This keeps the original photo in
+      // IndexedDB intact while ensuring the printed report is date-free.
+      try {
+        const _fontSize = Math.max(20, Math.round(w / 40));
+        const _padding = 12;
+        ctx.font = `${_fontSize}px Arial, sans-serif`;
+        const _sampleDate = '2026-04-16'; // widest likely date string
+        const _tw = ctx.measureText(_sampleDate).width;
+        const _rw = _tw + _padding * 2;
+        const _rh = _fontSize + _padding;
+        const _sx = Math.round(w - _rw);
+        const _sy = Math.round(h - _rh);
+        // Sample a thin strip just above the stamp
+        const _sampleH = Math.min(4, _sy);
+        if (_sampleH > 0 && _sx >= 0 && _sy >= 0) {
+          const _sample = ctx.getImageData(_sx, Math.max(0, _sy - _sampleH), Math.round(_rw), _sampleH);
+          // Tile the sample strip over the stamp region
+          for (let _y = _sy; _y < h; _y++) {
+            ctx.putImageData(_sample, _sx, _y, 0, 0, Math.round(_rw), _sampleH);
+          }
+        }
+      } catch (_e) { /* stamp removal is best-effort */ }
+
       resolve(canvas.toDataURL('image/jpeg', quality));
     };
     img.onerror = () => resolve(dataUrl); // fallback to original on error
@@ -9524,46 +9552,73 @@ async function generateVesselDescription() {
     ? (keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : ' with a [FIN/FULL/SHOAL/WING] keel')
     : '';
   const draftStr = draft ? ` with a maximum draft of ${draft}` : (vesselType === 'sail' ? ' with a maximum draft of [X\'X"]' : '');
+  const ballastStr = survey.ballast || '';
 
+  // v2244: richer vessel description — four distinct paragraphs:
+  // 1. Identification & hull  2. Propulsion  3. Accommodation & systems  4. Safety & condition
+
+  // ── Para 1: Identification, hull geometry, and exterior ──
   let desc = `"${vesselName}" is a ${yearStr} ${makeStr} ${modelStr}, a ${constructionStr} ${hullTypeStr} ${typeStr}. `;
   desc += `She has an overall length of ${loa || '[XX\'XX"]'}, a beam of ${beam || '[XX\'XX"]'}${keelStr}${draftStr}`;
   if (displacement) desc += `, and a displacement of ${displacement}`;
+  if (ballastStr && vesselType === 'sail') desc += ` (ballast: ${ballastStr})`;
   desc += `.`;
   desc += rigDesc;
+  // Hull/deck colours woven into this paragraph when known
+  if (hullColour && bootStripeColour && deckColour) {
+    desc += ` The hull is finished in ${hullColour} with a ${bootStripeColour} boot stripe, and the deck is ${deckColour}.`;
+  } else if (hullColour && deckColour) {
+    desc += ` The hull is finished in ${hullColour} and the deck is ${deckColour}.`;
+  } else if (hullColour) {
+    desc += ` The hull is finished in ${hullColour}.`;
+  }
+
+  // ── Para 2: Propulsion ──
   desc += `\n\n`;
   desc += engineDesc;
+
+  // ── Para 3: Accommodation, electrical, and electronics ──
   desc += `\n\n`;
-  // v2243: hull/deck colours — only include sentences where data is known.
-  // Previously used [COLOUR] placeholders that cleanupPlaceholders stripped,
-  // leaving the description too thin.
-  if (hullColour && bootStripeColour && deckColour) {
-    desc += `The hull is ${hullColour} with a ${bootStripeColour} boot stripe. The deck is ${deckColour}. `;
-  } else if (hullColour) {
-    desc += `The hull is ${hullColour}. `;
-  }
-  // Cabin layout — include what we know, bracket what we don't
   const cabinStr = cabins || '[NUMBER]';
   const headStr = survey.headCount ? String(survey.headCount) : '[NUMBER]';
-  desc += `The vessel features ${cabinStr} cabin(s), ${headStr} head(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
-  desc += `\n\n`;
+  desc += `Below decks the vessel features ${cabinStr} cabin(s) and ${headStr} head(s). `;
   if (electrical) {
     desc += `The electrical system is ${electrical}. `;
   } else {
     desc += `The electrical system is [12V DC / 120V AC] with [XX] amp shore power service. `;
   }
-  // v2243: electronics — build as complete prose. "Navigation and
-  // communication equipment included…" reads more like a list heading
-  // than a sentence. Add "aboard" for natural flow.
   if (electronicsDesc) {
     desc += `Navigation and communication equipment aboard included ${electronicsDesc.replace(/^Navigation and communication equipment included /i, '')}`;
     if (!desc.endsWith('. ')) desc += ' ';
   } else {
     desc += `Navigation and communication equipment included [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
   }
+
+  // ── Para 4: Safety equipment and overall condition ──
   desc += '\n\n';
   desc += safetyDesc || `Safety equipment included [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
-  desc += `\n\n`;
-  desc += `The vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained.`;
+  // v2244: auto-derive condition from ratings distribution
+  let _conditionSentence = '';
+  if (survey.items) {
+    const _ratings = Object.values(survey.items).map(d => (d.rating || '').charAt(0)).filter(Boolean);
+    const _aCount = _ratings.filter(r => r === 'A').length;
+    const _bCount = _ratings.filter(r => r === 'B').length;
+    const _cCount = _ratings.filter(r => r === 'C').length;
+    const _total = _aCount + _bCount + _cCount;
+    if (_total > 0) {
+      const _cPct = Math.round((_cCount / _total) * 100);
+      if (_aCount === 0 && _bCount <= 2 && _cPct >= 85) {
+        _conditionSentence = ` At the time of the survey the vessel was in good overall condition, consistent with her age and use, and appeared to have been well maintained.`;
+      } else if (_aCount === 0 && _cPct >= 65) {
+        _conditionSentence = ` At the time of the survey the vessel was in fair to good overall condition with a number of items requiring attention, as detailed in the body of this report.`;
+      } else if (_aCount <= 2 && _cPct >= 50) {
+        _conditionSentence = ` At the time of the survey the vessel was in fair overall condition with deficiencies noted. Corrective action is recommended before the vessel is placed into regular service.`;
+      } else {
+        _conditionSentence = ` At the time of the survey the vessel exhibited significant deficiencies. The reader is directed to the Findings and Recommendations section of this report for details.`;
+      }
+    }
+  }
+  desc += _conditionSentence || `\n\nThe vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained.`;
 
   const textarea = document.getElementById('vesselDescription');
   if (textarea) {
@@ -9735,24 +9790,28 @@ async function regenerateDescriptionFromInspection() {
     ? (keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : ' with a [FIN/FULL/SHOAL/WING] keel')
     : '';
   const draftStr = draft ? ` with a maximum draft of ${draft}` : (vesselType === 'sail' ? ' with a maximum draft of [X\'X"]' : '');
+  const ballastStr = survey.ballast || '';
 
+  // v2244: richer vessel description (copy 2 — regenerateDescriptionFromInspection)
   let desc = `"${vesselName}" is a ${yearStr} ${makeStr} ${modelStr}, a ${constructionStr} ${hullTypeStr} ${typeStr}. `;
   desc += `She has an overall length of ${loa || '[XX\'XX"]'}, a beam of ${beam || '[XX\'XX"]'}${keelStr}${draftStr}`;
   if (displacement) desc += `, and a displacement of ${displacement}`;
+  if (ballastStr && vesselType === 'sail') desc += ` (ballast: ${ballastStr})`;
   desc += `.`;
   desc += rigDesc;
+  if (hullColour && bootStripeColour && deckColour) {
+    desc += ` The hull is finished in ${hullColour} with a ${bootStripeColour} boot stripe, and the deck is ${deckColour}.`;
+  } else if (hullColour && deckColour) {
+    desc += ` The hull is finished in ${hullColour} and the deck is ${deckColour}.`;
+  } else if (hullColour) {
+    desc += ` The hull is finished in ${hullColour}.`;
+  }
   desc += `\n\n`;
   desc += engineDesc;
   desc += `\n\n`;
-  if (hullColour && bootStripeColour && deckColour) {
-    desc += `The hull is ${hullColour} with a ${bootStripeColour} boot stripe. The deck is ${deckColour}. `;
-  } else if (hullColour) {
-    desc += `The hull is ${hullColour}. `;
-  }
   const cabinStr = cabins || '[NUMBER]';
   const headStr = survey.headCount ? String(survey.headCount) : '[NUMBER]';
-  desc += `The vessel features ${cabinStr} cabin(s), ${headStr} head(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
-  desc += `\n\n`;
+  desc += `Below decks the vessel features ${cabinStr} cabin(s) and ${headStr} head(s). `;
   if (electrical) {
     desc += `The electrical system is ${electrical}. `;
   } else {
@@ -9766,8 +9825,28 @@ async function regenerateDescriptionFromInspection() {
   }
   desc += '\n\n';
   desc += safetyDesc || `Safety equipment included [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
-  desc += `\n\n`;
-  desc += `The vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained.`;
+  // v2244: auto-derive condition from ratings distribution
+  let _conditionSentence2 = '';
+  if (survey.items) {
+    const _ratings2 = Object.values(survey.items).map(d => (d.rating || '').charAt(0)).filter(Boolean);
+    const _a2 = _ratings2.filter(r => r === 'A').length;
+    const _b2 = _ratings2.filter(r => r === 'B').length;
+    const _c2 = _ratings2.filter(r => r === 'C').length;
+    const _t2 = _a2 + _b2 + _c2;
+    if (_t2 > 0) {
+      const _cp2 = Math.round((_c2 / _t2) * 100);
+      if (_a2 === 0 && _b2 <= 2 && _cp2 >= 85) {
+        _conditionSentence2 = ` At the time of the survey the vessel was in good overall condition, consistent with her age and use, and appeared to have been well maintained.`;
+      } else if (_a2 === 0 && _cp2 >= 65) {
+        _conditionSentence2 = ` At the time of the survey the vessel was in fair to good overall condition with a number of items requiring attention, as detailed in the body of this report.`;
+      } else if (_a2 <= 2 && _cp2 >= 50) {
+        _conditionSentence2 = ` At the time of the survey the vessel was in fair overall condition with deficiencies noted. Corrective action is recommended before the vessel is placed into regular service.`;
+      } else {
+        _conditionSentence2 = ` At the time of the survey the vessel exhibited significant deficiencies. The reader is directed to the Findings and Recommendations section of this report for details.`;
+      }
+    }
+  }
+  desc += _conditionSentence2 || `\n\nThe vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained.`;
 
   // Confirm before overwriting
   if (survey.vesselDescription && survey.vesselDescription.trim()) {
@@ -9940,24 +10019,28 @@ function buildDescriptionFromSurvey(survey) {
     ? (keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : ' with a [FIN/FULL/SHOAL/WING] keel')
     : '';
   const draftStr = draft ? ` with a maximum draft of ${draft}` : (vesselType === 'sail' ? ' with a maximum draft of [X\'X"]' : '');
+  const ballastStr = survey.ballast || '';
 
+  // v2244: richer vessel description (copy 3 — buildVesselDescription pure function)
   let desc = `"${vesselName}" is a ${yearStr} ${makeStr} ${modelStr}, a ${constructionStr} ${hullTypeStr} ${typeStr}. `;
   desc += `She has an overall length of ${loa || '[XX\'XX"]'}, a beam of ${beam || '[XX\'XX"]'}${keelStr}${draftStr}`;
   if (displacement) desc += `, and a displacement of ${displacement}`;
+  if (ballastStr && vesselType === 'sail') desc += ` (ballast: ${ballastStr})`;
   desc += `.`;
   desc += rigDesc;
+  if (hullColour && bootStripeColour && deckColour) {
+    desc += ` The hull is finished in ${hullColour} with a ${bootStripeColour} boot stripe, and the deck is ${deckColour}.`;
+  } else if (hullColour && deckColour) {
+    desc += ` The hull is finished in ${hullColour} and the deck is ${deckColour}.`;
+  } else if (hullColour) {
+    desc += ` The hull is finished in ${hullColour}.`;
+  }
   desc += `\n\n`;
   desc += engineDesc;
   desc += `\n\n`;
-  if (hullColour && bootStripeColour && deckColour) {
-    desc += `The hull is ${hullColour} with a ${bootStripeColour} boot stripe. The deck is ${deckColour}. `;
-  } else if (hullColour) {
-    desc += `The hull is ${hullColour}. `;
-  }
   const cabinStr = cabins || '[NUMBER]';
   const headStr = survey.headCount ? String(survey.headCount) : '[NUMBER]';
-  desc += `The vessel features ${cabinStr} cabin(s), ${headStr} head(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
-  desc += `\n\n`;
+  desc += `Below decks the vessel features ${cabinStr} cabin(s) and ${headStr} head(s). `;
   if (electrical) {
     desc += `The electrical system is ${electrical}. `;
   } else {
@@ -9971,8 +10054,28 @@ function buildDescriptionFromSurvey(survey) {
   }
   desc += '\n\n';
   desc += safetyDesc || `Safety equipment included [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
-  desc += `\n\n`;
-  desc += `The vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained.`;
+  // v2244: auto-derive condition from ratings distribution
+  let _conditionSentence3 = '';
+  if (survey.items) {
+    const _ratings3 = Object.values(survey.items).map(d => (d.rating || '').charAt(0)).filter(Boolean);
+    const _a3 = _ratings3.filter(r => r === 'A').length;
+    const _b3 = _ratings3.filter(r => r === 'B').length;
+    const _c3 = _ratings3.filter(r => r === 'C').length;
+    const _t3 = _a3 + _b3 + _c3;
+    if (_t3 > 0) {
+      const _cp3 = Math.round((_c3 / _t3) * 100);
+      if (_a3 === 0 && _b3 <= 2 && _cp3 >= 85) {
+        _conditionSentence3 = ` At the time of the survey the vessel was in good overall condition, consistent with her age and use, and appeared to have been well maintained.`;
+      } else if (_a3 === 0 && _cp3 >= 65) {
+        _conditionSentence3 = ` At the time of the survey the vessel was in fair to good overall condition with a number of items requiring attention, as detailed in the body of this report.`;
+      } else if (_a3 <= 2 && _cp3 >= 50) {
+        _conditionSentence3 = ` At the time of the survey the vessel was in fair overall condition with deficiencies noted. Corrective action is recommended before the vessel is placed into regular service.`;
+      } else {
+        _conditionSentence3 = ` At the time of the survey the vessel exhibited significant deficiencies. The reader is directed to the Findings and Recommendations section of this report for details.`;
+      }
+    }
+  }
+  desc += _conditionSentence3 || `\n\nThe vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained.`;
 
   return desc;
 }
@@ -18347,6 +18450,71 @@ async function generateReport() {
   // Migrate old item labels before generating report
   if (migrateSurveyLabels(survey)) await saveSurvey(survey);
 
+  // ── v2244: Date-integrity check ───────────────────────────────────────
+  // Extract capture timestamps from photo IDs (all formats embed Date.now())
+  // and warn if any photo post-dates the survey or report date.
+  {
+    const _surveyDateISO = survey.surveyDate || '';
+    const _reportDateISO = survey.reportDate || new Date().toISOString().split('T')[0];
+    // Use the earlier of surveyDate / reportDate as the "certified" date
+    const _certifiedISO = (_surveyDateISO && _surveyDateISO < _reportDateISO) ? _surveyDateISO : _reportDateISO;
+    if (_certifiedISO) {
+      // End of the certified day in local time
+      const _certifiedEnd = new Date(_certifiedISO + 'T23:59:59').getTime();
+      let _latestPhotoMs = 0;
+      // Gather all photo IDs across the survey
+      const _allPhotoIds = [];
+      // Doc photos
+      ['hinPhoto','compliancePhoto','licencePhoto','tcPaperLicencePhoto','coverPhoto'].forEach(k => {
+        if (survey[k]) _allPhotoIds.push(survey[k]);
+      });
+      // Multi-doc arrays
+      ['enginePhoto','enginePlatePhoto','transmissionPhoto','transmissionPlatePhoto',
+       'engine2Photo','engine2PlatePhoto','transmission2Photo','transmission2PlatePhoto',
+       'fourCornerPhotos'].forEach(k => {
+        const v = survey[k];
+        if (Array.isArray(v)) v.forEach(id => { if (id) _allPhotoIds.push(id); });
+        else if (typeof v === 'object' && v) Object.values(v).forEach(id => { if (id) _allPhotoIds.push(id); });
+        else if (v) _allPhotoIds.push(v);
+      });
+      // Item photos
+      if (survey.items) {
+        Object.values(survey.items).forEach(d => {
+          if (d.photos) d.photos.forEach(id => _allPhotoIds.push(id));
+        });
+      }
+      // Safety equipment photos
+      if (survey.safetyEquipment) {
+        survey.safetyEquipment.forEach(e => {
+          if (e.photos) e.photos.forEach(id => _allPhotoIds.push(id));
+        });
+      }
+      // Extract timestamps — photo IDs contain Date.now() segments (13-digit numbers)
+      _allPhotoIds.forEach(id => {
+        const tsMatches = String(id).match(/(?:^|_)(\d{13})(?:_|$)/g);
+        if (tsMatches) {
+          tsMatches.forEach(m => {
+            const ts = parseInt(m.replace(/_/g, ''), 10);
+            if (ts > 1600000000000 && ts < 2000000000000) { // sanity: 2020–2033
+              if (ts > _latestPhotoMs) _latestPhotoMs = ts;
+            }
+          });
+        }
+      });
+      if (_latestPhotoMs > 0 && _latestPhotoMs > _certifiedEnd) {
+        const _latestDate = new Date(_latestPhotoMs);
+        const _photoDateStr = _latestDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+        const _certDateStr = new Date(_certifiedISO + 'T12:00:00').toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+        const _proceed = await showConfirm(
+          `⚠️ Date integrity issue\n\nThe report/survey date is ${_certDateStr}, but photos were captured as late as ${_photoDateStr}.\n\nAn underwriter may reject a report whose certification date precedes the photographic evidence.\n\nOptions:\n• Update the survey date to match your photos\n• Use "Remove Date Stamps" from the overflow menu\n\nGenerate anyway?`,
+          'Generate Anyway',
+          'Go Back and Fix'
+        );
+        if (!_proceed) return;
+      }
+    }
+  }
+
   const activeTemplate = getTemplateForSurvey(survey);
   const esc = (s) => (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   // v2238: field-level exclude from report
@@ -18743,10 +18911,10 @@ async function generateReport() {
     /* v2227: uniform report photo size (60% reduction vs the old 800×600).
        Applied everywhere photos render in the body: item photos, finding
        photos, nameplates, HIN/compliance plates, four-corner overview. */
-    .report-photo { width: 320px; height: 240px; object-fit: cover; border: 1px solid #d1d5db; border-radius: 4px; display: block; }
-    .report-photo-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; margin-top: 8px; }
-    .report-photo-card { display: inline-block; vertical-align: top; width: 320px; }
-    .report-photo-card .caption { font-size: 9pt; color: #4b5563; margin-top: 3px; font-style: italic; text-align: center; }
+    .report-photo { width: 260px; height: 195px; object-fit: cover; border: 1px solid #d1d5db; border-radius: 4px; display: block; }
+    .report-photo-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; margin-top: 6px; }
+    .report-photo-card { display: inline-block; vertical-align: top; width: 260px; }
+    .report-photo-card .caption { font-size: 8pt; color: #4b5563; margin-top: 2px; font-style: italic; text-align: center; }
   </style>
 </head>
 <body>

@@ -12,6 +12,21 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2244 — 2026-04-16
+
+### Date integrity, richer description, photo cleanup
+
+- **Date-integrity validation**: `generateReport()` now checks all photo capture timestamps against the survey/report date. If any photo was taken after the certified date, a warning dialog explains the issue and offers to go back and fix it. Prevents underwriter-rejectable chronological discrepancies.
+- **Auto-strip date stamps from report photos**: `compressPhotoForReport()` now removes the YYYY-MM-DD date stamp from the bottom-right corner of every photo during report generation. Original photos in IndexedDB are untouched; only the printed output is date-free.
+- **Richer vessel description template**: All three description builders updated:
+  - Ballast included for sailboats when available
+  - Hull/deck colours woven into the identification paragraph (not a standalone sentence)
+  - "Below decks" paragraph groups accommodation with electrical and electronics
+  - Auto-derived condition assessment from ratings distribution (good/fair to good/fair/significant deficiencies) replaces the generic placeholder
+- **Smaller report photos**: Inline photos reduced from 320×240 to 260×195 (same 4:3 ratio, ~35% less page area). Fits 3 across on a standard page width.
+
+---
+
 ## v2243 — 2026-04-16
 
 ### Report concision, accuracy, and structure fixes
