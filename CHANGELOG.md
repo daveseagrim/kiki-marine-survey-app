@@ -12,6 +12,15 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2254 — 2026-04-16
+
+### Drive session expiry warning
+- Amber warning banner appears at the top of the screen when the Google Drive token expires (~55 minutes after sign-in).
+- Banner includes a one-tap "Sign In" button to reconnect without leaving the current screen.
+- "Dismiss" button hides the banner if you don't need Drive right now.
+- Checked every 60 seconds and also triggered when an auto-sync detects the expired token.
+- Banner auto-hides when sign-in succeeds (popup or redirect flow).
+
 ## v2253 — 2026-04-16
 
 ### Consolidated save architecture

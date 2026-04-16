@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2253';
+const APP_VERSION = 'v2254';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2407,6 +2407,75 @@ function _showBackupWarning(service, photoLabel) {
   // Auto-dismiss after 10 seconds
   setTimeout(() => { if (bar.parentElement) bar.remove(); }, 10000);
 }
+
+// ── v2254: Persistent Drive token-expiry warning banner ──────────────
+// Shows an amber bar at the top when the Drive token expires mid-session,
+// with a one-tap "Sign In" button to reconnect. Stays until dismissed or
+// sign-in succeeds. Checked periodically (every 60s) and on auto-sync skip.
+let _driveExpiryShown = false;
+function _showDriveExpiryWarning() {
+  if (_driveExpiryShown) return;  // Don't stack duplicates
+  if (typeof DriveBackup === 'undefined') return;
+  // Only show if Drive WAS connected (token was persisted at some point)
+  if (!localStorage.getItem('_driveTokenTime')) return;
+  _driveExpiryShown = true;
+
+  const existing = document.getElementById('drive-expiry-bar');
+  if (existing) existing.remove();
+
+  const bar = document.createElement('div');
+  bar.id = 'drive-expiry-bar';
+  bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9998;background:#d97706;color:white;padding:calc(env(safe-area-inset-top, 0px) + 8px) 16px 8px 16px;font-size:13px;font-weight:600;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;';
+  bar.innerHTML = `
+    <span>☁️ Google Drive session expired</span>
+    <button id="driveReSignIn" style="background:white;color:#92400e;border:none;border-radius:6px;padding:5px 14px;font-weight:700;font-size:12px;cursor:pointer;">Sign In</button>
+    <button onclick="this.parentElement.remove(); window._driveExpiryShown=false;" style="background:transparent;color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.4);border-radius:6px;padding:5px 10px;font-weight:600;font-size:11px;cursor:pointer;">Dismiss</button>
+  `;
+  document.body.appendChild(bar);
+
+  const signInBtn = document.getElementById('driveReSignIn');
+  if (signInBtn) {
+    signInBtn.onclick = async () => {
+      signInBtn.textContent = 'Signing in…';
+      signInBtn.disabled = true;
+      try {
+        await DriveBackup.signIn();
+        // If we get here (popup flow), sign-in succeeded
+        bar.remove();
+        _driveExpiryShown = false;
+        showToast('Google Drive reconnected ✓');
+      } catch (err) {
+        // On iOS redirect flow, page will unload — this catch won't fire.
+        // On popup cancel/failure:
+        signInBtn.textContent = 'Sign In';
+        signInBtn.disabled = false;
+        if (err.code !== 'auth/popup-closed-by-user') {
+          console.warn('[Drive] Re-sign-in failed:', err.message);
+        }
+      }
+    };
+  }
+}
+
+function _hideDriveExpiryWarning() {
+  _driveExpiryShown = false;
+  const bar = document.getElementById('drive-expiry-bar');
+  if (bar) bar.remove();
+}
+
+// Periodic check: every 60 seconds, check if Drive token has expired
+setInterval(() => {
+  if (typeof DriveBackup === 'undefined' || !DriveBackup.isSignedIn) return;
+  // If Drive was connected but token is now expired, show the banner
+  const tokenTime = parseInt(localStorage.getItem('_driveTokenTime') || '0', 10);
+  if (tokenTime && (Date.now() - tokenTime) >= 3300000 && !DriveBackup.isSignedIn()) {
+    _showDriveExpiryWarning();
+  }
+  // If Drive is now connected again (e.g. after redirect sign-in), hide it
+  if (DriveBackup.isSignedIn() && _driveExpiryShown) {
+    _hideDriveExpiryWarning();
+  }
+}, 60000);
 
 async function getPhotoById(photoId) {
   return new Promise((resolve) => {
@@ -21041,6 +21110,7 @@ const DriveBackup = (() => {
         _persistToken();
         sessionStorage.removeItem('_driveRedirectPending');
         console.log('[Drive] Redirect sign-in completed, token obtained');
+        if (typeof _hideDriveExpiryWarning === 'function') _hideDriveExpiryWarning();
         showToast('Google Drive connected ✓');
         // Re-render home to show the updated Drive button state
         if (!currentSurveyId) renderHome();
@@ -21498,7 +21568,9 @@ const DriveBackup = (() => {
     if ((Date.now() - (window._driveTokenTime || 0)) >= 3300000) {
       _clearPersistedToken();
       _accessToken = null;
-      console.log('[Drive] Auto-sync skipped — token expired. Sign in again from the home screen.');
+      console.log('[Drive] Auto-sync skipped — token expired.');
+      // v2254: show the expiry warning banner
+      if (typeof _showDriveExpiryWarning === 'function') _showDriveExpiryWarning();
       return;
     }
 
