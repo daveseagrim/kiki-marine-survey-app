@@ -12,6 +12,18 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2241 — 2026-04-16
+
+### Report quality fixes (from 64-page PDF review)
+
+- **Photo captions**: First photo under each item keeps the item label; subsequent photos are numbered "photo 2 of N" etc. instead of repeating the same caption.
+- **Vessel Description spacing**: Defensive fix ensures a period followed by a capital letter always gets a space (fixes "14,100 lbs.The electrical system" run-together).
+- **cleanupTypos on checklist summary**: The typo-correction pipeline (`cleanupTypos()`) now runs on checklist summary table text too (previously only ran on Detailed Findings and F&R, so "th operation" etc. slipped through).
+- **Estimated Replacement Cost conditionals**: Notes Regarding Report Format, the Summary paragraph, and the Valuation Worksheet preamble now omit "Estimated Replacement Cost" when the field is empty instead of referencing it.
+- **B-finding recommendations**: Extract the specific action sentence from the surveyor's observation text (e.g., "Replace the depleted anodes before relaunching the vessel.") and prepend it to the standard recommendation. Disclaimer-style sentences are excluded.
+
+---
+
 ## v2240 — 2026-04-16
 
 ### Fixed — Safety photo ReferenceError in report generation

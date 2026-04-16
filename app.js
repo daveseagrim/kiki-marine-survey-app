@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2240';
+const APP_VERSION = 'v2241';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -18918,7 +18918,7 @@ async function generateReport() {
       <li><strong>Safety Equipment — TC TP 511</strong> — Required safety equipment per Transport Canada regulations, with on-board verification status.</li>
       <li><strong>Detailed Survey Findings</strong> — The full, itemised survey observations by category.</li>
       <li><strong>Findings &amp; Recommendations</strong> — All items rated "A" (Critical), "B" (Needs Attention), "C" (Serviceable), "Not tested/not verified", and "Powered up only" compiled for quick reference.</li>
-      <li><strong>Rating &amp; Valuation</strong> — Overall condition rating (BUC Marine Grading System), Fair Market Value, Estimated Replacement Cost, and Valuation Worksheet.</li>
+      <li><strong>Rating &amp; Valuation</strong> — Overall condition rating (BUC Marine Grading System), Fair Market Value${survey.replacementCost ? ', Estimated Replacement Cost' : ''}, and Valuation Worksheet.</li>
       <li><strong>Surveyor's Certification</strong></li>
     </ol>
   </div>
@@ -19024,7 +19024,7 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
   <!-- ═══ VESSEL DESCRIPTION ═══ -->
   <h2>VESSEL DESCRIPTION</h2>
   <div class="scope-text">
-    <p>${esc(cleanupPlaceholders(survey.vesselDescription)).replace(/\n/g, '</p><p>')}</p>
+    <p>${esc(cleanupPlaceholders(survey.vesselDescription)).replace(/\.([A-Z])/g, '. $1').replace(/\n/g, '</p><p>')}</p>
   </div>
 ` : ''}
 
@@ -19129,15 +19129,19 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
           // v2239: A/B findings keep full text in the checklist summary;
           // C and lower-severity items truncate to the first sentence to
           // reduce redundancy (full text is in Detailed Survey Findings).
+          // v2241: cleanupTypos applied to checklist summary text too
+          // (previously only ran on Detailed Findings and F&R, so "th
+          // operation" etc. slipped through in the summary table).
           let notesText = '—';
           if (d.text) {
             if (isViolation) {
-              notesText = d.text;
+              notesText = cleanupTypos(d.text);
             } else {
               // First sentence only for C / NT / PO items
-              const _m = d.text.trim().match(/^(.+?[.!?])(?:\s|$)/);
-              notesText = _m ? _m[1] : d.text;
-              if (notesText.length < d.text.trim().length) notesText += ' …';
+              const _cleaned = cleanupTypos(d.text);
+              const _m = _cleaned.trim().match(/^(.+?[.!?])(?:\s|$)/);
+              notesText = _m ? _m[1] : _cleaned;
+              if (notesText.length < _cleaned.trim().length) notesText += ' …';
             }
           }
           const stdText = isViolation && d.standards && d.standards.length > 0 ? d.standards.join('; ') : '—';
@@ -19438,14 +19442,23 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
           // v2227: uniform photo layout. Photos from the same item sit
           // side-by-side via flex-wrap at fixed 320×240. Caption under
           // each. Cuts previous 800×600 footprint by 60%.
+          // v2241: photo captions — first photo gets the item label,
+          // subsequent photos are numbered "Photo 2 of N" etc. to avoid
+          // the same caption repeating six times on paper (page-21 bug).
           let itemPhotosHtml = '';
           if (itemData.photos && itemData.photos.length > 0) {
-            const imgs = itemData.photos
-              .filter(pid => itemPhotoCache[pid])
-              .map(pid => `<div class="report-photo-card">
-                <img src="${itemPhotoCache[pid]}" alt="${esc(item.label)}" class="report-photo" />
-                <div class="caption">${esc(item.label)}</div>
-              </div>`)
+            const validPids = itemData.photos.filter(pid => itemPhotoCache[pid]);
+            const total = validPids.length;
+            const imgs = validPids
+              .map((pid, idx) => {
+                const cap = total === 1
+                  ? item.label
+                  : (idx === 0 ? item.label : `${item.label} — photo ${idx + 1} of ${total}`);
+                return `<div class="report-photo-card">
+                <img src="${itemPhotoCache[pid]}" alt="${esc(cap)}" class="report-photo" />
+                <div class="caption">${esc(cap)}</div>
+              </div>`;
+              })
               .join('');
             if (imgs) {
               itemPhotosHtml = `<div class="report-photo-row">${imgs}</div>`;
@@ -19534,7 +19547,25 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     if (severity === 'A') {
       return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> Immediate correction required before the vessel is next underway${stdCite}. This finding represents a direct safety risk or code violation.</em></p>`;
     } else if (severity === 'B') {
-      return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> Schedule repairs in the near future to maintain compliance with applicable codes, regulations, standards, or recommended practices${stdCite}.</em></p>`;
+      // v2241: extract the last action-oriented sentence from the
+      // observation text (it usually contains the specific repair
+      // instruction the surveyor wrote). Append it to the standard
+      // recommendation so the reader sees the actionable detail.
+      let specificAction = '';
+      if (f.text) {
+        const sentences = f.text.trim().replace(/\s+/g, ' ').match(/[^.!?]+[.!?]+/g);
+        if (sentences && sentences.length >= 2) {
+          // Last sentence is typically the action ("Replace the
+          // anodes before relaunching."). Skip if it's just a
+          // disclaimer-style sentence.
+          const last = sentences[sentences.length - 1].trim();
+          const isDisclaimer = /\b(visual observation only|does not constitute|confirmation of serviceability)\b/i.test(last);
+          if (!isDisclaimer && /\b(replace|repair|service|inspect|reapply|address|correct|install|secure|test|recommend)\b/i.test(last)) {
+            specificAction = ' ' + last;
+          }
+        }
+      }
+      return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong>${specificAction} Schedule repairs in the near future to maintain compliance with applicable codes, regulations, standards, or recommended practices${stdCite}.</em></p>`;
     } else {
       // v2240: C-rated items don't get a generic recommendation line —
       // the observation text alone is sufficient for maintenance items.
@@ -19736,11 +19767,11 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
 
     + '<p><strong>Appraisal Methodology:</strong></p>'
     + '<p class="scope-text">' + _methodology + '</p>'
-    + '<p class="scope-text"><strong>Summary:</strong> In accordance with the request for a Marine Survey of the \u201c' + esc(survey.vesselName) + '\u201d, for the purpose of evaluating its present condition and estimating its Fair Market Value and Replacement Cost, I herewith submit my conclusion based on the preceding report. The subject vessel was personally inspected by the undersigned on <strong>' + (survey.surveyDate || 'N/A') + '</strong>. Subject to correction of deficiencies listed in sections A and B, the vessel is considered to be reasonably suitable for its intended use. Other deficiencies listed should be attended to in keeping with good maintenance practices or as upgrades.</p>'
+    + '<p class="scope-text"><strong>Summary:</strong> In accordance with the request for a Marine Survey of the \u201c' + esc(survey.vesselName) + '\u201d, for the purpose of evaluating its present condition and estimating its Fair Market Value' + (survey.replacementCost ? ' and Replacement Cost' : '') + ', I herewith submit my conclusion based on the preceding report. The subject vessel was personally inspected by the undersigned on <strong>' + (survey.surveyDate || 'N/A') + '</strong>. Subject to correction of deficiencies listed in sections A and B, the vessel is considered to be reasonably suitable for its intended use. Other deficiencies listed should be attended to in keeping with good maintenance practices or as upgrades.</p>'
     + '<p><strong>Condition Adjustment:</strong> The vessel\u2019s overall condition rating of \u201c' + _overallCond + '\u201d has been factored into the final valuation range using the BUC Marine Grading System.</p>'
 
     + '<h3 style="margin:20px 0 8px 0;color:#066aab;font-size:11pt;">VALUATION WORKSHEET</h3>'
-    + '<div class="scope-text"><p>The following data ' + (survey.skipComparables ? 'source' + (_srcCount === 1 ? ' was' : 's were') : (_srcCount === 1 ? 'source and comparable were' : 'sources and comparables were')) + ' used in determining the Fair Market Value and Estimated Replacement Cost of the subject vessel.</p></div>'
+    + '<div class="scope-text"><p>The following data ' + (survey.skipComparables ? 'source' + (_srcCount === 1 ? ' was' : 's were') : (_srcCount === 1 ? 'source and comparable were' : 'sources and comparables were')) + ' used in determining the Fair Market Value' + (survey.replacementCost ? ' and Estimated Replacement Cost' : '') + ' of the subject vessel.</p></div>'
 
     + '<table>'
     + '<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">' + _srcLabelConsulted + '</td></tr>'
