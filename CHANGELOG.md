@@ -29,6 +29,8 @@ lets you roll back to a specific version with confidence.
   - Auto-derived condition assessment from ratings distribution (good/fair to good/fair/significant deficiencies) replaces the generic placeholder
   - v2245 audit fix: driveType auto-resolution ported to Copies 1 and 2 (was only in Copy 3). `survey.driveType` now resolves to "shaft drive", "sterndrive", "saildrive", or "IPS pod drive" in all three builders.
 - **Smaller report photos**: Inline photos reduced from 320×240 to 260×195 (same 4:3 ratio, ~35% less page area). Fits 3 across on a standard page width.
+- **Finding classification fix**: "Not verified" and standalone "NT" rating values now correctly bucketed into the NT findings group in Findings & Recommendations (previously fell through unhandled).
+- **Landscape camera fix**: Batch camera overlay now responsive in landscape orientation. Layout switches from column to row — video fills the left side, shutter/done buttons stack on the right, header and photo strip are hidden. Close button overlaid on the viewfinder in landscape. Prevents the "tiny horizontal slit" viewfinder on iPhone landscape.
 
 ---
 

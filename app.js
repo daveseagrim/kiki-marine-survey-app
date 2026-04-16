@@ -18841,7 +18841,8 @@ async function generateReport() {
           else if (r.startsWith('B')) { findingCount.B++; bucket = 'B'; }
           else if (r.startsWith('C')) { findingCount.C++; bucket = 'C'; }
           else if (r.startsWith('Powered')) { findingCount.PO++; bucket = 'PO'; }
-          else if (r.startsWith('Not tested')) { findingCount.NT++; bucket = 'NT'; }
+          // v2245: align with classifyRatingForReport — also catch 'Not verified' and standalone 'NT'
+          else if (r.startsWith('Not tested') || r.startsWith('Not verified') || r === 'NT') { findingCount.NT++; bucket = 'NT'; }
           if (bucket) {
             const code = (bucket === 'NT' || bucket === 'PO') ? `${bucket}-${findingCount[bucket]}` : `${bucket}-${findingCount[bucket]}`;
             findings[bucket].push({ label: item.label, ...d, code, category: category.name });
@@ -21775,23 +21776,67 @@ async function openBatchCamera(itemLabel, opts) {
   const overlay = document.createElement('div');
   overlay.id = 'batchCamOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:#000;z-index:99999;display:flex;flex-direction:column;';
+
+  // v2245: inject a <style> block for landscape-responsive camera layout.
+  // In landscape the fixed header, strip, and buttons ate all the vertical
+  // space, leaving the viewfinder a narrow slit. Now in landscape the
+  // layout switches to row: video fills the left side, controls sit on the
+  // right, and the photo strip is hidden (photo count badge is sufficient).
   overlay.innerHTML = `
-    <div style="flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(0,0,0,0.55);color:#fff;padding-top:calc(14px + env(safe-area-inset-top));">
+    <style>
+      @media (orientation: landscape) and (max-height: 500px) {
+        #batchCamOverlay { flex-direction: row !important; }
+        #batchCamOverlay > [data-cam="header"] { display: none !important; }
+        #batchCamOverlay > [data-cam="video"]  { flex: 1 1 auto !important; }
+        #batchCamOverlay > [data-cam="strip"]  { display: none !important; }
+        #batchCamOverlay > [data-cam="controls"] {
+          flex-direction: column !important;
+          padding: 12px !important;
+          padding-right: calc(12px + env(safe-area-inset-right)) !important;
+          padding-bottom: 12px !important;
+          gap: 16px !important;
+          justify-content: center !important;
+          width: auto !important;
+        }
+        #batchCamOverlay > [data-cam="controls"] button {
+          width: 64px !important; height: 64px !important;
+        }
+        #batchCamOverlay > [data-cam="controls"] #batchCamDone { font-size: 12px !important; }
+      }
+    </style>
+    <div data-cam="header" style="flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(0,0,0,0.55);color:#fff;padding-top:calc(14px + env(safe-area-inset-top));">
       <button id="batchCamClose" style="background:none;border:none;color:#fff;font-size:28px;font-weight:700;cursor:pointer;padding:4px 10px;min-height:44px;">✕</button>
       <div id="batchCamTitle" style="font-size:15px;font-weight:600;text-align:center;flex:1;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${(itemLabel || '').replace(/</g,'&lt;')}</div>
       <div style="width:44px;"></div>
     </div>
-    <div style="flex:1 1 auto;position:relative;background:#000;overflow:hidden;">
+    <div data-cam="video" style="flex:1 1 auto;position:relative;background:#000;overflow:hidden;">
       <video id="batchCamVideo" playsinline autoplay muted style="width:100%;height:100%;object-fit:cover;background:#000;"></video>
       <div id="batchCamCount" style="position:absolute;top:12px;left:12px;background:rgba(0,0,0,0.65);color:#fff;padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600;">0 photos</div>
+      <button id="batchCamCloseLandscape" style="display:none;position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.65);border:none;color:#fff;font-size:22px;font-weight:700;cursor:pointer;padding:6px 12px;border-radius:999px;min-height:36px;">✕</button>
     </div>
-    <div id="batchCamStrip" style="flex:0 0 auto;background:#111;padding:10px 12px;display:flex;gap:8px;overflow-x:auto;min-height:76px;align-items:center;"></div>
-    <div style="flex:0 0 auto;background:#000;display:flex;align-items:center;justify-content:center;gap:40px;padding:20px 0;padding-bottom:calc(20px + env(safe-area-inset-bottom));">
+    <div data-cam="strip" id="batchCamStrip" style="flex:0 0 auto;background:#111;padding:10px 12px;display:flex;gap:8px;overflow-x:auto;min-height:76px;align-items:center;"></div>
+    <div data-cam="controls" style="flex:0 0 auto;background:#000;display:flex;align-items:center;justify-content:center;gap:40px;padding:20px 0;padding-bottom:calc(20px + env(safe-area-inset-bottom));">
       <button id="batchCamShutter" aria-label="Take photo" style="width:88px;height:88px;border-radius:50%;background:#066aab;border:5px solid #f5b942;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:38px;padding:0;line-height:1;">📷</button>
       <button id="batchCamDone" aria-label="Done" style="width:88px;height:88px;border-radius:50%;background:#f5b942;color:#066aab;border:5px solid #066aab;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;padding:0;line-height:1;letter-spacing:0.5px;">DONE</button>
     </div>
   `;
   document.body.appendChild(overlay);
+
+  // v2245: landscape close button — since the header is hidden in landscape,
+  // provide an alternative close target on the video overlay.
+  const _lsClose = document.getElementById('batchCamCloseLandscape');
+  if (_lsClose) {
+    // Show/hide based on orientation
+    const _updateLsClose = () => {
+      _lsClose.style.display = (window.innerHeight < 500 && window.innerWidth > window.innerHeight) ? 'block' : 'none';
+    };
+    window.addEventListener('resize', _updateLsClose);
+    _updateLsClose();
+    _lsClose.addEventListener('click', () => {
+      window.removeEventListener('resize', _updateLsClose);
+      if (typeof discardStagedPhotos === 'function') discardStagedPhotos();
+    });
+  }
 
   const video = document.getElementById('batchCamVideo');
   const shutter = document.getElementById('batchCamShutter');
