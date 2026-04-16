@@ -12,6 +12,16 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2247 — 2026-04-16
+
+### Service worker stability (pre-survey hardening)
+
+- **Removed 60-second SW polling**: `setInterval(() => reg.update(), 60000)` deleted. The SW still updates on navigation via `updateViaCache: 'none'`, but no longer polls mid-survey — eliminates the risk of a forced reload while entering data.
+- **Removed force-navigate on SW activate**: The `clients.matchAll()` + `client.navigate(client.url)` in the SW `activate` handler was causing crash-like full-page reloads on iPhone PWA whenever a new worker activated. Removed — the `controllerchange` listener in `app.js` already handles graceful reloads.
+- **Cached firebase-auth-compat.js**: Added the missing auth SDK script to `URLS_TO_CACHE` in `sw.js`. All four Firebase SDK scripts loaded by `index.html` are now pre-cached, preventing brittle offline startup if auth is needed.
+
+---
+
 ## v2246 — 2026-04-16
 
 ### Critical bounce-back fix, local logo, view-restore fix

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v2246';
+const CACHE_NAME = 'kiki-marine-v2247';
 const URLS_TO_CACHE = [
   './',
   'index.html',
@@ -29,6 +29,7 @@ const URLS_TO_CACHE = [
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js',
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
 ];
 
 // Listen for SKIP_WAITING message from the app (force-update flow)
@@ -66,12 +67,10 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    }).then(() => {
-      // Force all open tabs/PWA instances to reload with fresh code
-      return self.clients.matchAll({ type: 'window' }).then(clients => {
-        clients.forEach(client => client.navigate(client.url));
-      });
     })
+    // v2247: removed force-navigate of all clients — the controllerchange
+    // listener in app.js already handles reloads gracefully. Force-navigating
+    // caused crash-like restarts on iPhone PWA.
   );
   self.clients.claim();
 });
