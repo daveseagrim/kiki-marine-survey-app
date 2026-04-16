@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2247';
+const APP_VERSION = 'v2248';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -21850,8 +21850,13 @@ async function openBatchCamera(itemLabel, opts) {
   // Start camera
   try {
     setCameraActive(true);
+    // v2248: request high resolution without implying a landscape aspect ratio.
+    // The previous { width: 1920, height: 1080 } locked iOS Safari to a
+    // landscape stream, so portrait photos came out sideways. Using the same
+    // ideal value for both axes lets the browser pick the native sensor
+    // orientation and simply cap at ~1920 px on the long edge.
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1920 } },
       audio: false
     });
     bc.stream = stream;
@@ -21890,11 +21895,24 @@ function snapStagedPhoto() {
   const video = document.getElementById('batchCamVideo');
   if (!video || !video.videoWidth) return;
 
+  // v2248: cap the canvas to 2048 px on the long edge. When getUserMedia
+  // constraints can't match the requested resolution (e.g. portrait mode on
+  // iOS), the browser may fall back to the full native sensor (4032×3024).
+  // A canvas that large (~48 MB) plus the toDataURL allocation crashes the
+  // iOS Safari tab. Capping at 2048 keeps memory safe while still exceeding
+  // report-print needs at 200 dpi.
+  let w = video.videoWidth, h = video.videoHeight;
+  const maxDim = 2048;
+  if (w > maxDim || h > maxDim) {
+    if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+    else       { w = Math.round(w * maxDim / h); h = maxDim; }
+  }
+
   const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
+  canvas.width = w;
+  canvas.height = h;
   const ctx = canvas.getContext('2d');
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(video, 0, 0, w, h);
   // Keep staged copies at native-ish quality — final cap happens on commit.
   const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
 

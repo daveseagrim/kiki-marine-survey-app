@@ -12,6 +12,14 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2248 — 2026-04-16
+
+### Batch camera portrait crash fix
+
+- **Portrait shutter crash fixed**: The `getUserMedia` constraints requested `width: 1920, height: 1080` (landscape). On iOS Safari in portrait, the browser couldn't match those constraints and fell back to the full native sensor resolution (4032×3024). When `snapStagedPhoto` created a canvas at that size (~48 MB) and called `toDataURL`, iOS killed the tab. Two fixes applied: (1) `getUserMedia` now requests `width: 1920, height: 1920` — same ideal on both axes lets the browser pick the natural orientation without implying landscape; (2) `snapStagedPhoto` caps the canvas at 2048 px on the long edge before drawing, preventing memory-pressure crashes regardless of what resolution the stream provides.
+
+---
+
 ## v2247 — 2026-04-16
 
 ### Service worker stability (pre-survey hardening)
