@@ -12,17 +12,22 @@ lets you roll back to a specific version with confidence.
 
 ---
 
-## v2244 — 2026-04-16
+## v2245 — 2026-04-16
 
-### Date integrity, richer description, photo cleanup
+### Date integrity, richer description, photo cleanup, audit fixes
 
 - **Date-integrity validation**: `generateReport()` now checks all photo capture timestamps against the survey/report date. If any photo was taken after the certified date, a warning dialog explains the issue and offers to go back and fix it. Prevents underwriter-rejectable chronological discrepancies.
-- **Auto-strip date stamps from report photos**: `compressPhotoForReport()` now removes the YYYY-MM-DD date stamp from the bottom-right corner of every photo during report generation. Original photos in IndexedDB are untouched; only the printed output is date-free.
+- **Auto-strip date stamps from report photos**: `compressPhotoForReport()` removes the YYYY-MM-DD date stamp from the bottom-right corner of photos during report generation. Original photos in IndexedDB are untouched; only the printed output is date-free.
+  - v2245 audit fix: stamp removal now guarded — checks average brightness of the stamp region first. Only strips if a dark rectangle is detected (avg brightness < 100). Unstamped photos are left intact.
+  - v2245 audit fix: uses widest possible date glyphs ('2088-08-08') for `measureText` plus +8px safety margin and +4px height margin, matching the geometry used by `removeDateStampFromPhoto()`.
+  - v2245 audit fix: tiling loop uses single-row `putImageData` (cleaner, matches standalone remover).
+  - v2245 audit fix: `console.warn` on failure for field debugging.
 - **Richer vessel description template**: All three description builders updated:
   - Ballast included for sailboats when available
   - Hull/deck colours woven into the identification paragraph (not a standalone sentence)
   - "Below decks" paragraph groups accommodation with electrical and electronics
   - Auto-derived condition assessment from ratings distribution (good/fair to good/fair/significant deficiencies) replaces the generic placeholder
+  - v2245 audit fix: driveType auto-resolution ported to Copies 1 and 2 (was only in Copy 3). `survey.driveType` now resolves to "shaft drive", "sterndrive", "saildrive", or "IPS pod drive" in all three builders.
 - **Smaller report photos**: Inline photos reduced from 320×240 to 260×195 (same 4:3 ratio, ~35% less page area). Fits 3 across on a standard page width.
 
 ---

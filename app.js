@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2244';
+const APP_VERSION = 'v2245';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -196,32 +196,54 @@ function compressPhotoForReport(dataUrl, maxDim = 1200, quality = 0.7) {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
 
-      // v2244: auto-strip date stamp from report photos.
+      // v2244→v2245: auto-strip date stamp from report photos.
       // The stamp added by addDateStampToPhoto() sits in the bottom-right
       // corner — dark rect with white YYYY-MM-DD text, font = width/40,
       // padding 12 px. We paint over it by sampling pixels just above the
       // stamp region and tiling them down. This keeps the original photo in
       // IndexedDB intact while ensuring the printed report is date-free.
+      //
+      // Guards:
+      //  1. Use widest possible date glyphs ('2088-08-08') for measureText
+      //     plus a safety margin, so the removal region is never too narrow.
+      //  2. Detect whether a stamp is actually present by checking the
+      //     average brightness of the stamp region — only strip if it's
+      //     dark (the stamp has rgba(0,0,0,0.7) background).
       try {
         const _fontSize = Math.max(20, Math.round(w / 40));
         const _padding = 12;
+        const _margin = 8; // safety margin for font width variation
         ctx.font = `${_fontSize}px Arial, sans-serif`;
-        const _sampleDate = '2026-04-16'; // widest likely date string
-        const _tw = ctx.measureText(_sampleDate).width;
-        const _rw = _tw + _padding * 2;
-        const _rh = _fontSize + _padding;
-        const _sx = Math.round(w - _rw);
-        const _sy = Math.round(h - _rh);
-        // Sample a thin strip just above the stamp
-        const _sampleH = Math.min(4, _sy);
-        if (_sampleH > 0 && _sx >= 0 && _sy >= 0) {
-          const _sample = ctx.getImageData(_sx, Math.max(0, _sy - _sampleH), Math.round(_rw), _sampleH);
-          // Tile the sample strip over the stamp region
-          for (let _y = _sy; _y < h; _y++) {
-            ctx.putImageData(_sample, _sx, _y, 0, 0, Math.round(_rw), _sampleH);
+        const _tw = ctx.measureText('2088-08-08').width; // widest digit combo
+        const _rw = Math.round(_tw + _padding * 2 + _margin);
+        const _rh = Math.round(_fontSize + _padding + 4); // +4 matches removeDateStampFromPhoto
+        const _sx = Math.max(0, w - _rw);
+        const _sy = Math.max(0, h - _rh);
+        if (_sx >= 0 && _sy >= 0 && _rw > 0 && _rh > 0) {
+          // Check whether a dark stamp rect is present before removing
+          const _stampPixels = ctx.getImageData(_sx, _sy, _rw, _rh);
+          const _d = _stampPixels.data;
+          let _sumBrightness = 0;
+          const _pixelCount = _d.length / 4;
+          for (let _i = 0; _i < _d.length; _i += 4) {
+            _sumBrightness += (_d[_i] + _d[_i+1] + _d[_i+2]) / 3;
+          }
+          const _avgBrightness = _sumBrightness / _pixelCount;
+          // The stamp background is rgba(0,0,0,0.7) ≈ brightness ~53 after
+          // alpha blending onto typical content. Only strip if substantially
+          // dark — a region above 100 is likely natural image content.
+          if (_avgBrightness < 100) {
+            // Sample a thin strip just above the stamp
+            const _sampleH = Math.min(2, _sy);
+            if (_sampleH > 0) {
+              const _strip = ctx.getImageData(_sx, _sy - _sampleH, _rw, 1);
+              for (let _row = 0; _row < _rh; _row++) {
+                ctx.putImageData(_strip, _sx, _sy + _row);
+              }
+            }
           }
         }
-      } catch (_e) { /* stamp removal is best-effort */ }
+      } catch (_e) { console.warn('stamp removal skipped:', _e); }
 
       resolve(canvas.toDataURL('image/jpeg', quality));
     };
@@ -9451,32 +9473,38 @@ async function generateVesselDescription() {
   // Check for Engine 2
   const eng2Section = document.getElementById('engine2Section');
   const hasEngine2 = eng2Section && eng2Section.style.display !== 'none';
-  const eng2Make = document.getElementById('engine2Make')?.value || '';
-  const eng2Model = document.getElementById('engine2Model')?.value || '';
-  const eng2HP = document.getElementById('engine2HP')?.value || '';
-  const eng2Fuel = document.getElementById('fuelType2')?.value || '';
+
+  // v2245: resolve drive type from saved survey so the description auto-fills
+  // instead of emitting placeholder text. Ported from Copy 3 for parity.
+  const _survey1 = currentSurveyId ? await getSurvey(currentSurveyId) : null;
+  const driveTypeLower1 = (_survey1?.driveType || '').toLowerCase();
+  const _driveLabelMap1 = { 'shaft': 'shaft drive', 'outdrive': 'sterndrive', 'ips': 'IPS pod drive', 'saildrive': 'saildrive' };
+  const _driveSingular1 = _driveLabelMap1[driveTypeLower1] || '';
+  const _drivePlural1 = _driveSingular1
+    ? (_driveSingular1 === 'IPS pod drive' ? 'IPS pod drives' : `${_driveSingular1}s`)
+    : '';
+  const _engTypeFromDrive1 = ({ 'shaft': 'inboard', 'ips': 'inboard', 'saildrive': 'inboard', 'outdrive': 'sterndrive' })[driveTypeLower1] || '';
 
   let engineDesc = '';
   if (vesselType === 'human') {
     engineDesc = `This is a human-powered vessel with no auxiliary engine.`;
   } else if (vesselType === 'sail') {
-    const engType = engineTypeStr || '[inboard/outboard]';
-    const driveType = engineTypeStr === 'inboard' ? '[shaft drive/saildrive]' : '[SHAFT DRIVE/SAILDRIVE]';
-    engineDesc = `Auxiliary power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a ${driveType}.`;
+    const engType = engineTypeStr || _engTypeFromDrive1 || '[inboard/outboard]';
+    const drivePhrase = _driveSingular1 || (engineTypeStr === 'inboard' ? '[shaft drive/saildrive]' : '[SHAFT DRIVE/SAILDRIVE]');
+    engineDesc = `Auxiliary power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a ${drivePhrase}.`;
   } else if (hasEngine2) {
-    const engType = engineTypeStr || '[inboard/outboard/sterndrive]';
-    const eng2MakeModel = (eng2Make && eng2Model) ? `${eng2Make} ${eng2Model}` :
-                          eng2Make ? `${eng2Make} [MODEL]` : engMakeModel;
-    const eng2HPStr = eng2HP ? `${eng2HP} horsepower` : engHPStr;
-    const eng2FuelStr = eng2Fuel || engFuel;
-    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines rated at ${engHPStr} each, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through [SHAFT DRIVE(S)/STERNDRIVE(S)].`;
+    const engType = engineTypeStr || _engTypeFromDrive1 || '[inboard/outboard/sterndrive]';
+    const drivePhrase = _drivePlural1 || '[SHAFT DRIVES/STERNDRIVES]';
+    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines rated at ${engHPStr} each, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through ${drivePhrase}.`;
   } else {
-    const engType = engineTypeStr || '[inboard/outboard/sterndrive]';
-    engineDesc = `Power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING] [3/4]-blade propeller through a [SHAFT DRIVE/STERNDRIVE].`;
+    const engType = engineTypeStr || _engTypeFromDrive1 || '[inboard/outboard/sterndrive]';
+    const drivePhrase = _driveSingular1 || '[SHAFT DRIVE/STERNDRIVE]';
+    engineDesc = `Power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING] [3/4]-blade propeller through a ${drivePhrase}.`;
   }
 
   // Pull survey data for propellers, shafts, electronics, and safety
-  const survey = vesselType === 'sail' ? (await getSurvey(currentSurveyId)) : (await getSurvey(currentSurveyId));
+  // v2245: reuse _survey1 loaded above for driveType resolution
+  const survey = _survey1 || (currentSurveyId ? await getSurvey(currentSurveyId) : null);
   const driveLineCount = survey?.driveLineCount || 1;
   const hasRudder = survey?.hasRudder !== false;
 
@@ -9699,23 +9727,31 @@ async function regenerateDescriptionFromInspection() {
                          transmissionMake ? `${transmissionMake} [MODEL]` : '[MAKE/MODEL]';
 
   const hasEngine2 = !!survey.engine2Make;
-  const eng2Make = survey.engine2Make || '';
-  const eng2Model = survey.engine2Model || '';
-  const eng2HP = survey.engine2HP || '';
+
+  // v2245: resolve drive type from survey.driveType (ported from Copy 3)
+  const driveTypeLower2 = (survey.driveType || '').toLowerCase();
+  const _driveLabelMap2 = { 'shaft': 'shaft drive', 'outdrive': 'sterndrive', 'ips': 'IPS pod drive', 'saildrive': 'saildrive' };
+  const _driveSingular2 = _driveLabelMap2[driveTypeLower2] || '';
+  const _drivePlural2 = _driveSingular2
+    ? (_driveSingular2 === 'IPS pod drive' ? 'IPS pod drives' : `${_driveSingular2}s`)
+    : '';
+  const _engTypeFromDrive2 = ({ 'shaft': 'inboard', 'ips': 'inboard', 'saildrive': 'inboard', 'outdrive': 'sterndrive' })[driveTypeLower2] || '';
 
   let engineDesc = '';
   if (vesselType === 'human') {
     engineDesc = `This is a human-powered vessel with no auxiliary engine.`;
   } else if (vesselType === 'sail') {
-    const engType = engineTypeStr || '[inboard/outboard]';
-    const driveType = engineTypeStr === 'inboard' ? '[shaft drive/saildrive]' : '[SHAFT DRIVE/SAILDRIVE]';
-    engineDesc = `Auxiliary power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a ${driveType}.`;
+    const engType = engineTypeStr || _engTypeFromDrive2 || '[inboard/outboard]';
+    const drivePhrase = _driveSingular2 || (engineTypeStr === 'inboard' ? '[shaft drive/saildrive]' : '[SHAFT DRIVE/SAILDRIVE]');
+    engineDesc = `Auxiliary power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a ${drivePhrase}.`;
   } else if (hasEngine2) {
-    const engType = engineTypeStr || '[inboard/outboard/sterndrive]';
-    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines rated at ${engHPStr} each, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through [SHAFT DRIVE(S)/STERNDRIVE(S)].`;
+    const engType = engineTypeStr || _engTypeFromDrive2 || '[inboard/outboard/sterndrive]';
+    const drivePhrase = _drivePlural2 || '[SHAFT DRIVES/STERNDRIVES]';
+    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines rated at ${engHPStr} each, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through ${drivePhrase}.`;
   } else {
-    const engType = engineTypeStr || '[inboard/outboard/sterndrive]';
-    engineDesc = `Power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING] [3/4]-blade propeller through a [SHAFT DRIVE/STERNDRIVE].`;
+    const engType = engineTypeStr || _engTypeFromDrive2 || '[inboard/outboard/sterndrive]';
+    const drivePhrase = _driveSingular2 || '[SHAFT DRIVE/STERNDRIVE]';
+    engineDesc = `Power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING] [3/4]-blade propeller through a ${drivePhrase}.`;
   }
 
   // v2230: Propeller/shaft/cutlass/outdrive observations removed — those
