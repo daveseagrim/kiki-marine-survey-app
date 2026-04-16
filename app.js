@@ -9533,32 +9533,37 @@ async function generateVesselDescription() {
   desc += `\n\n`;
   desc += engineDesc;
   desc += `\n\n`;
-  const _hullC = hullColour || '[COLOUR]';
-  const _bootC = bootStripeColour || '[COLOUR]';
-  const _deckC = deckColour || '[COLOUR]';
-  desc += `The hull is ${_hullC} with a ${_bootC} boot stripe. The deck is ${_deckC} with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
-  // v2228: resolve head count from survey.headCount (set on the Head(s)
-  // category). Cabin count already flows from numberCabins. Berths field
-  // not captured in the survey yet, so the [NUMBER] berth(s) placeholder
-  // stays until a berth-count field is added.
+  // v2243: hull/deck colours — only include sentences where data is known.
+  // Previously used [COLOUR] placeholders that cleanupPlaceholders stripped,
+  // leaving the description too thin.
+  if (hullColour && bootStripeColour && deckColour) {
+    desc += `The hull is ${hullColour} with a ${bootStripeColour} boot stripe. The deck is ${deckColour}. `;
+  } else if (hullColour) {
+    desc += `The hull is ${hullColour}. `;
+  }
+  // Cabin layout — include what we know, bracket what we don't
   const cabinStr = cabins || '[NUMBER]';
   const headStr = survey.headCount ? String(survey.headCount) : '[NUMBER]';
-  desc += `The vessel features ${cabinStr} cabin(s) with [NUMBER] berth(s), ${headStr} head(s) with [MANUAL/ELECTRIC] marine toilet(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
-  desc += `The galley is [PORT/STARBOARD/AFT] and includes a [PROPANE/ELECTRIC/ALCOHOL] stove with [OVEN], a [12V/120V] refrigerator, and a [SINGLE/DOUBLE] stainless steel sink.`;
+  desc += `The vessel features ${cabinStr} cabin(s), ${headStr} head(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
   desc += `\n\n`;
   if (electrical) {
     desc += `The electrical system is ${electrical}. `;
   } else {
     desc += `The electrical system is [12V DC / 120V AC] with [XX] amp shore power service. `;
   }
-  // v2228: past tense — this is a surveyor evaluation of the equipment found.
-  desc += electronicsDesc || `Navigation and communication equipment included [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
+  // v2243: electronics — build as complete prose. "Navigation and
+  // communication equipment included…" reads more like a list heading
+  // than a sentence. Add "aboard" for natural flow.
+  if (electronicsDesc) {
+    desc += `Navigation and communication equipment aboard included ${electronicsDesc.replace(/^Navigation and communication equipment included /i, '')}`;
+    if (!desc.endsWith('. ')) desc += ' ';
+  } else {
+    desc += `Navigation and communication equipment included [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
+  }
   desc += '\n\n';
-  // v2228: past tense — surveyor evaluation of on-board safety gear.
   desc += safetyDesc || `Safety equipment included [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
   desc += `\n\n`;
-  // v2228: past tense — this is a surveyor evaluation, not an identity fact.
-  desc += `The vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained. [ANY NOTABLE MODIFICATIONS, DAMAGE HISTORY, OR OBSERVATIONS].`;
+  desc += `The vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained.`;
 
   const textarea = document.getElementById('vesselDescription');
   if (textarea) {
@@ -9739,32 +9744,30 @@ async function regenerateDescriptionFromInspection() {
   desc += `\n\n`;
   desc += engineDesc;
   desc += `\n\n`;
-  const _hC = hullColour || '[COLOUR]';
-  const _bC = bootStripeColour || '[COLOUR]';
-  const _dC = deckColour || '[COLOUR]';
-  desc += `The hull is ${_hC} with a ${_bC} boot stripe. The deck is ${_dC} with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
-  // v2228: resolve head count from survey.headCount (set on the Head(s)
-  // category). Cabin count already flows from numberCabins. Berths field
-  // not captured in the survey yet, so the [NUMBER] berth(s) placeholder
-  // stays until a berth-count field is added.
+  if (hullColour && bootStripeColour && deckColour) {
+    desc += `The hull is ${hullColour} with a ${bootStripeColour} boot stripe. The deck is ${deckColour}. `;
+  } else if (hullColour) {
+    desc += `The hull is ${hullColour}. `;
+  }
   const cabinStr = cabins || '[NUMBER]';
   const headStr = survey.headCount ? String(survey.headCount) : '[NUMBER]';
-  desc += `The vessel features ${cabinStr} cabin(s) with [NUMBER] berth(s), ${headStr} head(s) with [MANUAL/ELECTRIC] marine toilet(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
-  desc += `The galley is [PORT/STARBOARD/AFT] and includes a [PROPANE/ELECTRIC/ALCOHOL] stove with [OVEN], a [12V/120V] refrigerator, and a [SINGLE/DOUBLE] stainless steel sink.`;
+  desc += `The vessel features ${cabinStr} cabin(s), ${headStr} head(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
   desc += `\n\n`;
   if (electrical) {
     desc += `The electrical system is ${electrical}. `;
   } else {
     desc += `The electrical system is [12V DC / 120V AC] with [XX] amp shore power service. `;
   }
-  // v2228: past tense — this is a surveyor evaluation of the equipment found.
-  desc += electronicsDesc || `Navigation and communication equipment included [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
+  if (electronicsDesc) {
+    desc += `Navigation and communication equipment aboard included ${electronicsDesc.replace(/^Navigation and communication equipment included /i, '')}`;
+    if (!desc.endsWith('. ')) desc += ' ';
+  } else {
+    desc += `Navigation and communication equipment included [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
+  }
   desc += '\n\n';
-  // v2228: past tense — surveyor evaluation of on-board safety gear.
   desc += safetyDesc || `Safety equipment included [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
   desc += `\n\n`;
-  // v2228: past tense — this is a surveyor evaluation, not an identity fact.
-  desc += `The vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained. [ANY NOTABLE MODIFICATIONS, DAMAGE HISTORY, OR OBSERVATIONS].`;
+  desc += `The vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained.`;
 
   // Confirm before overwriting
   if (survey.vesselDescription && survey.vesselDescription.trim()) {
@@ -9946,32 +9949,30 @@ function buildDescriptionFromSurvey(survey) {
   desc += `\n\n`;
   desc += engineDesc;
   desc += `\n\n`;
-  const _hC = hullColour || '[COLOUR]';
-  const _bC = bootStripeColour || '[COLOUR]';
-  const _dC = deckColour || '[COLOUR]';
-  desc += `The hull is ${_hC} with a ${_bC} boot stripe. The deck is ${_dC} with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
-  // v2228: resolve head count from survey.headCount (set on the Head(s)
-  // category). Cabin count already flows from numberCabins. Berths field
-  // not captured in the survey yet, so the [NUMBER] berth(s) placeholder
-  // stays until a berth-count field is added.
+  if (hullColour && bootStripeColour && deckColour) {
+    desc += `The hull is ${hullColour} with a ${bootStripeColour} boot stripe. The deck is ${deckColour}. `;
+  } else if (hullColour) {
+    desc += `The hull is ${hullColour}. `;
+  }
   const cabinStr = cabins || '[NUMBER]';
   const headStr = survey.headCount ? String(survey.headCount) : '[NUMBER]';
-  desc += `The vessel features ${cabinStr} cabin(s) with [NUMBER] berth(s), ${headStr} head(s) with [MANUAL/ELECTRIC] marine toilet(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
-  desc += `The galley is [PORT/STARBOARD/AFT] and includes a [PROPANE/ELECTRIC/ALCOHOL] stove with [OVEN], a [12V/120V] refrigerator, and a [SINGLE/DOUBLE] stainless steel sink.`;
+  desc += `The vessel features ${cabinStr} cabin(s), ${headStr} head(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
   desc += `\n\n`;
   if (electrical) {
     desc += `The electrical system is ${electrical}. `;
   } else {
     desc += `The electrical system is [12V DC / 120V AC] with [XX] amp shore power service. `;
   }
-  // v2228: past tense — this is a surveyor evaluation of the equipment found.
-  desc += electronicsDesc || `Navigation and communication equipment included [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
+  if (electronicsDesc) {
+    desc += `Navigation and communication equipment aboard included ${electronicsDesc.replace(/^Navigation and communication equipment included /i, '')}`;
+    if (!desc.endsWith('. ')) desc += ' ';
+  } else {
+    desc += `Navigation and communication equipment included [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
+  }
   desc += '\n\n';
-  // v2228: past tense — surveyor evaluation of on-board safety gear.
   desc += safetyDesc || `Safety equipment included [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
   desc += `\n\n`;
-  // v2228: past tense — this is a surveyor evaluation, not an identity fact.
-  desc += `The vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained. [ANY NOTABLE MODIFICATIONS, DAMAGE HISTORY, OR OBSERVATIONS].`;
+  desc += `The vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained.`;
 
   return desc;
 }
@@ -18932,14 +18933,20 @@ async function generateReport() {
   <div class="scope-text">
     <p>This report is presented in the following order:</p>
     <ol>
+      <li><strong>Purpose and Scope</strong></li>
+      <li><strong>Methodology and Limitations</strong></li>
+      <li><strong>Conduct of Survey</strong></li>
+      <li><strong>Definitions of Terms</strong></li>
       <li><strong>General Vessel Information &amp; Specifications</strong></li>
+      <li><strong>Survey Conditions</strong></li>
+      <li><strong>Vessel Documentation Data</strong></li>
       <li><strong>Vessel Description</strong> — A narrative description of the vessel.</li>
-      <li><strong>Use of Ratings</strong> — Definitions of the A/B/C/NT/Safety rating categories.</li>
+      <li><strong>Use of Ratings</strong> — Definitions of the A/B/C/NT/PO rating categories.</li>
       <li><strong>Findings Overview</strong> — At-a-glance summary of finding counts and key items needing attention.</li>
-      <li><strong>Survey Checklist Summary</strong> — A table of all inspected items showing rating, violation status, finding code, and applicable standards.</li>
+      <li><strong>Survey Checklist Summary</strong> — A table of all inspected items showing rating, finding code, and applicable standards.</li>
       <li><strong>Safety Equipment — TC TP 511</strong> — Required safety equipment per Transport Canada regulations, with on-board verification status.</li>
       <li><strong>Detailed Survey Findings</strong> — The full, itemised survey observations by category.</li>
-      <li><strong>Findings &amp; Recommendations</strong> — All items rated "A" (Critical), "B" (Needs Attention), "C" (Serviceable), "Not tested/not verified", and "Powered up only" compiled for quick reference.</li>
+      <li><strong>Findings &amp; Recommendations</strong> — All items compiled for quick reference, grouped by severity.</li>
       <li><strong>Rating &amp; Valuation</strong> — Overall condition rating (BUC Marine Grading System), Fair Market Value${survey.replacementCost ? ', Estimated Replacement Cost' : ''}, and Valuation Worksheet.</li>
       <li><strong>Surveyor's Certification</strong></li>
     </ol>
@@ -19051,7 +19058,7 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
 ` : ''}
 
   <!-- ═══ USE OF RATINGS (v2240: moved here from before TOC) ═══ -->
-  <h2>USE OF "A", "B", "C", "NOT TESTED" AND "SAFETY EQUIPMENT" RATINGS</h2>
+  <h2>USE OF RATINGS</h2>
   <div class="scope-text">
     <ul class="def-list">
       <li><span style="background:#dc2626;color:white;padding:2px 8px;font-weight:bold;">A — Critical</span><br/>
@@ -19063,8 +19070,10 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
       <li><span style="background:#16a34a;color:white;padding:2px 8px;font-weight:bold;">C — Serviceable</span><br/>
         <em>Definition:</em> Currently meets all applicable safety and performance standards.<br/>
         <em>Action:</em> No corrective work required.</li>
-      <li><span style="background:#6b7280;color:white;padding:2px 8px;font-weight:bold;">Not tested / not verified</span><br/>
+      <li><span style="background:#6b7280;color:white;padding:2px 8px;font-weight:bold;">Not Tested / Not Verified</span><br/>
         <em>Definition:</em> A comprehensive inspection was attempted, but was not possible due to constraints imposed upon the surveyor (e.g., no power available, inability to remove panels, requirements not to conduct destructive tests, or limitations on the inspection time).</li>
+      <li><span style="background:#6b7280;color:white;padding:2px 8px;font-weight:bold;">Powered Up Only (PO)</span><br/>
+        <em>Definition:</em> The equipment was powered on and confirmed operational, but could not be fully tested under normal operating conditions (e.g., the vessel was out of the water or essential inputs were unavailable).</li>
       <li><span style="background:#2563eb;color:white;padding:2px 8px;font-weight:bold;">Safety Equipment (TC TP 511)</span><br/>
         <em>Definition:</em> Required safety equipment per Transport Canada TP 511E Safe Boating Guide and Small Vessel Regulations (SOR/2010-91), verified as present on board.<br/>
         <em>Action:</em> Missing items must be acquired before the vessel is next underway.</li>

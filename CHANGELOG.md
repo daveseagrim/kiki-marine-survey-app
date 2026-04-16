@@ -14,12 +14,16 @@ lets you roll back to a specific version with confidence.
 
 ## v2243 — 2026-04-16
 
-### Report concision, standards auto-detection, and comparables fix
+### Report concision, accuracy, and structure fixes
 
 - **Checklist summary truncation**: ALL items (including A/B) now show first sentence only in the at-a-glance summary table. Full text remains in Detailed Survey Findings.
 - **F&R compact tables**: C, NT, and PO findings in Findings & Recommendations rendered as compact three-column tables (Finding / Item / Summary) instead of individual blocks with border-left styling. A/B findings retain the full block format with recommendations. Estimated page reduction: 8–10 pages.
-- **Standards auto-merge**: New `mergeTextStandards()` helper scans observation text for ABYC, TC/TP, SAE, NFPA references and merges any not already in the checked standards list. Applied to Detailed Findings, Checklist Summary, and F&R citations. Fixes the outdrive item citing ABYC E-2 in text while only showing P-4 in Applicable Standards.
+- **Standards auto-merge**: New `mergeTextStandards()` helper scans observation text for ABYC, TC/TP, SAE, NFPA references and merges any not already in the checked standards list. Applied to Detailed Findings, Checklist Summary, and F&R citations.
 - **Comparables language**: The Valuation Worksheet preamble now says "source was used" instead of "source and comparable were used" when no comparables are recorded.
+- **Notes Regarding Report Format**: Now lists all 16 sections in actual print order, starting from Purpose and Scope through Surveyor's Certification.
+- **Powered Up Only (PO) rating defined**: Added PO definition to the Use of Ratings section (previously used in the report but never defined).
+- **Use of Ratings heading**: Simplified from the long "USE OF A, B, C, NOT TESTED AND SAFETY EQUIPMENT RATINGS" to "USE OF RATINGS".
+- **Vessel description template**: Hull/deck colour sentences now omitted when data is unknown (instead of producing [COLOUR] placeholders that get stripped). Removed galley template sentence. Cosmetic condition sentence simplified. Electronics prose polished.
 
 ---
 
