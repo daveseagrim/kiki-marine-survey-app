@@ -18767,7 +18767,6 @@ async function generateReport() {
     <span style="font-size:10pt;color:#066aab;letter-spacing:0.5px;">KIKI MARINE &nbsp;&bull;&nbsp; (647) 289-7876 &nbsp;&bull;&nbsp; dave@kikimarine.ca &nbsp;&bull;&nbsp; kikimarine.ca</span>
     <p style="font-size:9pt;color:#6b7280;margin:6px 0 0 0;font-style:italic;">Based in Toronto serving marinas and boatyards from Niagara to Pickering, Muskokas, Simcoe and the Kawarthas.</p>
   </div>
-  <p style="text-align:center; font-size:10pt; color:#6b7280; margin-top:6px; font-style:italic;">Comprehensive Marine Surveying &amp; Consulting — Serving the Great Lakes, Georgian Bay and beyond.</p>
 
   ${Object.keys(fourCornerPhotos).length > 0 ? `
   <!-- ═══ VESSEL OVERVIEW PHOTOGRAPHS (v2227 — moved from end to top) ═══ -->
