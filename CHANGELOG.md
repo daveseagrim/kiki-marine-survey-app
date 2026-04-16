@@ -12,6 +12,54 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2237 — 2026-04-16
+
+### Added — Executive Summary page
+
+New section after four-corner photos (near front of report) with: vessel info
+table (YMM, HIN, condition rating, FMV), findings overview table (A/B/C/NT/PO
+counts + safety equipment status), top 3 A findings, and top 3 B findings.
+
+### Changed — Rating & Valuation moved to front of report
+
+R&V section (BUC grading, Statement of Valuation, valuation figures, methodology,
+worksheet, and comparables) relocated from after Safety Equipment to immediately
+after the Executive Summary. TOC and Notes Regarding Report Format updated to
+reflect new section order.
+
+### Fixed — Skipped safety items still showing as missing in report
+
+Items marked as skipped (individual or sub-category) in the Safety Equipment
+section were still counted as "missing" in the report, Executive Summary,
+description builders, and Check Report validator. All six locations now filter
+out skipped items using the same `!e.skipped && !skippedCategoriesMap[e.category]`
+pattern already used in the in-app accordion.
+
+### Changed — Valuation sources singular/plural
+
+When only one valuation source is consulted, all labels in the report now read
+"Valuation Source" (singular) instead of "Valuation Sources". Applies to the
+figures table, worksheet header, sources row, and worksheet introduction text.
+
+### Changed — Report branding improvements
+
+Running page footer now shows "Kiki Marine · (647) 289-7876 · kikimarine.ca"
+in brand blue, with vessel name centered and page numbers on the right.
+Surveyor's Certificate footer restyled with cleaner layout matching letterhead
+aesthetic. Cover page footer updated with consistent branding bar.
+
+### Fixed — Website domain corrected to kikimarine.ca
+
+All report text references changed from kikimarinesurveyor.ca to kikimarine.ca.
+Logo image URLs remain pointed at the image host.
+
+### Changed — Home page header aligned with Edit Intro form
+
+Home page header now uses the same branded layout (header-title + header-subtitle)
+as the Edit Intro and inspection views for visual consistency.
+
+---
+
 ## v2236 — 2026-04-15
 
 ### Changed — Report redundancy reduction (major page-count savings)
@@ -20,9 +68,8 @@ Findings & Recommendations now shows only the first sentence of each
 observation, with a cross-reference to the full text + photos in Detailed
 Survey Findings. Previously the entire observation was repeated verbatim.
 
-Checklist Summary notes re-truncated to 150 characters with ellipsis — full
-text lives in Detailed Survey Findings. The v2227 change to show full notes
-was tripling report length.
+Checklist Summary notes remain full-length (reverted mid-v2236 at surveyor's
+request — complete notes are essential for at-a-glance review).
 
 ### Added — Hull / deck / boot stripe colour fields
 
