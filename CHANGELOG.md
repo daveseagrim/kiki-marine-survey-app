@@ -12,6 +12,23 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2232 — 2026-04-15
+
+### Changed — Brand colour alignment (#006699 → #066aab)
+
+Unified the entire app UI to use the kikimarinesurveyor.ca brand colour
+#066aab. Previously the app chrome (headers, buttons, accents, checkboxes,
+toasts, dialogs, bottom sheets) used #006699 while the report already used
+#066aab. Now both are consistent.
+
+- index.html: 13 occurrences of #006699 → #066aab (header, buttons,
+  gradients, borders, active states, accent-color)
+- app.js: 106 occurrences of #006699 → #066aab (inline styles across
+  component builder, bottom sheets, photo panels, dialogs, inspection UI)
+- Header box-shadow rgba updated to match new primary
+
+---
+
 ## v2231 — 2026-04-15
 
 ### Added — Skip Comparables toggle and Final Concluded Value field

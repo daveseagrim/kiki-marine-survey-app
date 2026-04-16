@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2231';
+const APP_VERSION = 'v2232';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -564,9 +564,9 @@ function renderComponentBuilder(builderKey, itemLabel, savedSelections, category
   const baseRatingLetter = itemRating ? (itemRating.startsWith('Not') ? 'N' : itemRating.charAt(0)) : '';
 
   let html = `
-    <div id="component-builder-panel" style="border-bottom:2px solid #006699;margin-bottom:8px;">
+    <div id="component-builder-panel" style="border-bottom:2px solid #066aab;margin-bottom:8px;">
       <div style="padding:8px 20px;background:#f0f7ff;border-bottom:1px solid #d1d5db;">
-        <div style="font-size:13px;font-weight:700;color:#006699;">🔧 ${builder.title}</div>
+        <div style="font-size:13px;font-weight:700;color:#066aab;">🔧 ${builder.title}</div>
         <div style="font-size:11px;color:#6b7280;margin-top:2px;">Select the condition of each sub-component. The finding text and rating will be generated automatically.</div>
       </div>
   `;
@@ -608,7 +608,7 @@ function renderComponentBuilder(builderKey, itemLabel, savedSelections, category
           <label style="display:flex;align-items:flex-start;gap:8px;padding:6px 8px;background:${isChecked ? '#dbeafe' : '#f9fafb'};border:1px solid ${isChecked ? '#93c5fd' : '#e5e7eb'};border-radius:6px;cursor:pointer;">
             <input type="checkbox" class="cb-multi-${comp.key}" value="${idx}" ${isChecked ? 'checked' : ''}
                    onchange="onComponentBuilderChange('${safeLabel}', '${builderKey.replace(/'/g, "\\'")}')"
-                   style="width:16px;height:16px;margin-top:1px;accent-color:#006699;flex-shrink:0;">
+                   style="width:16px;height:16px;margin-top:1px;accent-color:#066aab;flex-shrink:0;">
             <span style="font-size:13px;line-height:1.35;flex:1;">${opt.label}${ratingTag}</span>
           </label>
         `;
@@ -672,7 +672,7 @@ function renderComponentBuilder(builderKey, itemLabel, savedSelections, category
               <label style="display:flex;align-items:center;gap:4px;font-size:12px;padding:4px 8px;background:${isChecked ? '#dbeafe' : '#f3f4f6'};border:1px solid ${isChecked ? '#93c5fd' : '#d1d5db'};border-radius:6px;cursor:pointer;">
                 <input type="checkbox" class="cb-loc-${comp.key}" value="${loc}" ${isChecked ? 'checked' : ''}
                        onchange="onComponentBuilderChange('${safeLabel}', '${builderKey.replace(/'/g, "\\'")}')"
-                       style="width:14px;height:14px;accent-color:#006699;">
+                       style="width:14px;height:14px;accent-color:#066aab;">
                 ${loc}
               </label>
           `;
@@ -712,7 +712,7 @@ function renderComponentBuilder(builderKey, itemLabel, savedSelections, category
   html += `
       <div style="padding:10px 20px;">
         <button onclick="applyComponentBuilder('${safeLabel}', '${builderKey.replace(/'/g, "\\'")}', '${safeCat}')"
-                style="width:100%;padding:10px;background:#006699;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
+                style="width:100%;padding:10px;background:#066aab;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
           Generate Finding Text
         </button>
       </div>
@@ -1472,7 +1472,7 @@ function _showBackupNowBanner() {
   }
   banner.style.opacity = '1';
   banner.innerHTML = `
-    <div style="background:#006699;color:white;padding:10px 16px 6px;font-size:13px;font-weight:600;text-align:center;">
+    <div style="background:#066aab;color:white;padding:10px 16px 6px;font-size:13px;font-weight:600;text-align:center;">
       ☁️ Backing up ${count} photo${count > 1 ? 's' : ''}...
     </div>
     <div style="height:4px;background:#004466;">
@@ -1671,7 +1671,7 @@ async function syncAllPhotosToFirebase() {
     const remaining = total - done;
     const pct = Math.round((done / total) * 100);
     banner.innerHTML = `
-      <div style="background:#006699;color:white;padding:10px 16px 6px;font-size:13px;font-weight:600;text-align:center;">
+      <div style="background:#066aab;color:white;padding:10px 16px 6px;font-size:13px;font-weight:600;text-align:center;">
         ☁️ Uploading photo ${done} of ${total} — ${remaining} to go
       </div>
       <div style="height:4px;background:#004466;">
@@ -2614,7 +2614,7 @@ function showToast(message) {
   const toast = document.createElement('div');
   toast.id = 'toast-msg';
   toast.textContent = message;
-  toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#006699;color:white;padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+  toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#066aab;color:white;padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
 }
@@ -2711,7 +2711,7 @@ function showAlert(message) {
       <div style="background:white;border-radius:14px;padding:20px 24px;max-width:320px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,0.3);text-align:center;">
         <p style="font-size:15px;color:#333;margin:0 0 18px 0;line-height:1.4;">${message}</p>
         <button onclick="document.getElementById('customModalOverlay').remove();window._modalResolve&&window._modalResolve(true);"
-                style="width:100%;padding:12px;background:#006699;color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">OK</button>
+                style="width:100%;padding:12px;background:#066aab;color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">OK</button>
       </div>`;
     window._modalResolve = resolve;
     document.body.appendChild(overlay);
@@ -3298,7 +3298,7 @@ function showNotesSheet(itemLabel, categoryName) {
             <label style="display:flex;align-items:center;gap:10px;padding:8px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;">
               <input type="checkbox" value="${standard}" ${isChecked ? 'checked' : ''}
                      onchange="updateStandards('${safeLabel}', this)"
-                     style="width:18px;height:18px;accent-color:#006699;" />
+                     style="width:18px;height:18px;accent-color:#066aab;" />
               <span style="font-size:13px;">${standard}</span>
             </label>
           `;
@@ -3306,7 +3306,7 @@ function showNotesSheet(itemLabel, categoryName) {
         standardsHtml = `
           <details style="margin:6px 20px 10px 20px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;">
             <summary style="padding:8px 12px;font-size:12px;color:#6b7280;cursor:pointer;list-style:none;">
-              <strong style="color:#006699;">Auto-selected standards:</strong> ${escapeHtml(summaryText)} <span style="color:#9ca3af;">· tap to manage</span>
+              <strong style="color:#066aab;">Auto-selected standards:</strong> ${escapeHtml(summaryText)} <span style="color:#9ca3af;">· tap to manage</span>
             </summary>
             <div style="border-top:1px solid #e5e7eb;">${checkboxesHtml}</div>
           </details>
@@ -3504,7 +3504,7 @@ function showNotesSheet(itemLabel, categoryName) {
         ${standardsHtml}
         <div class="sheet-btn-row">
           <button onclick="closeNotesSheet('${safeLabel}');" style="background:#e5e7eb;color:#374151;">Cancel</button>
-          <button onclick="saveNotesFromSheet('${safeLabel}', '${safeCat}', '${sanitizedLabel}');" style="background:#006699;color:white;">Save Notes</button>
+          <button onclick="saveNotesFromSheet('${safeLabel}', '${safeCat}', '${sanitizedLabel}');" style="background:#066aab;color:white;">Save Notes</button>
         </div>
       </div>
     `;
@@ -4042,7 +4042,7 @@ function setupPhotoSortable(gridEl, itemLabel) {
     thumb.addEventListener('dragover', (e) => {
       e.preventDefault();
       try { e.dataTransfer.dropEffect = 'move'; } catch (_) {}
-      thumb.style.outline = '2px solid #006699';
+      thumb.style.outline = '2px solid #066aab';
     });
     thumb.addEventListener('dragleave', () => { thumb.style.outline = ''; });
     thumb.addEventListener('drop', async (e) => {
@@ -4159,18 +4159,18 @@ function showMediaSheet(itemLabel, categoryName) {
         <div style="padding:12px 20px;display:flex;flex-direction:column;gap:10px;">
           <button type="button"
                   onclick="document.getElementById('bottomSheetOverlay').remove(); openBatchCamera('${safeLabel}');"
-                  style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#006699;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;">
+                  style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#066aab;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;">
             \ud83d\udcf7 Take photos
           </button>
           <button type="button"
                   onclick="document.getElementById('bottomSheetOverlay').remove(); importPhotosForItem('${safeLabel}');"
-                  style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:white;color:#006699;border:2px solid #006699;border-radius:10px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;">
+                  style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:white;color:#066aab;border:2px solid #066aab;border-radius:10px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;">
             \ud83d\uddbc\ufe0f Import photos from library / files
           </button>
           <div style="font-size:11px;color:#9ca3af;text-align:center;margin-top:-2px;">Both buttons support selecting multiple photos at once. On desktop, you can also drag photo files directly onto this item's card.</div>
         </div>
         <div class="sheet-btn-row">
-          <button onclick="document.getElementById('bottomSheetOverlay').remove();" style="background:#006699;color:white;">Done</button>
+          <button onclick="document.getElementById('bottomSheetOverlay').remove();" style="background:#066aab;color:white;">Done</button>
         </div>
       </div>
     `;
@@ -4227,7 +4227,7 @@ async function showPhotoActionOverlay(photoId, itemLabel, categoryName) {
     </div>
     <div style="flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:16px 18px;padding-bottom:calc(16px + env(safe-area-inset-bottom));">
       <button id="pao-edit"
-              style="background:#006699;color:#fff;border:none;border-radius:10px;padding:14px 0;font-size:15px;font-weight:700;cursor:pointer;min-height:52px;">✏️ Edit</button>
+              style="background:#066aab;color:#fff;border:none;border-radius:10px;padding:14px 0;font-size:15px;font-weight:700;cursor:pointer;min-height:52px;">✏️ Edit</button>
       <button id="pao-move"
               style="background:#0369a1;color:#fff;border:none;border-radius:10px;padding:14px 0;font-size:15px;font-weight:700;cursor:pointer;min-height:52px;">↗ Move</button>
       <button id="pao-delete"
@@ -4380,17 +4380,17 @@ function showMovePhotoPicker(photoId, sourceItemLabel, sourceCategoryName, allIt
 
   overlay.innerHTML = `
     <div style="background:white;border-radius:16px 16px 0 0;width:100%;max-width:560px;display:flex;flex-direction:column;box-shadow:0 -6px 24px rgba(0,0,0,0.25);padding-bottom:calc(16px + env(safe-area-inset-bottom));" onclick="event.stopPropagation();">
-      <div style="padding:18px 20px 8px;font-weight:700;font-size:17px;color:#006699;">Move photo to…</div>
+      <div style="padding:18px 20px 8px;font-weight:700;font-size:17px;color:#066aab;">Move photo to…</div>
       <div style="padding:4px 20px 8px;font-size:12px;color:#6b7280;">From: ${esc(sourceItemLabel)}</div>
       <div style="padding:8px 20px 4px;">
-        <select id="movePhotoSelect" size="1" style="width:100%;padding:14px 12px;border:2px solid #006699;border-radius:10px;font-size:16px;font-weight:600;color:#006699;background:white;box-sizing:border-box;-webkit-appearance:menulist;appearance:menulist;">
+        <select id="movePhotoSelect" size="1" style="width:100%;padding:14px 12px;border:2px solid #066aab;border-radius:10px;font-size:16px;font-weight:600;color:#066aab;background:white;box-sizing:border-box;-webkit-appearance:menulist;appearance:menulist;">
           <option value="" disabled selected>— Choose destination —</option>
           ${optionsHtml}
         </select>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 20px 6px;">
         <button onclick="document.getElementById('movePhotoPickerOverlay').remove();" style="background:#64748b;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Cancel</button>
-        <button id="movePhotoApply" style="background:#006699;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Move</button>
+        <button id="movePhotoApply" style="background:#066aab;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Move</button>
       </div>
     </div>
   `;
@@ -5591,7 +5591,7 @@ function refreshChipStrip(textarea) {
     // Derive a title for the section. For now use a generic label + hint.
     const sectionTitle = isMulti ? 'Select all that apply' : 'Choose one';
     html += `<div style="margin-top:${ti === 0 ? '0' : '12px'};padding-top:${ti === 0 ? '0' : '10px'};${ti === 0 ? '' : 'border-top:1px dashed #e5e7eb;'}">`;
-    html += `<div style="font-size:11px;font-weight:700;color:#006699;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">${sectionTitle}</div>`;
+    html += `<div style="font-size:11px;font-weight:700;color:#066aab;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">${sectionTitle}</div>`;
 
     tok.options.forEach((opt, oi) => {
       const isObj = (typeof opt === 'object');
@@ -5607,13 +5607,13 @@ function refreshChipStrip(textarea) {
       const countBadge = countable ? `
         <button type="button" class="opt-count-badge"
                 data-opt-token="${ti}" data-opt-opt="${oi}" data-opt-count="1"
-                style="flex-shrink:0;margin-left:auto;border:1px solid #006699;background:#006699;color:white;border-radius:6px;min-width:40px;min-height:32px;padding:4px 10px;font-size:14px;font-weight:700;cursor:pointer;line-height:1;">1</button>
+                style="flex-shrink:0;margin-left:auto;border:1px solid #066aab;background:#066aab;color:white;border-radius:6px;min-width:40px;min-height:32px;padding:4px 10px;font-size:14px;font-weight:700;cursor:pointer;line-height:1;">1</button>
       ` : '';
       html += `
         <label style="display:flex;align-items:center;gap:10px;padding:7px 2px;cursor:pointer;min-height:40px;">
           <input type="${isMulti ? 'checkbox' : 'radio'}" name="snbld-${textarea.id}-${ti}"
                  data-token-idx="${ti}" data-opt-idx="${oi}"
-                 style="width:20px;height:20px;accent-color:#006699;flex-shrink:0;" />
+                 style="width:20px;height:20px;accent-color:#066aab;flex-shrink:0;" />
           <span style="font-size:14px;color:#1f2937;line-height:1.4;flex:1;">${escapeHtml(rawLabel)}${cites}</span>
           ${countBadge}
         </label>
@@ -5636,7 +5636,7 @@ function refreshChipStrip(textarea) {
   // main template stays intact.
   html += `
     <div style="margin-top:14px;padding-top:10px;border-top:1px dashed #e5e7eb;">
-      <div style="font-size:11px;font-weight:700;color:#006699;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Additional observations (optional)</div>
+      <div style="font-size:11px;font-weight:700;color:#066aab;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Additional observations (optional)</div>
       <textarea data-freeform-notes="1" rows="2"
                 placeholder="Type any extra details in your own words — appended as a separate sentence."
                 spellcheck="true" autocorrect="on" autocapitalize="sentences"
@@ -6346,7 +6346,7 @@ function openChipPopover(textarea, tok, anchorEl) {
     rowsHtml += `
       <label style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #f3f4f6;cursor:pointer;min-height:48px;">
         <input type="${isMulti ? 'checkbox' : 'radio'}" name="chip-opt" value="${i}"
-               style="width:20px;height:20px;accent-color:#006699;flex-shrink:0;" />
+               style="width:20px;height:20px;accent-color:#066aab;flex-shrink:0;" />
         <span style="font-size:15px;color:#1f2937;line-height:1.4;">${escapeHtml(label)}${cites}</span>
       </label>
     `;
@@ -6354,7 +6354,7 @@ function openChipPopover(textarea, tok, anchorEl) {
 
   overlay.innerHTML = `
     <div style="background:white;border-radius:16px 16px 0 0;width:100%;max-width:560px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 -6px 24px rgba(0,0,0,0.25);padding-bottom:calc(16px + env(safe-area-inset-bottom));" onclick="event.stopPropagation();">
-      <div style="padding:18px 20px 6px;font-weight:700;font-size:17px;color:#006699;">${escapeHtml(tok.label)}</div>
+      <div style="padding:18px 20px 6px;font-weight:700;font-size:17px;color:#066aab;">${escapeHtml(tok.label)}</div>
       <div style="padding:2px 20px 10px;font-size:12px;color:#6b7280;">${isMulti ? 'Select all that apply' : 'Choose one'}</div>
       <div style="overflow-y:auto;flex:1 1 auto;">
         ${rowsHtml}
@@ -6368,7 +6368,7 @@ function openChipPopover(textarea, tok, anchorEl) {
         <button type="button" id="chipCancel"
           style="background:#64748b;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Cancel</button>
         <button type="button" id="chipApply"
-          style="background:#006699;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Apply</button>
+          style="background:#066aab;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px;">Apply</button>
       </div>
     </div>
   `;
@@ -6684,7 +6684,7 @@ function renderHome() {
     const pillBase = 'flex:1;border:none;border-radius:14px;padding:8px 4px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;text-align:center;';
     const driveBtn = DriveBackup.isSignedIn()
       ? `<button style="${pillBase}background:#3399cc;color:white;" onclick="DriveBackup.backupAll()">☁️ Backup to Drive</button>`
-      : `<button style="${pillBase}background:rgba(0,102,153,0.08);color:#006699;border:1px solid #3399cc;" onclick="(async()=>{try{await DriveBackup.signIn();showToast('Signed in to Google Drive ✓');renderHome();}catch(e){if(e.code!=='auth/popup-closed-by-user')showAlert('Sign-in failed: '+e.message);}})()">☁️ Google Drive</button>`;
+      : `<button style="${pillBase}background:rgba(0,102,153,0.08);color:#066aab;border:1px solid #3399cc;" onclick="(async()=>{try{await DriveBackup.signIn();showToast('Signed in to Google Drive ✓');renderHome();}catch(e){if(e.code!=='auth/popup-closed-by-user')showAlert('Sign-in failed: '+e.message);}})()">☁️ Google Drive</button>`;
     const firebaseSyncBtn = (typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled())
       ? `<button style="${pillBase}background:#f59e0b;color:white;" onclick="syncAllPhotosToFirebase()">🔥 Sync All to Firebase</button>`
       : '';
@@ -6694,8 +6694,8 @@ function renderHome() {
         <div style="position:relative;flex:0 0 auto;">
           <button style="border:none;border-radius:14px;padding:8px 12px;font-size:14px;font-weight:700;cursor:pointer;background:#f1f5f9;color:#64748b;" onclick="event.stopPropagation();const m=document.getElementById('homeOverflowMenu');if(m)m.style.display=m.style.display==='none'?'flex':'none';">⋯</button>
           <div id="homeOverflowMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.18);padding:6px;flex-direction:column;gap:4px;min-width:170px;z-index:200;">
-            <button onclick="document.getElementById('homeOverflowMenu').style.display='none';exportAllSurveys()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#006699;">📦 Export All Surveys</button>
-            <button onclick="document.getElementById('homeOverflowMenu').style.display='none';importSurvey()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#006699;">📥 Import Survey</button>
+            <button onclick="document.getElementById('homeOverflowMenu').style.display='none';exportAllSurveys()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#066aab;">📦 Export All Surveys</button>
+            <button onclick="document.getElementById('homeOverflowMenu').style.display='none';importSurvey()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#066aab;">📥 Import Survey</button>
             <button onclick="document.getElementById('homeOverflowMenu').style.display='none';forceAppUpdate()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#64748b;">↻ Force Update</button>
           </div>
         </div>
@@ -6760,7 +6760,7 @@ function renderHome() {
             : survey.surveyType === 'Pre-purchase survey' ? 'P-P'
             : survey.surveyType === 'Appraisal' ? 'APR' : '';
           const typeBadgeBg = survey.surveyType === 'Insurance survey' ? '#f59e0b'
-            : survey.surveyType === 'Pre-purchase survey' ? '#006699'
+            : survey.surveyType === 'Pre-purchase survey' ? '#066aab'
             : survey.surveyType === 'Appraisal' ? '#7c3aed' : '#94a3b8';
 
           const vesselName = survey.vesselName ? esc(survey.vesselName) : 'Unnamed';
@@ -6768,7 +6768,7 @@ function renderHome() {
           const location = survey.location ? esc(shortLocation(survey.location)) : '';
           const ymm = survey.yearMakeModel ? esc(survey.yearMakeModel) : '';
 
-          const progressColour = completion === 100 ? '#16a34a' : completion >= 50 ? '#006699' : '#94a3b8';
+          const progressColour = completion === 100 ? '#16a34a' : completion >= 50 ? '#066aab' : '#94a3b8';
           const rowId = `sr-${survey.id}`;
           const separator = idx > 0 ? 'border-top:1px solid #f1f5f9;' : '';
 
@@ -6809,8 +6809,8 @@ function renderHome() {
               <!-- Expandable actions panel -->
               <div id="${rowId}" style="display:none;padding:0 10px 10px 52px;">
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                  <button onclick="event.stopPropagation();(async()=>{currentSurveyId='${survey.id}';checkSurvey();})()" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#ffcc00;color:#006699;border:none;border-radius:14px;cursor:pointer;">✅ Check</button>
-                  <button onclick="event.stopPropagation();(async()=>{const s=await getSurvey('${survey.id}');if(s)generateReport(s);})()" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#006699;color:white;border:none;border-radius:14px;cursor:pointer;">📄 Report</button>
+                  <button onclick="event.stopPropagation();(async()=>{currentSurveyId='${survey.id}';checkSurvey();})()" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#ffcc00;color:#066aab;border:none;border-radius:14px;cursor:pointer;">✅ Check</button>
+                  <button onclick="event.stopPropagation();(async()=>{const s=await getSurvey('${survey.id}');if(s)generateReport(s);})()" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#066aab;color:white;border:none;border-radius:14px;cursor:pointer;">📄 Report</button>
                   <button onclick="event.stopPropagation();exportSurvey('${survey.id}')" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:14px;cursor:pointer;">📤 Export</button>
                   <button onclick="event.stopPropagation();deleteSurveyConfirm('${survey.id}')" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#fef2f2;color:#dc2626;border:none;border-radius:14px;cursor:pointer;">🗑 Delete</button>
                 </div>
@@ -6835,7 +6835,7 @@ function renderHome() {
 
     const fab = document.createElement('button');
     fab.className = 'fab';
-    fab.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#006699" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+    fab.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#066aab" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
     fab.onclick = () => renderNewSurveyForm();
     document.body.appendChild(fab);
   });
@@ -6885,7 +6885,7 @@ function renderNewSurveyForm() {
            onerror="this.style.display='none'">
       <button class="header-back" onclick="confirmAbandonNewSurvey()" style="flex-shrink:0;">←</button>
       <div style="flex:1;min-width:0;">
-        <div class="header-title" style="color:#006699;">New Survey</div>
+        <div class="header-title" style="color:#066aab;">New Survey</div>
         <div class="header-subtitle" style="color:#3399cc;">${APP_VERSION}</div>
       </div>
       <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
@@ -7073,11 +7073,11 @@ function renderNewSurveyForm() {
         <textarea id="changesToPlan" placeholder="Any modifications or changes" autocapitalize="sentences"></textarea>
       </div>
 
-      <h3 style="margin-top:16px;color:#006699;">Engine & Transmission</h3>
+      <h3 style="margin-top:16px;color:#066aab;">Engine & Transmission</h3>
 
       <!-- Engine 1 -->
       <div style="border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin-bottom:10px;background:#f8fafc;">
-        <div id="engine1Label" style="font-weight:700;font-size:13px;color:#006699;margin-bottom:8px;">Engine</div>
+        <div id="engine1Label" style="font-weight:700;font-size:13px;color:#066aab;margin-bottom:8px;">Engine</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <div class="form-group">
             <label class="form-label" style="font-size:12px;">Engine Make</label>
@@ -7137,7 +7137,7 @@ function renderNewSurveyForm() {
             </div>
           </div>
         </div>
-        <div style="font-weight:700;font-size:13px;color:#006699;margin:12px 0 8px;">Transmission 1</div>
+        <div style="font-weight:700;font-size:13px;color:#066aab;margin:12px 0 8px;">Transmission 1</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <div class="form-group">
             <label class="form-label" style="font-size:12px;">Transmission Make</label>
@@ -7181,7 +7181,7 @@ function renderNewSurveyForm() {
       <!-- Engine 2 (hidden by default) -->
       <div id="engine2Section" style="display:none;border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin-bottom:10px;background:#f8fafc;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <div style="font-weight:700;font-size:13px;color:#006699;">Engine 2 (Starboard)</div>
+          <div style="font-weight:700;font-size:13px;color:#066aab;">Engine 2 (Starboard)</div>
           <button class="btn-secondary" style="font-size:11px;padding:2px 8px;color:#dc2626;" onclick="removeEngine2()">Remove</button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -7243,7 +7243,7 @@ function renderNewSurveyForm() {
             </div>
           </div>
         </div>
-        <div style="font-weight:700;font-size:13px;color:#006699;margin:12px 0 8px;">Transmission 2</div>
+        <div style="font-weight:700;font-size:13px;color:#066aab;margin:12px 0 8px;">Transmission 2</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <div class="form-group">
             <label class="form-label" style="font-size:12px;">Transmission Make</label>
@@ -7403,7 +7403,7 @@ function renderNewSurveyForm() {
         </div>
       </div>
 
-      <h3 style="margin-top:16px;color:#006699;">Vessel Overview Photos (Four Corners)</h3>
+      <h3 style="margin-top:16px;color:#066aab;">Vessel Overview Photos (Four Corners)</h3>
       <div style="font-size:12px;color:#6b7280;margin-bottom:10px;">SAMS requires four overview photos showing the vessel from each corner. These appear at the end of the report.</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div>
@@ -7609,7 +7609,7 @@ function renderNewSurveyForm() {
       </div>
 
       <div style="display:flex;align-items:center;gap:8px;margin-top:16px;">
-        <h3 style="margin:0;color:#006699;">Comparable Vessels</h3>
+        <h3 style="margin:0;color:#066aab;">Comparable Vessels</h3>
         <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#6b7280;cursor:pointer;margin-left:auto;">
           <input type="checkbox" id="skipComparables" onchange="toggleComparablesSection()"> Skip
         </label>
@@ -8318,7 +8318,7 @@ function editSurveyDetails(surveyId) {
 
     // 📝 Desc button — regenerate and update textarea in-place (no page re-render)
     const descBtn2 = document.createElement('button');
-    descBtn2.style.cssText = ps + 'background:#ffcc00;color:#006699;font-weight:700;';
+    descBtn2.style.cssText = ps + 'background:#ffcc00;color:#066aab;font-weight:700;';
     descBtn2.innerHTML = '📝 Desc';
     descBtn2.onclick = async () => {
       await saveEditFormSilently();
@@ -8344,7 +8344,7 @@ function editSurveyDetails(surveyId) {
 
     // ✅ Check button
     const checkBtn2 = document.createElement('button');
-    checkBtn2.style.cssText = ps + 'background:#ffcc00;color:#006699;font-weight:700;';
+    checkBtn2.style.cssText = ps + 'background:#ffcc00;color:#066aab;font-weight:700;';
     checkBtn2.innerHTML = '✅ Check';
     checkBtn2.onclick = async () => {
       await saveEditFormSilently();
@@ -8354,7 +8354,7 @@ function editSurveyDetails(surveyId) {
 
     // 📄 Report button
     const reportBtn2 = document.createElement('button');
-    reportBtn2.style.cssText = ps + 'background:#006699;color:white;';
+    reportBtn2.style.cssText = ps + 'background:#066aab;color:white;';
     reportBtn2.innerHTML = '📄 Report';
     reportBtn2.onclick = async () => {
       await saveEditFormSilently();
@@ -9182,7 +9182,7 @@ function suggestValuation() {
     const query = encodeURIComponent(input);
     card.innerHTML = `
       <p style="color:#1e40af;font-weight:bold;margin:0 0 8px;">No built-in value data found for this model</p>
-      <p style="color:#006699;font-size:13px;margin:0 0 12px;">Check live sources for current market pricing:</p>
+      <p style="color:#066aab;font-size:13px;margin:0 0 12px;">Check live sources for current market pricing:</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn-secondary" style="font-size:13px;"
                 onclick="window.open('https://www.yachtworld.com/boats-for-sale/?keyword=${encodeURIComponent(input)}','_blank')">
@@ -9213,14 +9213,14 @@ function suggestValuation() {
 
       <div style="background:white;border:1px solid #dbeafe;border-radius:6px;padding:10px 12px;margin-bottom:10px;">
         <p style="color:#6b7280;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px;">Source: BUC Value Guide (built-in database)</p>
-        <p style="color:#006699;font-size:20px;font-weight:bold;margin:0;">${lowFmt} – ${highFmt} USD</p>
+        <p style="color:#066aab;font-size:20px;font-weight:bold;margin:0;">${lowFmt} – ${highFmt} USD</p>
         <p style="color:#374151;font-size:13px;margin:4px 0 0;">${lowCAD} – ${highCAD} CAD @ ${usdcad.toFixed(2)}</p>
       </div>
 
       <p style="color:#374151;font-size:12px;margin:0 0 4px;line-height:1.5;">
         <em>BUC guide values reflect average condition. Adjust for actual condition, equipment, upgrades, and location. SAMS requires corroboration from additional sources.</em>
       </p>
-      <p style="color:#006699;font-size:13px;margin:0 0 10px;">${entry.rationale}</p>
+      <p style="color:#066aab;font-size:13px;margin:0 0 10px;">${entry.rationale}</p>
 
       <p style="color:#1e40af;font-weight:600;font-size:13px;margin:0 0 6px;">Search additional sources to corroborate:</p>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
@@ -10545,7 +10545,7 @@ function renderInspection(survey) {
   const app = document.getElementById('app');
 
   const surveyTypeBanner = survey.surveyType
-    ? `<div style="background:${survey.surveyType === 'Insurance survey' ? '#ffcc00' : '#006699'};color:${survey.surveyType === 'Insurance survey' ? '#006699' : '#fff'};text-align:center;font-size:12px;font-weight:700;padding:4px 0;letter-spacing:0.5px;">${esc(survey.surveyType).toUpperCase()}</div>`
+    ? `<div style="background:${survey.surveyType === 'Insurance survey' ? '#ffcc00' : '#066aab'};color:${survey.surveyType === 'Insurance survey' ? '#066aab' : '#fff'};text-align:center;font-size:12px;font-weight:700;padding:4px 0;letter-spacing:0.5px;">${esc(survey.surveyType).toUpperCase()}</div>`
     : '';
 
   // v2228: Inspection-page header now matches the Home-page branding.
@@ -10559,7 +10559,7 @@ function renderInspection(survey) {
            onerror="this.style.display='none'">
       <button class="header-back" onclick="backToHome()" style="flex-shrink:0;">←</button>
       <div style="flex:1;min-width:0;">
-        <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#006699;">${esc(survey.vesselName)}</div>
+        <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#066aab;">${esc(survey.vesselName)}</div>
         <div class="header-subtitle" style="color:#3399cc;">${APP_VERSION}</div>
       </div>
       <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
@@ -10786,14 +10786,14 @@ function renderInspection(survey) {
         <button onclick="setVesselTypeFromInspection('sail')"
                 style="padding:7px 18px;font-size:13px;font-weight:600;border:none;border-radius:20px;cursor:pointer;
                        transition:background 0.15s,color 0.15s;
-                       background:${currentVesselType === 'sail' ? '#006699' : '#e2e8f0'};
+                       background:${currentVesselType === 'sail' ? '#066aab' : '#e2e8f0'};
                        color:${currentVesselType === 'sail' ? 'white' : '#475569'};">
           Sail
         </button>
         <button onclick="setVesselTypeFromInspection('power')"
                 style="padding:7px 18px;font-size:13px;font-weight:600;border:none;border-radius:20px;cursor:pointer;
                        transition:background 0.15s,color 0.15s;
-                       background:${currentVesselType === 'power' ? '#006699' : '#e2e8f0'};
+                       background:${currentVesselType === 'power' ? '#066aab' : '#e2e8f0'};
                        color:${currentVesselType === 'power' ? 'white' : '#475569'};">
           Power
         </button>
@@ -10861,9 +10861,9 @@ function renderInspection(survey) {
     if (categoryName === 'Head(s)') {
       html += `
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;">
-          <span style="font-size:14px;font-weight:600;color:#006699;">Number of heads:</span>
+          <span style="font-size:14px;font-weight:600;color:#066aab;">Number of heads:</span>
           <select id="headCountSelect" onchange="updateHeadCount(parseInt(this.value))"
-                  style="padding:8px 12px;border:1px solid #93c5fd;border-radius:6px;font-size:15px;font-weight:600;background:white;color:#006699;min-width:60px;">
+                  style="padding:8px 12px;border:1px solid #93c5fd;border-radius:6px;font-size:15px;font-weight:600;background:white;color:#066aab;min-width:60px;">
             ${[1,2,3,4].map(n => `<option value="${n}" ${headCount === n ? 'selected' : ''}>${n}</option>`).join('')}
           </select>
         </div>
@@ -10874,9 +10874,9 @@ function renderInspection(survey) {
     if (categoryName === 'Hull exterior, keel and propulsion') {
       html += `
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;">
-          <span style="font-size:13px;font-weight:600;color:#006699;">🚢 Number of hulls:</span>
+          <span style="font-size:13px;font-weight:600;color:#066aab;">🚢 Number of hulls:</span>
           <select id="hullCountSelect" onchange="updateHullCount(parseInt(this.value))"
-                  style="padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:14px;font-weight:600;background:white;color:#006699;min-width:50px;">
+                  style="padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:14px;font-weight:600;background:white;color:#066aab;min-width:50px;">
             <option value="1" ${hullCount === 1 ? 'selected' : ''}>1 (monohull)</option>
             <option value="2" ${hullCount === 2 ? 'selected' : ''}>2 (catamaran)</option>
             <option value="3" ${hullCount === 3 ? 'selected' : ''}>3 (trimaran)</option>
@@ -10902,12 +10902,12 @@ function renderInspection(survey) {
 
       html += `
         <div style="margin-bottom:12px;padding:12px;background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;">
-          <div style="font-size:13px;font-weight:700;color:#006699;margin-bottom:8px;">⚙️ Drive Configuration</div>
+          <div style="font-size:13px;font-weight:700;color:#066aab;margin-bottom:8px;">⚙️ Drive Configuration</div>
           <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
             <div style="display:flex;align-items:center;gap:6px;">
               <span style="font-size:13px;font-weight:600;color:#374151;">Drive type:</span>
               <select id="driveTypeSelect" onchange="updateDriveType(this.value)"
-                      style="padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:14px;font-weight:600;background:white;color:#006699;">
+                      style="padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:14px;font-weight:600;background:white;color:#066aab;">
                 ${driveTypeOptions}
               </select>
             </div>
@@ -10919,7 +10919,7 @@ function renderInspection(survey) {
             <div style="display:flex;align-items:center;gap:6px;">
               <span style="font-size:13px;font-weight:600;color:#374151;">Drive lines:</span>
               <select id="driveLineCountSelect" onchange="updateDriveLineCount(parseInt(this.value))"
-                      style="padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:14px;font-weight:600;background:white;color:#006699;min-width:50px;">
+                      style="padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:14px;font-weight:600;background:white;color:#066aab;min-width:50px;">
                 ${[1,2,3].map(n => `<option value="${n}" ${driveLineCount === n ? 'selected' : ''}>${n}</option>`).join('')}
               </select>
             </div>
@@ -10936,7 +10936,7 @@ function renderInspection(survey) {
           <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
             <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;">
               <input type="checkbox" id="hasRudderToggle" ${hasRudder ? 'checked' : ''} onchange="toggleHasRudder(this.checked)"
-                     style="width:18px;height:18px;accent-color:#006699;">
+                     style="width:18px;height:18px;accent-color:#066aab;">
               Vessel has a rudder
             </label>
             <span style="font-size:11px;color:#6b7280;">${hasRudder ? '(rudder items shown)' : '(rudder items hidden)'}</span>
@@ -11002,7 +11002,7 @@ function renderInspection(survey) {
       const _narr = (survey.propulsionNarrative || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       html += `
         <div style="margin-bottom:14px;padding:12px;background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;">
-          <div style="font-size:13px;font-weight:700;color:#006699;margin-bottom:8px;">⚙️ Propulsion Narrative — pick or type, then the paragraph auto-writes</div>
+          <div style="font-size:13px;font-weight:700;color:#066aab;margin-bottom:8px;">⚙️ Propulsion Narrative — pick or type, then the paragraph auto-writes</div>
           ${_dl('engineLocationOpts', engineLocationOpts)}
           ${_dl('engineAccessOpts', engineAccessOpts)}
           ${_dl('gaugesLocationOpts', gaugesLocationOpts)}
@@ -11038,9 +11038,9 @@ function renderInspection(survey) {
             </label>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-            <span style="font-size:12px;font-weight:600;color:#006699;">Auto-generated narrative (edit freely — or tap Regenerate to resume auto-updates)</span>
+            <span style="font-size:12px;font-weight:600;color:#066aab;">Auto-generated narrative (edit freely — or tap Regenerate to resume auto-updates)</span>
             <button type="button" onclick="regeneratePropulsionNarrative()"
-                    style="background:white;color:#006699;border:1px solid #006699;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">
+                    style="background:white;color:#066aab;border:1px solid #066aab;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">
               ✨ Regenerate
             </button>
           </div>
@@ -11068,7 +11068,7 @@ function renderInspection(survey) {
           <div id="area-photo-wrap-${sanitized}" style="margin-bottom:16px;padding:12px;background:#f3f4f6;border:1px dashed #d1d5db;border-radius:8px;opacity:0.75;">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
               <div style="font-weight:600;font-size:14px;color:#6b7280;">⊘ ${mediaItem.label} — skipped${photos.length > 0 ? ` (${photos.length} photo${photos.length === 1 ? '' : 's'} retained)` : ''}</div>
-              <button onclick="toggleExclude('${safeLabel}')" style="background:white;color:#006699;border:1px solid #006699;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;">Unskip</button>
+              <button onclick="toggleExclude('${safeLabel}')" style="background:white;color:#066aab;border:1px solid #066aab;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;">Unskip</button>
             </div>
           </div>
         `;
@@ -11084,19 +11084,19 @@ function renderInspection(survey) {
                 <div style="position:relative;width:84px;">
                   <img id="thumb-${pid}" src="" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
                   <button onclick="event.stopPropagation();deleteAreaPhoto('${pid}', '${safeLabel}')" aria-label="Delete photo" style="position:absolute;top:-8px;right:-8px;background:#dc2626;color:white;border:2px solid white;border-radius:50%;width:30px;height:30px;font-size:16px;font-weight:700;cursor:pointer;line-height:26px;text-align:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,0.3);">×</button>
-                  <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#006699;color:white;border:none;border-radius:6px;padding:6px 0;font-size:12px;font-weight:700;cursor:pointer;">Move ↗</button>
+                  <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#066aab;color:white;border:none;border-radius:6px;padding:6px 0;font-size:12px;font-weight:700;cursor:pointer;">Move ↗</button>
                 </div>
               `).join('')}
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:8px;">
               <button type="button"
                 onclick="openBatchCamera('${safeLabel}', { isArea: true, categoryName: '${safeCat}' })"
-                style="background:#006699;color:white;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
+                style="background:#066aab;color:white;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
                 📷 ${photos.length > 0 ? `Take More (${photos.length})` : 'Take Photos'}
               </button>
               <button type="button"
                 onclick="importPhotosForItem('${safeLabel}')"
-                style="background:white;color:#006699;border:2px solid #006699;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
+                style="background:white;color:#066aab;border:2px solid #066aab;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
                 🖼️ Import photos from library / files
               </button>
             </div>
@@ -11194,8 +11194,8 @@ function renderInspection(survey) {
         const subSkipped = !!skippedCategoriesMap[eq.category];
         const safeCat = eq.category.replace(/'/g, "\\'");
         html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #ddd;">
-          <span style="font-weight:bold;color:#006699;font-size:13px;${subSkipped ? 'opacity:0.5;text-decoration:line-through;' : ''}">${eq.category}${subSkipped ? ' <span style="color:#6b7280;font-size:11px;font-weight:normal;text-decoration:none;">— sub-category skipped</span>' : ''}</span>
-          <button onclick="toggleSafetySubcategorySkip('${safeCat}', ${!subSkipped})" style="background:${subSkipped ? 'white' : 'transparent'};color:${subSkipped ? '#006699' : '#6b7280'};border:1px solid ${subSkipped ? '#006699' : '#d1d5db'};border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;">
+          <span style="font-weight:bold;color:#066aab;font-size:13px;${subSkipped ? 'opacity:0.5;text-decoration:line-through;' : ''}">${eq.category}${subSkipped ? ' <span style="color:#6b7280;font-size:11px;font-weight:normal;text-decoration:none;">— sub-category skipped</span>' : ''}</span>
+          <button onclick="toggleSafetySubcategorySkip('${safeCat}', ${!subSkipped})" style="background:${subSkipped ? 'white' : 'transparent'};color:${subSkipped ? '#066aab' : '#6b7280'};border:1px solid ${subSkipped ? '#066aab' : '#d1d5db'};border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;">
             ${subSkipped ? 'Unskip' : '⊘ Skip'}
           </button>
         </div>`;
@@ -11211,7 +11211,7 @@ function renderInspection(survey) {
           <div class="rated-item" style="border-left: 4px solid #d1d5db; background:#f9fafb; padding: 8px 10px; margin-bottom: 8px; opacity:0.65;">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
               <div style="font-size:13px;color:#6b7280;">⊘ <strong>${eq.name}</strong> — skipped${safetyPhotoCount > 0 ? ` (${safetyPhotoCount} photo${safetyPhotoCount === 1 ? '' : 's'} retained)` : ''}</div>
-              <button onclick="toggleSafetyItemSkip(${idx}, false)" style="background:white;color:#006699;border:1px solid #006699;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">Unskip</button>
+              <button onclick="toggleSafetyItemSkip(${idx}, false)" style="background:white;color:#066aab;border:1px solid #066aab;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">Unskip</button>
             </div>
           </div>`;
         return;
@@ -11254,7 +11254,7 @@ function renderInspection(survey) {
   if (!sectionSkipped) {
     html += `
         <div style="margin-top:16px;padding-top:12px;border-top:1px solid #e5e7eb;">
-          <div style="font-weight:600;font-size:13px;color:#006699;margin-bottom:6px;">Add Additional Safety Equipment</div>
+          <div style="font-weight:600;font-size:13px;color:#066aab;margin-bottom:6px;">Add Additional Safety Equipment</div>
           <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Select items found on board that are not in the standard TC TP 511 list.</div>
           <div id="customSafetyOptions" style="display:flex;flex-direction:column;gap:6px;">
             ${ADDITIONAL_SAFETY_ITEMS.map(item => {
@@ -11480,7 +11480,7 @@ function ensureReportButton() {
 
   // Check button — pre-flight survey validation
   const checkBtn = document.createElement('button');
-  checkBtn.style.cssText = pillStyle + 'background:#ffcc00;color:#006699;font-weight:700;';
+  checkBtn.style.cssText = pillStyle + 'background:#ffcc00;color:#066aab;font-weight:700;';
   checkBtn.innerHTML = '✅ Check';
   checkBtn.title = 'Pre-flight check — find missing fields, empty ratings, and issues before generating report';
   checkBtn.onclick = () => checkSurvey();
@@ -11488,7 +11488,7 @@ function ensureReportButton() {
 
   // Edit Intro button
   const introBtn = document.createElement('button');
-  introBtn.style.cssText = pillStyle + 'background:#006699;color:white;';
+  introBtn.style.cssText = pillStyle + 'background:#066aab;color:white;';
   introBtn.innerHTML = '✏️ Intro';
   introBtn.onclick = () => editSurveyDetails(currentSurveyId);
   bottomBar.appendChild(introBtn);
@@ -11740,7 +11740,7 @@ function ensureReportButton() {
 
   // Force Update option
   const updateOpt = document.createElement('button');
-  updateOpt.style.cssText = 'border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#006699;';
+  updateOpt.style.cssText = 'border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#066aab;';
   updateOpt.innerHTML = '↻ Force Update';
   updateOpt.onclick = () => { overflowMenu.style.display = 'none'; forceAppUpdate(); };
   overflowMenu.appendChild(updateOpt);
@@ -11757,7 +11757,7 @@ function ensureReportButton() {
   // Preview Report button
   btn = document.createElement('button');
   btn.id = 'reportBtn';
-  btn.style.cssText = pillStyle + 'background:#006699;color:white;box-shadow:0 2px 8px rgba(0,102,153,0.3);';
+  btn.style.cssText = pillStyle + 'background:#066aab;color:white;box-shadow:0 2px 8px rgba(0,102,153,0.3);';
   btn.innerHTML = '📄 Report';
   btn.onclick = () => generateReport();
   bottomBar.appendChild(btn);
@@ -12733,7 +12733,7 @@ async function checkSurvey() {
         <div id="row_${item._checkId}" data-cs-msg="${escapedMsg}" style="margin-bottom:4px;${isReviewed ? 'opacity:0.5;' : ''}">
           <div style="background:${sevBg[item.severity]};border:1px solid ${sevBorder[item.severity]};border-radius:8px;padding:8px 10px;display:flex;align-items:flex-start;gap:8px;">
             <input type="checkbox" ${isReviewed ? 'checked' : ''} onchange="window._csToggleReviewed('${item._checkId}', this.checked)"
-                   style="flex-shrink:0;margin-top:2px;width:18px;height:18px;accent-color:#006699;cursor:pointer;" />
+                   style="flex-shrink:0;margin-top:2px;width:18px;height:18px;accent-color:#066aab;cursor:pointer;" />
             ${ratingBadge}
             <div style="flex:1;min-width:0;">
               <div style="font-size:13px;font-weight:600;color:#1e293b;line-height:1.4;display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
@@ -12744,7 +12744,7 @@ async function checkSurvey() {
               </div>
               ${item.severity === 'proofread' && item.text ? `<div style="font-size:11px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;">${(item.text.length > 70 ? item.text.substring(0, 70) + '…' : item.text).replace(/</g, '&lt;')}</div>` : ''}
             </div>
-            ${hasTappableItem ? `<button onclick="window._csGoToItem(${idx});event.stopPropagation();" style="flex-shrink:0;background:#006699;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">Go ➜</button>` : ''}
+            ${hasTappableItem ? `<button onclick="window._csGoToItem(${idx});event.stopPropagation();" style="flex-shrink:0;background:#066aab;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">Go ➜</button>` : ''}
           </div>
           ${inlineContent}
         </div>`;
@@ -12774,7 +12774,7 @@ async function checkSurvey() {
         <div style="margin-bottom:3px;">
           <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;display:flex;align-items:center;gap:8px;">
             <input type="checkbox" ${reviewedState[item._checkId] ? 'checked' : ''} onchange="window._csToggleReviewed('${item._checkId}', this.checked)"
-                   style="flex-shrink:0;width:16px;height:16px;accent-color:#006699;cursor:pointer;" />
+                   style="flex-shrink:0;width:16px;height:16px;accent-color:#066aab;cursor:pointer;" />
             <div style="flex:1;min-width:0;font-size:12px;color:#64748b;">${displayText}</div>
             ${hasTappableItem ? `<button onclick="window._csGoToItem(${idx});event.stopPropagation();" style="flex-shrink:0;background:#94a3b8;color:white;border:none;border-radius:6px;padding:3px 7px;font-size:10px;cursor:pointer;">Go ➜</button>` : ''}
           </div>
@@ -12834,7 +12834,7 @@ async function checkSurvey() {
   overlay.id = 'checkSurveyOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:white;z-index:9999;display:flex;flex-direction:column;';
   overlay.innerHTML = `
-    <div style="flex-shrink:0;background:#006699;color:white;padding:12px 16px calc(12px + env(safe-area-inset-top, 0px)) 16px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="flex-shrink:0;background:#066aab;color:white;padding:12px 16px calc(12px + env(safe-area-inset-top, 0px)) 16px;display:flex;align-items:center;justify-content:space-between;">
       <h2 style="margin:0;font-size:17px;font-weight:700;">✔ Survey Quality Check</h2>
       <button onclick="document.getElementById('checkSurveyOverlay')?.remove();" style="background:rgba(255,255,255,0.15);color:white;border:none;border-radius:8px;padding:6px 14px;font-size:14px;cursor:pointer;">✕ Close</button>
     </div>
@@ -13133,7 +13133,7 @@ async function checkSurvey() {
       backBtn = document.createElement('button');
       backBtn.id = 'csBackToCheckBtn';
       backBtn.textContent = '← Back to Check Survey';
-      backBtn.style.cssText = 'position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));left:50%;transform:translateX(-50%);background:#006699;color:white;border:none;border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+      backBtn.style.cssText = 'position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));left:50%;transform:translateX(-50%);background:#066aab;color:white;border:none;border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
       backBtn.onclick = async function() {
         backBtn.remove();
         await _csEvaluateAndReturn(scrollPos);
@@ -13316,7 +13316,7 @@ async function toggleRemainingList(btn) {
       return `<a href="#" role="button"
                  onclick="event.preventDefault(); event.stopPropagation(); jumpToChecklistItem(this.getAttribute('data-item-label')); return false;"
                  data-item-label="${safe}"
-                 style="display:block;color:#006699;text-decoration:underline;padding:6px 0;min-height:32px;line-height:20px;">• ${display}</a>`;
+                 style="display:block;color:#066aab;text-decoration:underline;padding:6px 0;min-height:32px;line-height:20px;">• ${display}</a>`;
     }).join('');
     popover.innerHTML = `
       <div style="color:#991b1b;font-weight:600;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:0.4px;">
@@ -13532,7 +13532,7 @@ function _csShowEvalModal(working, reason, scrollPos) {
         ${reason.replace(/</g, '&lt;')}
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;">
-        <button id="csEvalGoBack" style="width:100%;padding:12px;background:#006699;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">
+        <button id="csEvalGoBack" style="width:100%;padding:12px;background:#066aab;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">
           ← Go back and fix
         </button>
         <button id="csEvalForceOK" style="width:100%;padding:12px;background:white;color:#64748b;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;">
@@ -14739,7 +14739,7 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
     wrapper.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
         <div style="font-weight:600;font-size:14px;color:#6b7280;">⊘ ${mediaLabel} — skipped${photos.length > 0 ? ` (${photos.length} photo${photos.length === 1 ? '' : 's'} retained)` : ''}</div>
-        <button onclick="toggleExclude('${safeLabel}')" style="background:white;color:#006699;border:1px solid #006699;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;">Unskip</button>
+        <button onclick="toggleExclude('${safeLabel}')" style="background:white;color:#066aab;border:1px solid #066aab;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;">Unskip</button>
       </div>
     `;
     return;
@@ -14757,19 +14757,19 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
         <div style="position:relative;width:84px;">
           <img id="thumb-${pid}" src="" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
           <button onclick="event.stopPropagation();deleteAreaPhoto('${pid}', '${safeLabel}')" aria-label="Delete photo" style="position:absolute;top:-8px;right:-8px;background:#dc2626;color:white;border:2px solid white;border-radius:50%;width:30px;height:30px;font-size:16px;font-weight:700;cursor:pointer;line-height:26px;text-align:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,0.3);">×</button>
-          <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#006699;color:white;border:none;border-radius:6px;padding:6px 0;font-size:12px;font-weight:700;cursor:pointer;">Move ↗</button>
+          <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#066aab;color:white;border:none;border-radius:6px;padding:6px 0;font-size:12px;font-weight:700;cursor:pointer;">Move ↗</button>
         </div>
       `).join('')}
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;">
       <button type="button"
         onclick="openBatchCamera('${safeLabel}', { isArea: true, categoryName: '${safeCat}' })"
-        style="background:#006699;color:white;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
+        style="background:#066aab;color:white;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
         📷 ${photos.length > 0 ? `Take More (${photos.length})` : 'Take Photos'}
       </button>
       <button type="button"
         onclick="importPhotosForItem('${safeLabel}')"
-        style="background:white;color:#006699;border:2px solid #006699;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
+        style="background:white;color:#066aab;border:2px solid #066aab;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
         🖼️ Import photos from library / files
       </button>
     </div>
@@ -14926,7 +14926,7 @@ function showPhotoPreviewModal(fieldKey, label, stampedDataUrl, fileType) {
 
   modal.innerHTML = `
     <div style="background:white;border-radius:12px;max-width:95vw;width:100%;margin:10px auto;padding:14px;display:flex;flex-direction:column;align-items:center;">
-      <div style="font-weight:600;margin-bottom:8px;color:#006699;font-size:14px;">Photo Preview — ${label}</div>
+      <div style="font-weight:600;margin-bottom:8px;color:#066aab;font-size:14px;">Photo Preview — ${label}</div>
       <div style="position:relative;width:100%;text-align:center;margin-bottom:8px;">
         <img id="previewImage" src="${stampedDataUrl}" style="max-width:100%;max-height:45vh;border-radius:8px;border:1px solid #ccc;">
       </div>
@@ -15193,7 +15193,7 @@ function startAnnotation() {
 
   overlay.innerHTML = `
     <div id="annoToolbar" style="display:flex;gap:6px;padding:10px 12px;background:#1e293b;align-items:center;flex-wrap:wrap;">
-      <button id="annoToolCircle" onclick="setAnnotationTool('circle')" style="padding:6px 12px;border-radius:6px;border:2px solid #3b82f6;background:#006699;color:white;font-size:13px;font-weight:600;cursor:pointer;">⭕ Circle</button>
+      <button id="annoToolCircle" onclick="setAnnotationTool('circle')" style="padding:6px 12px;border-radius:6px;border:2px solid #3b82f6;background:#066aab;color:white;font-size:13px;font-weight:600;cursor:pointer;">⭕ Circle</button>
       <button id="annoToolArrow" onclick="setAnnotationTool('arrow')" style="padding:6px 12px;border-radius:6px;border:2px solid transparent;background:#374151;color:white;font-size:13px;font-weight:600;cursor:pointer;">➜ Arrow</button>
       <button id="annoToolText" onclick="setAnnotationTool('text')" style="padding:6px 12px;border-radius:6px;border:2px solid transparent;background:#374151;color:white;font-size:13px;font-weight:600;cursor:pointer;">Aa Text</button>
       <div style="flex:1;"></div>
@@ -15253,7 +15253,7 @@ function setAnnotationTool(tool) {
     const btn = document.getElementById('annoTool' + t.charAt(0).toUpperCase() + t.slice(1));
     if (btn) {
       btn.style.borderColor = (t === tool) ? '#3b82f6' : 'transparent';
-      btn.style.background = (t === tool) ? '#006699' : '#374151';
+      btn.style.background = (t === tool) ? '#066aab' : '#374151';
     }
   });
 }
@@ -15977,7 +15977,7 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options, su
   // Rating buttons
   options.forEach(option => {
     const isActive = itemData.rating === option;
-    const color = RATING_COLORS[option] || '#006699';
+    const color = RATING_COLORS[option] || '#066aab';
     html += `
       <button class="rating-btn ${isActive ? 'active' : ''}"
               style="${isActive ? `background-color: ${color}; border-color: ${color};` : ''}"
@@ -17462,7 +17462,7 @@ function updateCollapseButton(show) {
     if (!btn) {
       btn = document.createElement('button');
       btn.id = 'floatingCollapseBtn';
-      btn.style.cssText = 'position:fixed;bottom:130px;right:16px;z-index:9998;background:#006699;color:white;border:none;border-radius:14px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.35);display:flex;align-items:center;gap:6px;';
+      btn.style.cssText = 'position:fixed;bottom:130px;right:16px;z-index:9998;background:#066aab;color:white;border:none;border-radius:14px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.35);display:flex;align-items:center;gap:6px;';
       btn.innerHTML = '▲ Collapse';
       btn.title = 'Collapse current section';
       btn.onclick = collapseCurrentSection;
@@ -18268,12 +18268,12 @@ async function generateReport() {
 <body>
 
   <!-- Export toolbar (hidden when printing) -->
-  <div id="exportToolbar" style="position:sticky;top:0;z-index:999;background:#006699;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:3px solid #f0c040;margin:-20px -20px 16px -20px;padding:12px 24px;">
+  <div id="exportToolbar" style="position:sticky;top:0;z-index:999;background:#066aab;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:3px solid #f0c040;margin:-20px -20px 16px -20px;padding:12px 24px;">
     <span style="color:white;font-size:11pt;font-weight:bold;">Kiki Marine — Survey Report</span>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button onclick="window.close(); if(!window.closed) history.back();" style="background:#4ade80;color:#006699;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">← Back to Inspection</button>
-      <button onclick="window.print()" style="background:#fff;color:#006699;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">🖨️ Print / PDF</button>
-      <button onclick="exportToWord()" style="background:#f0c040;color:#006699;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">📥 Download as Word</button>
+      <button onclick="window.close(); if(!window.closed) history.back();" style="background:#4ade80;color:#066aab;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">← Back to Inspection</button>
+      <button onclick="window.print()" style="background:#fff;color:#066aab;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">🖨️ Print / PDF</button>
+      <button onclick="exportToWord()" style="background:#f0c040;color:#066aab;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">📥 Download as Word</button>
       <button onclick="toggleProseMode()" id="proseModeBtn" style="background:#e5e7eb;color:#333;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">📝 Prose Mode</button>
     </div>
   </div>
@@ -19079,7 +19079,7 @@ ${survey.vesselDescription ? `
           // .rating-na / .rating-po CSS classes now.
           const ratingClass = classifyRatingForReport(ratingLabel).cssClass;
           const code = findingCodeMap[item.label];
-          const codeTag = code ? ` <strong style="color:${RATING_COLORS[ratingLabel] || '#006699'};">(Finding ${code})</strong>` : '';
+          const codeTag = code ? ` <strong style="color:${RATING_COLORS[ratingLabel] || '#066aab'};">(Finding ${code})</strong>` : '';
 
           // Build inline photos for the body — large, captioned, like Norm Behring's style
           // v2227: uniform photo layout. Photos from the same item sit
@@ -19130,7 +19130,7 @@ ${survey.vesselDescription ? `
           }
 
           html += `
-  <div class="item" style="border-left-color: ${RATING_COLORS[ratingLabel] || '#006699'};">
+  <div class="item" style="border-left-color: ${RATING_COLORS[ratingLabel] || '#066aab'};">
     <p><strong>${esc(displayItemLabel(item.label, survey))}</strong>${ratingLabel ? ` — <span class="${ratingClass}">${ratingLabel}</span>${codeTag}` : ''}</p>
     ${outdriveInfoHtml}
     ${winchInfoHtml}
@@ -19413,7 +19413,7 @@ function toggleProseMode() {
     });
     // Compact the detailed findings
     items.forEach(item => {
-      item.style.borderLeft = '3px solid #006699';
+      item.style.borderLeft = '3px solid #066aab';
       item.style.padding = '4px 8px';
       item.style.margin = '6px 0';
     });
@@ -19468,7 +19468,7 @@ function renderReportInPage(html) {
 
   const app = document.getElementById('app');
   app.innerHTML = `
-    <div style="position:fixed;top:0;left:0;right:0;z-index:100;background:#006699;padding:12px 16px;display:flex;align-items:center;gap:12px;">
+    <div style="position:fixed;top:0;left:0;right:0;z-index:100;background:#066aab;padding:12px 16px;display:flex;align-items:center;gap:12px;">
       <button onclick="history.back()" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">←</button>
       <span style="color:white;font-weight:600;">Survey Report</span>
       <button onclick="window.print()" style="margin-left:auto;background:#16a34a;color:white;border:none;padding:8px 16px;border-radius:6px;font-size:14px;cursor:pointer;">🖨️ Print/PDF</button>
@@ -19915,12 +19915,12 @@ const BackupProgress = (() => {
       <div style="background:white;border-radius:14px;max-width:460px;width:100%;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
           <span style="font-size:24px;">☁️</span>
-          <h2 id="bpTitle" style="margin:0;font-size:18px;color:#006699;">Backing up to Google Drive</h2>
+          <h2 id="bpTitle" style="margin:0;font-size:18px;color:#066aab;">Backing up to Google Drive</h2>
         </div>
         <div id="bpSurveyLabel" style="font-size:14px;font-weight:600;color:#374151;margin-bottom:6px;">Preparing…</div>
         <div id="bpStepLabel" style="font-size:12px;color:#6b7280;margin-bottom:12px;">—</div>
         <div style="background:#e5e7eb;border-radius:10px;height:14px;overflow:hidden;margin-bottom:6px;">
-          <div id="bpBar" style="background:linear-gradient(90deg,#3399cc,#006699);height:100%;width:0%;transition:width 0.3s ease;"></div>
+          <div id="bpBar" style="background:linear-gradient(90deg,#3399cc,#066aab);height:100%;width:0%;transition:width 0.3s ease;"></div>
         </div>
         <div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:14px;">
           <span id="bpPercent">0%</span>
@@ -20047,10 +20047,10 @@ function showDriveApiDisabledDialog(activationUrl, done, total) {
       <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;margin-bottom:14px;">
         <div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:4px;">ENABLE URL</div>
         <a href="${url}" target="_blank" rel="noopener"
-           style="color:#006699;font-size:12px;word-break:break-all;text-decoration:underline;">${url}</a>
+           style="color:#066aab;font-size:12px;word-break:break-all;text-decoration:underline;">${url}</a>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button id="driveApiOpenBtn" style="flex:1;min-width:140px;padding:10px;background:#006699;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+        <button id="driveApiOpenBtn" style="flex:1;min-width:140px;padding:10px;background:#066aab;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
           🔗 Open Enable Page
         </button>
         <button id="driveApiCopyBtn" style="flex:1;min-width:120px;padding:10px;background:#f1f5f9;color:#334155;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
@@ -20982,8 +20982,8 @@ async function openBatchCamera(itemLabel, opts) {
     </div>
     <div id="batchCamStrip" style="flex:0 0 auto;background:#111;padding:10px 12px;display:flex;gap:8px;overflow-x:auto;min-height:76px;align-items:center;"></div>
     <div style="flex:0 0 auto;background:#000;display:flex;align-items:center;justify-content:center;gap:40px;padding:20px 0;padding-bottom:calc(20px + env(safe-area-inset-bottom));">
-      <button id="batchCamShutter" aria-label="Take photo" style="width:88px;height:88px;border-radius:50%;background:#006699;border:5px solid #f5b942;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:38px;padding:0;line-height:1;">📷</button>
-      <button id="batchCamDone" aria-label="Done" style="width:88px;height:88px;border-radius:50%;background:#f5b942;color:#006699;border:5px solid #006699;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;padding:0;line-height:1;letter-spacing:0.5px;">DONE</button>
+      <button id="batchCamShutter" aria-label="Take photo" style="width:88px;height:88px;border-radius:50%;background:#066aab;border:5px solid #f5b942;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:38px;padding:0;line-height:1;">📷</button>
+      <button id="batchCamDone" aria-label="Done" style="width:88px;height:88px;border-radius:50%;background:#f5b942;color:#066aab;border:5px solid #066aab;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;padding:0;line-height:1;letter-spacing:0.5px;">DONE</button>
     </div>
   `;
   document.body.appendChild(overlay);
