@@ -12,6 +12,15 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2242 — 2026-04-16
+
+### Standards auto-detection and comparables language fix
+
+- **Standards auto-merge**: New `mergeTextStandards()` helper scans observation text for ABYC, TC/TP, SAE, NFPA references and merges any not already in the checked standards list. Applied to Detailed Findings, Checklist Summary, and F&R citations. Fixes the outdrive item citing ABYC E-2 in text while only showing P-4 in Applicable Standards.
+- **Comparables language**: The Valuation Worksheet preamble now says "source was used" instead of "source and comparable were used" when no comparables are recorded.
+
+---
+
 ## v2241 — 2026-04-16
 
 ### Report quality fixes (from 64-page PDF review)

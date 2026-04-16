@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2241';
+const APP_VERSION = 'v2242';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -18425,6 +18425,28 @@ async function generateReport() {
       // double spaces → single
       .replace(/  +/g, ' ');
   };
+
+  // v2242: auto-detect standards cited in observation text and merge with
+  // the checked standards array. Catches cases like "Per ABYC E-2, ..."
+  // in the text when only ABYC P-4 was ticked in the form.
+  const mergeTextStandards = (checkedStandards, text) => {
+    if (!text) return checkedStandards || [];
+    const checked = (checkedStandards || []).slice(); // don't mutate original
+    // Match ABYC X-NN, TC TP NNNN, SAE JNNNN, NFPA NNN patterns
+    const refs = text.match(/\bABYC\s+[A-Z]-\d+\b/gi) || [];
+    const tcRefs = text.match(/\bT(?:C\s+)?TP\s*\d+\b/gi) || [];
+    const saeRefs = text.match(/\bSAE\s+J\d+\b/gi) || [];
+    const nfpaRefs = text.match(/\bNFPA\s+\d+\b/gi) || [];
+    const allRefs = [...refs, ...tcRefs, ...saeRefs, ...nfpaRefs];
+    allRefs.forEach(ref => {
+      const norm = ref.replace(/\s+/g, ' ').trim().toUpperCase();
+      // Only add if not already covered by an existing checked standard
+      const alreadyCovered = checked.some(s => s.toUpperCase().includes(norm));
+      if (!alreadyCovered) checked.push(ref.replace(/\s+/g, ' ').trim());
+    });
+    return checked;
+  };
+
   const reportDate = survey.reportDate || new Date().toISOString().split('T')[0];
   // Format a YYYY-MM-DD date as "April 15, 2026" for reader-facing display
   // (the ISO value is still kept for storage/inputs).
@@ -19144,7 +19166,8 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
               if (notesText.length < _cleaned.trim().length) notesText += ' …';
             }
           }
-          const stdText = isViolation && d.standards && d.standards.length > 0 ? d.standards.join('; ') : '—';
+          const _mergedStd = isViolation ? mergeTextStandards(d.standards, d.text) : [];
+          const stdText = _mergedStd.length > 0 ? _mergedStd.join('; ') : '—';
           // v2228: classify via helper — the previous fallthrough chain
           // mislabelled "Not applicable" and "Powered up only" as "NT —
           // Not Tested" in the summary table. NA and PO now render with
@@ -19502,7 +19525,11 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     ${winchInfoHtml}
     ${mastOptionsHtml}
     ${itemData.text ? `<p>${esc(cleanupTypos(depersonalise(dedup(itemData.text))))}</p>` : ''}
-    ${(ratingLabel.startsWith('A') || ratingLabel.startsWith('B')) && itemData.standards && itemData.standards.length > 0 ? `<p class="standards"><strong>Applicable Standards:</strong> ${itemData.standards.join(', ')}</p>` : ''}
+    ${(() => {
+      if (!(ratingLabel.startsWith('A') || ratingLabel.startsWith('B'))) return '';
+      const _merged = mergeTextStandards(itemData.standards, itemData.text);
+      return _merged.length > 0 ? `<p class="standards"><strong>Applicable Standards:</strong> ${_merged.join(', ')}</p>` : '';
+    })()}
     ${itemPhotosHtml}
   </div>`;
         });
@@ -19543,7 +19570,8 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
 
   // Helper: build a specific recommendation line citing the item's standards
   function buildRecommendation(f, severity) {
-    const stdCite = (severity === 'A' || severity === 'B') && f.standards && f.standards.length ? ` (${f.standards.join('; ')})` : '';
+    const _frMerged = (severity === 'A' || severity === 'B') ? mergeTextStandards(f.standards, f.text) : [];
+    const stdCite = _frMerged.length > 0 ? ` (${_frMerged.join('; ')})` : '';
     if (severity === 'A') {
       return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> Immediate correction required before the vessel is next underway${stdCite}. This finding represents a direct safety risk or code violation.</em></p>`;
     } else if (severity === 'B') {
@@ -19771,7 +19799,14 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     + '<p><strong>Condition Adjustment:</strong> The vessel\u2019s overall condition rating of \u201c' + _overallCond + '\u201d has been factored into the final valuation range using the BUC Marine Grading System.</p>'
 
     + '<h3 style="margin:20px 0 8px 0;color:#066aab;font-size:11pt;">VALUATION WORKSHEET</h3>'
-    + '<div class="scope-text"><p>The following data ' + (survey.skipComparables ? 'source' + (_srcCount === 1 ? ' was' : 's were') : (_srcCount === 1 ? 'source and comparable were' : 'sources and comparables were')) + ' used in determining the Fair Market Value' + (survey.replacementCost ? ' and Estimated Replacement Cost' : '') + ' of the subject vessel.</p></div>'
+    // v2242: only say "and comparables" if comparables were actually recorded
+    + (function() {
+      const _hasComps = !survey.skipComparables && survey.comparables && survey.comparables.length > 0 && survey.comparables.some(c => c.vessel);
+      const _ws2 = _hasComps
+        ? (_srcCount === 1 ? 'source and comparable were' : 'sources and comparables were')
+        : 'source' + (_srcCount === 1 ? ' was' : 's were');
+      return '<div class="scope-text"><p>The following data ' + _ws2 + ' used in determining the Fair Market Value' + (survey.replacementCost ? ' and Estimated Replacement Cost' : '') + ' of the subject vessel.</p></div>';
+    })()
 
     + '<table>'
     + '<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">' + _srcLabelConsulted + '</td></tr>'
