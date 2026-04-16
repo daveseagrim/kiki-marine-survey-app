@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v2239';
+const CACHE_NAME = 'kiki-marine-v2240';
 const URLS_TO_CACHE = [
   './',
   'index.html',
@@ -24,6 +24,7 @@ const URLS_TO_CACHE = [
   'icon-512.png',
   'icon-192-maskable.png',
   'icon-512-maskable.png',
+  'signature.png',
   'https://kikimarinesurveyor.ca/wp-content/uploads/2024/11/new_logo.png',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',

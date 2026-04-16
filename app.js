@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2239';
+const APP_VERSION = 'v2240';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -15276,9 +15276,9 @@ async function removeAllDateStamps() {
         req.onsuccess = () => res(req.result);
         req.onerror = () => rej(req.error);
       });
-      if (photo && photo.data) {
-        const cleaned = await removeDateStampFromPhoto(photo.data);
-        photo.data = cleaned;
+      if (photo && photo.dataUrl) {
+        const cleaned = await removeDateStampFromPhoto(photo.dataUrl);
+        photo.dataUrl = cleaned;
         const tx2 = db.transaction('photos', 'readwrite');
         const store2 = tx2.objectStore('photos');
         await new Promise((res, rej) => {
@@ -18495,6 +18495,20 @@ async function generateReport() {
     if (survey[_key]) fourCornerPhotos[_key] = await loadAndCompress(survey[_key]);
   }
 
+  // ── Pre-load surveyor signature image (converted to base64 for embedding) ──
+  let signatureBase64 = '';
+  try {
+    const sigResp = await fetch('signature.png');
+    if (sigResp.ok) {
+      const sigBlob = await sigResp.blob();
+      signatureBase64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(sigBlob);
+      });
+    }
+  } catch (e) { console.warn('Could not load signature.png:', e); }
+
   // ── Pre-fetch all per-item photos (compressed for report) ────────────
   const itemPhotoCache = {};
   async function cachePhoto(photoId) {
@@ -18796,26 +18810,20 @@ async function generateReport() {
       _esValueHtml = '<span style="color:#6b7280;font-style:italic;">Not yet assessed</span>';
     }
 
-    // Top A findings (max 3)
-    const _topA = findings.A.slice(0, 3).map(f =>
-      '<li style="margin-bottom:4px;"><strong style="color:#dc2626;">' + esc(f.code) + '</strong> — ' + esc(f.label) + '</li>'
+    // v2239: list ALL A and B findings — this is printed on paper,
+    // the reader needs the complete picture without flipping pages.
+    const _allA = findings.A.map(f =>
+      '<li style="margin-bottom:4px;"><strong style="color:#dc2626;">' + esc(f.code) + '</strong> — ' + esc(displayItemLabel(f.label, survey)) + '</li>'
     ).join('');
-    // Top B findings (max 3)
-    const _topB = findings.B.slice(0, 3).map(f =>
-      '<li style="margin-bottom:4px;"><strong style="color:#d97706;">' + esc(f.code) + '</strong> — ' + esc(f.label) + '</li>'
+    const _allB = findings.B.map(f =>
+      '<li style="margin-bottom:4px;"><strong style="color:#d97706;">' + esc(f.code) + '</strong> — ' + esc(displayItemLabel(f.label, survey)) + '</li>'
     ).join('');
 
     return `
   <div class="page-break"></div>
   <h2 style="background:#066aab;font-size:14pt;">EXECUTIVE SUMMARY</h2>
-  <table style="border:2px solid #066aab;">
-    <tr><td style="width:40%;background:#e8edf2;"><strong>Vessel</strong></td><td>${esc(survey.yearMakeModel || 'N/A')} — "${esc(survey.vesselName || 'N/A')}"</td></tr>
-    <tr><td style="background:#e8edf2;"><strong>HIN</strong></td><td>${esc(survey.hinNumber || 'N/A')}</td></tr>
-    <tr><td style="background:#e8edf2;"><strong>Overall Condition Rating</strong></td><td><strong style="color:#066aab;font-size:12pt;">${_esCond.toUpperCase()}</strong></td></tr>
-    <tr><td style="background:#e8edf2;"><strong>Estimated Fair Market Value</strong></td><td>${_esValueHtml}</td></tr>
-  </table>
-
-  <table style="margin-top:12px;">
+  <!-- v2239: vessel info table removed — redundant with cover page + General Vessel Info -->
+  <table>
     <tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Findings Overview</td></tr>
     <tr><td style="width:40%;"><strong><span style="color:#dc2626;">&#9632;</span> Critical (A)</strong></td><td>${findings.A.length} finding${findings.A.length !== 1 ? 's' : ''}</td></tr>
     <tr><td><strong><span style="color:#d97706;">&#9632;</span> Needs Attention (B)</strong></td><td>${findings.B.length} finding${findings.B.length !== 1 ? 's' : ''}</td></tr>
@@ -18825,9 +18833,9 @@ async function generateReport() {
     <tr><td><strong>Safety Equipment (TC TP 511)</strong></td><td>${_esSafe.length > 0 ? _esChecked + ' of ' + _esSafe.length + ' verified' + (_esMissing > 0 ? ' — <strong style="color:#dc2626;">' + _esMissing + ' missing</strong>' : ' — <strong style="color:#16a34a;">all present</strong>') : '<span style="color:#6b7280;">Not yet assessed</span>'}</td></tr>
   </table>
 
-  ${findings.A.length > 0 ? '<div style="margin-top:12px;"><strong style="color:#dc2626;">Priority Safety Findings:</strong><ul style="margin-top:4px;">' + _topA + (findings.A.length > 3 ? '<li style="color:#6b7280;font-style:italic;">…and ' + (findings.A.length - 3) + ' more (see Findings &amp; Recommendations)</li>' : '') + '</ul></div>' : ''}
+  ${findings.A.length > 0 ? '<div style="margin-top:12px;"><strong style="color:#dc2626;">Priority Safety Findings:</strong><ul style="margin-top:4px;">' + _allA + '</ul></div>' : ''}
 
-  ${findings.B.length > 0 ? '<div style="margin-top:8px;"><strong style="color:#d97706;">Key Items Needing Attention:</strong><ul style="margin-top:4px;">' + _topB + (findings.B.length > 3 ? '<li style="color:#6b7280;font-style:italic;">…and ' + (findings.B.length - 3) + ' more (see Findings &amp; Recommendations)</li>' : '') + '</ul></div>' : ''}
+  ${findings.B.length > 0 ? '<div style="margin-top:8px;"><strong style="color:#d97706;">Key Items Needing Attention:</strong><ul style="margin-top:4px;">' + _allB + '</ul></div>' : ''}
   `;
   })()}
 
@@ -18976,16 +18984,10 @@ async function generateReport() {
     // ── Valuation Worksheet ──
     + '<h3 style="margin:20px 0 8px 0;color:#066aab;font-size:11pt;">VALUATION WORKSHEET</h3>'
     + '<div class="scope-text"><p>The following data ' + (survey.skipComparables ? 'source' + (_srcCount === 1 ? ' was' : 's were') : (_srcCount === 1 ? 'source and comparable were' : 'sources and comparables were')) + ' used in determining the Fair Market Value and Estimated Replacement Cost of the subject vessel.</p></div>'
-    + '<table>'
-    + '<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Subject Vessel</td></tr>'
-    + '<tr><td style="width:40%;"><strong>Vessel</strong></td><td>' + (esc(survey.yearMakeModel) || 'N/A') + '</td></tr>'
-    + '<tr><td><strong>Vessel Name</strong></td><td>' + (esc(survey.vesselName) || 'N/A') + '</td></tr>'
-    + '<tr><td><strong>HIN</strong></td><td>' + (esc(survey.hinNumber) || 'N/A') + '</td></tr>'
-    + '<tr><td><strong>Overall Condition Rating</strong></td><td>' + _overallCond + '</td></tr>'
-    + '<tr><td><strong>Date of Survey</strong></td><td>' + (survey.surveyDate || 'N/A') + '</td></tr>'
-    + '</table>'
+    // v2239: Subject Vessel info block removed — redundant with
+    // General Vessel Information and Executive Summary above.
 
-    + '<table style="margin-top:12px;">'
+    + '<table>'
     + '<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">' + _srcLabelConsulted + '</td></tr>'
     + '<tr><td style="width:40%;"><strong>' + (_srcCount === 1 ? 'Source' : 'Sources') + '</strong></td><td>' + _wsSrcCell + '</td></tr>'
     + '<tr><td><strong>BUC Value Range</strong></td><td>' + _bucRangeCell + '</td></tr>'
@@ -18994,8 +18996,9 @@ async function generateReport() {
     + (_concU ? '<tr style="border-top:2px solid #066aab;"><td><strong>Final Concluded FMV</strong></td><td><strong style="color:#066aab;">USD $' + _concU.toLocaleString() + (_xr ? ' &nbsp;/&nbsp; CAD $' + _concC.toLocaleString() : '') + '</strong></td></tr>' : '')
     + '</table>'
 
-    // v2231: comparables table hidden when skipComparables is true
-    + (survey.skipComparables ? '' :
+    // v2239: comparables table hidden when skipComparables is true
+    // OR when no comparable vessels have actually been entered.
+    + (survey.skipComparables || !survey.comparables || survey.comparables.length === 0 || survey.comparables.every(c => !c.vessel) ? '' :
       '<table style="margin-top:12px;">'
       + '<tr><td colspan="6" style="background:#e8edf2;font-weight:bold;">Comparable Vessels / Market Research</td></tr>'
       + '<tr><th>Source</th><th>Vessel</th><th>Price (USD)</th><th>Location</th><th>Date</th><th>Notes</th></tr>'
@@ -19214,14 +19217,8 @@ async function generateReport() {
        the headline verdict (rating, FMV, finding counts) near the front.
        The full Rating & Valuation section follows the Executive Summary. -->
 
-${survey.locationLat && survey.locationLon ? `
-  <!-- v2228: show the survey location address + GPS coordinates.
-       No links — the report is typically viewed on paper. -->
-  <div style="margin: 10px 0; padding: 10px 14px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:4px; font-size:10pt;">
-    ${survey.location ? `<div style="color:#1f2937;"><strong>Survey Location:</strong> ${esc(survey.location)}</div>` : ''}
-    <div style="color:#6b7280;${survey.location ? 'margin-top:3px;font-size:9pt;' : ''}"><strong>GPS:</strong> ${parseFloat(survey.locationLat).toFixed(5)}, ${parseFloat(survey.locationLon).toFixed(5)}</div>
-  </div>
-` : ''}
+<!-- v2239: GPS location block removed — location is already in the
+     Survey Conditions table above. GPS coords are internal data only. -->
 
   <!-- ═══ VESSEL SPECIFICATIONS ═══ -->`;
   const isSail = (survey.vesselType || '').toLowerCase() === 'sail';
@@ -19403,8 +19400,12 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
       if (eq.photos && eq.photos.length > 0) {
         let photoImgs = '';
         for (const pid of eq.photos) {
-          if (itemPhotoCache[pid]) {
-            photoImgs += `<img src="${itemPhotoCache[pid]}" style="width:240px;height:180px;object-fit:cover;border-radius:4px;margin:3px;border:1px solid #ccc;" />`;
+          const src = itemPhotoCache[pid];
+          if (!src) {
+            console.warn('Safety photo missing from cache — ID:', pid, '(item:', eq.name, ')');
+          }
+          if (src) {
+            photoImgs += `<img src="${src}" style="width:240px;height:180px;object-fit:cover;border-radius:4px;margin:3px;border:1px solid #ccc;" />`;
           }
         }
         if (photoImgs) {
@@ -19725,7 +19726,9 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     } else if (severity === 'B') {
       return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> Schedule repairs in the near future to maintain compliance with applicable codes, regulations, standards, or recommended practices${stdCite}.</em></p>`;
     } else {
-      return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> Address in keeping with good marine maintenance practices.</em></p>`;
+      // v2240: C-rated items don't get a generic recommendation line —
+      // the observation text alone is sufficient for maintenance items.
+      return '';
     }
   }
 
@@ -19737,16 +19740,13 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
   // pointing the reader to the full observation + photos in the Detailed
   // Survey Findings section above.
   function renderFinding(f, color, severity) {
-    const photoCount = (f.photos && f.photos.length) || 0;
-    const crossRef = f.category
-      ? `<p style="font-size:9pt;color:#6b7280;margin:4px 0 0 0;"><em>See full observation${photoCount > 0 ? ` and ${photoCount} photo${photoCount === 1 ? '' : 's'}` : ''} in <strong>Detailed Survey Findings → ${esc(f.category)}</strong>.</em></p>`
-      : '';
     const briefText = truncateForFR(cleanupTypos(depersonalise(dedup(f.text || ''))));
+    // v2240: cross-reference sentences removed ("See full observation and
+    // N photos in Detailed Survey Findings → ...") — unnecessary on paper.
     return `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid ${color};">
       <strong style="color:${color};">Finding ${f.code}</strong> — ${esc(displayItemLabel(f.label, survey))}
       ${briefText ? `<p style="margin:3px 0;">${esc(briefText)}</p>` : ''}
       ${buildRecommendation(f, severity)}
-      ${crossRef}
     </div>`;
   }
 
@@ -19787,15 +19787,10 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
       // v2228: photos removed from F&R; cross-reference points readers to
       // the Detailed Survey Findings section where the photo + full
       // observation already live.
-      const _ntPhotoCount = (f.photos && f.photos.length) || 0;
-      const _ntCrossRef = f.category
-        ? `<p style="font-size:9pt;color:#6b7280;margin:4px 0 0 0;"><em>See full observation${_ntPhotoCount > 0 ? ` and ${_ntPhotoCount} photo${_ntPhotoCount === 1 ? '' : 's'}` : ''} in <strong>Detailed Survey Findings → ${esc(f.category)}</strong>.</em></p>`
-        : '';
       const _ntBrief = truncateForFR(cleanupTypos(depersonalise(dedup(f.text || ''))));
       html += `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid #6b7280;">
         <strong style="color:#6b7280;">Finding ${f.code}</strong> — ${esc(f.label)}
         ${_ntBrief ? `<p style="margin:3px 0;">${esc(_ntBrief)}</p>` : ''}
-        ${_ntCrossRef}
       </div>`;
     });
   }
@@ -19804,15 +19799,10 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
   if (findings.PO.length > 0) {
     html += `<h3 style="color:#6b7280;">Powered Up Only</h3>`;
     findings.PO.forEach(f => {
-      const _poPhotoCount = (f.photos && f.photos.length) || 0;
-      const _poCrossRef = f.category
-        ? `<p style="font-size:9pt;color:#6b7280;margin:4px 0 0 0;"><em>See full observation${_poPhotoCount > 0 ? ` and ${_poPhotoCount} photo${_poPhotoCount === 1 ? '' : 's'}` : ''} in <strong>Detailed Survey Findings → ${esc(f.category)}</strong>.</em></p>`
-        : '';
       const _poBrief = truncateForFR(cleanupTypos(depersonalise(dedup(f.text || ''))));
       html += `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid #6b7280;">
         <strong style="color:#6b7280;">Finding ${f.code}</strong> — ${esc(f.label)}
         ${_poBrief ? `<p style="margin:3px 0;">${esc(_poBrief)}</p>` : ''}
-        ${_poCrossRef}
       </div>`;
     });
   }
@@ -19842,7 +19832,8 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
           <a href="mailto:dave@kikimarine.ca" style="color:#066aab;text-decoration:none;">dave@kikimarine.ca</a> &nbsp;&bull;&nbsp;
           <a href="https://kikimarine.ca" style="color:#066aab;text-decoration:none;">kikimarine.ca</a>
         </p>
-        <p style="margin:8px 0 0 0;font-size:10pt;"><strong>Signed:</strong> ${reportDateLong}</p>
+        ${signatureBase64 ? `<img src="${signatureBase64}" alt="Surveyor Signature" style="max-width:200px;height:auto;margin:8px 0 4px 0;display:block;" />` : ''}
+        <p style="margin:4px 0 0 0;font-size:10pt;"><strong>Signed:</strong> ${reportDateLong}</p>
       </div>
     </div>
     <div style="margin-top:16px;padding:10px 0;border-top:2px solid #066aab;text-align:center;">

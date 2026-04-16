@@ -12,6 +12,49 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2240 — 2026-04-16
+
+### Fixed — Safety photo ReferenceError in report generation
+
+The v2239 safety-photo render code referenced an undefined
+`safetyPhotoFallback` variable, which would cause a ReferenceError. Removed
+the broken fallback and added diagnostic `console.warn` logging when a safety
+photo is missing from the pre-load cache.
+
+### Fixed — Date-stamp removal reading wrong field (`photo.data` → `photo.dataUrl`)
+
+`removeAllDateStamps()` read `photo.data` instead of `photo.dataUrl`, so the
+function silently did nothing. Corrected to use the actual IndexedDB field
+name.
+
+### Changed — Removed C-rated recommendation boilerplate from F&R
+
+The generic "Recommendation: Address in keeping with good marine maintenance
+practices." line that appeared on every C-rated finding has been removed.
+A- and B-rated findings keep their specific recommendation text.
+
+### Changed — Removed cross-reference sentences from F&R
+
+The "See full observation and N photos in Detailed Survey Findings → ..."
+sentences below each finding have been removed. These are unnecessary on a
+printed report where the reader can see the Detailed Findings section directly.
+
+### Added — Surveyor's signature image in Surveyor's Certificate
+
+Dave's signature image (`signature.png`) is now pre-loaded during report
+generation, converted to base64, and displayed above the "Signed:" date line
+in the Surveyor's Certificate section. Works in both Print/PDF and Word export.
+
+### Changed — v2239 iterative report cleanup (previously unbundled)
+
+Captures several v2239 changes that were made iteratively but not logged:
+- Executive Summary: removed vessel info table and FMV row (redundant)
+- Valuation Worksheet: removed Subject Vessel info block (redundant)
+- Comparables table: suppressed when no comparable vessels are listed
+- GPS location block: removed from below Survey Conditions table
+
+---
+
 ## v2239 — 2026-04-16
 
 ### Fixed — FMV formatting bug ($18 instead of $18,000)
@@ -37,6 +80,12 @@ Detailed Survey Findings, Findings & Recommendations), C-rated and
 lower-severity items in the Checklist Summary table now show only the first
 sentence of the surveyor's notes, with an ellipsis. A/B findings keep the
 full text since they require the reader's immediate attention.
+
+### Changed — Executive Summary lists all A and B findings
+
+The Executive Summary previously capped at 3 items per severity with an
+"…and X more" overflow link. Since this is printed on paper, the reader needs
+the complete list. All A and B findings now appear in full.
 
 ### Added — Common typo auto-correction at report time
 
