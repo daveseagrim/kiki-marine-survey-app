@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2225';
+const APP_VERSION = 'v2227';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2832,7 +2832,7 @@ function showNotesSheet(itemLabel, categoryName) {
       // template-rename rollouts. Dedupe against any phrasing already
       // present so we never double up.
       if (/^Not\b/i.test(itemData.rating || '') && /^\s*battery charger\s*$/i.test(itemLabel || '')) {
-        const noAcText = 'Because the vessel was not connected to AC power, operation of the battery charger was not verified at the time of survey.';
+        const noAcText = 'Because the boat was not connected to AC power, operation of the battery charger was not verified at the time of survey.';
         const alreadyThere = sheetVariants.some(v => /(not connected to AC power|no AC power available)/i.test(v.text || ''));
         if (!alreadyThere) {
           sheetVariants.push({ section: 'Battery charger', rating: 'Not tested', phase: 'observed', severity: 1, text: noAcText });
@@ -10612,7 +10612,14 @@ function renderInspection(survey) {
     </div>
   `;
 
+  // v2227: fully-skipped categories accumulate here so we can append them
+  // at the bottom of the inspection view (under Instruments) rather than
+  // in template order. Keeps the active work up top and the "these are
+  // deliberately skipped" housekeeping out of the way.
+  let skippedCategoriesHtml = '';
+
   Object.entries(ratedItemsByCategory).forEach(([categoryName, items]) => {
+    const _htmlStart = html.length;
     const categoryCompletionCount = items.filter(item =>
       survey.items[item.label]?.rating || survey.items[item.label]?.excluded
     ).length;
@@ -10920,6 +10927,15 @@ function renderInspection(survey) {
         </div>
       </div>
     `;
+
+    // v2227: if this entire category is skipped (every item excluded),
+    // peel its HTML off the main stream and hold it aside. It'll render
+    // in a collapsed block at the bottom of the inspection view, under
+    // Instruments & Electronics, so the active work stays up top.
+    if (allExcluded) {
+      skippedCategoriesHtml += html.substring(_htmlStart);
+      html = html.substring(0, _htmlStart);
+    }
   });
 
   // Valuation & Comparables removed from inspection screen — lives on the
@@ -10938,66 +10954,115 @@ function renderInspection(survey) {
   const bracketObj = TC_SAFETY_EQUIPMENT.brackets.find(b => b.id === (survey.safetyBracket || getLengthBracket(survey.loa)));
   const bracketLabel = bracketObj ? bracketObj.label : 'Unknown';
   const typeLabel = (survey.safetyVesselType || survey.vesselType || 'power').replace('-', ' ');
-  const safetyChecked = survey.safetyEquipment.filter(e => e.checked).length;
-  const safetyTotal = survey.safetyEquipment.length;
+  const sectionSkipped = !!survey.safetyEquipmentSkipped;
+  const skippedCategoriesMap = survey.safetySubcategoriesSkipped || {};
+  // v2227: honour per-section / per-sub-category / per-item skip flags
+  const activeSafety = survey.safetyEquipment.filter(e => !e.skipped && !skippedCategoriesMap[e.category]);
+  const safetyChecked = activeSafety.filter(e => e.checked).length;
+  const safetyTotal = activeSafety.length;
   const safetyPct = safetyTotal > 0 ? Math.round((safetyChecked / safetyTotal) * 100) : 0;
+  const safetyProgressText = sectionSkipped
+    ? 'Skipped'
+    : (safetyTotal === 0 ? 'No items' : `${safetyPct}% (${safetyChecked}/${safetyTotal})`);
+
+  // v2227: remember where the Safety block starts so we can relocate it to
+  // the bottom of the inspection view when the whole section is skipped.
+  const _safetyHtmlStart = html.length;
 
   html += `
-    <div class="category-accordion">
-      <button class="accordion-header" onclick="toggleAccordion(this)" style="background: #2563eb; color: white;">
+    <div class="category-accordion" data-category-name="Safety Equipment (TC TP 511)">
+      <button class="accordion-header" onclick="toggleAccordion(this)" style="background: ${sectionSkipped ? '#9ca3af' : '#2563eb'}; color: white;">
         <span class="accordion-chevron" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;font-size:22px;color:rgba(255,255,255,0.8);flex-shrink:0;margin-left:-12px;transition:transform 0.2s;">▾</span>
-        <span class="category-title">🛡️ Safety Equipment (TC TP 511)</span>
-        <span class="category-progress">${safetyPct}% (${safetyChecked}/${safetyTotal})</span>
+        <span class="category-title">🛡️ Safety Equipment (TC TP 511)${sectionSkipped ? ' <span style="background:rgba(255,255,255,0.25);color:white;font-size:11px;padding:1px 8px;border-radius:4px;margin-left:6px;">Section skipped</span>' : ''}</span>
+        <span class="category-progress">${safetyProgressText}</span>
       </button>
       <div class="accordion-content" style="display: none;">
-        <div style="padding: 10px 0; font-size: 13px; color: #555; border-bottom: 1px solid #e5e7eb; margin-bottom: 12px;">
-          <strong>Vessel class:</strong> ${typeLabel} — <strong>Length bracket:</strong> ${bracketLabel}<br/>
-          <em>Per Transport Canada TP 511E Safe Boating Guide & Small Vessel Regulations (SOR/2010-91)</em>
-          <br/><button class="btn-secondary" style="margin-top:8px;font-size:12px;padding:4px 12px;"
-                  onclick="regenerateSafetyChecklist()">🔄 Regenerate Checklist</button>
+        <div style="display:flex;gap:8px;margin-bottom:12px;padding:8px;background:#f9fafb;border-radius:8px;">
+          <button class="btn-secondary" style="font-size:12px;padding:6px 12px;${sectionSkipped ? 'background:#fee2e2;border-color:#fca5a5;' : ''}"
+                  onclick="toggleSafetyEquipmentSectionSkip(${!sectionSkipped})">
+            ${sectionSkipped ? '✅ Include Safety Section' : '⊘ Skip Entire Safety Section'}
+          </button>
         </div>
+        ${sectionSkipped
+          ? `<div style="padding:12px;background:#f3f4f6;border:1px dashed #d1d5db;border-radius:8px;color:#6b7280;font-size:13px;">
+              ⊘ The entire Safety Equipment section is skipped. It will be excluded from the generated report. Use the button above to unskip.
+            </div>`
+          : `<div style="padding: 10px 0; font-size: 13px; color: #555; border-bottom: 1px solid #e5e7eb; margin-bottom: 12px;">
+              <strong>Vessel class:</strong> ${typeLabel} — <strong>Length bracket:</strong> ${bracketLabel}<br/>
+              <em>Per Transport Canada TP 511E Safe Boating Guide &amp; Small Vessel Regulations (SOR/2010-91)</em>
+              <br/><button class="btn-secondary" style="margin-top:8px;font-size:12px;padding:4px 12px;"
+                      onclick="regenerateSafetyChecklist()">🔄 Regenerate Checklist</button>
+            </div>`
+        }
   `;
 
-  let lastCategory = '';
-  survey.safetyEquipment.forEach((eq, idx) => {
-    if (eq.category !== lastCategory) {
-      lastCategory = eq.category;
-      html += `<div style="font-weight:bold;margin-top:14px;margin-bottom:6px;color:#006699;font-size:13px;border-bottom:1px solid #ddd;padding-bottom:4px;">${eq.category}</div>`;
-    }
-    const checkedAttr = eq.checked ? 'checked' : '';
-    const safetyPhotoCount = (eq.photos && eq.photos.length) || 0;
-    const isCustom = eq.custom ? true : false;
-    html += `
-      <div class="rated-item" style="border-left: 4px solid ${eq.checked ? '#16a34a' : '#2563eb'}; padding: 8px 10px; margin-bottom: 8px;">
+  if (!sectionSkipped) {
+    let lastCategory = '';
+    survey.safetyEquipment.forEach((eq, idx) => {
+      if (eq.category !== lastCategory) {
+        lastCategory = eq.category;
+        const subSkipped = !!skippedCategoriesMap[eq.category];
+        const safeCat = eq.category.replace(/'/g, "\\'");
+        html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #ddd;">
+          <span style="font-weight:bold;color:#006699;font-size:13px;${subSkipped ? 'opacity:0.5;text-decoration:line-through;' : ''}">${eq.category}${subSkipped ? ' <span style="color:#6b7280;font-size:11px;font-weight:normal;text-decoration:none;">— sub-category skipped</span>' : ''}</span>
+          <button onclick="toggleSafetySubcategorySkip('${safeCat}', ${!subSkipped})" style="background:${subSkipped ? 'white' : 'transparent'};color:${subSkipped ? '#006699' : '#6b7280'};border:1px solid ${subSkipped ? '#006699' : '#d1d5db'};border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;">
+            ${subSkipped ? 'Unskip' : '⊘ Skip'}
+          </button>
+        </div>`;
+      }
+      const subSkipped = !!skippedCategoriesMap[eq.category];
+      const itemSkipped = !!eq.skipped;
+      const isDim = subSkipped || itemSkipped;
+      const checkedAttr = eq.checked ? 'checked' : '';
+      const safetyPhotoCount = (eq.photos && eq.photos.length) || 0;
+      const isCustom = eq.custom ? true : false;
+      if (itemSkipped) {
+        html += `
+          <div class="rated-item" style="border-left: 4px solid #d1d5db; background:#f9fafb; padding: 8px 10px; margin-bottom: 8px; opacity:0.65;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+              <div style="font-size:13px;color:#6b7280;">⊘ <strong>${eq.name}</strong> — skipped${safetyPhotoCount > 0 ? ` (${safetyPhotoCount} photo${safetyPhotoCount === 1 ? '' : 's'} retained)` : ''}</div>
+              <button onclick="toggleSafetyItemSkip(${idx}, false)" style="background:white;color:#006699;border:1px solid #006699;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">Unskip</button>
+            </div>
+          </div>`;
+        return;
+      }
+      html += `
+      <div class="rated-item" style="border-left: 4px solid ${eq.checked ? '#16a34a' : '#2563eb'}; padding: 8px 10px; margin-bottom: 8px; ${subSkipped ? 'opacity:0.55;' : ''}">
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
-          <input type="checkbox" ${checkedAttr}
+          <input type="checkbox" ${checkedAttr} ${subSkipped ? 'disabled' : ''}
                  onchange="toggleSafetyItem(${idx}, this.checked)"
                  style="margin-top:3px;width:18px;height:18px;accent-color:#2563eb;" />
           <div style="flex:1;">
             <strong>${eq.name}</strong>
             ${isCustom ? '<span style="display:inline-block;background:#f59e0b;color:white;font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;">Custom</span>' : `<span style="display:inline-block;background:#2563eb;color:white;font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;">Req: ${eq.requirement}</span>`}
-            ${eq.checked ? '<span style="color:#16a34a;font-weight:bold;margin-left:6px;">✓ On board</span>' : '<span style="color:#dc2626;font-size:11px;margin-left:6px;">Not verified</span>'}
+            <span data-safety-status="1">${eq.checked ? '<span style="color:#16a34a;font-weight:bold;margin-left:6px;">✓ On board</span>' : '<span style="color:#dc2626;font-size:11px;margin-left:6px;">Not verified</span>'}</span>
           </div>
+          <button type="button" onclick="event.preventDefault();event.stopPropagation();toggleSafetyItemSkip(${idx}, true)" title="Skip this item" style="background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:600;cursor:pointer;">⊘ Skip</button>
           ${isCustom ? `<button onclick="event.preventDefault();removeCustomSafetyItem(${idx})" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;padding:0 4px;" title="Remove">✕</button>` : ''}
         </label>
         <div style="margin-top:4px;margin-left:28px;display:flex;gap:8px;align-items:center;">
           <input type="text" placeholder="Notes (condition, expiry date, location...)"
                  value="${(eq.notes || '').replace(/"/g, '&quot;')}"
                  onchange="updateSafetyNote(${idx}, this.value)"
+                 ${subSkipped ? 'disabled' : ''}
                  style="flex:1;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;" />
-          <button onclick="captureSafetyPhoto(${idx})" style="background:#2563eb;color:white;border:none;border-radius:4px;padding:4px 8px;font-size:11px;white-space:nowrap;cursor:pointer;">
+          <button onclick="captureSafetyPhoto(${idx})" ${subSkipped ? 'disabled' : ''} style="background:#2563eb;color:white;border:none;border-radius:4px;padding:4px 8px;font-size:11px;white-space:nowrap;cursor:pointer;${subSkipped ? 'opacity:0.5;' : ''}">
             📷${safetyPhotoCount > 0 ? ` ${safetyPhotoCount}` : ''}
           </button>
         </div>
         <div id="safety-thumbs-${idx}" style="margin-top:4px;margin-left:28px;display:flex;flex-wrap:wrap;gap:4px;"></div>
       </div>
     `;
-  });
+    });
+  }
 
   // Build list of already-added custom item names for disabling in the dropdown
   const addedCustomNames = survey.safetyEquipment.filter(e => e.custom).map(e => e.name);
 
-  html += `
+  // v2227: hide the "Add Additional Safety Equipment" block entirely when
+  // the section is skipped — no need to add items to a skipped section.
+  if (!sectionSkipped) {
+    html += `
         <div style="margin-top:16px;padding-top:12px;border-top:1px solid #e5e7eb;">
           <div style="font-weight:600;font-size:13px;color:#006699;margin-bottom:6px;">Add Additional Safety Equipment</div>
           <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Select items found on board that are not in the standard TC TP 511 list.</div>
@@ -11016,9 +11081,22 @@ function renderInspection(survey) {
             </div>
           </div>
         </div>
+    `;
+  }
+  html += `
       </div>
     </div>
   `;
+
+  // v2227: If Safety Equipment is fully skipped at the section level, move
+  // its accordion down to the "Skipped sections" block at the bottom of
+  // the inspection view (under Instruments), so the active inspection
+  // work stays up top. The accordion is still fully functional there —
+  // tapping Unskip restores it to normal position on next render.
+  if (sectionSkipped) {
+    skippedCategoriesHtml += html.substring(_safetyHtmlStart);
+    html = html.substring(0, _safetyHtmlStart);
+  }
 
   // ── Instruments & Electronics Section ─────────────────────────────────
   if (!survey.instrumentsElectronics) survey.instrumentsElectronics = [];
@@ -11116,6 +11194,23 @@ function renderInspection(survey) {
       </div>
     </div>
   `;
+
+  // v2227: Skipped sections bucket — fully-skipped categories and a
+  // skipped-Safety section live here at the bottom so they don't clutter
+  // the active inspection view. Each accordion is still fully functional;
+  // tapping ✅ Include promotes it back to its normal position on the
+  // next render.
+  if (skippedCategoriesHtml) {
+    html += `
+      <div style="margin-top:18px;padding:12px 14px 4px 14px;border-top:2px dashed #e5e7eb;">
+        <div style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">
+          ⊘ Skipped Sections
+          <span style="color:#9ca3af;font-weight:500;text-transform:none;letter-spacing:0;font-size:11px;margin-left:6px;">Expand any accordion to unskip</span>
+        </div>
+        ${skippedCategoriesHtml}
+      </div>
+    `;
+  }
 
   html += `</div>`;
   content.innerHTML = html;
@@ -13321,16 +13416,47 @@ async function saveValuationFromInspection() {
 
 // Safety equipment interaction functions
 async function toggleSafetyItem(idx, checked) {
+  // v2227: don't full-re-render — it collapses the Safety accordion and
+  // jumps the surveyor back to the top of the inspection. Update only the
+  // affected item's visual state + the progress counter in the header.
   const survey = await getSurvey(currentSurveyId);
   if (!survey || !survey.safetyEquipment[idx]) return;
   survey.safetyEquipment[idx].checked = checked;
   await saveSurvey(survey);
-  // Remember scroll position and which accordion was open
-  const scrollY = window.scrollY;
-  _openAccordionCategory = '🛡️ Safety Equipment (TC TP 511)';
-  renderInspection(survey);
-  // Restore scroll position after re-render
-  requestAnimationFrame(() => { window.scrollTo(0, scrollY); });
+
+  // Update the item row's border + status chip in place
+  const checkbox = document.querySelector(`input[type="checkbox"][onchange*="toggleSafetyItem(${idx},"]`);
+  const row = checkbox ? checkbox.closest('.rated-item') : null;
+  if (row) {
+    row.style.borderLeft = `4px solid ${checked ? '#16a34a' : '#2563eb'}`;
+    // Rebuild the little status chip next to the item name
+    const labelDiv = row.querySelector('label > div');
+    if (labelDiv) {
+      const oldChip = labelDiv.querySelector('[data-safety-status]');
+      if (oldChip) oldChip.remove();
+      const chip = document.createElement('span');
+      chip.setAttribute('data-safety-status', '1');
+      if (checked) {
+        chip.style.cssText = 'color:#16a34a;font-weight:bold;margin-left:6px;';
+        chip.textContent = '✓ On board';
+      } else {
+        chip.style.cssText = 'color:#dc2626;font-size:11px;margin-left:6px;';
+        chip.textContent = 'Not verified';
+      }
+      labelDiv.appendChild(chip);
+    }
+  }
+
+  // Update the Safety Equipment progress counter in the accordion header
+  const total = survey.safetyEquipment.length;
+  const checkedCount = survey.safetyEquipment.filter(e => e.checked && !e.skipped).length;
+  const pct = total > 0 ? Math.round((checkedCount / total) * 100) : 0;
+  document.querySelectorAll('.category-progress').forEach(el => {
+    const titleEl = el.parentElement && el.parentElement.querySelector('.category-title');
+    if (titleEl && titleEl.textContent && titleEl.textContent.indexOf('Safety Equipment') !== -1) {
+      el.textContent = `${pct}% (${checkedCount}/${total})`;
+    }
+  });
 }
 
 async function updateSafetyNote(idx, note) {
@@ -13338,6 +13464,48 @@ async function updateSafetyNote(idx, note) {
   if (!survey || !survey.safetyEquipment[idx]) return;
   survey.safetyEquipment[idx].notes = note;
   await saveSurvey(survey);
+}
+
+// ── Safety Equipment skip controls (v2227) ─────────────────────────────
+// Three levels of skip, mirroring the other categories:
+//   1) Whole Safety Equipment section → survey.safetyEquipmentSkipped
+//   2) A sub-category inside Safety → survey.safetySubcategoriesSkipped[catName]
+//   3) An individual safety item     → eq.skipped
+// Skipped items are excluded from the report and from progress counts.
+async function toggleSafetyEquipmentSectionSkip(skip) {
+  if (skip) {
+    const yes = await showConfirm('Skip the entire Safety Equipment section?\n\nAll items will be excluded from the report. You can unskip later.', 'Skip Section', 'Cancel');
+    if (!yes) return;
+  }
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  survey.safetyEquipmentSkipped = !!skip;
+  _openAccordionCategory = 'Safety Equipment (TC TP 511)';
+  await saveSurvey(survey);
+  renderInspection(survey);
+}
+
+async function toggleSafetySubcategorySkip(subcategory, skip) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  if (!survey.safetySubcategoriesSkipped) survey.safetySubcategoriesSkipped = {};
+  if (skip) {
+    survey.safetySubcategoriesSkipped[subcategory] = true;
+  } else {
+    delete survey.safetySubcategoriesSkipped[subcategory];
+  }
+  _openAccordionCategory = 'Safety Equipment (TC TP 511)';
+  await saveSurvey(survey);
+  renderInspection(survey);
+}
+
+async function toggleSafetyItemSkip(idx, skip) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !survey.safetyEquipment[idx]) return;
+  survey.safetyEquipment[idx].skipped = !!skip;
+  _openAccordionCategory = 'Safety Equipment (TC TP 511)';
+  await saveSurvey(survey);
+  renderInspection(survey);
 }
 
 // Predefined additional safety items not in TC TP 511 standard list
@@ -17676,6 +17844,17 @@ async function generateReport() {
   const transmission2PhotoDataUrl = transmission2Photos[0] || '';
   const transmission2PlatePhotoDataUrl = transmission2PlatePhotos[0] || '';
 
+  // v2227: load four-corner overview photos up front so we can render them
+  // right after the cover hero (previously they landed at the very end of
+  // the report, which Dave correctly flagged as the wrong place — these
+  // set the reader's visual context for the whole report).
+  const fourCornerPhotos = {};
+  const cornerKeys = ['fourCornerPortBow', 'fourCornerStbdBow', 'fourCornerPortStern', 'fourCornerStbdStern'];
+  const cornerLabels = {'fourCornerPortBow': 'Port Bow', 'fourCornerStbdBow': 'Starboard Bow', 'fourCornerPortStern': 'Port Stern', 'fourCornerStbdStern': 'Starboard Stern'};
+  for (const _key of cornerKeys) {
+    if (survey[_key]) fourCornerPhotos[_key] = await loadAndCompress(survey[_key]);
+  }
+
   // ── Pre-fetch all per-item photos (compressed for report) ────────────
   const itemPhotoCache = {};
   async function cachePhoto(photoId) {
@@ -17825,10 +18004,12 @@ async function generateReport() {
         font-family: Arial, Helvetica, sans-serif;
       }
     }
+    /* v2227: SAMS reviewer flagged "some pages numbered; all must be
+       numbered". Keep Page X of Y and vessel footer on the cover page too
+       — only the top-center running title is suppressed (cover already has
+       its own title banner). */
     @page :first {
       @top-center { content: none; }
-      @bottom-left { content: none; }
-      @bottom-right { content: none; }
     }
     @media print {
       .page-break { page-break-after: always; }
@@ -17851,7 +18032,10 @@ async function generateReport() {
     .item { margin: 6px 0; padding: 4px 0 4px 10px; border-left: 3px solid #066aab; }
     .standards { font-size: 9pt; color: #4b5563; margin-top: 2px; }
     .item p { margin: 2px 0; }
-    .footer { margin-top: 40px; padding: 20px; border-top: 2px solid #066aab; color: #4b5563; font-size: 10pt; }
+    /* v2227: keep Surveyor's Certificate aligned flush with the body text
+       (previous padding was double-insetting the block). Only the top
+       separator + spacing remain. */
+    .footer { margin-top: 40px; padding: 16px 0 0 0; border-top: 2px solid #066aab; color: #4b5563; font-size: 10pt; }
     .footer a { color: #066aab; text-decoration: none; }
     .header-bar { border-bottom: 1px solid #d1d5db; font-size: 9pt; color: #6b7280; padding-bottom: 4px; margin-bottom: 16px; }
     .scope-text { font-size: 10pt; line-height: 1.5; }
@@ -17869,7 +18053,14 @@ async function generateReport() {
     .checklist-table .rating-pill { display: inline-block; padding: 1px 7px; border-radius: 3px; color: white; font-weight: bold; font-size: 8pt; white-space: nowrap; }
     .checklist-table .violation-yes { color: #dc2626; font-weight: bold; }
     .checklist-table .violation-no { color: #16a34a; }
-    .checklist-table .text-snippet { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .checklist-table .text-snippet { white-space: normal; word-break: break-word; font-size: 8.5pt; line-height: 1.35; }
+    /* v2227: uniform report photo size (60% reduction vs the old 800×600).
+       Applied everywhere photos render in the body: item photos, finding
+       photos, nameplates, HIN/compliance plates, four-corner overview. */
+    .report-photo { width: 320px; height: 240px; object-fit: cover; border: 1px solid #d1d5db; border-radius: 4px; display: block; }
+    .report-photo-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; margin-top: 8px; }
+    .report-photo-card { display: inline-block; vertical-align: top; width: 320px; }
+    .report-photo-card .caption { font-size: 9pt; color: #4b5563; margin-top: 3px; font-style: italic; text-align: center; }
   </style>
 </head>
 <body>
@@ -17917,6 +18108,17 @@ async function generateReport() {
   </div>
   <p style="text-align:center; font-size:10pt; color:#6b7280; margin-top:6px; font-style:italic;">Comprehensive Marine Surveying &amp; Consulting — Serving the Great Lakes, Georgian Bay and beyond.</p>
 
+  ${Object.keys(fourCornerPhotos).length > 0 ? `
+  <!-- ═══ VESSEL OVERVIEW PHOTOGRAPHS (v2227 — moved from end to top) ═══ -->
+  <h2>VESSEL OVERVIEW PHOTOGRAPHS</h2>
+  <div class="report-photo-row" style="justify-content:center;">
+    ${cornerKeys.map(k => fourCornerPhotos[k] ? `<div class="report-photo-card">
+        <img src="${fourCornerPhotos[k]}" alt="${cornerLabels[k]}" class="report-photo" />
+        <div class="caption">${cornerLabels[k]}</div>
+      </div>` : '').join('')}
+  </div>
+  ` : ''}
+
   <!-- ═══ PURPOSE AND SCOPE ═══ -->
   <h2>PURPOSE AND SCOPE</h2>
   <div class="scope-text">
@@ -17957,26 +18159,84 @@ async function generateReport() {
   </div>
 
   <!-- ═══ DEFINITIONS OF TERMS ═══ -->
+  ${(() => {
+    // v2226: Only include terms that actually appear in *this* survey.
+    // Haystack = every piece of content that flows into the rendered report
+    // (surveyor-entered text, item labels and snippet text, applied
+    // standards, safety checklist names, valuation rationale/sources),
+    // plus the fixed boilerplate prose from Purpose and Scope, Methodology,
+    // and Conduct of Survey — those always mention ABYC, Transport Canada,
+    // Limited Trial Run, Conductivity, TP 1332, NFPA 302, Canada Shipping
+    // Act, so those terms stay in by default. Everything else (Bonding
+    // System, BUC, Percussion Testing, Through-Hull Fitting, USCG 33 CFR
+    // 183, Fair Market Value, Estimated Replacement Cost) only appears if
+    // the surveyor actually used it.
+    const haystackParts = [
+      // Fixed boilerplate terms that are always in the report body
+      'ABYC Transport Canada Canada Shipping Act Limited Trial Run conductivity meter conductivity TP 1332 NFPA 302 HIN Hull Identification Number TC TP 511 Safe Boating',
+      // Surveyor-entered free-text fields
+      survey.vesselDescription || '',
+      survey.propulsionNarrative || '',
+      survey.valuationRationale || '',
+      (Array.isArray(survey.valuationSources) ? survey.valuationSources.join(' ') : (survey.valuationSource || '')),
+      survey.storageDetails || '',
+      survey.independentSurveys || '',
+      survey.changesToPlan || '',
+      survey.overallCondition || '',
+      // Valuation numerics imply the FMV / replacement-cost terms
+      (survey.valuationLow || survey.valuationHigh) ? 'fair market value valuation' : '',
+      survey.replacementCost ? 'replacement cost' : ''
+    ];
+    if (survey.items) {
+      for (const label of Object.keys(survey.items)) {
+        const it = survey.items[label];
+        if (!it || it.excluded) continue;
+        if (it.text) haystackParts.push(it.text);
+        if (it.rating) haystackParts.push(it.rating);
+        if (Array.isArray(it.standards)) haystackParts.push(it.standards.join(' '));
+        haystackParts.push(label);
+      }
+    }
+    if (Array.isArray(survey.safetyEquipment)) {
+      haystackParts.push(survey.safetyEquipment.map(e => (e && e.name) || '').join(' '));
+    }
+    const _hay = haystackParts.join(' ').toLowerCase();
+    const _has = (...needles) => needles.some(n => _hay.includes(n.toLowerCase()));
+
+    const TERM_DEFS = [
+      { term: 'ABYC', def: 'American Boat and Yacht Council — develops voluntary safety standards for the design, construction, maintenance, and repair of recreational boats.', show: () => _has('abyc') },
+      { term: 'Bonding System', def: 'A system of electrically connecting metallic non-current-carrying parts of a vessel to reduce corrosion and minimize the risk of electric shock.', show: () => _has('bonding', 'bond the') },
+      { term: 'BUC', def: 'BUC International Corp. — publisher of the BUC Used Boat Price Guide, an industry-accepted reference for marine vessel valuation.', show: () => _has('buc ', 'bucvalu', 'buc value', 'buc research', 'buc international', 'buc used', 'buc price') },
+      { term: 'Canada Shipping Act, 2001', def: 'The primary federal legislation governing safety in Canadian marine transportation, including construction and equipment requirements for small vessels.', show: () => _has('canada shipping act') },
+      { term: 'Conductivity Meter', def: 'A non-destructive testing instrument that measures the electrical conductivity of hull and deck laminates to detect elevated conductivity levels. Readings are relative indicators only.', show: () => _has('conductivity') },
+      { term: 'Fair Market Value (FMV)', def: 'The most probable price a vessel should bring in a competitive and open market under all conditions requisite to a fair sale, with buyer and seller each acting prudently and knowledgeably.', show: () => _has('fair market value', 'fmv') },
+      { term: 'Estimated Replacement Cost', def: 'The estimated cost to replace the surveyed vessel with one of like kind and quality at current market prices, excluding applicable taxes.', show: () => _has('replacement cost') },
+      { term: 'HIN', def: 'Hull Identification Number — a unique serial number assigned to a vessel by the manufacturer, required by Transport Canada and the USCG for identification and registration.', show: () => _has('hin', 'hull identification number') },
+      { term: 'Limited Trial Run', def: 'A brief operational test of the vessel conducted under controlled conditions. This term does not imply a comprehensive sea trial and results are limited by prevailing conditions.', show: () => _has('limited trial run') },
+      { term: 'NFPA 302', def: 'National Fire Protection Association Standard 302 — Fire Protection Standard for Pleasure and Commercial Motor Craft.', show: () => _has('nfpa 302', 'nfpa-302') },
+      { term: 'Percussion Testing', def: 'A non-destructive technique using a sounding hammer or similar instrument to tap the hull and deck surfaces, identifying delamination, voids, or water-saturated areas by changes in tone.', show: () => _has('percussion', 'impact and resonance', 'sounding hammer', 'phenolic hammer') },
+      { term: 'TC TP 511', def: 'Transport Canada publication TP 511E — Safe Boating Guide, outlining mandatory safety equipment requirements for pleasure craft in Canadian waters.', show: () => _has('tp 511', 'tp-511', 'tp511') },
+      { term: 'TC TP 1332', def: 'Transport Canada publication TP 1332E — Construction Standards for Small Vessels, establishing mandatory construction and performance standards.', show: () => _has('tp 1332', 'tp-1332', 'tp1332') },
+      { term: 'Through-Hull Fitting', def: 'Any device that penetrates the hull below the waterline to allow water intake or discharge. Typically fitted with a seacock or valve for shutoff capability.', show: () => _has('through-hull', 'through hull', 'thru-hull', 'thru hull', 'seacock') },
+      { term: 'USCG 33 CFR 183', def: 'United States Coast Guard regulations under Title 33, Code of Federal Regulations, Part 183 — Boats and Associated Equipment, applicable to vessels manufactured for the North American market.', show: () => _has('33 cfr 183', 'cfr 183') },
+    ];
+    const visible = TERM_DEFS.filter(t => {
+      try { return !!t.show(); } catch(e) { return true; }
+    });
+    if (visible.length === 0) return '';
+    const rows = visible.map(t =>
+      `<tr><td style="vertical-align:top;"><strong>${esc(t.term)}</strong></td><td>${esc(t.def)}</td></tr>`
+    ).join('');
+    return `
   <h2>DEFINITIONS OF TERMS</h2>
   <div class="scope-text">
+    <p style="font-size:9pt;color:#6b7280;margin:0 0 6px;font-style:italic;">Only terms referenced in this report are listed.</p>
     <table style="font-size:10pt;">
-      <tr><td style="width:30%;vertical-align:top;"><strong>ABYC</strong></td><td>American Boat and Yacht Council — develops voluntary safety standards for the design, construction, maintenance, and repair of recreational boats.</td></tr>
-      <tr><td style="vertical-align:top;"><strong>Bonding System</strong></td><td>A system of electrically connecting metallic non-current-carrying parts of a vessel to reduce corrosion and minimize the risk of electric shock.</td></tr>
-      <tr><td style="vertical-align:top;"><strong>BUC</strong></td><td>BUC International Corp. — publisher of the BUC Used Boat Price Guide, an industry-accepted reference for marine vessel valuation.</td></tr>
-      <tr><td style="vertical-align:top;"><strong>Canada Shipping Act, 2001</strong></td><td>The primary federal legislation governing safety in Canadian marine transportation, including construction and equipment requirements for small vessels.</td></tr>
-      <tr><td style="vertical-align:top;"><strong>Conductivity Meter</strong></td><td>A non-destructive testing instrument that measures the electrical conductivity of hull and deck laminates to detect elevated conductivity levels. Readings are relative indicators only.</td></tr>
-      <tr><td style="vertical-align:top;"><strong>Fair Market Value (FMV)</strong></td><td>The most probable price a vessel should bring in a competitive and open market under all conditions requisite to a fair sale, with buyer and seller each acting prudently and knowledgeably.</td></tr>
-      <tr><td style="vertical-align:top;"><strong>Estimated Replacement Cost</strong></td><td>The estimated cost to replace the surveyed vessel with one of like kind and quality at current market prices, excluding applicable taxes.</td></tr>
-      <tr><td style="vertical-align:top;"><strong>HIN</strong></td><td>Hull Identification Number — a unique serial number assigned to a vessel by the manufacturer, required by Transport Canada and the USCG for identification and registration.</td></tr>
-      <tr><td style="vertical-align:top;"><strong>Limited Trial Run</strong></td><td>A brief operational test of the vessel conducted under controlled conditions. This term does not imply a comprehensive sea trial and results are limited by prevailing conditions.</td></tr>
-      <tr><td style="vertical-align:top;"><strong>NFPA 302</strong></td><td>National Fire Protection Association Standard 302 — Fire Protection Standard for Pleasure and Commercial Motor Craft.</td></tr>
-      <tr><td style="vertical-align:top;"><strong>Percussion Testing</strong></td><td>A non-destructive technique using a sounding hammer or similar instrument to tap the hull and deck surfaces, identifying delamination, voids, or water-saturated areas by changes in tone.</td></tr>
-      <tr><td style="vertical-align:top;"><strong>TC TP 511</strong></td><td>Transport Canada publication TP 511E — Safe Boating Guide, outlining mandatory safety equipment requirements for pleasure craft in Canadian waters.</td></tr>
-      <tr><td style="vertical-align:top;"><strong>TC TP 1332</strong></td><td>Transport Canada publication TP 1332E — Construction Standards for Small Vessels, establishing mandatory construction and performance standards.</td></tr>
-      <tr><td style="vertical-align:top;"><strong>Through-Hull Fitting</strong></td><td>Any device that penetrates the hull below the waterline to allow water intake or discharge. Typically fitted with a seacock or valve for shutoff capability.</td></tr>
-      <tr><td style="vertical-align:top;"><strong>USCG 33 CFR 183</strong></td><td>United States Coast Guard regulations under Title 33, Code of Federal Regulations, Part 183 — Boats and Associated Equipment, applicable to vessels manufactured for the North American market.</td></tr>
+      <tr><td style="width:30%;"></td><td></td></tr>
+      ${rows}
     </table>
-  </div>
+  </div>`;
+  })()}
 
   <!-- ═══ USE OF RATINGS ═══ -->
   <h2>USE OF "A", "B", "C", "NOT TESTED" AND "SAFETY EQUIPMENT" RATINGS</h2>
@@ -18052,9 +18312,9 @@ async function generateReport() {
     <tr><td><strong>Date of Report</strong></td><td>${reportDate}</td></tr>
     <tr><td><strong>Vessel Name</strong></td><td>${esc(survey.vesselName) || 'N/A'}</td></tr>
     <tr><td><strong>Year/Make/Model</strong></td><td>${esc(survey.yearMakeModel) || 'N/A'}</td></tr>
-    <tr><td><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
+    <tr><td><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>
     ${(survey.tcLicense || survey.tcLicenseType) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${survey.tcLicenseExpiry ? ' (expires ' + esc(survey.tcLicenseExpiry) + ')' : ''}</td></tr>` : ''}
-    <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
+    <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>
     <tr><td><strong>Vessel Material</strong></td><td>${esc(survey.construction) || 'N/A'}</td></tr>
     <tr><td><strong>LOA (Length Overall)</strong></td><td>${esc(survey.loa) || 'N/A'}</td></tr>
     <tr><td><strong>LWL (Length at Waterline)</strong></td><td>${esc(survey.lwl) || 'N/A'}</td></tr>
@@ -18121,10 +18381,10 @@ ${survey.locationLat && survey.locationLon ? `
   <!-- ═══ VESSEL DOCUMENTATION ═══ -->
   <h2>VESSEL DOCUMENTATION DATA</h2>
   <table>
-    <tr><td style="width:40%;"><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
+    <tr><td style="width:40%;"><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>
     ${(survey.tcLicense || survey.tcLicenseType || licencePhotoDataUrl || tcPaperLicencePhotoDataUrl) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${survey.tcLicenseExpiry ? ' (expires ' + esc(survey.tcLicenseExpiry) + ')' : ''}${licencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Licence number on hull:</em><br><img src="' + licencePhotoDataUrl + '" alt="Licence Number on Hull" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}${tcPaperLicencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Transport Canada paper licence:</em><br><img src="' + tcPaperLicencePhotoDataUrl + '" alt="TC Paper Licence" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>` : ''}
     <tr><td><strong>Tax Status (Duties Paid)</strong></td><td>${esc(survey.taxStatus) || 'N/A'}</td></tr>
-    <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" style="max-width:500px;max-height:350px;margin-top:6px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>
+    <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>
   </table>
 
 ${survey.vesselDescription ? `
@@ -18141,13 +18401,12 @@ ${survey.vesselDescription ? `
   <table class="checklist-table">
     <thead>
       <tr>
-        <th style="width:4%;">#</th>
-        <th style="width:20%;">Item</th>
-        <th style="width:24%;">Selected Text</th>
-        <th style="width:12%;">Rating</th>
-        <th style="width:8%;">Violation</th>
+        <th style="width:3%;">#</th>
+        <th style="width:18%;">Item</th>
+        <th style="width:42%;">Surveyor Notes</th>
+        <th style="width:11%;">Rating</th>
         <th style="width:6%;">Finding</th>
-        <th style="width:26%;">Applicable Standard(s)</th>
+        <th style="width:20%;">Applicable Standard(s)</th>
       </tr>
     </thead>
     <tbody>
@@ -18164,7 +18423,7 @@ ${survey.vesselDescription ? `
         if (answeredItems.length === 0) return;
 
         // Category header row
-        html += `<tr><td colspan="7" style="background:#e8edf2;font-weight:bold;padding:5px 8px;font-size:9pt;border-top:2px solid #006699;">${esc(category.name)}</td></tr>`;
+        html += `<tr><td colspan="6" style="background:#e8edf2;font-weight:bold;padding:5px 8px;font-size:9pt;border-top:2px solid #066aab;">${esc(category.name)}</td></tr>`;
 
         answeredItems.forEach(item => {
           tableRow++;
@@ -18174,15 +18433,17 @@ ${survey.vesselDescription ? `
           const isViolation = rating.startsWith('A') || rating.startsWith('B');
           const ratingColor = rating.startsWith('A') ? '#dc2626' : rating.startsWith('B') ? '#d97706' : rating.startsWith('C') ? '#16a34a' : '#6b7280';
           const ratingShort = rating.startsWith('A') ? 'A' : rating.startsWith('B') ? 'B' : rating.startsWith('C') ? 'C' : 'NT';
-          const textSnippet = d.text ? (d.text.length > 80 ? d.text.substring(0, 77) + '...' : d.text) : '—';
+          // v2227: surface the FULL surveyor-entered note (was previously
+          // truncated at 80 chars + CSS ellipsis so only the first line
+          // was readable). Report readers need the complete prose here.
+          const notesText = d.text ? d.text : '—';
           const stdText = isViolation && d.standards && d.standards.length > 0 ? d.standards.join('; ') : '—';
 
           html += `<tr>
             <td style="text-align:center;">${tableRow}</td>
             <td>${esc(displayItemLabel(item.label, survey))}</td>
-            <td class="text-snippet" title="${esc(d.text || '')}">${esc(textSnippet)}</td>
+            <td class="text-snippet">${esc(notesText)}</td>
             <td><span class="rating-pill" style="background:${ratingColor};">${ratingShort} — ${rating.startsWith('Not') ? 'Not Tested' : rating.split(' - ')[1] || rating}</span></td>
-            <td style="text-align:center;" class="${isViolation ? 'violation-yes' : 'violation-no'}">${isViolation ? 'YES' : 'No'}</td>
             <td style="text-align:center;font-weight:bold;color:${ratingColor};">${code}</td>
             <td style="font-size:8pt;">${esc(stdText)}</td>
           </tr>`;
@@ -18394,9 +18655,9 @@ ${survey.vesselDescription ? `
             || survey.transmissionMakeModel;
           const hasTwin = !!survey.engine2Make;
           const nameplateImg = (url, label) =>
-            `<div style="margin:4px 4px 0 0;display:inline-block;vertical-align:top;">
-              <div style="font-size:10px;color:#6b7280;margin-bottom:3px;">${esc(label)}</div>
-              <img src="${url}" alt="${esc(label)}" style="max-width:600px;max-height:480px;width:auto;height:auto;border:1px solid #ccc;border-radius:4px;display:block;" />
+            `<div class="report-photo-card">
+              <img src="${url}" alt="${esc(label)}" class="report-photo" />
+              <div class="caption">${esc(label)}</div>
             </div>`;
           let specTableHtml = '';
           if (hasAnyEngine) {
@@ -18448,17 +18709,20 @@ ${survey.vesselDescription ? `
           const codeTag = code ? ` <strong style="color:${RATING_COLORS[ratingLabel] || '#006699'};">(Finding ${code})</strong>` : '';
 
           // Build inline photos for the body — large, captioned, like Norm Behring's style
+          // v2227: uniform photo layout. Photos from the same item sit
+          // side-by-side via flex-wrap at fixed 320×240. Caption under
+          // each. Cuts previous 800×600 footprint by 60%.
           let itemPhotosHtml = '';
           if (itemData.photos && itemData.photos.length > 0) {
             const imgs = itemData.photos
               .filter(pid => itemPhotoCache[pid])
-              .map(pid => `<div style="display:inline-block;margin:6px 8px 6px 0;vertical-align:top;">
-                <img src="${itemPhotoCache[pid]}" alt="${esc(item.label)}" style="max-width:800px;max-height:600px;width:auto;height:auto;border:1px solid #ccc;border-radius:4px;" />
-                <div style="font-size:9pt;color:#666;margin-top:3px;font-style:italic;">${esc(item.label)}</div>
+              .map(pid => `<div class="report-photo-card">
+                <img src="${itemPhotoCache[pid]}" alt="${esc(item.label)}" class="report-photo" />
+                <div class="caption">${esc(item.label)}</div>
               </div>`)
               .join('');
             if (imgs) {
-              itemPhotosHtml = `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">${imgs}</div>`;
+              itemPhotosHtml = `<div class="report-photo-row">${imgs}</div>`;
             }
           }
 
@@ -18524,12 +18788,12 @@ ${survey.vesselDescription ? `
     if (!f.photos || f.photos.length === 0) return '';
     const imgs = f.photos
       .filter(pid => itemPhotoCache[pid])
-      .map(pid => `<div style="display:inline-block;margin:4px 6px 4px 0;vertical-align:top;">
-        <img src="${itemPhotoCache[pid]}" alt="${esc(f.label)}" style="max-width:760px;max-height:570px;width:auto;height:auto;border:1px solid #ccc;border-radius:4px;" />
-        <div style="font-size:9pt;color:#666;margin-top:2px;font-style:italic;">${esc(f.label)}</div>
+      .map(pid => `<div class="report-photo-card">
+        <img src="${itemPhotoCache[pid]}" alt="${esc(f.label)}" class="report-photo" />
+        <div class="caption">${esc(f.label)}</div>
       </div>`)
       .join('');
-    return imgs ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;">${imgs}</div>` : '';
+    return imgs ? `<div class="report-photo-row">${imgs}</div>` : '';
   }
 
   // Helper: build a specific recommendation line citing the item's standards
@@ -18582,11 +18846,16 @@ ${survey.vesselDescription ? `
   if (findings.NT.length > 0) {
     html += `<h3 style="color:#6b7280;">Not Tested / Not Verified</h3>`;
     findings.NT.forEach(f => {
+      // v2227: the blanket "Note: A comprehensive inspection was attempted…"
+      // line was auto-appended to every NT finding, producing the same
+      // sentence 20+ times in the report. Removed — the same disclaimer
+      // already appears once in Purpose and Scope / Methodology, which is
+      // sufficient. Each NT finding's own note text (from the surveyor's
+      // chip selection) carries the specific reason.
       html += `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid #6b7280;">
         <strong style="color:#6b7280;">Finding ${f.code}</strong> — ${esc(f.label)}
         ${f.text ? `<p style="margin:3px 0;">${esc(depersonalise(dedup(f.text)))}</p>` : ''}
         ${findingPhotos(f)}
-        <p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Note:</strong> A comprehensive inspection was attempted but was not possible due to constraints imposed upon the surveyor. Further inspection is recommended when conditions permit.</em></p>
       </div>`;
     });
   }
@@ -18733,30 +19002,9 @@ ${survey.vesselDescription ? `
   </div>
   `;
 
-  // ── FOUR CORNERS VESSEL PHOTOS ──────────────────────────────────────
-  let fourCornerPhotos = {};
-  const cornerKeys = ['fourCornerPortBow', 'fourCornerStbdBow', 'fourCornerPortStern', 'fourCornerStbdStern'];
-  const cornerLabels = {'fourCornerPortBow': 'Port Bow', 'fourCornerStbdBow': 'Starboard Bow', 'fourCornerPortStern': 'Port Stern', 'fourCornerStbdStern': 'Starboard Stern'};
-  for (const key of cornerKeys) {
-    if (survey[key]) {
-      fourCornerPhotos[key] = await loadAndCompress(survey[key]);
-    }
-  }
-
-  if (Object.keys(fourCornerPhotos).length > 0) {
-    html += `<div class="page-break"></div>`;
-    html += `<h2>VESSEL OVERVIEW PHOTOGRAPHS</h2>`;
-    html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">`;
-    for (const key of cornerKeys) {
-      if (fourCornerPhotos[key]) {
-        html += `<div style="text-align:center;">
-          <img src="${fourCornerPhotos[key]}" alt="${cornerLabels[key]}" style="max-width:100%;max-height:350px;border:1px solid #ccc;border-radius:4px;" />
-          <p style="font-size:10pt;color:#555;margin-top:4px;font-style:italic;">${cornerLabels[key]}</p>
-        </div>`;
-      }
-    }
-    html += `</div>`;
-  }
+  // v2227: The Vessel Overview Photographs block was moved to the top of
+  // the report (right after the cover hero). It used to live at the end,
+  // but reader context is better set up front.
 
   html += `<script>
 async function exportToWord() {

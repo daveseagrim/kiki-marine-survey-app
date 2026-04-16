@@ -12,6 +12,139 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2227 — 2026-04-15
+
+### Changed — Report readability pass + inspection-view skip tidying
+
+Wide-ranging follow-up to the SAMS review and Dave's report-cleanup
+list. Everything below ships in one push.
+
+**Report: redundant boilerplate removed.** The blanket "Note: A
+comprehensive inspection was attempted but was not possible…"
+sentence used to be auto-appended under every NT finding in Findings
+& Recommendations, which produced the same sentence 20+ times in a
+single report. Removed entirely — the equivalent disclaimer already
+appears once in Purpose and Scope and once in Methodology, which is
+enough.
+
+**Report: Surveyor Notes column.** The checklist summary's "Selected
+Text" column is renamed to "Surveyor Notes", the 80-character JS
+truncation is removed, and the CSS `white-space: nowrap` +
+`text-overflow: ellipsis` that was hiding the overflow is replaced
+with normal wrapping at `word-break: break-word`. The full surveyor-
+entered note now renders in full. The "Violation" column was dropped
+because the Rating column already colour-codes A/B/C and violation
+status is effectively redundant; column widths rebalanced (Surveyor
+Notes now 42% of table width).
+
+**Report: uniform photo sizing.** All body photos (checklist item
+photos, Findings & Recommendations photos, HIN plate, compliance
+plate, engine and transmission nameplates, four-corner overview) now
+render through a single `.report-photo` CSS class at 320×240 with
+`object-fit: cover`. Per Dave's brief, that's ~60% reduction from the
+previous 800×600 body-item photos — and consistent everywhere. Photos
+from the same item sit side-by-side through a `.report-photo-row`
+flex container that wraps as needed.
+
+**Report: Vessel Overview Photographs moved to the top.** The four-
+corner (Port Bow / Starboard Bow / Port Stern / Starboard Stern)
+block used to render at the very end of the report. It now renders
+directly below the cover hero so the reader has visual context
+before reading prose. The old end-of-report block was removed.
+
+**Report: Surveyor's Certificate margins.** The `.footer` CSS had
+`padding: 20px` on top of the body's existing 20px, which double-
+inset the entire Surveyor's Certificate block compared with the
+surrounding body text. Reduced to `padding: 16px 0 0 0` so the
+Certificate lines up flush with the rest of the report.
+
+**Report: Page X of Y on every page.** The `@page :first` rule was
+suppressing the bottom-left vessel footer and the bottom-right page
+counter on the cover page. Only the top-center running title is now
+suppressed on page 1; page numbering and vessel footer appear on
+every page, addressing SAMS reviewer's "pages numbered: all must be
+numbered" flag.
+
+**Report: Definitions of Terms is now dynamic.** The table no longer
+lists every term unconditionally. Each definition carries a matcher
+(including aliases — Percussion Testing also matches "impact and
+resonance", "sounding hammer", "phenolic hammer"; Through-Hull also
+matches "seacock", "thru-hull") and only appears when the haystack
+(surveyor prose, item labels + ratings + notes + standards, safety
+equipment names, plus the fixed boilerplate in Purpose and Scope /
+Methodology / Conduct of Survey) contains a match. A small italic
+note under the heading tells the reader the list is filtered. If
+nothing matches the entire section is omitted.
+
+**Inspection view: Safety Equipment skip controls.** Matches the
+existing per-category skip behaviour for other sections. Three
+levels: whole section (`survey.safetyEquipmentSkipped`), sub-
+category (`survey.safetySubcategoriesSkipped[catName]`), and
+individual item (`eq.skipped`). Each has its own button in the
+accordion; tapping again unskips. Skipped items/sub-categories are
+excluded from the progress count, from the generated report, and
+render collapsed in the inspection view. The auto-generated checklist
+is still regeneratable via the existing button.
+
+**Inspection view: `toggleSafetyItem` no longer full-re-renders.**
+Ticking a checkbox in the Safety section was triggering a
+`renderInspection()` which collapsed the Safety accordion and
+scrolled the surveyor back to the top. It now updates the single
+item's border and status chip in place, plus the progress counter in
+the header. No scroll jump, no accordion collapse.
+
+**Inspection view: skipped sections moved to the bottom.** Fully
+skipped categories (every item excluded) and a fully skipped Safety
+Equipment section now render in a "⊘ Skipped Sections" block at the
+bottom of the inspection view, under Instruments & Electronics —
+rather than inline in template order. Keeps the active inspection
+work at the top. Unskipping promotes the category back to its normal
+position on the next render.
+
+**Battery charger Not-tested chip re-phrased.** The "no AC power"
+observed option now reads "Because the boat was not connected to AC
+power, operation of the battery charger was not verified at the time
+of survey." (was "the vessel was not connected…"). Updated in both
+the text_library.json entry and the guaranteed showNotesSheet
+injection.
+
+---
+
+## v2226 — 2026-04-15
+
+### Changed — Definitions of Terms now filters to only the terms that appear in this survey
+
+Previously the Definitions of Terms table rendered all fifteen terms
+on every report, which padded the report and forced the reader to
+skim definitions that were never cited in the body.
+
+The section now assembles a haystack from everything that ends up in
+the rendered report — surveyor-entered free text (vessel description,
+propulsion narrative, valuation rationale/sources, storage details,
+independent surveys, changes to plan, overall condition), every item
+label plus its rating, notes, and applied standards, the safety
+equipment names, and the fixed boilerplate prose from Purpose and
+Scope / Methodology / Conduct of Survey. Each term carries its own
+matcher function (with aliases, e.g. Percussion Testing also matches
+"impact and resonance", "sounding hammer", "phenolic hammer"; Through-
+Hull also matches "seacock" / "thru-hull"). Terms whose matchers
+return false are dropped from the table.
+
+Boilerplate-referenced terms (ABYC, Canada Shipping Act, Conductivity
+Meter, Limited Trial Run, TP 1332, NFPA 302, TC TP 511, HIN) will
+always appear — they're cited in prose that ships with every report.
+The conditional ones (Bonding System, BUC, Percussion Testing, Fair
+Market Value, Estimated Replacement Cost, Through-Hull Fitting, USCG
+33 CFR 183) only show when actually used. A small italic note
+directly under the DEFINITIONS OF TERMS heading tells the reader the
+list is filtered to what this survey cites.
+
+If no terms survive the filter (unlikely but possible for a minimal
+stub survey), the entire section is omitted rather than rendering an
+empty table.
+
+---
+
 ## v2225 — 2026-04-15
 
 ### Changed — Propulsion narrative triple-checked + Check Report audits added + report aligned to Kiki Marine brand
