@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2249';
+const APP_VERSION = 'v2250';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -19020,9 +19020,12 @@ async function generateReport() {
   <!-- v2240: Rating & Valuation moved to just before Surveyor's Certification -->
 
   <!-- ═══ PURPOSE AND SCOPE ═══ -->
+  <!-- v2250: trimmed to a concise statement of intent. Detailed methods,
+       limitations, and disclaimers now live exclusively in
+       Methodology and Limitations (previously duplicated here). -->
   <h2>PURPOSE AND SCOPE</h2>
   <div class="scope-text">
-    <p>This surveyor attended aboard the vessel to determine its physical condition and market value. Using visual, non-destructive methods in accessible areas, the hull, deck, rigging, mechanical and electrical systems, and safety equipment were evaluated in accordance with ABYC standards and applicable Transport Canada regulations. Internal inspection of engines, transmissions, drives, generators, and stability analysis were beyond the scope of this survey. Electrical and electronic equipment was powered up and tested for basic functionality where possible. Concealed wiring was not inspected — engagement of an ABYC-certified marine electrical engineer is recommended for a detailed assessment. Vessel tankage was visually inspected; filling and pressure testing are advised for a complete evaluation. No fixed partitions, panels, furniture, electronics, or stored gear were removed, and locked or inaccessible spaces were not surveyed. This report reflects the surveyor's unbiased opinion as of the inspection date and is not an inventory, warranty, or guarantee. It is intended solely for the client and any associated lenders or underwriters and is not assignable.</p>
+    <p>This surveyor attended aboard the vessel to determine its physical condition and market value. The hull, deck, rigging, mechanical and electrical systems, and safety equipment were evaluated in accordance with ABYC standards and applicable Transport Canada regulations. This report reflects the surveyor's unbiased opinion as of the inspection date and is intended solely for the client and any associated lenders or underwriters. It is not assignable.</p>
 
     <div class="bold-disclaimer">It should be noted that although the vessel's structure and components were evaluated against ABYC and Transport Canada standards, many boats were built before these codes were established or enforced and therefore may not be subject to them. Furthermore, when a boat or its components predate current standards, those standards may only become applicable if the boat or its systems are modified. It is not within the scope of this surveyor's responsibilities to determine the relevance or enforceability of these standards.</div>
   </div>
@@ -19140,29 +19143,9 @@ async function generateReport() {
 
   <!-- v2240: Rating Definitions moved to after Vessel Description -->
 
-  <!-- ═══ NOTES REGARDING REPORT FORMAT ═══ -->
-  <h2>NOTES REGARDING REPORT FORMAT</h2>
-  <div class="scope-text">
-    <p>This report is presented in the following order:</p>
-    <ol>
-      <li><strong>Purpose and Scope</strong></li>
-      <li><strong>Methodology and Limitations</strong></li>
-      <li><strong>Conduct of Survey</strong></li>
-      <li><strong>Definitions of Terms</strong></li>
-      <li><strong>General Vessel Information &amp; Specifications</strong></li>
-      <li><strong>Survey Conditions</strong></li>
-      <li><strong>Vessel Documentation Data</strong></li>
-      <li><strong>Vessel Description</strong> — A narrative description of the vessel.</li>
-      <li><strong>Use of Ratings</strong> — Definitions of the A/B/C/NT/PO rating categories.</li>
-      <li><strong>Findings Overview</strong> — At-a-glance summary of finding counts and key items needing attention.</li>
-      <li><strong>Survey Checklist Summary</strong> — A table of all inspected items showing rating, finding code, and applicable standards.</li>
-      <li><strong>Safety Equipment — TC TP 511</strong> — Required safety equipment per Transport Canada regulations, with on-board verification status.</li>
-      <li><strong>Detailed Survey Findings</strong> — The full, itemised survey observations by category.</li>
-      <li><strong>Findings &amp; Recommendations</strong> — All items compiled for quick reference, grouped by severity.</li>
-      <li><strong>Rating &amp; Valuation</strong> — Overall condition rating (BUC Marine Grading System), Fair Market Value${survey.replacementCost ? ', Estimated Replacement Cost' : ''}, and Valuation Worksheet.</li>
-      <li><strong>Surveyor's Certification</strong></li>
-    </ol>
-  </div>
+  <!-- v2250: "Notes Regarding Report Format" section removed — it was a
+       numbered list of every section, duplicating the Table of Contents
+       that immediately followed it. -->
 
   <!-- ═══ TABLE OF CONTENTS ═══ -->
   <h2>TABLE OF CONTENTS</h2>
@@ -19172,7 +19155,6 @@ async function generateReport() {
       <li>Methodology and Limitations</li>
       <li>Conduct of Survey</li>
       <li>Definitions of Terms</li>
-      <li>Notes Regarding Report Format</li>
       <li>General Vessel Information</li>
       <li>Vessel Specifications</li>
       <li>Survey Conditions</li>
@@ -19303,12 +19285,7 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
   const _foChecked = _foSafe.filter(e => e.checked).length;
   const _foMissing = _foSafe.length - _foChecked;
 
-  const _foAllA = findings.A.map(f =>
-    '<li style="margin-bottom:4px;"><strong style="color:#dc2626;">' + esc(f.code) + '</strong> — ' + esc(displayItemLabel(f.label, survey)) + '</li>'
-  ).join('');
-  const _foAllB = findings.B.map(f =>
-    '<li style="margin-bottom:4px;"><strong style="color:#d97706;">' + esc(f.code) + '</strong> — ' + esc(displayItemLabel(f.label, survey)) + '</li>'
-  ).join('');
+  // v2250: _foAllA / _foAllB removed — bullet lists no longer in Findings Overview
 
   html += `
   <table>
@@ -19320,8 +19297,9 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     <tr><td><strong>Safety Equipment (TC TP 511)</strong></td><td>${_foSafe.length > 0 ? _foChecked + ' of ' + _foSafe.length + ' verified' + (_foMissing > 0 ? ' — <strong style="color:#dc2626;">' + _foMissing + ' missing</strong>' : ' — <strong style="color:#16a34a;">all present</strong>') : '<span style="color:#6b7280;">Not yet assessed</span>'}</td></tr>
   </table>
 
-  ${findings.A.length > 0 ? '<div style="margin-top:12px;"><strong style="color:#dc2626;">Priority Safety Findings:</strong><ul style="margin-top:4px;">' + _foAllA + '</ul></div>' : ''}
-  ${findings.B.length > 0 ? '<div style="margin-top:8px;"><strong style="color:#d97706;">Key Items Needing Attention:</strong><ul style="margin-top:4px;">' + _foAllB + '</ul></div>' : ''}
+  <!-- v2250: A and B bullet lists removed from Findings Overview — they
+       duplicated the Findings & Recommendations section verbatim. The
+       count table above is sufficient as an at-a-glance summary. -->
 
   <!-- ═══ SURVEY CHECKLIST SUMMARY ═══ -->
   <h2>SURVEY CHECKLIST SUMMARY</h2>
@@ -19401,17 +19379,9 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     }
   });
 
+  // v2250: post-checklist summary count line removed — same counts
+  // already appear in the Findings Overview table above.
   html += `</tbody></table>
-
-  <div style="margin-top:10px; font-size:9pt; color:#555;">
-    <strong>Summary:</strong>
-    <span style="color:#dc2626;">&#9632;</span> A — Critical: ${findings.A.length} &nbsp;
-    <span style="color:#d97706;">&#9632;</span> B — Needs Attention: ${findings.B.length} &nbsp;
-    <span style="color:#16a34a;">&#9632;</span> C — Serviceable: ${findings.C.length} &nbsp;
-    <span style="color:#6b7280;">&#9632;</span> Not Tested: ${findings.NT.length} &nbsp;
-    ${findings.PO.length > 0 ? '<span style="color:#6b7280;">&#9632;</span> PO — Powered Up Only: ' + findings.PO.length + ' &nbsp;' : ''}
-    | &nbsp; <strong>Total items inspected: ${tableRow}</strong>
-  </div>
 
   <div class="page-break"></div>
 

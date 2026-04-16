@@ -12,6 +12,18 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2250 — 2026-04-16
+
+### Report redundancy reduction
+
+- **"Notes Regarding Report Format" section removed** — it was a numbered list of every section, immediately followed by the Table of Contents which listed the same sections. Removed entirely; TOC entry also removed.
+- **Purpose and Scope trimmed** — previously repeated most of the content in Methodology and Limitations (non-destructive methods, no panel removal, engine/electrical/tankage limitations, not a warranty/guarantee). Now a concise 3-sentence statement of intent; the bold standards-applicability disclaimer is retained. All detail lives exclusively in Methodology and Limitations.
+- **Findings Overview A/B bullet lists removed** — previously listed every A and B finding by code + label, duplicating the Findings & Recommendations section. The count table remains as an at-a-glance summary.
+- **Post-checklist summary count line removed** — the A/B/C/NT/PO counts at the bottom of the Survey Checklist Summary table duplicated the Findings Overview table. Removed.
+- **Dead code cleanup** — `_foAllA` and `_foAllB` variables (only used by the removed bullet lists) removed.
+
+---
+
 ## v2249 — 2026-04-16
 
 ### Google Drive sign-in fix for iPhone / PWA
