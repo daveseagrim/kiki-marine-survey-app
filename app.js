@@ -19318,61 +19318,70 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     const onBoard = activeSafetyEq.filter(e => e.checked).length;
     const missing = activeSafetyEq.length - onBoard;
 
+    // v2251: Safety Equipment rendered as individual finding blocks
+    // matching the Detailed Survey Findings style — colored left border,
+    // bold item name, status pill, notes text, and photos beneath.
+    // Previously rendered as a table.
     html += `
   <h2 style="background:#2563eb;">SAFETY EQUIPMENT — TRANSPORT CANADA TP 511</h2>
-  <p style="font-size:10pt;color:#555;">Vessel class: <strong>${safeTypeLabel}</strong> — Length bracket: <strong>${safeBracket ? safeBracket.label : 'N/A'}</strong><br/>
-  Per Transport Canada TP 511E Safe Boating Guide &amp; Small Vessel Regulations (SOR/2010-91).</p>
-  <table class="checklist-table">
-    <thead>
-      <tr>
-        <th style="width:5%;background:#2563eb;">#</th>
-        <th style="width:30%;background:#2563eb;">Required Equipment</th>
-        <th style="width:10%;background:#2563eb;">Requirement</th>
-        <th style="width:12%;background:#2563eb;">On Board?</th>
-        <th style="width:18%;background:#2563eb;">Category</th>
-        <th style="width:25%;background:#2563eb;">Notes / Condition</th>
-      </tr>
-    </thead>
-    <tbody>
-    `;
-
-    activeSafetyEq.forEach((eq, idx) => {
-      const statusColor = eq.checked ? '#16a34a' : '#dc2626';
-      const statusText = eq.checked ? '✓ Yes' : '✗ MISSING';
-      let safetyPhotoRow = '';
-      if (eq.photos && eq.photos.length > 0) {
-        let photoImgs = '';
-        for (const pid of eq.photos) {
-          const src = itemPhotoCache[pid];
-          if (!src) {
-            console.warn('Safety photo missing from cache — ID:', pid, '(item:', eq.name, ')');
-          }
-          if (src) {
-            photoImgs += `<img src="${src}" style="width:240px;height:180px;object-fit:cover;border-radius:4px;margin:3px;border:1px solid #ccc;" />`;
-          }
-        }
-        if (photoImgs) {
-          safetyPhotoRow = `<tr><td colspan="6" style="padding:4px 8px;">${photoImgs}</td></tr>`;
-        }
-      }
-      html += `<tr>
-        <td style="text-align:center;">${idx + 1}</td>
-        <td>${esc(eq.name)}</td>
-        <td style="text-align:center;">${esc(eq.requirement)}</td>
-        <td style="text-align:center;font-weight:bold;color:${statusColor};">${statusText}</td>
-        <td style="font-size:9pt;">${esc(eq.category)}</td>
-        <td style="font-size:9pt;">${esc(eq.notes || '—')}</td>
-      </tr>${safetyPhotoRow}`;
-    });
-
-    html += `</tbody></table>
-    <div style="margin-top:8px;font-size:10pt;">
+  <div class="scope-text">
+    <p>Vessel class: <strong>${safeTypeLabel}</strong> — Length bracket: <strong>${safeBracket ? safeBracket.label : 'N/A'}</strong><br/>
+    Per Transport Canada TP 511E Safe Boating Guide &amp; Small Vessel Regulations (SOR/2010-91).</p>
+    <p style="font-size:10pt;">
       <span style="color:#16a34a;">&#9632;</span> On board: <strong>${onBoard}</strong> &nbsp;
       <span style="color:#dc2626;">&#9632;</span> Missing/not verified: <strong>${missing}</strong> &nbsp;
       | &nbsp; Total required items: <strong>${activeSafetyEq.length}</strong>
-    </div>
-    ${missing > 0 ? '<p style="color:#dc2626;font-weight:bold;font-size:10pt;margin-top:8px;">⚠ Vessel does not carry all required safety equipment per Transport Canada regulations.</p>' : '<p style="color:#16a34a;font-weight:bold;font-size:10pt;margin-top:8px;">✓ Vessel carries all required safety equipment per Transport Canada regulations.</p>'}
-    <div class="page-break"></div>
+    </p>
+    ${missing > 0 ? '<p style="color:#dc2626;font-weight:bold;font-size:10pt;">⚠ Vessel does not carry all required safety equipment per Transport Canada regulations.</p>' : '<p style="color:#16a34a;font-weight:bold;font-size:10pt;">✓ Vessel carries all required safety equipment per Transport Canada regulations.</p>'}
+  </div>
+  `;
+
+    // Group by category for sub-headers (like Detailed Findings groups by category)
+    const _safeCats = {};
+    activeSafetyEq.forEach(eq => {
+      const cat = eq.category || 'General';
+      if (!_safeCats[cat]) _safeCats[cat] = [];
+      _safeCats[cat].push(eq);
+    });
+
+    Object.keys(_safeCats).forEach(catName => {
+      html += `<h3 style="margin:14px 0 6px;color:#2563eb;font-size:10pt;border-bottom:1px solid #2563eb;padding-bottom:3px;">${esc(catName)}</h3>`;
+
+      _safeCats[catName].forEach(eq => {
+        const statusColor = eq.checked ? '#16a34a' : '#dc2626';
+        const statusText = eq.checked ? '✓ On Board' : '✗ MISSING';
+        const statusBg = eq.checked ? '#dcfce7' : '#fee2e2';
+
+        // Build photo block matching Detailed Survey Findings style
+        let safetyPhotosHtml = '';
+        if (eq.photos && eq.photos.length > 0) {
+          const validPhotos = eq.photos.filter(pid => itemPhotoCache[pid]);
+          const total = validPhotos.length;
+          const imgs = validPhotos.map((pid, idx) => {
+            const cap = total === 1
+              ? eq.name
+              : (idx === 0 ? eq.name : `${eq.name} — photo ${idx + 1} of ${total}`);
+            return `<div class="report-photo-card">
+              <img src="${itemPhotoCache[pid]}" alt="${esc(cap)}" class="report-photo" />
+              <div class="caption">${esc(cap)}</div>
+            </div>`;
+          }).join('');
+          if (imgs) {
+            safetyPhotosHtml = `<div class="report-photo-row">${imgs}</div>`;
+          }
+        }
+
+        html += `
+  <div class="item" style="border-left-color: ${statusColor};">
+    <p><strong>${esc(eq.name)}</strong> — <span style="display:inline-block;padding:1px 8px;border-radius:3px;color:${statusColor};background:${statusBg};font-weight:bold;font-size:9pt;">${statusText}</span></p>
+    ${eq.requirement ? `<p style="font-size:9pt;color:#555;"><em>Requirement: ${esc(eq.requirement)}</em></p>` : ''}
+    ${eq.notes ? `<p>${esc(eq.notes)}</p>` : ''}
+    ${safetyPhotosHtml}
+  </div>`;
+      });
+    });
+
+    html += `<div class="page-break"></div>
     `;
   }
 
@@ -19382,60 +19391,63 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     const ieNotWorking = survey.instrumentsElectronics.filter(e => e.working === false).length;
     const ieNotTested = survey.instrumentsElectronics.filter(e => e.working === null || e.working === undefined).length;
 
+    // v2251: Instruments & Electronics rendered as individual finding
+    // blocks matching the Detailed Survey Findings style.
     html += `
   <h2 style="background:#7c3aed;">INSTRUMENTS &amp; ELECTRONICS INVENTORY</h2>
-  <table class="checklist-table">
-    <thead>
-      <tr>
-        <th style="width:5%;background:#7c3aed;">#</th>
-        <th style="width:20%;background:#7c3aed;">Instrument / Device</th>
-        <th style="width:15%;background:#7c3aed;">Make</th>
-        <th style="width:15%;background:#7c3aed;">Model</th>
-        <th style="width:8%;background:#7c3aed;">Year</th>
-        <th style="width:12%;background:#7c3aed;">Status</th>
-        <th style="width:25%;background:#7c3aed;">Notes</th>
-      </tr>
-    </thead>
-    <tbody>
-    `;
-
-    survey.instrumentsElectronics.forEach((item, idx) => {
-      const statusColor = item.working === true ? '#16a34a' : item.working === false ? '#dc2626' : '#6b7280';
-      const statusText = item.working === true ? '✓ Working' : item.working === false ? '✗ Not working' : '— Not tested';
-
-      let iePhotoRow = '';
-      if (item.photos && item.photos.length > 0) {
-        let photoImgs = '';
-        for (const pid of item.photos) {
-          if (itemPhotoCache[pid]) {
-            photoImgs += `<img src="${itemPhotoCache[pid]}" style="width:240px;height:180px;object-fit:cover;border-radius:4px;margin:3px;border:1px solid #ccc;" />`;
-          }
-        }
-        if (photoImgs) {
-          iePhotoRow = `<tr><td colspan="7" style="padding:4px 8px;">${photoImgs}</td></tr>`;
-        }
-      }
-
-      html += `<tr>
-        <td style="text-align:center;">${idx + 1}</td>
-        <td><strong>${esc(item.name || 'Unidentified')}</strong>${item.aiDetails ? `<br/><span style="font-size:8pt;color:#555;">${esc(item.aiDetails)}</span>` : ''}</td>
-        <td>${esc(item.make || '—')}</td>
-        <td>${esc(item.model || '—')}</td>
-        <td style="text-align:center;">${esc(item.year || '—')}</td>
-        <td style="text-align:center;font-weight:bold;color:${statusColor};">${statusText}</td>
-        <td style="font-size:9pt;">${esc(item.notes || '—')}</td>
-      </tr>${iePhotoRow}`;
-    });
-
-    html += `</tbody></table>
-    <div style="margin-top:8px;font-size:10pt;">
+  <div class="scope-text">
+    <p style="font-size:10pt;">
       <span style="color:#16a34a;">&#9632;</span> Working: <strong>${ieWorking}</strong> &nbsp;
       <span style="color:#dc2626;">&#9632;</span> Not working: <strong>${ieNotWorking}</strong> &nbsp;
       <span style="color:#6b7280;">&#9632;</span> Not tested: <strong>${ieNotTested}</strong> &nbsp;
       | &nbsp; Total instruments: <strong>${survey.instrumentsElectronics.length}</strong>
-    </div>
-    ${ieNotWorking > 0 ? `<p style="color:#dc2626;font-weight:bold;font-size:10pt;margin-top:8px;">⚠ ${ieNotWorking} instrument${ieNotWorking > 1 ? 's' : ''} found to be non-operational.</p>` : ''}
-    <div class="page-break"></div>
+    </p>
+    ${ieNotWorking > 0 ? `<p style="color:#dc2626;font-weight:bold;font-size:10pt;">⚠ ${ieNotWorking} instrument${ieNotWorking > 1 ? 's' : ''} found to be non-operational.</p>` : ''}
+  </div>
+  `;
+
+    survey.instrumentsElectronics.forEach(item => {
+      const statusColor = item.working === true ? '#16a34a' : item.working === false ? '#dc2626' : '#6b7280';
+      const statusText = item.working === true ? '✓ Working' : item.working === false ? '✗ Not working' : '— Not tested';
+      const statusBg = item.working === true ? '#dcfce7' : item.working === false ? '#fee2e2' : '#f3f4f6';
+
+      // Spec line — make / model / year on one line
+      const specParts = [];
+      if (item.make) specParts.push(item.make);
+      if (item.model) specParts.push(item.model);
+      if (item.year) specParts.push(`(${item.year})`);
+      const specLine = specParts.length > 0 ? specParts.join(' ') : '';
+
+      // Build photo block matching Detailed Survey Findings style
+      let iePhotosHtml = '';
+      if (item.photos && item.photos.length > 0) {
+        const validPhotos = item.photos.filter(pid => itemPhotoCache[pid]);
+        const total = validPhotos.length;
+        const imgs = validPhotos.map((pid, idx) => {
+          const cap = total === 1
+            ? (item.name || 'Instrument')
+            : (idx === 0 ? (item.name || 'Instrument') : `${item.name || 'Instrument'} — photo ${idx + 1} of ${total}`);
+          return `<div class="report-photo-card">
+            <img src="${itemPhotoCache[pid]}" alt="${esc(cap)}" class="report-photo" />
+            <div class="caption">${esc(cap)}</div>
+          </div>`;
+        }).join('');
+        if (imgs) {
+          iePhotosHtml = `<div class="report-photo-row">${imgs}</div>`;
+        }
+      }
+
+      html += `
+  <div class="item" style="border-left-color: ${statusColor};">
+    <p><strong>${esc(item.name || 'Unidentified')}</strong> — <span style="display:inline-block;padding:1px 8px;border-radius:3px;color:${statusColor};background:${statusBg};font-weight:bold;font-size:9pt;">${statusText}</span></p>
+    ${specLine ? `<p style="font-size:9pt;color:#555;"><em>${esc(specLine)}</em></p>` : ''}
+    ${item.aiDetails ? `<p style="font-size:9pt;color:#555;">${esc(item.aiDetails)}</p>` : ''}
+    ${item.notes ? `<p>${esc(item.notes)}</p>` : ''}
+    ${iePhotosHtml}
+  </div>`;
+    });
+
+    html += `<div class="page-break"></div>
     `;
   }
 

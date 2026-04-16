@@ -20,6 +20,11 @@ lets you roll back to a specific version with confidence.
 - **TOC updated** — "Survey Checklist Summary" entry removed. Report now has 15 sections in the Table of Contents.
 - **Dead code cleaned** — `tableRow` counter and all checklist summary rendering logic removed.
 
+### Safety Equipment & Instruments rendered as finding blocks
+
+- **Safety Equipment — TC TP 511** converted from a 6-column table to individual finding blocks matching the Detailed Survey Findings style: colored left border (green = on board, red = missing), bold equipment name + status pill, requirement line, notes text, and photos using the standard `report-photo-card` / `report-photo-row` layout. Items grouped by category with sub-headers.
+- **Instruments & Electronics Inventory** converted the same way: colored left border (green/red/grey), bold name + status pill, make/model/year spec line, AI details, notes, and photos. All sections now have a consistent visual style throughout the report.
+
 ---
 
 ## v2250 — 2026-04-16
