@@ -12,6 +12,49 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2236 — 2026-04-15
+
+### Changed — Report redundancy reduction (major page-count savings)
+
+Findings & Recommendations now shows only the first sentence of each
+observation, with a cross-reference to the full text + photos in Detailed
+Survey Findings. Previously the entire observation was repeated verbatim.
+
+Checklist Summary notes re-truncated to 150 characters with ellipsis — full
+text lives in Detailed Survey Findings. The v2227 change to show full notes
+was tripling report length.
+
+### Added — Hull / deck / boot stripe colour fields
+
+Three new text fields on the Edit Intro form (Hull Colour, Boot Stripe Colour,
+Deck Colour) auto-fill the `[COLOUR]` placeholders in the vessel description
+template. All three description-builder functions updated.
+
+### Added — Check Report warns on unfilled description placeholders
+
+Scans the vessel description for `[UPPERCASE]` template tokens and flags them
+as warnings with a count and list of unique placeholders found.
+
+### Added — FMV sanity check in Check Report
+
+If the concluded FMV, low value, or high value is under $500, a critical/warning
+issue is raised suggesting a data-entry error (e.g. "$25" → "Did you mean $25,000?").
+
+### Fixed — Safety equipment "and N more" truncation
+
+Missing safety items in the vessel description were capped at 5 names with
+"and N more". Now lists all missing items — there are rarely more than ~14 total,
+so a single sentence handles them cleanly.
+
+### Fixed — Outdrive / saildrive standards reference
+
+Outdrive and saildrive checklist items now auto-apply both ABYC P-4 (Inboard
+Engines) and ABYC E-2 (Cathodic Protection), since those items explicitly cover
+corrosion and anodes. Previously only P-4 was cited. The consumer of the map
+(`getStandardForItem`) now handles both string and array values.
+
+---
+
 ## v2235 — 2026-04-15
 
 ### Added — Compact R&V summary after General Vessel Information

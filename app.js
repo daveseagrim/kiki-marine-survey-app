@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2235';
+const APP_VERSION = 'v2236';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -4515,8 +4515,8 @@ const ITEM_STANDARD_MAP = {
   'Propeller/drive anode': 'ABYC E-2 - Cathodic Protection',
   'Cutlass bearing': 'ABYC P-4 - Inboard Engines',
   'Propeller': 'ABYC P-4 - Inboard Engines',
-  'Outdrive': 'ABYC P-4 - Inboard Engines',
-  'Sail drive': 'ABYC P-4 - Inboard Engines',
+  'Outdrive': ['ABYC P-4 - Inboard Engines', 'ABYC E-2 - Cathodic Protection'],
+  'Sail drive': ['ABYC P-4 - Inboard Engines', 'ABYC E-2 - Cathodic Protection'],
   'Bow thruster': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
   'Stern thruster': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
   'Through-hull': 'ABYC TH-27 - Seacocks/Through-Hull Fittings',
@@ -6476,6 +6476,9 @@ function createNewSurvey(formData) {
     maxDraft: formData.maxDraft,
     totalSailArea: formData.totalSailArea,
     construction: formData.construction,
+    hullColour: formData.hullColour,
+    bootStripeColour: formData.bootStripeColour,
+    deckColour: formData.deckColour,
     keelType: formData.keelType,
     numberCabins: formData.numberCabins,
     electricalSystem: formData.electricalSystem,
@@ -7033,6 +7036,19 @@ function renderNewSurveyForm() {
       <div class="form-group">
         <label class="form-label">Construction</label>
         <input type="text" id="construction" placeholder="e.g., Fibreglass">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Hull Colour</label>
+        <input type="text" id="hullColour" placeholder="e.g., White">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Boot Stripe Colour</label>
+        <input type="text" id="bootStripeColour" placeholder="e.g., Blue">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Deck Colour</label>
+        <input type="text" id="deckColour" placeholder="e.g., White">
       </div>
 
       <div class="form-group">
@@ -8123,6 +8139,9 @@ function editSurveyDetails(surveyId) {
         maxDraft: survey.maxDraft,
         totalSailArea: survey.totalSailArea,
         construction: survey.construction,
+        hullColour: survey.hullColour,
+        bootStripeColour: survey.bootStripeColour,
+        deckColour: survey.deckColour,
         keelType: survey.keelType,
         numberCabins: survey.numberCabins,
         electricalSystem: survey.electricalSystem,
@@ -8392,6 +8411,9 @@ function saveSurveyDetails(surveyId) {
       maxDraft: document.getElementById('maxDraft')?.value || '',
       totalSailArea: document.getElementById('totalSailArea')?.value || '',
       construction: document.getElementById('construction')?.value || '',
+      hullColour: document.getElementById('hullColour')?.value || '',
+      bootStripeColour: document.getElementById('bootStripeColour')?.value || '',
+      deckColour: document.getElementById('deckColour')?.value || '',
       keelType: document.getElementById('keelType')?.value || '',
       numberCabins: document.getElementById('numberCabins')?.value || '',
       electricalSystem: document.getElementById('electricalSystem')?.value || '',
@@ -9336,6 +9358,9 @@ async function generateVesselDescription() {
   const boatStyle = document.getElementById('boatStyle')?.value || '';
   const hullType = document.getElementById('hullType')?.value || '';
   const construction = document.getElementById('construction')?.value || '';
+  const hullColour = document.getElementById('hullColour')?.value || '';
+  const bootStripeColour = document.getElementById('bootStripeColour')?.value || '';
+  const deckColour = document.getElementById('deckColour')?.value || '';
   const loa = document.getElementById('loa')?.value || '';
   const beam = document.getElementById('beam')?.value || '';
   const draft = document.getElementById('maxDraft')?.value || '';
@@ -9477,8 +9502,8 @@ async function generateVesselDescription() {
     const missing = survey.safetyEquipment.length - onBoard;
     safetyDesc = `Safety equipment per Transport Canada TP 511: ${onBoard} of ${survey.safetyEquipment.length} required items verified on board.`;
     if (missing > 0) {
-      const missingNames = survey.safetyEquipment.filter(e => !e.checked).map(e => e.name).slice(0, 5);
-      safetyDesc += ` Missing: ${missingNames.join(', ')}${missing > 5 ? ` and ${missing - 5} more` : ''}.`;
+      const missingNames = survey.safetyEquipment.filter(e => !e.checked).map(e => e.name);
+      safetyDesc += ` Missing: ${missingNames.join(', ')}.`;
     }
   }
 
@@ -9497,7 +9522,10 @@ async function generateVesselDescription() {
   desc += `\n\n`;
   desc += engineDesc;
   desc += `\n\n`;
-  desc += `The hull is [COLOUR] with a [COLOUR] boot stripe. The deck is [COLOUR] with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
+  const _hullC = hullColour || '[COLOUR]';
+  const _bootC = bootStripeColour || '[COLOUR]';
+  const _deckC = deckColour || '[COLOUR]';
+  desc += `The hull is ${_hullC} with a ${_bootC} boot stripe. The deck is ${_deckC} with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
   // v2228: resolve head count from survey.headCount (set on the Head(s)
   // category). Cabin count already flows from numberCabins. Berths field
   // not captured in the survey yet, so the [NUMBER] berth(s) placeholder
@@ -9555,6 +9583,9 @@ async function regenerateDescriptionFromInspection() {
   const boatStyle = survey.boatStyle || '';
   const hullType = survey.hullType || '';
   const construction = survey.construction || '';
+  const hullColour = survey.hullColour || '';
+  const bootStripeColour = survey.bootStripeColour || '';
+  const deckColour = survey.deckColour || '';
   const loa = survey.loa || '';
   const beam = survey.beam || '';
   const draft = survey.maxDraft || '';
@@ -9675,8 +9706,8 @@ async function regenerateDescriptionFromInspection() {
     const missing = survey.safetyEquipment.length - onBoard;
     safetyDesc = `Safety equipment per Transport Canada TP 511: ${onBoard} of ${survey.safetyEquipment.length} required items verified on board.`;
     if (missing > 0) {
-      const missingNames = survey.safetyEquipment.filter(e => !e.checked).map(e => e.name).slice(0, 5);
-      safetyDesc += ` Missing: ${missingNames.join(', ')}${missing > 5 ? ` and ${missing - 5} more` : ''}.`;
+      const missingNames = survey.safetyEquipment.filter(e => !e.checked).map(e => e.name);
+      safetyDesc += ` Missing: ${missingNames.join(', ')}.`;
     }
   }
 
@@ -9695,7 +9726,10 @@ async function regenerateDescriptionFromInspection() {
   desc += `\n\n`;
   desc += engineDesc;
   desc += `\n\n`;
-  desc += `The hull is [COLOUR] with a [COLOUR] boot stripe. The deck is [COLOUR] with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
+  const _hC = hullColour || '[COLOUR]';
+  const _bC = bootStripeColour || '[COLOUR]';
+  const _dC = deckColour || '[COLOUR]';
+  desc += `The hull is ${_hC} with a ${_bC} boot stripe. The deck is ${_dC} with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
   // v2228: resolve head count from survey.headCount (set on the Head(s)
   // category). Cabin count already flows from numberCabins. Berths field
   // not captured in the survey yet, so the [NUMBER] berth(s) placeholder
@@ -9742,6 +9776,9 @@ function buildDescriptionFromSurvey(survey) {
   const boatStyle = survey.boatStyle || '';
   const hullType = survey.hullType || '';
   const construction = survey.construction || '';
+  const hullColour = survey.hullColour || '';
+  const bootStripeColour = survey.bootStripeColour || '';
+  const deckColour = survey.deckColour || '';
   const loa = survey.loa || '';
   const beam = survey.beam || '';
   const draft = survey.maxDraft || '';
@@ -9874,8 +9911,8 @@ function buildDescriptionFromSurvey(survey) {
     const missing = survey.safetyEquipment.length - onBoard;
     safetyDesc = `Safety equipment per Transport Canada TP 511: ${onBoard} of ${survey.safetyEquipment.length} required items verified on board.`;
     if (missing > 0) {
-      const missingNames = survey.safetyEquipment.filter(e => !e.checked).map(e => e.name).slice(0, 5);
-      safetyDesc += ` Missing: ${missingNames.join(', ')}${missing > 5 ? ` and ${missing - 5} more` : ''}.`;
+      const missingNames = survey.safetyEquipment.filter(e => !e.checked).map(e => e.name);
+      safetyDesc += ` Missing: ${missingNames.join(', ')}.`;
     }
   }
 
@@ -9894,7 +9931,10 @@ function buildDescriptionFromSurvey(survey) {
   desc += `\n\n`;
   desc += engineDesc;
   desc += `\n\n`;
-  desc += `The hull is [COLOUR] with a [COLOUR] boot stripe. The deck is [COLOUR] with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
+  const _hC = hullColour || '[COLOUR]';
+  const _bC = bootStripeColour || '[COLOUR]';
+  const _dC = deckColour || '[COLOUR]';
+  desc += `The hull is ${_hC} with a ${_bC} boot stripe. The deck is ${_dC} with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
   // v2228: resolve head count from survey.headCount (set on the Head(s)
   // category). Cabin count already flows from numberCabins. Berths field
   // not captured in the survey yet, so the [NUMBER] berth(s) placeholder
@@ -10294,6 +10334,9 @@ function startNewSurvey() {
     maxDraft: document.getElementById('maxDraft')?.value || '',
     totalSailArea: document.getElementById('totalSailArea')?.value || '',
     construction: document.getElementById('construction')?.value || '',
+    hullColour: document.getElementById('hullColour')?.value || '',
+    bootStripeColour: document.getElementById('bootStripeColour')?.value || '',
+    deckColour: document.getElementById('deckColour')?.value || '',
     keelType: document.getElementById('keelType')?.value || '',
     numberCabins: document.getElementById('numberCabins')?.value || '',
     electricalSystem: document.getElementById('electricalSystem')?.value || '',
@@ -12213,8 +12256,30 @@ async function checkSurvey() {
     if (!survey.valuationLow) add('warning', 'Valuation', 'Missing: Low value estimate', null, 'valuationLow');
     if (!survey.valuationHigh) add('warning', 'Valuation', 'Missing: High value estimate', null, 'valuationHigh');
   }
-  if (!survey.concludedValue) add('warning', 'Valuation', 'Missing: Final concluded Fair Market Value', null, 'concludedValue');
+  if (!survey.concludedValue) {
+    add('warning', 'Valuation', 'Missing: Final concluded Fair Market Value', null, 'concludedValue');
+  } else {
+    // v2236: sanity check — flag suspiciously low values that look like
+    // data-entry errors (e.g. "25" instead of "25000").
+    const _cv = parseFloat(String(survey.concludedValue).replace(/[^0-9.]/g, ''));
+    if (!isNaN(_cv) && _cv > 0 && _cv < 500) {
+      add('critical', 'Valuation', `Concluded FMV looks like a data-entry error: $${_cv}. Did you mean $${(_cv * 1000).toLocaleString()}?`, null, 'concludedValue');
+    }
+  }
   if (!survey.overallCondition) add('critical', 'Valuation', 'Missing: Overall condition rating (BUC grade)', null, 'overallCondition');
+  // v2236: also flag if low/high values look unreasonably small
+  if (survey.valuationLow) {
+    const _vl = parseFloat(String(survey.valuationLow).replace(/[^0-9.]/g, ''));
+    if (!isNaN(_vl) && _vl > 0 && _vl < 500) {
+      add('warning', 'Valuation', `Low value ($${_vl}) looks like a data-entry error. Did you mean $${(_vl * 1000).toLocaleString()}?`, null, 'valuationLow');
+    }
+  }
+  if (survey.valuationHigh) {
+    const _vh = parseFloat(String(survey.valuationHigh).replace(/[^0-9.]/g, ''));
+    if (!isNaN(_vh) && _vh > 0 && _vh < 500) {
+      add('warning', 'Valuation', `High value ($${_vh}) looks like a data-entry error. Did you mean $${(_vh * 1000).toLocaleString()}?`, null, 'valuationHigh');
+    }
+  }
   if (!survey.valuationRationale && !survey.valuationSource) {
     add('warning', 'Valuation', 'Missing: Valuation rationale or source', null, 'valuationRationale');
   }
@@ -12266,6 +12331,18 @@ async function checkSurvey() {
   // ── 8. VESSEL DESCRIPTION ───────────────────────────────────────────────
   if (!survey.vesselDescription || survey.vesselDescription.trim().length < 20) {
     add('warning', 'Vessel Description', 'Vessel description is missing or too short', null, 'vesselDescription');
+  } else {
+    // v2236: scan for unfilled template placeholders — [COLOUR], [XX], etc.
+    const descText = survey.vesselDescription;
+    const _placeholders = descText.match(/\[[A-Z][A-Z /\-']*\]/g);
+    if (_placeholders && _placeholders.length > 0) {
+      const unique = [...new Set(_placeholders)];
+      if (unique.length <= 3) {
+        add('warning', 'Vessel Description', `Contains unfilled placeholders: ${unique.join(', ')}`, null, 'vesselDescription');
+      } else {
+        add('warning', 'Vessel Description', `Contains ${unique.length} unfilled placeholders: ${unique.slice(0, 3).join(', ')} (+${unique.length - 3} more)`, null, 'vesselDescription');
+      }
+    }
   }
 
   // ── 9. TC LICENCE ───────────────────────────────────────────────────────
@@ -16543,7 +16620,9 @@ function selectRating(itemLabel, categoryName, rating) {
       // Auto-apply the single most relevant standard for A and B ratings only
       if (rating.startsWith('A') || rating.startsWith('B')) {
         const itemStandard = getStandardForItem(itemLabel, categoryName);
-        survey.items[itemLabel].standards = itemStandard ? [itemStandard] : [];
+        survey.items[itemLabel].standards = itemStandard
+          ? (Array.isArray(itemStandard) ? itemStandard : [itemStandard])
+          : [];
       } else {
         survey.items[itemLabel].standards = [];
       }
@@ -18731,10 +18810,14 @@ ${survey.vesselDescription ? `
           const rating = d.rating;
           const code = findingCodeMap[item.label] || '';
           const isViolation = rating.startsWith('A') || rating.startsWith('B');
-          // v2227: surface the FULL surveyor-entered note (was previously
-          // truncated at 80 chars + CSS ellipsis so only the first line
-          // was readable). Report readers need the complete prose here.
-          const notesText = d.text ? d.text : '—';
+          // v2236: revert to truncated summary — full text lives in
+          // Detailed Survey Findings. Showing the complete prose here was
+          // tripling report length (checklist summary + detailed findings
+          // + F&R all repeated the same text verbatim).
+          const _rawNotes = d.text ? d.text.trim() : '';
+          const notesText = _rawNotes.length > 150
+            ? _rawNotes.slice(0, 147) + '…'
+            : (_rawNotes || '—');
           const stdText = isViolation && d.standards && d.standards.length > 0 ? d.standards.join('; ') : '—';
           // v2228: classify via helper — the previous fallthrough chain
           // mislabelled "Not applicable" and "Powered up only" as "NT —
@@ -19264,6 +19347,20 @@ ${survey.vesselDescription ? `
   // Findings; F&R carries a cross-reference pointing the reader there.
   // See git history if a compact photo-thumbnail F&R variant is wanted.
 
+  // v2236: truncate observation text to its first sentence for F&R.
+  // The full text + photos already live in Detailed Survey Findings;
+  // F&R is an action list, not a second verbatim copy.
+  function truncateForFR(text) {
+    if (!text) return '';
+    const t = text.trim();
+    // Match first sentence ending with .!? followed by space or end
+    const m = t.match(/^(.+?[.!?])(?:\s|$)/);
+    const first = m ? m[1] : t;
+    // If we truncated, add ellipsis
+    if (first.length < t.length) return first + ' …';
+    return first;
+  }
+
   // Helper: build a specific recommendation line citing the item's standards
   function buildRecommendation(f, severity) {
     const stdCite = (severity === 'A' || severity === 'B') && f.standards && f.standards.length ? ` (${f.standards.join('; ')})` : '';
@@ -19288,9 +19385,10 @@ ${survey.vesselDescription ? `
     const crossRef = f.category
       ? `<p style="font-size:9pt;color:#6b7280;margin:4px 0 0 0;"><em>See full observation${photoCount > 0 ? ` and ${photoCount} photo${photoCount === 1 ? '' : 's'}` : ''} in <strong>Detailed Survey Findings → ${esc(f.category)}</strong>.</em></p>`
       : '';
+    const briefText = truncateForFR(depersonalise(dedup(f.text || '')));
     return `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid ${color};">
       <strong style="color:${color};">Finding ${f.code}</strong> — ${esc(displayItemLabel(f.label, survey))}
-      ${f.text ? `<p style="margin:3px 0;">${esc(depersonalise(dedup(f.text)))}</p>` : ''}
+      ${briefText ? `<p style="margin:3px 0;">${esc(briefText)}</p>` : ''}
       ${buildRecommendation(f, severity)}
       ${crossRef}
     </div>`;
@@ -19337,9 +19435,10 @@ ${survey.vesselDescription ? `
       const _ntCrossRef = f.category
         ? `<p style="font-size:9pt;color:#6b7280;margin:4px 0 0 0;"><em>See full observation${_ntPhotoCount > 0 ? ` and ${_ntPhotoCount} photo${_ntPhotoCount === 1 ? '' : 's'}` : ''} in <strong>Detailed Survey Findings → ${esc(f.category)}</strong>.</em></p>`
         : '';
+      const _ntBrief = truncateForFR(depersonalise(dedup(f.text || '')));
       html += `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid #6b7280;">
         <strong style="color:#6b7280;">Finding ${f.code}</strong> — ${esc(f.label)}
-        ${f.text ? `<p style="margin:3px 0;">${esc(depersonalise(dedup(f.text)))}</p>` : ''}
+        ${_ntBrief ? `<p style="margin:3px 0;">${esc(_ntBrief)}</p>` : ''}
         ${_ntCrossRef}
       </div>`;
     });
@@ -19353,9 +19452,10 @@ ${survey.vesselDescription ? `
       const _poCrossRef = f.category
         ? `<p style="font-size:9pt;color:#6b7280;margin:4px 0 0 0;"><em>See full observation${_poPhotoCount > 0 ? ` and ${_poPhotoCount} photo${_poPhotoCount === 1 ? '' : 's'}` : ''} in <strong>Detailed Survey Findings → ${esc(f.category)}</strong>.</em></p>`
         : '';
+      const _poBrief = truncateForFR(depersonalise(dedup(f.text || '')));
       html += `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid #6b7280;">
         <strong style="color:#6b7280;">Finding ${f.code}</strong> — ${esc(f.label)}
-        ${f.text ? `<p style="margin:3px 0;">${esc(depersonalise(dedup(f.text)))}</p>` : ''}
+        ${_poBrief ? `<p style="margin:3px 0;">${esc(_poBrief)}</p>` : ''}
         ${_poCrossRef}
       </div>`;
     });
