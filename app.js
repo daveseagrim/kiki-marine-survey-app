@@ -2128,7 +2128,9 @@ const SaveStatus = (() => {
     if (_pill && document.body.contains(_pill)) return;
     _pill = document.createElement('button');
     _pill.id = 'saveStatusPill';
-    _pill.style.cssText = 'position:fixed;top:calc(8px + env(safe-area-inset-top, 0px));right:8px;z-index:1500;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.96);color:#0f172a;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.12);cursor:pointer;font-family:inherit;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);';
+    // v2251: position pill just below the header bar instead of overlapping it.
+    // The header is ~56px tall plus safe-area-inset-top on notched iPhones.
+    _pill.style.cssText = 'position:fixed;top:calc(60px + env(safe-area-inset-top, 0px));right:8px;z-index:1500;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.96);color:#0f172a;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.12);cursor:pointer;font-family:inherit;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);';
     _pill.innerHTML = '<span id="saveDot" style="width:8px;height:8px;border-radius:50%;background:#9ca3af;display:inline-block;"></span><span id="saveText">Idle</span>';
     _pill.title = 'Save status — tap for sync details';
     _pill.onclick = _showDetailPanel;
@@ -7362,7 +7364,7 @@ function renderNewSurveyForm() {
         <div style="border:1px solid #e5e7eb;border-radius:8px;padding:10px;background:#f9fafb;margin-bottom:8px;">
           <div id="attendeesList" style="margin-bottom:8px;">
             <div style="display:flex;justify-content:space-between;align-items:center;background:#dcfce7;border:1px solid #86efac;border-radius:6px;padding:8px 10px;margin-bottom:6px;">
-              <span style="font-size:13px;"><strong>Dave Seagrim</strong> (SAMS Surveyor Associate)</span>
+              <span style="font-size:13px;"><strong>Dave Seagrim</strong> SAMS Surveyor Associate, ABYC Master Advisor</span>
               <span style="font-size:12px;color:#6b7280;">Primary</span>
             </div>
           </div>
@@ -7370,7 +7372,7 @@ function renderNewSurveyForm() {
             <button class="btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="addAttendeeField()">+ Add Person</button>
           </div>
         </div>
-        <input type="hidden" id="personsInAttendance" value="Dave Seagrim (SAMS Surveyor Associate)">
+        <input type="hidden" id="personsInAttendance" value="Dave Seagrim SAMS Surveyor Associate, ABYC Master Advisor">
       </div>
 
       <div class="form-group">
@@ -9460,7 +9462,7 @@ async function generateVesselDescription() {
     const mastData = survey?.items?.['Main mast'] || {};
     const steppingStr = mastData.mastStepping ? mastData.mastStepping.toLowerCase() : '[deck-stepped/keel-stepped]';
     const trackStr = mastData.mastTrackType ? ` with ${mastData.mastTrackType.toLowerCase()}` : '';
-    rigDesc = ` She is ${rigType}-rigged with a ${steppingStr} [aluminium/carbon fibre] mast${trackStr}.`;
+    rigDesc = ` "${vesselName}" is ${rigType}-rigged with a ${steppingStr} [aluminium/carbon fibre] mast${trackStr}.`;
     if (sailArea) rigDesc += ` Total sail area is ${sailArea}.`;
   }
 
@@ -9589,7 +9591,7 @@ async function generateVesselDescription() {
 
   // ── Para 1: Identification, hull geometry, and exterior ──
   let desc = `"${vesselName}" is a ${yearStr} ${makeStr} ${modelStr}, a ${constructionStr} ${hullTypeStr} ${typeStr}. `;
-  desc += `She has an overall length of ${loa || '[XX\'XX"]'}, a beam of ${beam || '[XX\'XX"]'}${keelStr}${draftStr}`;
+  desc += `"${vesselName}" has an overall length of ${loa || '[XX\'XX"]'}, a beam of ${beam || '[XX\'XX"]'}${keelStr}${draftStr}`;
   if (displacement) desc += `, and a displacement of ${displacement}`;
   if (ballastStr && vesselType === 'sail') desc += ` (ballast: ${ballastStr})`;
   desc += `.`;
@@ -9717,7 +9719,7 @@ async function regenerateDescriptionFromInspection() {
     const mastData = survey.items?.['Main mast'] || {};
     const steppingStr = mastData.mastStepping ? mastData.mastStepping.toLowerCase() : '[deck-stepped/keel-stepped]';
     const trackStr = mastData.mastTrackType ? ` with ${mastData.mastTrackType.toLowerCase()}` : '';
-    rigDesc = ` She is ${rigType}-rigged with a ${steppingStr} [aluminium/carbon fibre] mast${trackStr}.`;
+    rigDesc = ` "${vesselName}" is ${rigType}-rigged with a ${steppingStr} [aluminium/carbon fibre] mast${trackStr}.`;
     if (sailArea) rigDesc += ` Total sail area is ${sailArea}.`;
   }
 
@@ -9832,7 +9834,7 @@ async function regenerateDescriptionFromInspection() {
 
   // v2244: richer vessel description (copy 2 — regenerateDescriptionFromInspection)
   let desc = `"${vesselName}" is a ${yearStr} ${makeStr} ${modelStr}, a ${constructionStr} ${hullTypeStr} ${typeStr}. `;
-  desc += `She has an overall length of ${loa || '[XX\'XX"]'}, a beam of ${beam || '[XX\'XX"]'}${keelStr}${draftStr}`;
+  desc += `"${vesselName}" has an overall length of ${loa || '[XX\'XX"]'}, a beam of ${beam || '[XX\'XX"]'}${keelStr}${draftStr}`;
   if (displacement) desc += `, and a displacement of ${displacement}`;
   if (ballastStr && vesselType === 'sail') desc += ` (ballast: ${ballastStr})`;
   desc += `.`;
@@ -9942,7 +9944,7 @@ function buildDescriptionFromSurvey(survey) {
     const mastData = survey.items?.['Main mast'] || {};
     const steppingStr = mastData.mastStepping ? mastData.mastStepping.toLowerCase() : '[deck-stepped/keel-stepped]';
     const trackStr = mastData.mastTrackType ? ` with ${mastData.mastTrackType.toLowerCase()}` : '';
-    rigDesc = ` She is ${rigType}-rigged with a ${steppingStr} [aluminium/carbon fibre] mast${trackStr}.`;
+    rigDesc = ` "${vesselName}" is ${rigType}-rigged with a ${steppingStr} [aluminium/carbon fibre] mast${trackStr}.`;
     if (sailArea) rigDesc += ` Total sail area is ${sailArea}.`;
   }
 
@@ -10061,7 +10063,7 @@ function buildDescriptionFromSurvey(survey) {
 
   // v2244: richer vessel description (copy 3 — buildVesselDescription pure function)
   let desc = `"${vesselName}" is a ${yearStr} ${makeStr} ${modelStr}, a ${constructionStr} ${hullTypeStr} ${typeStr}. `;
-  desc += `She has an overall length of ${loa || '[XX\'XX"]'}, a beam of ${beam || '[XX\'XX"]'}${keelStr}${draftStr}`;
+  desc += `"${vesselName}" has an overall length of ${loa || '[XX\'XX"]'}, a beam of ${beam || '[XX\'XX"]'}${keelStr}${draftStr}`;
   if (displacement) desc += `, and a displacement of ${displacement}`;
   if (ballastStr && vesselType === 'sail') desc += ` (ballast: ${ballastStr})`;
   desc += `.`;
@@ -10506,7 +10508,7 @@ function updateAttendeesList() {
   const field = document.getElementById('personsInAttendance');
   if (!list || !field) return;
 
-  const attendees = ['Dave Seagrim (SAMS Surveyor Associate)'];
+  const attendees = ['Dave Seagrim SAMS Surveyor Associate, ABYC Master Advisor'];
   const extras = list.querySelectorAll('[data-attendee-extra] input');
   extras.forEach(input => {
     const val = input.value.trim();
@@ -19238,8 +19240,8 @@ async function generateReport() {
   <table>
     ${!_excl('hinNumber') ? `<tr><td style="width:40%;"><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>` : ''}
     ${!_excl('tcLicense') && (survey.tcLicense || survey.tcLicenseType || licencePhotoDataUrl || tcPaperLicencePhotoDataUrl) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${survey.tcLicenseExpiry ? ' (expires ' + esc(survey.tcLicenseExpiry) + ')' : ''}${licencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Licence number on hull:</em><br><img src="' + licencePhotoDataUrl + '" alt="Licence Number on Hull" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}${tcPaperLicencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Transport Canada paper licence:</em><br><img src="' + tcPaperLicencePhotoDataUrl + '" alt="TC Paper Licence" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>` : ''}
-    ${_row('taxStatus', 'Tax Status (Duties Paid)', esc(survey.taxStatus) || 'N/A')}
-    ${!_excl('compliancePlate') ? `<tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>` : ''}
+    ${!_excl('taxStatus') && survey.taxStatus ? `<tr><td><strong>Tax Status (Duties Paid)</strong></td><td>${esc(survey.taxStatus)}</td></tr>` : ''}
+    ${!_excl('compliancePlate') && (survey.compliancePlate || compliancePhotoDataUrl) ? `<tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || ''}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>` : ''}
   </table>
 
 ${survey.vesselDescription && !_excl('vesselDescription') ? `

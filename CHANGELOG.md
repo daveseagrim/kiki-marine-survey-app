@@ -25,6 +25,13 @@ lets you roll back to a specific version with confidence.
 - **Safety Equipment — TC TP 511** converted from a 6-column table to individual finding blocks matching the Detailed Survey Findings style: colored left border (green = on board, red = missing), bold equipment name + status pill, requirement line, notes text, and photos using the standard `report-photo-card` / `report-photo-row` layout. Items grouped by category with sub-headers.
 - **Instruments & Electronics Inventory** converted the same way: colored left border (green/red/grey), bold name + status pill, make/model/year spec line, AI details, notes, and photos. All sections now have a consistent visual style throughout the report.
 
+### Additional fixes
+
+- **Persons in Attendance** default updated from "Dave Seagrim (SAMS Surveyor Associate)" to "Dave Seagrim SAMS Surveyor Associate, ABYC Master Advisor" — all three instances (display, hidden input, attendee list builder).
+- **Vessel description "She" → vessel name** — all six instances of "She has an overall length" and "She is [rig]-rigged" in the three description builders (sail/power/human-powered) now use `"${vesselName}"` instead.
+- **Tax Status / Compliance Plate** — these fields are now omitted from the Vessel Documentation section of the report when left blank, instead of showing "N/A". Compliance plate row also omitted when no photo is captured.
+- **SaveStatus pill repositioned** — moved from `top: 8px` (overlapping header) to `top: 60px` (just below the header bar) so it no longer covers navigation buttons or content.
+
 ---
 
 ## v2250 — 2026-04-16
