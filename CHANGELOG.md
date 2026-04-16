@@ -12,6 +12,18 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2253 — 2026-04-16
+
+### Consolidated save architecture
+- **Automatic Drive sync**: Survey JSON auto-pushes to Google Drive every 30 seconds (throttled, non-blocking). Uses a single `_autosync.json` file per vessel that overwrites on each push — no duplicate files.
+- **Save pill → Save Now button**: Tapping the save status pill forces an immediate save to all three backends (IndexedDB + Firebase + Drive). Long-press shows the detail panel.
+- **`saveEverywhere()` function**: Unified force-save accessible from any screen. Collects current form data, saves locally, pushes to Firebase, and pushes survey JSON to Drive — all in one tap.
+- **Drive token persistence**: OAuth token saved to localStorage and auto-restored on app restart. Dave stays "signed in" to Drive across sessions (token valid ~55 minutes; silent refresh on desktop, graceful expiry on iOS).
+- **Graceful token expiry**: Auto-sync skips silently when the Drive token has expired rather than triggering a disruptive redirect on iOS. Sign in again from the home screen when convenient.
+- **Backend indicators on pill**: Shows 🔥 (Firebase) and ☁️ (Drive) icons on the save pill when those backends are connected.
+- **Updated detail panel**: Long-press the pill to see per-backend status (Local, Firebase, Drive) with connection state and sync timing.
+- **F&R explanatory text removed**: Duplicate rating definitions under Findings & Recommendations removed (already in Use of Ratings section).
+
 ## v2252 — 2026-04-16
 
 ### Condition sentence uses surveyor's BUC grade

@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2252';
+const APP_VERSION = 'v2253';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2123,6 +2123,8 @@ const SaveStatus = (() => {
   let _photoCount = 0;
   let _refreshTimer = null;
   let _pill = null;
+  let _longPressTimer = null;
+  let _didLongPress = false;
 
   function show() {
     if (_pill && document.body.contains(_pill)) return;
@@ -2132,13 +2134,44 @@ const SaveStatus = (() => {
     // The header is ~56px tall plus safe-area-inset-top on notched iPhones.
     _pill.style.cssText = 'position:fixed;top:calc(60px + env(safe-area-inset-top, 0px));right:8px;z-index:1500;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.96);color:#0f172a;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.12);cursor:pointer;font-family:inherit;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);';
     _pill.innerHTML = '<span id="saveDot" style="width:8px;height:8px;border-radius:50%;background:#9ca3af;display:inline-block;"></span><span id="saveText">Idle</span>';
-    _pill.title = 'Save status — tap for sync details';
-    _pill.onclick = _showDetailPanel;
+    _pill.title = 'Tap to save now · Hold for details';
+    // v2253: Tap = save everywhere, long-press = detail panel
+    _pill.addEventListener('pointerdown', _onPointerDown);
+    _pill.addEventListener('pointerup', _onPointerUp);
+    _pill.addEventListener('pointercancel', _onPointerCancel);
+    // Prevent default click (we handle it via pointer events)
+    _pill.onclick = (e) => e.preventDefault();
     document.body.appendChild(_pill);
     if (!_refreshTimer) {
       _refreshTimer = setInterval(_refresh, 2000);
     }
     _refresh();
+  }
+
+  function _onPointerDown(e) {
+    _didLongPress = false;
+    _longPressTimer = setTimeout(() => {
+      _didLongPress = true;
+      _longPressTimer = null;
+      // Haptic feedback on iOS if available
+      if (navigator.vibrate) navigator.vibrate(20);
+      _showDetailPanel();
+    }, 500);
+  }
+
+  function _onPointerUp(e) {
+    if (_longPressTimer) {
+      clearTimeout(_longPressTimer);
+      _longPressTimer = null;
+    }
+    if (!_didLongPress) {
+      // Short tap — save everywhere
+      if (typeof saveEverywhere === 'function') saveEverywhere();
+    }
+  }
+
+  function _onPointerCancel() {
+    if (_longPressTimer) { clearTimeout(_longPressTimer); _longPressTimer = null; }
   }
 
   function hide() {
@@ -2195,6 +2228,13 @@ const SaveStatus = (() => {
         else when = `${Math.floor(secs / 3600)}h ago`;
         label = `✓ Saved ${when} ${photos}`.trim();
       }
+      // v2253: append backend indicators
+      const fbOn = typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled && FirebaseSync.isEnabled();
+      const drOn = typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn();
+      const backends = [];
+      if (fbOn) backends.push('🔥');
+      if (drOn) backends.push('☁️');
+      if (backends.length) label += ' ' + backends.join('');
     }
     dot.style.background = dotColor;
     text.textContent = label;
@@ -2212,27 +2252,28 @@ const SaveStatus = (() => {
 
     const overlay = document.createElement('div');
     overlay.id = 'saveStatusDetail';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:10000;display:flex;align-items:flex-start;justify-content:flex-end;padding:60px 8px 0 8px;';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:10000;display:flex;align-items:flex-start;justify-content:flex-end;padding:calc(80px + env(safe-area-inset-top, 0px)) 8px 0 8px;';
     overlay.innerHTML = `
       <div style="background:white;border-radius:12px;width:100%;max-width:340px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,0.2);" onclick="event.stopPropagation();">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <strong style="font-size:14px;color:#0f172a;">Save status</strong>
+          <strong style="font-size:14px;color:#0f172a;">Save Status</strong>
           <button id="ssClose" style="background:none;border:none;font-size:20px;color:#64748b;cursor:pointer;line-height:1;">×</button>
         </div>
         <div style="font-size:13px;line-height:1.7;color:#374151;">
-          <div><strong>Local (this device):</strong></div>
+          <div><strong>📱 Local (this device):</strong></div>
           <div style="padding-left:10px;">📷 ${_photoCount} photos in IndexedDB</div>
-          <div style="padding-left:10px;">💾 Last data save: ${_lastSaveAt ? new Date(_lastSaveAt).toLocaleTimeString() : 'no saves yet this session'}</div>
-          <div style="margin-top:8px;"><strong>Cloud (Firebase):</strong></div>
-          <div style="padding-left:10px;">${firebaseOk ? `✓ Connected · ${fbBacked}/${session} this session backed up` : '○ Not connected'}</div>
+          <div style="padding-left:10px;">💾 Last save: ${_lastSaveAt ? new Date(_lastSaveAt).toLocaleTimeString() : 'no saves yet'}</div>
+          <div style="margin-top:8px;"><strong>🔥 Firebase:</strong></div>
+          <div style="padding-left:10px;">${firebaseOk ? `<span style="color:#16a34a;">✓</span> Connected · auto-syncs on every save` : '<span style="color:#9ca3af;">○</span> Not connected'}</div>
           ${queued > 0 ? `<div style="padding-left:10px;color:#d97706;">⏳ ${queued} photos queued for upload</div>` : ''}
-          <div style="margin-top:8px;"><strong>Cloud (Google Drive):</strong></div>
-          <div style="padding-left:10px;">${driveOk ? '✓ Signed in · use 💾 Backup to push' : '○ Not signed in'}</div>
+          <div style="margin-top:8px;"><strong>☁️ Google Drive:</strong></div>
+          <div style="padding-left:10px;">${driveOk ? '<span style="color:#16a34a;">✓</span> Signed in · auto-syncs every 30s' : '<span style="color:#9ca3af;">○</span> Not signed in'}</div>
         </div>
         <div style="margin-top:12px;padding-top:10px;border-top:1px solid #e5e7eb;font-size:11px;color:#6b7280;">
-          Local saves happen instantly to IndexedDB on this device. Cloud
-          backups happen automatically (Firebase) when you pause for 5+ seconds,
-          or on demand (Drive backup button).
+          <strong>Tap</strong> the save pill anytime to force an immediate save
+          to all connected backends. <strong>Hold</strong> to see this panel.
+          Saves happen automatically — local is instant, Firebase on every change,
+          Drive every 30 seconds.
         </div>
       </div>
     `;
@@ -2244,6 +2285,57 @@ const SaveStatus = (() => {
 
   return { show, hide, markSaving, markSaved, markError, setPhotoCount };
 })();
+
+// ── v2253: saveEverywhere — force-save to all three backends now ─────────
+// Called when the user taps the save pill. Collects current form data,
+// saves to IndexedDB, pushes to Firebase, and pushes survey JSON to Drive.
+// Non-blocking for cloud backends — local save is awaited, cloud is fire-and-forget.
+async function saveEverywhere() {
+  if (!currentSurveyId) return;
+  SaveStatus.markSaving();
+  try {
+    // 1. Collect latest form data and save locally
+    if (typeof saveEditFormSilently === 'function' &&
+        (currentView === 'edit-survey' || currentView === 'new-survey')) {
+      await saveEditFormSilently();
+    } else {
+      // On inspection screen — just re-save the current survey
+      const survey = await getSurvey(currentSurveyId);
+      if (survey) await saveSurvey(survey);
+    }
+
+    // 2. Force Firebase push (may already have happened via hook, but ensure it)
+    if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled()) {
+      const survey = await getSurvey(currentSurveyId);
+      if (survey) {
+        FirebaseSync.pushSurvey(survey).catch(err =>
+          console.warn('[SaveEverywhere] Firebase push failed:', err.message || err)
+        );
+      }
+    }
+
+    // 3. Force immediate Drive auto-sync (bypass throttle)
+    if (typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn()) {
+      const survey = await getSurvey(currentSurveyId);
+      if (survey) {
+        // Cancel any pending throttled sync for this survey
+        if (_driveAutoSync && _driveAutoSync.timers[currentSurveyId]) {
+          clearTimeout(_driveAutoSync.timers[currentSurveyId]);
+          delete _driveAutoSync.timers[currentSurveyId];
+          delete _driveAutoSync.pending[currentSurveyId];
+        }
+        DriveBackup.autoSyncJSON(survey).catch(err =>
+          console.warn('[SaveEverywhere] Drive push failed:', err.message || err)
+        );
+      }
+    }
+
+    SaveStatus.markSaved();
+  } catch (err) {
+    console.error('[SaveEverywhere] Error:', err);
+    SaveStatus.markError(err.message || 'Save failed');
+  }
+}
 
 // Wrapper to count photos in IndexedDB for a survey and update the pill
 async function refreshSavePillPhotoCount(surveyId) {
@@ -20865,6 +20957,44 @@ const DriveBackup = (() => {
     return !!_accessToken;
   }
 
+  // v2253: Persist Drive token to localStorage so it survives page reloads
+  // and app restarts. Tokens last ~1 hour; we store the token + timestamp
+  // and check validity on restore. This means Dave stays "signed in" to
+  // Drive across sessions without re-authenticating every time.
+  function _persistToken() {
+    if (_accessToken) {
+      try {
+        localStorage.setItem('_driveToken', _accessToken);
+        localStorage.setItem('_driveTokenTime', String(window._driveTokenTime || Date.now()));
+      } catch (e) { /* swallow — localStorage full or private browsing */ }
+    }
+  }
+  function _restoreToken() {
+    try {
+      const saved = localStorage.getItem('_driveToken');
+      const savedTime = parseInt(localStorage.getItem('_driveTokenTime') || '0', 10);
+      // Token is still valid if less than 55 minutes old (tokens last 1 hour)
+      if (saved && savedTime && (Date.now() - savedTime) < 3300000) {
+        _accessToken = saved;
+        window._driveTokenTime = savedTime;
+        console.log('[Drive] Restored saved token, valid for', Math.round((3300000 - (Date.now() - savedTime)) / 60000), 'more minutes');
+        return true;
+      }
+      // Expired — clear stale token
+      localStorage.removeItem('_driveToken');
+      localStorage.removeItem('_driveTokenTime');
+    } catch (e) { /* swallow */ }
+    return false;
+  }
+  function _clearPersistedToken() {
+    try {
+      localStorage.removeItem('_driveToken');
+      localStorage.removeItem('_driveTokenTime');
+    } catch (e) { /* swallow */ }
+  }
+  // Attempt to restore on module load
+  _restoreToken();
+
   // v2248: detect iOS / standalone PWA where popups are blocked.
   // signInWithRedirect works everywhere; signInWithPopup is faster on
   // desktop but unusable in PWA home-screen mode on iOS.
@@ -20895,6 +21025,7 @@ const DriveBackup = (() => {
     const result = await firebase.auth().signInWithPopup(provider);
     _accessToken = result.credential.accessToken;
     window._driveTokenTime = Date.now();
+    _persistToken();
     console.log('[Drive] Signed in, token obtained');
     return _accessToken;
   }
@@ -20907,6 +21038,7 @@ const DriveBackup = (() => {
       if (result && result.credential && result.credential.accessToken) {
         _accessToken = result.credential.accessToken;
         window._driveTokenTime = Date.now();
+        _persistToken();
         sessionStorage.removeItem('_driveRedirectPending');
         console.log('[Drive] Redirect sign-in completed, token obtained');
         showToast('Google Drive connected ✓');
@@ -20931,6 +21063,8 @@ const DriveBackup = (() => {
     if (_accessToken && (Date.now() - (window._driveTokenTime || 0)) < 3300000) {
       return _accessToken; // Still valid
     }
+    // v2253: try restoring from localStorage before triggering a sign-in flow
+    if (_restoreToken()) return _accessToken;
     console.log('[Drive] Token expired or missing, refreshing...');
 
     // If the user is already signed in to Firebase Auth, try to get a
@@ -20950,6 +21084,7 @@ const DriveBackup = (() => {
         const result = await firebase.auth().signInWithPopup(provider);
         _accessToken = result.credential.accessToken;
         window._driveTokenTime = Date.now();
+        _persistToken();
         console.log('[Drive] Token refreshed');
         return _accessToken;
       } catch (e) {
@@ -21320,7 +21455,95 @@ const DriveBackup = (() => {
     }
   }
 
-  return { isSignedIn, signIn, checkRedirectResult, backupSurvey, backupOnePhoto, backupAll, ensureToken };
+  // ── v2253: Update an existing file on Drive (PATCH) ──────────────────
+  async function updateFile(fileId, mimeType, content) {
+    const token = await ensureToken();
+    const res = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': mimeType },
+      body: content instanceof Blob ? content : new Blob([content], { type: mimeType })
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Drive update failed (${res.status}): ${errText}`);
+    }
+    return await res.json();
+  }
+
+  // ── v2253: Find a file by exact name in a Drive folder ──────────────
+  async function findFileInFolder(folderId, fileName) {
+    const token = await ensureToken();
+    const q = encodeURIComponent(`name='${fileName.replace(/'/g, "\\'")}' and '${folderId}' in parents and trashed=false`);
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return (data.files && data.files.length > 0) ? data.files[0].id : null;
+  }
+
+  // ── v2253: Lightweight auto-sync — push survey JSON to Drive ────────
+  // Uploads/overwrites a single autosync JSON file per vessel. Much
+  // lighter than backupSurvey() (no photo scanning or upload). Designed
+  // to be called frequently from the throttled saveSurvey() hook.
+  // Caches folder IDs to minimise API calls on repeated saves.
+  const _folderCache = {};       // vesselName → folderId
+  const _autosyncFileCache = {}; // vesselName → fileId on Drive
+
+  async function autoSyncJSON(survey) {
+    if (!isSignedIn()) return;
+    if (!survey || !survey.id) return;
+    // v2253: If the token is expired, don't trigger a re-auth flow from
+    // auto-sync — that would cause a disruptive redirect on iOS. Just skip.
+    if ((Date.now() - (window._driveTokenTime || 0)) >= 3300000) {
+      _clearPersistedToken();
+      _accessToken = null;
+      console.log('[Drive] Auto-sync skipped — token expired. Sign in again from the home screen.');
+      return;
+    }
+
+    const vesselName = survey.vesselName || 'Unnamed';
+    const safeName = vesselName.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const fileName = `${safeName}_autosync.json`;
+
+    // 1. Get or create the vessel folder (cached after first call)
+    let folderId = _folderCache[vesselName];
+    if (!folderId) {
+      folderId = await getOrCreateVesselFolder(vesselName);
+      _folderCache[vesselName] = folderId;
+    }
+
+    // 2. Strip photo blobs from the clone (too large for JSON)
+    const clone = JSON.parse(JSON.stringify(survey));
+    if (clone.items) {
+      for (const key of Object.keys(clone.items)) {
+        const item = clone.items[key];
+        if (item && item.photos) {
+          item.photos = item.photos.map(p => typeof p === 'string' && p.startsWith('data:') ? '(photo-in-drive)' : p);
+        }
+      }
+    }
+    clone._autosyncAt = new Date().toISOString();
+    const json = JSON.stringify(clone, null, 2);
+
+    // 3. Find existing autosync file (cached) or create new
+    let fileId = _autosyncFileCache[vesselName];
+    if (!fileId) {
+      fileId = await findFileInFolder(folderId, fileName);
+      if (fileId) _autosyncFileCache[vesselName] = fileId;
+    }
+
+    if (fileId) {
+      // Update existing file
+      await updateFile(fileId, 'application/json', json);
+    } else {
+      // Create new file
+      const created = await uploadFile(folderId, fileName, 'application/json', json);
+      if (created && created.id) _autosyncFileCache[vesselName] = created.id;
+    }
+  }
+
+  return { isSignedIn, signIn, checkRedirectResult, backupSurvey, backupOnePhoto, backupAll, ensureToken, autoSyncJSON };
 })();
 
 const FirebaseSync = (() => {
@@ -21709,8 +21932,36 @@ const FirebaseSync = (() => {
 })();
 
 
-// ── Hook saveSurvey to also push to Firebase ─────────────────────────────────
+// ── Hook saveSurvey to also push to Firebase + Drive ────────────────────────
 const _originalSaveSurvey = saveSurvey;
+
+// v2253: Throttled Drive auto-sync — at most once every 30 seconds per survey.
+// Stores the latest survey snapshot and a timer; when the timer fires, the
+// most recent snapshot is pushed (so intermediate saves are coalesced).
+const _driveAutoSync = { timers: {}, pending: {} };
+function _scheduleDriveAutoSync(survey) {
+  if (!survey || !survey.id) return;
+  if (typeof DriveBackup === 'undefined' || !DriveBackup.isSignedIn()) return;
+  const sid = survey.id;
+  // Always keep the latest snapshot
+  _driveAutoSync.pending[sid] = survey;
+  // If a timer is already running for this survey, let it fire with the latest data
+  if (_driveAutoSync.timers[sid]) return;
+  _driveAutoSync.timers[sid] = setTimeout(async () => {
+    const latest = _driveAutoSync.pending[sid];
+    delete _driveAutoSync.pending[sid];
+    delete _driveAutoSync.timers[sid];
+    if (latest) {
+      try {
+        await DriveBackup.autoSyncJSON(latest);
+        console.log('[Drive] Auto-sync pushed:', latest.vesselName || sid);
+      } catch (err) {
+        console.warn('[Drive] Auto-sync failed (non-fatal):', err.message || err);
+      }
+    }
+  }, 30000);
+}
+
 saveSurvey = async function(survey) {
   // Add lastModified timestamp for sync conflict resolution
   if (!FirebaseSync.isSuppressed()) {
@@ -21721,6 +21972,8 @@ saveSurvey = async function(survey) {
   if (FirebaseSync.isEnabled() && !FirebaseSync.isSuppressed()) {
     FirebaseSync.pushSurvey(survey).catch(err => console.error('[Sync] Push failed:', err));
   }
+  // v2253: Queue Drive auto-sync (throttled, non-blocking)
+  _scheduleDriveAutoSync(survey);
   return result;
 };
 
