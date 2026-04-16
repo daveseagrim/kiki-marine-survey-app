@@ -12,6 +12,38 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2233 — 2026-04-15
+
+### Changed — Unified refined aesthetic across all pages
+
+Harmonised the visual weight of every page (New Survey form, Edit Intro,
+Inspection view, bottom sheets, modals) to match the home page's lighter,
+more delicate design language.
+
+- **Buttons:** Removed gradient from .btn-primary; all button classes now use
+  pill-shaped border-radius (14px) with lighter box-shadows
+- **Form headings:** Reduced from 20px bold blue with 2px border to 13px
+  uppercase slate-gray with 1px #e2e8f0 divider (matches home month headers)
+- **Form labels:** Lighter weight (14px, #475569 slate instead of #333 black)
+- **Inputs:** Border colour standardised to #e2e8f0; softer focus ring (2px
+  at 8% opacity instead of 3px at 15%)
+- **Header:** Thinner bottom border (1px #e2e8f0 instead of 2px #3399cc);
+  lighter shadow; title reduced from 20px/700 to 17px/600
+- **Back button:** Softer background (#f1f5f9); matched border-radius (10px)
+- **Accordion headers:** Reduced min-height from 60px to 48px; font from 16px
+  to 14px; tighter padding (12px 14px)
+- **Cards & items:** All border colours aligned to #e2e8f0; border-radius to
+  10px; subtle background tints (#f8fafc, #f1f5f9) instead of generic grays
+- **Progress bar:** Slimmed from 8px to 4px height
+- **FAB:** Flat gold fill (no gradient); smaller (52px); lighter shadow
+- **Bottom sheet:** Softer dividers (#f1f5f9); pill-style action buttons
+- **Modal:** Slightly more rounded (14px); lighter shadow
+
+All changes are CSS-only — no JavaScript logic modified. No layout shifts or
+functional behaviour affected.
+
+---
+
 ## v2232 — 2026-04-15
 
 ### Changed — Brand colour alignment (#006699 → #066aab)
