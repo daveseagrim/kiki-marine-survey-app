@@ -12,6 +12,114 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2228 — 2026-04-15
+
+Report-only pass addressing SAMS-style feedback and a stack of small
+follow-ups. No app-UI changes in this release.
+
+### Fixed — Broken "Survey Location Map" on the report
+
+The General Vessel Information block rendered an OpenStreetMap static
+image via `staticmap.openstreetmap.de/staticmap.php?...` — that provider
+has been unreliable and was rendering as a broken-image icon on shipped
+reports (visible above the "Rating & Valuation" block).
+
+Replaced with a compact, no-external-image GPS block that shows the
+coordinates rounded to five decimal places and offers two clickable
+deep-links — one to OpenStreetMap (`/?mlat=…&mlon=…#map=14/lat/lon`)
+and one to Google Maps (`/maps?q=lat,lon`). Both render clean in the
+HTML report, survive the Word export, and require no API key or
+third-party availability. The surrounding `Survey Location` row in the
+info table is unchanged.
+
+The `getStaticMapUrl()` helper (previously unused dead code that also
+pointed at the broken provider) was updated to return an OSM deep-link
+URL so any future caller gets a working URL instead of a broken one.
+
+### Fixed — NA items rendered as "NT — Not Tested" in the report
+
+The Checklist Summary rating pill and the body-section `ratingClass`
+used a hand-rolled `rating.startsWith('A') ? … : rating.startsWith('B')
+? … : rating.startsWith('C') ? … : 'NT'` fallthrough chain that
+silently swept every other rating — including "Not applicable" and
+"Powered up only" — into the NT bucket. Dave caught it on a Bow thruster
+rated NA in the survey that showed up as NT in the report.
+
+Introduced `classifyRatingForReport(rating)` as the single source of
+truth: returns `{ code, label, color, cssClass }` for each rating,
+including a proper `NA / Not Applicable / rating-na` triple and
+`PO / Powered Up Only / rating-po` for Powered up only. Every site in
+`generateReport()` that was classifying ratings has been updated to use
+it. Added matching `.rating-na` / `.rating-po` CSS rules to both the
+scoped report stylesheet and the Word-export embedded styles.
+
+### Changed — Not-applicable items are now dropped from the report
+
+`Not applicable` ratings no longer appear in either the Checklist
+Summary or the Detailed Survey Findings — they just clutter the
+reader's view with "this item isn't on the vessel" noise. The NA
+filter is applied after the existing `excluded` filter. Not-tested
+items continue to appear everywhere (Summary, Body, Findings &
+Recommendations) per Dave's policy.
+
+### Changed — Checklist Summary preamble no longer mentions "Violation"
+
+The Violation column was removed from the Checklist Summary in v2227,
+but the intro paragraph still said "...whether it constitutes a
+violation, and applicable standards." Updated to "...its surveyor
+notes, rating, finding code where applicable, and the relevant
+standards."
+
+### Changed — Vessel Information and Vessel Documentation consolidated
+
+General Vessel Information was double-printing every field that also
+appeared in Vessel Specifications, Survey Conditions, or Vessel
+Documentation Data: HIN + photo, TC Licence + expiry, Compliance
+Plate + photo, Construction/Material, LOA, LWL, Beam, Displacement,
+Draft, and Weather all appeared twice on the front of the report.
+
+Trimmed the General Vessel Information table to survey-event metadata
+only — Survey Type, Date of Inspection, Date of Report, Vessel Name,
+Year/Make/Model, Location, Client, Persons in Attendance, Independent
+Surveys, and Surveyor. Physical dimensions now live only in Vessel
+Specifications; regulatory-ID fields (HIN, TC Licence, Tax Status,
+Compliance Plate) live only in Vessel Documentation Data; Weather
+lives only in Survey Conditions. Dates now render via
+`formatLongDate()` ("April 15, 2026") for consistency with the cover
+and signature.
+
+### Changed — Vessel Description auto-fills more placeholders from survey data
+
+`buildDescriptionFromSurvey()` — the function the saveSurvey auto-regen
+path uses — now resolves more placeholders from live survey data so
+the description keeps itself current as the surveyor enters values:
+
+- **Drive type:** `[SHAFT DRIVE/STERNDRIVE]` now resolves from
+  `survey.driveType`. Shaft → "shaft drive", outdrive → "sterndrive",
+  IPS → "IPS pod drive", saildrive → "saildrive". Twin engines pluralise
+  correctly (e.g. "sterndrives", "IPS pod drives"). When the DB lookup
+  for inboard/outboard/sterndrive comes up empty, it now falls back to
+  deriving from `driveType` before emitting the placeholder.
+- **Head count:** `[NUMBER] head(s)` now resolves from
+  `survey.headCount` (the value the Head(s) category uses for its
+  expansion). Berth count field is not captured in the survey yet, so
+  that placeholder remains until a field is added.
+- **Electronics inventory:** widened to count any rated item that means
+  "installed and at least functional" (A/B/C/Powered-up), not just C.
+  Items rated NA emit an explicit "No X installed" sentence so the
+  reader knows we checked. NT items are silent. Output now reads
+  naturally — "Navigation and communication equipment includes VHF
+  radio, GPS/chartplotter, and depth sounder. No radar or autopilot is
+  installed." — instead of the old `[GPS/CHARTPLOTTER], [VHF RADIO], …`
+  placeholder fallback.
+
+The description auto-regenerates on any `saveSurvey()` call whose
+survey has `descriptionAutoGenerated` truthy, so these updates flow
+through whenever any contributing field is edited anywhere in the
+app.
+
+---
+
 ## v2227 — 2026-04-15
 
 ### Changed — Report readability pass + inspection-view skip tidying

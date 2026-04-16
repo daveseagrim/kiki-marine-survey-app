@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2227';
+const APP_VERSION = 'v2228';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -290,6 +290,29 @@ const RATING_SHORT_LABELS = {
 
 function getRatingShortLabel(rating) {
   return RATING_SHORT_LABELS[rating] || rating;
+}
+
+// v2228: single source of truth for how the report labels, colours, and
+// classes each rating. Previous code used `rating.startsWith('A') ? … :
+// rating.startsWith('B') ? … : rating.startsWith('C') ? … : 'NT'`
+// fallthrough patterns that silently grouped "Not applicable" and
+// "Powered up only" into the 'NT' bucket — so NA items were rendered
+// as "NT — Not Tested" in the checklist summary and tagged `rating-nt`
+// in the body. Use this helper everywhere in the report-gen path
+// instead of hand-rolled startsWith chains.
+function classifyRatingForReport(rating) {
+  const r = String(rating || '');
+  if (r.startsWith('A')) return { code: 'A', label: 'Critical', color: '#dc2626', cssClass: 'rating-a' };
+  if (r.startsWith('B')) return { code: 'B', label: 'Needs Attention', color: '#d97706', cssClass: 'rating-b' };
+  if (r.startsWith('C')) return { code: 'C', label: 'Serviceable', color: '#16a34a', cssClass: 'rating-c' };
+  if (r.startsWith('Powered')) return { code: 'PO', label: 'Powered Up Only', color: '#6b7280', cssClass: 'rating-po' };
+  if (r.startsWith('Not applicable') || r.toLowerCase() === 'n/a' || r.toLowerCase() === 'na') {
+    return { code: 'NA', label: 'Not Applicable', color: '#6b7280', cssClass: 'rating-na' };
+  }
+  if (r.startsWith('Not tested') || r.startsWith('Not verified') || r === 'NT') {
+    return { code: 'NT', label: 'Not Tested', color: '#6b7280', cssClass: 'rating-nt' };
+  }
+  return { code: (r.charAt(0) || '?').toUpperCase(), label: r || '—', color: '#6b7280', cssClass: 'rating-nt' };
 }
 
 // Transform a raw checklist-item label into its display form for the current
@@ -8685,9 +8708,13 @@ function showMapPreview(lat, lon) {
   `;
 }
 
-// Generate a static map URL for reports (sized for Google Docs — ~480x280)
+// v2228: staticmap.openstreetmap.de is down / unreliable and was rendering
+// as a broken-image icon on shipped reports. The current report code uses a
+// text + clickable-link treatment instead (no external image dependency).
+// This helper is kept for any future caller but now returns an OSM deep-link
+// URL rather than a broken static-image URL.
 function getStaticMapUrl(lat, lon) {
-  return `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lon}&zoom=14&size=480x280&maptype=mapnik&markers=${lat},${lon},red-pushpin`;
+  return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}&zoom=14#map=14/${lat}/${lon}`;
 }
 
 // ─── Boat Lookup Helpers ───────────────────────────────────────────────────
@@ -9405,8 +9432,13 @@ async function generateVesselDescription() {
   desc += propDesc;
   desc += `\n\n`;
   desc += `The hull is [COLOUR] with a [COLOUR] boot stripe. The deck is [COLOUR] with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
+  // v2228: resolve head count from survey.headCount (set on the Head(s)
+  // category). Cabin count already flows from numberCabins. Berths field
+  // not captured in the survey yet, so the [NUMBER] berth(s) placeholder
+  // stays until a berth-count field is added.
   const cabinStr = cabins || '[NUMBER]';
-  desc += `The vessel features ${cabinStr} cabin(s) with [NUMBER] berth(s), [NUMBER] head(s) with [MANUAL/ELECTRIC] marine toilet(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
+  const headStr = survey.headCount ? String(survey.headCount) : '[NUMBER]';
+  desc += `The vessel features ${cabinStr} cabin(s) with [NUMBER] berth(s), ${headStr} head(s) with [MANUAL/ELECTRIC] marine toilet(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
   desc += `The galley is [PORT/STARBOARD/AFT] and includes a [PROPANE/ELECTRIC/ALCOHOL] stove with [OVEN], a [12V/120V] refrigerator, and a [SINGLE/DOUBLE] stainless steel sink.`;
   desc += `\n\n`;
   if (electrical) {
@@ -9529,20 +9561,52 @@ async function regenerateDescriptionFromInspection() {
     }
   }
 
-  // Electronics from survey items
+  // Electronics from survey items — v2228: broadened from C-only to any
+  // rating that means "installed and at least functional" (A/B/C/Powered-up).
+  // Items rated NA get an explicit "No X installed" sentence so the reader
+  // knows we checked. NT items are silent.
   let electronicsDesc = '';
   if (survey.items) {
-    const electronicItems = ['VHF radio', 'GPS/chartplotter', 'Depth sounder/fish finder', 'Radar', 'Autopilot', 'AIS transponder/receiver'];
-    const foundElectronics = [];
-    for (const eLabel of electronicItems) {
-      const match = Object.keys(survey.items).find(k => k.toLowerCase().includes(eLabel.toLowerCase().split('/')[0]));
-      if (match && survey.items[match].rating && survey.items[match].rating.startsWith('C')) {
-        foundElectronics.push(eLabel.split('/')[0]);
+    const electronicItems = [
+      { key: 'vhf', display: 'VHF radio' },
+      { key: 'gps', display: 'GPS/chartplotter' },
+      { key: 'chartplotter', display: 'GPS/chartplotter' },
+      { key: 'depth sounder', display: 'depth sounder' },
+      { key: 'fish finder', display: 'depth sounder' },
+      { key: 'radar', display: 'radar' },
+      { key: 'autopilot', display: 'autopilot' },
+      { key: 'ais', display: 'AIS transponder' }
+    ];
+    const installed = new Set();
+    const absent = new Set();
+    for (const { key, display } of electronicItems) {
+      const match = Object.keys(survey.items).find(k => k.toLowerCase().includes(key));
+      if (!match) continue;
+      const data = survey.items[match];
+      if (!data || !data.rating || data.excluded) continue;
+      const r = data.rating;
+      if (r.startsWith('A') || r.startsWith('B') || r.startsWith('C') || r.startsWith('Powered')) {
+        installed.add(display);
+      } else if (r.startsWith('Not applicable')) {
+        absent.add(display);
       }
     }
-    if (foundElectronics.length > 0) {
-      electronicsDesc = `Navigation and communication equipment includes ${foundElectronics.join(', ')}.`;
+    const installedList = Array.from(installed);
+    const absentList = Array.from(absent);
+    const parts = [];
+    if (installedList.length === 1) {
+      parts.push(`Navigation and communication equipment includes ${installedList[0]}.`);
+    } else if (installedList.length === 2) {
+      parts.push(`Navigation and communication equipment includes ${installedList[0]} and ${installedList[1]}.`);
+    } else if (installedList.length > 2) {
+      parts.push(`Navigation and communication equipment includes ${installedList.slice(0, -1).join(', ')}, and ${installedList[installedList.length - 1]}.`);
     }
+    if (absentList.length === 1) {
+      parts.push(`No ${absentList[0]} is installed.`);
+    } else if (absentList.length > 1) {
+      parts.push(`No ${absentList.slice(0, -1).join(', ')} or ${absentList[absentList.length - 1]} is installed.`);
+    }
+    electronicsDesc = parts.join(' ');
   }
 
   // Safety equipment from TC TP 511
@@ -9574,8 +9638,13 @@ async function regenerateDescriptionFromInspection() {
   desc += propDesc;
   desc += `\n\n`;
   desc += `The hull is [COLOUR] with a [COLOUR] boot stripe. The deck is [COLOUR] with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
+  // v2228: resolve head count from survey.headCount (set on the Head(s)
+  // category). Cabin count already flows from numberCabins. Berths field
+  // not captured in the survey yet, so the [NUMBER] berth(s) placeholder
+  // stays until a berth-count field is added.
   const cabinStr = cabins || '[NUMBER]';
-  desc += `The vessel features ${cabinStr} cabin(s) with [NUMBER] berth(s), [NUMBER] head(s) with [MANUAL/ELECTRIC] marine toilet(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
+  const headStr = survey.headCount ? String(survey.headCount) : '[NUMBER]';
+  desc += `The vessel features ${cabinStr} cabin(s) with [NUMBER] berth(s), ${headStr} head(s) with [MANUAL/ELECTRIC] marine toilet(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
   desc += `The galley is [PORT/STARBOARD/AFT] and includes a [PROPANE/ELECTRIC/ALCOHOL] stove with [OVEN], a [12V/120V] refrigerator, and a [SINGLE/DOUBLE] stainless steel sink.`;
   desc += `\n\n`;
   if (electrical) {
@@ -9655,19 +9724,33 @@ function buildDescriptionFromSurvey(survey) {
 
   const hasEngine2 = !!survey.engine2Make;
 
+  // v2228: resolve drive type from survey.driveType so the description
+  // auto-fills instead of emitting "[SHAFT DRIVE/STERNDRIVE]" placeholder.
+  // Also back-fill engType (inboard/outboard/sterndrive) from driveType
+  // when the engine DB lookup came up empty.
+  const driveTypeLower = (survey.driveType || '').toLowerCase();
+  const driveLabelMap = { 'shaft': 'shaft drive', 'outdrive': 'sterndrive', 'ips': 'IPS pod drive', 'saildrive': 'saildrive' };
+  const driveLabelSingular = driveLabelMap[driveTypeLower] || '';
+  const driveLabelPlural = driveLabelSingular
+    ? (driveLabelSingular === 'IPS pod drive' ? 'IPS pod drives' : `${driveLabelSingular}s`)
+    : '';
+  const engTypeFromDrive = ({ 'shaft': 'inboard', 'ips': 'inboard', 'saildrive': 'inboard', 'outdrive': 'sterndrive' })[driveTypeLower] || '';
+
   let engineDesc = '';
   if (vesselType === 'human') {
     engineDesc = `This is a human-powered vessel with no auxiliary engine.`;
   } else if (vesselType === 'sail') {
-    const engType = engineTypeStr || '[inboard/outboard]';
-    const driveType = engineTypeStr === 'inboard' ? '[shaft drive/saildrive]' : '[SHAFT DRIVE/SAILDRIVE]';
-    engineDesc = `Auxiliary power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a ${driveType}.`;
+    const engType = engineTypeStr || engTypeFromDrive || '[inboard/outboard]';
+    const drivePhrase = driveLabelSingular || (engineTypeStr === 'inboard' ? '[shaft drive/saildrive]' : '[SHAFT DRIVE/SAILDRIVE]');
+    engineDesc = `Auxiliary power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a ${drivePhrase}.`;
   } else if (hasEngine2) {
-    const engType = engineTypeStr || '[inboard/outboard/sterndrive]';
-    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines rated at ${engHPStr} each, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through [SHAFT DRIVE(S)/STERNDRIVE(S)].`;
+    const engType = engineTypeStr || engTypeFromDrive || '[inboard/outboard/sterndrive]';
+    const drivePhrase = driveLabelPlural || '[SHAFT DRIVES/STERNDRIVES]';
+    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines rated at ${engHPStr} each, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through ${drivePhrase}.`;
   } else {
-    const engType = engineTypeStr || '[inboard/outboard/sterndrive]';
-    engineDesc = `Power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING] [3/4]-blade propeller through a [SHAFT DRIVE/STERNDRIVE].`;
+    const engType = engineTypeStr || engTypeFromDrive || '[inboard/outboard/sterndrive]';
+    const drivePhrase = driveLabelSingular || '[SHAFT DRIVE/STERNDRIVE]';
+    engineDesc = `Power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING] [3/4]-blade propeller through a ${drivePhrase}.`;
   }
 
   // Propeller/shaft data from survey items
@@ -9684,20 +9767,52 @@ function buildDescriptionFromSurvey(survey) {
     }
   }
 
-  // Electronics from survey items
+  // Electronics from survey items — v2228: broadened from C-only to any
+  // rating that means "installed and at least functional" (A/B/C/Powered-up).
+  // Items rated NA get an explicit "No X installed" sentence so the reader
+  // knows we checked. NT items are silent.
   let electronicsDesc = '';
   if (survey.items) {
-    const electronicItems = ['VHF radio', 'GPS/chartplotter', 'Depth sounder/fish finder', 'Radar', 'Autopilot', 'AIS transponder/receiver'];
-    const foundElectronics = [];
-    for (const eLabel of electronicItems) {
-      const match = Object.keys(survey.items).find(k => k.toLowerCase().includes(eLabel.toLowerCase().split('/')[0]));
-      if (match && survey.items[match].rating && survey.items[match].rating.startsWith('C')) {
-        foundElectronics.push(eLabel.split('/')[0]);
+    const electronicItems = [
+      { key: 'vhf', display: 'VHF radio' },
+      { key: 'gps', display: 'GPS/chartplotter' },
+      { key: 'chartplotter', display: 'GPS/chartplotter' },
+      { key: 'depth sounder', display: 'depth sounder' },
+      { key: 'fish finder', display: 'depth sounder' },
+      { key: 'radar', display: 'radar' },
+      { key: 'autopilot', display: 'autopilot' },
+      { key: 'ais', display: 'AIS transponder' }
+    ];
+    const installed = new Set();
+    const absent = new Set();
+    for (const { key, display } of electronicItems) {
+      const match = Object.keys(survey.items).find(k => k.toLowerCase().includes(key));
+      if (!match) continue;
+      const data = survey.items[match];
+      if (!data || !data.rating || data.excluded) continue;
+      const r = data.rating;
+      if (r.startsWith('A') || r.startsWith('B') || r.startsWith('C') || r.startsWith('Powered')) {
+        installed.add(display);
+      } else if (r.startsWith('Not applicable')) {
+        absent.add(display);
       }
     }
-    if (foundElectronics.length > 0) {
-      electronicsDesc = `Navigation and communication equipment includes ${foundElectronics.join(', ')}.`;
+    const installedList = Array.from(installed);
+    const absentList = Array.from(absent);
+    const parts = [];
+    if (installedList.length === 1) {
+      parts.push(`Navigation and communication equipment includes ${installedList[0]}.`);
+    } else if (installedList.length === 2) {
+      parts.push(`Navigation and communication equipment includes ${installedList[0]} and ${installedList[1]}.`);
+    } else if (installedList.length > 2) {
+      parts.push(`Navigation and communication equipment includes ${installedList.slice(0, -1).join(', ')}, and ${installedList[installedList.length - 1]}.`);
     }
+    if (absentList.length === 1) {
+      parts.push(`No ${absentList[0]} is installed.`);
+    } else if (absentList.length > 1) {
+      parts.push(`No ${absentList.slice(0, -1).join(', ')} or ${absentList[absentList.length - 1]} is installed.`);
+    }
+    electronicsDesc = parts.join(' ');
   }
 
   // Safety equipment from TC TP 511
@@ -9729,8 +9844,13 @@ function buildDescriptionFromSurvey(survey) {
   desc += propDesc;
   desc += `\n\n`;
   desc += `The hull is [COLOUR] with a [COLOUR] boot stripe. The deck is [COLOUR] with [NON-SKID MOULDED/TEAK OVERLAY] surfaces. `;
+  // v2228: resolve head count from survey.headCount (set on the Head(s)
+  // category). Cabin count already flows from numberCabins. Berths field
+  // not captured in the survey yet, so the [NUMBER] berth(s) placeholder
+  // stays until a berth-count field is added.
   const cabinStr = cabins || '[NUMBER]';
-  desc += `The vessel features ${cabinStr} cabin(s) with [NUMBER] berth(s), [NUMBER] head(s) with [MANUAL/ELECTRIC] marine toilet(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
+  const headStr = survey.headCount ? String(survey.headCount) : '[NUMBER]';
+  desc += `The vessel features ${cabinStr} cabin(s) with [NUMBER] berth(s), ${headStr} head(s) with [MANUAL/ELECTRIC] marine toilet(s), and a [V-BERTH/AFT CABIN/SALON] layout. `;
   desc += `The galley is [PORT/STARBOARD/AFT] and includes a [PROPANE/ELECTRIC/ALCOHOL] stove with [OVEN], a [12V/120V] refrigerator, and a [SINGLE/DOUBLE] stainless steel sink.`;
   desc += `\n\n`;
   if (electrical) {
@@ -18028,6 +18148,8 @@ async function generateReport() {
     .rating-b { color: #d97706; font-weight: bold; }
     .rating-c { color: #16a34a; font-weight: bold; }
     .rating-nt { color: #6b7280; font-weight: bold; }
+    .rating-na { color: #6b7280; font-weight: bold; }
+    .rating-po { color: #6b7280; font-weight: bold; }
     .rating-safety { color: #2563eb; font-weight: bold; }
     .item { margin: 6px 0; padding: 4px 0 4px 10px; border-left: 3px solid #066aab; }
     .standards { font-size: 9pt; color: #4b5563; margin-top: 2px; }
@@ -18305,33 +18427,39 @@ async function generateReport() {
   <div class="page-break"></div>
 
   <!-- ═══ GENERAL VESSEL INFORMATION ═══ -->
+  <!-- v2228: trimmed to the *survey event* metadata only. HIN / TC
+       Licence / Compliance Plate moved to VESSEL DOCUMENTATION DATA
+       below; Construction / LOA / LWL / Beam / Displacement / Draft
+       moved to VESSEL SPECIFICATIONS; Weather moved to SURVEY
+       CONDITIONS. Previously these fields appeared in two places,
+       which bloated the front of the report. -->
   <h2>GENERAL VESSEL INFORMATION</h2>
   <table>
     <tr><td style="width:40%;"><strong>Type of Survey Requested</strong></td><td>${esc(survey.surveyType) || 'N/A'}</td></tr>
-    <tr><td><strong>Date of Survey Inspection</strong></td><td>${survey.surveyDate || 'N/A'}</td></tr>
-    <tr><td><strong>Date of Report</strong></td><td>${reportDate}</td></tr>
+    <tr><td><strong>Date of Survey Inspection</strong></td><td>${surveyDateLong || 'N/A'}</td></tr>
+    <tr><td><strong>Date of Report</strong></td><td>${reportDateLong}</td></tr>
     <tr><td><strong>Vessel Name</strong></td><td>${esc(survey.vesselName) || 'N/A'}</td></tr>
-    <tr><td><strong>Year/Make/Model</strong></td><td>${esc(survey.yearMakeModel) || 'N/A'}</td></tr>
-    <tr><td><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || 'N/A'}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>
-    ${(survey.tcLicense || survey.tcLicenseType) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${survey.tcLicenseExpiry ? ' (expires ' + esc(survey.tcLicenseExpiry) + ')' : ''}</td></tr>` : ''}
-    <tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || 'N/A'}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>
-    <tr><td><strong>Vessel Material</strong></td><td>${esc(survey.construction) || 'N/A'}</td></tr>
-    <tr><td><strong>LOA (Length Overall)</strong></td><td>${esc(survey.loa) || 'N/A'}</td></tr>
-    <tr><td><strong>LWL (Length at Waterline)</strong></td><td>${esc(survey.lwl) || 'N/A'}</td></tr>
-    <tr><td><strong>Beam</strong></td><td>${esc(survey.beam) || 'N/A'}</td></tr>
-    <tr><td><strong>Displacement</strong></td><td>${esc(survey.displacement) || 'N/A'}</td></tr>
-    <tr><td><strong>Draft</strong></td><td>${esc(survey.maxDraft) || 'N/A'}</td></tr>
+    <tr><td><strong>Year / Make / Model</strong></td><td>${esc(survey.yearMakeModel) || 'N/A'}</td></tr>
     <tr><td><strong>Location of Survey Inspection</strong></td><td>${esc(survey.location) || 'N/A'}</td></tr>
     <tr><td><strong>Client / Purchaser</strong></td><td>${esc(survey.clientName) || 'N/A'}</td></tr>
     <tr><td><strong>Persons in Attendance</strong></td><td>${esc(survey.personsInAttendance) || 'N/A'}</td></tr>
     <tr><td><strong>Independent Surveys</strong></td><td>${esc(survey.independentSurveys) || 'No independent surveys (engine, electrical, ultrasonic gauging, etc.) were conducted in conjunction with this inspection.'}</td></tr>
-    <tr><td><strong>Weather Conditions</strong></td><td>${esc(survey.weather) || 'N/A'}</td></tr>
     <tr><td><strong>Surveyor</strong></td><td>Dave Seagrim, SAMS Surveyor Associate, ABYC Master Advisor</td></tr>
   </table>
 
 ${survey.locationLat && survey.locationLon ? `
-  <div style="margin: 10px 0;">
-    <img src="https://staticmap.openstreetmap.de/staticmap.php?center=${survey.locationLat},${survey.locationLon}&zoom=13&size=480x280&markers=${survey.locationLat},${survey.locationLon},red-pushpin" alt="Survey Location Map" style="border: 1px solid #ddd; border-radius: 4px;" />
+  <!-- v2228: replaced broken staticmap.openstreetmap.de image (the
+       provider has been unreliable and was rendering as a broken-image
+       icon on shipped reports) with a compact GPS block + clickable
+       OpenStreetMap and Google Maps links. No external image dependency,
+       no API key required, survives the Word export. -->
+  <div style="margin: 10px 0; padding: 10px 14px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:4px; font-size:10pt;">
+    <div style="color:#1f2937;"><strong>GPS Coordinates:</strong> ${parseFloat(survey.locationLat).toFixed(5)}, ${parseFloat(survey.locationLon).toFixed(5)}</div>
+    <div style="margin-top:4px;color:#4b5563;">
+      <a href="https://www.openstreetmap.org/?mlat=${survey.locationLat}&amp;mlon=${survey.locationLon}&amp;zoom=14#map=14/${survey.locationLat}/${survey.locationLon}" style="color:#066aab;text-decoration:none;">View on OpenStreetMap</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://www.google.com/maps?q=${survey.locationLat},${survey.locationLon}" style="color:#066aab;text-decoration:none;">View on Google Maps</a>
+    </div>
   </div>
 ` : ''}
 
@@ -18397,7 +18525,7 @@ ${survey.vesselDescription ? `
 
   <!-- ═══ SURVEY CHECKLIST SUMMARY ═══ -->
   <h2>SURVEY CHECKLIST SUMMARY</h2>
-  <p style="font-size:9pt;color:#666;margin-bottom:8px;">The following table provides an at-a-glance overview of every inspected item, its rating, whether it constitutes a violation, and applicable standards. Detailed observations follow in the body of the report.</p>
+  <p style="font-size:9pt;color:#666;margin-bottom:8px;">The following table provides an at-a-glance overview of every inspected item — its surveyor notes, rating, finding code where applicable, and the relevant standards. Detailed observations follow in the body of the report.</p>
   <table class="checklist-table">
     <thead>
       <tr>
@@ -18419,7 +18547,17 @@ ${survey.vesselDescription ? `
         if (!category.items || category.name === 'Survey Specifications' || category.name === 'Vessel Specifications') return;
         const ratedItems = category.items.filter(i => i.type === 'list');
         // Only include items with ratings in the checklist summary
-        const answeredItems = ratedItems.filter(i => survey.items[i.label]?.rating && !survey.items[i.label]?.excluded);
+        // v2228: Not-applicable items are dropped entirely from the
+        // report (checklist summary AND detailed findings) — they just
+        // clutter the reader's view with "item doesn't exist on this
+        // vessel" rows. Not-tested items all stay in. A/B/C always stay.
+        const answeredItems = ratedItems.filter(i => {
+          const d = survey.items[i.label];
+          if (!d || !d.rating || d.excluded) return false;
+          const _clsRow = classifyRatingForReport(d.rating);
+          if (_clsRow.code === 'NA') return false;
+          return true;
+        });
         if (answeredItems.length === 0) return;
 
         // Category header row
@@ -18431,20 +18569,23 @@ ${survey.vesselDescription ? `
           const rating = d.rating;
           const code = findingCodeMap[item.label] || '';
           const isViolation = rating.startsWith('A') || rating.startsWith('B');
-          const ratingColor = rating.startsWith('A') ? '#dc2626' : rating.startsWith('B') ? '#d97706' : rating.startsWith('C') ? '#16a34a' : '#6b7280';
-          const ratingShort = rating.startsWith('A') ? 'A' : rating.startsWith('B') ? 'B' : rating.startsWith('C') ? 'C' : 'NT';
           // v2227: surface the FULL surveyor-entered note (was previously
           // truncated at 80 chars + CSS ellipsis so only the first line
           // was readable). Report readers need the complete prose here.
           const notesText = d.text ? d.text : '—';
           const stdText = isViolation && d.standards && d.standards.length > 0 ? d.standards.join('; ') : '—';
+          // v2228: classify via helper — the previous fallthrough chain
+          // mislabelled "Not applicable" and "Powered up only" as "NT —
+          // Not Tested" in the summary table. NA and PO now render with
+          // their own codes and labels.
+          const _cls = classifyRatingForReport(rating);
 
           html += `<tr>
             <td style="text-align:center;">${tableRow}</td>
             <td>${esc(displayItemLabel(item.label, survey))}</td>
             <td class="text-snippet">${esc(notesText)}</td>
-            <td><span class="rating-pill" style="background:${ratingColor};">${ratingShort} — ${rating.startsWith('Not') ? 'Not Tested' : rating.split(' - ')[1] || rating}</span></td>
-            <td style="text-align:center;font-weight:bold;color:${ratingColor};">${code}</td>
+            <td><span class="rating-pill" style="background:${_cls.color};">${_cls.code} — ${_cls.label}</span></td>
+            <td style="text-align:center;font-weight:bold;color:${_cls.color};">${code}</td>
             <td style="font-size:8pt;">${esc(stdText)}</td>
           </tr>`;
         });
@@ -18610,14 +18751,19 @@ ${survey.vesselDescription ? `
         if (!category.items || category.name === 'Survey Specifications' || category.name === 'Vessel Specifications') return;
 
         const ratedItems = expandReportItems(category.items.filter(item => item.type === 'list'));
-        // Include items that have: a rating OR text/notes OR photos (and are not excluded)
+        // Include items that have: a rating OR text/notes OR photos (and are not excluded).
+        // v2228: Not-applicable items are dropped from the report body too
+        // (they just clutter the reader's view with "item doesn't exist on
+        // this vessel" entries). Not-tested items all stay in, per policy.
         const completedItems = ratedItems.filter(item => {
           const itemData = survey.items[item.label];
           if (!itemData || itemData.excluded) return false;
           const hasRating = itemData.rating && itemData.rating.trim();
           const hasText = itemData.text && itemData.text.trim();
           const hasPhotos = itemData.photos && itemData.photos.length > 0;
-          return hasRating || hasText || hasPhotos;
+          if (!(hasRating || hasText || hasPhotos)) return false;
+          if (hasRating && classifyRatingForReport(itemData.rating).code === 'NA') return false;
+          return true;
         });
         // Special case: Engine(s) and drive(s) — inject the merged
         // Propulsion section at the top (v2224). Identity lives next to
@@ -18704,7 +18850,10 @@ ${survey.vesselDescription ? `
         completedItems.forEach(item => {
           const itemData = survey.items[item.label];
           const ratingLabel = itemData.rating || '';
-          const ratingClass = ratingLabel.startsWith('A') ? 'rating-a' : ratingLabel.startsWith('B') ? 'rating-b' : ratingLabel.startsWith('C') ? 'rating-c' : 'rating-nt';
+          // v2228: classify via helper — NA and PO previously fell through
+          // to 'rating-nt' which was semantically wrong. Uses its own
+          // .rating-na / .rating-po CSS classes now.
+          const ratingClass = classifyRatingForReport(ratingLabel).cssClass;
           const code = findingCodeMap[item.label];
           const codeTag = code ? ` <strong style="color:${RATING_COLORS[ratingLabel] || '#006699'};">(Finding ${code})</strong>` : '';
 
@@ -19075,6 +19224,8 @@ async function exportToWord() {
       '  .rating-b { color: #d97706; font-weight: bold; }' +
       '  .rating-c { color: #16a34a; font-weight: bold; }' +
       '  .rating-nt { color: #6b7280; font-weight: bold; }' +
+      '  .rating-na { color: #6b7280; font-weight: bold; }' +
+      '  .rating-po { color: #6b7280; font-weight: bold; }' +
       '  .rating-safety { color: #2563eb; font-weight: bold; }' +
       '  .item { margin: 12px 0; padding: 8px 10px; border-left: 4px solid #066aab; }' +
       '  .footer { margin-top: 40px; padding: 20px; border-top: 2px solid #066aab; }' +
