@@ -12,6 +12,11 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2262 — 2026-04-16
+
+### Camera diagnostic build
+- Visible on-screen toasts show whether the shutter handler fires, what removes the camera overlay, and whether the page reloads mid-camera. Temporary diagnostics to identify the root cause of the shutter-closes-camera bug.
+
 ## v2261 — 2026-04-16
 
 ### Camera fix — defer SW reload while camera is open

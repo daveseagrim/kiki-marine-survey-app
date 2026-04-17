@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2261';
+const APP_VERSION = 'v2262';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -20945,6 +20945,13 @@ async function initApp() {
     // firing as soon as it finishes loading.
     loadSpellDict();
 
+    // v2262 diagnostic: if the page was reloaded while camera was open, show what happened
+    const _reloadDiag = sessionStorage.getItem('_cameraReloadDiag');
+    if (_reloadDiag) {
+      sessionStorage.removeItem('_cameraReloadDiag');
+      setTimeout(() => showToast('⚠️ ' + _reloadDiag, 15000), 500);
+    }
+
     // If recovering from camera-induced page reload, go straight back
     // to the inspection instead of showing the home screen
     if (window._cameraRecoverySurveyId) {
@@ -22838,9 +22845,32 @@ async function openBatchCamera(itemLabel, opts) {
   const closeBtn = document.getElementById('batchCamClose');
   const doneBtn = document.getElementById('batchCamDone');
 
-  shutter.addEventListener('click', snapStagedPhoto);
+  shutter.addEventListener('click', () => {
+    showToast('📸 Shutter tapped', 1500);
+    snapStagedPhoto();
+  });
   closeBtn.addEventListener('click', discardStagedPhotos);
   doneBtn.addEventListener('click', commitStagedPhotos);
+
+  // v2262 diagnostic: watch for unexpected overlay removal
+  const _diagObserver = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      for (const node of m.removedNodes) {
+        if (node.id === 'batchCamOverlay') {
+          const stack = new Error().stack || '';
+          showToast('⚠️ OVERLAY REMOVED — ' + stack.split('\n').slice(1, 3).join(' | ').substring(0, 200), 10000);
+        }
+      }
+    }
+  });
+  _diagObserver.observe(document.body, { childList: true });
+
+  // v2262 diagnostic: catch page reloads while camera is open
+  window._diagBeforeUnload = () => {
+    // This fires if the page is about to reload/navigate — save evidence to sessionStorage
+    sessionStorage.setItem('_cameraReloadDiag', 'Page reloaded while camera was open at ' + new Date().toISOString());
+  };
+  window.addEventListener('beforeunload', window._diagBeforeUnload);
 
   // Start camera
   try {
@@ -23081,6 +23111,9 @@ function discardStagedPhotos() {
 }
 
 function closeBatchCameraOverlay() {
+  // v2262 diagnostic: log what called this
+  const _stack = new Error().stack || '';
+  showToast('🔍 closeBatchCamera called from: ' + _stack.split('\n').slice(1, 4).join(' | ').substring(0, 250), 12000);
   const bc = window._batchCam;
   try {
     if (bc.stream) {
