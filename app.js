@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2265';
+const APP_VERSION = 'v2266';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -11634,7 +11634,7 @@ function renderInspection(survey) {
     // a plain span. stopPropagation prevents the accordion from toggling.
     const progressHtml = (allExcluded || isComplete)
       ? `<span class="category-progress" style="color:${progressColor};margin-left:auto;flex-shrink:0;white-space:nowrap;">${progressText}</span>`
-      : `<span class="category-progress" style="color:${progressColor};margin-left:auto;flex-shrink:0;white-space:nowrap;" onclick="event.stopPropagation();">${remaining} left <button type="button" class="remaining-btn" onclick="event.stopPropagation(); toggleRemainingList(this.closest('.category-accordion'));" aria-label="Show items left" style="background:none;border:none;cursor:pointer;padding:2px 4px;font-size:inherit;color:inherit;vertical-align:middle;">▾</button></span>`;
+      : `<span class="category-progress remaining-btn" style="color:${progressColor};margin-left:auto;flex-shrink:0;white-space:nowrap;cursor:pointer;" onclick="event.stopPropagation(); toggleRemainingList(this.closest('.category-accordion'));">${remaining} left ▾</span>`;
 
     html += `
       <div class="category-accordion" data-category-name="${categoryName.replace(/"/g, '&quot;')}">
@@ -14062,14 +14062,14 @@ async function toggleRemainingList(accordion) {
     // Toggle: if popover already open, close it
     const existing = accordion.querySelector('.remaining-list-popover');
     if (existing) {
-      if (arrowBtn) arrowBtn.textContent = '▾';
+      if (arrowBtn) arrowBtn.textContent = arrowBtn.textContent.replace('▴', '▾');
       existing.remove();
       return;
     }
 
     // Close any other open popovers first (one-at-a-time UX)
     document.querySelectorAll('.remaining-list-popover').forEach(p => p.remove());
-    document.querySelectorAll('.remaining-btn').forEach(b => { b.textContent = '▾'; });
+    document.querySelectorAll('.remaining-btn').forEach(b => { b.textContent = b.textContent.replace('▴', '▾'); });
 
     // Collect unrated (and non-skipped) items from the accordion's wrappers
     const survey = await getSurvey(currentSurveyId);
@@ -14107,7 +14107,7 @@ async function toggleRemainingList(accordion) {
       <div>${linksHtml}</div>
     `;
     // Flip caret on the trigger
-    if (arrowBtn) arrowBtn.textContent = '▴';
+    if (arrowBtn) arrowBtn.textContent = arrowBtn.textContent.replace('▾', '▴');
 
     // Insert just after the accordion header so it stays visible even
     // when the accordion content is collapsed.
@@ -14124,7 +14124,7 @@ function jumpToChecklistItem(itemLabel) {
   if (!itemLabel) return;
   // Close any open popover first
   document.querySelectorAll('.remaining-list-popover').forEach(p => p.remove());
-  document.querySelectorAll('.remaining-btn').forEach(b => { b.textContent = '▾'; });
+  document.querySelectorAll('.remaining-btn').forEach(b => { b.textContent = b.textContent.replace('▴', '▾'); });
   // Locate the target wrapper
   let el = null;
   const wrappers = document.querySelectorAll('.compact-item-wrapper');
@@ -17368,7 +17368,7 @@ function updateCategoryHeader(survey, categoryName) {
   const progressText = allExcluded ? 'Skipped' : (isComplete ? 'Done' : `${remaining} left`);
   const progressHtml = (allExcluded || isComplete)
     ? `<span class="category-progress" style="color:${progressColor};margin-left:auto;flex-shrink:0;white-space:nowrap;">${progressText}</span>`
-    : `<span class="category-progress" style="color:${progressColor};margin-left:auto;flex-shrink:0;white-space:nowrap;" onclick="event.stopPropagation();">${remaining} left <button type="button" class="remaining-btn" onclick="event.stopPropagation(); toggleRemainingList(this.closest('.category-accordion'));" aria-label="Show items left" style="background:none;border:none;cursor:pointer;padding:2px 4px;font-size:inherit;color:inherit;vertical-align:middle;">▾</button></span>`;
+    : `<span class="category-progress remaining-btn" style="color:${progressColor};margin-left:auto;flex-shrink:0;white-space:nowrap;cursor:pointer;" onclick="event.stopPropagation(); toggleRemainingList(this.closest('.category-accordion'));">${remaining} left ▾</span>`;
   const progressEl = header.querySelector('.category-progress');
   if (progressEl) {
     progressEl.outerHTML = progressHtml;
@@ -18382,7 +18382,7 @@ function toggleAccordion(button) {
 
   // v2265: close any open "items left" popovers and reset their carets
   document.querySelectorAll('.remaining-list-popover').forEach(p => p.remove());
-  document.querySelectorAll('.remaining-btn').forEach(b => { b.textContent = '▾'; });
+  document.querySelectorAll('.remaining-btn').forEach(b => { b.textContent = b.textContent.replace('▴', '▾'); });
 
   // Close all other open accordions first
   document.querySelectorAll('.accordion-content').forEach(el => {

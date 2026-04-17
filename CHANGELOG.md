@@ -12,6 +12,11 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2266 — 2026-04-16
+
+### Fix — Progress text now actually on the same line as category title
+- v2265 had a `<button>` nested inside the `<button class="accordion-header">` — invalid HTML that browsers fix by closing the outer button early, pushing "N left" onto its own line. Replaced the inner button with a `<span>` so everything stays in the same flex row.
+
 ## v2265 — 2026-04-16
 
 ### UI — Category header layout
