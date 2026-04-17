@@ -955,6 +955,20 @@
     {
       "section": "Cutlass bearing(s)",
       "rating": "C - regular diameter",
+      "text": "The cutlass bearing showed minimal wear consistent with a vessel of this age and usage.",
+      "phase": "observed",
+      "severity": 2
+    },
+    {
+      "section": "Cutlass bearing(s)",
+      "rating": "C - regular diameter",
+      "text": "The rubber flutes remained defined and the bearing was providing adequate shaft support.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Cutlass bearing(s)",
+      "rating": "C - regular diameter",
       "text": "Applying pressure to the propeller shaft in multiple directions did not produce excessive movement.",
       "phase": "observed",
       "severity": 3
@@ -1098,6 +1112,20 @@
       "text": "The transom was in satisfactory condition.",
       "phase": "observed",
       "severity": 3
+    },
+    {
+      "section": "Transom",
+      "rating": "C",
+      "text": "The transom contained an integrated swim platform.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Transom",
+      "rating": "C",
+      "text": "The integrated swim platform was in good condition with no structural concerns.",
+      "phase": "observed",
+      "severity": 1
     },
     {
       "section": "Hull exterior above the waterline",
@@ -1501,6 +1529,13 @@
     {
       "section": "Transom",
       "rating": "A",
+      "text": "The transom contained an integrated swim platform.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Transom",
+      "rating": "A",
       "text": "The transom is deteriorated or delaminated, compromising structural integrity.",
       "phase": "observed",
       "severity": 5
@@ -1511,6 +1546,20 @@
       "text": "This is a safety-critical issue requiring immediate repair.",
       "phase": "observed",
       "severity": 5
+    },
+    {
+      "section": "Transom",
+      "rating": "B",
+      "text": "The transom contained an integrated swim platform.",
+      "phase": "observed",
+      "severity": 2
+    },
+    {
+      "section": "Transom",
+      "rating": "B",
+      "text": "The integrated swim platform showed cosmetic wear or minor surface damage.",
+      "phase": "observed",
+      "severity": 2
     },
     {
       "section": "Transom",
@@ -3373,6 +3422,41 @@
       "phase": "observed",
       "severity": 2,
       "text": "Despite minor cosmetic corrosion, the propeller was in satisfactory condition and properly attached."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Minor surface corrosion was noted on the blades, typical of a vessel of this age."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Light galvanic corrosion was present on the blade surfaces but had not compromised the blade profile."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Electrolysis staining was noted on the propeller but blade integrity was not affected."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The propeller showed no significant corrosion or damage."
+    },
+    {
+      "section": "Propeller(s)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Minor marine growth was present on the blades."
     },
     {
       "section": "Propeller(s)",
@@ -25153,6 +25237,27 @@
     {
       "section": "Deck and coachroof/pilothouse condition",
       "rating": "C",
+      "text": "The deck and coachroof were in very good condition with no visible spider cracks, stress cracks, or surface defects noted at the time of the survey.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Deck and coachroof/pilothouse condition",
+      "rating": "C",
+      "text": "The gelcoat and non-skid surfaces were in very good order throughout, consistent with the age and care of the vessel.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Deck and coachroof/pilothouse condition",
+      "rating": "C",
+      "text": "The deck and coachroof presented well with no cracking, crazing, or signs of structural movement.",
+      "phase": "means",
+      "severity": 1
+    },
+    {
+      "section": "Deck and coachroof/pilothouse condition",
+      "rating": "C",
       "text": "Minor spider and stress cracks were noted in the deck and coachroof, typical of a vessel of this age.",
       "phase": "observed",
       "severity": 2
@@ -26239,6 +26344,13 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
+      "text": "The deck and coachroof produced a clear and even tone throughout with no indications of core moisture, voids, or delamination.",
+      "section": "Deck and coachroof/pilot percussion testing"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
       "text": "No dull thuds or ringing tones were detected during impact testing.",
       "section": "Deck and coachroof/pilot percussion testing"
     },
@@ -27156,7 +27268,35 @@
       "rating": "B",
       "phase": "observed",
       "severity": 2,
+      "text": "The vessel was fitted with teak grab rails.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The vessel was fitted with stainless steel grab rails.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
       "text": "The finish on one or more grab rails was worn or weathered.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The teak grab rails showed weathering and surface checking consistent with age and UV exposure.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Surface rust staining was noted on one or more stainless steel grab rails.",
       "section": "Grab rails"
     },
     {
@@ -27205,6 +27345,20 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
+      "text": "The vessel was fitted with teak grab rails.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The vessel was fitted with stainless steel grab rails.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
       "text": "All grab rails were solidly mounted and showed no visible deficiencies.",
       "section": "Grab rails"
     },
@@ -27213,6 +27367,20 @@
       "phase": "observed",
       "severity": 1,
       "text": "The mounting hardware and bedding were intact.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The teak showed normal weathering consistent with a vessel of this age and was structurally sound.",
+      "section": "Grab rails"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The stainless steel finish was clean and free of significant corrosion.",
       "section": "Grab rails"
     },
     {
@@ -27247,8 +27415,260 @@
       "section": "Deck hatch(es), windows and portholes (exterior observations)",
       "rating": "B",
       "phase": "observed",
+      "severity": 2,
+      "text": "Sealant around the [insert location] was lifting."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Sealant around the periphery of the [insert location] was cracked and no longer providing a watertight seal."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Crazing was noted in the [insert location] lens."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "observed",
       "severity": 3,
-      "text": "An area warranting attention was noted on this item."
+      "text": "A hairline crack was noted in the [insert location] lens."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The [insert location] hinge was loose."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The [insert location] hinges had come loose from their fastenings."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The [insert location] seal was worn or compressed and no longer providing a reliable weather seal."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The bedding compound around the [insert location] frame was deteriorating."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The [insert location] frame showed surface corrosion."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The [insert location] was difficult to open or close."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The [insert location] dogs were stiff or difficult to operate."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The [insert location] latch or lock was not functioning."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "UV damage was noted on the [insert location] lens."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The [insert location] flyscreen was torn or missing."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Failing sealant allows water ingress below deck and should be addressed before it causes further damage."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Crazing reduces visibility and, if advanced, weakens the lens."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Loose hinges may allow a hatch to open unexpectedly or break free in heavy weather."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 2,
+      "text": "A worn seal may allow water ingress during heavy rain or spray conditions."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "means",
+      "severity": 2,
+      "text": "Corroded frames may weaken the mounting and compromise the seal over time."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Renew the sealant around the affected opening(s)."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Replace the affected lens."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Replace the worn seal(s)."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Repair or replace the affected hinge(s)."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Rebed the affected frame(s)."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Address this at the next scheduled service."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "A crack was noted in the [insert location] lens."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The [insert location] hinge had pulled free of its mount."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The [insert location] frame was severely corroded."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The [insert location] was not watertight."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The [insert location] frame had separated from the deck."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "A cracked lens compromises watertight integrity and represents a risk of flooding in heavy weather."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "A",
+      "phase": "means",
+      "severity": 4,
+      "text": "A failed hinge cannot secure the hatch and represents a safety concern."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "A compromised opening poses a risk of downflooding in heavy weather."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Replace the affected lens before the vessel is returned to service."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "A",
+      "phase": "action",
+      "severity": 4,
+      "text": "Repair or replace the affected hinge(s) before the vessel is returned to service."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "A",
+      "phase": "action",
+      "severity": 4,
+      "text": "The corroded frame(s) should be removed, repaired or replaced, and properly rebedded."
+    },
+    {
+      "section": "Deck hatch(es), windows and portholes (exterior observations)",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Professional assessment and repair is required before the vessel is returned to service."
     },
     {
       "section": "Deck and coachroof/pilothouse condition",

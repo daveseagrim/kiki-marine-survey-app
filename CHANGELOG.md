@@ -12,6 +12,78 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2290 — 2026-04-16
+
+### Changed
+- **Deck hatches/windows/portholes — reworked with [insert location] templates.**
+  Replaced the generic "one or more hatches/windows/portholes" snippets with
+  `[insert location]` template sentences. The surveyor types which specific
+  hatch, window, or porthole is affected, then ticks the issue from a
+  comprehensive list. B-rating issues now include: sealant lifting, sealant
+  cracked at periphery, crazing, hairline crack, loose hinge, hinges come
+  loose, worn seal, deteriorating bedding, frame corrosion, difficult to
+  open/close, stiff dogs, non-functioning latch, UV damage, torn flyscreen.
+  A-rating issues: cracked lens, hinge pulled free, severe frame corrosion,
+  not watertight, frame separated from deck. Matching means and action
+  sentences expanded for both ratings.
+
+---
+
+## v2289 — 2026-04-16
+
+### Added
+- **Cutlass bearing — minimal wear snippets.** Two new C-rating observed sentences
+  for bearings with acceptable wear: "minimal wear consistent with age" and
+  "rubber flutes remained defined."
+- **Transom — integrated swim platform snippets.** "The transom contained an
+  integrated swim platform" added for all three ratings (A/B/C) with condition-
+  specific sentences for C (good condition) and B (cosmetic wear).
+- **Propeller — expanded C-rating corrosion options.** Five new observed sentences:
+  minor surface corrosion typical of age, light galvanic corrosion, electrolysis
+  staining, no significant corrosion, and minor marine growth.
+
+---
+
+## v2288 — 2026-04-16
+
+### Added
+- **Deck hatches, windows and portholes — expanded snippets.** 29 new sentences
+  covering B and A ratings. B-rating: sealant lifting (hatch/window/porthole),
+  crazing (hatch/window/porthole), loose hinges, stiff porthole dogs, failing
+  bedding — with matching means and action sentences. A-rating: cracked lens
+  (hatch/window/porthole), hinge pulled free, severely corroded frames — with
+  matching means and action sentences.
+
+---
+
+## v2287 — 2026-04-16
+
+### Added
+- **Grab rail material snippets — teak and stainless steel.** New observed sentences
+  for C and B ratings let the surveyor specify the grab rail material (teak or
+  stainless steel) and include material-specific condition notes (e.g., teak
+  weathering/checking, stainless rust staining, teak structurally sound).
+
+---
+
+## v2286 — 2026-04-16
+
+### Added
+- **Deck percussion "all clear tone" snippet.** New C-rating observed sentence:
+  "The deck and coachroof produced a clear and even tone throughout…" for cases
+  where the entire deck tested clean (complements the existing "Most of…" option).
+
+---
+
+## v2285 — 2026-04-16
+
+### Added
+- **Deck condition C-rating: "very good condition" snippets.** Added three new
+  sentences for newer or well-maintained decks with no cracks or defects. The
+  existing "minor spider cracks" sentences remain for older vessels.
+
+---
+
 ## v2284 — 2026-04-16
 
 ### Added
