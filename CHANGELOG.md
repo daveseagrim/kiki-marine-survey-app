@@ -15,8 +15,8 @@ lets you roll back to a specific version with confidence.
 ## v2265 — 2026-04-16
 
 ### UI — Category header layout
-- Moved "N left ▾" progress indicator to the right side of the category header row (same line as the title) instead of appearing on a separate line below. Uses `margin-left:auto` so it right-aligns naturally.
-- Matched progress text font size to the category title (inherits from header instead of the previous hard-coded 12px).
+- "N left" now sits on the right side of the header, same line as the category title, in matching font, size, and weight. A small ▾ arrow next to it toggles the items-left list; tapping ▾ again (now ▴) collapses it.
+- Removed old CSS overrides (`font-size:12px`, `opacity:0.7`) from `.category-progress` that were shrinking and fading the text.
 - Toggling the accordion (expand/collapse) now closes any open "items left" popover list, so the collapse chevron works as expected when the list is showing.
 
 ## v2264 — 2026-04-16
