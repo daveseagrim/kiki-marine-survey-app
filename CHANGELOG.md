@@ -12,6 +12,19 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2255 — 2026-04-16
+
+### One save button everywhere
+- **Home screen**: Removed separate "☁️ Backup to Drive" and "🔥 Sync All to Firebase" buttons. Replaced with single "💾 Save All Surveys" that pushes every survey + photos to all connected backends.
+- **Inspection screen**: Replaced "💾 Backup" with "💾 Save" — saves locally, pushes to Firebase, and uploads to Drive (with photos) in one tap.
+- **Edit Intro screen**: Same — "💾 Save" replaces "💾 Backup", calls `saveEverywhere()`.
+- **`backupAllEverywhere()` function**: New unified home-screen backup that pushes all surveys to Firebase + Drive with progress dialog. If neither backend is connected, prompts Drive sign-in first.
+
+### Header and save pill layout fixes
+- Removed version number from inspection header — cleaner, more room for vessel name.
+- Reduced logo size slightly (36px → 32px) and tightened header gaps.
+- Save pill moved down to `82px + safe-area` so it no longer overlaps the survey-type banner (e.g., "INSURANCE SURVEY").
+
 ## v2254 — 2026-04-16
 
 ### Drive session expiry warning
