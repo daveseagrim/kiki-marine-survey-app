@@ -12,6 +12,29 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2298 — 2026-04-16
+
+### Changed
+- **Hot water tank — proper surveyor language for C-rating observed snippets.**
+  Replaced 4 generic snippets with 7 detailed observations covering: tank
+  location (with `[insert location]` input), condition assessment, plumbing
+  connections and hose clamps, electrical supply and wire gauge, pressure
+  relief valve placement, engine heat-exchange plumbing, and absence of
+  leakage at connections.
+
+---
+
+## v2297 — 2026-04-16
+
+### Fixed
+- **"in in good order condition" grammar fix across 5 snippets.** Fixed double
+  "in" and removed "order". Replaced with `{specify:good|serviceable}`
+  condition token so the surveyor can choose between "good condition" and
+  "serviceable condition". Affected sections: Bilge/stringers/ribs, sails,
+  additional sails, helm seat, windshield seals.
+
+---
+
 ## v2296 — 2026-04-16
 
 ### Changed

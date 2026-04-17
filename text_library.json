@@ -5199,7 +5199,7 @@
     {
       "section": "Genoa 1 (largest)",
       "rating": "C",
-      "text": "The sail is in in good order condition and safe for use.",
+      "text": "The sail is in {specify:good|serviceable} condition and safe for use.",
       "phase": "observed",
       "severity": 1
     },
@@ -5374,7 +5374,7 @@
     {
       "section": "Sails - other",
       "rating": "C",
-      "text": "Additional sails are in in good order condition and safe for use.",
+      "text": "Additional sails are in {specify:good|serviceable} condition and safe for use.",
       "phase": "observed",
       "severity": 1
     },
@@ -12366,7 +12366,7 @@
     {
       "section": "Flybridge Helm seat",
       "rating": "C",
-      "text": "The helm seat is solidly mounted with upholstery in in good order condition.",
+      "text": "The helm seat is solidly mounted with upholstery in {specify:good|serviceable} condition.",
       "phase": "observed",
       "severity": 1
     },
@@ -15779,7 +15779,7 @@
     {
       "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "C",
-      "text": "Stringers and ribs that were visible from the cabin bilge appeared to be in in good order condition.",
+      "text": "Stringers and ribs that were visible from the cabin bilge appeared to be in {specify:good|serviceable} condition.",
       "phase": "observed",
       "severity": 1
     },
@@ -18163,30 +18163,51 @@
     {
       "section": "Hot water tank(s), plumbing and electrical",
       "rating": "C",
-      "text": "The hot water tank appeared to be installed correctly with appropriate fittings and tubing.",
+      "text": "The hot water tank was located in the [insert location].",
       "phase": "observed",
-      "severity": 3
+      "severity": 1
     },
     {
       "section": "Hot water tank(s), plumbing and electrical",
       "rating": "C",
-      "text": "Electrical wiring appeared properly installed.",
+      "text": "The tank appeared in satisfactory condition with no visible corrosion or damage.",
       "phase": "observed",
-      "severity": 3
+      "severity": 1
     },
     {
       "section": "Hot water tank(s), plumbing and electrical",
       "rating": "C",
-      "text": "The pressure relief valve discharged to a lower point in the bilge away from batteries and other electronics.",
+      "text": "The plumbing connections were secure with no evidence of leakage at the fittings or hose clamps.",
       "phase": "observed",
-      "severity": 3
+      "severity": 1
     },
     {
       "section": "Hot water tank(s), plumbing and electrical",
       "rating": "C",
-      "text": "No leakage was observed.",
+      "text": "The electrical supply to the hot water tank was properly installed with appropriate wire gauge and connections.",
       "phase": "observed",
-      "severity": 3
+      "severity": 1
+    },
+    {
+      "section": "Hot water tank(s), plumbing and electrical",
+      "rating": "C",
+      "text": "The pressure relief valve was present and discharged to a lower point in the bilge, clear of batteries and other electronics.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Hot water tank(s), plumbing and electrical",
+      "rating": "C",
+      "text": "The hot water tank was also plumbed to the engine cooling system for heat exchange.",
+      "phase": "observed",
+      "severity": 2
+    },
+    {
+      "section": "Hot water tank(s), plumbing and electrical",
+      "rating": "C",
+      "text": "No leakage was observed at any plumbing or electrical connection.",
+      "phase": "observed",
+      "severity": 1
     },
     {
       "section": "Black water tank(s) and plumbing",
@@ -26329,7 +26350,7 @@
     {
       "section": "Windshield, pilot house windows, frames and seals",
       "rating": "C",
-      "text": "Seals were intact and in in good order condition.",
+      "text": "Seals were intact and in {specify:good|serviceable} condition.",
       "phase": "observed",
       "severity": 1
     },
