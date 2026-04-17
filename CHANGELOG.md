@@ -12,6 +12,16 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2283 — 2026-04-16
+
+### Changed
+- **Transducer C-rating: removed redundant anti-fouling sentence.** The singular
+  "The transducer was securely mounted and not coated with anti-fouling" repeated
+  what the plural sentence already says. Replaced with "The transducer face was
+  clean and free of marine growth" — complementary rather than redundant.
+
+---
+
 ## v2282 — 2026-04-16
 
 ### Changed
