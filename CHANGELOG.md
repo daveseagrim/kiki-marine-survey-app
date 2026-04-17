@@ -12,6 +12,13 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2269 — 2026-04-16
+
+### UI — Compact category headers, "N left" is the toggle
+- Removed the separate "▾ Show items left" row — saves vertical space per category.
+- "N left ▾" text on the right side of the header is now directly clickable to toggle the items-left popover. Tap it to expand the list, tap again to collapse.
+- Changed accordion-header from `<button>` to `<div>` to avoid nested interactive element issues on iOS Safari. The clickable "N left ▾" span uses `stopPropagation` so it doesn't also toggle the accordion.
+
 ## v2268 — 2026-04-16
 
 ### Hotfix — Blank screen on load
