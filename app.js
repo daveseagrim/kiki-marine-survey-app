@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2255';
+const APP_VERSION = 'v2257';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2338,103 +2338,250 @@ async function saveEverywhere() {
   }
 }
 
-// ── v2255: backupAllEverywhere — unified "Save All Surveys" for home screen ──
-// Pushes every survey to all connected backends (Firebase + Drive) with
-// photos. Shows progress via BackupProgress dialog. Sign-in prompts are
-// handled inline if Drive is not connected yet.
+// ── v2257: backupAllEverywhere — unified "Save All Surveys" for home screen ──
+// Iterates every survey and saves each to all three backends with
+// per-backend progress rows. If neither cloud backend is connected,
+// prompts Drive sign-in first.
 async function backupAllEverywhere() {
   const surveys = await getAllSurveys();
   if (!surveys.length) { showToast('No surveys to save'); return; }
 
-  // If Drive is not signed in, offer to sign in first
-  const driveOk = typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn();
   const firebaseOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled();
+  let driveOk = typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn();
 
+  // If neither cloud backend connected, offer Drive sign-in
   if (!driveOk && !firebaseOk) {
-    // Neither backend connected — try to sign into Drive
     try {
       await DriveBackup.signIn();
-      // If popup flow, we'll continue. If redirect flow, page unloads.
-      showToast('Google Drive connected ✓');
+      driveOk = DriveBackup.isSignedIn();
+      if (driveOk) showToast('Google Drive connected ✓');
     } catch (e) {
       if (e.code === 'auth/popup-closed-by-user') return;
-      showToast('Drive sign-in failed — saving locally only');
     }
   }
 
-  // Now run the backup
-  BackupProgress.show();
-  let done = 0;
-  let failed = 0;
-  let totalPhotos = 0;
+  const backends = [
+    { id: 'local', label: 'This Device', icon: '📱' },
+    { id: 'firebase', label: 'Firebase', icon: '🔥' },
+    { id: 'drive', label: 'Google Drive', icon: '☁️' }
+  ];
 
-  for (const survey of surveys) {
-    const vesselName = survey.vesselName || 'Unnamed';
-    BackupProgress.update({
-      surveyLabel: vesselName,
-      stepLabel: `Survey ${done + 1} of ${surveys.length}`,
-      percent: Math.round((done / surveys.length) * 100)
-    });
+  SaveProgress.show('Saving All Surveys…', `${surveys.length} surveys`, backends);
 
+  let localDone = 0, fbDone = 0, driveDone = 0;
+  let localFail = 0, fbFail = 0, driveFail = 0;
+  let drivePhotos = 0;
+
+  // 1. Save all locally first
+  SaveProgress.markActive('local', `Saving survey 1 of ${surveys.length}…`);
+  for (const s of surveys) {
     try {
-      // Push to Firebase
-      if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled()) {
-        await FirebaseSync.pushSurvey(survey);
-        // Push photos
-        const photos = await new Promise((resolve) => {
+      await _originalSaveSurvey(s); // bypass hooks to avoid triggering auto-sync per survey
+      localDone++;
+      SaveProgress.updateDetail('local', `Saved ${localDone} of ${surveys.length}`);
+    } catch (e) { localFail++; }
+  }
+  localFail > 0
+    ? SaveProgress.markFailed('local', `${localDone} saved, ${localFail} failed`)
+    : SaveProgress.markDone('local', `${localDone} surveys ✓`);
+
+  if (SaveProgress.isCancelled()) { SaveProgress.finish(false, '⚠ Cancelled'); return; }
+
+  // 2. Firebase — all surveys + photos
+  if (!firebaseOk) {
+    SaveProgress.markSkipped('firebase', 'Not connected');
+  } else {
+    SaveProgress.markActive('firebase', 'Pushing surveys…');
+    for (const s of surveys) {
+      if (SaveProgress.isCancelled()) break;
+      try {
+        await FirebaseSync.pushSurvey(s);
+        // Push photos for this survey
+        const photoIds = await new Promise((resolve) => {
           const tx = db.transaction(['photos'], 'readonly');
           const index = tx.objectStore('photos').index('surveyId');
-          const results = [];
-          index.openCursor(IDBKeyRange.only(survey.id)).onsuccess = (e) => {
+          const keys = [];
+          index.openKeyCursor(IDBKeyRange.only(s.id)).onsuccess = (e) => {
             const cursor = e.target.result;
-            if (cursor) { results.push(cursor.value); cursor.continue(); }
-            else resolve(results);
+            if (cursor) { keys.push(cursor.primaryKey); cursor.continue(); }
+            else resolve(keys);
           };
         });
-        for (const photo of photos) {
-          await FirebaseSync.pushPhoto(photo);
+        for (const pid of photoIds) {
+          if (SaveProgress.isCancelled()) break;
+          const photo = await getPhotoById(pid);
+          if (photo) await FirebaseSync.pushPhoto(photo);
         }
-      }
+        fbDone++;
+        SaveProgress.updateDetail('firebase', `${fbDone} of ${surveys.length} surveys`);
+      } catch (e) { fbFail++; }
+    }
+    if (SaveProgress.isCancelled()) {
+      SaveProgress.markSkipped('firebase', `${fbDone} saved before cancel`);
+    } else {
+      fbFail > 0
+        ? SaveProgress.markFailed('firebase', `${fbDone} saved, ${fbFail} failed`)
+        : SaveProgress.markDone('firebase', `${fbDone} surveys + photos ✓`);
+    }
+  }
 
-      // Push to Drive (full backup with photos)
-      if (typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn()) {
+  if (SaveProgress.isCancelled()) { SaveProgress.finish(false, '⚠ Cancelled'); return; }
+
+  // 3. Google Drive — all surveys + photos
+  if (!driveOk) {
+    SaveProgress.markSkipped('drive', 'Not signed in');
+  } else {
+    SaveProgress.markActive('drive', 'Uploading surveys…');
+    for (const s of surveys) {
+      if (SaveProgress.isCancelled()) break;
+      try {
         const result = await DriveBackup.backupSurvey(
-          survey.id,
-          (update) => BackupProgress.update(update),
-          () => BackupProgress.isCancelled()
+          s.id,
+          (update) => {
+            const label = s.vesselName || 'Unnamed';
+            if (update.stepLabel) SaveProgress.updateDetail('drive', `${label}: ${update.stepLabel}`);
+          },
+          () => SaveProgress.isCancelled()
         );
-        totalPhotos += result.uploaded || 0;
+        drivePhotos += result.uploaded || 0;
+        driveDone++;
+        SaveProgress.updateDetail('drive', `${driveDone} of ${surveys.length} surveys`);
+      } catch (e) {
+        if (e.driveApiDisabled) {
+          SaveProgress.markFailed('drive', 'Drive API not enabled');
+          SaveProgress.finish(false, '⚠ Drive API needs enabling');
+          return;
+        }
+        if (e.cancelled) break;
+        driveFail++;
       }
+    }
+    if (SaveProgress.isCancelled()) {
+      SaveProgress.markSkipped('drive', `${driveDone} saved before cancel`);
+    } else {
+      driveFail > 0
+        ? SaveProgress.markFailed('drive', `${driveDone} saved, ${driveFail} failed`)
+        : SaveProgress.markDone('drive', `${driveDone} surveys · ${drivePhotos} photos ✓`);
+    }
+  }
 
-      done++;
-    } catch (err) {
-      failed++;
-      console.error(`[BackupAll] ${vesselName} failed:`, err);
-      if (err.driveApiDisabled) {
-        BackupProgress.hide();
-        showDriveApiDisabledDialog(err.activationUrl, done, surveys.length);
-        return;
+  const allOk = localFail === 0 && fbFail === 0 && driveFail === 0 && !SaveProgress.isCancelled();
+  SaveProgress.finish(allOk, allOk ? '✓ All Surveys Saved' : '⚠ Finished with errors');
+}
+
+// ── v2257: saveSurveyWithProgress — single-survey save with per-backend dialog ──
+// Shows the SaveProgress dialog with Local / Firebase / Drive rows,
+// saves to each in sequence, and updates each row's status in real time.
+async function saveSurveyWithProgress(surveyId) {
+  if (!surveyId) return;
+  window._backupActive = true;
+
+  const survey = await getSurvey(surveyId);
+  if (!survey) { showToast('Survey not found'); window._backupActive = false; return; }
+
+  const vesselName = survey.vesselName || 'Unnamed';
+  const firebaseOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled();
+  const driveOk = typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn();
+
+  // Build backend rows
+  const backends = [
+    { id: 'local', label: 'This Device', icon: '📱' },
+    { id: 'firebase', label: 'Firebase', icon: '🔥' },
+    { id: 'drive', label: 'Google Drive', icon: '☁️' }
+  ];
+
+  SaveProgress.show('Saving…', vesselName, backends);
+  let allOk = true;
+
+  // 1. Local save
+  SaveProgress.markActive('local', 'Saving to IndexedDB…');
+  try {
+    // Collect latest form data if on edit screen
+    if (typeof saveEditFormSilently === 'function' &&
+        (currentView === 'edit-survey' || currentView === 'new-survey')) {
+      await saveEditFormSilently();
+    } else {
+      await saveSurvey(survey);
+    }
+    SaveProgress.markDone('local', 'Saved ✓');
+    SaveStatus.markSaved();
+  } catch (err) {
+    SaveProgress.markFailed('local', 'Error: ' + (err.message || err));
+    allOk = false;
+  }
+
+  // 2. Firebase
+  if (!firebaseOk) {
+    SaveProgress.markSkipped('firebase', 'Not connected');
+  } else if (SaveProgress.isCancelled()) {
+    SaveProgress.markSkipped('firebase', 'Cancelled');
+  } else {
+    SaveProgress.markActive('firebase', 'Pushing survey data…');
+    try {
+      const freshSurvey = await getSurvey(surveyId);
+      if (freshSurvey) await FirebaseSync.pushSurvey(freshSurvey);
+
+      // Push photos
+      const photoIds = await new Promise((resolve) => {
+        const tx = db.transaction(['photos'], 'readonly');
+        const index = tx.objectStore('photos').index('surveyId');
+        const keys = [];
+        index.openKeyCursor(IDBKeyRange.only(surveyId)).onsuccess = (e) => {
+          const cursor = e.target.result;
+          if (cursor) { keys.push(cursor.primaryKey); cursor.continue(); }
+          else resolve(keys);
+        };
+      });
+      let fbPhotoDone = 0;
+      for (const pid of photoIds) {
+        if (SaveProgress.isCancelled()) break;
+        const photo = await getPhotoById(pid);
+        if (photo) await FirebaseSync.pushPhoto(photo);
+        fbPhotoDone++;
+        SaveProgress.updateDetail('firebase', `Photo ${fbPhotoDone} of ${photoIds.length}`);
       }
-      if (err.cancelled) {
-        BackupProgress.finish({ title: '⚠ Cancelled', subtitle: `${done} of ${surveys.length} saved`, success: false });
-        return;
+      SaveProgress.markDone('firebase', `Survey + ${fbPhotoDone} photos ✓`);
+    } catch (err) {
+      SaveProgress.markFailed('firebase', 'Error: ' + (err.message || err));
+      allOk = false;
+    }
+  }
+
+  // 3. Google Drive
+  if (!driveOk) {
+    SaveProgress.markSkipped('drive', 'Not signed in');
+  } else if (SaveProgress.isCancelled()) {
+    SaveProgress.markSkipped('drive', 'Cancelled');
+  } else {
+    SaveProgress.markActive('drive', 'Preparing…');
+    try {
+      const result = await DriveBackup.backupSurvey(
+        surveyId,
+        (update) => {
+          if (update.stepLabel) SaveProgress.updateDetail('drive', update.stepLabel);
+          else if (update.detail) SaveProgress.updateDetail('drive', update.detail);
+        },
+        () => SaveProgress.isCancelled()
+      );
+      const photoInfo = result.uploaded > 0
+        ? `Survey + ${result.uploaded} photos ✓`
+        : `Survey data ✓ · ${result.skipped || 0} photos already on Drive`;
+      SaveProgress.markDone('drive', photoInfo);
+    } catch (err) {
+      if (err.driveApiDisabled) {
+        SaveProgress.markFailed('drive', 'Drive API not enabled');
+      } else if (err.cancelled) {
+        SaveProgress.markSkipped('drive', 'Cancelled');
+      } else {
+        SaveProgress.markFailed('drive', 'Error: ' + (err.message || err));
+        allOk = false;
       }
     }
   }
 
-  if (failed > 0) {
-    BackupProgress.finish({
-      title: '⚠ Finished with errors',
-      subtitle: `${done} saved, ${failed} failed`,
-      success: false
-    });
-  } else {
-    BackupProgress.finish({
-      title: '✓ All surveys saved',
-      subtitle: `${done} surveys · ${totalPhotos} photos uploaded`,
-      success: true
-    });
-  }
+  window._hasUnsavedBackup = false;
+  window._backupActive = false;
+  SaveProgress.finish(allOk, allOk ? '✓ Saved' : '⚠ Saved with errors');
 }
 
 // Wrapper to count photos in IndexedDB for a survey and update the pill
@@ -8664,25 +8811,11 @@ function editSurveyDetails(surveyId) {
     };
     editBar.appendChild(descBtn2);
 
-    // v2255: 💾 Unified save button
+    // v2257: 💾 Unified save button with per-backend progress
     const saveBtn2 = document.createElement('button');
     saveBtn2.style.cssText = ps + 'background:#3399cc;color:white;';
     saveBtn2.innerHTML = '💾 Save';
-    saveBtn2.onclick = async () => {
-      saveBtn2.innerHTML = '💾 Saving…';
-      saveBtn2.disabled = true;
-      try {
-        await saveEditFormSilently();
-        // Force push to all backends (saveEverywhere handles Firebase + Drive)
-        await saveEverywhere();
-        showToast('Saved ✓');
-      } catch (err) {
-        showToast('Save failed — ' + (err.message || err));
-      } finally {
-        saveBtn2.innerHTML = '💾 Save';
-        saveBtn2.disabled = false;
-      }
-    };
+    saveBtn2.onclick = () => saveSurveyWithProgress(survey.id);
     editBar.appendChild(saveBtn2);
 
     // ✅ Check button
@@ -12042,94 +12175,16 @@ function ensureReportButton() {
 
   const pillStyle = 'border:none;border-radius:14px;padding:8px 12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;';
 
-  // Check button — pre-flight survey validation
-  const checkBtn = document.createElement('button');
-  checkBtn.style.cssText = pillStyle + 'background:#ffcc00;color:#066aab;font-weight:700;';
-  checkBtn.innerHTML = '✅ Check';
-  checkBtn.title = 'Pre-flight check — find missing fields, empty ratings, and issues before generating report';
-  checkBtn.onclick = () => checkSurvey();
-  bottomBar.appendChild(checkBtn);
-
-  // Edit Intro button
-  const introBtn = document.createElement('button');
-  introBtn.style.cssText = pillStyle + 'background:#066aab;color:white;';
-  introBtn.innerHTML = '✏️ Intro';
-  introBtn.onclick = () => editSurveyDetails(currentSurveyId);
-  bottomBar.appendChild(introBtn);
+  // v2256: Only Save + overflow on the bottom bar. Check, Intro, Report
+  // moved into the overflow menu for a clean, single-button experience.
 
   // v2255: Unified save button — saves to all connected backends
   const saveBtn = document.createElement('button');
   saveBtn.id = 'backupBtn';
   saveBtn.style.cssText = pillStyle + 'background:#3399cc;color:white;box-shadow:0 2px 8px rgba(51,153,204,0.3);';
   saveBtn.innerHTML = '💾 Save';
-  saveBtn.onclick = async () => {
-    window._backupActive = true;
-    saveBtn.innerHTML = '💾 Saving…';
-    saveBtn.disabled = true;
-    try {
-      const survey = await getSurvey(currentSurveyId);
-      if (!survey) { showToast('Survey not found'); return; }
-
-      // 1. Save locally + push to Firebase (via hook)
-      await saveSurvey(survey);
-
-      // 2. Push photos to Firebase
-      if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled()) {
-        const photos = await new Promise((resolve) => {
-          const tx = db.transaction(['photos'], 'readonly');
-          const index = tx.objectStore('photos').index('surveyId');
-          const results = [];
-          index.openCursor(IDBKeyRange.only(currentSurveyId)).onsuccess = (e) => {
-            const cursor = e.target.result;
-            if (cursor) { results.push(cursor.value); cursor.continue(); }
-            else resolve(results);
-          };
-        });
-        for (const photo of photos) {
-          await FirebaseSync.pushPhoto(photo);
-        }
-      }
-
-      // 3. Push to Drive (full backup with photos)
-      if (typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn()) {
-        BackupProgress.show();
-        try {
-          const result = await DriveBackup.backupSurvey(
-            currentSurveyId,
-            (update) => BackupProgress.update(update),
-            () => BackupProgress.isCancelled()
-          );
-          BackupProgress.finish({
-            title: '✓ Saved everywhere',
-            subtitle: `${result.vesselName} · ${result.uploaded} photos to Drive`,
-            success: true
-          });
-        } catch (driveErr) {
-          if (driveErr.driveApiDisabled) {
-            BackupProgress.hide();
-            showDriveApiDisabledDialog(driveErr.activationUrl, 0, 1);
-          } else if (driveErr.cancelled) {
-            BackupProgress.finish({ title: '⚠ Cancelled', subtitle: 'Local + Firebase saved, Drive cancelled', success: false });
-          } else {
-            BackupProgress.finish({ title: '⚠ Drive failed', subtitle: 'Local + Firebase saved. Drive: ' + (driveErr.message || driveErr), success: false });
-          }
-        }
-      } else {
-        showToast('Saved ✓');
-      }
-
-      window._hasUnsavedBackup = false;
-      SaveStatus.markSaved();
-    } catch (err) {
-      console.error('Save error:', err);
-      showToast('Save failed — ' + (err.message || err));
-      SaveStatus.markError(err.message);
-    } finally {
-      saveBtn.innerHTML = '💾 Save';
-      saveBtn.disabled = false;
-      window._backupActive = false;
-    }
-  };
+  // v2257: unified save with per-backend progress dialog
+  saveBtn.onclick = () => saveSurveyWithProgress(currentSurveyId);
   bottomBar.appendChild(saveBtn);
 
   // ⋯ More overflow menu (Recover Photos, Force Update)
@@ -12149,6 +12204,32 @@ function ensureReportButton() {
   const overflowMenu = document.createElement('div');
   overflowMenu.id = 'inspOverflowMenu';
   overflowMenu.style.cssText = 'display:none;position:absolute;bottom:100%;right:0;margin-bottom:8px;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.18);padding:6px;flex-direction:column;gap:4px;min-width:180px;z-index:200;';
+
+  // v2256: Primary actions moved from bottom bar into overflow menu
+  const menuItemStyle = 'border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;width:100%;';
+
+  const reportOpt = document.createElement('button');
+  reportOpt.style.cssText = menuItemStyle + 'color:#066aab;';
+  reportOpt.innerHTML = '📄 Generate Report';
+  reportOpt.onclick = () => { overflowMenu.style.display = 'none'; generateReport(); };
+  overflowMenu.appendChild(reportOpt);
+
+  const checkOpt = document.createElement('button');
+  checkOpt.style.cssText = menuItemStyle + 'color:#b45309;';
+  checkOpt.innerHTML = '✅ Pre-Flight Check';
+  checkOpt.onclick = () => { overflowMenu.style.display = 'none'; checkSurvey(); };
+  overflowMenu.appendChild(checkOpt);
+
+  const introOpt = document.createElement('button');
+  introOpt.style.cssText = menuItemStyle + 'color:#066aab;';
+  introOpt.innerHTML = '✏️ Edit Vessel Info';
+  introOpt.onclick = () => { overflowMenu.style.display = 'none'; editSurveyDetails(currentSurveyId); };
+  overflowMenu.appendChild(introOpt);
+
+  // Divider
+  const divider = document.createElement('div');
+  divider.style.cssText = 'height:1px;background:#e5e7eb;margin:4px 0;';
+  overflowMenu.appendChild(divider);
 
   // Recover Photos option
   const recoverOpt = document.createElement('button');
@@ -12302,13 +12383,6 @@ function ensureReportButton() {
     if (menu) menu.style.display = 'none';
   }, { once: false, passive: true });
 
-  // Preview Report button
-  btn = document.createElement('button');
-  btn.id = 'reportBtn';
-  btn.style.cssText = pillStyle + 'background:#066aab;color:white;box-shadow:0 2px 8px rgba(0,102,153,0.3);';
-  btn.innerHTML = '📄 Report';
-  btn.onclick = () => generateReport();
-  bottomBar.appendChild(btn);
 }
 
 // ─── Engine Data Migration ────────────────────────────────────────────────
@@ -21027,6 +21101,145 @@ const BackupProgress = (() => {
   }
 
   return { show, update, finish, hide, isCancelled };
+})();
+
+// ── v2257: SaveProgress — per-backend progress dialog ──────────────────────
+// Shows a clean dialog with one row per save destination (Local, Firebase,
+// Drive), each with its own status indicator. Used by both single-survey
+// Save and home-screen Save All Surveys.
+const SaveProgress = (() => {
+  let _overlay = null;
+  let _cancelled = false;
+  let _startTime = 0;
+  let _timer = null;
+
+  function isCancelled() { return _cancelled; }
+
+  // backends: array of { id, label, icon } e.g. [{ id:'local', label:'This Device', icon:'📱' }]
+  function show(title, surveyLabel, backends) {
+    _cancelled = false;
+    _startTime = Date.now();
+    const existing = document.getElementById('saveProgressOverlay');
+    if (existing) existing.remove();
+
+    _overlay = document.createElement('div');
+    _overlay.id = 'saveProgressOverlay';
+    _overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10002;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+    const rowsHtml = backends.map(b => `
+      <div id="sp-row-${b.id}" style="display:flex;align-items:center;gap:10px;padding:8px 0;">
+        <span style="font-size:18px;width:24px;text-align:center;">${b.icon}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:600;color:#374151;">${b.label}</div>
+          <div id="sp-detail-${b.id}" style="font-size:11px;color:#6b7280;margin-top:2px;">Waiting…</div>
+        </div>
+        <div id="sp-status-${b.id}" style="font-size:18px;width:24px;text-align:center;">⏳</div>
+      </div>
+    `).join('');
+
+    _overlay.innerHTML = `
+      <div style="background:white;border-radius:14px;max-width:420px;width:100%;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <span style="font-size:22px;">💾</span>
+          <h2 id="spTitle" style="margin:0;font-size:17px;color:#066aab;">${title || 'Saving…'}</h2>
+        </div>
+        <div id="spSurveyLabel" style="font-size:13px;color:#6b7280;margin-bottom:12px;">${surveyLabel || ''}</div>
+        <div style="border-top:1px solid #e5e7eb;padding-top:8px;">
+          ${rowsHtml}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #e5e7eb;">
+          <span id="spElapsed" style="font-size:11px;color:#94a3b8;">0s</span>
+          <button id="spCancelBtn" style="padding:8px 14px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(_overlay);
+    document.getElementById('spCancelBtn').onclick = () => {
+      _cancelled = true;
+      const btn = document.getElementById('spCancelBtn');
+      if (btn) { btn.textContent = 'Cancelling…'; btn.disabled = true; }
+    };
+
+    _timer = setInterval(() => {
+      const el = document.getElementById('spElapsed');
+      if (el) {
+        const s = Math.floor((Date.now() - _startTime) / 1000);
+        el.textContent = s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
+      }
+    }, 1000);
+  }
+
+  // Mark a backend row as in-progress with a detail message
+  function markActive(backendId, detail) {
+    const statusEl = document.getElementById(`sp-status-${backendId}`);
+    const detailEl = document.getElementById(`sp-detail-${backendId}`);
+    if (statusEl) statusEl.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;font-size:16px;">⏳</span>';
+    if (detailEl) detailEl.textContent = detail || 'Saving…';
+  }
+
+  // Update detail text for a backend (e.g. "Photo 3 of 12")
+  function updateDetail(backendId, detail) {
+    const detailEl = document.getElementById(`sp-detail-${backendId}`);
+    if (detailEl) detailEl.textContent = detail || '';
+  }
+
+  // Mark a backend as done
+  function markDone(backendId, detail) {
+    const statusEl = document.getElementById(`sp-status-${backendId}`);
+    const detailEl = document.getElementById(`sp-detail-${backendId}`);
+    if (statusEl) statusEl.textContent = '✅';
+    if (detailEl) { detailEl.textContent = detail || 'Done'; detailEl.style.color = '#16a34a'; }
+  }
+
+  // Mark a backend as skipped (not connected)
+  function markSkipped(backendId, detail) {
+    const statusEl = document.getElementById(`sp-status-${backendId}`);
+    const detailEl = document.getElementById(`sp-detail-${backendId}`);
+    if (statusEl) statusEl.textContent = '⊘';
+    if (detailEl) { detailEl.textContent = detail || 'Not connected'; detailEl.style.color = '#9ca3af'; }
+  }
+
+  // Mark a backend as failed
+  function markFailed(backendId, detail) {
+    const statusEl = document.getElementById(`sp-status-${backendId}`);
+    const detailEl = document.getElementById(`sp-detail-${backendId}`);
+    if (statusEl) statusEl.textContent = '⚠️';
+    if (detailEl) { detailEl.textContent = detail || 'Failed'; detailEl.style.color = '#dc2626'; }
+  }
+
+  // Update the survey label (for Save All, cycles through surveys)
+  function setSurveyLabel(label) {
+    const el = document.getElementById('spSurveyLabel');
+    if (el) el.textContent = label || '';
+  }
+
+  // Final state — show Close button
+  function finish(success, title) {
+    if (!_overlay) return;
+    if (_timer) { clearInterval(_timer); _timer = null; }
+    const titleEl = document.getElementById('spTitle');
+    const cancelBtn = document.getElementById('spCancelBtn');
+    if (titleEl) {
+      titleEl.textContent = title || (success ? '✓ Saved' : '⚠ Finished with errors');
+      titleEl.style.color = success ? '#16a34a' : '#dc2626';
+    }
+    if (cancelBtn) {
+      cancelBtn.textContent = 'Close';
+      cancelBtn.style.background = '#f1f5f9';
+      cancelBtn.style.color = '#334155';
+      cancelBtn.style.borderColor = '#e5e7eb';
+      cancelBtn.disabled = false;
+      cancelBtn.onclick = () => hide();
+    }
+  }
+
+  function hide() {
+    if (_timer) { clearInterval(_timer); _timer = null; }
+    if (_overlay) { _overlay.remove(); _overlay = null; }
+    _cancelled = false;
+  }
+
+  return { show, markActive, updateDetail, markDone, markSkipped, markFailed, setSurveyLabel, finish, hide, isCancelled };
 })();
 
 // Friendly dialog when the Google Drive API hasn't been enabled on the

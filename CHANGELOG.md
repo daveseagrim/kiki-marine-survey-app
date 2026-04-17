@@ -12,6 +12,23 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2257 — 2026-04-16
+
+### Per-backend save progress dialog
+- New `SaveProgress` dialog shows a row for each save destination (📱 This Device, 🔥 Firebase, ☁️ Google Drive) with real-time status per row: ⏳ waiting → saving detail → ✅ done / ⚠️ failed / ⊘ not connected.
+- **Inspection & Edit Intro**: "💾 Save" now opens the progress dialog showing each backend's status as the save runs. Single survey only.
+- **Home screen**: "💾 Save All Surveys" shows the same dialog, iterating through all surveys with per-backend progress.
+- Cancel button available during save — partially completed backends stay saved.
+- Elapsed timer shown at bottom of dialog.
+- `saveSurveyWithProgress(surveyId)` shared function used by both inspection and edit intro screens.
+
+## v2256 — 2026-04-16
+
+### Clean bottom bar — Save + overflow only
+- Inspection bottom bar now shows only **💾 Save** and **⋯** (overflow menu).
+- **📄 Generate Report**, **✅ Pre-Flight Check**, and **✏️ Edit Vessel Info** moved into the overflow menu, above the existing Recover Photos / Remove Date Stamps / Force Update options.
+- Divider line separates primary actions from utility actions in the menu.
+
 ## v2255 — 2026-04-16
 
 ### One save button everywhere
