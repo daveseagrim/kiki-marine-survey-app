@@ -12,6 +12,15 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2303 — 2026-04-16
+
+### Removed
+- **Main sheet — removed traveller snippet.** The "traveller tackle operated
+  smoothly" C-rating snippet was removed from the Main sheet section since
+  the traveller has its own dedicated section (Traveller and tackle).
+
+---
+
 ## v2302 — 2026-04-16
 
 ### Changed
