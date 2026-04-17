@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2258';
+const APP_VERSION = 'v2259';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2388,16 +2388,44 @@ async function backupAllEverywhere() {
 
   if (SaveProgress.isCancelled()) { SaveProgress.finish(false, '⚠ Cancelled'); return; }
 
-  // 2. Firebase — all surveys + photos
+  // 2. Firebase — all surveys + photos (v2259: skip already-synced)
   if (!firebaseOk) {
     SaveProgress.markSkipped('firebase', 'Not connected');
   } else {
-    SaveProgress.markActive('firebase', 'Pushing surveys…');
+    SaveProgress.markActive('firebase', 'Checking what needs syncing…');
+
+    // Fetch remote timestamps in one batch so we can skip up-to-date surveys
+    let remoteTimestamps = {};
+    try {
+      const snap = await window.fsDb.collection('surveys').get();
+      snap.docs.forEach(doc => {
+        const d = doc.data();
+        remoteTimestamps[doc.id] = new Date(d.lastModified || d.createdAt || 0).getTime();
+      });
+    } catch (e) { /* if fetch fails, push everything */ }
+
+    let fbSkipped = 0, fbPhotos = 0;
     for (const s of surveys) {
       if (SaveProgress.isCancelled()) break;
       try {
+        const localTime = new Date(s.lastModified || s.createdAt || 0).getTime();
+        const remoteTime = remoteTimestamps[s.id] || 0;
+        const surveyName = s.vesselName || 'Unnamed';
+
+        if (remoteTime >= localTime && remoteTime > 0) {
+          // Survey already up to date on Firebase — skip entirely
+          fbSkipped++;
+          fbDone++;
+          SaveProgress.updateDetail('firebase', `${surveyName}: already synced ✓`);
+          SaveProgress.setProgress('firebase', Math.round((fbDone / surveys.length) * 100));
+          continue;
+        }
+
+        // Survey needs pushing
+        SaveProgress.updateDetail('firebase', `${surveyName}: pushing survey data…`);
         await FirebaseSync.pushSurvey(s);
-        // Push photos for this survey
+
+        // Push photos for this survey — skip any already on Firebase
         const photoIds = await new Promise((resolve) => {
           const tx = db.transaction(['photos'], 'readonly');
           const index = tx.objectStore('photos').index('surveyId');
@@ -2408,11 +2436,24 @@ async function backupAllEverywhere() {
             else resolve(keys);
           };
         });
+
+        let photoUploaded = 0, photoSkipped = 0;
         for (const pid of photoIds) {
           if (SaveProgress.isCancelled()) break;
-          const photo = await getPhotoById(pid);
-          if (photo) await FirebaseSync.pushPhoto(photo);
+          // Check if photo already exists in Firebase before loading it
+          const exists = await FirebaseSync.photoExistsInFirebase(pid);
+          if (exists) { photoSkipped++; continue; }
+
+          let photo = await getPhotoById(pid);
+          if (photo && photo.dataUrl) {
+            SaveProgress.updateDetail('firebase', `${surveyName}: photo ${photoUploaded + photoSkipped + 1} of ${photoIds.length}`);
+            await FirebaseSync.pushPhoto(photo);
+            photoUploaded++;
+            fbPhotos++;
+          }
+          photo = null; // Release memory immediately
         }
+
         fbDone++;
         SaveProgress.updateDetail('firebase', `${fbDone} of ${surveys.length} surveys`);
         SaveProgress.setProgress('firebase', Math.round((fbDone / surveys.length) * 100));
@@ -2421,9 +2462,12 @@ async function backupAllEverywhere() {
     if (SaveProgress.isCancelled()) {
       SaveProgress.markSkipped('firebase', `${fbDone} saved before cancel`);
     } else {
+      const detail = fbSkipped > 0
+        ? `${fbDone} surveys (${fbSkipped} already synced) · ${fbPhotos} photos ✓`
+        : `${fbDone} surveys · ${fbPhotos} photos ✓`;
       fbFail > 0
         ? SaveProgress.markFailed('firebase', `${fbDone} saved, ${fbFail} failed`)
-        : SaveProgress.markDone('firebase', `${fbDone} surveys + photos ✓`);
+        : SaveProgress.markDone('firebase', detail);
     }
   }
 
@@ -2531,7 +2575,7 @@ async function saveSurveyWithProgress(surveyId) {
       const freshSurvey = await getSurvey(surveyId);
       if (freshSurvey) await FirebaseSync.pushSurvey(freshSurvey);
 
-      // Push photos
+      // Push photos — skip any already on Firebase (v2259)
       const photoIds = await new Promise((resolve) => {
         const tx = db.transaction(['photos'], 'readonly');
         const index = tx.objectStore('photos').index('surveyId');
@@ -2542,18 +2586,27 @@ async function saveSurveyWithProgress(surveyId) {
           else resolve(keys);
         };
       });
-      let fbPhotoDone = 0;
+      let fbPhotoUploaded = 0, fbPhotoSkipped = 0;
       const fbTotal = photoIds.length;
-      SaveProgress.setProgress('firebase', fbTotal > 0 ? 30 : 90); // 30% after survey data, scale rest for photos
+      SaveProgress.setProgress('firebase', fbTotal > 0 ? 30 : 90);
       for (const pid of photoIds) {
         if (SaveProgress.isCancelled()) break;
-        const photo = await getPhotoById(pid);
-        if (photo) await FirebaseSync.pushPhoto(photo);
-        fbPhotoDone++;
-        SaveProgress.updateDetail('firebase', `Photo ${fbPhotoDone} of ${fbTotal}`);
-        SaveProgress.setProgress('firebase', 30 + Math.round((fbPhotoDone / fbTotal) * 70));
+        const exists = await FirebaseSync.photoExistsInFirebase(pid);
+        if (exists) { fbPhotoSkipped++; continue; }
+        let photo = await getPhotoById(pid);
+        if (photo && photo.dataUrl) {
+          await FirebaseSync.pushPhoto(photo);
+          fbPhotoUploaded++;
+        }
+        photo = null; // Release memory immediately
+        const processed = fbPhotoUploaded + fbPhotoSkipped;
+        SaveProgress.updateDetail('firebase', `Photo ${processed} of ${fbTotal}${fbPhotoSkipped > 0 ? ` (${fbPhotoSkipped} already synced)` : ''}`);
+        SaveProgress.setProgress('firebase', 30 + Math.round((processed / fbTotal) * 70));
       }
-      SaveProgress.markDone('firebase', `Survey + ${fbPhotoDone} photos ✓`);
+      const photoDetail = fbPhotoSkipped > 0
+        ? `Survey + ${fbPhotoUploaded} photos (${fbPhotoSkipped} already synced) ✓`
+        : `Survey + ${fbPhotoUploaded} photos ✓`;
+      SaveProgress.markDone('firebase', photoDetail);
     } catch (err) {
       SaveProgress.markFailed('firebase', 'Error: ' + (err.message || err));
       allOk = false;
@@ -21950,6 +22003,9 @@ const FirebaseSync = (() => {
   let _lastLocalPushTime = {};      // Track when we last pushed each survey to avoid echo
   let _syncStatus = 'disconnected'; // disconnected | syncing | synced | error
   let _lastSyncTime = null;
+  let _periodicTimer = null;          // v2259: 5-minute polling interval
+  let _lastSyncTimestamp = 0;         // v2259: epoch ms of last completed sync (throttle guard)
+  let _periodicSyncRunning = false;   // v2259: prevent overlapping periodic syncs
 
   // ── Status UI ──────────────────────────────────────────────────────
   function updateSyncStatusUI(status, detail) {
@@ -22120,6 +22176,16 @@ const FirebaseSync = (() => {
     }
   }
 
+  // v2259: Check whether a photo's metadata already exists in Firestore
+  // (meaning it was already uploaded to Storage). Returns true if exists.
+  async function photoExistsInFirebase(photoId) {
+    if (!window.fsDb) return false;
+    try {
+      const doc = await window.fsDb.collection('photos').doc(photoId).get();
+      return doc.exists;
+    } catch (e) { return false; }
+  }
+
   // Pull all photos for a survey from Firebase Storage into IndexedDB
   async function pullPhotosForSurvey(survey) {
     if (!_syncEnabled || !window.fsDb || !window.fsStorage) return;
@@ -22240,10 +22306,94 @@ const FirebaseSync = (() => {
       }
 
       updateSyncStatusUI('synced', 'Initial sync complete');
+      _lastSyncTimestamp = Date.now();
       if (currentView === 'surveys') renderHome();  // v2247: only refresh if user is still on home
     } catch (err) {
       console.error('Initial sync error:', err);
       updateSyncStatusUI('error', err.message);
+    }
+  }
+
+  // ── v2259: Periodic Sync — lightweight two-way pull/push every 5 min ───
+  // Also fires on visibilitychange (app foreground) with a 30 s throttle.
+  // Skips photo push on periodic sync to save bandwidth — photos are pushed
+  // on explicit Save or initial sync only.
+  async function periodicSync() {
+    if (!_syncEnabled || !window.fsDb) return;
+    if (_periodicSyncRunning) return; // prevent overlap
+    // Throttle: don't sync if last sync was < 30 s ago
+    if (Date.now() - _lastSyncTimestamp < 30000) return;
+
+    _periodicSyncRunning = true;
+    updateSyncStatusUI('syncing', 'Syncing…');
+    let pulled = 0, pushed = 0;
+    try {
+      const localSurveys = await getAllSurveys();
+      const remoteSnap = await window.fsDb.collection('surveys').get();
+      const remoteSurveyMap = {};
+      remoteSnap.docs.forEach(doc => { remoteSurveyMap[doc.id] = doc.data(); });
+
+      // Compare each local survey with remote
+      for (const local of localSurveys) {
+        const remote = remoteSurveyMap[local.id];
+        const localTime = new Date(local.lastModified || local.createdAt || 0).getTime();
+        const remoteTime = remote ? new Date(remote.lastModified || remote.createdAt || 0).getTime() : 0;
+
+        if (!remote || localTime > remoteTime) {
+          // Local is newer — push (survey data only, no photos on periodic sync)
+          await pushSurvey(local);
+          pushed++;
+        } else if (remoteTime > localTime) {
+          // Remote is newer — pull it down
+          // Apply the same richness guard as startListening
+          const lScore = _scoreSurveyContent(local);
+          const rScore = _scoreSurveyContent(remote);
+          const localRicher =
+            lScore.textChars > rScore.textChars * 1.2 + 50 ||
+            lScore.photoCount > rScore.photoCount ||
+            lScore.ratedItems > rScore.ratedItems;
+          if (localRicher) {
+            // Local is richer despite older timestamp — push local up
+            await pushSurvey(local);
+            pushed++;
+          } else {
+            remote.id = local.id;
+            _suppressLocalWrite = true;
+            await saveSurvey(remote);
+            _suppressLocalWrite = false;
+            await pullPhotosForSurvey(remote);
+            pulled++;
+          }
+        }
+        delete remoteSurveyMap[local.id];
+      }
+
+      // Pull any remote-only surveys (created on another device)
+      for (const [id, remote] of Object.entries(remoteSurveyMap)) {
+        remote.id = id;
+        _suppressLocalWrite = true;
+        await saveSurvey(remote);
+        _suppressLocalWrite = false;
+        await pullPhotosForSurvey(remote);
+        pulled++;
+      }
+
+      _lastSyncTimestamp = Date.now();
+      updateSyncStatusUI('synced', new Date().toLocaleTimeString());
+
+      // Refresh UI and notify user if anything changed
+      if (pulled > 0) {
+        if (currentView === 'surveys') renderHome();
+        showToast(`☁️ ${pulled} survey${pulled > 1 ? 's' : ''} updated from cloud`);
+      }
+      if (pushed > 0 || pulled > 0) {
+        console.log(`[Sync] Periodic sync: pushed ${pushed}, pulled ${pulled}`);
+      }
+    } catch (err) {
+      console.error('[Sync] Periodic sync error:', err);
+      updateSyncStatusUI('error', err.message);
+    } finally {
+      _periodicSyncRunning = false;
     }
   }
 
@@ -22302,7 +22452,20 @@ const FirebaseSync = (() => {
     updateSyncStatusUI('syncing', 'Connecting…');
     startListening();
     initialSync();
-    console.log('[Sync] Firebase real-time sync enabled');
+
+    // v2259: periodic sync every 5 minutes — catches changes if the
+    // real-time listener disconnects (common on iOS background/foreground)
+    if (_periodicTimer) clearInterval(_periodicTimer);
+    _periodicTimer = setInterval(() => { periodicSync(); }, 5 * 60 * 1000);
+
+    // v2259: also sync when app comes back to foreground (iOS PWA resume)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && _syncEnabled) {
+        periodicSync(); // throttle guard inside prevents excessive calls
+      }
+    });
+
+    console.log('[Sync] Firebase two-way sync enabled (5-min polling + foreground trigger)');
   }
 
   // Re-apply current sync status to a freshly rendered DOM element
@@ -22323,6 +22486,8 @@ const FirebaseSync = (() => {
     pushPhoto,
     removePhoto,
     pullPhotosForSurvey,
+    photoExistsInFirebase,
+    periodicSync,
     updateSyncStatusUI,
     refreshUI
   };

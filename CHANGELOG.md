@@ -12,6 +12,22 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2259 — 2026-04-16
+
+### Two-way sync between devices
+- **Periodic sync every 5 minutes**: Polls Firebase for remote changes and pulls newer surveys down, pushes locally-newer surveys up. Catches updates that the real-time Firestore listener may miss after iOS backgrounding.
+- **Foreground trigger**: When the app comes back to foreground (switching apps, waking the phone), an immediate sync fires with a 30-second throttle to prevent excessive calls.
+- **Last-save-wins conflict resolution**: If the same survey was edited on two devices, the more recently saved version wins. The existing richness guard prevents a stale remote copy from overwriting a richer local one.
+- **Cloud pull notification**: Toast shows "☁️ 2 surveys updated from cloud" when remote changes are pulled down, and home screen refreshes automatically.
+- **Photo pull on sync**: When a remote-newer survey is pulled, its photos are also downloaded from Firebase Storage.
+- `FirebaseSync.periodicSync()` exposed for manual trigger if needed.
+
+### Firebase save crash fix & resume support
+- **Skip already-synced surveys**: `backupAllEverywhere()` now fetches remote timestamps in one batch and skips surveys whose `lastModified` already matches. If the app quit mid-save, restarting and tapping Save again picks up where it left off instead of re-uploading everything.
+- **Skip already-uploaded photos**: Before loading a photo from IndexedDB, checks Firestore metadata to see if it's already on Firebase Storage. Skips if so — avoids loading large base64 strings into memory unnecessarily.
+- **Memory pressure fix**: Photo references are nulled out immediately after each upload (`photo = null`) so the garbage collector can reclaim memory between uploads. Prevents iPhone PWA crashes during large saves.
+- Same fixes applied to `saveSurveyWithProgress()` (single-survey save).
+
 ## v2258 — 2026-04-16
 
 ### Progress bars in save dialog
