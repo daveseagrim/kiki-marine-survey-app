@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2259';
+const APP_VERSION = 'v2260';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2437,21 +2437,31 @@ async function backupAllEverywhere() {
           };
         });
 
+        // v2260: batch-check which photos exist on Firebase in one query
+        let existingPhotoSet = new Set();
+        if (photoIds.length > 0) {
+          try {
+            const snap = await window.fsDb.collection('photos')
+              .where('surveyId', '==', s.id).get();
+            snap.docs.forEach(doc => existingPhotoSet.add(doc.id));
+          } catch (e) { /* fall back to uploading all */ }
+        }
+
         let photoUploaded = 0, photoSkipped = 0;
         for (const pid of photoIds) {
           if (SaveProgress.isCancelled()) break;
-          // Check if photo already exists in Firebase before loading it
-          const exists = await FirebaseSync.photoExistsInFirebase(pid);
-          if (exists) { photoSkipped++; continue; }
-
-          let photo = await getPhotoById(pid);
-          if (photo && photo.dataUrl) {
-            SaveProgress.updateDetail('firebase', `${surveyName}: photo ${photoUploaded + photoSkipped + 1} of ${photoIds.length}`);
-            await FirebaseSync.pushPhoto(photo);
-            photoUploaded++;
-            fbPhotos++;
+          if (existingPhotoSet.has(pid)) {
+            photoSkipped++;
+          } else {
+            let photo = await getPhotoById(pid);
+            if (photo && photo.dataUrl) {
+              SaveProgress.updateDetail('firebase', `${surveyName}: photo ${photoUploaded + photoSkipped + 1} of ${photoIds.length}`);
+              await FirebaseSync.pushPhoto(photo);
+              photoUploaded++;
+              fbPhotos++;
+            }
+            photo = null; // Release memory immediately
           }
-          photo = null; // Release memory immediately
         }
 
         fbDone++;
@@ -2474,10 +2484,10 @@ async function backupAllEverywhere() {
   if (SaveProgress.isCancelled()) { SaveProgress.finish(false, '⚠ Cancelled'); return; }
 
   // 3. Google Drive — all surveys + photos
-  if (!driveOk) {
-    SaveProgress.markSkipped('drive', 'Not signed in');
-  } else {
+  // v2260: extracted into a helper so the "Tap to sign in" retry can call it
+  async function _runDriveBackupAll() {
     SaveProgress.markActive('drive', 'Uploading surveys…');
+    SaveProgress.setProgress('drive', 0);
     for (const s of surveys) {
       if (SaveProgress.isCancelled()) break;
       try {
@@ -2486,7 +2496,6 @@ async function backupAllEverywhere() {
           (update) => {
             const label = s.vesselName || 'Unnamed';
             if (update.stepLabel) SaveProgress.updateDetail('drive', `${label}: ${update.stepLabel}`);
-            // Intra-survey progress: interpolate between driveDone and driveDone+1
             if (typeof update.percent === 'number') {
               const base = Math.round((driveDone / surveys.length) * 100);
               const slice = Math.round((1 / surveys.length) * 100);
@@ -2502,7 +2511,6 @@ async function backupAllEverywhere() {
       } catch (e) {
         if (e.driveApiDisabled) {
           SaveProgress.markFailed('drive', 'Drive API not enabled');
-          SaveProgress.finish(false, '⚠ Drive API needs enabling');
           return;
         }
         if (e.cancelled) break;
@@ -2516,6 +2524,12 @@ async function backupAllEverywhere() {
         ? SaveProgress.markFailed('drive', `${driveDone} saved, ${driveFail} failed`)
         : SaveProgress.markDone('drive', `${driveDone} surveys · ${drivePhotos} photos ✓`);
     }
+  }
+
+  if (!driveOk) {
+    SaveProgress.markSkipped('drive', 'Not signed in', _runDriveBackupAll);
+  } else {
+    await _runDriveBackupAll();
   }
 
   const allOk = localFail === 0 && fbFail === 0 && driveFail === 0 && !SaveProgress.isCancelled();
@@ -2589,16 +2603,31 @@ async function saveSurveyWithProgress(surveyId) {
       let fbPhotoUploaded = 0, fbPhotoSkipped = 0;
       const fbTotal = photoIds.length;
       SaveProgress.setProgress('firebase', fbTotal > 0 ? 30 : 90);
+
+      // v2260: batch-check which photos already exist on Firebase in one query
+      // instead of 138 individual round trips
+      let existingPhotoIds = new Set();
+      if (fbTotal > 0) {
+        try {
+          const snap = await window.fsDb.collection('photos')
+            .where('surveyId', '==', surveyId).get();
+          snap.docs.forEach(doc => existingPhotoIds.add(doc.id));
+        } catch (e) { /* if batch fails, fall back to uploading all */ }
+      }
+
       for (const pid of photoIds) {
         if (SaveProgress.isCancelled()) break;
-        const exists = await FirebaseSync.photoExistsInFirebase(pid);
-        if (exists) { fbPhotoSkipped++; continue; }
-        let photo = await getPhotoById(pid);
-        if (photo && photo.dataUrl) {
-          await FirebaseSync.pushPhoto(photo);
-          fbPhotoUploaded++;
+        if (existingPhotoIds.has(pid)) {
+          fbPhotoSkipped++;
+        } else {
+          let photo = await getPhotoById(pid);
+          if (photo && photo.dataUrl) {
+            await FirebaseSync.pushPhoto(photo);
+            fbPhotoUploaded++;
+          }
+          photo = null; // Release memory immediately
         }
-        photo = null; // Release memory immediately
+        // Update progress for EVERY photo (uploaded or skipped)
         const processed = fbPhotoUploaded + fbPhotoSkipped;
         SaveProgress.updateDetail('firebase', `Photo ${processed} of ${fbTotal}${fbPhotoSkipped > 0 ? ` (${fbPhotoSkipped} already synced)` : ''}`);
         SaveProgress.setProgress('firebase', 30 + Math.round((processed / fbTotal) * 70));
@@ -2614,12 +2643,10 @@ async function saveSurveyWithProgress(surveyId) {
   }
 
   // 3. Google Drive
-  if (!driveOk) {
-    SaveProgress.markSkipped('drive', 'Not signed in');
-  } else if (SaveProgress.isCancelled()) {
-    SaveProgress.markSkipped('drive', 'Cancelled');
-  } else {
+  // v2260: extracted so "Tap to sign in" retry can call it
+  async function _runDriveBackupSingle() {
     SaveProgress.markActive('drive', 'Preparing…');
+    SaveProgress.setProgress('drive', 0);
     try {
       const result = await DriveBackup.backupSurvey(
         surveyId,
@@ -2646,6 +2673,14 @@ async function saveSurveyWithProgress(surveyId) {
         allOk = false;
       }
     }
+  }
+
+  if (!driveOk) {
+    SaveProgress.markSkipped('drive', 'Not signed in', _runDriveBackupSingle);
+  } else if (SaveProgress.isCancelled()) {
+    SaveProgress.markSkipped('drive', 'Cancelled');
+  } else {
+    await _runDriveBackupSingle();
   }
 
   window._hasUnsavedBackup = false;
@@ -21181,6 +21216,7 @@ const SaveProgress = (() => {
   let _cancelled = false;
   let _startTime = 0;
   let _timer = null;
+  let _retryCallbacks = {};  // v2260: per-backend retry callbacks for sign-in-from-dialog
 
   function isCancelled() { return _cancelled; }
 
@@ -21276,13 +21312,50 @@ const SaveProgress = (() => {
   }
 
   // Mark a backend as skipped (not connected)
-  function markSkipped(backendId, detail) {
+  // v2260: if a retryCallback is provided, the row becomes tappable —
+  // tapping triggers sign-in and then runs the callback to retry that backend.
+  function markSkipped(backendId, detail, retryCallback) {
+    const rowEl = document.getElementById(`sp-row-${backendId}`);
     const statusEl = document.getElementById(`sp-status-${backendId}`);
     const detailEl = document.getElementById(`sp-detail-${backendId}`);
     const bar = document.getElementById(`sp-bar-${backendId}`);
     if (statusEl) statusEl.textContent = '⊘';
-    if (detailEl) { detailEl.textContent = detail || 'Not connected'; detailEl.style.color = '#9ca3af'; }
+    if (detailEl) {
+      detailEl.textContent = detail || 'Not connected';
+      detailEl.style.color = '#9ca3af';
+    }
     if (bar) { bar.style.width = '100%'; bar.style.background = '#d1d5db'; }
+
+    // Make row tappable for sign-in if a retry callback was provided
+    if (retryCallback && rowEl) {
+      _retryCallbacks[backendId] = retryCallback;
+      if (detailEl) {
+        detailEl.innerHTML = (detail || 'Not signed in') +
+          ' · <span style="color:#066aab;text-decoration:underline;cursor:pointer;">Tap to sign in</span>';
+      }
+      rowEl.style.cursor = 'pointer';
+      rowEl.onclick = async () => {
+        rowEl.onclick = null;
+        rowEl.style.cursor = '';
+        if (detailEl) { detailEl.textContent = 'Signing in…'; detailEl.style.color = '#d97706'; }
+        if (statusEl) statusEl.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;font-size:16px;">⏳</span>';
+        try {
+          await DriveBackup.signIn();
+          if (DriveBackup.isSignedIn()) {
+            if (detailEl) { detailEl.textContent = 'Connected ✓ — saving…'; detailEl.style.color = '#16a34a'; }
+            const cb = _retryCallbacks[backendId];
+            delete _retryCallbacks[backendId];
+            if (cb) await cb();
+          } else {
+            if (detailEl) { detailEl.textContent = 'Sign-in cancelled'; detailEl.style.color = '#9ca3af'; }
+            if (statusEl) statusEl.textContent = '⊘';
+          }
+        } catch (e) {
+          if (detailEl) { detailEl.textContent = 'Sign-in failed'; detailEl.style.color = '#dc2626'; }
+          if (statusEl) statusEl.textContent = '⚠️';
+        }
+      };
+    }
   }
 
   // Mark a backend as failed

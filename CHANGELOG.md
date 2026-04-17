@@ -12,6 +12,18 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2260 — 2026-04-16
+
+### Drive "Tap to sign in" from save dialog
+- When Google Drive shows "Not signed in" in the save progress dialog, the row now shows "Tap to sign in" and is tappable. Tapping triggers Google sign-in, and if successful, immediately runs the Drive backup without closing the dialog.
+- Works in both single-survey Save and Save All Surveys.
+
+### Firebase save speed fix (batch photo check)
+- Previously, checking whether photos already exist on Firebase made one Firestore query per photo (e.g., 138 round trips for 138 photos = 13 seconds of waiting). Now uses a single batch query per survey to fetch all existing photo IDs at once. Should reduce the check from ~13s to under 1s.
+
+### Progress bar fix for skipped photos
+- Firebase progress bar was stuck at ~30% when all photos were already synced (the `continue` statement for skipped photos jumped past the progress update). Now the bar advances for every photo whether uploaded or skipped.
+
 ## v2259 — 2026-04-16
 
 ### Two-way sync between devices
