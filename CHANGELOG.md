@@ -12,6 +12,17 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2284 — 2026-04-16
+
+### Added
+- **Camera zoom control.** The batch camera now resets to 1x zoom on open
+  (previously defaulted to whatever iOS chose, often full magnification).
+  A slider appears at the bottom of the viewfinder to adjust zoom from 1x
+  to max. Fully isolated in its own try/catch — if the browser doesn't
+  support zoom capabilities, the camera works exactly as before.
+
+---
+
 ## v2283 — 2026-04-16
 
 ### Changed

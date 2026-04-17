@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2283';
+const APP_VERSION = 'v2284';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -23139,6 +23139,44 @@ async function openBatchCamera(itemLabel, opts) {
     bc.stream = stream;
     video.srcObject = stream;
     await video.play().catch(() => {});
+
+    // v2283: Zoom control — reset to 1x and add slider if supported
+    try {
+      const track = stream.getVideoTracks()[0];
+      if (track) {
+        const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
+        if (caps.zoom) {
+          // Reset to minimum zoom (1x) immediately
+          await track.applyConstraints({ advanced: [{ zoom: caps.zoom.min }] });
+          // Add zoom slider to the video area
+          const videoContainer = document.querySelector('[data-cam="video"]');
+          if (videoContainer) {
+            const zoomBar = document.createElement('div');
+            zoomBar.id = 'batchCamZoom';
+            zoomBar.style.cssText = 'position:absolute;bottom:12px;left:16px;right:16px;display:flex;align-items:center;gap:8px;z-index:2;';
+            zoomBar.innerHTML = `
+              <span style="color:#fff;font-size:11px;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,0.8);white-space:nowrap;">1x</span>
+              <input type="range" id="batchCamZoomSlider"
+                min="${caps.zoom.min}" max="${caps.zoom.max}" step="${caps.zoom.step || 0.1}"
+                value="${caps.zoom.min}"
+                style="flex:1;height:28px;accent-color:#f5b942;cursor:pointer;">
+              <span id="batchCamZoomLabel" style="color:#fff;font-size:11px;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,0.8);white-space:nowrap;">${Math.round(caps.zoom.max)}x</span>
+            `;
+            videoContainer.appendChild(zoomBar);
+            const slider = document.getElementById('batchCamZoomSlider');
+            if (slider) {
+              slider.addEventListener('input', () => {
+                const val = parseFloat(slider.value);
+                track.applyConstraints({ advanced: [{ zoom: val }] }).catch(() => {});
+              });
+            }
+          }
+        }
+      }
+    } catch (zoomErr) {
+      // Zoom not supported — silently ignore, camera works fine without it
+      console.warn('Zoom setup skipped:', zoomErr);
+    }
   } catch (err) {
     console.error('getUserMedia failed:', err);
     closeBatchCameraOverlay();
