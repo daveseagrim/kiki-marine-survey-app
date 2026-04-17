@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2273';
+const APP_VERSION = 'v2274';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -12286,8 +12286,8 @@ function renderInspection(survey) {
 }
 
 function ensureReportButton() {
-  let btn = document.getElementById('reportBtn');
-  if (btn) return; // already exists
+  // v2274: guard on the bottom bar itself (reportBtn ID no longer exists)
+  if (document.getElementById('inspectionBottomBar')) return;
   // Remove old fab if present
   const fab = document.querySelector('.fab');
   if (fab) fab.remove();

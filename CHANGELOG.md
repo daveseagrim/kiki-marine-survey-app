@@ -12,6 +12,16 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2274 — 2026-04-16
+### Fixed
+- **Save status pill disappeared** — `ensureReportButton()` guarded on a stale
+  `reportBtn` ID that no longer exists, so the 500 ms retry setTimeout created a
+  *second* bottom bar that visually covered the first (which held the pill).
+  Changed guard to check `inspectionBottomBar` instead; the retry now correctly
+  bails when the bar already exists.
+
+---
+
 ## v2273 — 2026-04-16
 
 ### UI — Bottom bar layout: Save | Status | ⋯
