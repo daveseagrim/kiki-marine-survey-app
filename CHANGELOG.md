@@ -12,6 +12,17 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2278 — 2026-04-16
+
+### Fixed
+- **Database JSON files now include cache-buster query params** (`?v=APP_VERSION`)
+  on `boat_specs_db.json`, `boat_values_db.json`, `engine_db.json`, and
+  `outdrive_db.json`. Previously only the template/library files had busters,
+  so the browser/CDN could serve stale database JSON even after a version bump.
+  This was preventing the newly added Oceanis 343 from appearing.
+
+---
+
 ## v2277 — 2026-04-16
 
 ### Added

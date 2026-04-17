@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2277';
+const APP_VERSION = 'v2278';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -1264,10 +1264,10 @@ async function fetchDataFiles() {
       fetch('survey_template.json?v=' + APP_VERSION),
       fetch('insurance_survey_template.json?v=' + APP_VERSION),
       fetch('text_library.json?v=' + APP_VERSION),
-      fetch('boat_specs_db.json'),
-      fetch('boat_values_db.json'),
-      fetch('engine_db.json'),
-      fetch('outdrive_db.json')
+      fetch('boat_specs_db.json?v=' + APP_VERSION),
+      fetch('boat_values_db.json?v=' + APP_VERSION),
+      fetch('engine_db.json?v=' + APP_VERSION),
+      fetch('outdrive_db.json?v=' + APP_VERSION)
     ]);
 
     // Parse each template individually so one bad file cannot prevent others from loading
