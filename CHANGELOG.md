@@ -12,6 +12,15 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2277 — 2026-04-16
+
+### Added
+- **Beneteau Oceanis 343** added to `boat_specs_db.json` (2005–2008, sailboat).
+  Includes deep keel (6'5") and shallow keel (4'9") draft variants. Aliases
+  cover "Oceanis 343 Clipper" and "Beneteau 343".
+
+---
+
 ## v2276 — 2026-04-16
 
 ### Fixed

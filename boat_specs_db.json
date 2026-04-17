@@ -1146,6 +1146,34 @@
       "construction": "Fibreglass"
     },
     {
+      "id": "beneteau-oceanis-343",
+      "make": "Beneteau",
+      "model": "Oceanis 343",
+      "aliases": [
+        "oceanis 343",
+        "oceanis343",
+        "oceanis 343 clipper",
+        "beneteau 343"
+      ],
+      "yearStart": 2005,
+      "yearEnd": 2008,
+      "type": "sailboat",
+      "loa": "35'6\"",
+      "lwl": "31'2\"",
+      "beam": "11'5\"",
+      "displacement": "12,290 lbs",
+      "ballast": "3,402 lbs",
+      "maxDraft": "6'5\"",
+      "draftVariants": [
+        { "label": "Deep keel", "draft": "6'5\"" },
+        { "label": "Shallow keel", "draft": "4'9\"" }
+      ],
+      "totalSailArea": "597 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
       "id": "beneteau-oceanis-373",
       "make": "Beneteau",
       "model": "Oceanis 373",
