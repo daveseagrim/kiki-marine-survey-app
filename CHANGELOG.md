@@ -17,6 +17,8 @@ lets you roll back to a specific version with confidence.
 ### Drive "Tap to sign in" from save dialog
 - When Google Drive shows "Not signed in" in the save progress dialog, the row now shows "Tap to sign in" and is tappable. Tapping triggers Google sign-in, and if successful, immediately runs the Drive backup without closing the dialog.
 - Works in both single-survey Save and Save All Surveys.
+- **iPhone/iPad redirect flow fix**: On iOS, Google sign-in uses a redirect (page unloads). The dialog now detects this and shows "Redirecting to Google…" instead of waiting for a callback that will never come. After returning from Google, a green banner confirms "Google Drive connected — tap Save to back up to Drive."
+- **iPad detection fix**: Modern iPads (iPadOS 13+) report as desktop Safari. Redirect detection now includes the `navigator.platform + maxTouchPoints` check to match DriveBackup's own logic, preventing a mismatch where the dialog expected popup flow but sign-in actually did a redirect.
 
 ### Firebase save speed fix (batch photo check)
 - Previously, checking whether photos already exist on Firebase made one Firestore query per photo (e.g., 138 round trips for 138 photos = 13 seconds of waiting). Now uses a single batch query per survey to fetch all existing photo IDs at once. Should reduce the check from ~13s to under 1s.

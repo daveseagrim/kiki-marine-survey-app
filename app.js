@@ -2814,6 +2814,22 @@ function _hideDriveExpiryWarning() {
   if (bar) bar.remove();
 }
 
+// v2260: Show a green banner after redirect sign-in so the user knows
+// Drive is connected and they can save. Auto-dismisses after 6 seconds.
+function _showDriveConnectedBanner() {
+  const existing = document.getElementById('drive-connected-bar');
+  if (existing) existing.remove();
+  const bar = document.createElement('div');
+  bar.id = 'drive-connected-bar';
+  bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:10001;background:#16a34a;color:white;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top, 0px));display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.2);transition:opacity 0.3s;';
+  bar.innerHTML = '☁️ Google Drive connected — tap Save to back up to Drive';
+  document.body.appendChild(bar);
+  setTimeout(() => {
+    bar.style.opacity = '0';
+    setTimeout(() => bar.remove(), 400);
+  }, 6000);
+}
+
 // Periodic check: every 60 seconds, check if Drive token has expired
 setInterval(() => {
   if (typeof DriveBackup === 'undefined' || !DriveBackup.isSignedIn) return;
@@ -21329,30 +21345,53 @@ const SaveProgress = (() => {
     // Make row tappable for sign-in if a retry callback was provided
     if (retryCallback && rowEl) {
       _retryCallbacks[backendId] = retryCallback;
+      // Detect if we're on iOS/standalone (redirect flow) — sign-in will
+      // reload the page, so we can't run the callback inline.
+      // Must match DriveBackup's _useRedirect logic (includes modern iPads
+      // that report as MacIntel with touch support).
+      const isRedirectFlow = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+                             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+                             (navigator.standalone === true) ||
+                             window.matchMedia('(display-mode: standalone)').matches;
       if (detailEl) {
-        detailEl.innerHTML = (detail || 'Not signed in') +
-          ' · <span style="color:#066aab;text-decoration:underline;cursor:pointer;">Tap to sign in</span>';
+        detailEl.innerHTML = (detail || 'Not signed in') + ' · <span style="color:#066aab;text-decoration:underline;cursor:pointer;">Tap to sign in</span>';
       }
       rowEl.style.cursor = 'pointer';
       rowEl.onclick = async () => {
         rowEl.onclick = null;
         rowEl.style.cursor = '';
-        if (detailEl) { detailEl.textContent = 'Signing in…'; detailEl.style.color = '#d97706'; }
-        if (statusEl) statusEl.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;font-size:16px;">⏳</span>';
-        try {
-          await DriveBackup.signIn();
-          if (DriveBackup.isSignedIn()) {
-            if (detailEl) { detailEl.textContent = 'Connected ✓ — saving…'; detailEl.style.color = '#16a34a'; }
-            const cb = _retryCallbacks[backendId];
-            delete _retryCallbacks[backendId];
-            if (cb) await cb();
-          } else {
-            if (detailEl) { detailEl.textContent = 'Sign-in cancelled'; detailEl.style.color = '#9ca3af'; }
-            if (statusEl) statusEl.textContent = '⊘';
+        if (isRedirectFlow) {
+          // Redirect flow: page will reload after Google auth.
+          // Tell the user what to expect.
+          if (detailEl) { detailEl.textContent = 'Redirecting to Google…'; detailEl.style.color = '#d97706'; }
+          if (statusEl) statusEl.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;font-size:16px;">⏳</span>';
+          try {
+            await DriveBackup.signIn();
+            // If we reach here on redirect flow, signIn returned null
+            // (page will unload momentarily)
+          } catch (e) {
+            if (detailEl) { detailEl.textContent = 'Sign-in failed'; detailEl.style.color = '#dc2626'; }
+            if (statusEl) statusEl.textContent = '⚠️';
           }
-        } catch (e) {
-          if (detailEl) { detailEl.textContent = 'Sign-in failed'; detailEl.style.color = '#dc2626'; }
-          if (statusEl) statusEl.textContent = '⚠️';
+        } else {
+          // Popup flow (desktop): sign in and immediately run backup
+          if (detailEl) { detailEl.textContent = 'Signing in…'; detailEl.style.color = '#d97706'; }
+          if (statusEl) statusEl.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;font-size:16px;">⏳</span>';
+          try {
+            await DriveBackup.signIn();
+            if (DriveBackup.isSignedIn()) {
+              if (detailEl) { detailEl.textContent = 'Connected ✓ — saving…'; detailEl.style.color = '#16a34a'; }
+              const cb = _retryCallbacks[backendId];
+              delete _retryCallbacks[backendId];
+              if (cb) await cb();
+            } else {
+              if (detailEl) { detailEl.textContent = 'Sign-in cancelled'; detailEl.style.color = '#9ca3af'; }
+              if (statusEl) statusEl.textContent = '⊘';
+            }
+          } catch (e) {
+            if (detailEl) { detailEl.textContent = 'Sign-in failed'; detailEl.style.color = '#dc2626'; }
+            if (statusEl) statusEl.textContent = '⚠️';
+          }
         }
       };
     }
@@ -21562,7 +21601,8 @@ const DriveBackup = (() => {
         sessionStorage.removeItem('_driveRedirectPending');
         console.log('[Drive] Redirect sign-in completed, token obtained');
         if (typeof _hideDriveExpiryWarning === 'function') _hideDriveExpiryWarning();
-        showToast('Google Drive connected ✓');
+        // v2260: show a clear banner so the user knows Drive is ready
+        _showDriveConnectedBanner();
         // Re-render home to show the updated Drive button state
         if (!currentSurveyId) renderHome();
       } else if (sessionStorage.getItem('_driveRedirectPending')) {
