@@ -12,6 +12,11 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2272 — 2026-04-16
+
+### UI — Align save status pill with bottom bar
+- Adjusted pill position to sit at the same vertical level as the Save button (inside the bottom bar area, right-aligned) instead of floating above it.
+
 ## v2271 — 2026-04-16
 
 ### UI — Move save status pill to bottom

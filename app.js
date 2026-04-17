@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2271';
+const APP_VERSION = 'v2272';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2133,8 +2133,8 @@ const SaveStatus = (() => {
     // v2251: position pill just below the header bar instead of overlapping it.
     // The header is ~56px tall plus safe-area-inset-top on notched iPhones.
     // v2255: position below header + survey-type banner (header ~52px + banner ~24px + safe-area)
-    // v2271: moved pill to bottom-right, just above the bottom bar
-    _pill.style.cssText = 'position:fixed;bottom:calc(56px + env(safe-area-inset-bottom, 0px));right:8px;z-index:1500;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.96);color:#0f172a;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.12);cursor:pointer;font-family:inherit;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);';
+    // v2271: pill sits in the bottom bar area, right-aligned, same level as Save
+    _pill.style.cssText = 'position:fixed;bottom:calc(10px + env(safe-area-inset-bottom, 0px));right:12px;z-index:1500;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.96);color:#0f172a;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.12);cursor:pointer;font-family:inherit;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);';
     _pill.innerHTML = '<span id="saveDot" style="width:8px;height:8px;border-radius:50%;background:#9ca3af;display:inline-block;"></span><span id="saveText">Idle</span>';
     _pill.title = 'Tap to save now · Hold for details';
     // v2253: Tap = save everywhere, long-press = detail panel
