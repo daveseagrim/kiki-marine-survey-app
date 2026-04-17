@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2269';
+const APP_VERSION = 'v2270';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -11578,7 +11578,7 @@ function renderInspection(survey) {
   const currentVesselType = survey.vesselType || '';
   html += `
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:8px 12px;">
-      <span style="font-size:13px;font-weight:600;color:#475569;">⛵ Vessel Type:</span>
+      <span style="font-size:13px;font-weight:600;color:#475569;line-height:1.2;">Vessel<br>Type:</span>
       <div style="display:flex;gap:6px;">
         <button onclick="setVesselTypeFromInspection('sail')"
                 style="padding:7px 18px;font-size:13px;font-weight:600;border:none;border-radius:20px;cursor:pointer;

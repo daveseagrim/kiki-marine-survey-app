@@ -12,6 +12,12 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2270 — 2026-04-16
+
+### UI — Vessel Type label cleanup
+- Removed sailboat emoji from "Vessel Type:" label.
+- Split "Vessel Type:" onto two lines to shift the Sail/Power buttons left and reduce crowding at the top of the inspection view.
+
 ## v2269 — 2026-04-16
 
 ### UI — Compact category headers, "N left" is the toggle
