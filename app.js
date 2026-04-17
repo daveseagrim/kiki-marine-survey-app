@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2275';
+const APP_VERSION = 'v2276';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -3814,7 +3814,8 @@ function showNotesSheet(itemLabel, categoryName) {
               `;
               lastPhase = phase;
             }
-            const s = sObj.text;
+            // v2276: pluralize rudder references in sentence picker display
+            const s = pluralizeRudder(sObj.text, survey.rudderCount);
             // v2184: inline input placeholders:
             //   [insert reading range]  → two number inputs (low–high)
             //   [insert count]          → one small number input
@@ -4307,6 +4308,9 @@ window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
       // Clean up doubled spaces from the optional space
       text = text.replace(/\s{2,}/g, ' ').replace(/\s+([.,;:])/g, '$1');
     }
+    // v2276: pluralize rudder references based on rudderCount
+    const _rc = (window._currentSurveyCache && window._currentSurveyCache.rudderCount) || 1;
+    text = pluralizeRudder(text, _rc);
     parts.push(text);
   });
   ta.value = parts.join(' ');

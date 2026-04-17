@@ -12,6 +12,17 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2276 — 2026-04-16
+
+### Fixed
+- **Build Observation sentence picker now pluralizes rudder text.** The "tick
+  sentences to compose" UI was rendering raw singular text even when 2 rudders
+  were selected. Added `pluralizeRudder()` to both the picker display path and
+  the `_kkRebuildFromSentencePicker` assembly path so composed text uses correct
+  plural/verb forms.
+
+---
+
 ## v2275 — 2026-04-16
 ### Added
 - **Rudder count selector** — new "Number of Rudders" dropdown on the vessel info
