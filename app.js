@@ -22006,6 +22006,7 @@ const FirebaseSync = (() => {
   let _periodicTimer = null;          // v2259: 5-minute polling interval
   let _lastSyncTimestamp = 0;         // v2259: epoch ms of last completed sync (throttle guard)
   let _periodicSyncRunning = false;   // v2259: prevent overlapping periodic syncs
+  let _visibilityHandler = null;      // v2259: named handler so we can remove on re-init
 
   // ── Status UI ──────────────────────────────────────────────────────
   function updateSyncStatusUI(status, detail) {
@@ -22111,8 +22112,12 @@ const FirebaseSync = (() => {
             _suppressLocalWrite = false;
             console.log(`[Sync] Updated local survey: ${remoteSurvey.vesselName || remoteSurvey.id}`);
 
-            // Pull any photos from Storage for this survey
-            await pullPhotosForSurvey(remoteSurvey);
+            // Pull photos from Storage — but NOT if device is under memory
+            // pressure (camera active, backup running). Photos will catch up
+            // on the next explicit Save or app restart.
+            if (!window._cameraActive && !window._backupActive) {
+              await pullPhotosForSurvey(remoteSurvey);
+            }
 
             // Refresh UI if we're on the home page or viewing this survey
             if (!currentSurveyId) {
@@ -22200,16 +22205,18 @@ const FirebaseSync = (() => {
         const local = await getPhotoById(meta.id);
         if (local && local.dataUrl) continue;  // Already have it
 
-        // Download from Storage
+        // Download from Storage — one at a time, release memory after each
         if (meta.storageRef) {
           try {
             const ref = window.fsStorage.ref(meta.storageRef);
             const url = await ref.getDownloadURL();
             const response = await fetch(url);
-            const blob = await response.blob();
-            const dataUrl = await blobToDataUrl(blob);
+            let blob = await response.blob();
+            let dataUrl = await blobToDataUrl(blob);
+            blob = null; // release blob before saving
             const photo = { ...meta, dataUrl };
             await savePhoto(photo);
+            dataUrl = null; // release base64 string
             console.log(`[Sync] Downloaded photo: ${meta.id}`);
           } catch (dlErr) {
             console.warn(`[Sync] Could not download photo ${meta.id}:`, dlErr);
@@ -22316,15 +22323,26 @@ const FirebaseSync = (() => {
 
   // ── v2259: Periodic Sync — lightweight two-way pull/push every 5 min ───
   // Also fires on visibilitychange (app foreground) with a 30 s throttle.
-  // Skips photo push on periodic sync to save bandwidth — photos are pushed
-  // on explicit Save or initial sync only.
+  //
+  // SAFETY CONSTRAINTS (crash prevention):
+  // - NO photo downloads during periodic sync — photos are memory-heavy and
+  //   would crash iPhone during active survey work. Photos only pull on
+  //   explicit Save or initial sync (when app is freshly opened).
+  // - NO photo pushes — survey metadata only. Saves bandwidth and battery.
+  // - Skips entirely if a save/backup is in progress (_backupActive).
+  // - Skips the survey currently being edited (currentSurveyId) to avoid
+  //   overwriting unsaved form data.
+  // - Pauses the real-time listener during sync to prevent race conditions.
   async function periodicSync() {
     if (!_syncEnabled || !window.fsDb) return;
     if (_periodicSyncRunning) return; // prevent overlap
+    if (window._backupActive) return; // don't compete with an active save
     // Throttle: don't sync if last sync was < 30 s ago
     if (Date.now() - _lastSyncTimestamp < 30000) return;
 
     _periodicSyncRunning = true;
+    // Pause real-time listener to avoid race conditions during sync
+    _suppressLocalWrite = true;
     updateSyncStatusUI('syncing', 'Syncing…');
     let pulled = 0, pushed = 0;
     try {
@@ -22335,17 +22353,22 @@ const FirebaseSync = (() => {
 
       // Compare each local survey with remote
       for (const local of localSurveys) {
+        // Skip the survey the user is actively editing — don't touch it
+        if (typeof currentSurveyId !== 'undefined' && local.id === currentSurveyId) {
+          delete remoteSurveyMap[local.id];
+          continue;
+        }
+
         const remote = remoteSurveyMap[local.id];
         const localTime = new Date(local.lastModified || local.createdAt || 0).getTime();
         const remoteTime = remote ? new Date(remote.lastModified || remote.createdAt || 0).getTime() : 0;
 
         if (!remote || localTime > remoteTime) {
-          // Local is newer — push (survey data only, no photos on periodic sync)
+          // Local is newer — push (survey data only, no photos)
           await pushSurvey(local);
           pushed++;
         } else if (remoteTime > localTime) {
-          // Remote is newer — pull it down
-          // Apply the same richness guard as startListening
+          // Remote is newer — pull it down (metadata only, NO photos)
           const lScore = _scoreSurveyContent(local);
           const rScore = _scoreSurveyContent(remote);
           const localRicher =
@@ -22353,28 +22376,21 @@ const FirebaseSync = (() => {
             lScore.photoCount > rScore.photoCount ||
             lScore.ratedItems > rScore.ratedItems;
           if (localRicher) {
-            // Local is richer despite older timestamp — push local up
             await pushSurvey(local);
             pushed++;
           } else {
             remote.id = local.id;
-            _suppressLocalWrite = true;
-            await saveSurvey(remote);
-            _suppressLocalWrite = false;
-            await pullPhotosForSurvey(remote);
+            await saveSurvey(remote); // _suppressLocalWrite is true → no Firebase re-push
             pulled++;
           }
         }
         delete remoteSurveyMap[local.id];
       }
 
-      // Pull any remote-only surveys (created on another device)
+      // Pull any remote-only surveys (created on another device) — metadata only
       for (const [id, remote] of Object.entries(remoteSurveyMap)) {
         remote.id = id;
-        _suppressLocalWrite = true;
-        await saveSurvey(remote);
-        _suppressLocalWrite = false;
-        await pullPhotosForSurvey(remote);
+        await saveSurvey(remote); // _suppressLocalWrite is true → no Firebase re-push
         pulled++;
       }
 
@@ -22393,6 +22409,7 @@ const FirebaseSync = (() => {
       console.error('[Sync] Periodic sync error:', err);
       updateSyncStatusUI('error', err.message);
     } finally {
+      _suppressLocalWrite = false; // Re-enable real-time listener
       _periodicSyncRunning = false;
     }
   }
@@ -22435,10 +22452,14 @@ const FirebaseSync = (() => {
     }
 
     for (const pid of photoIds) {
-      const photo = await getPhotoById(pid);
+      // v2259: check if already on Firebase before loading into memory
+      const exists = await photoExistsInFirebase(pid);
+      if (exists) continue;
+      let photo = await getPhotoById(pid);
       if (photo && photo.dataUrl) {
         await pushPhoto(photo);
       }
+      photo = null; // v2259: release memory immediately
     }
   }
 
@@ -22459,11 +22480,16 @@ const FirebaseSync = (() => {
     _periodicTimer = setInterval(() => { periodicSync(); }, 5 * 60 * 1000);
 
     // v2259: also sync when app comes back to foreground (iOS PWA resume)
-    document.addEventListener('visibilitychange', () => {
+    // Use a named handler so we can remove it if init() is called again
+    if (_visibilityHandler) {
+      document.removeEventListener('visibilitychange', _visibilityHandler);
+    }
+    _visibilityHandler = () => {
       if (document.visibilityState === 'visible' && _syncEnabled) {
         periodicSync(); // throttle guard inside prevents excessive calls
       }
-    });
+    };
+    document.addEventListener('visibilitychange', _visibilityHandler);
 
     console.log('[Sync] Firebase two-way sync enabled (5-min polling + foreground trigger)');
   }
@@ -22535,7 +22561,10 @@ saveSurvey = async function(survey) {
     FirebaseSync.pushSurvey(survey).catch(err => console.error('[Sync] Push failed:', err));
   }
   // v2253: Queue Drive auto-sync (throttled, non-blocking)
-  _scheduleDriveAutoSync(survey);
+  // v2259: Skip Drive auto-sync when suppressed (e.g. periodicSync pulling from cloud)
+  if (!FirebaseSync.isSuppressed()) {
+    _scheduleDriveAutoSync(survey);
+  }
   return result;
 };
 

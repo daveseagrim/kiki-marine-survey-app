@@ -24,9 +24,17 @@ lets you roll back to a specific version with confidence.
 
 ### Firebase save crash fix & resume support
 - **Skip already-synced surveys**: `backupAllEverywhere()` now fetches remote timestamps in one batch and skips surveys whose `lastModified` already matches. If the app quit mid-save, restarting and tapping Save again picks up where it left off instead of re-uploading everything.
-- **Skip already-uploaded photos**: Before loading a photo from IndexedDB, checks Firestore metadata to see if it's already on Firebase Storage. Skips if so — avoids loading large base64 strings into memory unnecessarily.
-- **Memory pressure fix**: Photo references are nulled out immediately after each upload (`photo = null`) so the garbage collector can reclaim memory between uploads. Prevents iPhone PWA crashes during large saves.
-- Same fixes applied to `saveSurveyWithProgress()` (single-survey save).
+- **Skip already-uploaded photos**: Before loading a photo from IndexedDB, checks Firestore metadata to see if it's already on Firebase Storage. Skips if so — avoids loading large base64 strings into memory unnecessarily. Applied to `pushAllPhotosForSurvey`, `backupAllEverywhere`, and `saveSurveyWithProgress`.
+- **Memory pressure fix**: Photo references are nulled out immediately after each upload/download (`photo = null`, `blob = null`, `dataUrl = null`) so the garbage collector can reclaim memory between operations. Applied across all photo push and pull functions.
+
+### Crash prevention hardening
+- **No photo downloads during periodic sync**: `periodicSync()` only syncs survey metadata (JSON). Photos are only downloaded during explicit Save or initial sync (app launch). Prevents memory pressure from background photo downloads while mid-survey.
+- **No photo downloads during camera use**: Real-time listener skips `pullPhotosForSurvey` when `_cameraActive` or `_backupActive` is true.
+- **Skip active survey during periodic sync**: The survey currently being edited (`currentSurveyId`) is excluded from periodic sync to prevent overwriting unsaved form data.
+- **Backup-active guard**: Periodic sync skips entirely if a save/backup operation is running.
+- **Race condition prevention**: Real-time Firestore listener is paused (`_suppressLocalWrite`) during periodic sync to prevent concurrent writes.
+- **Drive auto-sync guard**: Suppressed-mode saves (from periodic sync pulls) no longer trigger Drive auto-sync.
+- **Listener stacking fix**: `visibilitychange` handler uses a named reference, removed before re-adding on `init()` re-entry.
 
 ## v2258 — 2026-04-16
 
