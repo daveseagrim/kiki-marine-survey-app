@@ -12,6 +12,36 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2300 — 2026-04-16
+
+### Changed
+- **Deck/coachroof spider cracks snippet — removed age redundancy.** When
+  composed after "gelcoat and non-skid surfaces were in very good order...
+  consistent with the age and care of the vessel", the spider cracks sentence
+  repeated an age reference. Converted the trailing clause to a
+  `{specify:}` token with three options: "typical of a vessel of this age"
+  (when used alone), "consistent with normal weathering and use" (when age
+  is already mentioned), or "these were cosmetic and not structural in
+  nature" (for emphasis on structural soundness).
+
+---
+
+## v2299 — 2026-04-16
+
+### Changed
+- **Swim platform conductivity — added "fine for age" snippets.** Added 6 new
+  C-rating snippets matching the hull conductivity pattern: readings ranged
+  between `[insert reading range]`, consistent with vessels of similar age,
+  readings not abnormal for the vessel's age, within normal range for
+  fibreglass of this age, and a monitoring action item.
+- **Propulsion narrative — auto-lowercase user-entered locations.** Engine bay
+  location, engine access, gauges location, and controls location values now
+  have their first character lowercased before insertion so the narrative reads
+  naturally mid-sentence (e.g. "located under the cockpit" instead of
+  "located Under the cockpit"). Dave can capitalize freely in the input fields.
+
+---
+
 ## v2298 — 2026-04-16
 
 ### Changed

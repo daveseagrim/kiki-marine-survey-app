@@ -2657,6 +2657,48 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
+      "text": "Conductivity readings on the swim platform ranged between [insert reading range] and were consistent with proper condition.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The swim platform returned readings consistent with a sound laminate, with no elevated conductivity detected.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "means",
+      "severity": 2,
+      "text": "The swim platform returned elevated readings of [insert reading range], consistent with vessels of similar age and construction.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "These readings were not considered abnormal for the vessel's age.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "The readings fell within the normal range for a fibreglass swim platform of this age.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "Monitor the swim platform readings between seasons as a matter of routine.",
+      "section": "Swim platform and ladder - condition and conductivity readings"
+    },
+    {
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
       "text": "No deficiencies were noted on the swim platform or ladder.",
       "section": "Swim platform and ladder - condition and conductivity readings"
     },
@@ -25405,7 +25447,7 @@
     {
       "section": "Deck and coachroof/pilothouse condition",
       "rating": "C",
-      "text": "Minor spider and stress cracks were noted in the deck and coachroof, typical of a vessel of this age.",
+      "text": "Minor spider and stress cracks were noted in the deck and coachroof{specify:, typical of a vessel of this age|, consistent with normal weathering and use|; these were cosmetic and not structural in nature}.",
       "phase": "observed",
       "severity": 2
     },

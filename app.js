@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2298';
+const APP_VERSION = 'v2300';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -10985,8 +10985,12 @@ function buildPropulsionNarrative(survey) {
     : (makeModel ? `${articleAn ? 'An' : 'A'} ${enginePhrase}${eHP ? ` rated at ${eHP}` : ''}` : `The vessel's engine`);
 
   // ── Location / access ─────────────────────────────────────────────
-  const loc = (survey.engineLocation || '').trim();
-  const acc = (survey.engineAccess || '').trim();
+  // v2299: lowercase the first character of user-entered location/access
+  // values so they read naturally mid-sentence (e.g. "located under the
+  // cockpit" not "located Under the cockpit").
+  const _lcFirst = (s) => s ? s.charAt(0).toLowerCase() + s.slice(1) : s;
+  const loc = _lcFirst((survey.engineLocation || '').trim());
+  const acc = _lcFirst((survey.engineAccess || '').trim());
   const wasOrWere = hasTwin ? 'were' : 'was';
   let placementSentence = '';
   if (loc && acc) {
@@ -11034,8 +11038,8 @@ function buildPropulsionNarrative(survey) {
   }
 
   // ── Gauges / controls ─────────────────────────────────────────────
-  const gaugeLoc = (survey.engineGaugesLocation || '').trim();
-  const ctrlLoc = (survey.engineControlsLocation || '').trim();
+  const gaugeLoc = _lcFirst((survey.engineGaugesLocation || '').trim());
+  const ctrlLoc = _lcFirst((survey.engineControlsLocation || '').trim());
   // Pull test status from existing rated items where possible
   const getRatingStatus = (labelParts) => {
     if (!survey.items) return '';
