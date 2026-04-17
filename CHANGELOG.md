@@ -12,6 +12,11 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2263 — 2026-04-16
+
+### Camera diagnostic v2 — persistent stack trace
+- Previous toast diagnostics collided (both used the same DOM element). Now the `closeBatchCameraOverlay` call stack is saved to sessionStorage and displayed as a persistent red banner after the camera closes. This will show exactly what function is calling closeBatchCameraOverlay when the shutter is tapped.
+
 ## v2262 — 2026-04-16
 
 ### Camera diagnostic build

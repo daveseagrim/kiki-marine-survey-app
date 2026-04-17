@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2262';
+const APP_VERSION = 'v2263';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -8916,19 +8916,8 @@ function editSurveyDetails(surveyId) {
 
     const ps = 'border:none;border-radius:22px;padding:8px 12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;';
 
-    // 📝 Desc button — regenerate and update textarea in-place (no page re-render)
-    const descBtn2 = document.createElement('button');
-    descBtn2.style.cssText = ps + 'background:#ffcc00;color:#066aab;font-weight:700;';
-    descBtn2.innerHTML = '📝 Desc';
-    descBtn2.onclick = async () => {
-      await saveEditFormSilently();
-      await regenerateDescriptionFromInspection();
-      // Update the textarea in-place instead of re-rendering
-      const updated = await getSurvey(survey.id);
-      const descEl = document.getElementById('vesselDescription');
-      if (updated && descEl) descEl.value = updated.vesselDescription || '';
-    };
-    editBar.appendChild(descBtn2);
+    // v2262: Desc button removed — description auto-generates on save,
+    // so a manual trigger is redundant (and was error-prone).
 
     // v2257: 💾 Unified save button with per-backend progress
     const saveBtn2 = document.createElement('button');
@@ -23111,9 +23100,10 @@ function discardStagedPhotos() {
 }
 
 function closeBatchCameraOverlay() {
-  // v2262 diagnostic: log what called this
-  const _stack = new Error().stack || '';
-  showToast('🔍 closeBatchCamera called from: ' + _stack.split('\n').slice(1, 4).join(' | ').substring(0, 250), 12000);
+  // v2263 diagnostic: persist the call stack so we can see who closed the camera
+  const _stack = new Error().stack || 'no stack';
+  const _diagText = 'closeBatchCamera called at ' + new Date().toISOString() + '\n' + _stack;
+  try { sessionStorage.setItem('_cameraDiag', _diagText); } catch(e){}
   const bc = window._batchCam;
   try {
     if (bc.stream) {
@@ -23129,6 +23119,22 @@ function closeBatchCameraOverlay() {
     window._swUpdatePending = false;
     persistViewState();
     window.location.reload();
+  }
+  // v2263 diagnostic: show persistent banner with the call stack
+  const _diagData = sessionStorage.getItem('_cameraDiag');
+  if (_diagData) {
+    sessionStorage.removeItem('_cameraDiag');
+    setTimeout(() => {
+      const banner = document.createElement('div');
+      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#dc2626;color:white;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top,0px));font-size:11px;font-family:monospace;white-space:pre-wrap;word-break:break-all;max-height:50vh;overflow:auto;';
+      banner.textContent = _diagData;
+      const closeBtn = document.createElement('button');
+      closeBtn.textContent = '✕ Close';
+      closeBtn.style.cssText = 'display:block;margin-top:8px;background:white;color:#dc2626;border:none;border-radius:4px;padding:6px 16px;font-weight:700;cursor:pointer;';
+      closeBtn.onclick = () => banner.remove();
+      banner.appendChild(closeBtn);
+      document.body.appendChild(banner);
+    }, 300);
   }
 }
 
