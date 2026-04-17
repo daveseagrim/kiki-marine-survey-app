@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2264';
+const APP_VERSION = 'v2265';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -11633,8 +11633,8 @@ function renderInspection(survey) {
     // tap-to-jump links. When the category is Done or fully Skipped, render
     // a plain span. stopPropagation prevents the accordion from toggling.
     const progressHtml = (allExcluded || isComplete)
-      ? `<span class="category-progress" style="color:${progressColor};font-weight:700;">${progressText}</span>`
-      : `<button type="button" class="category-progress remaining-btn" onclick="event.stopPropagation(); toggleRemainingList(this);" title="Show items left to rate" style="color:${progressColor};font-weight:700;background:transparent;border:none;cursor:pointer;padding:0;margin-left:12px;font:inherit;font-size:12px;text-decoration:underline dotted;">${progressText} ▾</button>`;
+      ? `<span class="category-progress" style="color:${progressColor};font-weight:700;margin-left:auto;flex-shrink:0;font-size:inherit;">${progressText}</span>`
+      : `<button type="button" class="category-progress remaining-btn" onclick="event.stopPropagation(); toggleRemainingList(this);" title="Show items left to rate" style="color:${progressColor};font-weight:700;background:transparent;border:none;cursor:pointer;padding:0;margin-left:auto;flex-shrink:0;font:inherit;text-decoration:underline dotted;">${progressText} ▾</button>`;
 
     html += `
       <div class="category-accordion" data-category-name="${categoryName.replace(/"/g, '&quot;')}">
@@ -17368,8 +17368,8 @@ function updateCategoryHeader(survey, categoryName) {
   const remaining = categoryItems.length - completionCount;
   const progressText = allExcluded ? 'Skipped' : (isComplete ? 'Done' : `${remaining} left`);
   const progressHtml = (allExcluded || isComplete)
-    ? `<span class="category-progress" style="color:${progressColor};font-weight:700;">${progressText}</span>`
-    : `<button type="button" class="category-progress remaining-btn" onclick="event.stopPropagation(); toggleRemainingList(this);" title="Show items left to rate" style="color:${progressColor};font-weight:700;background:transparent;border:none;cursor:pointer;padding:0;margin-left:12px;font:inherit;font-size:12px;text-decoration:underline dotted;">${progressText} ▾</button>`;
+    ? `<span class="category-progress" style="color:${progressColor};font-weight:700;margin-left:auto;flex-shrink:0;font-size:inherit;">${progressText}</span>`
+    : `<button type="button" class="category-progress remaining-btn" onclick="event.stopPropagation(); toggleRemainingList(this);" title="Show items left to rate" style="color:${progressColor};font-weight:700;background:transparent;border:none;cursor:pointer;padding:0;margin-left:auto;flex-shrink:0;font:inherit;text-decoration:underline dotted;">${progressText} ▾</button>`;
   const progressEl = header.querySelector('.category-progress');
   if (progressEl) {
     progressEl.outerHTML = progressHtml;
@@ -18380,6 +18380,12 @@ function toggleAccordion(button) {
   const content = button.parentElement.querySelector('.accordion-content');
   if (!content) return;
   const isOpen = content.style.display !== 'none';
+
+  // v2265: close any open "items left" popovers and reset their carets
+  document.querySelectorAll('.remaining-list-popover').forEach(p => p.remove());
+  document.querySelectorAll('.remaining-btn').forEach(b => {
+    b.innerHTML = b.innerHTML.replace(/▴/, '▾');
+  });
 
   // Close all other open accordions first
   document.querySelectorAll('.accordion-content').forEach(el => {
