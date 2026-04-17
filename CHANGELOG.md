@@ -12,6 +12,13 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2261 — 2026-04-16
+
+### Camera fix — defer SW reload while camera is open
+- The service worker `controllerchange` handler was reloading the page while the batch camera overlay was active, destroying the camera and returning the user to the inspection view with no photo captured.
+- Now defers the reload until `closeBatchCameraOverlay()` runs (after Done or Close), then reloads to apply the update.
+- Added diagnostic logging to `snapStagedPhoto` (try-catch + console logs) to trace any remaining camera issues.
+
 ## v2260 — 2026-04-16
 
 ### Drive "Tap to sign in" from save dialog

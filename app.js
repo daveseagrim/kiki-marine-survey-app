@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2260';
+const APP_VERSION = 'v2261';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -20650,10 +20650,20 @@ if ('serviceWorker' in navigator) {
       console.log('ServiceWorker registration failed: ', err);
     });
 
-  // When the new SW takes over, reload the page automatically
+  // When the new SW takes over, reload the page automatically.
+  // v2261: defer the reload if the camera is open — reloading mid-capture
+  // destroys the overlay and the user loses staged photos.
   let refreshing = false;
+  window._swUpdatePending = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (refreshing) return;
+    if (window._cameraActive) {
+      // Camera is open — don't reload now. Flag it so we reload
+      // when the camera closes (closeBatchCameraOverlay).
+      window._swUpdatePending = true;
+      console.log('[SW] Update deferred — camera active');
+      return;
+    }
     refreshing = true;
     persistViewState();
     window.location.reload();
@@ -22877,9 +22887,12 @@ function _batchCameraFallback(itemLabel, opts) {
 }
 
 function snapStagedPhoto() {
+  // v2261 diagnostic: confirm this function actually runs when shutter is tapped
+  console.log('[Camera] snapStagedPhoto called');
+  try {
   const bc = window._batchCam;
   const video = document.getElementById('batchCamVideo');
-  if (!video || !video.videoWidth) return;
+  if (!video || !video.videoWidth) { console.warn('[Camera] video not ready:', video ? video.videoWidth : 'no element'); return; }
 
   // v2248: cap the canvas to 2048 px on the long edge. When getUserMedia
   // constraints can't match the requested resolution (e.g. portrait mode on
@@ -22912,6 +22925,11 @@ function snapStagedPhoto() {
     setTimeout(() => { sh.style.background = '#fff'; }, 110);
   }
   refreshBatchCamStrip();
+  console.log('[Camera] snapStagedPhoto completed, staged count:', bc.staged.length);
+  } catch (err) {
+    console.error('[Camera] snapStagedPhoto error:', err);
+    showToast('Camera error: ' + (err.message || err));
+  }
 }
 
 function refreshBatchCamStrip() {
@@ -23074,6 +23092,12 @@ function closeBatchCameraOverlay() {
   const overlay = document.getElementById('batchCamOverlay');
   if (overlay) overlay.remove();
   setCameraActive(false);
+  // v2261: if a SW update was deferred because the camera was open, reload now
+  if (window._swUpdatePending) {
+    window._swUpdatePending = false;
+    persistViewState();
+    window.location.reload();
+  }
 }
 
 // Expose for inline onclick handlers
