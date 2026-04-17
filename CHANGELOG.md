@@ -12,6 +12,34 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2302 — 2026-04-16
+
+### Changed
+- **Spreaders/boots — added rubber boot snippets alongside integrated fittings.**
+  C-rating: converted "tipped with integrated spreader end fittings" to
+  `{specify:}` token offering integrated fittings or rubber boots. Added two
+  new C-observed snippets for boot condition (intact/pliable, properly seated
+  for chafe protection). Applied same `{specify:}` pattern to "Not tested"
+  rating. B-rating: converted deterioration snippet to `{specify:}` with three
+  options (cracked, UV-hardened, missing). Fixed phase assignments: water
+  ingress moved to means, replacement moved to action. Added sail chafe
+  and rigging corrosion language.
+
+---
+
+## v2301 — 2026-04-16
+
+### Changed
+- **Chainplates — deck-mounted escutcheon option.** Added C-rating snippet for
+  vessels where shrouds feed through deck-mounted escutcheons into reinforced
+  hull moulding (no external chainplates). Added companion snippet confirming
+  escutcheons seated properly with no movement, cracking, or sealant failure.
+  Replaced generic "These presented no deficiencies" with specific "No
+  deficiencies were noted at the chainplate attachment points." Kept existing
+  bolt-through escutcheon option as a lower-severity alternative.
+
+---
+
 ## v2300 — 2026-04-16
 
 ### Changed

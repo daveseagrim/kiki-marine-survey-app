@@ -4702,16 +4702,30 @@
     {
       "section": "Chainplates (exterior)pins and bolts",
       "rating": "C",
-      "text": "Rather, there were chainplate escutcheons which cover and protect the deck penetrations where the shroud tangs bolt through the hull.",
+      "text": "The shrouds were fed through deck-mounted escutcheons that tied into reinforced sections of the hull moulding below.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Chainplates (exterior)pins and bolts",
       "rating": "C",
-      "text": "These presented no deficiencies.",
+      "text": "The escutcheons were seated properly with no signs of movement, cracking, or sealant failure at the deck penetrations.",
       "phase": "observed",
       "severity": 3
+    },
+    {
+      "section": "Chainplates (exterior)pins and bolts",
+      "rating": "C",
+      "text": "Rather, there were chainplate escutcheons which cover and protect the deck penetrations where the shroud tangs bolt through the hull.",
+      "phase": "observed",
+      "severity": 4
+    },
+    {
+      "section": "Chainplates (exterior)pins and bolts",
+      "rating": "C",
+      "text": "No deficiencies were noted at the chainplate attachment points.",
+      "phase": "observed",
+      "severity": 5
     },
     {
       "section": "Chainplates (exterior)pins and bolts",
@@ -4758,30 +4772,44 @@
     {
       "section": "Spreaders/boots",
       "rating": "C",
-      "text": "The spreaders were tipped with integrated spreader end fittings.",
+      "text": "The spreaders were tipped with {specify:integrated spreader end fittings|rubber spreader boots}.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Spreaders/boots",
+      "rating": "C",
+      "text": "Both the spreaders and the {specify:spreader end fittings|spreader boots} appeared in proper condition.",
+      "phase": "observed",
+      "severity": 2
+    },
+    {
+      "section": "Spreaders/boots",
+      "rating": "C",
+      "text": "The spreader boots were intact and pliable with no cracking or UV degradation.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Spreaders/boots",
       "rating": "C",
-      "text": "Both the spreaders and the spreader end fittings appeared in proper condition.",
+      "text": "The boots were properly seated over the shroud-to-spreader connection, providing adequate chafe protection.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Spreaders/boots",
       "rating": "Not tested - too high to see",
-      "text": "The spreaders were tipped with integrated spreader end fittings.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Spreaders/boots",
-      "rating": "Not tested - too high to see",
-      "text": "As seen from the deck, both the spreaders and the spreader end fittings appeared serviceable.",
+      "text": "The spreaders were tipped with {specify:integrated spreader end fittings|rubber spreader boots}.",
       "phase": "observed",
       "severity": 1
+    },
+    {
+      "section": "Spreaders/boots",
+      "rating": "Not tested - too high to see",
+      "text": "As seen from the deck, both the spreaders and the {specify:spreader end fittings|spreader boots} appeared serviceable.",
+      "phase": "observed",
+      "severity": 2
     },
     {
       "section": "Spreaders/boots",
@@ -4807,22 +4835,22 @@
     {
       "section": "Spreaders/boots",
       "rating": "B",
-      "text": "The spreader boots are deteriorating, cracked, or worn.",
+      "text": "The spreader boots were {specify:deteriorating and cracked|hardened and showing UV degradation|missing from one or more spreader tips}.",
       "phase": "observed",
-      "severity": 4
+      "severity": 2
     },
     {
       "section": "Spreaders/boots",
       "rating": "B",
-      "text": "Water ingress is possible.",
-      "phase": "observed",
+      "text": "Water ingress at the spreader tips is possible, which may lead to moisture migration down the mast and standing rigging corrosion.",
+      "phase": "means",
       "severity": 3
     },
     {
       "section": "Spreaders/boots",
       "rating": "B",
-      "text": "The boots should be resealed or replaced to prevent moisture migration down the mast.",
-      "phase": "means",
+      "text": "The boots should be replaced to prevent moisture migration and chafe damage to the sails.",
+      "phase": "action",
       "severity": 3
     },
     {
