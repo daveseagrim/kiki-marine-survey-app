@@ -7719,15 +7719,79 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Hull Colour</label>
-        <input type="text" id="hullColour" placeholder="e.g., White">
+        <select id="hullColour" onchange="handleColourSelect(this)">
+          <option value="">Select</option>
+          <option value="White">White</option>
+          <option value="Off-white">Off-white</option>
+          <option value="Cream">Cream</option>
+          <option value="Light grey">Light grey</option>
+          <option value="Dark grey">Dark grey</option>
+          <option value="Black">Black</option>
+          <option value="Navy blue">Navy blue</option>
+          <option value="Dark blue">Dark blue</option>
+          <option value="Light blue">Light blue</option>
+          <option value="Blue">Blue</option>
+          <option value="Red">Red</option>
+          <option value="Burgundy">Burgundy</option>
+          <option value="Green">Green</option>
+          <option value="Dark green">Dark green</option>
+          <option value="Yellow">Yellow</option>
+          <option value="Beige">Beige</option>
+          <option value="Tan">Tan</option>
+          <option value="Brown">Brown</option>
+          <option value="Gold">Gold</option>
+          <option value="__other__">Other…</option>
+        </select>
+        <input type="text" id="hullColour_other" class="colour-other-input" placeholder="Enter colour…" style="display:none;margin-top:6px;" oninput="syncColourOther(this,'hullColour')">
       </div>
       <div class="form-group">
         <label class="form-label">Boot Stripe Colour</label>
-        <input type="text" id="bootStripeColour" placeholder="e.g., Blue">
+        <select id="bootStripeColour" onchange="handleColourSelect(this)">
+          <option value="">Select / None</option>
+          <option value="None">None</option>
+          <option value="White">White</option>
+          <option value="Off-white">Off-white</option>
+          <option value="Light grey">Light grey</option>
+          <option value="Dark grey">Dark grey</option>
+          <option value="Black">Black</option>
+          <option value="Navy blue">Navy blue</option>
+          <option value="Dark blue">Dark blue</option>
+          <option value="Light blue">Light blue</option>
+          <option value="Blue">Blue</option>
+          <option value="Red">Red</option>
+          <option value="Burgundy">Burgundy</option>
+          <option value="Green">Green</option>
+          <option value="Dark green">Dark green</option>
+          <option value="Yellow">Yellow</option>
+          <option value="Gold">Gold</option>
+          <option value="Beige">Beige</option>
+          <option value="Tan">Tan</option>
+          <option value="Brown">Brown</option>
+          <option value="__other__">Other…</option>
+        </select>
+        <input type="text" id="bootStripeColour_other" class="colour-other-input" placeholder="Enter colour…" style="display:none;margin-top:6px;" oninput="syncColourOther(this,'bootStripeColour')">
       </div>
       <div class="form-group">
         <label class="form-label">Deck Colour</label>
-        <input type="text" id="deckColour" placeholder="e.g., White">
+        <select id="deckColour" onchange="handleColourSelect(this)">
+          <option value="">Select</option>
+          <option value="White">White</option>
+          <option value="Off-white">Off-white</option>
+          <option value="Cream">Cream</option>
+          <option value="Light grey">Light grey</option>
+          <option value="Dark grey">Dark grey</option>
+          <option value="Black">Black</option>
+          <option value="Beige">Beige</option>
+          <option value="Tan">Tan</option>
+          <option value="Teak">Teak</option>
+          <option value="Teak and white">Teak and white</option>
+          <option value="Blue">Blue</option>
+          <option value="Light blue">Light blue</option>
+          <option value="Navy blue">Navy blue</option>
+          <option value="Green">Green</option>
+          <option value="__other__">Other…</option>
+        </select>
+        <input type="text" id="deckColour_other" class="colour-other-input" placeholder="Enter colour…" style="display:none;margin-top:6px;" oninput="syncColourOther(this,'deckColour')">
       </div>
 
       <div class="form-group">
@@ -8001,6 +8065,7 @@ function renderNewSurveyForm() {
             </div>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="addOwnerAttendee()">+ Add Owner</button>
             <button class="btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="addAttendeeField()">+ Add Person</button>
           </div>
         </div>
@@ -8889,6 +8954,11 @@ function editSurveyDetails(surveyId) {
         }
       }
 
+      // v2278: Restore colour selects (handles custom "Other" values)
+      restoreColourSelect('hullColour', survey.hullColour);
+      restoreColourSelect('bootStripeColour', survey.bootStripeColour);
+      restoreColourSelect('deckColour', survey.deckColour);
+
       // Trigger boat style options update after setting vessel type
       if (survey.vesselType) {
         updateBoatStyleOptions();
@@ -9088,9 +9158,9 @@ function saveSurveyDetails(surveyId) {
       maxDraft: document.getElementById('maxDraft')?.value || '',
       totalSailArea: document.getElementById('totalSailArea')?.value || '',
       construction: document.getElementById('construction')?.value || '',
-      hullColour: document.getElementById('hullColour')?.value || '',
-      bootStripeColour: document.getElementById('bootStripeColour')?.value || '',
-      deckColour: document.getElementById('deckColour')?.value || '',
+      hullColour: getColourValue('hullColour'),
+      bootStripeColour: getColourValue('bootStripeColour'),
+      deckColour: getColourValue('deckColour'),
       keelType: document.getElementById('keelType')?.value || '',
       numberCabins: document.getElementById('numberCabins')?.value || '',
       rudderCount: parseInt(document.getElementById('rudderCount')?.value, 10) || 1,
@@ -9978,6 +10048,50 @@ function suggestValuation() {
   card.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
+// v2278: Colour dropdown helpers — "Other…" reveals a text input
+function handleColourSelect(sel) {
+  const otherInput = document.getElementById(sel.id + '_other');
+  if (!otherInput) return;
+  if (sel.value === '__other__') {
+    otherInput.style.display = '';
+    otherInput.focus();
+  } else {
+    otherInput.style.display = 'none';
+    otherInput.value = '';
+  }
+}
+// Sync text typed in the "Other" input back so the form save reads the custom value
+function syncColourOther(input, selectId) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  // Store custom value in a data attribute; the save logic reads it
+  sel.dataset.customValue = input.value;
+}
+// Override .value getter for colour selects so save functions pick up custom text
+function getColourValue(id) {
+  const sel = document.getElementById(id);
+  if (!sel) return '';
+  if (sel.value === '__other__') return sel.dataset.customValue || '';
+  return sel.value;
+}
+// Restore a colour select from a saved value — adds custom option if needed
+function restoreColourSelect(id, value) {
+  if (!value) return;
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  // Try setting directly (works if value matches a built-in option)
+  sel.value = value;
+  if (sel.value === value) return; // matched
+  // Value is custom — select "Other" and show the text input
+  sel.value = '__other__';
+  sel.dataset.customValue = value;
+  const otherInput = document.getElementById(id + '_other');
+  if (otherInput) {
+    otherInput.value = value;
+    otherInput.style.display = '';
+  }
+}
+
 // Update boat style dropdown options based on vessel type
 function updateBoatStyleOptions() {
   const vesselType = document.getElementById('vesselType')?.value || '';
@@ -10089,9 +10203,10 @@ async function generateVesselDescription() {
   const boatStyle = document.getElementById('boatStyle')?.value || '';
   const hullType = document.getElementById('hullType')?.value || '';
   const construction = document.getElementById('construction')?.value || '';
-  const hullColour = document.getElementById('hullColour')?.value || '';
-  const bootStripeColour = document.getElementById('bootStripeColour')?.value || '';
-  const deckColour = document.getElementById('deckColour')?.value || '';
+  const hullColour = getColourValue('hullColour');
+  const _bsc = getColourValue('bootStripeColour');
+  const bootStripeColour = (_bsc.toLowerCase() === 'none') ? '' : _bsc;
+  const deckColour = getColourValue('deckColour');
   const loa = document.getElementById('loa')?.value || '';
   const beam = document.getElementById('beam')?.value || '';
   const draft = document.getElementById('maxDraft')?.value || '';
@@ -10338,7 +10453,8 @@ async function regenerateDescriptionFromInspection() {
   const hullType = survey.hullType || '';
   const construction = survey.construction || '';
   const hullColour = survey.hullColour || '';
-  const bootStripeColour = survey.bootStripeColour || '';
+  const _bscX = survey.bootStripeColour || '';
+  const bootStripeColour = (_bscX.toLowerCase() === 'none') ? '' : _bscX;
   const deckColour = survey.deckColour || '';
   const loa = survey.loa || '';
   const beam = survey.beam || '';
@@ -10543,7 +10659,8 @@ function buildDescriptionFromSurvey(survey) {
   const hullType = survey.hullType || '';
   const construction = survey.construction || '';
   const hullColour = survey.hullColour || '';
-  const bootStripeColour = survey.bootStripeColour || '';
+  const _bscX = survey.bootStripeColour || '';
+  const bootStripeColour = (_bscX.toLowerCase() === 'none') ? '' : _bscX;
   const deckColour = survey.deckColour || '';
   const loa = survey.loa || '';
   const beam = survey.beam || '';
@@ -11079,6 +11196,31 @@ async function confirmAbandonNewSurvey() {
 
 // ─── Persons in Attendance Management ──────────────────────────────────────
 
+// v2278: Quick-add the boat owner from the Client Name field
+function addOwnerAttendee() {
+  const clientName = document.getElementById('clientName')?.value?.trim() || '';
+  if (!clientName) {
+    alert('Please enter the Client Name first so it can be added as the owner.');
+    return;
+  }
+  // Check if owner is already listed
+  const field = document.getElementById('personsInAttendance');
+  if (field && field.value.toLowerCase().includes(clientName.toLowerCase())) {
+    alert(`${clientName} is already listed in Persons in Attendance.`);
+    return;
+  }
+  // Add a pre-filled attendee field
+  addAttendeeField();
+  const list = document.getElementById('attendeesList');
+  if (!list) return;
+  const inputs = list.querySelectorAll('[data-attendee-extra] input');
+  const lastInput = inputs[inputs.length - 1];
+  if (lastInput) {
+    lastInput.value = `${clientName} (Owner)`;
+    updateAttendeesList();
+  }
+}
+
 function addAttendeeField() {
   const list = document.getElementById('attendeesList');
   if (!list) return;
@@ -11151,9 +11293,9 @@ function startNewSurvey() {
     maxDraft: document.getElementById('maxDraft')?.value || '',
     totalSailArea: document.getElementById('totalSailArea')?.value || '',
     construction: document.getElementById('construction')?.value || '',
-    hullColour: document.getElementById('hullColour')?.value || '',
-    bootStripeColour: document.getElementById('bootStripeColour')?.value || '',
-    deckColour: document.getElementById('deckColour')?.value || '',
+    hullColour: getColourValue('hullColour'),
+    bootStripeColour: getColourValue('bootStripeColour'),
+    deckColour: getColourValue('deckColour'),
     keelType: document.getElementById('keelType')?.value || '',
     numberCabins: document.getElementById('numberCabins')?.value || '',
     rudderCount: parseInt(document.getElementById('rudderCount')?.value, 10) || 1,

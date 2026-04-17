@@ -14,6 +14,15 @@ lets you roll back to a specific version with confidence.
 
 ## v2278 — 2026-04-16
 
+### Changed
+- **Hull Colour, Boot Stripe Colour, and Deck Colour are now dropdowns** with
+  the most common boat colours pre-populated. Each includes an "Other…" option
+  that reveals a text input for custom colours. Existing surveys with custom
+  colour values restore correctly.
+- **"+ Add Owner" button** on Persons in Attendance — pulls the Client Name and
+  adds them as "[Name] (Owner)" in one tap. Prevents duplicates and prompts if
+  Client Name is empty.
+
 ### Fixed
 - **Database JSON files now include cache-buster query params** (`?v=APP_VERSION`)
   on `boat_specs_db.json`, `boat_values_db.json`, `engine_db.json`, and
