@@ -12,6 +12,14 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2264 — 2026-04-16
+
+### Fixed — Camera shutter closes overlay on iOS
+- **Root cause**: On iOS Safari, tapping the shutter button dispatched the click event to both the shutter AND the adjacent DONE button in the same flex container. `commitStagedPhotos` found `staged.length === 0` and immediately closed the camera — before the photo could be captured.
+- **Fix**: Added `stopPropagation()` + `stopImmediatePropagation()` on all three camera buttons (shutter, close, done) so tap events stay on the button that was actually tapped.
+- **Safety net**: `commitStagedPhotos` no longer closes the camera when staged is empty — it shows a "Take some photos first" hint instead. Even if the event leak recurs, the camera stays open.
+- Removed all v2261–v2263 diagnostic code (MutationObserver, sessionStorage stack traces, red banner, diagnostic toasts, console.log statements in snapStagedPhoto).
+
 ## v2263 — 2026-04-16
 
 ### Camera diagnostic v2 — persistent stack trace

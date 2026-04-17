@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2263';
+const APP_VERSION = 'v2264';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -20934,13 +20934,6 @@ async function initApp() {
     // firing as soon as it finishes loading.
     loadSpellDict();
 
-    // v2262 diagnostic: if the page was reloaded while camera was open, show what happened
-    const _reloadDiag = sessionStorage.getItem('_cameraReloadDiag');
-    if (_reloadDiag) {
-      sessionStorage.removeItem('_cameraReloadDiag');
-      setTimeout(() => showToast('⚠️ ' + _reloadDiag, 15000), 500);
-    }
-
     // If recovering from camera-induced page reload, go straight back
     // to the inspection instead of showing the home screen
     if (window._cameraRecoverySurveyId) {
@@ -22834,32 +22827,25 @@ async function openBatchCamera(itemLabel, opts) {
   const closeBtn = document.getElementById('batchCamClose');
   const doneBtn = document.getElementById('batchCamDone');
 
-  shutter.addEventListener('click', () => {
-    showToast('📸 Shutter tapped', 1500);
+  // v2264: use stopPropagation + stopImmediatePropagation on every button.
+  // On iOS Safari the tap event was dispatching to BOTH buttons in the same
+  // flex container — commitStagedPhotos fired on shutter tap, found staged
+  // empty, and closed the camera before the photo could be captured.
+  shutter.addEventListener('click', (e) => {
+    e.stopPropagation();
+    e.stopImmediatePropagation();
     snapStagedPhoto();
   });
-  closeBtn.addEventListener('click', discardStagedPhotos);
-  doneBtn.addEventListener('click', commitStagedPhotos);
-
-  // v2262 diagnostic: watch for unexpected overlay removal
-  const _diagObserver = new MutationObserver((mutations) => {
-    for (const m of mutations) {
-      for (const node of m.removedNodes) {
-        if (node.id === 'batchCamOverlay') {
-          const stack = new Error().stack || '';
-          showToast('⚠️ OVERLAY REMOVED — ' + stack.split('\n').slice(1, 3).join(' | ').substring(0, 200), 10000);
-        }
-      }
-    }
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    discardStagedPhotos();
   });
-  _diagObserver.observe(document.body, { childList: true });
-
-  // v2262 diagnostic: catch page reloads while camera is open
-  window._diagBeforeUnload = () => {
-    // This fires if the page is about to reload/navigate — save evidence to sessionStorage
-    sessionStorage.setItem('_cameraReloadDiag', 'Page reloaded while camera was open at ' + new Date().toISOString());
-  };
-  window.addEventListener('beforeunload', window._diagBeforeUnload);
+  doneBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    commitStagedPhotos();
+  });
 
   // Start camera
   try {
@@ -22905,12 +22891,10 @@ function _batchCameraFallback(itemLabel, opts) {
 }
 
 function snapStagedPhoto() {
-  // v2261 diagnostic: confirm this function actually runs when shutter is tapped
-  console.log('[Camera] snapStagedPhoto called');
   try {
   const bc = window._batchCam;
   const video = document.getElementById('batchCamVideo');
-  if (!video || !video.videoWidth) { console.warn('[Camera] video not ready:', video ? video.videoWidth : 'no element'); return; }
+  if (!video || !video.videoWidth) return;
 
   // v2248: cap the canvas to 2048 px on the long edge. When getUserMedia
   // constraints can't match the requested resolution (e.g. portrait mode on
@@ -22943,7 +22927,6 @@ function snapStagedPhoto() {
     setTimeout(() => { sh.style.background = '#fff'; }, 110);
   }
   refreshBatchCamStrip();
-  console.log('[Camera] snapStagedPhoto completed, staged count:', bc.staged.length);
   } catch (err) {
     console.error('[Camera] snapStagedPhoto error:', err);
     showToast('Camera error: ' + (err.message || err));
@@ -23026,7 +23009,10 @@ function editStagedPhoto(index) {
 async function commitStagedPhotos() {
   const bc = window._batchCam;
   if (bc.staged.length === 0) {
-    closeBatchCameraOverlay();
+    // v2264: don't close the camera — just hint that no photos were taken yet.
+    // Previously this closed the overlay, which made the shutter unusable on
+    // iOS when the tap event leaked to the DONE button.
+    showToast('Take some photos first, then tap DONE');
     return;
   }
 
@@ -23100,10 +23086,6 @@ function discardStagedPhotos() {
 }
 
 function closeBatchCameraOverlay() {
-  // v2263 diagnostic: persist the call stack so we can see who closed the camera
-  const _stack = new Error().stack || 'no stack';
-  const _diagText = 'closeBatchCamera called at ' + new Date().toISOString() + '\n' + _stack;
-  try { sessionStorage.setItem('_cameraDiag', _diagText); } catch(e){}
   const bc = window._batchCam;
   try {
     if (bc.stream) {
@@ -23119,22 +23101,6 @@ function closeBatchCameraOverlay() {
     window._swUpdatePending = false;
     persistViewState();
     window.location.reload();
-  }
-  // v2263 diagnostic: show persistent banner with the call stack
-  const _diagData = sessionStorage.getItem('_cameraDiag');
-  if (_diagData) {
-    sessionStorage.removeItem('_cameraDiag');
-    setTimeout(() => {
-      const banner = document.createElement('div');
-      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#dc2626;color:white;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top,0px));font-size:11px;font-family:monospace;white-space:pre-wrap;word-break:break-all;max-height:50vh;overflow:auto;';
-      banner.textContent = _diagData;
-      const closeBtn = document.createElement('button');
-      closeBtn.textContent = '✕ Close';
-      closeBtn.style.cssText = 'display:block;margin-top:8px;background:white;color:#dc2626;border:none;border-radius:4px;padding:6px 16px;font-weight:700;cursor:pointer;';
-      closeBtn.onclick = () => banner.remove();
-      banner.appendChild(closeBtn);
-      document.body.appendChild(banner);
-    }, 300);
   }
 }
 
