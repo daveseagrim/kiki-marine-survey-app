@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2290';
+const APP_VERSION = 'v2291';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -3815,7 +3815,11 @@ function showNotesSheet(itemLabel, categoryName) {
               lastPhase = phase;
             }
             // v2276: pluralize rudder references in sentence picker display
-            const s = pluralizeRudder(sObj.text, survey.rudderCount);
+            let s = pluralizeRudder(sObj.text, survey.rudderCount);
+            // v2290: interpolate mast stepping + track type into mast sentences
+            if (itemLabel === 'Main mast') {
+              s = _kkInterpolateMastDescFromData(itemData, s);
+            }
             // v2184: inline input placeholders:
             //   [insert reading range]  → two number inputs (low–high)
             //   [insert count]          → one small number input
@@ -4001,7 +4005,7 @@ function showNotesSheet(itemLabel, categoryName) {
           <div style="flex:1;">
             <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Mast Stepping</label>
             <select id="sheet-mastStepping" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
-                    onchange="saveMastOption('${safeLabel}', 'mastStepping', this.value)">
+                    onchange="saveMastOption('${safeLabel}', 'mastStepping', this.value);_kkRebuildFromSentencePicker('${sanitizedLabel}')">
               <option value="">Select...</option>
               <option value="Deck-stepped" ${mastStepping === 'Deck-stepped' ? 'selected' : ''}>Deck-stepped</option>
               <option value="Keel-stepped" ${mastStepping === 'Keel-stepped' ? 'selected' : ''}>Keel-stepped</option>
@@ -4010,7 +4014,7 @@ function showNotesSheet(itemLabel, categoryName) {
           <div style="flex:1;">
             <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Sail Track Type</label>
             <select id="sheet-mastTrackType" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
-                    onchange="saveMastOption('${safeLabel}', 'mastTrackType', this.value)">
+                    onchange="saveMastOption('${safeLabel}', 'mastTrackType', this.value);_kkRebuildFromSentencePicker('${sanitizedLabel}')">
               <option value="">Select...</option>
               <option value="In-mast roller furling" ${mastTrackType === 'In-mast roller furling' ? 'selected' : ''}>In-mast roller furling</option>
               <option value="External track" ${mastTrackType === 'External track' ? 'selected' : ''}>External track</option>
@@ -4253,6 +4257,39 @@ function showNotesSheet(itemLabel, categoryName) {
 // order with a single space. Disabled+checked chips (the `always`
 // boilerplate) are always included. [insert reading range] placeholders
 // are replaced with the number pair typed into the chip's inline inputs.
+// v2290: build a mast description and replace "The mast" / "the mast" /
+// "The main mast" → "The deck-stepped mast with in-mast roller furling"
+// Two versions:
+//   _kkInterpolateMastDescFromData(itemData, text) — reads saved itemData
+//     (used at initial render before DOM elements exist)
+//   _kkInterpolateMastDesc(text) — reads live DOM dropdowns
+//     (used during rebuild when user ticks/changes selections)
+function _kkApplyMastDesc(text, stepping, track) {
+  if (!stepping && !track) return text;
+  const desc = stepping && track
+    ? `${stepping} mast with ${track}`
+    : stepping
+      ? `${stepping} mast`
+      : `mast with ${track}`;
+  text = text.replace(/\bThe main mast\b/g, `The ${desc}`);
+  text = text.replace(/\bthe main mast\b/g, `the ${desc}`);
+  text = text.replace(/\bThe mast\b/g, `The ${desc}`);
+  text = text.replace(/\bthe mast\b/g, `the ${desc}`);
+  return text;
+}
+function _kkInterpolateMastDescFromData(itemData, text) {
+  const stepping = (itemData && itemData.mastStepping) ? itemData.mastStepping.toLowerCase() : '';
+  const track = (itemData && itemData.mastTrackType) ? itemData.mastTrackType.toLowerCase() : '';
+  return _kkApplyMastDesc(text, stepping, track);
+}
+function _kkInterpolateMastDesc(text) {
+  const steppingSel = document.getElementById('sheet-mastStepping');
+  const trackSel = document.getElementById('sheet-mastTrackType');
+  const stepping = (steppingSel && steppingSel.value) ? steppingSel.value.toLowerCase() : '';
+  const track = (trackSel && trackSel.value) ? trackSel.value.toLowerCase() : '';
+  return _kkApplyMastDesc(text, stepping, track);
+}
+
 window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
   const ta = document.getElementById(`sheet-text-${sanitizedLabel}`);
   const entries = (window._sentencePicker && window._sentencePicker[sanitizedLabel]) || [];
@@ -4311,6 +4348,8 @@ window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
     // v2276: pluralize rudder references based on rudderCount
     const _rc = (window._currentSurveyCache && window._currentSurveyCache.rudderCount) || 1;
     text = pluralizeRudder(text, _rc);
+    // v2290: interpolate mast stepping + track type
+    text = _kkInterpolateMastDesc(text);
     parts.push(text);
   });
   ta.value = parts.join(' ');

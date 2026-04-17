@@ -12,6 +12,18 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2291 — 2026-04-16
+
+### Changed
+- **Main mast — dropdown values woven into composed sentences.** When the
+  surveyor selects "Deck-stepped" or "Keel-stepped" and a sail track type,
+  the sentence picker automatically incorporates these into every sentence
+  containing "The mast" or "the mast". Example: "The deck-stepped mast with
+  in-mast roller furling appeared straight and properly aligned…". Changing
+  the dropdowns triggers an immediate rebuild of the composed text.
+
+---
+
 ## v2290 — 2026-04-16
 
 ### Changed
