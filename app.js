@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2272';
+const APP_VERSION = 'v2273';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2126,28 +2126,40 @@ const SaveStatus = (() => {
   let _longPressTimer = null;
   let _didLongPress = false;
 
+  // v2272: shared pill styles (no position — parent determines placement)
+  const _pillBaseStyle = 'display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.96);color:#0f172a;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.12);cursor:pointer;font-family:inherit;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);';
+
   function show() {
     if (_pill && document.body.contains(_pill)) return;
     _pill = document.createElement('button');
     _pill.id = 'saveStatusPill';
-    // v2251: position pill just below the header bar instead of overlapping it.
-    // The header is ~56px tall plus safe-area-inset-top on notched iPhones.
-    // v2255: position below header + survey-type banner (header ~52px + banner ~24px + safe-area)
-    // v2271: pill sits in the bottom bar area, right-aligned, same level as Save
-    _pill.style.cssText = 'position:fixed;bottom:calc(10px + env(safe-area-inset-bottom, 0px));right:12px;z-index:1500;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,0.96);color:#0f172a;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.12);cursor:pointer;font-family:inherit;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);';
+    _pill.style.cssText = _pillBaseStyle;
     _pill.innerHTML = '<span id="saveDot" style="width:8px;height:8px;border-radius:50%;background:#9ca3af;display:inline-block;"></span><span id="saveText">Idle</span>';
     _pill.title = 'Tap to save now · Hold for details';
-    // v2253: Tap = save everywhere, long-press = detail panel
     _pill.addEventListener('pointerdown', _onPointerDown);
     _pill.addEventListener('pointerup', _onPointerUp);
     _pill.addEventListener('pointercancel', _onPointerCancel);
-    // Prevent default click (we handle it via pointer events)
     _pill.onclick = (e) => e.preventDefault();
-    document.body.appendChild(_pill);
+    // v2272: place in the bottom bar middle slot if available, else float
+    _placePill();
     if (!_refreshTimer) {
       _refreshTimer = setInterval(_refresh, 2000);
     }
     _refresh();
+  }
+
+  // Place pill in the bottom bar middle slot, or fall back to fixed position
+  function _placePill() {
+    if (!_pill) return;
+    const slot = document.getElementById('bottomBarMiddle');
+    if (slot) {
+      _pill.style.cssText = _pillBaseStyle;  // flow-based, no position
+      slot.appendChild(_pill);
+    } else {
+      // Fallback: fixed position (e.g. on home screen where there's no bottom bar)
+      _pill.style.cssText = _pillBaseStyle + 'position:fixed;top:calc(82px + env(safe-area-inset-top, 0px));right:8px;z-index:1500;';
+      document.body.appendChild(_pill);
+    }
   }
 
   function _onPointerDown(e) {
@@ -2285,7 +2297,7 @@ const SaveStatus = (() => {
     if (closeBtn) closeBtn.onclick = () => overlay.remove();
   }
 
-  return { show, hide, markSaving, markSaved, markError, setPhotoCount };
+  return { show, hide, markSaving, markSaved, markError, setPhotoCount, _placePill };
 })();
 
 // ── v2253: saveEverywhere — force-save to all three backends now ─────────
@@ -12280,25 +12292,26 @@ function ensureReportButton() {
   const fab = document.querySelector('.fab');
   if (fab) fab.remove();
 
-  // Bottom action bar container — two rows on mobile, single row on wide screens
+  // v2272: Bottom bar — Save (left), status pill (middle), ⋯ (right)
   const bottomBar = document.createElement('div');
   bottomBar.id = 'inspectionBottomBar';
-  bottomBar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) 12px;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 -2px 10px rgba(0,0,0,0.1);z-index:100;';
+  bottomBar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) 12px;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 -2px 10px rgba(0,0,0,0.1);z-index:100;';
   document.body.appendChild(bottomBar);
 
   const pillStyle = 'border:none;border-radius:14px;padding:8px 12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;';
 
-  // v2256: Only Save + overflow on the bottom bar. Check, Intro, Report
-  // moved into the overflow menu for a clean, single-button experience.
-
-  // v2255: Unified save button — saves to all connected backends
+  // v2255: Unified save button — left side
   const saveBtn = document.createElement('button');
   saveBtn.id = 'backupBtn';
   saveBtn.style.cssText = pillStyle + 'background:#3399cc;color:white;box-shadow:0 2px 8px rgba(51,153,204,0.3);';
   saveBtn.innerHTML = '💾 Save';
-  // v2257: unified save with per-backend progress dialog
   saveBtn.onclick = () => saveSurveyWithProgress(currentSurveyId);
   bottomBar.appendChild(saveBtn);
+
+  // Middle slot — the SaveStatus pill will be repositioned here
+  const middleSlot = document.createElement('div');
+  middleSlot.id = 'bottomBarMiddle';
+  bottomBar.appendChild(middleSlot);
 
   // ⋯ More overflow menu (Recover Photos, Force Update)
   const moreWrap = document.createElement('div');
@@ -12489,6 +12502,9 @@ function ensureReportButton() {
 
   moreWrap.appendChild(overflowMenu);
   bottomBar.appendChild(moreWrap);
+
+  // v2272: if the SaveStatus pill already exists, move it into the middle slot
+  if (typeof SaveStatus !== 'undefined' && SaveStatus._placePill) SaveStatus._placePill();
 
   // Close overflow when tapping elsewhere
   document.addEventListener('click', () => {

@@ -12,6 +12,12 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2273 — 2026-04-16
+
+### UI — Bottom bar layout: Save | Status | ⋯
+- Bottom bar now uses `justify-content:space-between` with three items: Save button (left), save status pill (centre), ⋯ overflow menu (right).
+- Save status pill is placed directly into the bar (flow-based, not fixed-position) when the bar exists, with a fixed-position fallback for screens without a bottom bar (e.g. home).
+
 ## v2272 — 2026-04-16
 
 ### UI — Align save status pill with bottom bar
