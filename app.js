@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2278';
+const APP_VERSION = 'v2279';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -11620,6 +11620,7 @@ function renderInspection(survey) {
       <button class="header-back" onclick="backToHome()" style="flex-shrink:0;margin-left:2px;">←</button>
       <div style="flex:1;min-width:0;margin-left:4px;">
         <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#066aab;font-size:17px;">${esc(survey.vesselName)}</div>
+        <div style="font-size:10px;color:#9ca3af;">${APP_VERSION}</div>
       </div>
       <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
     </div>

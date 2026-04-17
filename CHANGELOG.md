@@ -12,6 +12,14 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2279 — 2026-04-16
+
+### Fixed
+- **Version number now shows on the inspection checklist page** below the
+  vessel name in the header. Was missing after the v2255 header redesign.
+
+---
+
 ## v2278 — 2026-04-16
 
 ### Changed
