@@ -12,6 +12,21 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2282 — 2026-04-16
+
+### Changed
+- **Conductivity testing snippets now include rudder(s).** Updated 7 existing
+  sentences in the "Hull and rudder(s) conductivity testing" section to mention
+  "hull and rudder(s)". Added 3 new rudder-specific sentences (A/B/C ratings)
+  for cases where the rudder alone shows elevated readings — common on
+  fibreglass rudders.
+- **Stern tube C-rating reworded.** Replaced "functioning as intended" (implies
+  operational testing) with visual-inspection language: "appeared to be in
+  satisfactory condition with no visible signs of corrosion, damage, or
+  misalignment at the time of the survey."
+
+---
+
 ## v2281 — 2026-04-16
 
 ### Fixed

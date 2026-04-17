@@ -424,14 +424,21 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "observed",
-      "text": "The hull returned readings consistently at or near 999 across large areas.",
+      "text": "The hull and rudder(s) returned readings consistently at or near 999 across large areas.",
+      "severity": 5
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "A",
+      "phase": "observed",
+      "text": "The rudder(s) returned readings consistently at or near 999.",
       "severity": 5
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "means",
-      "text": "Multiple areas of the hull showed readings in the upper end of the scale, consistent with significant moisture saturation.",
+      "text": "Multiple areas of the hull and rudder(s) showed readings in the upper end of the scale, consistent with significant moisture saturation.",
       "severity": 4
     },
     {
@@ -487,14 +494,21 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "observed",
-      "text": "The hull returned elevated readings of [insert reading range].",
+      "text": "The hull and rudder(s) returned elevated readings of [insert reading range].",
       "severity": 3
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "observed",
-      "text": "Localized elevated readings of [insert reading range] were observed in several areas of the hull.",
+      "text": "The rudder(s) returned elevated readings of [insert reading range].",
+      "severity": 3
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "B",
+      "phase": "observed",
+      "text": "Localized elevated readings of [insert reading range] were observed in several areas of the hull and rudder(s).",
       "severity": 2
     },
     {
@@ -557,14 +571,21 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
       "phase": "means",
-      "text": "The hull returned readings consistent with proper condition, with no elevated conductivity detected.",
+      "text": "The hull and rudder(s) returned readings consistent with proper condition, with no elevated conductivity detected.",
       "severity": 1
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
       "phase": "means",
-      "text": "The hull returned elevated readings of [insert reading range], consistent with vessels of similar age and construction.",
+      "text": "The hull and rudder(s) returned elevated readings of [insert reading range], consistent with vessels of similar age and construction.",
+      "severity": 2
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "C",
+      "phase": "means",
+      "text": "The rudder(s) returned elevated readings of [insert reading range], consistent with vessels of similar age and construction.",
       "severity": 2
     },
     {
@@ -578,7 +599,7 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "C",
       "phase": "means",
-      "text": "The readings fell within the normal range for a fibreglass hull of this age.",
+      "text": "The readings fell within the normal range for a fibreglass hull and rudder(s) of this age.",
       "severity": 1
     },
     {
@@ -773,7 +794,7 @@
     {
       "section": "Stern tube(s) (external)",
       "rating": "C",
-      "text": "The external stern tube was functioning as intended.",
+      "text": "The external stern tube appeared to be in satisfactory condition with no visible signs of corrosion, damage, or misalignment at the time of the survey.",
       "phase": "observed",
       "severity": 3
     },
