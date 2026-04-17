@@ -12,6 +12,37 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2294 — 2026-04-16
+
+### Fixed
+- **Jib/genoa tracks/cars — sentence order.** Swapped severity values so "The
+  jib tracks were solidly attached…" sorts before "The blocks were intact…"
+  in the sentence picker (tracks are the primary subject of the section).
+
+---
+
+## v2293 — 2026-04-16
+
+### Added
+- **Winch manufacturer woven into composed sentences.** Selecting "Lewmar" (or
+  any manufacturer) from the Winch Manufacturer dropdown dynamically replaces
+  "All winches" → "All Lewmar winches", "The winch" → "The Lewmar winch" in
+  both the checkbox labels and the composed textarea. Works with the "Other"
+  free-text input too. Changing the dropdown updates everything in real time.
+
+---
+
+## v2292 — 2026-04-16
+
+### Fixed
+- **Deckline organizers — "to the deck" fragment.** The C-rating had "to the
+  deck." as a standalone snippet that produced broken prose when combined with
+  "...were securely fastened." Replaced with two proper full sentences: one
+  ending "fastened to the deck." and one ending "fastened." No other fragment
+  snippets found in the library.
+
+---
+
 ## v2291 — 2026-04-16
 
 ### Changed

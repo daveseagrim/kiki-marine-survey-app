@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2291';
+const APP_VERSION = 'v2294';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -3816,10 +3816,6 @@ function showNotesSheet(itemLabel, categoryName) {
             }
             // v2276: pluralize rudder references in sentence picker display
             let s = pluralizeRudder(sObj.text, survey.rudderCount);
-            // v2290: interpolate mast stepping + track type into mast sentences
-            if (itemLabel === 'Main mast') {
-              s = _kkInterpolateMastDescFromData(itemData, s);
-            }
             // v2184: inline input placeholders:
             //   [insert reading range]  → two number inputs (low–high)
             //   [insert count]          → one small number input
@@ -3870,12 +3866,24 @@ function showNotesSheet(itemLabel, categoryName) {
                   `<option value="both">both</option>` +
                 `</select>`;
             })());
+            // v2291: store base rendered HTML in data-base-html so that
+            // _kkRefreshMastLabels() can re-interpolate when dropdowns change.
+            // Initial display gets mast desc applied from saved itemData.
+            const baseForAttr = rendered.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            // v2292: also apply winch manufacturer interpolation at render time
+            let displayRendered = rendered;
+            if (itemLabel === 'Main mast') {
+              displayRendered = _kkInterpolateMastDescFromData(itemData, displayRendered);
+            }
+            if (itemLabel.toLowerCase().includes('winch')) {
+              displayRendered = _kkInterpolateWinchDescFromData(itemData, displayRendered);
+            }
             sentencePickerHtml += `
               <label style="display:flex;gap:10px;padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;font-size:13px;line-height:1.45;">
                 <input type="checkbox" class="kk-sentence-chip" data-picker-key="${sanitizedLabel}" data-sentence-idx="${idx}"
                   onchange="_kkRebuildFromSentencePicker('${sanitizedLabel}')"
                   style="margin-top:3px;flex-shrink:0;">
-                <span>${rendered}</span>
+                <span class="kk-picker-text" data-base-html="${baseForAttr}">${displayRendered}</span>
               </label>
             `;
           });
@@ -4005,7 +4013,7 @@ function showNotesSheet(itemLabel, categoryName) {
           <div style="flex:1;">
             <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Mast Stepping</label>
             <select id="sheet-mastStepping" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
-                    onchange="saveMastOption('${safeLabel}', 'mastStepping', this.value);_kkRebuildFromSentencePicker('${sanitizedLabel}')">
+                    onchange="saveMastOption('${safeLabel}', 'mastStepping', this.value);_kkRefreshMastLabels('${sanitizedLabel}')">
               <option value="">Select...</option>
               <option value="Deck-stepped" ${mastStepping === 'Deck-stepped' ? 'selected' : ''}>Deck-stepped</option>
               <option value="Keel-stepped" ${mastStepping === 'Keel-stepped' ? 'selected' : ''}>Keel-stepped</option>
@@ -4014,7 +4022,7 @@ function showNotesSheet(itemLabel, categoryName) {
           <div style="flex:1;">
             <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Sail Track Type</label>
             <select id="sheet-mastTrackType" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
-                    onchange="saveMastOption('${safeLabel}', 'mastTrackType', this.value);_kkRebuildFromSentencePicker('${sanitizedLabel}')">
+                    onchange="saveMastOption('${safeLabel}', 'mastTrackType', this.value);_kkRefreshMastLabels('${sanitizedLabel}')">
               <option value="">Select...</option>
               <option value="In-mast roller furling" ${mastTrackType === 'In-mast roller furling' ? 'selected' : ''}>In-mast roller furling</option>
               <option value="External track" ${mastTrackType === 'External track' ? 'selected' : ''}>External track</option>
@@ -4289,6 +4297,55 @@ function _kkInterpolateMastDesc(text) {
   const track = (trackSel && trackSel.value) ? trackSel.value.toLowerCase() : '';
   return _kkApplyMastDesc(text, stepping, track);
 }
+// v2292: build a winch description and replace "All winches" / "The winch"
+// with the manufacturer name (e.g. "All Lewmar winches").
+function _kkApplyWinchDesc(text, make) {
+  if (!make) return text;
+  text = text.replace(/\bAll winches\b/g, `All ${make} winches`);
+  text = text.replace(/\ball winches\b/g, `all ${make} winches`);
+  text = text.replace(/\bThe winch\b/g, `The ${make} winch`);
+  text = text.replace(/\bthe winch\b/g, `the ${make} winch`);
+  text = text.replace(/\bThe winches\b/g, `The ${make} winches`);
+  text = text.replace(/\bthe winches\b/g, `the ${make} winches`);
+  return text;
+}
+function _kkInterpolateWinchDescFromData(itemData, text) {
+  const make = (itemData && itemData.winchMake) ? itemData.winchMake : '';
+  return _kkApplyWinchDesc(text, make);
+}
+function _kkInterpolateWinchDesc(text) {
+  let sel = document.getElementById('sheet-winchMake');
+  // If the select was replaced by a text input (Other... flow), read from the input
+  if (sel && sel.tagName === 'INPUT') return _kkApplyWinchDesc(text, sel.value || '');
+  const make = (sel && sel.value && sel.value !== '__other__') ? sel.value : '';
+  return _kkApplyWinchDesc(text, make);
+}
+function _kkRefreshWinchLabels(sanitizedLabel) {
+  const picker = document.getElementById('sheet-sentence-picker');
+  if (!picker) return;
+  picker.querySelectorAll('.kk-picker-text').forEach(span => {
+    const base = span.getAttribute('data-base-html');
+    if (!base) return;
+    span.innerHTML = _kkInterpolateWinchDesc(base);
+  });
+  _kkRebuildFromSentencePicker(sanitizedLabel);
+}
+
+// v2291: re-interpolate all picker label spans when mast dropdowns change.
+// Each <span class="kk-picker-text"> stores its base (pre-mast) HTML in
+// data-base-html. We re-apply _kkInterpolateMastDesc to that base and
+// replace the span's innerHTML.
+function _kkRefreshMastLabels(sanitizedLabel) {
+  const picker = document.getElementById('sheet-sentence-picker');
+  if (!picker) return;
+  picker.querySelectorAll('.kk-picker-text').forEach(span => {
+    const base = span.getAttribute('data-base-html');
+    if (!base) return;
+    span.innerHTML = _kkInterpolateMastDesc(base);
+  });
+  // Also rebuild the textarea if any checkboxes are ticked
+  _kkRebuildFromSentencePicker(sanitizedLabel);
+}
 
 window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
   const ta = document.getElementById(`sheet-text-${sanitizedLabel}`);
@@ -4350,6 +4407,8 @@ window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
     text = pluralizeRudder(text, _rc);
     // v2290: interpolate mast stepping + track type
     text = _kkInterpolateMastDesc(text);
+    // v2292: interpolate winch manufacturer
+    text = _kkInterpolateWinchDesc(text);
     parts.push(text);
   });
   ta.value = parts.join(' ');
@@ -18604,7 +18663,11 @@ function onSheetWinchMakeChange(itemLabel) {
     input.id = 'sheet-winchMake';
     input.placeholder = 'Type manufacturer...';
     input.style.cssText = 'width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;';
-    input.onblur = function() { saveWinchOption(itemLabel, 'winchMake', this.value); };
+    input.onblur = function() {
+      saveWinchOption(itemLabel, 'winchMake', this.value);
+      const _sl = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
+      _kkRefreshWinchLabels(_sl);
+    };
     select.replaceWith(input);
     input.focus();
     const modelSelect = document.getElementById('sheet-winchModel');
@@ -18642,6 +18705,9 @@ function onSheetWinchMakeChange(itemLabel) {
     }
   }
   saveWinchOption(itemLabel, 'winchModel', '');
+  // v2292: refresh picker labels with new winch manufacturer
+  const _sl = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
+  _kkRefreshWinchLabels(_sl);
 }
 
 function saveWinchOption(itemLabel, field, value) {

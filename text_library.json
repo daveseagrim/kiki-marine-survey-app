@@ -4947,14 +4947,14 @@
     {
       "section": "Deckline organizers, blocks, fairleads and clutches",
       "rating": "C",
-      "text": "All deckline organizers, blocks, fairleads, and clutches were securely fastened.",
+      "text": "All deckline organizers, blocks, fairleads, and clutches were securely fastened to the deck.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Deckline organizers, blocks, fairleads and clutches",
       "rating": "C",
-      "text": "to the deck.",
+      "text": "All deckline organizers, blocks, fairleads, and clutches were securely fastened.",
       "phase": "observed",
       "severity": 3
     },
@@ -5054,14 +5054,14 @@
       "rating": "C",
       "text": "The jib tracks were solidly attached to the deck, and the cars released and ran smoothly.",
       "phase": "observed",
-      "severity": 3
+      "severity": 1
     },
     {
       "section": "Jib/genoa tracks/cars",
       "rating": "C",
       "text": "The blocks were intact and in good order.",
       "phase": "observed",
-      "severity": 1
+      "severity": 2
     },
     {
       "section": "Main sheet",
