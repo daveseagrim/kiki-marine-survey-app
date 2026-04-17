@@ -12,6 +12,16 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2258 — 2026-04-16
+
+### Progress bars in save dialog
+- Each backend row (📱 This Device, 🔥 Firebase, ☁️ Google Drive) now shows a 6px progress bar that fills in real time as the save runs.
+- **Single-survey save**: Local bar jumps to 100% on completion. Firebase bar fills to 30% after survey data, then scales 30→100% as photos upload. Drive bar tracks the `percent` callback from the Drive upload loop.
+- **Save All Surveys**: Each backend's bar fills proportionally as surveys complete (e.g., 3 of 10 = 30%). Drive bar interpolates intra-survey photo progress for smooth fill.
+- Bars animate with a 0.3s CSS transition for a smooth visual.
+- Bar colours: blue during progress, green on success, grey on skip, red on failure.
+- `SaveProgress.setProgress(backendId, percent)` API added to the module's public interface.
+
 ## v2257 — 2026-04-16
 
 ### Per-backend save progress dialog

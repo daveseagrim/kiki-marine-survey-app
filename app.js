@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2257';
+const APP_VERSION = 'v2258';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -2379,6 +2379,7 @@ async function backupAllEverywhere() {
       await _originalSaveSurvey(s); // bypass hooks to avoid triggering auto-sync per survey
       localDone++;
       SaveProgress.updateDetail('local', `Saved ${localDone} of ${surveys.length}`);
+      SaveProgress.setProgress('local', Math.round((localDone / surveys.length) * 100));
     } catch (e) { localFail++; }
   }
   localFail > 0
@@ -2414,6 +2415,7 @@ async function backupAllEverywhere() {
         }
         fbDone++;
         SaveProgress.updateDetail('firebase', `${fbDone} of ${surveys.length} surveys`);
+        SaveProgress.setProgress('firebase', Math.round((fbDone / surveys.length) * 100));
       } catch (e) { fbFail++; }
     }
     if (SaveProgress.isCancelled()) {
@@ -2440,12 +2442,19 @@ async function backupAllEverywhere() {
           (update) => {
             const label = s.vesselName || 'Unnamed';
             if (update.stepLabel) SaveProgress.updateDetail('drive', `${label}: ${update.stepLabel}`);
+            // Intra-survey progress: interpolate between driveDone and driveDone+1
+            if (typeof update.percent === 'number') {
+              const base = Math.round((driveDone / surveys.length) * 100);
+              const slice = Math.round((1 / surveys.length) * 100);
+              SaveProgress.setProgress('drive', base + Math.round(slice * update.percent / 100));
+            }
           },
           () => SaveProgress.isCancelled()
         );
         drivePhotos += result.uploaded || 0;
         driveDone++;
         SaveProgress.updateDetail('drive', `${driveDone} of ${surveys.length} surveys`);
+        SaveProgress.setProgress('drive', Math.round((driveDone / surveys.length) * 100));
       } catch (e) {
         if (e.driveApiDisabled) {
           SaveProgress.markFailed('drive', 'Drive API not enabled');
@@ -2503,6 +2512,7 @@ async function saveSurveyWithProgress(surveyId) {
     } else {
       await saveSurvey(survey);
     }
+    SaveProgress.setProgress('local', 100);
     SaveProgress.markDone('local', 'Saved ✓');
     SaveStatus.markSaved();
   } catch (err) {
@@ -2533,12 +2543,15 @@ async function saveSurveyWithProgress(surveyId) {
         };
       });
       let fbPhotoDone = 0;
+      const fbTotal = photoIds.length;
+      SaveProgress.setProgress('firebase', fbTotal > 0 ? 30 : 90); // 30% after survey data, scale rest for photos
       for (const pid of photoIds) {
         if (SaveProgress.isCancelled()) break;
         const photo = await getPhotoById(pid);
         if (photo) await FirebaseSync.pushPhoto(photo);
         fbPhotoDone++;
-        SaveProgress.updateDetail('firebase', `Photo ${fbPhotoDone} of ${photoIds.length}`);
+        SaveProgress.updateDetail('firebase', `Photo ${fbPhotoDone} of ${fbTotal}`);
+        SaveProgress.setProgress('firebase', 30 + Math.round((fbPhotoDone / fbTotal) * 70));
       }
       SaveProgress.markDone('firebase', `Survey + ${fbPhotoDone} photos ✓`);
     } catch (err) {
@@ -2560,6 +2573,9 @@ async function saveSurveyWithProgress(surveyId) {
         (update) => {
           if (update.stepLabel) SaveProgress.updateDetail('drive', update.stepLabel);
           else if (update.detail) SaveProgress.updateDetail('drive', update.detail);
+          if (typeof update.percent === 'number') {
+            SaveProgress.setProgress('drive', update.percent);
+          }
         },
         () => SaveProgress.isCancelled()
       );
@@ -21127,13 +21143,18 @@ const SaveProgress = (() => {
     _overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10002;display:flex;align-items:center;justify-content:center;padding:20px;';
 
     const rowsHtml = backends.map(b => `
-      <div id="sp-row-${b.id}" style="display:flex;align-items:center;gap:10px;padding:8px 0;">
-        <span style="font-size:18px;width:24px;text-align:center;">${b.icon}</span>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;font-weight:600;color:#374151;">${b.label}</div>
-          <div id="sp-detail-${b.id}" style="font-size:11px;color:#6b7280;margin-top:2px;">Waiting…</div>
+      <div id="sp-row-${b.id}" style="padding:8px 0;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:18px;width:24px;text-align:center;">${b.icon}</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:600;color:#374151;">${b.label}</div>
+            <div id="sp-detail-${b.id}" style="font-size:11px;color:#6b7280;margin-top:2px;">Waiting…</div>
+          </div>
+          <div id="sp-status-${b.id}" style="font-size:18px;width:24px;text-align:center;">⏳</div>
         </div>
-        <div id="sp-status-${b.id}" style="font-size:18px;width:24px;text-align:center;">⏳</div>
+        <div style="margin:6px 0 0 34px;background:#e5e7eb;border-radius:6px;height:6px;overflow:hidden;">
+          <div id="sp-bar-${b.id}" style="background:#3399cc;height:100%;width:0%;border-radius:6px;transition:width 0.3s ease;"></div>
+        </div>
       </div>
     `).join('');
 
@@ -21169,12 +21190,20 @@ const SaveProgress = (() => {
     }, 1000);
   }
 
+  // Set the progress bar percentage for a backend (0-100)
+  function setProgress(backendId, percent) {
+    const bar = document.getElementById(`sp-bar-${backendId}`);
+    if (bar) bar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+  }
+
   // Mark a backend row as in-progress with a detail message
   function markActive(backendId, detail) {
     const statusEl = document.getElementById(`sp-status-${backendId}`);
     const detailEl = document.getElementById(`sp-detail-${backendId}`);
+    const bar = document.getElementById(`sp-bar-${backendId}`);
     if (statusEl) statusEl.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;font-size:16px;">⏳</span>';
     if (detailEl) detailEl.textContent = detail || 'Saving…';
+    if (bar) { bar.style.background = '#3399cc'; bar.style.width = '5%'; }
   }
 
   // Update detail text for a backend (e.g. "Photo 3 of 12")
@@ -21187,24 +21216,30 @@ const SaveProgress = (() => {
   function markDone(backendId, detail) {
     const statusEl = document.getElementById(`sp-status-${backendId}`);
     const detailEl = document.getElementById(`sp-detail-${backendId}`);
+    const bar = document.getElementById(`sp-bar-${backendId}`);
     if (statusEl) statusEl.textContent = '✅';
     if (detailEl) { detailEl.textContent = detail || 'Done'; detailEl.style.color = '#16a34a'; }
+    if (bar) { bar.style.width = '100%'; bar.style.background = '#16a34a'; }
   }
 
   // Mark a backend as skipped (not connected)
   function markSkipped(backendId, detail) {
     const statusEl = document.getElementById(`sp-status-${backendId}`);
     const detailEl = document.getElementById(`sp-detail-${backendId}`);
+    const bar = document.getElementById(`sp-bar-${backendId}`);
     if (statusEl) statusEl.textContent = '⊘';
     if (detailEl) { detailEl.textContent = detail || 'Not connected'; detailEl.style.color = '#9ca3af'; }
+    if (bar) { bar.style.width = '100%'; bar.style.background = '#d1d5db'; }
   }
 
   // Mark a backend as failed
   function markFailed(backendId, detail) {
     const statusEl = document.getElementById(`sp-status-${backendId}`);
     const detailEl = document.getElementById(`sp-detail-${backendId}`);
+    const bar = document.getElementById(`sp-bar-${backendId}`);
     if (statusEl) statusEl.textContent = '⚠️';
     if (detailEl) { detailEl.textContent = detail || 'Failed'; detailEl.style.color = '#dc2626'; }
+    if (bar) { bar.style.background = '#dc2626'; }
   }
 
   // Update the survey label (for Save All, cycles through surveys)
@@ -21239,7 +21274,7 @@ const SaveProgress = (() => {
     _cancelled = false;
   }
 
-  return { show, markActive, updateDetail, markDone, markSkipped, markFailed, setSurveyLabel, finish, hide, isCancelled };
+  return { show, markActive, updateDetail, setProgress, markDone, markSkipped, markFailed, setSurveyLabel, finish, hide, isCancelled };
 })();
 
 // Friendly dialog when the Google Drive API hasn't been enabled on the
