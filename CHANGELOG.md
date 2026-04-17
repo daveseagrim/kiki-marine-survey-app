@@ -12,6 +12,19 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2295 — 2026-04-16
+
+### Changed
+- **Cockpit, floor, seats and coaming — expanded snippets.** Replaced "presented
+  no deficiencies" with 8 proper C-rating observed sentences: good condition,
+  good for age, gelcoat intact, minor spider cracks for age, non-skid
+  serviceable, locker lids secure, coaming solid, cushions serviceable.
+  B-rating expanded from 1 to 7 observed sentences: spider cracks with
+  location, worn non-skid, cracked locker lid, loose hinge, water ingress at
+  coaming, floor flexing. Added matching means and action sentences.
+
+---
+
 ## v2294 — 2026-04-16
 
 ### Fixed

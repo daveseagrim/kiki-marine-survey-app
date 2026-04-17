@@ -7907,9 +7907,58 @@
     {
       "section": "Cockpit, floor, seats and coaming",
       "rating": "C",
-      "text": "The cockpit, floor, seats, and coaming presented no deficiencies.",
+      "text": "The cockpit floor, seats, and coaming were in good overall condition.",
       "phase": "observed",
-      "severity": 3
+      "severity": 1
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "C",
+      "text": "The cockpit floor, seats, and coaming were in good condition for a vessel of this age.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "C",
+      "text": "The gelcoat surfaces were intact with no significant cracking or crazing.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "C",
+      "text": "Minor spider cracks were present in the gelcoat, consistent with a vessel of this age.",
+      "phase": "observed",
+      "severity": 2
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "C",
+      "text": "The non-skid surfaces were in serviceable condition and provided adequate grip.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "C",
+      "text": "The seat locker lids were secure and the hinges functioned properly.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "C",
+      "text": "The coaming was solid with no signs of delamination or water ingress.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "C",
+      "text": "Cockpit cushions were in place and in serviceable condition.",
+      "phase": "observed",
+      "severity": 2
     },
     {
       "section": "Cockpit impact and resonance testing",
@@ -8414,16 +8463,79 @@
     {
       "section": "Cockpit, floor, seats and coaming",
       "rating": "B",
-      "text": "The cockpit shows spider cracks or minor water signs.",
+      "text": "Spider cracks were noted in the cockpit gelcoat, concentrated around [insert location].",
       "phase": "observed",
       "severity": 2
     },
     {
       "section": "Cockpit, floor, seats and coaming",
       "rating": "B",
-      "text": "Monitor and seal to prevent deterioration.",
+      "text": "Spider cracks were noted in the cockpit gelcoat in several areas.",
+      "phase": "observed",
+      "severity": 2
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "B",
+      "text": "The non-skid surfaces were worn and no longer providing adequate grip in wet conditions.",
+      "phase": "observed",
+      "severity": 2
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "B",
+      "text": "A seat locker lid was cracked or poorly fitting.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "B",
+      "text": "A seat locker hinge was loose or corroded.",
+      "phase": "observed",
+      "severity": 2
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "B",
+      "text": "Signs of water ingress were noted around the cockpit coaming at [insert location].",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "B",
+      "text": "The cockpit floor showed flexing underfoot in the area of [insert location].",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "B",
+      "phase": "means",
+      "severity": 2,
+      "text": "Spider cracks are cosmetic but should be monitored to ensure they do not deepen and allow water ingress into the laminate."
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Flexing underfoot may indicate core saturation or delamination and warrants further investigation."
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "B",
+      "text": "Monitor and seal to prevent further deterioration.",
       "phase": "action",
       "severity": 3
+    },
+    {
+      "section": "Cockpit, floor, seats and coaming",
+      "rating": "B",
+      "text": "Renew the non-skid surfaces at the next scheduled service.",
+      "phase": "action",
+      "severity": 2
     },
     {
       "section": "Cockpit drains",
