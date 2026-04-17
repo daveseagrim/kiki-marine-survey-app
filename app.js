@@ -7972,10 +7972,9 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Overall Description of Vessel</label>
-        <button class="btn-secondary" style="margin-bottom:8px;font-size:13px;" onclick="generateVesselDescription()">✨ Auto-Generate Description</button>
-        <textarea id="vesselDescription" rows="8" placeholder="Describe the vessel: hull type/material, rig, keel, propulsion, layout, cabins, history (e.g., freshwater only), any known damage or repairs..." autocapitalize="sentences" oninput="markDescriptionManuallyEdited()"></textarea>
+        <textarea id="vesselDescription" rows="8" placeholder="Auto-generates as you complete the survey. You can also type or edit here — placeholders in [BRACKETS] show what still needs attention." autocapitalize="sentences" oninput="markDescriptionManuallyEdited()"></textarea>
         <div id="placeholderCount" style="font-size:12px;color:#d97706;margin-top:4px;display:none;"></div>
-        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Auto-fills from form data when you save. Edit manually to override — placeholders in [BRACKETS] show what still needs attention.</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Builds automatically from your survey data each time you save. Edit freely to override — auto-updates resume if you clear the field.</div>
       </div>
 
       <h2 class="form-heading">Vessel Documentation</h2>

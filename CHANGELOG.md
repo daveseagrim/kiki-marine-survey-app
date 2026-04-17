@@ -19,6 +19,11 @@ lets you roll back to a specific version with confidence.
 - Now defers the reload until `closeBatchCameraOverlay()` runs (after Done or Close), then reloads to apply the update.
 - Added diagnostic logging to `snapStagedPhoto` (try-catch + console logs) to trace any remaining camera issues.
 
+### Removed "Auto-Generate Description" button
+- The manual "✨ Auto-Generate Description" button on the edit-survey form was removed. It was redundant — the description already auto-generates from survey data each time you save.
+- The button was also error-prone (read DOM fields that might not be loaded, causing crashes).
+- Updated placeholder and helper text to clarify that the description builds automatically on save, and editing the field manually overrides it.
+
 ## v2260 — 2026-04-16
 
 ### Drive "Tap to sign in" from save dialog
