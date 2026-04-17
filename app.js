@@ -5,7 +5,83 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2274';
+const APP_VERSION = 'v2275';
+
+// v2275: Rudder pluralization — adapts labels and snippet text based on
+// survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
+// verb agreement is adjusted ("was" → "were", "is" → "are", etc.).
+// Labels with the template form "Rudder(s)" or "rudder(s)" are resolved to
+// the correct singular or plural.
+function pluralizeRudder(text, rudderCount) {
+  if (!text) return text;
+  const n = parseInt(rudderCount, 10) || 1;
+
+  // 1) Resolve "(s)" markers — "Rudder(s)" → "Rudder" or "Rudders"
+  text = text.replace(/[Rr]udder\(s\)/g, (m) => {
+    const cap = m.charAt(0) === 'R';
+    return n >= 2 ? (cap ? 'Rudders' : 'rudders') : (cap ? 'Rudder' : 'rudder');
+  });
+
+  if (n < 2) return text;
+
+  // ── Plural transforms (only when rudderCount >= 2) ──
+
+  // 1b) "A/an [adjective] rudder" → "[Adjective] rudders" (drop article)
+  //     e.g. "A compromised rudder represents" → "Compromised rudders represent"
+  text = text.replace(/\b[Aa]n?\s+(\w+)\s+rudder\b(?!\s+(?:post|shaft|stock|core|stuffing|blade))/g, (m, adj) => {
+    return adj.charAt(0).toUpperCase() + adj.slice(1) + ' rudders';
+  });
+
+  // 2) "the rudder" → "both rudders"  (but not "the rudder post/shaft/..." yet)
+  text = text.replace(/\b[Tt]he rudder\b(?!\s+(?:post|shaft|stock|core|stuffing|blade))/g, (m) => {
+    return m.charAt(0) === 'T' ? 'Both rudders' : 'both rudders';
+  });
+
+  // 3) "a rudder" / "A rudder" (standalone, not "a rudder post" etc.)
+  text = text.replace(/\b[Aa] rudder\b(?!\s+(?:post|shaft|stock|core|stuffing|blade))/g, (m) => {
+    return m.charAt(0) === 'A' ? 'The rudders' : 'the rudders';
+  });
+
+  // 4) Compound nouns: "rudder post" → "rudder posts", "rudder shaft" →
+  //    "rudder shafts", "rudder stuffing box" → "rudder stuffing boxes",
+  //    "rudder core" → "rudder cores", "rudder blade" → "rudder blades"
+  text = text.replace(/\b(rudder) (post|shaft|stock|core|blade)s?\b/gi, (m, r, noun) => {
+    return r + ' ' + noun + 's';
+  });
+  text = text.replace(/\b(rudder) (stuffing box)(?!es)\b/gi, (m, r, noun) => {
+    return r + ' stuffing boxes';
+  });
+
+  // 5) Remaining standalone "rudder" (not already plural, not before a compound noun)
+  text = text.replace(/\b([Rr])udder\b(?!s)(?!\s+(?:post|shaft|stock|core|stuffing|blade))/g, (m, cap) => {
+    return cap === 'R' ? 'Rudders' : 'rudders';
+  });
+
+  // 6) Verb agreement — ONLY when "rudders" is clearly the sentence
+  //    subject.  We require it to appear at sentence start (after ^, ".",
+  //    "!", or "?") to avoid false positives like "on both rudders was
+  //    intact" where "anti-fouling" is the real subject.
+  //    Covers: "Both rudders was" → "Both rudders were"
+  //            "The rudder posts was" → "The rudder posts were"
+  text = text.replace(/(^|[.!?]\s+)(Both rudders)\s+was\b/gi, '$1$2 were');
+  text = text.replace(/(^|[.!?]\s+)(Both rudders)\s+is\b/gi, '$1$2 are');
+  text = text.replace(/(^|[.!?]\s+)(Both rudders)\s+has\b/gi, '$1$2 have');
+  text = text.replace(/(^|[.!?]\s+)(The rudder (?:posts|shafts|stocks|cores|blades|stuffing boxes))\s+was\b/gi, '$1$2 were');
+
+  // 7) Pronoun agreement: "its" → "their" when preceded by "rudders"
+  //    within a short window (same sentence).
+  text = text.replace(/\b(rudders\b[^.!?]{0,30}?)\bits\b/gi, '$1their');
+
+  // 8) Singular verb after "rudders" as subject: "rudders represents" →
+  //    "rudders represent". Covers common third-person-singular endings.
+  text = text.replace(/\b(rudders)\s+(represents|moves|has)\b/gi, (m, subj, verb) => {
+    const base = verb.toLowerCase();
+    const fixed = base === 'has' ? 'have' : base.replace(/s$/, '');
+    return subj + ' ' + fixed;
+  });
+
+  return text;
+}
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -374,11 +450,16 @@ function classifyRatingForReport(rating) {
 function displayItemLabel(rawLabel, survey) {
   if (!rawLabel) return '';
   const s = survey || window._currentSurveyCache || null;
-  if (!s || typeof window.transformLabelForDisplay !== 'function') return rawLabel;
-  const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
-    ? window.KikiSnippetTokens.contextFromSurvey(s)
-    : { hasRudder: s.hasRudder !== false, rudderCount: s.driveLineCount || 1 };
-  return window.transformLabelForDisplay(rawLabel, ctx);
+  if (!s) return rawLabel;
+  // v2275: apply rudder pluralization to labels even without transformLabelForDisplay
+  let label = rawLabel;
+  if (typeof window.transformLabelForDisplay === 'function') {
+    const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
+      ? window.KikiSnippetTokens.contextFromSurvey(s)
+      : { hasRudder: s.hasRudder !== false, rudderCount: parseInt(s.rudderCount, 10) || 1 };
+    label = window.transformLabelForDisplay(rawLabel, ctx);
+  }
+  return pluralizeRudder(label, s.rudderCount);
 }
 
 // Standards by category — covers all 24 inspection categories
@@ -3432,7 +3513,7 @@ function showNotesSheet(itemLabel, categoryName) {
     if (initialTextareaText && typeof window.expandSnippetTokens === 'function') {
       const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
         ? window.KikiSnippetTokens.contextFromSurvey(survey)
-        : { hasRudder: survey.hasRudder !== false, rudderCount: survey.driveLineCount || 1 };
+        : { hasRudder: survey.hasRudder !== false, rudderCount: parseInt(survey.rudderCount, 10) || 1 };
       initialTextareaText = window.expandSnippetTokens(initialTextareaText, ctx);
     }
 
@@ -3540,7 +3621,7 @@ function showNotesSheet(itemLabel, categoryName) {
         // preserved on the real objects for insertion-time expansion.
         const _expandCtx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
           ? window.KikiSnippetTokens.contextFromSurvey(survey)
-          : { hasRudder: survey && survey.hasRudder !== false, rudderCount: (survey && survey.driveLineCount) || 1 };
+          : { hasRudder: survey && survey.hasRudder !== false, rudderCount: (survey && parseInt(survey.rudderCount, 10)) || 1 };
         const sheetVariantsForDisplay = (typeof window.expandSnippetTokens === 'function')
           ? sheetVariants.map(v => Object.assign({}, v, { text: window.expandSnippetTokens(v.text, _expandCtx) }))
           : sheetVariants;
@@ -3843,9 +3924,11 @@ function showNotesSheet(itemLabel, categoryName) {
           if (typeof window.expandSnippetTokens === 'function' && survey) {
             const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
               ? window.KikiSnippetTokens.contextFromSurvey(survey)
-              : { hasRudder: survey.hasRudder !== false, rudderCount: survey.driveLineCount || 1 };
+              : { hasRudder: survey.hasRudder !== false, rudderCount: parseInt(survey.rudderCount, 10) || 1 };
             variantTextForDisplay = window.expandSnippetTokens(variant.text, ctx);
           }
+          // v2275: Pluralize plain-text rudder references based on rudderCount
+          variantTextForDisplay = pluralizeRudder(variantTextForDisplay, survey.rudderCount);
           const isActive = itemData.text === variantTextForDisplay || itemData.text === variant.text;
           // If the variant still uses other token syntax after rudder expansion,
           // render a clean preview instead of showing raw {count:...}/{any:...}.
@@ -4134,7 +4217,7 @@ function showNotesSheet(itemLabel, categoryName) {
         typeof window.expandSnippetTokens === 'function') {
       const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
         ? window.KikiSnippetTokens.contextFromSurvey(survey)
-        : { hasRudder: survey.hasRudder !== false, rudderCount: survey.driveLineCount || 1 };
+        : { hasRudder: survey.hasRudder !== false, rudderCount: parseInt(survey.rudderCount, 10) || 1 };
       const cleaned = window.expandSnippetTokens(ta.value, ctx);
       if (cleaned !== ta.value) {
         ta.value = cleaned;
@@ -4277,9 +4360,11 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
     if (typeof window.expandSnippetTokens === 'function' && survey) {
       const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
         ? window.KikiSnippetTokens.contextFromSurvey(survey)
-        : { hasRudder: survey.hasRudder !== false, rudderCount: survey.driveLineCount || 1 };
+        : { hasRudder: survey.hasRudder !== false, rudderCount: parseInt(survey.rudderCount, 10) || 1 };
       resolved = window.expandSnippetTokens(resolved, ctx);
     }
+    // v2275: Pluralize plain-text rudder references based on rudderCount
+    if (survey) resolved = pluralizeRudder(resolved, survey.rudderCount);
     // For per-drive-line expanded items, inject the side qualifier into
     // the first instance of the subject noun so the sentence reads
     // "The port propeller..." instead of "The propeller...".
@@ -7074,6 +7159,7 @@ function createNewSurvey(formData) {
     deckColour: formData.deckColour,
     keelType: formData.keelType,
     numberCabins: formData.numberCabins,
+    rudderCount: parseInt(formData.rudderCount, 10) || 1,
     electricalSystem: formData.electricalSystem,
     changesToPlan: formData.changesToPlan,
 
@@ -7651,6 +7737,14 @@ function renderNewSurveyForm() {
           <option value="5">5</option>
           <option value="6">6</option>
           <option value="7+">7+</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Number of Rudders</label>
+        <select id="rudderCount">
+          <option value="1">1</option>
+          <option value="2">2</option>
         </select>
       </div>
 
@@ -8738,6 +8832,7 @@ function editSurveyDetails(surveyId) {
         deckColour: survey.deckColour,
         keelType: survey.keelType,
         numberCabins: survey.numberCabins,
+        rudderCount: survey.rudderCount || '1',
         electricalSystem: survey.electricalSystem,
         changesToPlan: survey.changesToPlan,
         personsInAttendance: survey.personsInAttendance,
@@ -8994,6 +9089,7 @@ function saveSurveyDetails(surveyId) {
       deckColour: document.getElementById('deckColour')?.value || '',
       keelType: document.getElementById('keelType')?.value || '',
       numberCabins: document.getElementById('numberCabins')?.value || '',
+      rudderCount: parseInt(document.getElementById('rudderCount')?.value, 10) || 1,
       electricalSystem: document.getElementById('electricalSystem')?.value || '',
       changesToPlan: document.getElementById('changesToPlan')?.value || '',
       personsInAttendance: document.getElementById('personsInAttendance')?.value || '',
@@ -9581,6 +9677,12 @@ function applyBoatSpecs(specs) {
         updateBoatStyleOptions();
       }
     }
+  }
+
+  // v2275: Auto-fill rudder count from specs database
+  if (specs.rudderCount) {
+    const rudderEl = document.getElementById('rudderCount');
+    if (rudderEl) rudderEl.value = String(specs.rudderCount);
   }
 
   // Show draft variant note if the boat has multiple keel/draft options
@@ -11050,6 +11152,7 @@ function startNewSurvey() {
     deckColour: document.getElementById('deckColour')?.value || '',
     keelType: document.getElementById('keelType')?.value || '',
     numberCabins: document.getElementById('numberCabins')?.value || '',
+    rudderCount: parseInt(document.getElementById('rudderCount')?.value, 10) || 1,
     electricalSystem: document.getElementById('electricalSystem')?.value || '',
     changesToPlan: document.getElementById('changesToPlan')?.value || '',
 
@@ -14121,7 +14224,7 @@ async function toggleRemainingList(accordion) {
     popover.style.cssText = 'padding:8px 14px 10px 28px;background:#fef9f9;border-top:1px solid #fecaca;border-bottom:1px solid #fecaca;font-size:13px;';
     const linksHtml = remainingLabels.map(lbl => {
       const safe = String(lbl).replace(/"/g, '&quot;');
-      const display = String(lbl).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const display = String(typeof displayItemLabel === 'function' ? displayItemLabel(lbl, survey) : lbl).replace(/</g, '&lt;').replace(/>/g, '&gt;');
       return `<a href="#" role="button"
                  onclick="event.preventDefault(); event.stopPropagation(); jumpToChecklistItem(this.getAttribute('data-item-label')); return false;"
                  data-item-label="${safe}"
@@ -17557,7 +17660,7 @@ function insertSnippet(itemLabel, categoryName, text, cardEl, placeholdersJson) 
     if (typeof window.expandSnippetTokens === 'function' && survey) {
       const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
         ? window.KikiSnippetTokens.contextFromSurvey(survey)
-        : { hasRudder: survey.hasRudder !== false, rudderCount: survey.driveLineCount || 1 };
+        : { hasRudder: survey.hasRudder !== false, rudderCount: parseInt(survey.rudderCount, 10) || 1 };
       resolved = window.expandSnippetTokens(resolved, ctx);
     }
     if (sideWord) {
@@ -19863,7 +19966,7 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
           propulsionHeaderHtml = narrHtml + specTableHtml;
         }
 
-        html += `<h2>${esc(category.name)}</h2>${propulsionHeaderHtml}`;
+        html += `<h2>${esc(pluralizeRudder(category.name, survey.rudderCount))}</h2>${propulsionHeaderHtml}`;
 
         completedItems.forEach(item => {
           const itemData = survey.items[item.label];
@@ -19938,7 +20041,7 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     ${outdriveInfoHtml}
     ${winchInfoHtml}
     ${mastOptionsHtml}
-    ${itemData.text ? `<p>${esc(cleanupTypos(depersonalise(dedup(itemData.text))))}</p>` : ''}
+    ${itemData.text ? `<p>${esc(pluralizeRudder(cleanupTypos(depersonalise(dedup(itemData.text))), survey.rudderCount))}</p>` : ''}
     ${(() => {
       if (!(ratingLabel.startsWith('A') || ratingLabel.startsWith('B'))) return '';
       const _merged = mergeTextStandards(itemData.standards, itemData.text);
@@ -20151,7 +20254,7 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
   // pointing the reader to the full observation + photos in the Detailed
   // Survey Findings section above.
   function renderFinding(f, color, severity) {
-    const briefText = truncateForFR(cleanupTypos(depersonalise(dedup(f.text || ''))));
+    const briefText = pluralizeRudder(truncateForFR(cleanupTypos(depersonalise(dedup(f.text || '')))), survey.rudderCount);
     // v2240: cross-reference sentences removed ("See full observation and
     // N photos in Detailed Survey Findings → ...") — unnecessary on paper.
     return `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid ${color};">
@@ -20189,7 +20292,7 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     html += `<p style="font-size:9pt;color:#555;margin-bottom:8px;">The following ${findings.C.length} items were found to be in serviceable condition. Full observations appear in the Detailed Survey Findings section.</p>`;
     html += `<table style="font-size:9pt;"><tr><th style="width:60px;">Finding</th><th>Item</th><th>Summary</th></tr>`;
     findings.C.forEach(f => {
-      const _cBrief = truncateForFR(cleanupTypos(depersonalise(dedup(f.text || ''))));
+      const _cBrief = pluralizeRudder(truncateForFR(cleanupTypos(depersonalise(dedup(f.text || '')))), survey.rudderCount);
       html += `<tr>
         <td style="font-weight:bold;color:#16a34a;">${f.code}</td>
         <td>${esc(displayItemLabel(f.label, survey))}</td>

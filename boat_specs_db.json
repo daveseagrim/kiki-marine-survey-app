@@ -911,6 +911,7 @@
       "hullType": "Displacement",
       "keelType": "Fin",
       "construction": "Fibreglass",
+      "rudderCount": 2,
       "draftVariants": [
         {
           "keel": "Standard fin keel",

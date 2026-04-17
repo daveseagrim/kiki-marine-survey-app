@@ -12,6 +12,28 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2275 — 2026-04-16
+### Added
+- **Rudder count selector** — new "Number of Rudders" dropdown on the vessel info
+  screen (1 or 2). Stored as `survey.rudderCount`.
+- **Specs auto-fill for rudder count** — Oceanis 38 (and future entries) in
+  `boat_specs_db.json` can carry `rudderCount`; auto-filled on specs apply.
+- **Rudder pluralization throughout the app** — `pluralizeRudder()` function
+  transforms all displayed labels and snippet text based on rudderCount:
+  - Labels: "Rudder(s) condition" → "Rudder condition" or "Rudders condition"
+  - Snippet text: "The rudder was" → "Both rudders were"; "rudder post" →
+    "rudder posts"; "rudder stuffing box" → "rudder stuffing boxes"; verb
+    agreement (was/were, is/are, has/have) auto-corrected.
+  - Applied in: inspection view labels, notes sheet title, text library snippet
+    cards, snippet insertion, report body text, report findings, report category
+    headers, items-left popover.
+- Internal labels retain the `(s)` form as the canonical storage key; only the
+  display layer resolves singular/plural. Existing survey data is unaffected.
+- Fixed stale `rudderCount: survey.driveLineCount` fallback in all seven
+  token-expansion call sites — now correctly reads `survey.rudderCount`.
+
+---
+
 ## v2274 — 2026-04-16
 ### Fixed
 - **Save status pill disappeared** — `ensureReportButton()` guarded on a stale
