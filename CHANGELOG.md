@@ -12,6 +12,11 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2268 — 2026-04-16
+
+### Hotfix — Blank screen on load
+- `const accordion` was declared twice in `updateCategoryHeader`, causing a SyntaxError that prevented app.js from loading. Removed the duplicate declaration (reuses the existing one from earlier in the function).
+
 ## v2267 — 2026-04-16
 
 ### Fix — Category header layout (take 3)

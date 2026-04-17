@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2267';
+const APP_VERSION = 'v2268';
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
 window.addEventListener('error', (e) => {
@@ -17384,7 +17384,6 @@ function updateCategoryHeader(survey, categoryName) {
   }
 
   // Update the "Show items left" toggle (sits between header and content)
-  const accordion = header.closest('.category-accordion');
   const existingShowBtn = accordion ? accordion.querySelector(':scope > .remaining-btn') : null;
   if (allExcluded || isComplete) {
     if (existingShowBtn) existingShowBtn.remove();
