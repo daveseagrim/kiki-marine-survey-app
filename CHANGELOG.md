@@ -12,6 +12,12 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2267 — 2026-04-16
+
+### Fix — Category header layout (take 3)
+- Separated concerns: "N left" is now plain text right-aligned in the header (no click handler, no arrow inside the button). The "▾ Show items left" toggle is a separate `<div>` OUTSIDE the `<button>` element, between the header and the accordion content. This avoids all nested-interactive-element issues that were causing stray ▾ rendering on iOS Safari.
+- Toggle text flips between "▾ Show items left" and "▴ Hide items".
+
 ## v2266 — 2026-04-16
 
 ### Fix — Progress text now actually on the same line as category title
