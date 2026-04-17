@@ -12,6 +12,11 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2271 — 2026-04-16
+
+### UI — Move save status pill to bottom
+- Moved the "Saved Xm ago · N 📷 🔥" pill from the top-right corner to the bottom-right, just above the bottom bar. Frees up the crowded header area.
+
 ## v2270 — 2026-04-16
 
 ### UI — Vessel Type label cleanup
