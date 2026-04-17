@@ -12,6 +12,18 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2296 — 2026-04-16
+
+### Changed
+- **Cockpit drains — proper surveyor language with drain count.** Replaced
+  "found to be in order" with proper descriptions: "free of debris and drained
+  the cockpit properly", "drain hoses in serviceable condition". Added
+  `[insert count]` sentence: "The cockpit was fitted with [#] drains." so the
+  surveyor can specify how many. Separated the "under the engine lid" location
+  sentence from the function sentence so they can be composed independently.
+
+---
+
 ## v2295 — 2026-04-16
 
 ### Changed

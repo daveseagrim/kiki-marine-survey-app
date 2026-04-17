@@ -8019,16 +8019,30 @@
     {
       "section": "Cockpit drains",
       "rating": "C",
-      "text": "The cockpit drains were located under the engine lid, discharged to outlets in the hull, and were functioning as intended.",
+      "text": "The cockpit was fitted with [insert count] drains.",
       "phase": "observed",
-      "severity": 3
+      "severity": 1
     },
     {
       "section": "Cockpit drains",
       "rating": "C",
-      "text": "The cockpit drains were found to be in order.",
+      "text": "The cockpit drains were located under the engine lid and discharged to outlets in the hull.",
       "phase": "observed",
-      "severity": 3
+      "severity": 2
+    },
+    {
+      "section": "Cockpit drains",
+      "rating": "C",
+      "text": "The drains were free of debris and drained the cockpit properly.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Cockpit drains",
+      "rating": "C",
+      "text": "The drain hoses were in serviceable condition with secure clamp connections.",
+      "phase": "observed",
+      "severity": 2
     },
     {
       "section": "Cockpit table",
