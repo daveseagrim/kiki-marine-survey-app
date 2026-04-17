@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2279';
+const APP_VERSION = 'v2281';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -7353,7 +7353,7 @@ function renderHome() {
            onerror="this.style.display='none'">
       <div style="flex:1;min-width:0;">
         <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Kiki Marine Surveys</div>
-        <div class="header-subtitle">Condition &amp; Value — ${APP_VERSION}</div>
+        <div class="header-subtitle">Condition &amp; Value — <span onclick="forceAppUpdate()" style="cursor:pointer;text-decoration:underline dotted;color:#3b82f6;" title="Tap to check for updates">${APP_VERSION}</span></div>
       </div>
       <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
     </div>
@@ -7568,7 +7568,7 @@ function renderNewSurveyForm() {
       <button class="header-back" onclick="confirmAbandonNewSurvey()" style="flex-shrink:0;">←</button>
       <div style="flex:1;min-width:0;">
         <div class="header-title" style="color:#066aab;">New Survey</div>
-        <div class="header-subtitle" style="color:#3399cc;">${APP_VERSION}</div>
+        <div class="header-subtitle" style="color:#3399cc;"><span onclick="forceAppUpdate()" style="cursor:pointer;text-decoration:underline dotted;" title="Tap to check for updates">${APP_VERSION}</span></div>
       </div>
       <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
     </div>
@@ -8859,7 +8859,7 @@ function editSurveyDetails(surveyId) {
         <button class="header-back" onclick="returnToInspection('${survey.id}')" style="flex-shrink:0;">←</button>
         <div style="flex:1;min-width:0;">
           <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${(survey.vesselName || 'Survey').replace(/</g, '&lt;')}</div>
-          <div class="header-subtitle">Edit Vessel Information — ${APP_VERSION}</div>
+          <div class="header-subtitle">Edit Vessel Information — <span onclick="forceAppUpdate()" style="cursor:pointer;text-decoration:underline dotted;color:#3b82f6;" title="Tap to check for updates">${APP_VERSION}</span></div>
         </div>
         <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
       `;
@@ -11620,7 +11620,7 @@ function renderInspection(survey) {
       <button class="header-back" onclick="backToHome()" style="flex-shrink:0;margin-left:2px;">←</button>
       <div style="flex:1;min-width:0;margin-left:4px;">
         <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#066aab;font-size:17px;">${esc(survey.vesselName)}</div>
-        <div style="font-size:10px;color:#9ca3af;">${APP_VERSION}</div>
+        <div style="font-size:10px;color:#9ca3af;"><span onclick="forceAppUpdate()" style="cursor:pointer;text-decoration:underline dotted;color:#3b82f6;" title="Tap to check for updates">${APP_VERSION}</span></div>
       </div>
       <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
     </div>

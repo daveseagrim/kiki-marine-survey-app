@@ -12,6 +12,27 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2281 — 2026-04-16
+
+### Fixed
+- **Hull percussion/impact testing snippets now mention rudder(s).** Six
+  sentences in the "Hull and rudder(s) impact and resonance testing" section
+  of `text_library.json` only referenced "the hull" — now they say "the hull
+  and rudder(s)". The `pluralizeRudder()` function resolves `(s)` based on
+  rudderCount (1 → "rudder", 2 → "rudders").
+
+---
+
+## v2280 — 2026-04-16
+
+### Changed
+- **Tapping the version number on any page now triggers a force-update.** The
+  version label is tappable (blue, dotted underline) on the survey list, new
+  survey, edit vessel info, and inspection checklist pages. Tapping it checks
+  for a new service worker, downloads it, and reloads the app.
+
+---
+
 ## v2279 — 2026-04-16
 
 ### Fixed

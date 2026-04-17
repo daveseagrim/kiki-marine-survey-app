@@ -250,14 +250,14 @@
       "rating": "A",
       "phase": "observed",
       "severity": 1,
-      "text": "Impact and resonance testing was carried out across the hull."
+      "text": "Impact and resonance testing was carried out across the hull and rudder(s)."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
       "rating": "A",
       "phase": "observed",
       "severity": 5,
-      "text": "Percussion testing produced a dull thud across significant areas of the hull."
+      "text": "Percussion testing produced a dull thud across significant areas of the hull and rudder(s)."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
@@ -313,7 +313,7 @@
       "rating": "B",
       "phase": "observed",
       "severity": 1,
-      "text": "Impact and resonance testing was carried out across the hull."
+      "text": "Impact and resonance testing was carried out across the hull and rudder(s)."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
@@ -376,21 +376,21 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "Impact and resonance testing was carried out across the hull."
+      "text": "Impact and resonance testing was carried out across the hull and rudder(s)."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "Percussion testing of the hull produced a clear and even tone throughout."
+      "text": "Percussion testing of the hull and rudder(s) produced a clear and even tone throughout."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "No hollow-sounding or dull areas were detected during impact testing."
+      "text": "No hollow-sounding or dull areas were detected during impact testing of the hull and rudder(s)."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
