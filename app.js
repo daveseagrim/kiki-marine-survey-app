@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2348';
+const APP_VERSION = 'v2350';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4708,7 +4708,37 @@ window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
   });
   // v2308: prepend any hand-typed text the user wrote before ticking snippets
   const _manualKey = sanitizedLabel;
-  const _prefix = (_kkManualTextPrefix[_manualKey] || '').trim();
+  let _prefix = (_kkManualTextPrefix[_manualKey] || '').trim();
+  // v2350: defensive dedupe. _kkStampCheckOrder and _kkAutoCheckSavedSentences
+  // can't match chips that still carry [insert ...]/[describe ...]/[side]/
+  // [appliance]/[compressor] placeholders in the raw entry text against the
+  // filled-in saved textarea value, so the saved chip text leaks into the
+  // "manual prefix" bucket. Without this strip, the prefix then prepends the
+  // same sentence the user just re-ticked, producing 2×/3×/4× duplicates
+  // after successive save → reopen → tick cycles.
+  //
+  // Build a tolerant regex from each currently-ticked, resolved sentence:
+  // - escape all regex metachars so the sentence matches literally,
+  // - then swap the ESCAPED placeholder tokens back to `.*?` so the prefix
+  //   match tolerates whatever value the user typed previously.
+  if (_prefix && parts.length) {
+    const _escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    parts.forEach(p => {
+      if (!p) return;
+      const pattern = _escRe(p)
+        .replace(/\\\[insert reading range\\\]/g, '.*?')
+        .replace(/\\\[insert count\\\]/g, '.*?')
+        .replace(/\\\[insert (?:location\\\(s\\\)|locations|location)\\\]/g, '.*?')
+        .replace(/\\\[describe area\\\(s\\\)\\\]/g, '.*?')
+        .replace(/\\\[side\\\]/g, '.*?')
+        .replace(/\\\[appliance\\\]/g, '.*?')
+        .replace(/\\\[compressor\\\]/g, '.*?');
+      try {
+        const re = new RegExp(pattern, 'g');
+        _prefix = _prefix.replace(re, '').replace(/\s{2,}/g, ' ').trim();
+      } catch (_) { /* malformed pattern — skip this sentence */ }
+    });
+  }
   const snippetText = parts.join(' ');
   ta.value = _prefix ? (_prefix + ' ' + snippetText) : snippetText;
   ta.style.height = 'auto';

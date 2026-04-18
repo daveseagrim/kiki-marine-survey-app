@@ -12,6 +12,39 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2350 — 2026-04-18
+### Changed
+- **`Hull and rudder(s) conductivity testing` chips split — hull and rudder now separate chips.** The combined-phrasing chips forced the surveyor to tick both hull and rudder together even when only one was elevated, which made the sentence picker awkward when (for example) only the hull showed elevated readings. Split treatment at two rating levels:
+  - B / observed: `The hull and rudder(s) returned elevated readings of [insert reading range].` → replaced with a hull-only variant (`The hull returned elevated readings of [insert reading range].`). The matching rudder-only chip was already present (`The rudder(s) returned elevated readings of [insert reading range].`).
+  - B / observed: `Localized elevated readings of [insert reading range] were observed in several areas of the hull and rudder(s).` → split into two chips, hull-only and rudder-only (`…in several areas of the hull.` / `…in several areas of the rudder(s).`).
+  - A / observed: `The hull and rudder(s) returned readings consistently at or near 999 across large areas.` → replaced with hull-only variant (`The hull returned readings…`). Matching rudder-only chip was already present.
+- Means-column chips that describe the overall narrative assessment (e.g. `"…consistent with vessels of similar age and construction."`) are intentionally left combined — those sentences read better as a unified summary than as two parallel fragments.
+
+### Removed
+- **`Hull and rudder(s) conductivity testing` / B / observed — `No softness or delamination was observed at the time of survey.`** This was a blanket assurance that implied percussion-level confidence the conductivity test does not actually provide, so it could overstate the surveyor's findings. Dropped. Other sections that speak of softness/delamination as an explicit future-monitoring action (swim platform, aft deck conductivity, cockpit conductivity) are untouched.
+- **Exact-duplicate chip entries removed from `text_library.json`** (43 total). Running the same dedup key (section + rating + phase + text) across all 16 groups surfaced entries that were copy-pasted 2× or 3× into the same bucket and would have rendered as duplicate chips in the sentence picker:
+  - `Wiper blade operation` (Gauges and Instrumentation) — 15 chips each carried 3 copies (A/B/C observed, A means, A/B action). The worst single offender was `Not tested / observed` at 2 copies.
+  - `Sail drive(s) - (external)` (Hull) — 4 chips duplicated (A action, A observed, C action ×3, C means).
+  - `Outdrive(s) - (external)` (Hull) — `C action` "No corrective action is recommended at this time." appeared 2×.
+  - `Trim tabs (exterior tabs, actuators, mounts)` (Hull) — `C action` "No corrective action is recommended at this time." appeared 2×.
+  - `Freshwater tank and plumbing` (Fuel & Tanks) — `Not tested / observed` "No leakage was observed." appeared 2×.
+  - `Deck and coachroof/pilot house condition` (Deck) — `C action` "No corrective action is recommended at this time." appeared 2×.
+  - `Deck hatch(es), windows and portholes` (Deck) — `B action` "Address this at the next scheduled service." appeared 2×.
+- **Engine condition plural/singular dedupe.** Removed the two plural variants `The engines exhibited a moderate level of cleanliness.` and `The engines were damaged or non-functional.` from the `Engine condition` section. The singular forms (`The engine exhibited…` / `The engine was damaged…`) are kept. Rationale: twin-engine surveys already expand to `Port — Engine condition` / `Starboard — Engine condition`, each describing ONE engine, so singular is always the correct form after the v2216 per-drive-line expansion landed. Plural was legacy content from before the expansion.
+- `text_library.json` total entries down from 3,901 to 3,858. No surviving exact duplicates (verified with a Counter sweep across every group).
+
+### Fixed
+- **Chip text duplication on save → reopen → tick.** Ticking a sentence chip could produce 2×, 3×, or 4× copies of the same text in the notes textarea after successive save → reopen → tick cycles. Root cause: `_kkStampCheckOrder` and `_kkAutoCheckSavedSentences` could not match chips that still carry `[insert location]` / `[insert count]` / `[describe area(s)]` / `[side]` / `[appliance]` / `[compressor]` placeholders against the filled-in saved text. The chip text then leaked into the manual-prefix bucket, and the next tick prepended the prefix on top of the freshly-inserted chip — compounding on every reopen.
+- Fix: in `_kkRebuildFromSentencePicker`, defensively dedupe the prefix by building a tolerant regex from each currently-ticked resolved sentence (placeholders swapped back to `.*?`) and stripping matches from the prefix before concatenation. The chip tick no longer double-prepends, regardless of how many prior save/reopen cycles occurred.
+- Reported on Brightwork B (4× "The brightwork at several locations (see pictures) was deteriorated…") and Bundling support and wiring A (4× "Wiring at several locations was unsecured…"). Both share the same placeholder-chip pattern and both reproduce the fix.
+
+### Changed
+- **Library language polish: `was` / `looked` → `appeared`.** Swept `text_library.json` end-to-end converting visual-condition verbs from "was" / "looked" to "appeared" where the verb describes an observed condition (e.g. "oil was clean" → "oil appeared clean", "hull looked sound" → "hull appeared sound"). ~135 `was` lines and 4 `looked` lines changed across Hull, Running gear, Anodes, Rigging/Sails, Deck/Cockpit/Flybridge, Cabin/Interior, Heads/Plumbing, Engine/Drivetrain, Electrical, Safety, Deck fittings/Pulpit/Rails/Arch/Windows/Hatches.
+- Preserved intentionally: passives ("was observed", "was noted"), operational state ("was not tested", "was not serviceable", "was not functional"), factual installation/construction ("was installed", "was fitted", "was encapsulated"), situational ("was out of the water", "was ashore", "was stationary"), standards/specs, and "As this was a visual observation only…" (reclassified separately in a later version).
+- JSON validated end-to-end via `JSON.parse`. `looked` now at 0 occurrences; `appeared` up from ~230 to 353.
+
+---
+
 ## v2348 — 2026-04-18
 ### Changed
 - **Twin-engine `[side]` auto-fill.** On per-drive-line items — those prefixed `Port — `, `Starboard — `, or `#N — ` — snippets containing the `[side]` placeholder now auto-resolve to the item's side (port/starboard/#N) instead of rendering a port/starboard/both dropdown. The surveyor no longer has to pick a side on a card whose title already names it. Three sites updated in `app.js` so render, insert, and auto-check stay in sync:

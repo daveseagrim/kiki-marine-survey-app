@@ -82,28 +82,28 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The hull was in good order with no visible damage."
+      "text": "The hull appeared in good order with no visible damage."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The hull was in good overall condition with only cosmetic wear."
+      "text": "The hull appeared in good overall condition with only cosmetic wear."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The hull was in acceptable condition for normal use."
+      "text": "The hull appeared in acceptable condition for normal use."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The hull was suitable without structural concern."
+      "text": "The hull appeared suitable without structural concern."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
@@ -186,7 +186,7 @@
       "section": "Hull(s) condition (below the waterline)",
       "rating": "B",
       "phase": "means",
-      "text": "The damage was cosmetic and not structurally concerning.",
+      "text": "The damage appeared cosmetic and not structurally concerning.",
       "severity": 1
     },
     {
@@ -417,7 +417,7 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "A",
       "phase": "observed",
-      "text": "The hull and rudder(s) returned readings consistently at or near 999 across large areas.",
+      "text": "The hull returned readings consistently at or near 999 across large areas.",
       "severity": 5
     },
     {
@@ -487,7 +487,7 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "observed",
-      "text": "The hull and rudder(s) returned elevated readings of [insert reading range].",
+      "text": "The hull returned elevated readings of [insert reading range].",
       "severity": 3
     },
     {
@@ -501,7 +501,14 @@
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
       "phase": "observed",
-      "text": "Localized elevated readings of [insert reading range] were observed in several areas of the hull and rudder(s).",
+      "text": "Localized elevated readings of [insert reading range] were observed in several areas of the hull.",
+      "severity": 2
+    },
+    {
+      "section": "Hull and rudder(s) conductivity testing",
+      "rating": "B",
+      "phase": "observed",
+      "text": "Localized elevated readings of [insert reading range] were observed in several areas of the rudder(s).",
       "severity": 2
     },
     {
@@ -524,13 +531,6 @@
       "phase": "action",
       "text": "These findings suggested early-stage moisture absorption that should be addressed proactively.",
       "severity": 3
-    },
-    {
-      "section": "Hull and rudder(s) conductivity testing",
-      "rating": "B",
-      "phase": "observed",
-      "text": "No softness or delamination was observed at the time of survey.",
-      "severity": 1
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
@@ -675,7 +675,7 @@
     {
       "section": "Keel and keel joint",
       "rating": "C",
-      "text": "The keel was encapsulated and was intact and in good order.",
+      "text": "The keel was encapsulated and appeared intact and in good order.",
       "phase": "observed",
       "severity": 1
     },
@@ -766,21 +766,21 @@
     {
       "section": "Transducers (speed, depth, etc.)",
       "rating": "C",
-      "text": "The speed wheel turned freely, and the installation was in acceptable condition.",
+      "text": "The speed wheel turned freely, and the installation appeared in acceptable condition.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Transducers (speed, depth, etc.)",
       "rating": "C",
-      "text": "The transducer face was clean and free of marine growth.",
+      "text": "The transducer face appeared clean and free of marine growth.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Transducers (speed, depth, etc.)",
       "rating": "C",
-      "text": "The installation was in good working order.",
+      "text": "The installation appeared in good working order.",
       "phase": "observed",
       "severity": 3
     },
@@ -808,14 +808,14 @@
     {
       "section": "Skeg(s)",
       "rating": "C - single, bronze",
-      "text": "The inlaid bronze skeg was solidly mounted and in acceptable condition.",
+      "text": "The inlaid bronze skeg appeared solidly mounted and in acceptable condition.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Skeg(s)",
       "rating": "C - single, stainless steel",
-      "text": "The stainless steel skeg was solidly mounted to the hull with no visible distortion or corrosion at the attachment point.",
+      "text": "The stainless steel skeg appeared solidly mounted to the hull with no visible distortion or corrosion at the attachment point.",
       "phase": "observed",
       "severity": 1
     },
@@ -836,7 +836,7 @@
     {
       "section": "Skeg(s)",
       "rating": "B - stainless steel",
-      "text": "The stainless steel skeg was solidly mounted; however, surface corrosion and/or tea staining was observed at the weld seams.",
+      "text": "The stainless steel skeg appeared solidly mounted; however, surface corrosion and/or tea staining was observed at the weld seams.",
       "phase": "observed",
       "severity": 3
     },
@@ -955,7 +955,7 @@
     {
       "section": "Cutlass bearing(s)",
       "rating": "C - regular diameter",
-      "text": "The rubber flutes remained defined and the bearing was providing adequate shaft support.",
+      "text": "The rubber flutes remained defined and the bearing appeared to provide adequate shaft support.",
       "phase": "observed",
       "severity": 1
     },
@@ -1039,7 +1039,7 @@
     {
       "section": "Bow thruster",
       "rating": "A",
-      "text": "The bow thruster gear leg was solid and the propeller rotated freely.",
+      "text": "The bow thruster gear leg appeared solid and the propeller rotated freely.",
       "phase": "observed",
       "severity": 3
     },
@@ -1053,14 +1053,14 @@
     {
       "section": "Bow thruster",
       "rating": "B",
-      "text": "The bow thruster gear leg was solid and the propeller rotated freely.",
+      "text": "The bow thruster gear leg appeared solid and the propeller rotated freely.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Bow thruster",
       "rating": "C",
-      "text": "The bow thruster gear leg was solid and the propeller rotated freely.",
+      "text": "The bow thruster gear leg appeared solid and the propeller rotated freely.",
       "phase": "observed",
       "severity": 3
     },
@@ -1081,28 +1081,28 @@
     {
       "section": "Transom",
       "rating": "C - with door",
-      "text": "The door was firmly mounted on its hinges and functioned properly.",
+      "text": "The door appeared firmly mounted on its hinges and functioned properly.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Transom",
       "rating": "C - integrated lazarette",
-      "text": "The transom was intact and in good order with a properly functioning lazarette that housed the AC power inputs.",
+      "text": "The transom appeared intact and in good order with a properly functioning lazarette that housed the AC power inputs.",
       "phase": "observed",
       "severity": 1
     },
     {
       "section": "Transom",
       "rating": "C - minor repairs",
-      "text": "Despite some minor repairs in [insert location], the transom was in proper working condition.",
+      "text": "Despite some minor repairs in [insert location], the transom appeared in proper working condition.",
       "phase": "observed",
       "severity": 2
     },
     {
       "section": "Transom",
       "rating": "C",
-      "text": "The transom was in satisfactory condition.",
+      "text": "The transom appeared in satisfactory condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -1116,7 +1116,7 @@
     {
       "section": "Transom",
       "rating": "C",
-      "text": "The integrated swim platform was in good condition with no structural concerns.",
+      "text": "The integrated swim platform appeared in good condition with no structural concerns.",
       "phase": "observed",
       "severity": 1
     },
@@ -1272,7 +1272,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The hull exterior above the waterline was in good overall condition."
+      "text": "The hull exterior above the waterline appeared in good overall condition."
     },
     {
       "section": "Hull exterior above the waterline",
@@ -1286,7 +1286,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The gelcoat was in good condition with no visible cracking or damage."
+      "text": "The gelcoat appeared in good condition with no visible cracking or damage."
     },
     {
       "section": "Hull exterior above the waterline",
@@ -1307,7 +1307,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The hull exterior was in sound condition."
+      "text": "The hull exterior appeared in sound condition."
     },
     {
       "section": "Hull exterior above the waterline",
@@ -1445,21 +1445,21 @@
     {
       "section": "Rub rail",
       "rating": "B",
-      "text": "The remaining rub rail was solidly affixed and serviceable.",
+      "text": "The remaining rub rail appeared solidly affixed and serviceable.",
       "phase": "observed",
       "severity": 1
     },
     {
       "section": "Rub rail",
       "rating": "C",
-      "text": "The rub rail was solidly affixed to the hull and deck joint and was in acceptable condition.",
+      "text": "The rub rail appeared solidly affixed to the hull and deck joint and appeared in acceptable condition.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Hull–deck joint (exterior)",
       "rating": "C",
-      "text": "The hull and deck joint was intact and in satisfactory condition.",
+      "text": "The hull and deck joint appeared intact and in satisfactory condition.",
       "phase": "observed",
       "severity": 1
     },
@@ -1669,7 +1669,7 @@
     {
       "section": "Exhaust discharge position and condition",
       "rating": "A",
-      "text": "The exhaust discharge was blocked or restricted.",
+      "text": "The exhaust discharge appeared blocked or restricted.",
       "phase": "observed",
       "severity": 4
     },
@@ -1748,13 +1748,6 @@
       "rating": "A",
       "text": "The sail drive exhibited severe corrosion or the seal was compromised.",
       "phase": "means",
-      "severity": 5
-    },
-    {
-      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
-      "rating": "A",
-      "text": "Immediate professional inspection and repair is required before the vessel is launched.",
-      "phase": "action",
       "severity": 5
     },
     {
@@ -1972,7 +1965,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The drive {drives:housing was|housings were} free of impact damage and corrosion."
+      "text": "The drive {drives:housing appeared|housings appeared} free of impact damage and corrosion."
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
@@ -2000,14 +1993,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The {drives:propeller was|propellers were} in good condition and secure on the {drives:shaft|shafts}."
+      "text": "The {drives:propeller appeared|propellers appeared} in good condition and secure on the {drives:shaft|shafts}."
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The paint on the drive {drives:housing was|housings were} intact."
+      "text": "The paint on the drive {drives:housing appeared|housings appeared} intact."
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
@@ -2021,7 +2014,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The {drives:outdrive was|outdrives were} in overall sound condition."
+      "text": "The {drives:outdrive appeared|outdrives appeared} in overall sound condition."
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
@@ -2061,7 +2054,7 @@
     {
       "section": "Stern thruster",
       "rating": "B",
-      "text": "The stern thruster gear leg was solid and the propeller rotated freely.",
+      "text": "The stern thruster gear leg appeared solid and the propeller rotated freely.",
       "phase": "observed",
       "severity": 3
     },
@@ -2138,7 +2131,7 @@
     {
       "section": "Underwater lighting",
       "rating": "B",
-      "text": "The underwater lighting was functional but showed signs of age or minor corrosion.",
+      "text": "The underwater lighting appeared functional but showed signs of age or minor corrosion.",
       "phase": "observed",
       "severity": 2
     },
@@ -2294,7 +2287,7 @@
       "rating": "B",
       "phase": "means",
       "severity": 2,
-      "text": "The epoxy barrier coat remained intact and was providing protection, but the anti-fouling requires attention to maintain hull coverage."
+      "text": "The epoxy barrier coat remained intact and appeared to provide protection, but the anti-fouling requires attention to maintain hull coverage."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
@@ -2503,14 +2496,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The swim platform was integrated with the transom and was dry with no visible damage.",
+      "text": "The swim platform was integrated with the transom and appeared dry with no visible damage.",
       "section": "Swim platform and ladder"
     },
     {
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The swim ladder was securely mounted and showed no signs of deterioration.",
+      "text": "The swim ladder appeared securely mounted and showed no signs of deterioration.",
       "section": "Swim platform and ladder"
     },
     {
@@ -2685,14 +2678,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The swim platform was integrated with the transom and was dry with no visible damage.",
+      "text": "The swim platform was integrated with the transom and appeared dry with no visible damage.",
       "section": "Swim platform and ladder - condition and conductivity readings"
     },
     {
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The swim ladder was securely mounted and showed no signs of deterioration.",
+      "text": "The swim ladder appeared securely mounted and showed no signs of deterioration.",
       "section": "Swim platform and ladder - condition and conductivity readings"
     },
     {
@@ -3249,27 +3242,6 @@
       "text": "No corrective action is recommended at this time."
     },
     {
-      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
-      "rating": "A",
-      "phase": "observed",
-      "severity": 5,
-      "text": "A significant deficiency was observed."
-    },
-    {
-      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No immediate concern was identified."
-    },
-    {
-      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No corrective action is recommended at this time."
-    },
-    {
       "section": "Stern thruster",
       "rating": "A",
       "phase": "action",
@@ -3442,7 +3414,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The {specify:fixed two-blade|fixed three-blade|fixed four-blade|folding two-blade|folding three-blade|feathering three-blade|controllable pitch} propeller was in serviceable condition with no significant damage, pitting, or corrosion."
+      "text": "The {specify:fixed two-blade|fixed three-blade|fixed four-blade|folding two-blade|folding three-blade|feathering three-blade|controllable pitch} propeller appeared in serviceable condition with no significant damage, pitting, or corrosion."
     },
     {
       "section": "Propeller(s)",
@@ -3463,14 +3435,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The propeller was properly secured with the correct retaining nut and pin."
+      "text": "The propeller appeared properly secured with the correct retaining nut and pin."
     },
     {
       "section": "Propeller(s)",
       "rating": "C",
       "phase": "observed",
       "severity": 2,
-      "text": "Despite minor cosmetic corrosion, the propeller was in satisfactory condition and properly attached."
+      "text": "Despite minor cosmetic corrosion, the propeller appeared in satisfactory condition and properly attached."
     },
     {
       "section": "Propeller(s)",
@@ -3512,7 +3484,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The propeller was providing effective propulsion at the time of survey."
+      "text": "The propeller appeared to provide effective propulsion at the time of survey."
     },
     {
       "section": "Propeller(s)",
@@ -3652,7 +3624,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The rudder was in sound condition with no visible damage, delamination, or significant corrosion."
+      "text": "The rudder appeared in sound condition with no visible damage, delamination, or significant corrosion."
     },
     {
       "section": "Rudder(s) condition",
@@ -3673,14 +3645,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anti-fouling on the rudder was intact."
+      "text": "The anti-fouling on the rudder appeared intact."
     },
     {
       "section": "Rudder(s) condition",
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The steering system was responding appropriately at the time of survey."
+      "text": "The steering system appeared to respond appropriately at the time of survey."
     },
     {
       "section": "Rudder(s) condition",
@@ -3883,28 +3855,28 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The {drives:anode was|anodes were} new with no visible degradation."
+      "text": "The {drives:anode appeared|anodes appeared} new with no visible degradation."
     },
     {
       "section": "Propeller/drive anode(s)",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The {drives:anode was|anodes were} approximately twenty-five percent degraded and retained adequate sacrificial material."
+      "text": "The {drives:anode appeared|anodes appeared} approximately twenty-five percent degraded and retained adequate sacrificial material."
     },
     {
       "section": "Propeller/drive anode(s)",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The {drives:anode was|anodes were} securely mounted and did not exhibit undue corrosion."
+      "text": "The {drives:anode appeared|anodes appeared} securely mounted and did not exhibit undue corrosion."
     },
     {
       "section": "Propeller/drive anode(s)",
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The {drives:anode was|anodes were} providing effective galvanic protection at the time of survey."
+      "text": "The {drives:anode appeared|anodes appeared} to provide effective galvanic protection at the time of survey."
     },
     {
       "section": "Propeller/drive anode(s)",
@@ -3918,14 +3890,14 @@
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "The {drives:anode was|anodes were} approximately fifty percent degraded."
+      "text": "The {drives:anode appeared|anodes appeared} approximately fifty percent degraded."
     },
     {
       "section": "Propeller/drive anode(s)",
       "rating": "B",
       "phase": "observed",
       "severity": 4,
-      "text": "The {drives:anode was|anodes were} approximately seventy-five percent degraded."
+      "text": "The {drives:anode appeared|anodes appeared} approximately seventy-five percent degraded."
     },
     {
       "section": "Propeller/drive anode(s)",
@@ -4027,13 +3999,6 @@
     },
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No corrective action is recommended at this time."
-    },
-    {
-      "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
@@ -4132,13 +4097,6 @@
     },
     {
       "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No corrective action is recommended at this time."
-    },
-    {
-      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
@@ -4234,13 +4192,6 @@
       "phase": "means",
       "severity": 1,
       "text": "The anodes appear to be providing effective galvanic protection."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No corrective action is recommended at this time."
     },
     {
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
@@ -4506,7 +4457,7 @@
     {
       "section": "Forestay (as inspected from the deck)",
       "rating": "B",
-      "text": "The rig tension was approximately correct.",
+      "text": "The rig tension appeared approximately correct.",
       "phase": "observed",
       "severity": 3
     },
@@ -4534,7 +4485,7 @@
     {
       "section": "Forestay (as inspected from the deck)",
       "rating": "C",
-      "text": "The rig tension was approximately correct.",
+      "text": "The rig tension appeared approximately correct.",
       "phase": "observed",
       "severity": 3
     },
@@ -4646,7 +4597,7 @@
     {
       "section": "Shrouds, swages and turnbuckles",
       "rating": "B",
-      "text": "Also, the rig tension was approximately correct.",
+      "text": "Also, the rig tension appeared approximately correct.",
       "phase": "observed",
       "severity": 3
     },
@@ -4723,7 +4674,7 @@
     {
       "section": "Shrouds, swages and turnbuckles",
       "rating": "C",
-      "text": "The rig tension was approximately correct.",
+      "text": "The rig tension appeared approximately correct.",
       "phase": "observed",
       "severity": 3
     },
@@ -4940,7 +4891,7 @@
     {
       "section": "Mast partner, mast collar, mast step",
       "rating": "C",
-      "text": "All attached hardware was correctly installed with the correct pins and rings, and appeared in acceptable condition.",
+      "text": "All attached hardware appeared correctly installed with the correct pins and rings, and in acceptable condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -5171,7 +5122,7 @@
     {
       "section": "Main sheet",
       "rating": "C",
-      "text": "The mainsheet was pliable and free of fraying, and ran smoothly through its tackle.",
+      "text": "The mainsheet appeared pliable and free of fraying, and ran smoothly through its tackle.",
       "phase": "observed",
       "severity": 1
     },
@@ -5213,7 +5164,7 @@
     {
       "section": "Traveller and tackle",
       "rating": "C",
-      "text": "The tackle moved smoothly along its track; it was securely attached with the required pins and operated smoothly.",
+      "text": "The tackle moved smoothly along its track; it appeared securely attached with the required pins and operated smoothly.",
       "phase": "means",
       "severity": 3
     },
@@ -5255,14 +5206,14 @@
     {
       "section": "Backstay, turnbuckle(s), retaining rings/pins and chainplate(s)/tang(s)",
       "rating": "C",
-      "text": "The backstay was firmly attached at the transom, and all required pins were present.",
+      "text": "The backstay appeared firmly attached at the transom, and all required pins were present.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Backstay, turnbuckle(s), retaining rings/pins and chainplate(s)/tang(s)",
       "rating": "C",
-      "text": "The hydraulic backstay was functional and firmly attached at the transom, with all required pins present.",
+      "text": "The hydraulic backstay appeared functional and firmly attached at the transom, with all required pins present.",
       "phase": "means",
       "severity": 3
     },
@@ -5486,7 +5437,7 @@
     {
       "section": "Mast(s)",
       "rating": "C - external track",
-      "text": "The track was securely fastened with no loose or missing rivets.",
+      "text": "The track appeared securely fastened with no loose or missing rivets.",
       "phase": "observed",
       "severity": 4
     },
@@ -6405,14 +6356,14 @@
     {
       "section": "Aft deck condition (spider cracks, etc.)",
       "rating": "C",
-      "text": "The aft deck was in acceptable condition with no notable defects.",
+      "text": "The aft deck appeared in acceptable condition with no notable defects.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Aft deck condition (spider cracks, etc.)",
       "rating": "C",
-      "text": "The aft deck was in good working order.",
+      "text": "The aft deck appeared in good working order.",
       "phase": "observed",
       "severity": 3
     },
@@ -6734,7 +6685,7 @@
     {
       "section": "Condition (spider cracks, etc.)",
       "rating": "C",
-      "text": "The aft deck was in proper working condition with only minor cosmetic defects typical for age.",
+      "text": "The aft deck appeared in proper working condition with only minor cosmetic defects typical for age.",
       "phase": "observed",
       "severity": 2
     },
@@ -7233,21 +7184,21 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The aft deck cover was sound and in good order at the time of survey."
+      "text": "The aft deck cover appeared sound and in good order at the time of survey."
     },
     {
       "section": "Seating",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The aft deck seating was in good condition at the time of survey."
+      "text": "The aft deck seating appeared in good condition at the time of survey."
     }
   ],
   "Outboard": [
     {
       "section": "Outboard general condition and impression",
       "rating": "C",
-      "text": "The outboard was in satisfactory condition.",
+      "text": "The outboard appeared in satisfactory condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -7261,14 +7212,14 @@
     {
       "section": "Outboard general condition and impression",
       "rating": "B",
-      "text": "The outboard was generally serviceable with minor cosmetic wear typical for age.",
+      "text": "The outboard appeared generally serviceable with minor cosmetic wear typical for age.",
       "phase": "observed",
       "severity": 2
     },
     {
       "section": "Outboard general condition and impression",
       "rating": "B",
-      "text": "Operation was acceptable.",
+      "text": "Operation appeared acceptable.",
       "phase": "observed",
       "severity": 3
     },
@@ -7289,7 +7240,7 @@
     {
       "section": "Engine mount",
       "rating": "C",
-      "text": "The engine mount was securely attached and showed no abnormal movement.",
+      "text": "The engine mount appeared securely attached and showed no abnormal movement.",
       "phase": "observed",
       "severity": 3
     },
@@ -7303,7 +7254,7 @@
     {
       "section": "Engine mount",
       "rating": "B",
-      "text": "The engine mount was secure with minor surface corrosion at hardware.",
+      "text": "The engine mount appeared secure with minor surface corrosion at hardware.",
       "phase": "observed",
       "severity": 2
     },
@@ -7317,7 +7268,7 @@
     {
       "section": "Engine mount",
       "rating": "C",
-      "text": "The engine mount was securely mounted to the swim platform.",
+      "text": "The engine mount appeared securely mounted to the swim platform.",
       "phase": "observed",
       "severity": 3
     },
@@ -7415,14 +7366,14 @@
     {
       "section": "Outboard propeller",
       "rating": "C",
-      "text": "The stainless propeller was free of damage and securely fastened.",
+      "text": "The stainless propeller appeared free of damage and securely fastened.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Outboard propeller",
       "rating": "C",
-      "text": "Performance was smooth with no discernible vibration or cavitation during limited trial run.",
+      "text": "Performance appeared smooth with no discernible vibration or cavitation during limited trial run.",
       "phase": "observed",
       "severity": 1
     },
@@ -7450,7 +7401,7 @@
     {
       "section": "Outboard propeller",
       "rating": "C",
-      "text": "Aside from a couple of very minor dings, the stainless propeller was in good working order.",
+      "text": "Aside from a couple of very minor dings, the stainless propeller appeared in good working order.",
       "phase": "observed",
       "severity": 2
     },
@@ -7464,7 +7415,7 @@
     {
       "section": "Outboard oil",
       "rating": "C",
-      "text": "Engine oil appeared clean and was at the correct level.",
+      "text": "Engine oil appeared clean and at the correct level.",
       "phase": "observed",
       "severity": 3
     },
@@ -7478,7 +7429,7 @@
     {
       "section": "Outboard oil",
       "rating": "B",
-      "text": "Engine oil level was correct with slight discolouration typical for service hours.",
+      "text": "Engine oil level appeared correct with slight discolouration typical for service hours.",
       "phase": "observed",
       "severity": 3
     },
@@ -7492,7 +7443,7 @@
     {
       "section": "Outboard oil",
       "rating": "C",
-      "text": "The outboard engine oil was clean and filled to the correct level.",
+      "text": "The outboard engine oil appeared clean and filled to the correct level.",
       "phase": "observed",
       "severity": 3
     },
@@ -7851,7 +7802,7 @@
     {
       "section": "Cockpit, floor, seats and coaming",
       "rating": "C",
-      "text": "The coaming was solid with no signs of delamination or water ingress.",
+      "text": "The coaming appeared solid with no signs of delamination or water ingress.",
       "phase": "observed",
       "severity": 1
     },
@@ -7949,28 +7900,28 @@
     {
       "section": "Cockpit table",
       "rating": "C",
-      "text": "The cockpit table was firmly mounted to [identify mounting point] and showed no signs of deterioration.",
+      "text": "The cockpit table appeared firmly mounted to [identify mounting point] and showed no signs of deterioration.",
       "phase": "observed",
       "severity": 1
     },
     {
       "section": "Cockpit table",
       "rating": "C",
-      "text": "The cockpit table was firmly mounted to the cockpit floor and appeared sound and well-maintained.",
+      "text": "The cockpit table appeared firmly mounted to the cockpit floor and sound and well-maintained.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Cockpit table",
       "rating": "C",
-      "text": "The cockpit table was intact and in good order.",
+      "text": "The cockpit table appeared intact and in good order.",
       "phase": "observed",
       "severity": 1
     },
     {
       "section": "Cockpit table",
       "rating": "C",
-      "text": "The cockpit table was securely attached to the cockpit floor.",
+      "text": "The cockpit table appeared securely attached to the cockpit floor.",
       "phase": "observed",
       "severity": 3
     },
@@ -8054,7 +8005,7 @@
     {
       "section": "Steering wheel and steering",
       "rating": "B",
-      "text": "The steering wheel was solidly affixed to the binnacle, and the steering moved from block to block without binding or stiffness.",
+      "text": "The steering wheel appeared solidly affixed to the binnacle, and the steering moved from block to block without binding or stiffness.",
       "phase": "observed",
       "severity": 3,
       "vesselType": "sail"
@@ -8077,7 +8028,7 @@
     {
       "section": "Steering wheel and steering",
       "rating": "C - binnacle block to block",
-      "text": "The steering wheel was solidly affixed to the binnacle, and the steering moved from block to block without binding or stiffness.",
+      "text": "The steering wheel appeared solidly affixed to the binnacle, and the steering moved from block to block without binding or stiffness.",
       "phase": "observed",
       "severity": 3,
       "vesselType": "sail"
@@ -8085,7 +8036,7 @@
     {
       "section": "Binnacle",
       "rating": "C",
-      "text": "The binnacle was firmly attached to the cockpit sole.",
+      "text": "The binnacle appeared firmly attached to the cockpit sole.",
       "phase": "observed",
       "severity": 3
     },
@@ -8120,14 +8071,14 @@
     {
       "section": "Magnetic compass",
       "rating": "C",
-      "text": "The magnetic compass was securely mounted, easy to read, and worked correctly.",
+      "text": "The magnetic compass appeared securely mounted, easy to read, and worked correctly.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Tiller",
       "rating": "B",
-      "text": "The tiller was solidly attached to the rudder post.",
+      "text": "The tiller appeared solidly attached to the rudder post.",
       "phase": "observed",
       "severity": 3
     },
@@ -8141,7 +8092,7 @@
     {
       "section": "Tiller",
       "rating": "C",
-      "text": "The tiller was solidly attached to the rudder post and the extension was in acceptable condition.",
+      "text": "The tiller appeared solidly attached to the rudder post and the extension appeared in acceptable condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -8183,14 +8134,14 @@
     {
       "section": "Pushpit",
       "rating": "C",
-      "text": "The pushpit was solidly mounted to the transom coaming and was in good working order.",
+      "text": "The pushpit appeared solidly mounted to the transom coaming and appeared in good working order.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Pushpit",
       "rating": "C",
-      "text": "The pushpit was solidly mounted to the transom coaming and presented no deficiencies.",
+      "text": "The pushpit appeared solidly mounted to the transom coaming and presented no deficiencies.",
       "phase": "observed",
       "severity": 3
     },
@@ -8225,7 +8176,7 @@
     {
       "section": "BBQ or grill",
       "rating": "C",
-      "text": "The BBQ was solidly mounted on the pushpit and appeared in proper condition.",
+      "text": "The BBQ appeared solidly mounted on the pushpit and in proper condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -8274,7 +8225,7 @@
     {
       "section": "Bimini, dodger and canvas enclosure",
       "rating": "B",
-      "text": "The bimini was in fair condition.",
+      "text": "The bimini appeared in fair condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -8323,7 +8274,7 @@
     {
       "section": "Companionway",
       "rating": "B",
-      "text": "The companionway top slid open and closed smoothly and was in good working condition.",
+      "text": "The companionway top slid open and closed smoothly and appeared in good working condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -8337,7 +8288,7 @@
     {
       "section": "Companionway",
       "rating": "C",
-      "text": "The companionway opened and closed smoothly and was in good working condition.",
+      "text": "The companionway opened and closed smoothly and appeared in good working condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -8813,14 +8764,14 @@
     {
       "section": "Pushpit/pulpit",
       "rating": "C - with seating",
-      "text": "The pushpit was intact and in good order with seating incorporated into the design.",
+      "text": "The pushpit appeared intact and in good order with seating incorporated into the design.",
       "phase": "observed",
       "severity": 1
     },
     {
       "section": "Pushpit/pulpit",
       "rating": "C - with seating",
-      "text": "The structure was securely mounted with no cracking or corrosion at the base fittings.",
+      "text": "The structure appeared securely mounted with no cracking or corrosion at the base fittings.",
       "phase": "observed",
       "severity": 3
     },
@@ -8883,7 +8834,7 @@
     {
       "section": "Steering wheel and steering",
       "rating": "C",
-      "text": "The wheel was properly mounted and in proper condition.",
+      "text": "The wheel appeared properly mounted and in proper condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -8918,7 +8869,7 @@
     {
       "section": "Emergency tiller",
       "rating": "C",
-      "text": "The emergency tiller was present, properly stored, and appeared functional and ready for use if required.",
+      "text": "The emergency tiller appeared present, properly stored, functional and ready for use if required.",
       "phase": "observed",
       "severity": 3
     },
@@ -9654,21 +9605,21 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The engine locker lid was undamaged and easily removed.",
+      "text": "The engine locker lid appeared undamaged and easily removed.",
       "section": "Engine locker lid"
     },
     {
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The {specify:hydraulic|electric} engine lid control was working as intended.",
+      "text": "The {specify:hydraulic|electric} engine lid control appeared to work as intended.",
       "section": "Engine locker lid"
     },
     {
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The seal or gasket around the engine locker lid was intact.",
+      "text": "The seal or gasket around the engine locker lid appeared intact.",
       "section": "Engine locker lid"
     },
     {
@@ -9697,7 +9648,7 @@
       "rating": "B",
       "phase": "observed",
       "severity": 1,
-      "text": "The engine locker lid itself was sound and undamaged."
+      "text": "The engine locker lid itself appeared sound and undamaged."
     },
     {
       "section": "Propane valve, regulator, gauge, storage compartment and vent",
@@ -9711,14 +9662,14 @@
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "The steering wheel was solidly affixed and the steering moved from block to block without binding or stiffness."
+      "text": "The steering wheel appeared solidly affixed and the steering moved from block to block without binding or stiffness."
     },
     {
       "section": "Steering wheel and steering",
       "rating": "C",
       "phase": "observed",
       "severity": 3,
-      "text": "The steering wheel was solidly affixed and the steering moved from block to block without binding or stiffness."
+      "text": "The steering wheel appeared solidly affixed and the steering moved from block to block without binding or stiffness."
     }
   ],
   "Gauges and Instrumentation": [
@@ -9767,7 +9718,7 @@
     {
       "section": "Blower",
       "rating": "A",
-      "text": "The blower fan was functional.",
+      "text": "The blower fan appeared functional.",
       "phase": "observed",
       "severity": 3
     },
@@ -9802,7 +9753,7 @@
     {
       "section": "Blower",
       "rating": "C",
-      "text": "The blower operated properly and vent tubing was clear and intact from the fan to the outside.",
+      "text": "The blower operated properly and vent tubing appeared clear and intact from the fan to the outside.",
       "phase": "observed",
       "severity": 1
     },
@@ -10962,118 +10913,6 @@
       "severity": 3
     },
     {
-      "section": "Wiper blade operation",
-      "rating": "A",
-      "text": "The [side] windshield wiper was non-functional.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "A",
-      "text": "Both windshield wipers were non-functional.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "A",
-      "text": "Although the [side] wiper mechanism operated, the wiper blade was deteriorated and needs to be replaced.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "A",
-      "text": "Although both wiper mechanisms operated, the wiper blades were deteriorated and need to be replaced.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "A",
-      "text": "Non-functional wipers compromise forward visibility in rain and spray, creating a serious safety hazard.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "A",
-      "text": "Repair or replacement of the wiper motor and blades is required for safe forward visibility.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "A",
-      "text": "Replace the deteriorated wiper blades.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "B",
-      "text": "The [side] windshield wiper was not working.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "B",
-      "text": "Both windshield wipers were not working.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "B",
-      "text": "The [side] windshield wiper operated but with sluggish or streaking performance.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "B",
-      "text": "Both windshield wipers operated but with sluggish or streaking performance.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "B",
-      "text": "Wipers are an important safety feature for forward visibility in rain and spray.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "B",
-      "text": "Service and blade replacement are recommended to restore effective operation.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "C",
-      "text": "The [side] windshield wiper functioned properly and the blade was in acceptable condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "C",
-      "text": "Both windshield wipers functioned properly and the blades were in acceptable condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "Not tested",
-      "text": "Wiper operation was not tested.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
       "section": "Horn/sound signal (powered)",
       "rating": "A",
       "text": "The horn or powered sound signal was non-functional or broken.",
@@ -11372,7 +11211,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "Both blowers operated properly and vent tubing was clear and intact from the fans to the outside."
+      "text": "Both blowers operated properly and vent tubing appeared clear and intact from the fans to the outside."
     },
     {
       "section": "VHF",
@@ -11457,111 +11296,6 @@
       "phase": "observed",
       "severity": 4,
       "text": "No VHF antenna was installed on this vessel."
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "A",
-      "phase": "observed",
-      "severity": 4,
-      "text": "The [side] windshield wiper was non-functional."
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "A",
-      "phase": "observed",
-      "severity": 4,
-      "text": "Both windshield wipers were non-functional."
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "A",
-      "phase": "observed",
-      "severity": 3,
-      "text": "Although the [side] wiper mechanism operated, the wiper blade was deteriorated and needs to be replaced."
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "A",
-      "phase": "observed",
-      "severity": 3,
-      "text": "Although both wiper mechanisms operated, the wiper blades were deteriorated and need to be replaced."
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "A",
-      "phase": "means",
-      "severity": 4,
-      "text": "Non-functional wipers compromise forward visibility in rain and spray, creating a serious safety hazard."
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "A",
-      "phase": "action",
-      "severity": 4,
-      "text": "Repair or replacement of the wiper motor and blades is required for safe forward visibility."
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "A",
-      "phase": "action",
-      "severity": 3,
-      "text": "Replace the deteriorated wiper blades."
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "B",
-      "phase": "observed",
-      "severity": 3,
-      "text": "The [side] windshield wiper was not working."
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "B",
-      "phase": "observed",
-      "severity": 3,
-      "text": "Both windshield wipers were not working."
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "B",
-      "phase": "observed",
-      "severity": 2,
-      "text": "The [side] windshield wiper operated but with sluggish or streaking performance."
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "B",
-      "phase": "observed",
-      "severity": 2,
-      "text": "Both windshield wipers operated but with sluggish or streaking performance."
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "B",
-      "phase": "means",
-      "severity": 2,
-      "text": "Wipers are an important safety feature for forward visibility in rain and spray."
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "B",
-      "phase": "action",
-      "severity": 2,
-      "text": "Service and blade replacement are recommended to restore effective operation."
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "The [side] windshield wiper functioned properly and the blade was in acceptable condition."
-    },
-    {
-      "section": "Wiper blade operation",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "Both windshield wipers functioned properly and the blades were in acceptable condition."
     },
     {
       "section": "Entertainment/stereo",
@@ -11582,7 +11316,7 @@
     {
       "section": "Flybridge ladder/staircase",
       "rating": "C",
-      "text": "The ladder was solidly mounted and in satisfactory condition",
+      "text": "The ladder appeared solidly mounted and in satisfactory condition",
       "phase": "observed",
       "severity": 3
     },
@@ -11687,14 +11421,14 @@
     {
       "section": "Flybridge ladder/staircase",
       "rating": "C",
-      "text": "The flybridge ladder/staircase was firmly affixed.",
+      "text": "The flybridge ladder/staircase appeared firmly affixed.",
       "phase": "observed",
       "severity": 1
     },
     {
       "section": "Safety rails",
       "rating": "C",
-      "text": "The safety rail was securely mounted along the stanchions.",
+      "text": "The safety rail appeared securely mounted along the stanchions.",
       "phase": "observed",
       "severity": 3
     },
@@ -11743,14 +11477,14 @@
     {
       "section": "Flybridge table",
       "rating": "C",
-      "text": "The Flybridge table was firmly mounted to [describe mounting point] and appeared serviceable.",
+      "text": "The Flybridge table appeared firmly mounted to [describe mounting point] and serviceable.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Flybridge table",
       "rating": "C",
-      "text": "The Flybridge table was firmly mounted to the Flybridge floor and showed no signs of deterioration.",
+      "text": "The Flybridge table appeared firmly mounted to the Flybridge floor and showed no signs of deterioration.",
       "phase": "observed",
       "severity": 1
     },
@@ -11764,7 +11498,7 @@
     {
       "section": "Flybridge table",
       "rating": "C",
-      "text": "The Flybridge table was securely attached to the Flybridge floor.",
+      "text": "The Flybridge table appeared securely attached to the Flybridge floor.",
       "phase": "observed",
       "severity": 3
     },
@@ -11869,7 +11603,7 @@
     {
       "section": "Flybridge steering wheel, steering",
       "rating": "C",
-      "text": "The flybridge steering wheel was solidly affixed and the steering moved from block to block without binding or stiffness.",
+      "text": "The flybridge steering wheel appeared solidly affixed and the steering moved from block to block without binding or stiffness.",
       "phase": "observed",
       "severity": 3
     },
@@ -11904,7 +11638,7 @@
     {
       "section": "Magnetic compass",
       "rating": "C",
-      "text": "The magnetic compass was securely mounted, easy to read, and worked correctly.",
+      "text": "The magnetic compass appeared securely mounted, easy to read, and worked correctly.",
       "phase": "observed",
       "severity": 3
     },
@@ -11946,21 +11680,21 @@
     {
       "section": "Safety rail",
       "rating": "C",
-      "text": "The safety rail was solidly mounted to the transom coaming and was in satisfactory condition.",
+      "text": "The safety rail appeared solidly mounted to the transom coaming and in satisfactory condition.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Safety rail",
       "rating": "C",
-      "text": "The safety rail was solidly mounted to the flybridge deck and was in acceptable condition.",
+      "text": "The safety rail appeared solidly mounted to the flybridge deck and in acceptable condition.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Bimini, dodger and canvas enclosure",
       "rating": "B",
-      "text": "The bimini was in fair condition.",
+      "text": "The bimini appeared in fair condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -11974,7 +11708,7 @@
     {
       "section": "Bimini, dodger and canvas enclosure",
       "rating": "C",
-      "text": "The bimini was in good working order.",
+      "text": "The bimini appeared in good working order.",
       "phase": "observed",
       "severity": 3
     },
@@ -12604,7 +12338,7 @@
     {
       "section": "Flybridge Bimini/dodger/hardtop",
       "rating": "C",
-      "text": "The flybridge Bimini, dodger, or hardtop was in satisfactory condition and provided adequate weather protection.",
+      "text": "The flybridge Bimini, dodger, or hardtop appeared in satisfactory condition and provided adequate weather protection.",
       "phase": "means",
       "severity": 1
     },
@@ -13544,14 +13278,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The arch was sound and in good order at the time of survey."
+      "text": "The arch appeared sound and in good order at the time of survey."
     },
     {
       "section": "Flybridge Bimini/dodger/hardtop",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The flybridge bimini, dodger, or hardtop was sound and in good order at the time of survey."
+      "text": "The flybridge bimini, dodger, or hardtop appeared sound and in good order at the time of survey."
     }
   ],
   "Flybridge gauges and instrument": [
@@ -13600,7 +13334,7 @@
     {
       "section": "Blower",
       "rating": "A",
-      "text": "The blower fan was functional.",
+      "text": "The blower fan appeared functional.",
       "phase": "observed",
       "severity": 3
     },
@@ -13635,7 +13369,7 @@
     {
       "section": "Blower",
       "rating": "C",
-      "text": "The blower operated properly and vent tubing was clear and intact from the fan to the outside.",
+      "text": "The blower operated properly and vent tubing appeared clear and intact from the fan to the outside.",
       "phase": "observed",
       "severity": 1
     },
@@ -14890,7 +14624,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "Both blowers operated properly and vent tubing was clear and intact from the fans to the outside."
+      "text": "Both blowers operated properly and vent tubing appeared clear and intact from the fans to the outside."
     },
     {
       "section": "VHF",
@@ -15016,7 +14750,7 @@
     {
       "section": "Hull deck joint (interior)",
       "rating": "C",
-      "text": "The sealant appeared to be butyl and was functioning as intended.",
+      "text": "The sealant appeared to be butyl and appeared to function as intended.",
       "phase": "observed",
       "severity": 3
     },
@@ -15184,7 +14918,7 @@
     {
       "section": "Upholstery",
       "rating": "B",
-      "text": "The upholstery was in fair condition with localized wear.",
+      "text": "The upholstery appeared in fair condition with localized wear.",
       "phase": "observed",
       "severity": 2
     },
@@ -15198,7 +14932,7 @@
     {
       "section": "Upholstery",
       "rating": "C",
-      "text": "All upholstery was in good working order.",
+      "text": "All upholstery appeared in good working order.",
       "phase": "observed",
       "severity": 3
     },
@@ -15226,7 +14960,7 @@
     {
       "section": "Navigation table",
       "rating": "C",
-      "text": "The navigation table lid was solidly attached by its hinge and opened and closed properly.",
+      "text": "The navigation table lid appeared solidly attached by its hinge and opened and closed properly.",
       "phase": "observed",
       "severity": 3
     },
@@ -15240,7 +14974,7 @@
     {
       "section": "Storage, galley cabinets, drawers and galley counter",
       "rating": "C",
-      "text": "The galley counter was functioning as intended.",
+      "text": "The galley counter appeared to function as intended.",
       "phase": "observed",
       "severity": 3
     },
@@ -15261,7 +14995,7 @@
     {
       "section": "Galley faucet, sink and drain",
       "rating": "C",
-      "text": "The drain seacock was properly installed and opened and closed easily.",
+      "text": "The drain seacock appeared properly installed and opened and closed easily.",
       "phase": "observed",
       "severity": 3
     },
@@ -15303,7 +15037,7 @@
     {
       "section": "Refrigerator / icebox",
       "rating": "C",
-      "text": "The [appliance], cooled by a [compressor], appeared serviceable and was clean.",
+      "text": "The [appliance], cooled by a [compressor], appeared serviceable and clean.",
       "phase": "observed",
       "severity": 3
     },
@@ -15471,7 +15205,7 @@
     {
       "section": "Floor and carpet",
       "rating": "C",
-      "text": "The floor throughout the cabin was intact and in good order with wear consistent with age.",
+      "text": "The floor throughout the cabin appeared intact and in good order with wear consistent with age.",
       "phase": "observed",
       "severity": 1
     },
@@ -16339,7 +16073,7 @@
     {
       "section": "Refrigerator/freezer",
       "rating": "C",
-      "text": "The [appliance], cooled by a [compressor], appeared serviceable and was clean.",
+      "text": "The [appliance], cooled by a [compressor], appeared serviceable and clean.",
       "phase": "observed",
       "severity": 3
     },
@@ -17251,14 +16985,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The cabin sole was sound and in good order at the time of survey."
+      "text": "The cabin sole appeared sound and in good order at the time of survey."
     },
     {
       "section": "Floor and carpet",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "The cabin sole was structurally sound but the finish was worn and in need of refinishing."
+      "text": "The cabin sole appeared structurally sound but the finish appeared worn and in need of refinishing."
     },
     {
       "section": "Floor and carpet",
@@ -17349,7 +17083,7 @@
     {
       "section": "Head, toilet and seacock",
       "rating": "A",
-      "text": "No leakage was observed, and the intake seacock was securely attached and operated smoothly.",
+      "text": "No leakage was observed, and the intake seacock appeared securely attached and operated smoothly.",
       "phase": "observed",
       "severity": 3
     },
@@ -17398,7 +17132,7 @@
     {
       "section": "Head, toilet and seacock",
       "rating": "Not tested",
-      "text": "No leakage was observed, and the intake seacock was securely attached and turned easily.",
+      "text": "No leakage was observed, and the intake seacock appeared securely attached and turned easily.",
       "phase": "observed",
       "severity": 3
     },
@@ -17419,7 +17153,7 @@
     {
       "section": "Head, faucet, sink and drain",
       "rating": "Not tested",
-      "text": "No leakage was observed, and the intake seacock was securely attached and turned easily.",
+      "text": "No leakage was observed, and the intake seacock appeared securely attached and turned easily.",
       "phase": "observed",
       "severity": 3
     },
@@ -18056,13 +17790,6 @@
       "severity": 3
     },
     {
-      "section": "Freshwater tank and plumbing",
-      "rating": "Not tested",
-      "text": "No leakage was observed.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
       "section": "Freshwater pump",
       "rating": "C",
       "text": "The freshwater pump and accumulator were securely mounted and were readily accessible for inspection and maintenance.",
@@ -18655,7 +18382,7 @@
     {
       "section": "Engine condition",
       "rating": "C",
-      "text": "The engine was relatively clean with an appearance that suggested it had been maintained.",
+      "text": "The engine appeared relatively clean with an appearance that suggested it had been maintained.",
       "phase": "observed",
       "severity": 3
     },
@@ -18711,14 +18438,14 @@
     {
       "section": "Cooling water intake seacock(s) and strainer(s)",
       "rating": "C - detailed",
-      "text": "The cooling water intake seacock operated freely and the raw water strainer was clean and in serviceable condition.",
+      "text": "The cooling water intake seacock operated freely and the raw water strainer appeared clean and in serviceable condition.",
       "phase": "observed",
       "severity": 1
     },
     {
       "section": "Cooling water intake seacock(s) and strainer(s)",
       "rating": "C - detailed",
-      "text": "The strainer basket was intact and the housing showed no signs of cracking or leaking.",
+      "text": "The strainer basket appeared intact and the housing showed no signs of cracking or leaking.",
       "phase": "observed",
       "severity": 3
     },
@@ -18823,7 +18550,7 @@
     {
       "section": "Oil level and condition",
       "rating": "C",
-      "text": "The oil looked clean, and although the boat was ashore, it appeared to be at approximately the correct level.",
+      "text": "The oil appeared clean, and although the boat was ashore, it appeared to be at approximately the correct level.",
       "phase": "observed",
       "severity": 3
     },
@@ -18872,14 +18599,14 @@
     {
       "section": "Coolant level and quality",
       "rating": "C",
-      "text": "The coolant looked clean and appeared to be at approximately the correct level.",
+      "text": "The coolant appeared clean and appeared to be at approximately the correct level.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Coolant level and quality",
       "rating": "C - on shore, check level at launch",
-      "text": "The coolant looked clean, and although the boat was ashore, it appeared to be at approximately the correct level.",
+      "text": "The coolant appeared clean, and although the boat was ashore, it appeared to be at approximately the correct level.",
       "phase": "observed",
       "severity": 3
     },
@@ -18942,7 +18669,7 @@
     {
       "section": "Belts and pulleys",
       "rating": "C - single belt",
-      "text": "The belt was free of fraying and cracking and appeared to be at approximately the correct tension.",
+      "text": "The belt appeared free of fraying and cracking and at approximately the correct tension.",
       "phase": "observed",
       "severity": 3
     },
@@ -19040,7 +18767,7 @@
     {
       "section": "Gearbox general condition and impressions",
       "rating": "C",
-      "text": "The gearbox was relatively clean, with an appearance suggesting it had been maintained.",
+      "text": "The gearbox appeared relatively clean, with an appearance suggesting it had been maintained.",
       "phase": "observed",
       "severity": 3
     },
@@ -19089,14 +18816,14 @@
     {
       "section": "Gearbox oil",
       "rating": "C",
-      "text": "The gearbox oil appeared clean and was at the proper level.",
+      "text": "The gearbox oil appeared clean and at the proper level.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Gearbox oil",
       "rating": "C",
-      "text": "The gearbox oil looked clean, and although the boat was ashore, it appeared to be at approximately the correct level.",
+      "text": "The gearbox oil appeared clean, and although the boat was ashore, it appeared to be at approximately the correct level.",
       "phase": "observed",
       "severity": 3
     },
@@ -19229,7 +18956,7 @@
     {
       "section": "Bilge, stringers and ribs – accessible from engine bay",
       "rating": "C",
-      "text": "The compartment was clean.",
+      "text": "The compartment appeared clean.",
       "phase": "observed",
       "severity": 3
     },
@@ -19383,7 +19110,7 @@
     {
       "section": "Drive coupling",
       "rating": "C",
-      "text": "The drive coupling was securely fastened with no visible wear or misalignment.",
+      "text": "The drive coupling appeared securely fastened with no visible wear or misalignment.",
       "phase": "observed",
       "severity": 1
     },
@@ -19397,14 +19124,14 @@
     {
       "section": "Drive coupling",
       "rating": "C - with shaft and packing",
-      "text": "The drive coupling was securely attached and showed no signs of excessive wear or misalignment.",
+      "text": "The drive coupling appeared securely attached and showed no signs of excessive wear or misalignment.",
       "phase": "observed",
       "severity": 1
     },
     {
       "section": "Drive coupling",
       "rating": "C - with shaft and packing",
-      "text": "The interior propeller shaft appeared straight and was free of significant corrosion.",
+      "text": "The interior propeller shaft appeared straight and free of significant corrosion.",
       "phase": "observed",
       "severity": 5
     },
@@ -19467,14 +19194,14 @@
     {
       "section": "Stuffing box/packing gland/dripless seal",
       "rating": "C - traditional packing",
-      "text": "The drip rate was within acceptable limits at approximately one to two drops per minute under load.",
+      "text": "The drip rate appeared within acceptable limits at approximately one to two drops per minute under load.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Stuffing box/packing gland/dripless seal",
       "rating": "C - traditional packing",
-      "text": "The packing nut was accessible and properly adjusted.",
+      "text": "The packing nut appeared accessible and properly adjusted.",
       "phase": "observed",
       "severity": 3
     },
@@ -20218,7 +19945,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The engine was in good order at the time of survey."
+      "text": "The engine appeared in good order at the time of survey."
     },
     {
       "section": "Engine condition",
@@ -20236,24 +19963,10 @@
     },
     {
       "section": "Engine condition",
-      "rating": "B",
-      "phase": "observed",
-      "severity": 3,
-      "text": "The engines exhibited a moderate level of cleanliness."
-    },
-    {
-      "section": "Engine condition",
       "rating": "C",
       "phase": "observed",
       "severity": 3,
       "text": "The engines were relatively clean with an appearance that suggested they had been maintained."
-    },
-    {
-      "section": "Engine condition",
-      "rating": "A",
-      "phase": "observed",
-      "severity": 3,
-      "text": "The engines were damaged or non-functional."
     },
     {
       "section": "Exhaust condition",
@@ -20323,7 +20036,7 @@
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "The exhaust system was functional but showed signs of corrosion or minor leaking at connection points."
+      "text": "The exhaust system appeared functional but showed signs of corrosion or minor leaking at connection points."
     },
     {
       "section": "Exhaust condition",
@@ -20344,7 +20057,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The exhaust was in proper working condition and conformed to SAE J2006."
+      "text": "The exhaust appeared in proper working condition and conformed to SAE J2006."
     },
     {
       "section": "Exhaust condition",
@@ -20835,7 +20548,7 @@
     {
       "section": "Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)",
       "rating": "C - control cable",
-      "text": "Operation was smooth without stiffness or binding.",
+      "text": "Operation appeared smooth without stiffness or binding.",
       "phase": "observed",
       "severity": 1
     },
@@ -21446,7 +21159,7 @@
     {
       "section": "Starter battery(ies)",
       "rating": "C - singular, box",
-      "text": "The vessel’s starter battery was secured in a plastic battery box with an appropriate tie down strap.",
+      "text": "The vessel’s starter battery appeared secured in a plastic battery box with an appropriate tie down strap.",
       "phase": "observed",
       "severity": 3
     },
@@ -21460,14 +21173,14 @@
     {
       "section": "Starter battery(ies)",
       "rating": "C - singular, no box",
-      "text": "The starter battery's positive terminal was properly protected.",
+      "text": "The starter battery's positive terminal appeared properly protected.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Starter battery(ies)",
       "rating": "C - singular, no box",
-      "text": "The battery was adequately restrained, with movement limited to less than half an inch.",
+      "text": "The battery appeared adequately restrained, with movement limited to less than half an inch.",
       "phase": "observed",
       "severity": 3
     },
@@ -21502,7 +21215,7 @@
     {
       "section": "Starter battery(ies)",
       "rating": "Pre-purchase battery survey",
-      "text": "The battery was properly secured within a dedicated battery box.",
+      "text": "The battery appeared properly secured within a dedicated battery box.",
       "phase": "observed",
       "severity": 3
     },
@@ -21670,7 +21383,7 @@
     {
       "section": "House battery(ies)",
       "rating": "C - singular, no box",
-      "text": "The house batteries' positive terminal was properly protected, and the battery was adequately restrained, with movement limited to less than half an inch.",
+      "text": "The house batteries' positive terminal appeared properly protected, and the battery appeared adequately restrained, with movement limited to less than half an inch.",
       "phase": "observed",
       "severity": 3
     },
@@ -21775,7 +21488,7 @@
     {
       "section": "Distribution panel 12V",
       "rating": "C",
-      "text": "The 12V distribution panel was clearly labeled, and all switches and indicator lights appeared to function properly.",
+      "text": "The 12V distribution panel appeared clearly labeled, and all switches and indicator lights appeared to function properly.",
       "phase": "observed",
       "severity": 3
     },
@@ -21789,7 +21502,7 @@
     {
       "section": "Distribution panel 110V",
       "rating": "A",
-      "text": "The 110V distribution panel was clearly labeled, and all switches appeared to function properly.",
+      "text": "The 110V distribution panel appeared clearly labeled, and all switches appeared to function properly.",
       "phase": "observed",
       "severity": 3
     },
@@ -21810,7 +21523,7 @@
     {
       "section": "Distribution panel 110V",
       "rating": "C",
-      "text": "The 110V distribution panel was clearly labeled, and all appeared to function properly.",
+      "text": "The 110V distribution panel appeared clearly labeled, and all appeared to function properly.",
       "phase": "observed",
       "severity": 3
     },
@@ -21824,7 +21537,7 @@
     {
       "section": "Distribution panel 110V",
       "rating": "Not tested",
-      "text": "The 110V distribution panel was clearly labeled, and all switches appeared to function properly.",
+      "text": "The 110V distribution panel appeared clearly labeled, and all switches appeared to function properly.",
       "phase": "observed",
       "severity": 3
     },
@@ -21936,7 +21649,7 @@
     {
       "section": "Bundling support and wiring",
       "rating": "C",
-      "text": "Wiring was properly bundled and supported in the accessible areas examined.",
+      "text": "Wiring appeared properly bundled and supported in the accessible areas examined.",
       "phase": "observed",
       "severity": 3
     },
@@ -21957,7 +21670,7 @@
     {
       "section": "Heating and air conditioning",
       "rating": "Not tested",
-      "text": "The unit was solidly installed, the associated seacock operated smoothly, and the raw water strainer was clean with no sign of leakage.",
+      "text": "The unit appeared solidly installed, the associated seacock operated smoothly, and the raw water strainer appeared clean with no sign of leakage.",
       "phase": "observed",
       "severity": 3
     },
@@ -23786,7 +23499,7 @@
     {
       "section": "Horn or sound signalling device",
       "rating": "C",
-      "text": "The built in horn was functional.",
+      "text": "The built in horn appeared functional.",
       "phase": "observed",
       "severity": 3
     },
@@ -24943,14 +24656,14 @@
     {
       "section": "Pulpit",
       "rating": "C",
-      "text": "The pulpit remained solidly attached to the deck and was in proper working condition.",
+      "text": "The pulpit remained solidly attached to the deck and appeared in proper working condition.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Pulpit",
       "rating": "C",
-      "text": "The pulpit was solidly attached to the deck and was in satisfactory condition.",
+      "text": "The pulpit appeared solidly attached to the deck and in satisfactory condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -24992,7 +24705,7 @@
     {
       "section": "Bow roller",
       "rating": "C",
-      "text": "The bow roller assembly was solidly mounted, and the roller was intact and in working condition.",
+      "text": "The bow roller assembly appeared solidly mounted, and the roller appeared intact and in working condition.",
       "phase": "observed",
       "severity": 1
     },
@@ -25041,14 +24754,14 @@
     {
       "section": "Primary anchor, chain and rode",
       "rating": "C",
-      "text": "The primary anchor appeared to be of appropriate weight, was properly secured to the chain, and had adequate chain and rode.",
+      "text": "The primary anchor appeared to be of appropriate weight, appeared properly secured to the chain, and had adequate chain and rode.",
       "phase": "observed",
       "severity": 1
     },
     {
       "section": "Windlass",
       "rating": "C",
-      "text": "The windlass was in good working order and performed well during limited trial run testing.",
+      "text": "The windlass appeared in good working order and performed well during limited trial run testing.",
       "phase": "observed",
       "severity": 3
     },
@@ -25069,7 +24782,7 @@
     {
       "section": "Anchor locker",
       "rating": "C",
-      "text": "The anchor locker lid was solidly attached to its hinges and operated smoothly.",
+      "text": "The anchor locker lid appeared solidly attached to its hinges and operated smoothly.",
       "phase": "observed",
       "severity": 3
     },
@@ -25104,7 +24817,7 @@
     {
       "section": "Lifelines and safety rail",
       "rating": "C",
-      "text": "The safety rail was securely mounted along the stanchions.",
+      "text": "The safety rail appeared securely mounted along the stanchions.",
       "phase": "observed",
       "severity": 3
     },
@@ -25181,7 +24894,7 @@
     {
       "section": "Toerail and gunwale",
       "rating": "C",
-      "text": "Although the toerail could benefit from refinishing for appearance, it remained firmly attached at the gunwale and was serviceable.",
+      "text": "Although the toerail could benefit from refinishing for appearance, it remained firmly attached at the gunwale and appeared serviceable.",
       "phase": "observed",
       "severity": 2
     },
@@ -25216,21 +24929,21 @@
     {
       "section": "Toerail and gunwale",
       "rating": "C - aluminum toe rail",
-      "text": "It was securely attached and was in satisfactory condition.",
+      "text": "It appeared securely attached and in satisfactory condition.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Toerail and gunwale",
       "rating": "C - part of the deck good condition",
-      "text": "The toerail was in acceptable condition.",
+      "text": "The toerail appeared in acceptable condition.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Toerail and gunwale",
       "rating": "C - attached",
-      "text": "The toerail was firmly attached at the gunwale and was in good working order.",
+      "text": "The toerail appeared firmly attached at the gunwale and in good working order.",
       "phase": "observed",
       "severity": 3
     },
@@ -25370,7 +25083,7 @@
     {
       "section": "Arch – external condition and equipment",
       "rating": "B",
-      "text": "The arch was solidly attached and was serviceable.",
+      "text": "The arch appeared solidly attached and serviceable.",
       "phase": "observed",
       "severity": 1
     },
@@ -25384,7 +25097,7 @@
     {
       "section": "Arch – external condition and equipment",
       "rating": "C",
-      "text": "The arch was solidly attached and was functioning as intended.",
+      "text": "The arch appeared solidly attached and functioning as intended.",
       "phase": "observed",
       "severity": 3
     },
@@ -26621,13 +26334,6 @@
       "text": "No immediate concern was identified."
     },
     {
-      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No corrective action is recommended at this time."
-    },
-    {
       "section": "Shore water hookup",
       "rating": "A",
       "phase": "action",
@@ -27030,14 +26736,14 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The teak showed normal weathering consistent with a vessel of this age and was structurally sound.",
+      "text": "The teak showed normal weathering consistent with a vessel of this age and appeared structurally sound.",
       "section": "Grab rails"
     },
     {
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The stainless steel finish was clean and free of significant corrosion.",
+      "text": "The stainless steel finish appeared clean and free of significant corrosion.",
       "section": "Grab rails"
     },
     {
@@ -27235,13 +26941,6 @@
       "phase": "action",
       "severity": 3,
       "text": "Rebed the affected frame(s)."
-    },
-    {
-      "section": "Deck hatch(es), windows and portholes (exterior observations)",
-      "rating": "B",
-      "phase": "action",
-      "severity": 2,
-      "text": "Address this at the next scheduled service."
     },
     {
       "section": "Deck hatch(es), windows and portholes (exterior observations)",
