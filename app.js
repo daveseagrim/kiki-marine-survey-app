@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2336';
+const APP_VERSION = 'v2337';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -18383,6 +18383,11 @@ async function toggleExclude(itemLabel) {
   const overlay = document.getElementById('bottomSheetOverlay');
   if (overlay) overlay.remove();
   updateItemInPlace(survey, itemLabel);
+  // v2336: skipping counts as "handling" an item — auto-advance to the
+  // next remaining item if the surveyor arrived here via the "N left" list.
+  if (willSkip) {
+    _kkAutoAdvanceRemaining(itemLabel);
+  }
 }
 
 // Update a single item in place without re-rendering the entire page

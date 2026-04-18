@@ -12,6 +12,13 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2337 — 2026-04-18
+
+- **Auto-advance on skip from "N left".** Tapping ⊘ Skip on an item
+  reached via the "N left" list now advances to the next remaining item
+  (or collapses the accordion if all done), matching the behaviour of
+  rating an item.
+
 ## v2336 — 2026-04-18
 
 - **Skip-with-data warning.** Tapping ⊘ Skip on an item that already has
