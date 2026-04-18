@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2324';
+const APP_VERSION = 'v2325';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -5096,7 +5096,7 @@ function showMediaSheet(itemLabel, categoryName) {
 
     let photosHtml = '';
     if (itemData.photos && itemData.photos.length > 0) {
-      photosHtml = '<div id="sheet-photo-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 20px;">';
+      photosHtml = '<div id="sheet-photo-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 34px;">';
       (itemData.photos || []).forEach((photoId, idx) => {
         // v2306: each thumbnail wrapped in a container with rotate/delete buttons
         photosHtml += `
@@ -5109,12 +5109,14 @@ function showMediaSheet(itemLabel, categoryName) {
                   style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;min-height:20px;max-width:20px;max-height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box;backdrop-filter:blur(2px);-webkit-text-size-adjust:none;-webkit-tap-highlight-color:transparent;">↻</span>
             <span onclick="event.stopPropagation();_sheetDeletePhoto('${photoId}','${safeLabel}','${safeCat}')"
                   style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;min-height:20px;max-width:20px;max-height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box;backdrop-filter:blur(2px);-webkit-text-size-adjust:none;-webkit-tap-highlight-color:transparent;">✕</span>
+            <span onclick="event.stopPropagation();movePhotoFromSheet('${photoId}','${safeLabel}','${safeCat}')"
+                  style="position:absolute;bottom:3px;right:3px;background:rgba(6,106,171,0.75);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;min-height:20px;max-width:20px;max-height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box;backdrop-filter:blur(2px);-webkit-text-size-adjust:none;-webkit-tap-highlight-color:transparent;">↗</span>
           </div>
         `;
       });
       photosHtml += '</div>';
       if (itemData.photos.length > 1) {
-        photosHtml += '<div style="font-size:11px;color:#9ca3af;padding:0 20px 8px 20px;text-align:center;">Drag a photo onto another to reorder \u2022 Tap a photo to edit</div>';
+        photosHtml += '<div style="font-size:11px;color:#9ca3af;padding:0 34px 8px 34px;text-align:center;">Drag a photo onto another to reorder \u2022 Tap a photo to edit</div>';
       }
     }
 

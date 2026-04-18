@@ -12,6 +12,16 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2325 — 2026-04-18
+
+### Added
+- Move (↗) overlay button on bottom sheet photo grid — matches area photo grid style (blue 20px circle, bottom-right corner). Calls existing `movePhotoFromSheet()`.
+
+### Changed
+- Bottom sheet photo grid thumbnails ~10% smaller — side padding increased from 20px to 34px for a less crowded layout.
+
+---
+
 ## v2324 — 2026-04-18
 - Fixed "N left" counter mismatch: the category header counter could disagree with the "items left" popover list because the counter recalculated from the template (with filtering that drifted out of sync with the initial render). Now both the counter and the list read from the same DOM source, so they always agree.
 - Safety equipment camera rewrite: safety photo capture now uses the same batch camera overlay (getUserMedia with proper stream cleanup) as regular checklist sections, instead of a bare file input. Falls back to file picker if camera is unavailable.
