@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2337';
+const APP_VERSION = 'v2338';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -16472,12 +16472,23 @@ async function editSavedPhoto(photoId, itemLabel) {
   const bottomSheet = document.getElementById('bottomSheetOverlay');
   if (bottomSheet) bottomSheet.remove();
 
+  // v2338: build photo navigation list from survey data so prev/next works
+  const survey = await getSurvey(currentSurveyId);
+  const itemData = survey && survey.items ? survey.items[itemLabel] : null;
+  const photoIds = (itemData && itemData.photos) ? itemData.photos : [photoId];
+  const currentIdx = photoIds.indexOf(photoId);
+  window._photoNavList = { ids: photoIds, index: currentIdx >= 0 ? currentIdx : 0, itemLabel: itemLabel };
+
   const fieldKey = `_edit_${photoId}`;
   window._editingPhotoId = photoId;
   window._editingItemLabel = itemLabel;
   showPhotoPreviewModal(fieldKey, itemLabel, photo.dataUrl, 'image/jpeg');
 
-  // Override confirm button to update existing photo instead of creating new
+  _wireEditConfirmBtn(photoId, itemLabel);
+}
+
+// v2338: wire up the Confirm button for editing an existing photo
+function _wireEditConfirmBtn(photoId, itemLabel) {
   setTimeout(() => {
     const confirmBtn = document.querySelector('#photoPreviewModal .btn-primary');
     if (confirmBtn) {
@@ -16489,9 +16500,12 @@ async function editSavedPhoto(photoId, itemLabel) {
         const finalDataUrl = await bakePhotoEdits(data.stampedDataUrl, data.brightness || 100, data.contrast || 100, data.rotation || 0);
 
         // Update existing photo
-        photo.dataUrl = finalDataUrl;
-        photo.editedAt = new Date().toISOString();
-        await savePhoto(photo);
+        const photo = await getPhotoById(photoId);
+        if (photo) {
+          photo.dataUrl = finalDataUrl;
+          photo.editedAt = new Date().toISOString();
+          await savePhoto(photo);
+        }
 
         // Refresh item
         const survey = await getSurvey(currentSurveyId);
@@ -16501,6 +16515,52 @@ async function editSavedPhoto(photoId, itemLabel) {
       };
     }
   }, 100);
+}
+
+// v2338: navigate to previous or next photo in the preview modal
+async function navigatePhotoPreview(direction) {
+  const nav = window._photoNavList;
+  if (!nav || !nav.ids || nav.ids.length <= 1) return;
+  const newIdx = nav.index + direction;
+  if (newIdx < 0 || newIdx >= nav.ids.length) return;
+  nav.index = newIdx;
+  const newPhotoId = nav.ids[newIdx];
+  const photo = await getPhotoById(newPhotoId);
+  if (!photo) return;
+
+  // Update the preview image and reset filters
+  const img = document.getElementById('previewImage');
+  if (img) {
+    img.src = photo.dataUrl;
+    img.style.filter = '';
+    img.style.transform = '';
+    img.style.maxHeight = '45vh';
+  }
+  resetPhotoFilters();
+
+  // Update counter
+  const counter = document.getElementById('photoNavCounter');
+  if (counter) counter.textContent = `${newIdx + 1} / ${nav.ids.length}`;
+
+  // Update arrow visibility
+  const prevBtn = document.getElementById('photoNavPrev');
+  const nextBtn = document.getElementById('photoNavNext');
+  if (prevBtn) prevBtn.style.visibility = newIdx > 0 ? 'visible' : 'hidden';
+  if (nextBtn) nextBtn.style.visibility = newIdx < nav.ids.length - 1 ? 'visible' : 'hidden';
+
+  // Update pending data + re-wire confirm for the new photo
+  window._pendingPhotoData = {
+    fieldKey: `_edit_${newPhotoId}`,
+    label: nav.itemLabel,
+    stampedDataUrl: photo.dataUrl,
+    originalDataUrl: photo.dataUrl,
+    fileType: 'image/jpeg',
+    brightness: 100,
+    contrast: 100,
+    rotation: 0
+  };
+  window._editingPhotoId = newPhotoId;
+  _wireEditConfirmBtn(newPhotoId, nav.itemLabel);
 }
 
 // Capture a documentation photo (HIN plate, compliance plate, etc.)
@@ -16698,6 +16758,8 @@ async function removeAllDateStamps() {
 async function captureDocPhoto(fieldKey, label, event) {
   const file = event.target.files[0];
   if (!file) return;
+  // v2338: clear photo nav — new capture has no prev/next
+  window._photoNavList = null;
 
   const reader = new FileReader();
   reader.onload = async (e) => {
@@ -16725,8 +16787,15 @@ function showPhotoPreviewModal(fieldKey, label, stampedDataUrl, fileType) {
   modal.innerHTML = `
     <div style="background:white;border-radius:12px;max-width:95vw;width:100%;margin:10px auto;padding:14px;display:flex;flex-direction:column;align-items:center;">
       <div style="font-weight:600;margin-bottom:8px;color:#066aab;font-size:14px;">Photo Preview — ${label}</div>
-      <div style="position:relative;width:100%;text-align:center;margin-bottom:8px;">
-        <img id="previewImage" src="${stampedDataUrl}" style="max-width:100%;max-height:45vh;border-radius:8px;border:1px solid #ccc;">
+      <div style="position:relative;width:100%;text-align:center;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:0;">
+        <button id="photoNavPrev" onclick="navigatePhotoPreview(-1)"
+                style="visibility:${(window._photoNavList && window._photoNavList.index > 0) ? 'visible' : 'hidden'};flex-shrink:0;width:44px;height:44px;font-size:24px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;color:#334155;cursor:pointer;display:flex;align-items:center;justify-content:center;">‹</button>
+        <div style="flex:1;min-width:0;text-align:center;">
+          <img id="previewImage" src="${stampedDataUrl}" style="max-width:100%;max-height:45vh;border-radius:8px;border:1px solid #ccc;">
+          <div id="photoNavCounter" style="font-size:11px;color:#94a3b8;margin-top:4px;${(window._photoNavList && window._photoNavList.ids && window._photoNavList.ids.length > 1) ? '' : 'display:none;'}">${(window._photoNavList && window._photoNavList.ids) ? (window._photoNavList.index + 1) + ' / ' + window._photoNavList.ids.length : ''}</div>
+        </div>
+        <button id="photoNavNext" onclick="navigatePhotoPreview(1)"
+                style="visibility:${(window._photoNavList && window._photoNavList.ids && window._photoNavList.index < window._photoNavList.ids.length - 1) ? 'visible' : 'hidden'};flex-shrink:0;width:44px;height:44px;font-size:24px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;color:#334155;cursor:pointer;display:flex;align-items:center;justify-content:center;">›</button>
       </div>
 
       <div style="width:100%;padding:0 4px;">
@@ -16770,6 +16839,17 @@ function showPhotoPreviewModal(fieldKey, label, stampedDataUrl, fileType) {
   };
 
   modal.style.display = 'block';
+
+  // v2338: swipe left/right on the image to navigate photos (touch devices)
+  const previewImg = document.getElementById('previewImage');
+  if (previewImg && window._photoNavList && window._photoNavList.ids && window._photoNavList.ids.length > 1) {
+    let startX = 0;
+    previewImg.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+    previewImg.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 50) navigatePhotoPreview(dx < 0 ? 1 : -1);
+    }, { passive: true });
+  }
 }
 
 // Apply brightness/contrast filters to preview image
@@ -16965,6 +17045,7 @@ function closePhotoPreviewModal() {
   const modal = document.getElementById('photoPreviewModal');
   if (modal) modal.style.display = 'none';
   window._pendingPhotoData = null;
+  window._photoNavList = null; // v2338: clear photo navigation
 }
 
 // ── Photo Annotation ────────────────────────────────────────────────────────
@@ -23857,6 +23938,7 @@ function editStagedPhoto(index) {
   // the confirm button after the modal renders and write back to the staged
   // array instead.
   const fieldKey = '_batchstaged_' + staged.id;
+  window._photoNavList = null; // v2338: no prev/next in batch edit
   showPhotoPreviewModal(fieldKey, bc.itemLabel, staged.dataUrl, 'image/jpeg');
 
   setTimeout(() => {

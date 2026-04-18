@@ -12,6 +12,16 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2338 — 2026-04-18
+
+- **Photo preview navigation arrows.** When tapping a photo thumbnail in
+  the area photo grid to open the preview, left/right arrows now flank
+  the image so you can scroll through all photos in that section without
+  going back to the grid. A counter ("3 / 12") shows current position.
+  Swipe left/right on the image also works on touch devices. Arrows
+  hide at the first/last photo. New-capture and batch-camera previews
+  are unaffected (no arrows).
+
 ## v2337 — 2026-04-18
 
 - **Auto-advance on skip from "N left".** Tapping ⊘ Skip on an item
