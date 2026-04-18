@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2353';
+const APP_VERSION = 'v2354';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -14867,6 +14867,21 @@ async function checkSurvey() {
       _surveyOrder: workingItem ? workingItem._surveyOrder : 9999,
     };
 
+    // v2354: Capture a snapshot of the issue's current state so that when
+    // the surveyor taps Back, we can detect whether anything actually
+    // changed. If unchanged, _csEvaluateAndReturn returns silently to the
+    // Check dialog (no "Not yet resolved" modal). The read is async but
+    // always completes long before the user can navigate and tap Back.
+    window._csInitialSnapshot = null;
+    (async () => {
+      try {
+        const s = await getSurvey(currentSurveyId);
+        if (s && typeof _csSnapshotIssueState === 'function') {
+          window._csInitialSnapshot = _csSnapshotIssueState(workingItem, s);
+        }
+      } catch (e) { window._csInitialSnapshot = null; }
+    })();
+
     // Remember scroll position AND the next item's message for smart scroll restoration
     const scrollEl = document.getElementById('csScrollContainer');
     const scrollPos = scrollEl ? scrollEl.scrollTop : 0;
@@ -15184,6 +15199,34 @@ async function _kkAutoAdvanceRemaining(ratedLabel) {
   }
 }
 
+// ─── Snapshot an issue's current state for unchanged-detection ────────────
+// v2354: used by the Check-Survey Back button so that tapping Back without
+// making any edits returns silently to the Check dialog instead of popping
+// the "Not yet resolved" modal. Covers the fields the user can actually
+// change in-place: rating, text, standards, photos, flagged, excluded.
+// For header/intro issues it snapshots the referenced survey-level field.
+function _csSnapshotIssueState(working, survey) {
+  if (!working || !survey) return null;
+  try {
+    if (working.itemLabel) {
+      const d = (survey.items && survey.items[working.itemLabel]) || {};
+      return JSON.stringify({
+        r: d.rating || '',
+        t: d.text || '',
+        s: (d.standards || []).slice().sort(),
+        p: (d.photos || []).slice(),
+        f: !!d.flagged,
+        x: !!d.excluded,
+      });
+    }
+    if (working.navId) {
+      const v = survey[working.navId];
+      return JSON.stringify({ v: v == null ? '' : String(v) });
+    }
+  } catch (e) {}
+  return null;
+}
+
 // ─── Evaluate fix and return to Check Survey ──────────────────────────────
 async function _csEvaluateAndReturn(scrollPos) {
   const working = window._csWorkingOn;
@@ -15206,6 +15249,22 @@ async function _csEvaluateAndReturn(scrollPos) {
   // Re-read the survey to get current state
   const survey = await getSurvey(currentSurveyId);
   if (!survey) { await checkSurvey(); return; }
+
+  // v2354: Unchanged detection. If the surveyor opened the item but didn't
+  // change anything, Back should return silently to the Check dialog rather
+  // than hitting them with a "Not yet resolved" modal. Saved/fixed path and
+  // saved-but-still-broken path are unchanged below.
+  const initialSnapshot = window._csInitialSnapshot;
+  window._csInitialSnapshot = null;
+  if (initialSnapshot) {
+    const nowSnapshot = _csSnapshotIssueState(working, survey);
+    if (nowSnapshot && nowSnapshot === initialSnapshot) {
+      window._csWorkingOn = null;
+      await checkSurvey();
+      setTimeout(() => { if (window._csRestoreScroll) window._csRestoreScroll(scrollPos); }, 80);
+      return;
+    }
+  }
 
   const data = survey.items ? survey.items[working.itemLabel] : null;
   const result = _csCheckSingleIssue(working, data, survey);

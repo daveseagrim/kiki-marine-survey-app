@@ -12,6 +12,16 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2354 — 2026-04-18
+### Changed
+- **Check Survey (pre-flight) Back button — silent return when nothing changed.** After tapping `Go → Fix` on a flagged issue, the Back button used to always evaluate the issue; if it was still broken the surveyor would get hit with a "⚠️ Not yet resolved" modal even if they had only glanced at the item and hadn't edited anything. Now, on entry, we snapshot the issue's state (rating, notes text, standards, photo count, flagged, excluded — or for header fields, the referenced survey-level field). On Back, we compare the current state to that snapshot:
+  - **Unchanged** → close the Back button, reopen Check Survey, restore scroll. No modal. (The surveyor chose not to edit; don't nag them.)
+  - **Changed and now fixes the issue** → existing behaviour: green "Fixed!" card animates and auto-advances the scroll to the next remaining item. (This is the "auto-advance if saved" case Dave asked for, already working.)
+  - **Changed but still broken** → existing behaviour: "Not yet resolved" modal with Go-back / Force-OK / Return-without-resolving options.
+- Net effect: the pre-flight → fix → pre-flight loop now has no wasted modal for cases where the surveyor decided the flagged item was fine as-is, while still catching real partial edits. Snapshot is captured asynchronously when the item opens and always completes well before any user Back tap.
+
+---
+
 ## v2353 — 2026-04-18
 ### Added
 - **`Bundling support and wiring` — A-rating non-marine-grade wiring chip set.** Four new chips for the common ABYC E-11 finding where household (Romex-type) solid-core untinned wiring has been installed instead of marine-grade tinned stranded copper. Uses `[insert location(s)]` so the surveyor can point to panels, bilge, head, or specific runs as appropriate:
