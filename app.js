@@ -5017,10 +5017,10 @@ function showMediaSheet(itemLabel, categoryName) {
                  style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;"
                  onclick="showPhotoActionOverlay('${photoId}', '${safeLabel}', '${safeCat}')" />
             <button onclick="event.stopPropagation();_sheetRotatePhoto('${photoId}','${safeLabel}','${safeCat}')"
-                    style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:28px;height:28px;font-size:15px;line-height:28px;text-align:center;cursor:pointer;padding:0;backdrop-filter:blur(2px);"
+                    style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:25px;height:25px;font-size:14px;line-height:25px;text-align:center;cursor:pointer;padding:0;backdrop-filter:blur(2px);"
                     title="Rotate 90\u00b0">↻</button>
             <button onclick="event.stopPropagation();_sheetDeletePhoto('${photoId}','${safeLabel}','${safeCat}')"
-                    style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border:none;border-radius:50%;width:28px;height:28px;font-size:16px;line-height:28px;text-align:center;cursor:pointer;padding:0;backdrop-filter:blur(2px);"
+                    style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border:none;border-radius:50%;width:25px;height:25px;font-size:14px;line-height:25px;text-align:center;cursor:pointer;padding:0;backdrop-filter:blur(2px);"
                     title="Delete photo">✕</button>
           </div>
         `;
