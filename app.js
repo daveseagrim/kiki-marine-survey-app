@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2310';
+const APP_VERSION = 'v2311';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -15829,7 +15829,14 @@ async function loadCategoryThumbnails(accordionContentEl) {
     if (img.src && img.src.startsWith('data:')) continue;
     const photoId = img.id.replace('thumb-', '');
     const photo = await getPhotoById(photoId);
-    if (photo) img.src = photo.dataUrl;
+    if (photo) {
+      img.src = photo.dataUrl;
+    } else {
+      // v2311: hide orphaned photo placeholders (photo was deleted but ID
+      // lingered in the survey's photos array)
+      const wrapper = img.closest('.photo-item');
+      if (wrapper) wrapper.style.display = 'none';
+    }
   }
 }
 
