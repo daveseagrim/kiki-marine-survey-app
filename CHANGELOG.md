@@ -12,6 +12,15 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2369 — 2026-04-18
+### Fixed
+- **Report generation's "Date integrity issue" modal suggested a remedy that doesn't actually remedy anything.** The modal fires when any photo's capture timestamp (decoded from the photo record's ID — `Date.now()` embedded at photo creation) is later than the survey's declared certification date. The old modal text listed two options, one of which was: "Use 'Remove Date Stamps' from the overflow menu." That was misleading on two counts:
+  1. Since v2362 new photos no longer have date stamps burned into them at all, so the "Remove Date Stamps" feature is rapidly becoming irrelevant for active use — it only matters for legacy photos captured before v2362.
+  2. More importantly, the batch only strips *visual* pixel overlays off the JPEG. It never touches the photo record's `createdAt` or the `Date.now()` portion of the photo ID, which are exactly what this check is comparing against. So running that batch would dismiss zero "Date integrity" warnings. The integrity check is a pure timestamp comparison: `latestPhotoMs > _certifiedEnd`.
+- Replaced the two-bullet Options block with a single clear sentence: "The only fix is to update the survey date to match your most recent photos, or generate anyway and explain the discrepancy in the cover letter." Same two action buttons (Go Back and Fix / Generate Anyway); just the body copy is clarified.
+
+---
+
 ## v2368 — 2026-04-18
 ### Fixed / Removed
 - **Survey Report: two broken Print/PDF buttons reduced to one working button.** Two problems, both printing-related:

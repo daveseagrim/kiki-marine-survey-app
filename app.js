@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2368';
+const APP_VERSION = 'v2369';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -20468,7 +20468,7 @@ async function generateReport() {
         const _photoDateStr = _latestDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
         const _certDateStr = new Date(_certifiedISO + 'T12:00:00').toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
         const _proceed = await showConfirm(
-          `⚠️ Date integrity issue\n\nThe report/survey date is ${_certDateStr}, but photos were captured as late as ${_photoDateStr}.\n\nAn underwriter may reject a report whose certification date precedes the photographic evidence.\n\nOptions:\n• Update the survey date to match your photos\n• Use "Remove Date Stamps" from the overflow menu\n\nGenerate anyway?`,
+          `⚠️ Date integrity issue\n\nThe report/survey date is ${_certDateStr}, but one or more photos were captured as late as ${_photoDateStr}.\n\nAn underwriter may reject a report whose certification date precedes the photographic evidence.\n\nThe only fix is to update the survey date to match your most recent photos, or generate anyway and explain the discrepancy in the cover letter.\n\nGenerate anyway?`,
           'Generate Anyway',
           'Go Back and Fix'
         );
