@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2315';
+const APP_VERSION = 'v2316';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -5059,12 +5059,11 @@ function showMediaSheet(itemLabel, categoryName) {
       (itemData.photos || []).forEach((photoId, idx) => {
         // v2306: each thumbnail wrapped in a container with rotate/delete buttons
         photosHtml += `
-          <div style="position:relative;" data-photo-idx="${idx}">
+          <div style="position:relative;display:none;" data-photo-idx="${idx}">
             <img id="sheet-thumb-${photoId}" src=""
                  title="Drag to reorder \u2022 Tap to edit"
                  style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;"
-                 onclick="showPhotoActionOverlay('${photoId}', '${safeLabel}', '${safeCat}')"
-                 onerror="this.closest('[data-photo-idx]').style.display='none'" />
+                 onclick="showPhotoActionOverlay('${photoId}', '${safeLabel}', '${safeCat}')" />
             <span onclick="event.stopPropagation();_sheetRotatePhoto('${photoId}','${safeLabel}','${safeCat}')"
                   style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;min-height:20px;max-width:20px;max-height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box;backdrop-filter:blur(2px);-webkit-text-size-adjust:none;-webkit-tap-highlight-color:transparent;">↻</span>
             <span onclick="event.stopPropagation();_sheetDeletePhoto('${photoId}','${safeLabel}','${safeCat}')"
@@ -5110,28 +5109,17 @@ function showMediaSheet(itemLabel, categoryName) {
 
     // Load existing photo thumbnails
     if (itemData.photos && itemData.photos.length > 0) {
-      const _thumbLoads = itemData.photos.map(photoId => {
-        return getPhotoById(photoId).then(photo => {
+      itemData.photos.forEach(photoId => {
+        getPhotoById(photoId).then(photo => {
           const img = document.getElementById(`sheet-thumb-${photoId}`);
           if (photo && photo.dataUrl && img) {
             img.src = photo.dataUrl;
-          } else if (img) {
+            // v2316: wrapper starts hidden — show only when data loads
             const wrapper = img.closest('[data-photo-idx]');
-            if (wrapper) wrapper.style.display = 'none';
+            if (wrapper) wrapper.style.display = '';
           }
+          // Otherwise wrapper stays hidden (default since v2316)
         });
-      });
-      // v2315: after all loads complete, sweep for any still-broken thumbnails
-      Promise.all(_thumbLoads).then(() => {
-        const grid = document.getElementById('sheet-photo-grid');
-        if (grid) {
-          grid.querySelectorAll('img[id^="sheet-thumb-"]').forEach(img => {
-            if (!img.src || !img.src.startsWith('data:')) {
-              const wrapper = img.closest('[data-photo-idx]');
-              if (wrapper) wrapper.style.display = 'none';
-            }
-          });
-        }
       });
       // Wire drag-to-reorder on the thumbnail grid (v2162)
       const grid = document.getElementById('sheet-photo-grid');
@@ -15842,25 +15830,22 @@ async function loadCategoryThumbnails(accordionContentEl) {
   const thumbs = accordionContentEl.querySelectorAll('img[id^="thumb-"]');
   for (const img of thumbs) {
     // Skip already-loaded thumbnails (loaded photos have data: URLs)
-    if (img.src && img.src.startsWith('data:')) continue;
+    if (img.src && img.src.startsWith('data:')) {
+      // v2316: ensure wrapper is visible for already-loaded photos
+      const w = img.closest('.photo-item');
+      if (w) w.style.display = '';
+      continue;
+    }
     const photoId = img.id.replace('thumb-', '');
     const photo = await getPhotoById(photoId);
     if (photo && photo.dataUrl) {
       img.src = photo.dataUrl;
-    } else {
-      // v2315: hide orphaned or stub photo placeholders
+      // v2316: photo-items start hidden — show only when data loads
       const wrapper = img.closest('.photo-item');
-      if (wrapper) wrapper.style.display = 'none';
+      if (wrapper) wrapper.style.display = '';
     }
+    // Otherwise wrapper stays hidden (its default state since v2316)
   }
-  // v2315: final sweep — hide any thumbnails that still have no image data
-  // after all async loads complete (catches edge cases the per-photo check misses)
-  accordionContentEl.querySelectorAll('img[id^="thumb-"]').forEach(img => {
-    if (!img.src || !img.src.startsWith('data:')) {
-      const wrapper = img.closest('.photo-item');
-      if (wrapper) wrapper.style.display = 'none';
-    }
-  });
 }
 
 // Legacy wrapper kept for any external callers — now a no-op.
@@ -17745,10 +17730,9 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options, su
   if (itemData.photos && itemData.photos.length > 0) {
     itemData.photos.forEach(photoId => {
       html += `
-        <div class="photo-item" style="position: relative;">
+        <div class="photo-item" style="position: relative; display:none;">
           <img src="" id="thumb-${photoId}" class="photo-thumbnail"
-               onclick="editSavedPhoto('${photoId}', '${safeLabel}')"
-               onerror="this.closest('.photo-item').style.display='none'" />
+               onclick="editSavedPhoto('${photoId}', '${safeLabel}')" />
           <button style="position: absolute; top: -8px; right: -8px; width: 28px; height: 28px;
                        border-radius: 50%; background: #dc2626; color: white; border: none;
                        font-weight: bold; cursor: pointer;"

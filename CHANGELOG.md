@@ -12,6 +12,9 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2316 — 2026-04-17
+- Photo placeholders: reversed the approach — thumbnails now start hidden (display:none) and are only shown when valid image data loads. Eliminates broken placeholder flash entirely. Applies to both accordion and media sheet grids.
+
 ## v2315 — 2026-04-17
 - Broken photo placeholders: added post-load sweep that hides any thumbnail whose src is still not a data: URL after all async photo loads complete. Catches all edge cases (stubs, orphans, corrupt data) regardless of what getPhotoById returns. Applied to both accordion thumbnails and media sheet grid.
 
