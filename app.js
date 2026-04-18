@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2359';
+const APP_VERSION = 'v2360';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -9810,6 +9810,18 @@ function editSurveyDetails(surveyId) {
 
     // v2262: Desc button removed — description auto-generates on save,
     // so a manual trigger is redundant (and was error-prone).
+
+    // v2360: 📋 Survey — jump from Edit Intro back to the main inspection page.
+    // Saves form state silently so edits aren't lost when navigating away.
+    const surveyBtn2 = document.createElement('button');
+    surveyBtn2.style.cssText = ps + 'background:#066aab;color:white;';
+    surveyBtn2.innerHTML = '📋 Survey';
+    surveyBtn2.onclick = async () => {
+      await saveEditFormSilently();
+      const s = await getSurvey(survey.id);
+      if (s) renderInspection(s);
+    };
+    editBar.appendChild(surveyBtn2);
 
     // v2257: 💾 Unified save button with per-backend progress
     const saveBtn2 = document.createElement('button');
