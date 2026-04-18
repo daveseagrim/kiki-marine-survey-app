@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2313';
+const APP_VERSION = 'v2314';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -5063,7 +5063,8 @@ function showMediaSheet(itemLabel, categoryName) {
             <img id="sheet-thumb-${photoId}" src=""
                  title="Drag to reorder \u2022 Tap to edit"
                  style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;"
-                 onclick="showPhotoActionOverlay('${photoId}', '${safeLabel}', '${safeCat}')" />
+                 onclick="showPhotoActionOverlay('${photoId}', '${safeLabel}', '${safeCat}')"
+                 onerror="this.closest('[data-photo-idx]').style.display='none'" />
             <span onclick="event.stopPropagation();_sheetRotatePhoto('${photoId}','${safeLabel}','${safeCat}')"
                   style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;min-height:20px;max-width:20px;max-height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box;backdrop-filter:blur(2px);-webkit-text-size-adjust:none;-webkit-tap-highlight-color:transparent;">↻</span>
             <span onclick="event.stopPropagation();_sheetDeletePhoto('${photoId}','${safeLabel}','${safeCat}')"
@@ -17729,7 +17730,8 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options, su
       html += `
         <div class="photo-item" style="position: relative;">
           <img src="" id="thumb-${photoId}" class="photo-thumbnail"
-               onclick="editSavedPhoto('${photoId}', '${safeLabel}')" />
+               onclick="editSavedPhoto('${photoId}', '${safeLabel}')"
+               onerror="this.closest('.photo-item').style.display='none'" />
           <button style="position: absolute; top: -8px; right: -8px; width: 28px; height: 28px;
                        border-radius: 50%; background: #dc2626; color: white; border: none;
                        font-weight: bold; cursor: pointer;"

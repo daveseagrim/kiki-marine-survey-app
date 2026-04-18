@@ -12,6 +12,9 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2314 — 2026-04-17
+- Added onerror handlers to photo thumbnail img tags in both the accordion view and media sheet grid. If the browser fails to render a photo for any reason (corrupt data URL, Firebase stub with partial data, etc.), the thumbnail wrapper is automatically hidden. Belt-and-suspenders fix alongside the dataUrl check.
+
 ## v2313 — 2026-04-17
 - Fixed photo placeholder check: now verifies `photo.dataUrl` exists (not just the photo record). Photos that exist as Firebase stubs without image data are now hidden instead of showing broken placeholders. Applies to both accordion thumbnails and media sheet grid.
 
