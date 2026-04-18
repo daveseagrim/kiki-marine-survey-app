@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2364';
+const APP_VERSION = 'v2365';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -16973,7 +16973,17 @@ async function addDateStampToPhoto(dataUrl, maxResolution) {
 //   - Removed the no-op "blur smoothing" pass that read the region and
 //     wrote it back unchanged (comment claimed alpha blending but no
 //     alpha was applied).
-async function removeDateStampFromPhoto(dataUrl) {
+async function removeDateStampFromPhoto(dataUrl, opts) {
+  // v2365: accept an options object. When opts.force === true, skip the
+  // structural detection and unconditionally strip the stamp region.
+  // This mode is used by the user-triggered batch tool — the user has
+  // already acknowledged an "cannot be undone" confirmation, so we trust
+  // their intent. The report auto-strip still calls without force, so
+  // it keeps the safety guard for photos that were never stamped.
+  // Also returns { dataUrl, stripped, darkPct, brightPct } when opts
+  // is an object, so callers can collect diagnostic stats.
+  const force = !!(opts && opts.force);
+  const wantStats = !!(opts && opts.returnStats);
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
@@ -16999,7 +17009,7 @@ async function removeDateStampFromPhoto(dataUrl) {
         const stampY = Math.max(0, h - rectHeight);
 
         if (rectWidth <= 0 || rectHeight <= 0) {
-          resolve(dataUrl);
+          resolve(wantStats ? { dataUrl, stripped: false, darkPct: 0, brightPct: 0 } : dataUrl);
           return;
         }
 
@@ -17035,10 +17045,20 @@ async function removeDateStampFromPhoto(dataUrl) {
         const brightPct = (100 * brightCount) / pixelCount;
         const stampDetected = (darkPct > 30) && (brightPct > 1.5);
 
-        if (!stampDetected) {
-          // No stamp detected — return the image unchanged (but still
-          // re-encoded so the caller gets a valid JPEG dataUrl).
-          resolve(canvas.toDataURL('image/jpeg', 0.85));
+        // v2365: `force` mode (from user-triggered batch) skips the detection
+        // guard and always strips. The user has explicitly asked for the
+        // tool and acknowledged "cannot be undone" — we trust them over the
+        // heuristic. Photos that weren't stamped at all will pick up a ~65
+        // px × ~290 px bottom-right region filled with a vertical smear of
+        // the row just above it, which is usually invisible on mechanical
+        // survey photos (engines, hulls, bilges — typically uniform regions).
+        const shouldStrip = force || stampDetected;
+
+        if (!shouldStrip) {
+          // Detection didn't fire and the caller wasn't forcing — return
+          // the image unchanged (but still re-encoded for a valid JPEG).
+          const out = canvas.toDataURL('image/jpeg', 0.85);
+          resolve(wantStats ? { dataUrl: out, stripped: false, darkPct, brightPct } : out);
           return;
         }
 
@@ -17051,13 +17071,14 @@ async function removeDateStampFromPhoto(dataUrl) {
           }
         }
 
-        resolve(canvas.toDataURL('image/jpeg', 0.85));
+        const out = canvas.toDataURL('image/jpeg', 0.85);
+        resolve(wantStats ? { dataUrl: out, stripped: true, darkPct, brightPct } : out);
       } catch (err) {
         console.error('removeDateStampFromPhoto error:', err);
-        resolve(dataUrl);
+        resolve(wantStats ? { dataUrl, stripped: false, darkPct: 0, brightPct: 0, error: String(err) } : dataUrl);
       }
     };
-    img.onerror = () => resolve(dataUrl);
+    img.onerror = () => resolve(wantStats ? { dataUrl, stripped: false, darkPct: 0, brightPct: 0 } : dataUrl);
     img.src = dataUrl;
   });
 }
@@ -17106,6 +17127,10 @@ async function removeAllDateStamps() {
   showToast('Removing date stamps from ' + total + ' photos...');
 
   let processed = 0;
+  let detectedCount = 0;   // v2365: photos where detection fired
+  let forceCount = 0;      // v2365: photos stripped via force mode only
+  let writeFailed = 0;     // v2365: IDB put() failures
+  const sampleStats = [];  // v2365: first 5 photos' detection metrics
   // v2364: use the global `db` (initialised once at app startup by initDB)
   // instead of calling a non-existent `openDatabase()` helper. The previous
   // code threw `ReferenceError: openDatabase is not defined` on the very
@@ -17124,23 +17149,55 @@ async function removeAllDateStamps() {
         req.onerror = () => rej(req.error);
       });
       if (photo && photo.dataUrl) {
-        const cleaned = await removeDateStampFromPhoto(photo.dataUrl);
+        // v2365: force-strip + collect stats so we can diagnose why the
+        // function silently did nothing for Dave. The detection-based
+        // version was working in isolated tests but real photos might
+        // have slight differences (HEIC→JPEG colour shifts, EXIF rotation,
+        // etc.). Force mode sidesteps detection entirely.
+        const result = await removeDateStampFromPhoto(photo.dataUrl, {
+          force: true,
+          returnStats: true
+        });
+        const cleaned = (result && result.dataUrl) ? result.dataUrl : photo.dataUrl;
+        const wasDetected = !!(result && (result.darkPct > 30) && (result.brightPct > 1.5));
+        if (wasDetected) detectedCount++; else forceCount++;
+        if (sampleStats.length < 5) {
+          sampleStats.push({
+            pid: pid.substring(0, 24),
+            dark: result ? result.darkPct.toFixed(1) : '?',
+            bright: result ? result.brightPct.toFixed(1) : '?',
+            detected: wasDetected
+          });
+        }
         photo.dataUrl = cleaned;
         const tx2 = db.transaction('photos', 'readwrite');
         const store2 = tx2.objectStore('photos');
-        await new Promise((res, rej) => {
-          const put = store2.put(photo);
-          put.onsuccess = () => res();
-          put.onerror = () => rej(put.error);
-        });
-        processed++;
+        try {
+          await new Promise((res, rej) => {
+            const put = store2.put(photo);
+            put.onsuccess = () => res();
+            put.onerror = () => rej(put.error);
+          });
+          processed++;
+        } catch (putErr) {
+          writeFailed++;
+          console.error('IDB put failed for', pid, putErr);
+        }
       }
     } catch (err) {
       console.error('Error processing photo', pid, err);
     }
   }
 
-  showToast('Date stamps removed from ' + processed + ' of ' + total + ' photos.');
+  // v2365: diagnostic message so we can see what actually happened on
+  // Dave's device. If detectedCount is 0, the structural detection is
+  // not matching his real-world stamped photos — we'll need to adjust
+  // thresholds. If writeFailed > 0, the problem is IDB persistence.
+  console.log('[Remove Date Stamps] sample stats:', sampleStats);
+  const detectMsg = (detectedCount === total)
+    ? ''
+    : ` (${detectedCount} detected, ${forceCount} force-stripped${writeFailed > 0 ? ', ' + writeFailed + ' failed' : ''})`;
+  showToast('Date stamps removed from ' + processed + ' of ' + total + ' photos.' + detectMsg);
 
   // v2363: re-render the inspection view so all <img src="data:..."> tags
   // load the freshly-cleaned dataUrls from IndexedDB. Without this, the
