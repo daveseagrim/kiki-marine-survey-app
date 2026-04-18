@@ -12,6 +12,13 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2361 — 2026-04-18
+### Fixed
+- **Check Survey: "Back to Check Survey" button was invisible on desktop.** Tapping Go on a preflight issue fades the check-survey overlay out over 150ms (opacity transition) and keeps it in the DOM for a further ≈200ms before removing it. The floating Back button had `z-index: 200` while the overlay had `z-index: 9999`, so for the entire fade-out window the button was rendered *behind* the fading white overlay. On iPhone the fade is fast enough that the flash went unnoticed; on laptop the longer perceived fade made the button effectively invisible — the user ended up at the target item with no way back to the preflight. Bumped back-button z-index to 10001 so it sits above the overlay from the moment it's appended.
+- **Check Survey: Go button landed behind the floating Back button.** Navigation used `scrollIntoView({ block: 'center' })` which centers the item vertically in the viewport. The floating Back button is ≈60px tall at the top of the screen, so a "centered" item was partially (and sometimes entirely) tucked underneath it — it looked like the Go had jumped to the wrong item. Changed to `block: 'start'` combined with a temporary `scroll-margin-top: calc(72px + env(safe-area-inset-top, 0px))` applied to the target element, which `scrollIntoView` honours across nested scrollable containers. The style is restored after the smooth scroll completes (1.2s timeout). Same fix applied to the Edit Intro field path (header/engine/valuation/photo fields).
+
+---
+
 ## v2360 — 2026-04-18
 ### Added
 - **Edit Intro → Survey pill.** The Edit Intro page (Vessel Info / Header / Documentation / Photos / Valuation) had Save, Check, and Report pills in its bottom bar but no direct way back to the main inspection checklist — the user had to use the top-left back arrow or scroll up to tap the title. Added a 📋 Survey pill as the leftmost item in the bottom bar (so the bar reads: Survey | Save | Check | Report, left-to-right: navigation → save → validation → output). Tap saves the edit form silently (so no in-progress edits are lost), then calls `renderInspection(survey)` to jump straight to the checklist.

@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2360';
+const APP_VERSION = 'v2361';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -14951,7 +14951,12 @@ async function checkSurvey() {
       backBtn = document.createElement('button');
       backBtn.id = 'csBackToCheckBtn';
       backBtn.textContent = '← Back to Check Survey';
-      backBtn.style.cssText = 'position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));left:50%;transform:translateX(-50%);background:#066aab;color:white;border:none;border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+      // v2361: z-index 10001 — must sit ABOVE the check-survey overlay (9999)
+      // during its 200ms fade-out, otherwise the button is covered while the
+      // overlay is still in the DOM. Previously z-index was 200 which meant
+      // the button was invisible on desktop (where the fade is perceptible)
+      // even though on iPhone it flashed through fast enough to be noticed.
+      backBtn.style.cssText = 'position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));left:50%;transform:translateX(-50%);background:#066aab;color:white;border:none;border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;z-index:10001;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
       backBtn.onclick = async function() {
         backBtn.remove();
         await _csEvaluateAndReturn(scrollPos);
@@ -15023,7 +15028,12 @@ async function checkSurvey() {
 
           // Small delay for layout, then scroll and highlight
           setTimeout(() => {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // v2361: block:'start' + scroll-margin-top so the field isn't
+            // tucked under the floating "Back to Check Survey" button.
+            const prevMargin = el.style.scrollMarginTop;
+            el.style.scrollMarginTop = 'calc(72px + env(safe-area-inset-top, 0px))';
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(() => { el.style.scrollMarginTop = prevMargin; }, 1200);
             const highlightEl = el.closest('.form-group') || el.closest('div') || el;
             highlightEl.style.transition = 'background 0.3s, box-shadow 0.3s';
             highlightEl.style.background = '#fef3c7';
@@ -15075,7 +15085,18 @@ function _csExpandAccordionAndScroll(el) {
     }
   }
   setTimeout(() => {
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // v2361: use block:'start' + scroll-margin-top so the target sits just
+    // below the floating "Back to Check Survey" button (≈60px tall). Using
+    // block:'center' previously put the item behind the back button on
+    // laptop and on iPhone in landscape, giving the impression the Go
+    // button had landed on the wrong item. scroll-margin-top is honoured by
+    // scrollIntoView across nested scrollable containers, so it works
+    // whether the inspection view uses window scroll or an internal one.
+    const prevMargin = el.style.scrollMarginTop;
+    el.style.scrollMarginTop = 'calc(72px + env(safe-area-inset-top, 0px))';
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Restore after the smooth scroll has had time to complete
+    setTimeout(() => { el.style.scrollMarginTop = prevMargin; }, 1200);
     el.style.transition = 'background 0.3s, box-shadow 0.3s';
     el.style.background = '#fef3c7';
     el.style.boxShadow = '0 0 0 3px #f59e0b';
