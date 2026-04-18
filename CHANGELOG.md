@@ -12,6 +12,27 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2304 — 2026-04-16
+
+### Added
+- **Remote error logging to Firestore.** Errors caught by the global
+  `window.onerror` and `unhandledrejection` handlers are now also written to
+  a `error_logs` Firestore collection (when Firebase is connected). Each log
+  includes app version, active view, survey ID, last user action, user agent,
+  and online status. Rate-limited to 10 per minute. Fire-and-forget — never
+  blocks and never throws.
+- **`_kkLastAction` tracker** — 8 strategic placements (openSurvey,
+  generateReport, createNewSurvey, capturePhoto, saveSurveyWithProgress,
+  toggleSnippets, saveSurveyDetails) to provide context in error logs.
+- **SW update safety gate.** Service worker update reloads are now deferred
+  when a camera capture, Drive backup upload, or survey save is in progress.
+  Three flags (`_kkCameraActive`, `_kkBackupInFlight`, `_kkSaveInProgress`)
+  are checked in the `controllerchange` handler. If any flag is true, the
+  reload is deferred until all operations complete via `_checkDeferredUpdate()`.
+  This prevents mid-survey disruptions from background app updates.
+
+---
+
 ## v2303 — 2026-04-16
 
 ### Removed

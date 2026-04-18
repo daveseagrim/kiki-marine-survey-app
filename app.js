@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2303';
+const APP_VERSION = 'v2304';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -87,10 +87,12 @@ function pluralizeRudder(text, rudderCount) {
 window.addEventListener('error', (e) => {
   console.error('Global error:', e.error || e.message);
   try { showToast('Error: ' + (e.message || 'Unknown error').substring(0, 100)); } catch(_) {}
+  try { _kkLogRemoteError({ message: e.message || 'Unknown error', stack: (e.error && e.error.stack) || '' }); } catch(_) {}
 });
 window.addEventListener('unhandledrejection', (e) => {
   console.error('Unhandled rejection:', e.reason);
   try { showToast('Error: ' + String(e.reason).substring(0, 100)); } catch(_) {}
+  try { _kkLogRemoteError({ message: String(e.reason).substring(0, 500), stack: (e.reason && e.reason.stack) || '' }); } catch(_) {}
 });
 let db = null;
 let textLibrary = null;
@@ -180,6 +182,59 @@ let outdriveDb = null;
 let winchDb = null;
 let currentSurveyId = null;
 let currentView = 'surveys';
+
+// ── Remote error logging ────────────────────────────────────────────────
+// Tracks the last major user action so error reports include context.
+let _kkLastAction = '';
+// Rate-limit state: timestamps of recent remote log calls.
+const _kkErrorTimestamps = [];
+const _KK_ERROR_RATE_LIMIT = 10; // max errors per 60 s
+
+/**
+ * Fire-and-forget remote error logger.  Writes to the Firestore
+ * "error_logs" collection when Firebase is available.  Silently no-ops
+ * if Firebase isn't connected or rate limit is exceeded.
+ */
+function _kkLogRemoteError(errorInfo) {
+  try {
+    if (!window.fsDb) return;
+
+    // Rate-limit: drop if we've already logged 10 errors in the last minute
+    const now = Date.now();
+    while (_kkErrorTimestamps.length && _kkErrorTimestamps[0] < now - 60000) {
+      _kkErrorTimestamps.shift();
+    }
+    if (_kkErrorTimestamps.length >= _KK_ERROR_RATE_LIMIT) return;
+    _kkErrorTimestamps.push(now);
+
+    // Detect active view — use the global `currentView` plus any visible
+    // bottom-sheet or modal as a hint.
+    let activeView = (typeof currentView === 'string') ? currentView : 'unknown';
+    try {
+      const sheet = document.querySelector('.bottom-sheet[style*="translateY(0"]');
+      if (sheet) activeView += '+bottomSheet';
+    } catch (_) {}
+
+    const doc = {
+      appVersion:  APP_VERSION,
+      timestamp:   firebase.firestore.FieldValue.serverTimestamp(),
+      clientTime:  new Date().toISOString(),
+      message:     String(errorInfo.message || '').substring(0, 500),
+      stack:       String(errorInfo.stack || '').substring(0, 2000),
+      currentView: activeView,
+      surveyId:    (typeof currentSurveyId !== 'undefined' && currentSurveyId) ? currentSurveyId : null,
+      lastAction:  _kkLastAction || '',
+      userAgent:   navigator.userAgent,
+      online:      navigator.onLine
+    };
+
+    // Fire-and-forget — intentionally not awaited
+    window.fsDb.collection('error_logs').add(doc).catch(function () {});
+  } catch (_) {
+    // Must never throw
+  }
+}
+// ── End remote error logging ────────────────────────────────────────────
 
 // Persist view state to sessionStorage so reload returns to the same screen
 function persistViewState() {
@@ -332,6 +387,7 @@ function compressPhotoForReport(dataUrl, maxDim = 1200, quality = 0.7) {
 // iOS Chrome tab suspension when the camera app is open.
 function setCameraActive(val) {
   window._cameraActive = val;
+  _kkCameraActive = !!val;
   if (val) {
     try {
       sessionStorage.setItem('_cameraActive', '1');
@@ -343,6 +399,7 @@ function setCameraActive(val) {
     try {
       sessionStorage.removeItem('_cameraActive');
     } catch (e) {}
+    _checkDeferredUpdate();
   }
 }
 
@@ -1380,14 +1437,21 @@ async function saveSurvey(survey) {
     if (typeof console !== 'undefined') console.warn('auto-regen propulsion narrative failed', e);
   }
 
+  _kkSaveInProgress = true;
   return new Promise((resolve, reject) => {
     const tx = db.transaction(['surveys'], 'readwrite');
     const store = tx.objectStore('surveys');
     const request = store.put(survey);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => {
+      _kkSaveInProgress = false;
+      _checkDeferredUpdate();
+      reject(request.error);
+    };
     request.onsuccess = () => {
       // Mark that there are unsaved changes for backup reminder
       window._hasUnsavedBackup = true;
+      _kkSaveInProgress = false;
+      _checkDeferredUpdate();
       resolve(survey.id);
     };
   });
@@ -1523,6 +1587,26 @@ async function deleteSurvey(id) {
   });
 }
 
+// ─── SW update safety gate ────────────────────────────────────────────────
+// Flags that track when critical operations are in progress. The
+// controllerchange handler checks these before reloading the page —
+// if any flag is true the reload is deferred until the operation completes.
+let _kkCameraActive   = false;  // true while camera UI is open
+let _kkBackupInFlight = false;  // true while Drive/Firebase backup is uploading
+let _kkSaveInProgress = false;  // true while saveSurvey is running
+let _kkUpdatePending  = false;  // true when a SW update was deferred
+
+// Called at the end of every critical operation — if a SW update was
+// deferred, and no other critical operation is still running, reload now.
+function _checkDeferredUpdate() {
+  if (!_kkUpdatePending) return;
+  if (_kkCameraActive || _kkBackupInFlight || _kkSaveInProgress) return;
+  console.log('[SW] Deferred update — all operations complete, reloading');
+  _kkUpdatePending = false;
+  persistViewState();
+  window.location.reload();
+}
+
 // ─── Idle-triggered backup system ──────────────────────────────────────────
 // Photos are saved to IndexedDB instantly. Uploads only happen when the user
 // pauses activity for 5 seconds, taps Backup, or comes back online.
@@ -1652,6 +1736,7 @@ async function _processBackupQueue() {
   }
 
   _backupRunning = true;
+  _kkBackupInFlight = true;
   const totalToProcess = _pendingBackupIds.length;
   let uploaded = 0;
   let failed = 0;
@@ -1661,8 +1746,10 @@ async function _processBackupQueue() {
     if (Date.now() - _lastActivityTime < 3000) {
       // User is active — stop uploading, restart idle timer
       _backupRunning = false;
+      _kkBackupInFlight = false;
       _resetIdleTimer();
       _hideBackupBanner(`⏸ Paused — ${uploaded} backed up, ${_pendingBackupIds.length} remaining`);
+      _checkDeferredUpdate();
       return;
     }
 
@@ -1699,10 +1786,12 @@ async function _processBackupQueue() {
       // If everything is failing, stop trying
       if (failed >= 3) {
         _backupRunning = false;
+        _kkBackupInFlight = false;
         _hideBackupBanner(`⚠️ Upload issues — ${uploaded} done, ${_pendingBackupIds.length} will retry`);
         _showBackupWarning('Backup', `${failed} uploads failed — will retry when idle`);
         // Retry in 30 seconds
         setTimeout(() => { if (_pendingBackupIds.length > 0) _processBackupQueue(); }, 30000);
+        _checkDeferredUpdate();
         return;
       }
     }
@@ -1712,9 +1801,11 @@ async function _processBackupQueue() {
   }
 
   _backupRunning = false;
+  _kkBackupInFlight = false;
   const destinations = [firebaseOk ? 'Firebase' : null, driveOk ? 'Drive' : null].filter(Boolean).join(' + ');
   _hideBackupBanner(`✓ ${uploaded} photos backed up to ${destinations}`);
   _updateBackupStatusUI();
+  _checkDeferredUpdate();
 }
 
 // Listen for connectivity changes — auto-retry when back online
@@ -2634,11 +2725,13 @@ async function backupAllEverywhere() {
 // Shows the SaveProgress dialog with Local / Firebase / Drive rows,
 // saves to each in sequence, and updates each row's status in real time.
 async function saveSurveyWithProgress(surveyId) {
+  _kkLastAction = 'saveSurveyWithProgress:' + surveyId;
   if (!surveyId) return;
   window._backupActive = true;
+  _kkBackupInFlight = true;
 
   const survey = await getSurvey(surveyId);
-  if (!survey) { showToast('Survey not found'); window._backupActive = false; return; }
+  if (!survey) { showToast('Survey not found'); window._backupActive = false; _kkBackupInFlight = false; _checkDeferredUpdate(); return; }
 
   const vesselName = survey.vesselName || 'Unnamed';
   const firebaseOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled();
@@ -2779,7 +2872,9 @@ async function saveSurveyWithProgress(surveyId) {
 
   window._hasUnsavedBackup = false;
   window._backupActive = false;
+  _kkBackupInFlight = false;
   SaveProgress.finish(allOk, allOk ? '✓ Saved' : '⚠ Saved with errors');
+  _checkDeferredUpdate();
 }
 
 // Wrapper to count photos in IndexedDB for a survey and update the pill
@@ -7232,6 +7327,7 @@ window._chipStrip = {
 
 // Create new survey
 function createNewSurvey(formData) {
+  _kkLastAction = 'createNewSurvey:' + (formData.vesselName || '');
   const survey = {
     id: Date.now().toString(),
     createdAt: new Date().toISOString(),
@@ -9232,6 +9328,7 @@ function editSurveyDetails(surveyId) {
 }
 
 function saveSurveyDetails(surveyId) {
+  _kkLastAction = 'saveSurveyDetails:' + surveyId;
   getSurvey(surveyId).then(survey => {
     if (!survey) return;
 
@@ -15766,6 +15863,7 @@ function forceViewportRecalc() {
 }
 
 async function capturePhoto(itemLabel, event) {
+  _kkLastAction = 'capturePhoto:' + (itemLabel || '');
   // If called without event (e.g., from area photo button), trigger a file input
   if (!event || !event.target || !event.target.files) {
     const input = document.createElement('input');
@@ -17883,6 +17981,7 @@ function selectTextVariant(itemLabel, categoryName, variantText) {
 
 // Toggle snippet panel visibility
 function toggleSnippets(itemLabel) {
+  _kkLastAction = 'toggleSnippets:' + (itemLabel || '');
   const safeId = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
   const panel = document.getElementById('snippets-' + safeId);
   if (panel) {
@@ -19078,6 +19177,7 @@ function deletePhotoAndRefresh(photoId) {
 }
 
 function openSurvey(surveyId) {
+  _kkLastAction = 'openSurvey:' + surveyId;
   getSurvey(surveyId).then(survey => {
     // Auto-correct vessel type from specs database if it was saved incorrectly
     if (survey.yearMakeModel && boatSpecsDB && boatSpecsDB.boats) {
@@ -19282,6 +19382,7 @@ async function backToHome() {
 
 // Report generation
 async function generateReport() {
+  _kkLastAction = 'generateReport:' + currentSurveyId;
   try {
   const survey = await getSurvey(currentSurveyId);
   if (!survey) return;
@@ -21027,15 +21128,18 @@ if ('serviceWorker' in navigator) {
   // When the new SW takes over, reload the page automatically.
   // v2261: defer the reload if the camera is open — reloading mid-capture
   // destroys the overlay and the user loses staged photos.
+  // v2303: expanded safety gate — also defer if a backup or save is in flight.
   let refreshing = false;
   window._swUpdatePending = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (refreshing) return;
-    if (window._cameraActive) {
-      // Camera is open — don't reload now. Flag it so we reload
-      // when the camera closes (closeBatchCameraOverlay).
-      window._swUpdatePending = true;
-      console.log('[SW] Update deferred — camera active');
+    if (_kkCameraActive || _kkBackupInFlight || _kkSaveInProgress) {
+      // Critical operation in progress — don't reload now. The
+      // _checkDeferredUpdate() call at the end of each operation
+      // will trigger the reload once all flags are clear.
+      _kkUpdatePending = true;
+      window._swUpdatePending = true;  // keep legacy flag in sync
+      console.log('[SW] Update deferred — operation in progress');
       return;
     }
     refreshing = true;
@@ -23520,12 +23624,9 @@ function closeBatchCameraOverlay() {
   const overlay = document.getElementById('batchCamOverlay');
   if (overlay) overlay.remove();
   setCameraActive(false);
-  // v2261: if a SW update was deferred because the camera was open, reload now
-  if (window._swUpdatePending) {
-    window._swUpdatePending = false;
-    persistViewState();
-    window.location.reload();
-  }
+  // v2261+: deferred SW update is now handled by _checkDeferredUpdate()
+  // called from setCameraActive(false) above — it checks all safety flags
+  // (camera, backup, save) before allowing the reload.
 }
 
 // Expose for inline onclick handlers
