@@ -26013,6 +26013,48 @@
     },
     {
       "section": "Brightwork",
+      "rating": "B",
+      "text": "The brightwork at [insert location] was deteriorated and in need of refinishing to restore protection and appearance.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Brightwork",
+      "rating": "B",
+      "text": "The [insert location] needs to be rebedded in order to prevent moisture ingress and keep the laminate solid.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Brightwork",
+      "rating": "B",
+      "text": "Varnish was peeling, cracked, or worn through in several areas, exposing bare wood to the elements.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Brightwork",
+      "rating": "B",
+      "text": "If left unprotected, exposed wood will absorb moisture, leading to rot and potential structural compromise over time.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Brightwork",
+      "rating": "B",
+      "text": "Strip, sand, and refinish the affected brightwork with marine-grade varnish or equivalent coating.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Brightwork",
+      "rating": "B",
+      "text": "Remove, rebed with appropriate marine sealant, and reinstall to prevent moisture ingress into the deck core.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Brightwork",
       "rating": "C",
       "text": "The brightwork was generally in satisfactory condition.",
       "phase": "observed",

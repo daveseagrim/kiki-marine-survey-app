@@ -12,6 +12,17 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2334 — 2026-04-18
+
+- **Brightwork B-rating snippets expanded.** Added location-specific
+  observed ("brightwork at [insert location] was deteriorated"), rebedding
+  observed ("[insert location] needs to be rebedded to prevent moisture
+  ingress and keep the laminate solid"), varnish deterioration observed,
+  means (exposed wood → moisture → rot), and actions (strip/sand/refinish,
+  remove/rebed/reinstall). Previously had only 1 generic observed.
+
+---
+
 ## v2333 — 2026-04-18
 
 - **Fix sail drive ITEM_SNIPPET_MAP mismatch.** Target was missing the
