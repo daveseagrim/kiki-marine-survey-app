@@ -12,6 +12,26 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2327 — 2026-04-18
+
+### Fixed
+- **Photos disappear on rating change** — compact item thumbnails start `display:none` for lazy loading, but `selectRating` set `img.src` without removing `display:none`. Now unhides thumbnails after loading.
+- **Conductivity snippets** — removed "elevated" from deck/coachroof and aft deck conductivity sentences; fixed double `[insert reading range]` placeholder (was rendering four input fields instead of two).
+
+### Changed
+- **Area photo grid — larger thumbnails** — switched from fixed 84×84px thumbnails with flex-wrap to a 4-column CSS grid with responsive sizing, matching the bottom sheet photo grid.
+- **Area photo grid — collapsible** — tap the title bar to collapse/expand the photo grid and buttons. Chevron indicator (▼/▶) shows state. Keeps the inspection view tidy when categories have many photos.
+- Photo count shown in area photo title bar (e.g. "📷 Deck photos (22)").
+
+---
+
+## v2326 — 2026-04-18
+
+### Fixed
+- **Snippet duplication / "removed sentence comes back" bug** — When the notes sheet opens, picker sentences that already appear in the saved text are now auto-checked. Previously, the entire saved text was captured as a "hand-typed prefix" on the first checkbox tick, so: (1) unchecking a sentence left it embedded in the prefix, making it reappear; (2) ticking a sentence already in the text produced it twice. Now only truly hand-typed or placeholder-filled text becomes the prefix.
+
+---
+
 ## v2325 — 2026-04-18
 
 ### Added

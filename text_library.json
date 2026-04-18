@@ -6671,7 +6671,7 @@
     {
       "section": "Aft deck conductivity testing",
       "rating": "B",
-      "text": "The aft deck returned elevated readings between [insert details] and [insert details].",
+      "text": "The aft deck returned readings of [insert reading range].",
       "phase": "observed",
       "severity": 3
     },
@@ -6986,7 +6986,7 @@
     {
       "section": "Conductivity testing",
       "rating": "B",
-      "text": "The aft deck returned elevated readings between [insert reading range] and [insert reading range].",
+      "text": "The aft deck returned readings of [insert reading range].",
       "phase": "observed",
       "severity": 3
     },
@@ -25692,7 +25692,7 @@
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "C - some small areas",
-      "text": "The deck and coachroof returned elevated readings between [insert reading range] and [insert reading range].",
+      "text": "The deck and coachroof returned readings of [insert reading range].",
       "phase": "observed",
       "severity": 3
     },
@@ -25706,7 +25706,7 @@
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "C - no conductivity",
-      "text": "Conductivity testing of the deck and coachroof produced readings consistent with a sound laminate, with no elevated conductivity detected.",
+      "text": "Conductivity testing of the deck and coachroof produced readings consistent with a sound laminate, with no conductivity detected.",
       "phase": "observed",
       "severity": 3
     },

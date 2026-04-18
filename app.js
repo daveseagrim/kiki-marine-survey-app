@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2325';
+const APP_VERSION = 'v2327';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4387,6 +4387,9 @@ function showNotesSheet(itemLabel, categoryName) {
       ta.style.height = 'auto';
       ta.style.height = ta.scrollHeight + 'px';
     }
+    // v2326: auto-check picker sentences found in saved text so that
+    // unchecking them actually removes them (prevents prefix capture bug)
+    _kkAutoCheckSavedSentences(sanitizedLabel, survey, itemLabel);
     // Seed tone-warning banner so pre-existing flagged text lights up
     // immediately when the sheet opens — not only on next keystroke.
     if (ta && window._mainSheetToneCheck) {
@@ -4600,6 +4603,91 @@ window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
   ta.style.height = ta.scrollHeight + 'px';
   try { ta.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
 };
+
+// v2326: Auto-check picker sentences that already appear in the saved
+// textarea text when the notes sheet opens.  Fixes two bugs:
+//   1. "Removed sentence keeps coming back" — the entire saved text was
+//      captured as _kkManualTextPrefix on the first checkbox tick, so
+//      unchecking a sentence left it embedded in the prefix.
+//   2. Sentence duplication — ticking a sentence that was already in the
+//      saved text produced it twice (once in prefix, once from checkbox).
+// After auto-checking, only truly hand-typed / placeholder-filled text
+// remains as the prefix.
+function _kkAutoCheckSavedSentences(sanitizedLabel, survey, itemLabel) {
+  const entries = (window._sentencePicker && window._sentencePicker[sanitizedLabel]) || [];
+  if (!entries.length) return;
+  const ta = document.getElementById('sheet-text-' + sanitizedLabel);
+  if (!ta || !ta.value.trim()) return;
+  const picker = document.getElementById('sheet-sentence-picker');
+  if (!picker) return;
+
+  // Determine drive-line count for this item (per-drive-line items force singular)
+  const sideMatch = itemLabel.match(/^(Port|Starboard|#\d+)\s*—\s*/) &&
+                    !itemLabel.match(/^(?:Port|Starboard|Centre) hull\s*—/);
+  const dlc = sideMatch ? 1 : (parseInt(survey.driveLineCount, 10) || 1);
+  const rc = parseInt(survey.rudderCount, 10) || 1;
+
+  const labels = Array.from(picker.querySelectorAll('label'));
+  const savedText = ta.value.trim();
+  let workingText = savedText;
+  let orderCounter = 0;
+
+  // Resolve each sentence to its "as-inserted" form and collect matchable candidates
+  const candidates = [];
+  labels.forEach(lbl => {
+    const chip = lbl.querySelector('.kk-sentence-chip');
+    if (!chip) return;
+    const idx = parseInt(chip.getAttribute('data-sentence-idx'), 10);
+    const entry = entries[idx];
+    if (!entry || !entry.text) return;
+
+    // Resolve tokens the same way insertSnippetFromSheet / _kkRebuildFromSentencePicker do
+    let resolved = resolveCountTokens(entry.text, dlc);
+    if (typeof window.expandSnippetTokens === 'function') {
+      const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
+        ? window.KikiSnippetTokens.contextFromSurvey(survey)
+        : { hasRudder: survey.hasRudder !== false, rudderCount: rc };
+      resolved = window.expandSnippetTokens(resolved, ctx);
+    }
+    resolved = pluralizeRudder(resolved, rc);
+    // Handle [side] placeholder — single-drive surveys strip it at insertion
+    if (dlc < 2) {
+      resolved = resolved.replace(/\bThe\s+\[side\]\s*/g, 'The ')
+                         .replace(/\bthe\s+\[side\]\s*/g, 'the ')
+                         .replace(/\[side\]\s*/gi, '')
+                         .replace(/\s{2,}/g, ' ')
+                         .replace(/\s+([.,;:])/g, '$1');
+    }
+    // Apply mast/winch interpolation (reads from sheet dropdowns if present)
+    resolved = _kkInterpolateMastDesc(resolved);
+    resolved = _kkInterpolateWinchDesc(resolved);
+
+    // Skip sentences that still have unfilled placeholders — can't reliably match
+    if (/\[(?:insert |describe |side\])/i.test(resolved)) return;
+
+    candidates.push({ chip, resolved: resolved.trim() });
+  });
+
+  // Match longest first to avoid partial matches eating shorter ones
+  const matches = [];
+  candidates.forEach(({ chip, resolved }) => {
+    const pos = savedText.indexOf(resolved);
+    if (pos >= 0) matches.push({ chip, resolved, pos });
+  });
+
+  // Check in original text order so check-order mirrors document order
+  matches.sort((a, b) => a.pos - b.pos);
+  matches.forEach(({ chip, resolved }) => {
+    chip.checked = true;
+    orderCounter++;
+    chip.setAttribute('data-check-order', orderCounter);
+    workingText = workingText.replace(resolved, '').replace(/\s{2,}/g, ' ').trim();
+  });
+
+  // Whatever's left is truly hand-typed or placeholder-filled text
+  _kkManualTextPrefix[sanitizedLabel] = workingText;
+  _kkCheckOrderCounter = orderCounter;
+}
 
 // overlay's delegated click listener. Reads variants from the cache
 // stashed by showNotesSheet and dispatches to insertSnippetFromSheet.
@@ -12529,36 +12617,38 @@ function renderInspection(survey) {
       } else {
         html += `
           <div id="area-photo-wrap-${sanitized}" style="margin-bottom:16px;padding:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
-              <div style="font-weight:600;font-size:14px;color:#0369a1;">📷 ${mediaItem.label}</div>
-              <button onclick="toggleExclude('${safeLabel}')" style="background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;" title="Skip this photo section">⊘ Skip</button>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;" onclick="toggleAreaPhotoCollapse('${sanitized}')">
+              <div style="font-weight:600;font-size:14px;color:#0369a1;">📷 ${mediaItem.label}${photos.length > 0 ? ` (${photos.length})` : ''} <span id="area-chevron-${sanitized}" style="font-size:11px;color:#94a3b8;">▼</span></div>
+              <button onclick="event.stopPropagation();toggleExclude('${safeLabel}')" style="background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;" title="Skip this photo section">⊘ Skip</button>
             </div>
-            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
-              ${photos.map(pid => `
-                <div class="area-photo-wrap" style="position:relative;width:84px;height:84px;display:none;">
-                  <img id="thumb-${pid}" src="" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
-                  <span onclick="event.stopPropagation();rotateAreaPhoto('${pid}','${safeLabel}')"
-                        style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↻</span>
-                  <span onclick="event.stopPropagation();deleteAreaPhoto('${pid}','${safeLabel}')"
-                        style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">✕</span>
-                  <span onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')"
-                        style="position:absolute;bottom:3px;right:3px;background:rgba(6,106,171,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↗</span>
-                </div>
-              `).join('')}
+            <div id="area-photo-body-${sanitized}">
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+                ${photos.map(pid => `
+                  <div class="area-photo-wrap" style="position:relative;display:none;">
+                    <img id="thumb-${pid}" src="" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
+                    <span onclick="event.stopPropagation();rotateAreaPhoto('${pid}','${safeLabel}')"
+                          style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↻</span>
+                    <span onclick="event.stopPropagation();deleteAreaPhoto('${pid}','${safeLabel}')"
+                          style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">✕</span>
+                    <span onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')"
+                          style="position:absolute;bottom:3px;right:3px;background:rgba(6,106,171,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↗</span>
+                  </div>
+                `).join('')}
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                <button type="button"
+                  onclick="openBatchCamera('${safeLabel}', { isArea: true, categoryName: '${safeCat}' })"
+                  style="background:#066aab;color:white;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
+                  📷 ${photos.length > 0 ? `Take More (${photos.length})` : 'Take Photos'}
+                </button>
+                <button type="button"
+                  onclick="importPhotosForItem('${safeLabel}')"
+                  style="background:white;color:#066aab;border:2px solid #066aab;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
+                  🖼️ Import photos from library / files
+                </button>
+              </div>
+              <div style="font-size:11px;color:#6b7280;margin-top:6px;">Both buttons support selecting multiple photos at once. On desktop, you can also drag photo files onto any item card.</div>
             </div>
-            <div style="display:flex;flex-wrap:wrap;gap:8px;">
-              <button type="button"
-                onclick="openBatchCamera('${safeLabel}', { isArea: true, categoryName: '${safeCat}' })"
-                style="background:#066aab;color:white;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
-                📷 ${photos.length > 0 ? `Take More (${photos.length})` : 'Take Photos'}
-              </button>
-              <button type="button"
-                onclick="importPhotosForItem('${safeLabel}')"
-                style="background:white;color:#066aab;border:2px solid #066aab;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
-                🖼️ Import photos from library / files
-              </button>
-            </div>
-            <div style="font-size:11px;color:#6b7280;margin-top:6px;">Both buttons support selecting multiple photos at once. On desktop, you can also drag photo files onto any item card.</div>
           </div>
         `;
       }
@@ -16178,6 +16268,22 @@ async function deleteAreaPhoto(photoId, mediaLabel) {
 }
 
 /**
+ * v2327: Collapse / expand the area photo section body (grid + buttons).
+ */
+function toggleAreaPhotoCollapse(sanitized) {
+  const body = document.getElementById('area-photo-body-' + sanitized);
+  const chevron = document.getElementById('area-chevron-' + sanitized);
+  if (!body) return;
+  if (body.style.display === 'none') {
+    body.style.display = '';
+    if (chevron) chevron.textContent = '\u25BC'; // ▼
+  } else {
+    body.style.display = 'none';
+    if (chevron) chevron.textContent = '\u25B6'; // ▶
+  }
+}
+
+/**
  * v2324: Rotate an area photo 90° clockwise and refresh its thumbnail in place.
  */
 async function rotateAreaPhoto(photoId, mediaLabel) {
@@ -16223,36 +16329,38 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
   // Not excluded — reset styling and render the full UI
   wrapper.style.cssText = 'margin-bottom:16px;padding:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;';
   wrapper.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
-      <div style="font-weight:600;font-size:14px;color:#0369a1;">📷 ${mediaLabel}</div>
-      <button onclick="toggleExclude('${safeLabel}')" style="background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;" title="Skip this photo section">⊘ Skip</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;" onclick="toggleAreaPhotoCollapse('${sanitized}')">
+      <div style="font-weight:600;font-size:14px;color:#0369a1;">📷 ${mediaLabel}${photos.length > 0 ? ` (${photos.length})` : ''} <span id="area-chevron-${sanitized}" style="font-size:11px;color:#94a3b8;">▼</span></div>
+      <button onclick="event.stopPropagation();toggleExclude('${safeLabel}')" style="background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;" title="Skip this photo section">⊘ Skip</button>
     </div>
-    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
-      ${photos.map(pid => `
-        <div class="area-photo-wrap" style="position:relative;width:84px;height:84px;display:none;">
-          <img id="thumb-${pid}" src="" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
-          <span onclick="event.stopPropagation();rotateAreaPhoto('${pid}','${safeLabel}')"
-                style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↻</span>
-          <span onclick="event.stopPropagation();deleteAreaPhoto('${pid}','${safeLabel}')"
-                style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">✕</span>
-          <span onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')"
-                style="position:absolute;bottom:3px;right:3px;background:rgba(6,106,171,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↗</span>
-        </div>
-      `).join('')}
+    <div id="area-photo-body-${sanitized}">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+        ${photos.map(pid => `
+          <div class="area-photo-wrap" style="position:relative;display:none;">
+            <img id="thumb-${pid}" src="" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
+            <span onclick="event.stopPropagation();rotateAreaPhoto('${pid}','${safeLabel}')"
+                  style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↻</span>
+            <span onclick="event.stopPropagation();deleteAreaPhoto('${pid}','${safeLabel}')"
+                  style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">✕</span>
+            <span onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')"
+                  style="position:absolute;bottom:3px;right:3px;background:rgba(6,106,171,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↗</span>
+          </div>
+        `).join('')}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <button type="button"
+          onclick="openBatchCamera('${safeLabel}', { isArea: true, categoryName: '${safeCat}' })"
+          style="background:#066aab;color:white;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
+          📷 ${photos.length > 0 ? `Take More (${photos.length})` : 'Take Photos'}
+        </button>
+        <button type="button"
+          onclick="importPhotosForItem('${safeLabel}')"
+          style="background:white;color:#066aab;border:2px solid #066aab;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
+          🖼️ Import photos from library / files
+        </button>
+      </div>
+      <div style="font-size:11px;color:#6b7280;margin-top:6px;">Both buttons support selecting multiple photos at once. On desktop, you can also drag photo files onto any item card.</div>
     </div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;">
-      <button type="button"
-        onclick="openBatchCamera('${safeLabel}', { isArea: true, categoryName: '${safeCat}' })"
-        style="background:#066aab;color:white;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
-        📷 ${photos.length > 0 ? `Take More (${photos.length})` : 'Take Photos'}
-      </button>
-      <button type="button"
-        onclick="importPhotosForItem('${safeLabel}')"
-        style="background:white;color:#066aab;border:2px solid #066aab;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
-        🖼️ Import photos from library / files
-      </button>
-    </div>
-    <div style="font-size:11px;color:#6b7280;margin-top:6px;">Both buttons support selecting multiple photos at once. On desktop, you can also drag photo files onto any item card.</div>
   `;
 
   // Load thumbnails from IndexedDB
@@ -18015,12 +18123,16 @@ function selectRating(itemLabel, categoryName, rating) {
         const itemData = survey.items[itemLabel];
         compactDiv.innerHTML = buildCompactItemHTML(itemLabel, categoryName, itemData, options);
         // Load photo thumbnails for inline display
+        // v2327: also unhide — thumbnails start display:none for lazy loading
         if (itemData.photos && itemData.photos.length > 0) {
           itemData.photos.forEach(photoId => {
             getPhotoById(photoId).then(photo => {
               if (photo) {
                 const img = document.getElementById(`thumb-${photoId}`);
-                if (img) img.src = photo.dataUrl;
+                if (img) {
+                  img.src = photo.dataUrl;
+                  img.style.display = '';
+                }
               }
             });
           });
@@ -18048,7 +18160,10 @@ function selectRating(itemLabel, categoryName, rating) {
           getPhotoById(photoId).then(photo => {
             if (photo) {
               const img = document.getElementById(`thumb-${photoId}`);
-              if (img) img.src = photo.dataUrl;
+              if (img) {
+                img.src = photo.dataUrl;
+                img.style.display = '';
+              }
             }
           });
         });
