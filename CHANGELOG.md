@@ -12,6 +12,9 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2315 — 2026-04-17
+- Broken photo placeholders: added post-load sweep that hides any thumbnail whose src is still not a data: URL after all async photo loads complete. Catches all edge cases (stubs, orphans, corrupt data) regardless of what getPhotoById returns. Applied to both accordion thumbnails and media sheet grid.
+
 ## v2314 — 2026-04-17
 - Added onerror handlers to photo thumbnail img tags in both the accordion view and media sheet grid. If the browser fails to render a photo for any reason (corrupt data URL, Firebase stub with partial data, etc.), the thumbnail wrapper is automatically hidden. Belt-and-suspenders fix alongside the dataUrl check.
 

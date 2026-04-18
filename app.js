@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2314';
+const APP_VERSION = 'v2315';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -5110,18 +5110,28 @@ function showMediaSheet(itemLabel, categoryName) {
 
     // Load existing photo thumbnails
     if (itemData.photos && itemData.photos.length > 0) {
-      itemData.photos.forEach(photoId => {
-        getPhotoById(photoId).then(photo => {
+      const _thumbLoads = itemData.photos.map(photoId => {
+        return getPhotoById(photoId).then(photo => {
           const img = document.getElementById(`sheet-thumb-${photoId}`);
           if (photo && photo.dataUrl && img) {
             img.src = photo.dataUrl;
           } else if (img) {
-            // v2312: hide orphaned or stub photo (deleted, or Firebase stub
-            // without image data)
             const wrapper = img.closest('[data-photo-idx]');
             if (wrapper) wrapper.style.display = 'none';
           }
         });
+      });
+      // v2315: after all loads complete, sweep for any still-broken thumbnails
+      Promise.all(_thumbLoads).then(() => {
+        const grid = document.getElementById('sheet-photo-grid');
+        if (grid) {
+          grid.querySelectorAll('img[id^="sheet-thumb-"]').forEach(img => {
+            if (!img.src || !img.src.startsWith('data:')) {
+              const wrapper = img.closest('[data-photo-idx]');
+              if (wrapper) wrapper.style.display = 'none';
+            }
+          });
+        }
       });
       // Wire drag-to-reorder on the thumbnail grid (v2162)
       const grid = document.getElementById('sheet-photo-grid');
@@ -15838,12 +15848,19 @@ async function loadCategoryThumbnails(accordionContentEl) {
     if (photo && photo.dataUrl) {
       img.src = photo.dataUrl;
     } else {
-      // v2311: hide orphaned or stub photo placeholders (photo was deleted,
-      // or exists only as a Firebase stub without image data)
+      // v2315: hide orphaned or stub photo placeholders
       const wrapper = img.closest('.photo-item');
       if (wrapper) wrapper.style.display = 'none';
     }
   }
+  // v2315: final sweep — hide any thumbnails that still have no image data
+  // after all async loads complete (catches edge cases the per-photo check misses)
+  accordionContentEl.querySelectorAll('img[id^="thumb-"]').forEach(img => {
+    if (!img.src || !img.src.startsWith('data:')) {
+      const wrapper = img.closest('.photo-item');
+      if (wrapper) wrapper.style.display = 'none';
+    }
+  });
 }
 
 // Legacy wrapper kept for any external callers — now a no-op.
