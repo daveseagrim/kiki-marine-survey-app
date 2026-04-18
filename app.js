@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2327';
+const APP_VERSION = 'v2328';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -12622,7 +12622,7 @@ function renderInspection(survey) {
               <button onclick="event.stopPropagation();toggleExclude('${safeLabel}')" style="background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;" title="Skip this photo section">⊘ Skip</button>
             </div>
             <div id="area-photo-body-${sanitized}">
-              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px;margin-bottom:10px;">
                 ${photos.map(pid => `
                   <div class="area-photo-wrap" style="position:relative;display:none;">
                     <img id="thumb-${pid}" src="" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
@@ -16334,7 +16334,7 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
       <button onclick="event.stopPropagation();toggleExclude('${safeLabel}')" style="background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;" title="Skip this photo section">⊘ Skip</button>
     </div>
     <div id="area-photo-body-${sanitized}">
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px;margin-bottom:10px;">
         ${photos.map(pid => `
           <div class="area-photo-wrap" style="position:relative;display:none;">
             <img id="thumb-${pid}" src="" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">

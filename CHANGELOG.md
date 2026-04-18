@@ -12,6 +12,13 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2328 — 2026-04-18
+
+### Fixed
+- **Area photo grid too large on iPad/desktop** — changed from fixed 4-column grid to `repeat(auto-fill, minmax(72px, 1fr))`. Photos stay ~72–100px on any screen: 4 columns on iPhone, more columns on wider screens instead of enormous thumbnails.
+
+---
+
 ## v2327 — 2026-04-18
 
 ### Fixed
