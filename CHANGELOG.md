@@ -12,6 +12,19 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2329 — 2026-04-18
+
+- **Anchor snippets — undersized anchor + sizing rule of thumb (A rating).**
+  Added A-rating observed snippet: "The primary anchor is undersized for the
+  vessel and should be replaced before the vessel is returned to service."
+  Added A-rating action snippet with anchor sizing guidance: ~1.5–2 lb/ft for
+  modern designs (Rocna, Mantus, Spade), ~2–2.5 lb/ft for traditional patterns
+  (CQR, Bruce, Delta). Split "Replacement or significant repair is required."
+  into two separate action snippets: "Replacement is required." and
+  "Significant repair is required."
+
+---
+
 ## v2328 — 2026-04-18
 
 ### Fixed

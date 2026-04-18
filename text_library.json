@@ -26161,7 +26161,28 @@
     {
       "section": "Primary anchor, chain and rode",
       "rating": "A",
-      "text": "Replacement or significant repair is required.",
+      "text": "The primary anchor is undersized for the vessel and should be replaced before the vessel is returned to service.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Primary anchor, chain and rode",
+      "rating": "A",
+      "text": "Replacement is required.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Primary anchor, chain and rode",
+      "rating": "A",
+      "text": "Significant repair is required.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Primary anchor, chain and rode",
+      "rating": "A",
+      "text": "As a general rule of thumb, allow approximately 1.5 to 2 lb of anchor weight per foot of vessel length for modern designs such as Rocna, Mantus, or Spade, and 2 to 2.5 lb per foot for traditional plow or Danforth patterns such as CQR, Bruce, or Delta.",
       "phase": "action",
       "severity": 5
     },
