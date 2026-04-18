@@ -3975,8 +3975,8 @@ function showNotesSheet(itemLabel, categoryName) {
             }
             sentencePickerHtml += `
               <label style="display:flex;gap:10px;padding:10px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer;font-size:13px;line-height:1.45;">
-                <input type="checkbox" class="kk-sentence-chip" data-picker-key="${sanitizedLabel}" data-sentence-idx="${idx}"
-                  onchange="_kkRebuildFromSentencePicker('${sanitizedLabel}')"
+                <input type="checkbox" class="kk-sentence-chip" data-picker-key="${sanitizedLabel}" data-sentence-idx="${idx}" data-check-order=""
+                  onchange="_kkStampCheckOrder(this);_kkRebuildFromSentencePicker('${sanitizedLabel}')"
                   style="margin-top:3px;flex-shrink:0;">
                 <span class="kk-picker-text" data-base-html="${baseForAttr}">${displayRendered}</span>
               </label>
@@ -4442,16 +4442,34 @@ function _kkRefreshMastLabels(sanitizedLabel) {
   _kkRebuildFromSentencePicker(sanitizedLabel);
 }
 
+// v2307: track click order so sentences compose in the order ticked
+let _kkCheckOrderCounter = 0;
+window._kkStampCheckOrder = function(chip) {
+  if (chip.checked) {
+    _kkCheckOrderCounter++;
+    chip.setAttribute('data-check-order', _kkCheckOrderCounter);
+  } else {
+    chip.setAttribute('data-check-order', '');
+  }
+};
+
 window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
   const ta = document.getElementById(`sheet-text-${sanitizedLabel}`);
   const entries = (window._sentencePicker && window._sentencePicker[sanitizedLabel]) || [];
   if (!ta) return;
   const picker = document.getElementById('sheet-sentence-picker');
   if (!picker) return;
-  const parts = [];
+  // v2307: collect checked labels and sort by click order
+  const checkedLabels = [];
   picker.querySelectorAll('label').forEach(lbl => {
     const chip = lbl.querySelector('.kk-sentence-chip');
     if (!chip || !chip.checked) return;
+    const order = parseInt(chip.getAttribute('data-check-order'), 10) || 0;
+    checkedLabels.push({ lbl, chip, order });
+  });
+  checkedLabels.sort((a, b) => a.order - b.order);
+  const parts = [];
+  checkedLabels.forEach(({ lbl, chip }) => {
     const idx = parseInt(chip.getAttribute('data-sentence-idx'), 10);
     const entry = !isNaN(idx) ? entries[idx] : null;
     if (!entry) return;
