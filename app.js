@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2366';
+const APP_VERSION = 'v2367';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -13636,6 +13636,21 @@ async function checkSurvey() {
     if (s) renderInspection(s);
     await new Promise(r => setTimeout(r, 100));
     document.getElementById('csBackToCheckBtn')?.remove();
+  }
+
+  // v2367: Persist any pending inline textarea content (inspection notes)
+  // BEFORE reading the survey for preflight. Inspection textareas save on
+  // blur via autoSaveItemText, but if the user taps the Check button while
+  // a textarea is still focused (keyboard up on iPhone), the blur event may
+  // race with the click and the latest keystrokes never reach IDB. Result:
+  // a freshly C-rated item with just-typed notes was getting flagged as
+  // "C rated but no notes" because checkSurvey read the pre-edit snapshot
+  // from IDB. saveAllInspectionData walks every textarea[id^="text-"] and
+  // copies its .value onto survey.items[label].text (and also persists
+  // bilge pumps + comparables), saving only if anything changed — safe
+  // no-op when no textareas are present.
+  if (typeof saveAllInspectionData === 'function') {
+    try { await saveAllInspectionData(); } catch (_e) {}
   }
 
   const survey = await getSurvey(currentSurveyId);

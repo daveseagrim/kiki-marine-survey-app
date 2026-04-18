@@ -12,6 +12,14 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2367 — 2026-04-18
+### Fixed
+- **Check Survey (preflight) was flagging just-rated C items as "C rated but no notes" when notes had in fact been typed.** The bug was a save-order race: inspection-view textareas persist via the textarea's `onblur` → `autoSaveItemText()` handler, but if the user tapped the floating Check Survey button while a textarea was still focused (keyboard still up on iPhone), the click fired before the blur event completed — so the latest keystrokes never made it into IndexedDB. `checkSurvey()` then called `getSurvey()`, read the pre-edit snapshot with `data.text === ''`, hit the `baseRating === 'C' && !data.text` guard (app.js line 13935), and added a "Missing Notes" warning even though the notes were visibly on-screen. Same mechanism affected A/B ratings (line 13928) and the unreplaced-placeholder check (line 13940) — any preflight path that inspects `data.text` was reading stale data.
+- Fix: call `saveAllInspectionData()` at the top of `checkSurvey()`, right after the Edit Intro view's `saveEditFormSilently()` branch and before the `getSurvey()` read. `saveAllInspectionData()` walks every `textarea[id^="text-"]`, matches each back to its survey item by sanitised label, and copies `.value` onto `survey.items[label].text` (plus persists bilge pumps and comparables). It's a safe no-op when there are no textareas present (the forEach loop simply doesn't execute), so the edit-view path and any future entry points are unaffected. Typeof-guarded so a very early call (before the function is defined) won't throw; wrapped in try/catch so any persistence error in pending edits can't block the preflight from running.
+- Same race condition was latent on every report-generation path that reads `survey.items[*].text` — those already call `saveAllInspectionData()` directly (app.js line 20374 / 20393), which is why reports have always shown the right text but preflight didn't. This change brings preflight in line with the report path.
+
+---
+
 ## v2366 — 2026-04-18
 ### Added
 - **Safety Equipment section now accepts drag-and-drop and Import photos, matching the rest of the checklist.** Previously the TC TP 511 Safety Equipment items had only the 📷 camera button — the "Import photos from Library or Files" flow and the desktop drag-and-drop-from-Finder flow were both unavailable for safety items, so any photos originating from an existing library (e.g., a backup of a prior survey, or photos captured on a camera and transferred via AirDrop) had to be re-captured one by one. Two changes:
