@@ -9856,6 +9856,48 @@
     {
       "section": "Pushpit/pulpit",
       "rating": "B",
+      "text": "The pushpit/pulpit base fittings showed surface corrosion and minor play when loaded.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Pushpit/pulpit",
+      "rating": "B",
+      "text": "Cracking was observed in the weld at [insert location].",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Pushpit/pulpit",
+      "rating": "B",
+      "text": "The mounting bolts showed corrosion and the backing plates were not visible for inspection.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Pushpit/pulpit",
+      "rating": "B",
+      "text": "The stanchion tube showed signs of bending or deformation.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Pushpit/pulpit",
+      "rating": "B",
+      "text": "Inspect the base fittings, backing plates, and fasteners and service or replace as needed.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Pushpit/pulpit",
+      "rating": "B",
+      "text": "Have the cracked weld professionally repaired.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Pushpit/pulpit",
+      "rating": "B",
       "phase": "means",
       "severity": 3,
       "text": "This finding warrants attention in the near term."

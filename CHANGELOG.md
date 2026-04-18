@@ -12,6 +12,12 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2344 — 2026-04-18
+### Fixed
+- App was blank on load due to syntax error in the sentence-picker render chain. The v2343 patch added `.replace(/\[appliance\]/gi, ...)` and `.replace(/\[compressor\]/gi, ...)` after the `[side]` IIFE, but the existing `})());` terminated the `let rendered = escSnippet(s).replace(...)` chain before them, orphaning the new calls. Removed the stray `;` so the chain continues through the appliance/compressor replacements.
+
+---
+
 ## v2343 — 2026-04-18
 ### Added
 - `[appliance]` placeholder renders as dropdown: icebox / refrigerator / freezer / refrigerator/freezer.

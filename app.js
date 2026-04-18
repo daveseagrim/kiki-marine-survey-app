@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2343';
+const APP_VERSION = 'v2344';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4013,7 +4013,7 @@ function showNotesSheet(itemLabel, categoryName) {
                   `<option value="starboard">starboard</option>` +
                   `<option value="both">both</option>` +
                 `</select>`;
-            })());
+            })())
             // v2342: [appliance] placeholder for refrigerator/icebox/freezer type
             .replace(/\[appliance\]/gi,
               `<select class="kk-appliance-input" ` +
@@ -4036,7 +4036,7 @@ function showNotesSheet(itemLabel, categoryName) {
                   `<option value="remote compressor">remote compressor</option>` +
                   `<option value="internal compressor">internal compressor</option>` +
                   `<option value="none">no compressor (icebox only)</option>` +
-                `</select>`)
+                `</select>`);
             // v2291: store base rendered HTML in data-base-html so that
             // _kkRefreshMastLabels() can re-interpolate when dropdowns change.
             // Initial display gets mast desc applied from saved itemData.
