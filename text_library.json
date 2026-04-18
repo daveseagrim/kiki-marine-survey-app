@@ -25943,10 +25943,31 @@
     },
     {
       "section": "Toerail and gunwale",
-      "rating": "B",
+      "rating": "C",
       "text": "Although the toerail could benefit from refinishing for appearance, it remained firmly attached at the gunwale and was serviceable.",
       "phase": "observed",
-      "severity": 1
+      "severity": 2
+    },
+    {
+      "section": "Toerail and gunwale",
+      "rating": "B",
+      "text": "Cracking was observed along the top deck at the toerail joint that may be allowing moisture to penetrate the laminate.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Toerail and gunwale",
+      "rating": "B",
+      "text": "If left unaddressed, moisture ingress may saturate any core material and over time cause softness and compromise deck integrity.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Toerail and gunwale",
+      "rating": "B",
+      "text": "Sand or grind out the cracking, install backing where required, and fill appropriately to seal the joint and prevent further moisture ingress.",
+      "phase": "action",
+      "severity": 3
     },
     {
       "section": "Toerail and gunwale",

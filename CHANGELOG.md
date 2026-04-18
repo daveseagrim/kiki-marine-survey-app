@@ -12,6 +12,17 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2332 — 2026-04-18
+
+- **Toerail/gunwale snippets.** Moved "refinishing for appearance"
+  snippet from B to C rating. Added B-rating observed ("cracking along
+  top deck at the toerail joint, moisture may penetrate the laminate"),
+  means ("may saturate core material, cause softness, compromise deck
+  integrity"), and action ("sand or grind out cracking, install backing
+  where required, fill appropriately").
+
+---
+
 ## v2331 — 2026-04-18
 
 - **Mooring cleats and chocks — A-rating snippets expanded.** Added:
