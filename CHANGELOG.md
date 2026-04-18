@@ -12,6 +12,13 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2376 — 2026-04-18
+### Changed
+- **Findings & Recommendations: NT (Not Tested / Not Verified) table streamlined to two columns — Finding + Item.** Dave's follow-up to the v2373 C-table change: the NT section in F&R was still rendering a three-column table (Finding / Item / Reason), and the Reason column was carrying a truncated echo of the "not tested because…" prose that already lives in Detailed Survey Findings. Fix: keep the NT subsection (so the reader still gets the at-a-glance index of every not-tested item in one place) but drop the Reason column entirely. Table is now a tight two-column index — finding code and item label only — mirroring the v2373 C-table.
+- Code change: replaced the NT table render block in `generateReport()` (app.js ~line 21786) with a two-column version. No data model change — `baseRating === 'NT'` items are still collected the same way and still rendered in Detailed Survey Findings with their full observation text. The PO (Powered Up Only) table retains its three-column layout for now; revisit if Dave asks for the same treatment.
+
+---
+
 ## v2375 — 2026-04-18
 ### Changed
 - **Safety equipment removed from Overall Description of Vessel.** Dave's feedback: the auto-injected sentence "Safety equipment per Transport Canada TP 511: X of Y required items verified on board. Missing: …" was appearing in the Overall Description of Vessel textarea on the Edit Intro page and in the report's Vessel Description paragraph. That information belongs in the dedicated TC TP 511 Safety Equipment section of the report, not in the narrative description. Fix: the narrative no longer includes any safety-equipment summary. Paragraph 4 of the auto-built description now opens directly with the overall-condition sentence ("At the time of the survey the vessel was in …").

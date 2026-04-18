@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2375';
+const APP_VERSION = 'v2376';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -21777,23 +21777,22 @@ ${(() => {
     html += `</table>`;
   }
 
-  // v2242/v2373: NT and PO findings as compact tables. NT and PO are
-  // retained with their Notes/Reason columns because "not tested" and
-  // "powered up only" represent uncertainty the reader may need to
-  // follow up on — the brief explanation is actionable signal, not
-  // duplicated prose.
+  // v2242/v2373/v2376: NT findings as a compact two-column table. v2376:
+  // Reason column dropped — the detailed "why not tested" observation lives
+  // in Detailed Survey Findings already, and Dave's feedback was that the
+  // quick-reference NT table should mirror the C table's two-column form
+  // (Finding + Item) so the F&R page stays scannable. PO retains its Notes
+  // column for now; revisit if Dave asks for the same treatment there.
   if (findings.NT.length > 0) {
     html += `<h3 style="color:#6b7280;">Not Tested / Not Verified</h3>`;
     // v2372: Dropped "Full details appear in the Detailed Survey Findings
     // section" for the same reason as the C-table intro above.
     html += `<p style="font-size:9pt;color:#555;margin-bottom:8px;">The following ${findings.NT.length} items could not be fully tested or verified.</p>`;
-    html += `<table style="font-size:9pt;"><tr><th style="width:60px;">Finding</th><th>Item</th><th>Reason</th></tr>`;
+    html += `<table style="font-size:9pt;"><tr><th style="width:60px;">Finding</th><th>Item</th></tr>`;
     findings.NT.forEach(f => {
-      const _ntBrief = truncateForFR(cleanupTypos(depersonalise(dedup(f.text || ''))));
       html += `<tr>
         <td style="font-weight:bold;color:#6b7280;">${f.code}</td>
         <td>${esc(displayItemLabel(f.label, survey))}</td>
-        <td>${_ntBrief ? esc(_ntBrief) : '—'}</td>
       </tr>`;
     });
     html += `</table>`;
