@@ -12,6 +12,9 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2312 — 2026-04-17
+- Fixed orphaned photo placeholders in the media sheet grid (the popup with delete/rotate buttons). Same hide-if-missing logic as v2311 but for the second code path.
+
 ## v2311 — 2026-04-17
 - Fixed broken image placeholders for orphaned photos: thumbnails whose photo data no longer exists in IndexedDB are now hidden instead of showing a broken image icon.
 
