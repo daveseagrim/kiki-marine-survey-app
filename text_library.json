@@ -320,21 +320,14 @@
       "rating": "B",
       "phase": "observed",
       "severity": 2,
-      "text": "Localized variations in tone were observed in [describe area(s)]."
+      "text": "Localized ringing indicating possible voids, poor resin impregnation, or delamination was detected in [describe area(s)]. The tip of the hammer indicates the affected area."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "A slight dullness was detected in [describe area(s)]."
-    },
-    {
-      "section": "Hull and rudder(s) impact and resonance testing",
-      "rating": "B",
-      "phase": "observed",
-      "severity": 3,
-      "text": "Isolated hollow-sounding areas were observed in [describe area(s)]."
+      "text": "Localized thuds or dullness possibly indicating saturation were detected in [describe area(s)]. The tip of the hammer indicates the affected area."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
