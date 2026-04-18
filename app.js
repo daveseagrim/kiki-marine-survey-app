@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2358';
+const APP_VERSION = 'v2359';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -13813,13 +13813,24 @@ async function checkSurvey() {
       return;
     }
     // Drive line expansion
+    // v2359 FIX: strip "(s)" from the base label before prefixing so the
+    // resulting label matches renderInspection's (which does the same).
+    // Previously: "Port — Propeller shaft(s)" (check) vs "Port — Propeller shaft" (render)
+    // caused rated items to be reported as unrated.
     if (item.driveLineItem && driveLineCount > 1) {
       const driveLabels = driveLineCount === 2
         ? ['Port', 'Starboard']
         : Array.from({ length: driveLineCount }, (_, i) => `#${i + 1}`);
+      const baseLabel = item.label.replace(/\(s\)/g, '').trim();
       driveLabels.forEach(prefix => {
-        expandedItems.push({ label: `${prefix} — ${item.label}`, categoryName: item.categoryName });
+        expandedItems.push({ label: `${prefix} — ${baseLabel}`, categoryName: item.categoryName });
       });
+      return;
+    }
+    // Singularise drive line items for single drive line (v2359)
+    // Mirrors renderInspection (driveLineCount === 1): "Propeller shaft(s)" → "Propeller shaft"
+    if (item.driveLineItem && driveLineCount === 1) {
+      expandedItems.push({ label: item.label.replace(/\(s\)/g, ''), categoryName: item.categoryName });
       return;
     }
     // Singularise hull items for single hull

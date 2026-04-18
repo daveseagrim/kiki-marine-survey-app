@@ -12,6 +12,15 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2359 — 2026-04-18
+### Fixed
+- **Preflight (Check Survey) was reporting rated drive-line items as unrated.** The surveyor would rate items like `Propeller shaft`, `Cutlass bearing`, `Engine, general condition/impression`, etc., and Check Survey would still list them under "Unrated" — the root cause was a label-mismatch between `renderInspection()` (which builds the UI and determines what label the user's rating is stored under) and `checkSurvey()` (which looks the rating back up). The template entries carry a plural "(s)" suffix (e.g. `"Propeller shaft(s)"`). `renderInspection` strips `(s)` for single-drive-line boats and also strips it when multiplying labels for twin/triple installs (so the user sees and rates `"Propeller shaft"` or `"Port — Propeller shaft"`). `checkSurvey`, however, was only handling hulls correctly — drive-line items passed through with the "(s)" intact in both the single-drive-line and multi-drive-line branches, so `survey.items["Propeller shaft(s)"]` was always `undefined` and the preflight reported the item as unrated.
+  - Added a `driveLineItem && driveLineCount === 1` branch that singularises the label (mirrors `renderInspection` at line ~12481).
+  - Fixed the `driveLineItem && driveLineCount > 1` branch to strip "(s)" from the base label *before* prefixing with `Port —`/`Starboard —`/`#n —` (mirrors `renderInspection` at line ~12504).
+- Affects every survey that has any drive-line item rated — which is essentially every powerboat and auxiliary-sail survey. No data migration required; the fix is entirely in the check-survey lookup path, ratings on disk were always correct.
+
+---
+
 ## v2358 — 2026-04-18
 ### Added
 - **Dictionary: accepted-vocabulary additions.** The client-side spell-check (which underlines words not found in `dictionary.json` and offers inline suggestions) was flagging several domain-specific terms as typos. Added: `odour`, `odours`, `odourless` (Canadian English — the word was flagged even though `colour`, `labour`, `behaviour` etc. were already present); `flybridge` (marine term, was flagged in the Flybridge Storage locker chip screenshot); `romex` (brand/generic name for household solid-core non-marine wiring referenced in the ABYC E-11 chip set added in v2353); `untinned` (antonym of tinned, used throughout marine wiring findings). Dictionary total: 128,581 → 128,587 entries. All new entries lowercase per the file's case-insensitive convention — the spell-checker normalises to lowercase before lookup, so `Flybridge`, `FLYBRIDGE`, and `flybridge` will all pass.
