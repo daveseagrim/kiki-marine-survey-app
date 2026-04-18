@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2371';
+const APP_VERSION = 'v2372';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -21744,7 +21744,11 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
   if (findings.C.length === 0) {
     html += `<p>No Type C findings.</p>`;
   } else {
-    html += `<p style="font-size:9pt;color:#555;margin-bottom:8px;">The following ${findings.C.length} items were found to be in serviceable condition. Full observations appear in the Detailed Survey Findings section.</p>`;
+    // v2372: Dropped the "Full observations appear in the Detailed Survey
+    // Findings section" tail. Dave's critique: it's basically an admission
+    // of duplication — the reader knows where the body lives; restating it
+    // here reads as filler.
+    html += `<p style="font-size:9pt;color:#555;margin-bottom:8px;">The following ${findings.C.length} items were found to be in serviceable condition.</p>`;
     html += `<table style="font-size:9pt;"><tr><th style="width:60px;">Finding</th><th>Item</th><th>Summary</th></tr>`;
     findings.C.forEach(f => {
       const _cBrief = pluralizeRudder(truncateForFR(cleanupTypos(depersonalise(dedup(f.text || '')))), survey.rudderCount);
@@ -21760,7 +21764,9 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
   // v2242: NT and PO findings as compact tables (same rationale as C above)
   if (findings.NT.length > 0) {
     html += `<h3 style="color:#6b7280;">Not Tested / Not Verified</h3>`;
-    html += `<p style="font-size:9pt;color:#555;margin-bottom:8px;">The following ${findings.NT.length} items could not be fully tested or verified. Full details appear in the Detailed Survey Findings section.</p>`;
+    // v2372: Dropped "Full details appear in the Detailed Survey Findings
+    // section" for the same reason as the C-table intro above.
+    html += `<p style="font-size:9pt;color:#555;margin-bottom:8px;">The following ${findings.NT.length} items could not be fully tested or verified.</p>`;
     html += `<table style="font-size:9pt;"><tr><th style="width:60px;">Finding</th><th>Item</th><th>Reason</th></tr>`;
     findings.NT.forEach(f => {
       const _ntBrief = truncateForFR(cleanupTypos(depersonalise(dedup(f.text || ''))));

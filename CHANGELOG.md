@@ -12,6 +12,15 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2372 — 2026-04-18
+### Changed
+- **Findings & Recommendations: trimmed the "full observations appear in the Detailed Survey Findings section" disclaimers.** Dave's feedback on pages 54–56: the F&R section was explicitly telling the reader that the full content lives elsewhere, which reads as an admission of duplication rather than as useful signposting. The reader has already read the Detailed Survey Findings body by the time they reach F&R — pointing them back to it is filler. Cut two sentences:
+  - C-findings table intro: `"The following N items were found to be in serviceable condition. Full observations appear in the Detailed Survey Findings section."` → `"The following N items were found to be in serviceable condition."`
+  - NT (Not Tested) table intro: `"The following N items could not be fully tested or verified. Full details appear in the Detailed Survey Findings section."` → `"The following N items could not be fully tested or verified."`
+- Surgical text-only change. No structural changes to the report — C and NT tables still render the same way, just with tighter intro copy. v2373 (#46) will separately remove the C table entirely so the F&R summary focuses on A + B findings.
+
+---
+
 ## v2371 — 2026-04-18
 ### Added
 - **Check Survey now flags duplicate photos.** Dave noticed the report sometimes felt photo-heavy and suspected the same image was being attached to multiple places (same photo imported twice, same shot dragged onto two items, camera fires twice and both land, etc.). Preflight now scans every photo on the survey — checklist items, safety equipment, instruments/electronics, HIN plate, compliance plate, cover photo, TC licence, four-corner overview, engine and transmission photos — computes a SHA-256 digest of each photo's dataUrl, groups by digest, and any bucket with two or more photos is reported as a warning under a new **"Duplicate Photos"** category. The warning body reads `Same photo appears in N places: <Location A> • <Location B> • ...`, and the Go button (when navigable) jumps to the first item-based location so Dave can review and delete the extras.
