@@ -12,7 +12,21 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2347 — 2026-04-18
+### Removed
+- **Fuel filter(s) and water separator(s)** removed from the Engine(s) and drive(s) section of `survey_template.json`. No app.js or report-generator references — clean removal. Continues the v2346 engine-section cleanup (duplicate items were already pulled; this one was Dave's decision to rate elsewhere or not at all).
+
+### Changed
+- Field-reported wording polish in `text_library.json`:
+  - `Floor and carpet` / rating B / observed: "Minor stains, wear, or loose fasteners are visible." → "Minor stains and wear are visible." Dropped the loose-fasteners clause; fasteners belong to a different class of finding and muddied the chip.
+  - `Engine condition` / rating C: "The engines were relatively clean with an appearance that suggested they had been maintained." moved from phase `means` to phase `observed`. This sentence is an observation, not a consequence — it was incorrectly rendering under "What it means for this vessel" on the Port/Starboard engine cards. Applies to both port and starboard engine items (both items strip their side prefix and remap to the same `Engine condition` section).
+
+---
+
 ## v2346 — 2026-04-18
+### Removed
+- Engine section no longer lists **Fuel lines and fittings** or **Fuel tank(s) condition and installation**. Both were duplicates of items already covered under the separate Fuel, water and waste section (which keeps the single `Fuel tank(s)` item, line 1902 of `survey_template.json`, untouched). Removing them prevents double-rating and keeps engine findings focused on engine-side failures. No app.js or report-generator references to either label — clean removal.
+
 ### Added
 - Cabin lighting B-rating snippet set, added to both "Cabin lights" (the section the `Interior lighting` template item resolves to via `ITEM_SNIPPET_MAP`) and "Lighting (cabin)" (Electrical group, direct match):
   - Observed: "[insert count] lights did not function in [insert location(s)]."

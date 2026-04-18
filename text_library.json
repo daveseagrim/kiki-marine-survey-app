@@ -16101,7 +16101,7 @@
     {
       "section": "Floor and carpet",
       "rating": "B",
-      "text": "Minor stains, wear, or loose fasteners are visible.",
+      "text": "Minor stains and wear are visible.",
       "phase": "observed",
       "severity": 2
     },
@@ -20244,7 +20244,7 @@
     {
       "section": "Engine condition",
       "rating": "C",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3,
       "text": "The engines were relatively clean with an appearance that suggested they had been maintained."
     },

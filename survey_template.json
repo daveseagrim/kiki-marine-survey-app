@@ -2083,44 +2083,6 @@
             ]
           },
           {
-            "type": "list",
-            "label": "Fuel filter(s) and water separator(s)",
-            "driveLineItem": true,
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Fuel lines and fittings",
-            "driveLineItem": true,
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Fuel tank(s) condition and installation",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
             "type": "media",
             "label": "Gearbox nameplate(s)"
           },
