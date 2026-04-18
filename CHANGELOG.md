@@ -12,6 +12,13 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2306 — 2026-04-16
+
+### Added
+- **Inline delete and rotate buttons on photo grid.** Each thumbnail in the media sheet now has a red ✕ button (top-right) to delete and a ↻ button (bottom-left) to rotate 90° clockwise. Both work without leaving the grid view — rotate updates the thumbnail in place, delete confirms then refreshes the grid. The full-screen tap-to-edit overlay is still available by tapping the photo itself.
+
+---
+
 ## v2305 — 2026-04-16
 
 ### Fixed

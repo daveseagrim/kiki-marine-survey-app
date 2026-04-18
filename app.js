@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2305';
+const APP_VERSION = 'v2306';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -5009,11 +5009,20 @@ function showMediaSheet(itemLabel, categoryName) {
     if (itemData.photos && itemData.photos.length > 0) {
       photosHtml = '<div id="sheet-photo-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 20px;">';
       (itemData.photos || []).forEach((photoId, idx) => {
+        // v2306: each thumbnail wrapped in a container with rotate/delete buttons
         photosHtml += `
-          <img id="sheet-thumb-${photoId}" src="" data-photo-idx="${idx}"
-               title="Drag to reorder \u2022 Tap to edit"
-               style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;"
-               onclick="showPhotoActionOverlay('${photoId}', '${safeLabel}', '${safeCat}')" />
+          <div style="position:relative;" data-photo-idx="${idx}">
+            <img id="sheet-thumb-${photoId}" src=""
+                 title="Drag to reorder \u2022 Tap to edit"
+                 style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;"
+                 onclick="showPhotoActionOverlay('${photoId}', '${safeLabel}', '${safeCat}')" />
+            <button onclick="event.stopPropagation();_sheetRotatePhoto('${photoId}','${safeLabel}','${safeCat}')"
+                    style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:28px;height:28px;font-size:15px;line-height:28px;text-align:center;cursor:pointer;padding:0;backdrop-filter:blur(2px);"
+                    title="Rotate 90\u00b0">↻</button>
+            <button onclick="event.stopPropagation();_sheetDeletePhoto('${photoId}','${safeLabel}','${safeCat}')"
+                    style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border:none;border-radius:50%;width:28px;height:28px;font-size:16px;line-height:28px;text-align:center;cursor:pointer;padding:0;backdrop-filter:blur(2px);"
+                    title="Delete photo">✕</button>
+          </div>
         `;
       });
       photosHtml += '</div>';
@@ -5198,6 +5207,25 @@ function deletePhotoFromSheet(photoId, itemLabel, categoryName) {
     showMediaSheet(itemLabel, categoryName);
   }, 300);
 }
+
+// v2306: inline delete from grid — confirm then refresh the sheet
+window._sheetDeletePhoto = function(photoId, itemLabel, categoryName) {
+  if (!confirm('Delete this photo?')) return;
+  deletePhotoAndRefresh(photoId);
+  setTimeout(() => showMediaSheet(itemLabel, categoryName), 300);
+};
+
+// v2306: inline rotate from grid — rotate 90° CW, bake into data, refresh
+window._sheetRotatePhoto = async function(photoId, itemLabel, categoryName) {
+  const photo = await getPhotoById(photoId);
+  if (!photo) return;
+  const rotated = await bakePhotoEdits(photo.dataUrl, 100, 100, 90);
+  photo.dataUrl = rotated;
+  await savePhoto(photo);
+  // Update the thumbnail in place without refreshing the whole sheet
+  const img = document.getElementById(`sheet-thumb-${photoId}`);
+  if (img) img.src = rotated;
+};
 
 // Move photo from one checklist item to another — shows a searchable picker
 function movePhotoFromSheet(photoId, sourceItemLabel, sourceCategoryName) {
