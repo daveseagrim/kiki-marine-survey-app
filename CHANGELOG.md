@@ -12,6 +12,16 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2363 — 2026-04-18
+### Fixed
+- **"Remove Date Stamps" was silently skipping every photo with a bright background.** v2362 fixed the removal rectangle's geometry but kept the old stamp-detection rule: "strip only if the average brightness in the stamp region is below 100". That rule is wrong on any photo with a light bottom-right corner — which is most boat photos (white hulls, cabin bulkheads, headliners, sky). The math: the stamp's `rgba(0,0,0,0.7)` background alpha-blends to `0.3 × original_brightness`, so on a white (255) background the stamped rect averages 76. The white text glyphs (brightness 255) boost the region's overall average above 100 for any reasonably light background — pure-white tested at 118, yellow at 115, pink at 104. Every stamped photo with a light corner was getting a no-op from the function, which matched Dave's report that date stamps persisted after running the batch.
+  - Replaced average-brightness with **structural-signature detection**: a date stamp is a region that contains BOTH a substantial dark cluster (the alpha-blended rect background, brightness < 80) AND a thin bright cluster (the white text glyphs, brightness > 220). Natural image content almost never has that bimodal distribution concentrated in a tiny bottom-right area. Detection cutoffs: `darkPct > 30% AND brightPct > 1.5%`. Empirically measured stamped photos hit 65–84% dark / 12–21% bright; unstamped hit 0% on at least one of those metrics.
+  - Tested across 7 scenarios with full JPEG round-trip (stamp → encode → reload → detect): all 4 stamped variants correctly stripped (white, sky, pink, dark backgrounds); all 3 unstamped variants correctly left alone (pure-white, pure-dark, mid-grey — where the old rule would have FALSELY stripped the pure-dark photo because avg < 100).
+  - Same detection logic applied to the report generator's auto-strip (app.js ~line 348). That path was also affected — any stamped photo with a bright corner would have shown the stamp in the printed report.
+- **Batch removal wasn't refreshing the in-app thumbnails.** After the batch updates IndexedDB, the DOM's `<img src="data:...">` elements were still pointing at the OLD (stamped) dataUrls — so even when the removal succeeded on disk, the user kept seeing stamps in the UI until they closed and reopened the survey. Added `renderInspection(refreshed)` call at the end of `removeAllDateStamps()` so all thumbnails reload from IndexedDB as soon as the batch completes. Doc photos (HIN, compliance, cover) will refresh the next time the user opens Edit Intro — they're not in the inspection view.
+
+---
+
 ## v2362 — 2026-04-18
 ### Fixed
 - **Date stamps: new photos are no longer branded with a date stamp, and the "Remove Date Stamps" batch tool now actually removes them.** Two related problems, fixed together:

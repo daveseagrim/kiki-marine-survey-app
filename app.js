@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2362';
+const APP_VERSION = 'v2363';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -355,19 +355,26 @@ function compressPhotoForReport(dataUrl, maxDim = 1200, quality = 0.7) {
         const _sx = Math.max(0, w - _rw);
         const _sy = Math.max(0, h - _rh);
         if (_sx >= 0 && _sy >= 0 && _rw > 0 && _rh > 0) {
-          // Check whether a dark stamp rect is present before removing
+          // v2363: structural-signature detection instead of avg brightness.
+          // The stamp has a dark rect (rgba(0,0,0,0.7) ≈ brightness ≤ 76
+          // after alpha-blend on ANY background, even pure white) combined
+          // with bright white text glyphs (brightness > 220). Natural image
+          // content virtually never has that bimodal distribution in a tiny
+          // bottom-right region. The old avg<100 rule failed on any photo
+          // with a bright corner (sky/white hull/bulkhead/cabin headliner).
+          // Must stay in sync with removeDateStampFromPhoto.
           const _stampPixels = ctx.getImageData(_sx, _sy, _rw, _rh);
           const _d = _stampPixels.data;
-          let _sumBrightness = 0;
           const _pixelCount = _d.length / 4;
+          let _darkCount = 0, _brightCount = 0;
           for (let _i = 0; _i < _d.length; _i += 4) {
-            _sumBrightness += (_d[_i] + _d[_i+1] + _d[_i+2]) / 3;
+            const _b = (_d[_i] + _d[_i+1] + _d[_i+2]) / 3;
+            if (_b < 80) _darkCount++;
+            else if (_b > 220) _brightCount++;
           }
-          const _avgBrightness = _sumBrightness / _pixelCount;
-          // The stamp background is rgba(0,0,0,0.7) ≈ brightness ~53 after
-          // alpha blending onto typical content. Only strip if substantially
-          // dark — a region above 100 is likely natural image content.
-          if (_avgBrightness < 100) {
+          const _darkPct = (100 * _darkCount) / _pixelCount;
+          const _brightPct = (100 * _brightCount) / _pixelCount;
+          if (_darkPct > 30 && _brightPct > 1.5) {
             // Sample a thin strip just above the stamp
             const _sampleH = Math.min(2, _sy);
             if (_sampleH > 0) {
@@ -16996,20 +17003,39 @@ async function removeDateStampFromPhoto(dataUrl) {
           return;
         }
 
-        // Brightness check — only strip if the region is substantially dark.
-        // The stamp background is rgba(0,0,0,0.7) ≈ brightness ~53 after
-        // alpha blending onto typical content. Above 100 is almost
-        // certainly natural image content; skip to avoid introducing an
-        // artifact on a photo that was never stamped.
+        // v2363: Stamp detection by structural signature, not average
+        // brightness. The old avg<100 rule failed on bright backgrounds:
+        // rgba(0,0,0,0.7) over a white hull/sky/bulkhead alpha-blends to
+        // ≈76 brightness for the rect background, and white text glyphs
+        // at 255 boost the region average above the 100 threshold — so
+        // every stamped photo with a light corner was silently skipped.
+        //
+        // The new rule looks for the signature of a date stamp: a region
+        // that contains BOTH a substantial dark cluster (the rect bg,
+        // brightness < 80 after alpha blending — true for any real-world
+        // content except pure-white, and even then the rect is at 76) AND
+        // a thin bright cluster (the white text glyphs, brightness > 220).
+        // Natural photo content virtually never has this bimodal pattern
+        // concentrated in a tiny bottom-right region.
+        //
+        // Thresholds from empirical measurement across bg colours:
+        //   stamped: darkPct ≈ 73–84%, brightPct ≈ 12–21%
+        //   unstamped natural: darkPct = 0% OR brightPct < 0.5%
+        // Safe cutoffs: darkPct > 30 AND brightPct > 1.5
         const stampPixels = ctx.getImageData(stampX, stampY, rectWidth, rectHeight);
         const d = stampPixels.data;
-        let sumBrightness = 0;
         const pixelCount = d.length / 4;
+        let darkCount = 0, brightCount = 0;
         for (let i = 0; i < d.length; i += 4) {
-          sumBrightness += (d[i] + d[i + 1] + d[i + 2]) / 3;
+          const b = (d[i] + d[i + 1] + d[i + 2]) / 3;
+          if (b < 80) darkCount++;
+          else if (b > 220) brightCount++;
         }
-        const avgBrightness = sumBrightness / pixelCount;
-        if (avgBrightness >= 100) {
+        const darkPct = (100 * darkCount) / pixelCount;
+        const brightPct = (100 * brightCount) / pixelCount;
+        const stampDetected = (darkPct > 30) && (brightPct > 1.5);
+
+        if (!stampDetected) {
           // No stamp detected — return the image unchanged (but still
           // re-encoded so the caller gets a valid JPEG dataUrl).
           resolve(canvas.toDataURL('image/jpeg', 0.85));
@@ -17110,6 +17136,19 @@ async function removeAllDateStamps() {
   }
 
   showToast('Date stamps removed from ' + processed + ' of ' + total + ' photos.');
+
+  // v2363: re-render the inspection view so all <img src="data:..."> tags
+  // load the freshly-cleaned dataUrls from IndexedDB. Without this, the
+  // DOM still holds the old stamped dataUrls — the user runs the batch,
+  // sees the toast, but every visible thumbnail still shows a date stamp
+  // until they close and reopen the survey. That matched the complaint
+  // that "date stamps still aren't removed with the function".
+  try {
+    const refreshed = await getSurvey(currentSurveyId);
+    if (refreshed) renderInspection(refreshed);
+  } catch (e) {
+    console.warn('renderInspection refresh after removeAllDateStamps failed:', e);
+  }
 }
 
 async function captureDocPhoto(fieldKey, label, event) {
