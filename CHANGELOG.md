@@ -12,6 +12,23 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2377 — 2026-04-18
+### Fixed
+- **EMERGENCY: destructive no-op save pattern wiping comparables and hull/boot-stripe/deck colours.** The root cause of the recurring data-loss incidents Dave experienced (4 comparables wiped earlier today, hull/boot-stripe/deck colours wiped again minutes later while he was trying to send a report): every save path that collected form data from the DOM returned a zero-value (`[]` for comparables, `''` for colours) whenever the collector ran on a view where the form fields weren't mounted. The guards `(arr.length > 0 || survey.arr.length > 0)` in `saveAllInspectionData()` and unconditional assignments in `saveEditFormSilently()` / `saveSurveyDetails()` then wrote that empty value over the saved data, silently wiping it. This could fire whenever the surveyor tapped ANY Save button from a view other than Edit Intro — the inspection page, Check Survey page, etc.
+- **Fix strategy: sentinel values for DOM-absent state.**
+  - `collectComparables()` now returns `undefined` (not `[]`) when the `#comparablesEntries` container isn't in the DOM. Legitimate empty (container present, zero entries) still returns `[]`.
+  - `getColourValue(id)` now returns `undefined` (not `''`) when the colour `<select>` element isn't in the DOM. Legitimate empty (select present, nothing chosen) still returns `''`.
+- **All write sites audited and guarded:**
+  - `saveSurveyDetails` / `Object.assign(survey, updates)` — now strips `undefined` keys from `updates` before merging, so a missing colour dropdown never wipes the saved colour.
+  - `saveEditFormSilently` — comparables, skipComparables, excludedIntroFields, and valuationSources writes are now each gated on the relevant DOM container being present.
+  - `saveAllInspectionData` — comparables save path now checks for `undefined` before the legacy `.length > 0 ||` guard.
+  - `saveComparablesFromInspection` — same treatment.
+- **Safe call sites preserved.** `generateVesselDescription` (the DOM-driven Describe button) and `startNewSurvey` (fresh form) coerce `undefined` to `''` explicitly so downstream narrative and record-creation code that expects a string keeps working. `collectComparables` call in `valuationRationale` builder falls back to `[]` when undefined so the `.filter()` call doesn't throw.
+- **No migration needed** — this is a code-path fix. Saved surveys are untouched; existing data is preserved going forward. Surveys that were wiped BEFORE this fix must be recovered from Google Drive backup history (same procedure used for the 4 lost comparables).
+- **Why the old pattern existed.** The `(arr.length > 0 || survey.arr.length > 0)` guard was originally intended as "only touch the data when there's something to write OR something to clear" — but it read the old saved state after the new empty was already collected, creating a false positive whenever saved data existed. The sentinel-value approach is the correct shape: the collector itself reports whether the DOM was available, and every write site respects that signal.
+
+---
+
 ## v2376 — 2026-04-18
 ### Changed
 - **Findings & Recommendations: NT (Not Tested / Not Verified) table streamlined to two columns — Finding + Item.** Dave's follow-up to the v2373 C-table change: the NT section in F&R was still rendering a three-column table (Finding / Item / Reason), and the Reason column was carrying a truncated echo of the "not tested because…" prose that already lives in Detailed Survey Findings. Fix: keep the NT subsection (so the reader still gets the at-a-glance index of every not-tested item in one place) but drop the Reason column entirely. Table is now a tight two-column index — finding code and item label only — mirroring the v2373 C-table.

@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2376';
+const APP_VERSION = 'v2377';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -9970,7 +9970,19 @@ function saveSurveyDetails(surveyId) {
       excludedIntroFields: collectExcludedIntroFields()
     };
 
-    // Merge updates into existing survey (preserving items, photos, etc.)
+    // v2377: data-loss guard. Previously `Object.assign(survey, updates)`
+    // copied every key — including `undefined` — so if any DOM-backed
+    // collector (getColourValue, collectComparables, or any
+    // `document.getElementById(...)?.value` whose element wasn't on screen)
+    // returned undefined, it silently wiped the saved value. Now we strip
+    // `undefined` keys from `updates` before merging, and preserve the
+    // existing survey value in their place. Plain empty strings and empty
+    // arrays ARE still assigned — those represent legitimate intentional
+    // clears (user blanked the field on Edit Intro). Only the
+    // "DOM-wasn't-rendered" sentinel (undefined) is skipped.
+    for (const k of Object.keys(updates)) {
+      if (updates[k] === undefined) delete updates[k];
+    }
     Object.assign(survey, updates);
 
     // Clean up incompatible drive settings when vessel type changes from intro.
@@ -10036,14 +10048,38 @@ async function saveEditFormSilently() {
   survey.locationLat = window._surveyLat || survey.locationLat;
   survey.locationLon = window._surveyLon || survey.locationLon;
   survey.exchangeRate = parseFloat(document.getElementById('exchangeRate')?.value) || survey.exchangeRate || 1.35;
-  const srcEls = document.querySelectorAll('.val-source:checked');
-  if (srcEls.length > 0) {
+  // v2377 data-loss guard: only write valuation sources when the DOM
+  // checkboxes are rendered. The old path unconditionally assigned the
+  // result of `.val-source:checked`, which is `[]` when the Edit Intro
+  // view isn't mounted — silently wiping the saved sources array.
+  const _valSourceContainer = document.querySelector('.val-source');
+  if (_valSourceContainer) {
+    const srcEls = document.querySelectorAll('.val-source:checked');
     survey.valuationSources = Array.from(srcEls).map(cb => cb.value);
     survey.valuationSource = survey.valuationSources.join(', ');
   }
-  try { survey.comparables = collectComparables(); } catch(e) {}
-  try { survey.skipComparables = document.getElementById('skipComparables')?.checked || false; } catch(e) {}
-  try { survey.excludedIntroFields = collectExcludedIntroFields(); } catch(e) {}
+  // v2377: collectComparables() returns undefined when the DOM container
+  // is absent — skip the assignment to preserve the saved comparables.
+  // Only overwrite when the container is rendered (legitimate empty is fine).
+  try {
+    const _comps = collectComparables();
+    if (_comps !== undefined) survey.comparables = _comps;
+  } catch(e) {}
+  // v2377: skipComparables lives alongside the comparables section; only
+  // write it when the checkbox exists on screen.
+  try {
+    const _skipEl = document.getElementById('skipComparables');
+    if (_skipEl) survey.skipComparables = _skipEl.checked;
+  } catch(e) {}
+  // v2377: excludedIntroFields is derived from `.excl-toggle` buttons on
+  // Edit Intro — only write when at least one excl-toggle exists in the
+  // DOM (indicating Edit Intro is mounted). Otherwise we'd wipe the saved
+  // exclusion list every time saveEditFormSilently runs from another view.
+  try {
+    if (document.querySelector('.excl-toggle')) {
+      survey.excludedIntroFields = collectExcludedIntroFields();
+    }
+  } catch(e) {}
 
   await saveSurvey(survey);
 }
@@ -10822,9 +10858,17 @@ function syncColourOther(input, selectId) {
   sel.dataset.customValue = input.value;
 }
 // Override .value getter for colour selects so save functions pick up custom text
+// v2377: when the colour <select> isn't in the DOM (because we're not on
+// Edit Intro), return `undefined` instead of `''`. An empty string was
+// being written into survey.hullColour / bootStripeColour / deckColour by
+// saveSurveyDetails and silently wiping saved colour values whenever the
+// user triggered a save from a view where the colour dropdowns don't exist.
+// Callers that previously relied on the old "empty string on missing"
+// behaviour are reviewed in saveSurveyDetails and saveEditFormSilently —
+// neither of them needs it; both now skip writes when undefined.
 function getColourValue(id) {
   const sel = document.getElementById(id);
-  if (!sel) return '';
+  if (!sel) return undefined;   // DOM-absent sentinel — do NOT overwrite
   if (sel.value === '__other__') return sel.dataset.customValue || '';
   return sel.value;
 }
@@ -10983,10 +11027,13 @@ async function generateVesselDescription() {
   const boatStyle = document.getElementById('boatStyle')?.value || '';
   const hullType = document.getElementById('hullType')?.value || '';
   const construction = document.getElementById('construction')?.value || '';
-  const hullColour = getColourValue('hullColour');
-  const _bsc = getColourValue('bootStripeColour');
+  // v2377: getColourValue returns undefined when the DOM dropdown is absent —
+  // this builder runs off the live DOM, so we fall back to '' to preserve the
+  // old string-only downstream semantics (narrative paragraph conditionals).
+  const hullColour = getColourValue('hullColour') || '';
+  const _bsc = getColourValue('bootStripeColour') || '';
   const bootStripeColour = (_bsc.toLowerCase() === 'none') ? '' : _bsc;
-  const deckColour = getColourValue('deckColour');
+  const deckColour = getColourValue('deckColour') || '';
   const loa = document.getElementById('loa')?.value || '';
   const beam = document.getElementById('beam')?.value || '';
   const draft = document.getElementById('maxDraft')?.value || '';
@@ -11885,7 +11932,10 @@ function regenerateValuationRationale() {
   }
 
   const vessel = document.getElementById('yearMakeModel')?.value || 'the subject vessel';
-  const comparables = (typeof collectComparables === 'function') ? collectComparables() : [];
+  // v2377: collectComparables may return undefined (DOM-absent sentinel) —
+  // this function runs from the Edit Intro page so the DOM is expected to
+  // be present, but defend anyway so we don't throw on .filter.
+  const comparables = ((typeof collectComparables === 'function') ? collectComparables() : []) || [];
   const compCount = comparables.filter(c => c.vessel).length;
 
   let rationale = `The Fair Market Value of the ${vessel} has been determined through consultation of the following independent sources: ${checkedSources.join(', ')}.`;
@@ -12048,9 +12098,10 @@ function startNewSurvey() {
     maxDraft: document.getElementById('maxDraft')?.value || '',
     totalSailArea: document.getElementById('totalSailArea')?.value || '',
     construction: document.getElementById('construction')?.value || '',
-    hullColour: getColourValue('hullColour'),
-    bootStripeColour: getColourValue('bootStripeColour'),
-    deckColour: getColourValue('deckColour'),
+    // v2377: coerce undefined (DOM-absent) to '' for a fresh-survey record.
+    hullColour: getColourValue('hullColour') || '',
+    bootStripeColour: getColourValue('bootStripeColour') || '',
+    deckColour: getColourValue('deckColour') || '',
     keelType: document.getElementById('keelType')?.value || '',
     numberCabins: document.getElementById('numberCabins')?.value || '',
     rudderCount: parseInt(document.getElementById('rudderCount')?.value, 10) || 1,
@@ -12239,8 +12290,20 @@ function collectBilgePumps() {
 }
 
 // Collect comparable vessels data from form
+// v2377: collectComparables now returns `undefined` when the comparables
+// DOM container isn't rendered (user is on the inspection view or any page
+// other than Edit Intro). Historically this returned `[]` in that case,
+// and `saveEditFormSilently()` / `saveSurveyDetails()` would unconditionally
+// write that `[]` over the saved comparables array — wiping legitimate data
+// whenever the surveyor tapped any Save button from outside Edit Intro.
+// Callers must treat an `undefined` return as "no data available from the
+// DOM — preserve the existing saved value." An empty array is still
+// returned when the container IS rendered but the surveyor has deleted all
+// entries (a legitimate intentional-empty state).
 function collectComparables() {
-  const entries = document.querySelectorAll('#comparablesEntries > div');
+  const container = document.getElementById('comparablesEntries');
+  if (!container) return undefined;   // DOM-absent sentinel — do NOT overwrite
+  const entries = container.querySelectorAll(':scope > div');
   const comps = [];
   entries.forEach(entry => {
     comps.push({
@@ -15664,7 +15727,11 @@ function _csShowEvalModal(working, reason, scrollPos) {
 // Save comparables from the inspection view
 function saveComparablesFromInspection() {
   getSurvey(currentSurveyId).then(survey => {
-    survey.comparables = collectComparables();
+    // v2377: guard against destructive no-op save when the comparables DOM
+    // isn't rendered on the current view. Only overwrite when we actually
+    // collected something from the DOM.
+    const _comps = collectComparables();
+    if (_comps !== undefined) survey.comparables = _comps;
     // Also save valuation fields if they exist in the inspection view
     const lowEl = document.getElementById('inspValLow');
     const highEl = document.getElementById('inspValHigh');
@@ -20445,11 +20512,18 @@ async function saveAllInspectionData() {
     changed = true;
   }
 
-  // Save comparables
+  // Save comparables — v2377: collectComparables returns `undefined` when
+  // the DOM container is absent. That is the destructive-no-op case that
+  // wiped Dave's 4 comparables on 2026-04-18. Skip the assignment entirely
+  // when we can't see the DOM. The old guard (`.length > 0 || saved.length > 0`)
+  // was actually the BUG — it fired whenever the saved array was non-empty,
+  // so an absent DOM returning `[]` overwrote real data.
   const comparables = collectComparables();
-  if (comparables.length > 0 || (survey.comparables && survey.comparables.length > 0)) {
-    survey.comparables = comparables;
-    changed = true;
+  if (comparables !== undefined) {
+    if (comparables.length > 0 || (survey.comparables && survey.comparables.length > 0)) {
+      survey.comparables = comparables;
+      changed = true;
+    }
   }
 
   if (changed) {
