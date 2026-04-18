@@ -12,6 +12,9 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2318 — 2026-04-17
+- Fixed data-loss risk: generateReport() and exportSurvey() now call saveAllInspectionData() before loading the survey from IndexedDB. Previously, last-minute textarea edits, bilge pump changes, or comparable updates could be missing from the generated report if the user hadn't navigated away first.
+
 ## v2317 — 2026-04-17
 - Firebase "photos on another device" banner: now checks if each missing photo is actually recoverable (has a storageRef in Firebase). Unrecoverable orphan photo IDs are silently cleaned from the survey data. Banner only appears if there are genuinely downloadable photos.
 

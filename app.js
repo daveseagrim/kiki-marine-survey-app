@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2317';
+const APP_VERSION = 'v2318';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -3057,6 +3057,8 @@ async function deletePhoto(photoId) {
 
 async function exportSurvey(surveyId) {
   try {
+    // v2318: flush any unsaved DOM edits before exporting
+    if (currentSurveyId === surveyId) await saveAllInspectionData();
     const survey = await getSurvey(surveyId);
     if (!survey) { showAlert('Survey not found'); return; }
 
@@ -19536,6 +19538,9 @@ async function backToHome() {
 async function generateReport() {
   _kkLastAction = 'generateReport:' + currentSurveyId;
   try {
+  // v2318: flush any unsaved DOM edits (textareas, bilge pumps, comparables)
+  // to IndexedDB before loading the survey for report generation
+  await saveAllInspectionData();
   const survey = await getSurvey(currentSurveyId);
   if (!survey) return;
 
