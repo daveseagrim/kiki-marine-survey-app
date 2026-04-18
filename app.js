@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2319';
+const APP_VERSION = 'v2321';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -3725,12 +3725,12 @@ function showNotesSheet(itemLabel, categoryName) {
         const isNotTested = /^Not tested|not verified/i.test(itemData.rating);
 
         if (isNotApplicable) {
-          // Single canonical phrasing per user preference (v2183):
-          //   "No [item] were fitted on this vessel."  (plural)
-          //   "No [item] was fitted on this vessel."   (singular/uncountable)
+          // Single canonical phrasing per user preference (v2321):
+          //   "No [item] were installed on this vessel."  (plural)
+          //   "No [item] was installed on this vessel."   (singular/uncountable)
           const verb = isPlural ? 'were' : 'was';
           synth.push({ rating: 'N/A', phase: 'observed', severity: 1,
-            text: `No ${cleanLower} ${verb} fitted on this vessel.` });
+            text: `No ${cleanLower} ${verb} installed on this vessel.` });
         } else if (isNotTested) {
           const verbWas = isPlural ? 'were' : 'was';
           const theOrEmpty = isUncountable ? '' : 'The ';
@@ -15173,14 +15173,22 @@ async function captureSafetyPhoto(idx) {
   input.accept = 'image/*';
   input.multiple = true;  // allow multiple selection from camera roll
   // No capture attribute — allows camera roll, files, or camera
+
+  // v2320: clean up helper — clears busy flag, camera state, removes orphaned input
+  function _safetyPhotoCleanup() {
+    window._safetyPhotoBusy = false;
+    setCameraActive(false);
+    try { input.remove(); } catch (_e) {}
+  }
+
   input.onchange = async (e) => {
     const files = Array.from(e.target.files);
-    if (files.length === 0) { window._safetyPhotoBusy = false; return; }
+    if (files.length === 0) { _safetyPhotoCleanup(); return; }
 
     showToast(`Saving ${files.length} photo${files.length > 1 ? 's' : ''}...`);
 
     const survey = await getSurvey(currentSurveyId);
-    if (!survey || !survey.safetyEquipment[idx]) { window._safetyPhotoBusy = false; return; }
+    if (!survey || !survey.safetyEquipment[idx]) { _safetyPhotoCleanup(); return; }
 
     if (!survey.safetyEquipment[idx].photos) {
       survey.safetyEquipment[idx].photos = [];
@@ -15217,12 +15225,12 @@ async function captureSafetyPhoto(idx) {
     await saveSurvey(survey);
     showToast(`${saved} photo${saved !== 1 ? 's' : ''} saved`);
     loadSafetyThumbnails(idx, survey.safetyEquipment[idx].photos);
-    window._safetyPhotoBusy = false;
+    _safetyPhotoCleanup();
   };
   setCameraActive(true);
   input.click();
-  // Release lock if user cancels the camera
-  setTimeout(() => { window._safetyPhotoBusy = false; }, 60000);
+  // v2320: release ALL state if user cancels (no onchange fires)
+  setTimeout(() => { _safetyPhotoCleanup(); }, 60000);
 }
 
 // Load thumbnails for a safety equipment item — with view/delete buttons

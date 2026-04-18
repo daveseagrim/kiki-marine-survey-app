@@ -3291,6 +3291,13 @@
       "text": "No corrective action is recommended at this time."
     },
     {
+      "section": "Stern thruster",
+      "rating": "N/A",
+      "phase": "observed",
+      "severity": 1,
+      "text": "No stern thruster was installed on this vessel."
+    },
+    {
       "section": "Swim platform and ladder - condition and conductivity readings",
       "rating": "A",
       "phase": "observed",
@@ -4429,7 +4436,7 @@
       "rating": "N/A",
       "phase": "observed",
       "severity": 1,
-      "text": "No bow thruster was installed."
+      "text": "No bow thruster was installed on this vessel."
     }
   ],
   "Spars and rigging": [
@@ -10054,7 +10061,7 @@
     {
       "section": "Blower",
       "rating": "N/A",
-      "text": "No blower was installed.",
+      "text": "No blower was installed on this vessel.",
       "phase": "observed",
       "severity": 3
     },
@@ -13852,7 +13859,7 @@
     {
       "section": "Blower",
       "rating": "N/A",
-      "text": "No blower was installed.",
+      "text": "No blower was installed on this vessel.",
       "phase": "observed",
       "severity": 3
     },

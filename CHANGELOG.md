@@ -12,8 +12,15 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2321 — 2026-04-18
+- Changed auto-generated N/A text from "fitted" to "installed": "No hull anodes were installed on this vessel" instead of "No hull anodes were fitted on this vessel." Applies to all auto-generated Not Applicable snippets across the entire app.
+
+## v2320 — 2026-04-18
+- Fixed safety equipment photo crash: captureSafetyPhoto() was never calling setCameraActive(false) after capture, leaving camera state permanently flagged. File input elements were never removed from DOM. Now uses a cleanup helper that clears the busy flag, resets camera state, and removes the orphaned input on every exit path (success, empty selection, cancel timeout).
+
 ## v2319 — 2026-04-18
 - Complete text library phase audit: 268 snippets reclassified across all 16 categories to ensure every snippet is accurately categorized as "observed" (what was seen), "means" (what it means for the vessel), or "action" (what should be done). Fixed five recurring patterns: action directives labeled as observations, recommendations labeled as observations, standards citations labeled as observations instead of means, physical observations labeled as means, and consequence statements labeled as observations instead of means.
+- Consistent N/A language: bow thruster, stern thruster (new), and blower snippets now all read "No [item] was installed on this vessel."
 
 ## v2318 — 2026-04-17
 - Fixed data-loss risk: generateReport() and exportSurvey() now call saveAllInspectionData() before loading the survey from IndexedDB. Previously, last-minute textarea edits, bilge pump changes, or comparable updates could be missing from the generated report if the user hadn't navigated away first.
