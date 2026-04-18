@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2361';
+const APP_VERSION = 'v2362';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -16895,7 +16895,17 @@ async function navigatePhotoPreview(direction) {
   _wireEditConfirmBtn(newPhotoId, nav.itemLabel);
 }
 
-// Capture a documentation photo (HIN plate, compliance plate, etc.)
+// Process a captured photo — resizes to a sensible max dimension so the
+// canvas and resulting base64 stay memory-friendly.
+//
+// v2362: stopped burning the capture date into the bottom-right corner.
+// The stamp was making photos look unprofessional in reports and made
+// the "Remove Date Stamps" batch tool load-bearing (and when the removal
+// left a visible smudge, the photo was unusable). The capture date is
+// already preserved in the photo record's id (which embeds Date.now())
+// and in the survey's surveyDate, so the burned-in stamp was redundant.
+// Function name kept for compatibility with ~8 call sites across the app
+// — all of them still want the resize/recompress behaviour.
 async function addDateStampToPhoto(dataUrl, maxResolution) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -16916,31 +16926,9 @@ async function addDateStampToPhoto(dataUrl, maxResolution) {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, w, h);
 
-        // Add date stamp in bottom-right corner
-        const today = new Date();
-        const dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
-        const fontSize = Math.max(20, Math.round(canvas.width / 40));
-        const padding = 12;
-
-        ctx.font = `${fontSize}px Arial, sans-serif`;
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'bottom';
-
-        // Background rect for date
-        const textMetrics = ctx.measureText(dateStr);
-        const rectWidth = textMetrics.width + padding * 2;
-        const rectHeight = fontSize + padding;
-        ctx.fillRect(
-          canvas.width - rectWidth,
-          canvas.height - rectHeight,
-          rectWidth,
-          rectHeight
-        );
-
-        // White text
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(dateStr, canvas.width - padding, canvas.height - padding);
+        // v2362: no-op where the date stamp draw used to be.
+        // Preserve the resize + JPEG recompression — those are the main
+        // reasons this function is called on every capture path.
 
         resolve(canvas.toDataURL('image/jpeg', 0.85));
       } catch (canvasErr) {
@@ -16961,8 +16949,23 @@ async function addDateStampToPhoto(dataUrl, maxResolution) {
 // know the exact stamp geometry (bottom-right corner, dark rect + white
 // text, font size = width/40, padding 12px, date format YYYY-MM-DD), we
 // can calculate the stamp region precisely and fill it by sampling from
-// the row of pixels just above the stamp (stretched downward). This
-// produces a seamless result on typical boat/sky/water backgrounds.
+// the row of pixels just above the stamp (stretched downward).
+//
+// v2362: rewritten to match the successful auto-strip logic used in
+// report generation (app.js line ~347). Differences from v2238 that made
+// this function unreliable:
+//   - Widened the strip region by 8 px (was 4 px) to catch JPEG bleed
+//     from the dark rect's edge, which was leaving a visible dark sliver
+//     on the left side of the erased area.
+//   - Measured the stamp width with the widest plausible glyph combo
+//     ('2088-08-08') instead of today's date — dates with narrow digits
+//     (1, 7) left part of the stamp uncovered.
+//   - Added a brightness check: if the region is already light, there's
+//     no stamp to remove, and we skip the fill so "removing" a photo
+//     that was never stamped doesn't introduce an artifact.
+//   - Removed the no-op "blur smoothing" pass that read the region and
+//     wrote it back unchanged (comment claimed alpha blending but no
+//     alpha was applied).
 async function removeDateStampFromPhoto(dataUrl) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -16974,31 +16977,53 @@ async function removeDateStampFromPhoto(dataUrl) {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, w, h);
 
-        // Calculate stamp region using same formula as addDateStampToPhoto
+        // Calculate stamp region using the same formula the report
+        // auto-strip uses (must stay in sync with app.js ~line 348).
         const fontSize = Math.max(20, Math.round(w / 40));
         const padding = 12;
+        const margin = 8; // safety margin for font width variation + JPEG bleed
         ctx.font = fontSize + 'px Arial, sans-serif';
-        // Measure the widest plausible date string
-        const metrics = ctx.measureText('2026-04-16');
-        const rectWidth = Math.ceil(metrics.width + padding * 2) + 4; // +4 safety margin
-        const rectHeight = fontSize + padding + 4;
+        // Widest plausible date glyphs (all 8s in Arial are wider than 0/1/7)
+        const metrics = ctx.measureText('2088-08-08');
+        const rectWidth = Math.round(metrics.width + padding * 2 + margin);
+        const rectHeight = Math.round(fontSize + padding + 4);
 
-        const stampX = w - rectWidth;
-        const stampY = h - rectHeight;
+        const stampX = Math.max(0, w - rectWidth);
+        const stampY = Math.max(0, h - rectHeight);
 
-        // Sample a thin strip just above the stamp region (2px high)
-        const sampleY = Math.max(0, stampY - 2);
-        const strip = ctx.getImageData(stampX, sampleY, rectWidth, 2);
-
-        // Fill the stamp region by tiling the sampled strip
-        for (let row = 0; row < rectHeight; row++) {
-          ctx.putImageData(strip, stampX, stampY + row, 0, 0, rectWidth, 1);
+        if (rectWidth <= 0 || rectHeight <= 0) {
+          resolve(dataUrl);
+          return;
         }
 
-        // Smooth the seam with a slight blur via a second pass
-        // Draw the patched region onto itself with reduced alpha for blending
-        const patchData = ctx.getImageData(stampX, Math.max(0, stampY - 4), rectWidth, rectHeight + 8);
-        ctx.putImageData(patchData, stampX, Math.max(0, stampY - 4));
+        // Brightness check — only strip if the region is substantially dark.
+        // The stamp background is rgba(0,0,0,0.7) ≈ brightness ~53 after
+        // alpha blending onto typical content. Above 100 is almost
+        // certainly natural image content; skip to avoid introducing an
+        // artifact on a photo that was never stamped.
+        const stampPixels = ctx.getImageData(stampX, stampY, rectWidth, rectHeight);
+        const d = stampPixels.data;
+        let sumBrightness = 0;
+        const pixelCount = d.length / 4;
+        for (let i = 0; i < d.length; i += 4) {
+          sumBrightness += (d[i] + d[i + 1] + d[i + 2]) / 3;
+        }
+        const avgBrightness = sumBrightness / pixelCount;
+        if (avgBrightness >= 100) {
+          // No stamp detected — return the image unchanged (but still
+          // re-encoded so the caller gets a valid JPEG dataUrl).
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
+          return;
+        }
+
+        // Sample a 1-px strip just above the stamp and tile it downward.
+        const sampleH = Math.min(1, stampY);
+        if (sampleH > 0) {
+          const strip = ctx.getImageData(stampX, stampY - sampleH, rectWidth, 1);
+          for (let row = 0; row < rectHeight; row++) {
+            ctx.putImageData(strip, stampX, stampY + row);
+          }
+        }
 
         resolve(canvas.toDataURL('image/jpeg', 0.85));
       } catch (err) {

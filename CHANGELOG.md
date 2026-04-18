@@ -12,6 +12,15 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2362 — 2026-04-18
+### Fixed
+- **Date stamps: new photos are no longer branded with a date stamp, and the "Remove Date Stamps" batch tool now actually removes them.** Two related problems, fixed together:
+  1. **Capture path was burning a date into every photo.** `addDateStampToPhoto()` — called from every photo-capture code path (main camera, item photos, HIN, compliance plate, etc.) — drew a dark rectangle with the survey date in white text into the bottom-right corner of the image before saving. The capture date is already preserved in the photo record (the ID is `Date.now()`) and on the parent survey (`survey.surveyDate`), so the burned-in stamp was redundant *and* destructive — once committed to the JPEG bytes it could not be removed cleanly. Stripped the drawing step while keeping the resize + JPEG-recompression that the function is otherwise responsible for, so existing call sites continue to work with no signature change.
+  2. **`Remove Date Stamps` batch tool was under-masking old stamped photos.** The in-app removal tool used a tighter mask than the report-generator's auto-strip (which runs on every report render and had always worked): 4px margin vs 8px, narrower glyph measurement ('2026-04-16' vs '2088-08-08' — the latter is the widest possible digit string because `8` is the fattest numeral), and included a no-op "blur smoothing" pass that did nothing but slow the conversion. Rewrote to mirror the auto-strip logic exactly: margin=8, `measureText('2088-08-08')`, brightness sample check (skip if the strip above the stamp averages ≥ 100 — indicates no dark stamp present, avoid damaging clean photos), and dropped the dead blur pass. Now a survey with 50 stamped photos can be cleaned in one batch and the output matches what the report was already producing.
+- Capture date is still recorded (`photoRecord.timestamp = Date.now()`, `survey.surveyDate`) — only the pixel overlay is gone. If the surveyor needs the date visible on a printed photo, the report generator can be extended to overlay it at render time rather than bake it into the source.
+
+---
+
 ## v2361 — 2026-04-18
 ### Fixed
 - **Check Survey: "Back to Check Survey" button was invisible on desktop.** Tapping Go on a preflight issue fades the check-survey overlay out over 150ms (opacity transition) and keeps it in the DOM for a further ≈200ms before removing it. The floating Back button had `z-index: 200` while the overlay had `z-index: 9999`, so for the entire fade-out window the button was rendered *behind* the fading white overlay. On iPhone the fade is fast enough that the flash went unnoticed; on laptop the longer perceived fade made the button effectively invisible — the user ended up at the target item with no way back to the preflight. Bumped back-button z-index to 10001 so it sits above the overlay from the moment it's appended.
