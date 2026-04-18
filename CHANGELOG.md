@@ -12,6 +12,21 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2335 — 2026-04-18
+
+- **Progress circle enlarged.** The completion percentage ring in the
+  survey header increased from 34×34 to 40×40 px so the % text fits
+  comfortably inside the circle. Font bumped from 9 px to 10 px.
+- **Duplicate snippet prevention.** Tapping the same snippet card twice
+  no longer duplicates the sentence in the textarea. The app checks
+  whether the resolved text already exists before appending.
+- **Auto-advance from "N left" list.** When tapping an item from the
+  "N left" popover and then rating it, the app automatically scrolls to
+  the next unrated item in the same category. If that was the last item,
+  the accordion collapses so the user can decide where to go next. The
+  chain continues as long as items remain and the user keeps rating
+  inline (opening the notes sheet cancels auto-advance).
+
 ## v2334 — 2026-04-18
 
 - **Brightwork B-rating snippets expanded.** Added location-specific

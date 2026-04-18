@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2334';
+const APP_VERSION = 'v2335';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -3638,6 +3638,8 @@ function showNotesSheet(itemLabel, categoryName) {
   // v2309: reset click-order counter and manual-text prefix for this item
   // so each notes sheet opens fresh (no stale prefixes carrying over)
   _kkCheckOrderCounter = 0;
+  // v2335: opening the notes sheet means detailed work — cancel auto-advance
+  _kkRemainingNavAccordion = null;
   const _resetKey = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
   delete _kkManualTextPrefix[_resetKey];
 
@@ -4751,7 +4753,13 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
     // multi-sentence observation. Dave's deadline workflow: pick 2-3 cards
     // per item to build richer prose for lawyer review. Empty textarea →
     // insert normally. Non-empty → append with space separator.
+    // v2335: skip if the exact sentence is already present (prevents duplicate
+    // on double-tap of the same snippet card).
     const existing = (textarea.value || '').trim();
+    if (existing && existing.includes(resolved.trim())) {
+      // Already present — don't duplicate
+      return;
+    }
     textarea.value = existing ? (existing + ' ' + resolved) : resolved;
     // Reset collected citations (new snippet starts fresh only on first tap)
     if (!existing) setCollectedCitations(textarea, []);
@@ -7724,15 +7732,17 @@ async function updateCompletionBadge() {
   if (!survey) return;
   const pct = getCompletionPercentage(survey, true);
   const colour = pct.overall >= 80 ? '#22c55e' : pct.overall >= 50 ? '#eab308' : '#ef4444';
-  const dashLen = (pct.overall / 100) * 69.1;
+  // v2335: enlarged from 34×34 r=11 to 40×40 r=14 so the % text fits comfortably
+  const circumference = 87.96; // 2π × 14
+  const dashLen2 = (pct.overall / 100) * circumference;
   el.innerHTML = `
-    <div style="position:relative;width:34px;height:34px;cursor:pointer;" title="Checklist ${pct.checklist}%  Intro ${pct.intro}%  Overall ${pct.overall}%" onclick="showCompletionDetail()">
-      <svg width="34" height="34" viewBox="0 0 34 34">
-        <circle cx="17" cy="17" r="11" fill="none" stroke="#e2e8f0" stroke-width="3"/>
-        <circle cx="17" cy="17" r="11" fill="none" stroke="${colour}" stroke-width="3"
-                stroke-dasharray="${dashLen} 69.1" stroke-linecap="round" transform="rotate(-90 17 17)"/>
+    <div style="position:relative;width:40px;height:40px;cursor:pointer;" title="Checklist ${pct.checklist}%  Intro ${pct.intro}%  Overall ${pct.overall}%" onclick="showCompletionDetail()">
+      <svg width="40" height="40" viewBox="0 0 40 40">
+        <circle cx="20" cy="20" r="14" fill="none" stroke="#e2e8f0" stroke-width="3"/>
+        <circle cx="20" cy="20" r="14" fill="none" stroke="${colour}" stroke-width="3"
+                stroke-dasharray="${dashLen2} ${circumference}" stroke-linecap="round" transform="rotate(-90 20 20)"/>
       </svg>
-      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:${colour};">${pct.overall}%</div>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${colour};">${pct.overall}%</div>
     </div>`;
 }
 
@@ -14885,6 +14895,10 @@ async function toggleRemainingList(accordion) {
   }
 }
 
+// v2335: track that the user navigated here via the "N left" list,
+// so after they rate this item we can auto-advance to the next one.
+let _kkRemainingNavAccordion = null;
+
 function jumpToChecklistItem(itemLabel) {
   if (!itemLabel) return;
   // Close any open popover first
@@ -14903,7 +14917,66 @@ function jumpToChecklistItem(itemLabel) {
       if (w.getAttribute('data-item-label') === itemLabel) { el = w; break; }
     }
   }
-  if (el) _csExpandAccordionAndScroll(el);
+  if (el) {
+    // v2335: remember the accordion so auto-advance can find the next item
+    _kkRemainingNavAccordion = el.closest('.category-accordion');
+    _csExpandAccordionAndScroll(el);
+  }
+}
+
+// v2335: After rating an item reached via "N left", auto-advance to the
+// next unrated item in the same category, or collapse the accordion if done.
+async function _kkAutoAdvanceRemaining(ratedLabel) {
+  const accordion = _kkRemainingNavAccordion;
+  if (!accordion) return;
+  // Clear the flag so normal rating taps don't trigger advance
+  _kkRemainingNavAccordion = null;
+
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !survey.items) return;
+
+  // Collect remaining unrated, non-excluded items in this accordion
+  const wrappers = accordion.querySelectorAll('.compact-item-wrapper');
+  let nextEl = null;
+  for (const w of wrappers) {
+    const lbl = w.getAttribute('data-item-label');
+    if (!lbl || lbl === ratedLabel) continue;
+    const data = survey.items[lbl];
+    const isRated = !!(data && data.rating);
+    const isExcluded = !!(data && data.excluded);
+    if (!isRated && !isExcluded) {
+      nextEl = w;
+      break;
+    }
+  }
+
+  if (nextEl) {
+    // More items remain — set the flag again so chain continues
+    _kkRemainingNavAccordion = accordion;
+    setTimeout(() => {
+      nextEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      nextEl.style.transition = 'background 0.3s, box-shadow 0.3s';
+      nextEl.style.background = '#fef3c7';
+      nextEl.style.boxShadow = '0 0 0 3px #f59e0b';
+      setTimeout(() => { nextEl.style.background = ''; nextEl.style.boxShadow = ''; }, 3000);
+    }, 400);
+  } else {
+    // All items in this category are done — collapse the accordion
+    const content = accordion.querySelector('.accordion-content');
+    if (content && content.style.display !== 'none') {
+      setTimeout(() => {
+        content.style.display = 'none';
+        const header = accordion.querySelector('.accordion-header');
+        const chevron = header?.querySelector('.accordion-chevron');
+        if (chevron) chevron.textContent = '▸';
+        if (typeof _openAccordionCategory !== 'undefined') _openAccordionCategory = null;
+        if (typeof updateCollapseButton === 'function') updateCollapseButton(false);
+        // Scroll the now-collapsed accordion header into view so user
+        // can see the "Done" badge and decide where to go next
+        accordion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 600);
+    }
+  }
 }
 
 // ─── Evaluate fix and return to Check Survey ──────────────────────────────
@@ -18140,6 +18213,11 @@ function selectRating(itemLabel, categoryName, rating) {
           });
         }
         updateCategoryHeader(survey, categoryName);
+        // v2335: auto-advance to next remaining item if navigated via "N left"
+        // Only advance when a rating was actually set (not on deselect/clear)
+        if (survey.items[itemLabel] && survey.items[itemLabel].rating) {
+          _kkAutoAdvanceRemaining(itemLabel);
+        }
         return;
       }
 

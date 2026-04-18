@@ -25754,6 +25754,34 @@
     },
     {
       "section": "Bow roller",
+      "rating": "B",
+      "text": "The bow roller pin was worn or corroded and the roller was not turning freely.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Bow roller",
+      "rating": "B",
+      "text": "The bow roller mounting was loose and should be rebedded and retightened.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Bow roller",
+      "rating": "B",
+      "text": "A seized or worn roller increases chafe on the anchor rode and may cause the anchor to jam during deployment or retrieval.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Bow roller",
+      "rating": "B",
+      "text": "Replace the roller and pin assembly. Inspect and rebed the mounting hardware.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Bow roller",
       "rating": "C",
       "text": "The bow roller assembly was solidly mounted, and the roller was intact and in working condition.",
       "phase": "observed",
@@ -26296,6 +26324,48 @@
       "rating": "B",
       "text": "Treatment and ventilation improvement are advisable.",
       "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Anchor locker",
+      "rating": "B",
+      "text": "The anchor locker drain was partially blocked, allowing standing water to accumulate.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Anchor locker",
+      "rating": "B",
+      "text": "Mildew and moisture staining were present inside the anchor locker, indicating poor ventilation.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Anchor locker",
+      "rating": "B",
+      "text": "The anchor locker lid gasket was deteriorated or missing, allowing water to enter the locker.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Anchor locker",
+      "rating": "B",
+      "text": "Standing water and poor ventilation can promote mould and accelerate corrosion of the ground tackle.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Anchor locker",
+      "rating": "B",
+      "text": "Clear the drain, clean and treat the interior, and improve ventilation to prevent moisture buildup.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Anchor locker",
+      "rating": "B",
+      "text": "Replace the lid gasket to prevent water ingress.",
+      "phase": "action",
       "severity": 3
     },
     {
