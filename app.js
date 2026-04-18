@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2329';
+const APP_VERSION = 'v2331';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -154,6 +154,10 @@ function loadSpellDict() {
         'tacking', 'tack',
         'relaunch', 'relaunched', 'relaunching', 'relaunches',
         'touched-up', 'touched',
+        'rocna', 'mantus', 'spade',
+        'danforth', 'cqr', 'bruce', 'delta',
+        'rebed', 'rebedded', 'rebedding',
+        'retighten', 'retightened', 'retightening',
       ];
       MARINE_EXTRAS.forEach(w => SPELL_DICT.add(w.toLowerCase()));
       SPELL_DICT_LOADING = false;
@@ -1207,7 +1211,7 @@ const ITEM_SNIPPET_MAP = {
   'Flybridge Bimini/dodger/hardtop': 'Bimini, dodger and canvas enclosure',
   'Flybridge Sink, faucet and drain': 'Sink, faucets and drain',
   'Flybridge Stereo and speakers': 'Stereo and speakers',
-  'Deck and coachroof/pilot house condition (spider cracks, etc.)': 'Deck and coachroof/pilothouse condition',
+  'Deck and coachroof/pilot house condition (spider cracks, etc.)': 'Deck and coachroof/pilot house condition (spider cracks, etc.)',
   'Cockpit, floor, seats and coaming (spider cracks, etc.)': 'Cockpit, floor, seats and coaming',
   'Battery(ies), house': 'House battery(ies)',
   'Battery(ies), starter': 'Starter battery(ies)',
@@ -1228,8 +1232,8 @@ const ITEM_SNIPPET_MAP = {
   'Cockpit - other gauges and instrumentation': 'Engine gauges',
   'Cockpit percussion testing': 'Cockpit impact and resonance testing',
   'Condition': 'Aft deck condition (spider cracks, etc.)',
-  'Deck and coachroof/pilot house - other features': 'Deck and coachroof/pilothouse condition',
-  'Deck and coachroof/pilot house condition': 'Deck and coachroof/pilothouse condition',
+  'Deck and coachroof/pilot house - other features': 'Deck and coachroof/pilot house condition (spider cracks, etc.)',
+  'Deck and coachroof/pilot house condition': 'Deck and coachroof/pilot house condition (spider cracks, etc.)',
   'Deck and coachroof/pilot percussion testing': 'Deck and coachroof/pilot percussion testing',
   'Electrical, other, additional features': 'Electrical – other features',
   'Engines and drives - other features': 'Oil level and condition',
@@ -4500,16 +4504,14 @@ window._kkStampCheckOrder = function(chip) {
   if (chip.checked) {
     _kkCheckOrderCounter++;
     chip.setAttribute('data-check-order', _kkCheckOrderCounter);
-    // v2309: capture hand-typed text on first chip tick for this item
+    // v2309/v2329: capture hand-typed text on first chip tick for this item.
+    // Always set the prefix (even if empty) so hasOwnProperty is true and
+    // subsequent ticks don't re-capture rebuilt snippet text as prefix —
+    // that was the root cause of the first-sentence duplication bug.
     const key = chip.getAttribute('data-picker-key') || '';
     if (key && !_kkManualTextPrefix.hasOwnProperty(key)) {
       const ta = document.getElementById('sheet-text-' + key);
-      if (ta) {
-        const existing = ta.value.trim();
-        if (existing) {
-          _kkManualTextPrefix[key] = existing;
-        }
-      }
+      _kkManualTextPrefix[key] = (ta ? ta.value.trim() : '');
     }
   } else {
     chip.setAttribute('data-check-order', '');
@@ -12622,7 +12624,7 @@ function renderInspection(survey) {
               <button onclick="event.stopPropagation();toggleExclude('${safeLabel}')" style="background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;" title="Skip this photo section">⊘ Skip</button>
             </div>
             <div id="area-photo-body-${sanitized}">
-              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px;margin-bottom:10px;">
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,80px));gap:8px;margin-bottom:10px;">
                 ${photos.map(pid => `
                   <div class="area-photo-wrap" style="position:relative;display:none;">
                     <img id="thumb-${pid}" src="" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
@@ -16334,7 +16336,7 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
       <button onclick="event.stopPropagation();toggleExclude('${safeLabel}')" style="background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;" title="Skip this photo section">⊘ Skip</button>
     </div>
     <div id="area-photo-body-${sanitized}">
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px;margin-bottom:10px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,80px));gap:8px;margin-bottom:10px;">
         ${photos.map(pid => `
           <div class="area-photo-wrap" style="position:relative;display:none;">
             <img id="thumb-${pid}" src="" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">

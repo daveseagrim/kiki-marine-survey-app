@@ -12,6 +12,44 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2331 — 2026-04-18
+
+- **Mooring cleats and chocks — A-rating snippets expanded.** Added:
+  observed ("loose and pulling away from the deck"), means ("should a
+  cleat tear out, vessel will not be secure at the dock"), and action
+  ("remove, inspect deck core for damage, confirm solid laminate or
+  backing plate, rebed and retighten").
+
+---
+
+## v2330 — 2026-04-18
+
+- **Fix first-sentence duplication bug.** Root cause: when ticking
+  the first snippet on a fresh (empty) textarea, `_kkStampCheckOrder` did
+  not set `_kkManualTextPrefix` because the textarea was empty. On the
+  second tick, the rebuilt text ("Sentence A.") was captured as prefix,
+  producing "Sentence A. Sentence A. Sentence B." Fix: always set the
+  prefix (even if empty) on first tick so `hasOwnProperty` prevents
+  re-capture.
+- **Fix deck/coachroof snippet matching.** `ITEM_SNIPPET_MAP` mapped
+  the item to "Deck and coachroof/pilothouse condition" but
+  text_library.json used "Deck and coachroof/pilot house condition
+  (spider cracks, etc.)". Corrected the mapping and renamed all legacy
+  "pilothouse" section names to the canonical form.
+- **Cap area photo grid thumbnails at 80 px.** Changed CSS grid from
+  `minmax(72px, 1fr)` to `minmax(72px, 80px)` so photos stay small on
+  iPad and desktop, matching the bottom sheet size.
+- **Correct anchor sizing rule of thumb.** Changed from the incorrect
+  1.5–2 lb/ft to the standard ~1 lb/ft for traditional anchors (CQR,
+  Bruce, Delta), with note that modern high-performance designs (Rocna,
+  Mantus, Spade) achieve comparable holding at lower weight.
+- **Dictionary additions.** Added anchor brand names (Rocna, Mantus,
+  Spade, Danforth, CQR, Bruce, Delta) and marine repair terms (rebed,
+  rebedded, rebedding, retighten, retightened, retightening) to the
+  spell-check supplement.
+
+---
+
 ## v2329 — 2026-04-18
 
 - **Anchor snippets — undersized anchor + sizing rule of thumb (A rating).**

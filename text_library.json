@@ -25550,35 +25550,35 @@
   ],
   "Deck": [
     {
-      "section": "Deck and coachroof/pilothouse condition",
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
       "rating": "C",
       "text": "The deck and coachroof were in very good condition with no visible spider cracks, stress cracks, or surface defects noted at the time of the survey.",
       "phase": "observed",
       "severity": 1
     },
     {
-      "section": "Deck and coachroof/pilothouse condition",
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
       "rating": "C",
       "text": "The gelcoat and non-skid surfaces were in very good order throughout, consistent with the age and care of the vessel.",
       "phase": "observed",
       "severity": 1
     },
     {
-      "section": "Deck and coachroof/pilothouse condition",
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
       "rating": "C",
       "text": "The deck and coachroof presented well with no cracking, crazing, or signs of structural movement.",
       "phase": "observed",
       "severity": 1
     },
     {
-      "section": "Deck and coachroof/pilothouse condition",
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
       "rating": "C",
       "text": "Minor spider and stress cracks were observed in the deck and coachroof{specify:, typical of a vessel of this age|, consistent with normal weathering and use|; these were cosmetic and not structural in nature}.",
       "phase": "observed",
       "severity": 2
     },
     {
-      "section": "Deck and coachroof/pilothouse condition",
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
       "rating": "C",
       "text": "These were not considered concerning, but they warrant monitoring.",
       "phase": "means",
@@ -25769,7 +25769,7 @@
     {
       "section": "Primary anchor, chain and rode",
       "rating": "B",
-      "text": "As a guide, use approximately 1.5 to 2 lb per foot for modern patterns such as Rocna, Mantus, or Spade, and 2 to 2.5 lb per foot for older plow or Danforth types such as CQR, Bruce, or Delta.",
+      "text": "As a guide, allow approximately 1 lb of anchor weight per foot of vessel length for traditional plow or claw anchors such as CQR, Bruce, or Delta. Modern high-performance designs such as Rocna, Mantus, or Spade achieve comparable holding power at lower weight due to their scoop geometry.",
       "phase": "observed",
       "severity": 3
     },
@@ -26089,21 +26089,21 @@
       "severity": 3
     },
     {
-      "section": "Deck and coachroof/pilothouse condition",
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
       "rating": "A",
       "text": "The deck or pilothouse shows significant cracking, delamination, or structural compromise.",
       "phase": "observed",
       "severity": 5
     },
     {
-      "section": "Deck and coachroof/pilothouse condition",
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
       "rating": "A",
       "text": "Immediate repair is required.",
       "phase": "action",
       "severity": 5
     },
     {
-      "section": "Deck and coachroof/pilothouse condition",
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
       "rating": "B",
       "text": "Monitor and treat to prevent deterioration.",
       "phase": "action",
@@ -26182,7 +26182,7 @@
     {
       "section": "Primary anchor, chain and rode",
       "rating": "A",
-      "text": "As a general rule of thumb, allow approximately 1.5 to 2 lb of anchor weight per foot of vessel length for modern designs such as Rocna, Mantus, or Spade, and 2 to 2.5 lb per foot for traditional plow or Danforth patterns such as CQR, Bruce, or Delta.",
+      "text": "As a general rule of thumb, allow approximately 1 lb of anchor weight per foot of vessel length for traditional plow or claw anchors such as CQR, Bruce, or Delta. Modern high-performance designs such as Rocna, Mantus, or Spade achieve comparable holding power at lower weight due to their scoop geometry.",
       "phase": "action",
       "severity": 5
     },
@@ -26273,9 +26273,30 @@
     {
       "section": "Mooring cleats and chocks",
       "rating": "A",
+      "text": "One or more mooring cleats were loose and pulling away from the deck.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Mooring cleats and chocks",
+      "rating": "A",
+      "text": "Should a cleat tear out of the deck under load, the vessel will not be secure at the dock and may break free, creating a serious safety hazard.",
+      "phase": "means",
+      "severity": 5
+    },
+    {
+      "section": "Mooring cleats and chocks",
+      "rating": "A",
       "text": "Replacement is required.",
       "phase": "action",
       "severity": 3
+    },
+    {
+      "section": "Mooring cleats and chocks",
+      "rating": "A",
+      "text": "Remove the affected cleats, inspect the deck core for damage, and confirm that solid laminate or adequate backing plate exists at each mounting location. Rebed and retighten all fasteners.",
+      "phase": "action",
+      "severity": 5
     },
     {
       "section": "Mooring cleats and chocks",
@@ -26712,21 +26733,21 @@
       "section": "Deck and coachroof/pilot percussion testing"
     },
     {
-      "section": "Deck and coachroof/pilothouse condition",
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
       "rating": "A",
       "phase": "observed",
       "severity": 5,
       "text": "A significant deficiency was observed."
     },
     {
-      "section": "Deck and coachroof/pilothouse condition",
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
       "rating": "B",
       "phase": "means",
       "severity": 3,
       "text": "This finding warrants attention in the near term."
     },
     {
-      "section": "Deck and coachroof/pilothouse condition",
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
       "rating": "C",
       "phase": "action",
       "severity": 1,
@@ -28007,7 +28028,7 @@
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
     },
     {
-      "section": "Deck and coachroof/pilothouse condition",
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
