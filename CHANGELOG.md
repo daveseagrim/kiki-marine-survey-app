@@ -12,6 +12,19 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2351 — 2026-04-18
+### Added
+- **`Distribution panel 110V` — A-rating reverse-polarity indicator chip set.** Three new chips covering the specific A-severity finding when an AC panel lacks a reverse-polarity indicator. Wording mirrors the adjacent protective-guard chip pair (past-tense observed, imperative action), uses Canadian English, and avoids the informal "this device" framing:
+  - Observed: `A reverse-polarity indicator was not present on the AC shore-power panel.`
+  - Means: `The indicator warns the crew of a reversed polarity in the shore-power connection. Without one, the reversed-polarity condition — which presents shock and fire hazards — can go undetected during normal use.`
+  - Action: `Install a reverse-polarity indicator in accordance with ABYC E-11.`
+- Chips are additive — the existing A-rating protective-guard chip pair is unchanged, as is the generic A-means fallback. Surveyor can now pick the reverse-polarity narrative independently from the guard narrative.
+
+### Removed
+- **`Distribution panel 110V` / A / observed — `The 110V distribution panel appeared clearly labeled, and all switches appeared to function properly.`** This sentence describes a serviceable panel and belongs in the C-rating bucket (an identical chip already exists at C / observed). Its presence on A / observed was a copy-paste legacy — a critical-rating card should not offer a "panel is fine" option.
+
+---
+
 ## v2350 — 2026-04-18
 ### Changed
 - **`Hull and rudder(s) conductivity testing` chips split — hull and rudder now separate chips.** The combined-phrasing chips forced the surveyor to tick both hull and rudder together even when only one was elevated, which made the sentence picker awkward when (for example) only the hull showed elevated readings. Split treatment at two rating levels:

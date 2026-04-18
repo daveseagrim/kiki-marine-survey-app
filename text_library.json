@@ -21502,13 +21502,6 @@
     {
       "section": "Distribution panel 110V",
       "rating": "A",
-      "text": "The 110V distribution panel appeared clearly labeled, and all switches appeared to function properly.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Distribution panel 110V",
-      "rating": "A",
       "text": "A protective guard was not present on the reverse side of the panel.",
       "phase": "observed",
       "severity": 3
@@ -21519,6 +21512,24 @@
       "text": "Install a guard to prevent accidental contact with live parts.",
       "phase": "action",
       "severity": 3
+    },
+    {
+      "section": "Distribution panel 110V",
+      "rating": "A",
+      "phase": "observed",
+      "text": "A reverse-polarity indicator was not present on the AC shore-power panel."
+    },
+    {
+      "section": "Distribution panel 110V",
+      "rating": "A",
+      "phase": "means",
+      "text": "The indicator warns the crew of a reversed polarity in the shore-power connection. Without one, the reversed-polarity condition — which presents shock and fire hazards — can go undetected during normal use."
+    },
+    {
+      "section": "Distribution panel 110V",
+      "rating": "A",
+      "phase": "action",
+      "text": "Install a reverse-polarity indicator in accordance with ABYC E-11."
     },
     {
       "section": "Distribution panel 110V",
