@@ -12,6 +12,17 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2356 — 2026-04-18
+### Added
+- **`Flybridge Bimini/dodger/hardtop` — hardtop-specific chip set.** Previously the chip panel for this item pulled only from the fuzzy-matched `Bimini, dodger and canvas enclosure` section, which is written for soft canvas structures — zippers, snaps, fabric wear. Hardtops are rigid (fibreglass, aluminum, composite) and have none of those features. Added 15 hardtop-focused chips covering the conditions an ABYC-trained surveyor actually assesses on a rigid top:
+  - C (4 observed): solidly mounted + free of stress cracks, fasteners and mounting hardware secure, perimeter sealant and gaskets intact, gelcoat free of significant crazing or chalking.
+  - B (4 observed + 1 means + 1 action): minor gelcoat stress cracks, corroded mounting hardware, weathered perimeter sealant, support-post play at base; means-phase narrative about water tracking into supporting structure; action chip recommending reseal + hardware inspection at routine service.
+  - A (3 observed + 1 means + 1 action): significant structural cracking/delamination, loose or missing mounting hardware, active perimeter leak; means chip noting the wind/sea-loading structural hazard; action chip recommending professional repair or replacement before return to service.
+- All B-observed and A-observed chips that reference a location use `[insert location(s)]` so the surveyor can specify port corner, forward mounts, overhead seam, etc.
+- The existing bimini/dodger canvas chips remain available via the cross-section fuzzy match for vessels whose flybridge cover is actually canvas rather than rigid.
+
+---
+
 ## v2355 — 2026-04-18
 ### Fixed
 - **BUG: Engine 1 horsepower and fuel type were disappearing on every load.** On opening the Edit Intro view for a saved survey, the restore code set all fields from the stored survey (including `engineHP` and `fuelType`) and then called `onEngineMakeChange()` to cascade-populate the engine model dropdown. That cascade handler clears `engineHP` and `fuelType` as a side effect — intended when the user manually changes the make (old HP/fuel no longer apply) but wrong when we're just restoring saved data. The model field was being re-restored after the cascade; HP and fuel were not. Result: fields flashed in briefly then went blank, and the next auto-save wrote the blank strings back to IDB. Engine 2 had the same bug via the same pattern.

@@ -13286,6 +13286,111 @@
       "phase": "observed",
       "severity": 1,
       "text": "The flybridge bimini, dodger, or hardtop appeared sound and in good order at the time of survey."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The hardtop appeared solidly mounted and free of stress cracks at the time of survey."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The hardtop fasteners and mounting hardware appeared secure with no visible fatigue or corrosion."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Sealant and gaskets at the hardtop perimeter appeared intact with no evidence of water ingress."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The hardtop gelcoat appeared in satisfactory condition with no significant crazing or chalking."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Minor stress cracks were observed in the hardtop gelcoat at [insert location(s)]."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The hardtop mounting hardware showed signs of corrosion at [insert location(s)]."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Sealant at the hardtop perimeter appeared weathered and may allow water ingress at [insert location(s)]."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The hardtop support posts showed some play at their base connections."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Weathered sealant and corroded hardware allow water to track into the supporting structure, accelerating further deterioration if left unaddressed."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Recommend resealing the hardtop perimeter and inspecting all mounting hardware for corrosion as part of routine service."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The hardtop exhibited significant structural cracking or delamination at [insert location(s)]."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Hardtop mounting hardware was loose or missing, compromising structural integrity."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The hardtop was actively leaking at the perimeter seal or mounting points."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "A compromised hardtop presents a structural and water-ingress hazard, and loose mounting hardware can allow the structure to shift or detach under wind or sea loading."
+    },
+    {
+      "section": "Flybridge Bimini/dodger/hardtop",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "Recommend professional assessment and repair or replacement of the hardtop before the vessel is returned to service."
     }
   ],
   "Flybridge gauges and instrument": [
