@@ -12,6 +12,23 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2333 — 2026-04-18
+
+- **Fix sail drive ITEM_SNIPPET_MAP mismatch.** Target was missing the
+  ` - ` dash, so section-specific snippets were not appearing.
+- **Fix deck/coachroof percussion testing section names.** Renamed
+  lowercase "deck and coachroof/pilothouse impact and resonance testing"
+  to "Deck and coachroof/pilot percussion testing" to match the
+  ITEM_SNIPPET_MAP target.
+- **Expand deck/coachroof B-rating snippets.** Added 6 observed
+  sentences (spider cracks around hardware, stress cracks at transitions,
+  gelcoat crazing/chalking, non-skid wear, coachroof window frame
+  cracking, stanchion base cracks), 1 means (moisture/core saturation
+  risk), and 3 action sentences (grind and fill, rebed hardware, renew
+  non-skid). Previously had only 1 observed and 1 action.
+
+---
+
 ## v2332 — 2026-04-18
 
 - **Toerail/gunwale snippets.** Moved "refinishing for appearance"

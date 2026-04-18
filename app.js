@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2332';
+const APP_VERSION = 'v2333';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -1184,7 +1184,7 @@ const ITEM_SNIPPET_MAP = {
   'Pilot house Engine gauges (tachometer, speedometer, fuel, temperature, etc.)': 'Engine gauges',
   'Pilot house Engine start/stop': 'Engine start and stop',
   'Propane valve, regulator, gauge, storage compartment and vent.': 'Propane valve, regulator, gauge, storage compartment and vent',
-  'Sail drive(s) - (external), corrosion, propeller(s), anode(s)': 'Sail drive(s) (external), corrosion, propeller(s), anode(s)',
+  'Sail drive(s) - (external), corrosion, propeller(s), anode(s)': 'Sail drive(s) - (external), corrosion, propeller(s), anode(s)',
   'Signs of water ingress?': 'Signs of water ingress',
   'Swim platform and ladder - condition and conductivity readings': 'Swim platform and ladder',
   'Swim platform and ladder - condition and moisture readings': 'Swim platform and ladder',

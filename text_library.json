@@ -25585,63 +25585,63 @@
       "severity": 3
     },
     {
-      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "section": "Deck and coachroof/pilot percussion testing",
       "rating": "B",
       "text": "Percussion testing produced acoustics that may indicate saturation or rot within the core.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "section": "Deck and coachroof/pilot percussion testing",
       "rating": "B",
       "text": "The photographs show the areas identified by the hammer tip.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "section": "Deck and coachroof/pilot percussion testing",
       "rating": "B",
       "text": "No distinct soft spots were observed.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "section": "Deck and coachroof/pilot percussion testing",
       "rating": "B",
       "text": "Although they do not currently present any safety concerns, in order to mitigate the spread, these areas should be repaired.",
       "phase": "action",
       "severity": 3
     },
     {
-      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "section": "Deck and coachroof/pilot percussion testing",
       "rating": "C - one or two minor areas",
       "text": "Percussion testing of most of the deck and coachroof produced a clear and even tone across most areas with no indications of delamination or voids.",
       "phase": "observed",
       "severity": 5
     },
     {
-      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "section": "Deck and coachroof/pilot percussion testing",
       "rating": "C - one or two minor areas",
       "text": "[insert number of] localized areas produced dull thuds suggestive of present or past saturation with core deterioration.",
       "phase": "observed",
       "severity": 2
     },
     {
-      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "section": "Deck and coachroof/pilot percussion testing",
       "rating": "C - one or two minor areas",
       "text": "The photographs show the hammer tip indicating the areas.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "section": "Deck and coachroof/pilot percussion testing",
       "rating": "C - one or two minor areas",
       "text": "Monitor and plan localized repair if softness develops.",
       "phase": "action",
       "severity": 2
     },
     {
-      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "section": "Deck and coachroof/pilot percussion testing",
       "rating": "C",
       "text": "Percussion testing of the deck, and coachroof produced a clear and even tone with no indications of delamination or voids.",
       "phase": "observed",
@@ -26131,14 +26131,14 @@
       "severity": 3
     },
     {
-      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "section": "Deck and coachroof/pilot percussion testing",
       "rating": "A",
       "text": "Percussion testing revealed multiple soft or delaminated areas indicating structural failure.",
       "phase": "observed",
       "severity": 5
     },
     {
-      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "section": "Deck and coachroof/pilot percussion testing",
       "rating": "A",
       "text": "Repair is critical.",
       "phase": "action",
@@ -26413,7 +26413,77 @@
     {
       "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
       "rating": "B",
+      "text": "Spider cracks were present in the gelcoat around deck hardware and fittings, indicating stress at the mounting points.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "B",
+      "text": "Stress cracks were observed at structural transition points where the deck meets the coachroof.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "B",
+      "text": "Gelcoat crazing and chalking were evident across the deck and coachroof surfaces, consistent with UV degradation.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "B",
+      "text": "The non-skid surfaces were worn and no longer providing adequate traction in some areas.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "B",
+      "text": "Cracking was noted around the coachroof window frames that may allow moisture ingress if not addressed.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "B",
+      "text": "Stress cracks were observed around one or more stanchion bases, suggesting the hardware may warrant rebedding.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "B",
+      "text": "If left unaddressed, moisture may penetrate through cracked gelcoat and saturate core material, leading to softness and structural compromise over time.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "B",
       "text": "Monitoring and repair planning is recommended to prevent further deterioration.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "B",
+      "text": "Grind out the affected areas, apply appropriate filler and gelcoat to seal against moisture ingress.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "B",
+      "text": "Rebed and retighten hardware at the noted locations to prevent water ingress into the deck core.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+      "rating": "B",
+      "text": "Consider renewal of the non-skid surfaces in worn areas to restore safe traction.",
       "phase": "action",
       "severity": 3
     },
@@ -26775,21 +26845,21 @@
       "text": "No corrective action is recommended at this time."
     },
     {
-      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "section": "Deck and coachroof/pilot percussion testing",
       "rating": "A",
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
     },
     {
-      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "section": "Deck and coachroof/pilot percussion testing",
       "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
     },
     {
-      "section": "deck and coachroof/pilothouse impact and resonance testing",
+      "section": "Deck and coachroof/pilot percussion testing",
       "rating": "C",
       "phase": "means",
       "severity": 1,
