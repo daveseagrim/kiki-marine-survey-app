@@ -2138,7 +2138,7 @@
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "A",
-      "phase": "means",
+      "phase": "observed",
       "severity": 5,
       "text": "The barrier coat was compromised and the underlying laminate was exposed."
     },
@@ -2161,21 +2161,21 @@
       "rating": "A",
       "phase": "means",
       "severity": 5,
-      "text": "These findings compromised the coating system's ability to protect the laminate."
+      "text": "These findings compromised the proper layers of hull protection and the ability to protect the laminate."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "A",
       "phase": "action",
       "severity": 4,
-      "text": "Strip the failed coating system back to sound substrate, reapply primer, barrier coat, and anti-fouling before relaunching the vessel."
+      "text": "Strip the failed layers of hull protection back to sound substrate, reapply primer, barrier coat, and anti-fouling before relaunching the vessel."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "A",
       "phase": "action",
       "severity": 5,
-      "text": "The vessel should not be returned to the water until the coating system is restored."
+      "text": "The vessel should not be returned to the water until the proper layers of hull protection are restored."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
@@ -2217,7 +2217,7 @@
       "rating": "B",
       "phase": "means",
       "severity": 2,
-      "text": "The coating system was in overall sound condition but attention was required to maintain protection."
+      "text": "The proper layers of hull protection were in overall sound condition but attention was required to maintain protection."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
@@ -2287,7 +2287,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The coating system was providing effective protection to the hull."
+      "text": "The proper layers of hull protection were providing effective protection to the hull."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",

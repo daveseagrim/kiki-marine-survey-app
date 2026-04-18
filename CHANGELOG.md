@@ -14,6 +14,8 @@ lets you roll back to a specific version with confidence.
 
 ## v2310 — 2026-04-17
 - Hull percussion B-rating action snippets: removed "at the next haul-out" from monitoring snippet; rewrote recheck snippet to "Recommend rechecking with visual inspection, impact and conductivity testing periodically."
+- Moved "The barrier coat was compromised…" from "What it means" to "What was observed" phase.
+- Replaced all "coating system" references with "proper layers of hull protection" across primer/barrier coat/anti-fouling snippets (5 occurrences).
 
 ## v2309 — 2026-04-17
 - Hand-typed text preservation: typing in the observation textarea before ticking a snippet no longer overwrites your text — snippets append after what you wrote.
