@@ -14,13 +14,17 @@ lets you roll back to a specific version with confidence.
 
 ## v2346 — 2026-04-18
 ### Added
-- Cabin lighting B-rating snippet set, added to both "Interior lighting" (Cabin and conveniences) and "Lighting (cabin)" (Electrical) so the same chips appear regardless of which template item is open:
+- Cabin lighting B-rating snippet set, added to both "Cabin lights" (the section the `Interior lighting` template item resolves to via `ITEM_SNIPPET_MAP`) and "Lighting (cabin)" (Electrical group, direct match):
   - Observed: "[insert count] lights did not function in [insert location(s)]."
   - Observed: "[insert count] lights were loose in [insert location(s)]."
   - Observed: "[insert count] lights were missing from [insert location(s)], leaving only the wiring in place."
   - Action: "Repair of the affected light(s) is recommended to restore full illumination."
   - Action: "Installation of replacement light(s) at the affected locations is recommended to restore full illumination."
 - `[insert count]` placeholders render as inline number inputs and `[insert location(s)]` as inline text inputs (existing sentence-picker behaviour), so field entry is: tick → type count → type locations. Cabin lighting B has no `means` snippets — matches the cabin sole v2345 precedent where no generic sentence fits.
+
+### Fixed
+- **Snippet routing fix — the reason v2345 cabin sole chips never appeared in the field.** Entries were added under `"section": "Cabin sole"`, but `ITEM_SNIPPET_MAP` in `app.js` redirects the `Cabin sole` template item to look up the `"Floor and carpet"` section, so the new chips were orphaned. Relabelled the 5 v2345 cabin sole B entries from `"Cabin sole"` to `"Floor and carpet"`. Same bug class caught pre-flight for v2346 cabin lighting: relabelled the 5 `"Interior lighting"` entries to `"Cabin lights"` (the target of the `Interior lighting` → `Cabin lights` remap). The `Lighting (cabin)` Electrical-group entries were already correct and are unchanged.
+- QC lesson: trace each text-library addition through `ITEM_SNIPPET_MAP` before committing, not after the surveyor reports missing chips in the field.
 
 ---
 

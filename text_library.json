@@ -17254,35 +17254,35 @@
       "text": "The cabin sole was sound and in good order at the time of survey."
     },
     {
-      "section": "Cabin sole",
+      "section": "Floor and carpet",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
       "text": "The cabin sole was structurally sound but the finish was worn and in need of refinishing."
     },
     {
-      "section": "Cabin sole",
+      "section": "Floor and carpet",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
       "text": "Localized rot was observed in the cabin sole at [describe area(s)]."
     },
     {
-      "section": "Cabin sole",
+      "section": "Floor and carpet",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
       "text": "The cabin sole was broken at [describe area(s)], compromising the finish and, potentially, the underlying structure."
     },
     {
-      "section": "Cabin sole",
+      "section": "Floor and carpet",
       "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Refinishing is recommended to restore appearance and protect the substrate from moisture ingress."
     },
     {
-      "section": "Cabin sole",
+      "section": "Floor and carpet",
       "rating": "B",
       "phase": "action",
       "severity": 3,
@@ -17303,35 +17303,35 @@
       "text": "The interior lighting functioned properly at the time of survey."
     },
     {
-      "section": "Interior lighting",
+      "section": "Cabin lights",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
       "text": "[insert count] lights did not function in [insert location(s)]."
     },
     {
-      "section": "Interior lighting",
+      "section": "Cabin lights",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
       "text": "[insert count] lights were loose in [insert location(s)]."
     },
     {
-      "section": "Interior lighting",
+      "section": "Cabin lights",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
       "text": "[insert count] lights were missing from [insert location(s)], leaving only the wiring in place."
     },
     {
-      "section": "Interior lighting",
+      "section": "Cabin lights",
       "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Repair of the affected light(s) is recommended to restore full illumination."
     },
     {
-      "section": "Interior lighting",
+      "section": "Cabin lights",
       "rating": "B",
       "phase": "action",
       "severity": 3,
