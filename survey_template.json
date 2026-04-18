@@ -1989,19 +1989,6 @@
           },
           {
             "type": "list",
-            "label": "Engine alignment",
-            "driveLineItem": true,
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
             "label": "Cooling water intake seacock(s) and strainer(s)",
             "driveLineItem": true,
             "options": [

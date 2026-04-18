@@ -12,6 +12,14 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2342 — 2026-04-18
+### Changed
+- Removed "Engine alignment" from survey template (not something Dave surveys).
+### Fixed
+- HEIC conversion: added `createImageBitmap` as primary strategy (most reliable on macOS Chrome), then Image element fallback, then heic2any library. Better error toast suggests converting to JPG in Preview if all methods fail.
+
+---
+
 ## v2341 — 2026-04-18
 ### Fixed
 - HEIC drag-and-drop conversion: now tries native canvas conversion first (macOS Chrome/Safari decode HEIC via OS codec), falls back to heic2any library only if native fails. Much faster and more reliable.

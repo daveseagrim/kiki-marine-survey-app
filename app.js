@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2341';
+const APP_VERSION = 'v2342';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4994,7 +4994,24 @@ function isHeicFile(file) {
 // natively via the OS codec — much faster and more reliable). Falls back to
 // the heic2any JS library if native decoding fails.
 async function heicToJpegDataUrl(file) {
-  // Strategy 1: native canvas (works on macOS Chrome 117+, Safari 17+)
+  // Strategy 1a: createImageBitmap (best macOS Chrome/Safari HEIC path)
+  if (typeof createImageBitmap === 'function') {
+    try {
+      const bitmap = await createImageBitmap(file);
+      const canvas = document.createElement('canvas');
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(bitmap, 0, 0);
+      bitmap.close();
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      if (dataUrl && dataUrl.length > 100 && dataUrl.startsWith('data:image/jpeg')) {
+        return dataUrl;
+      }
+    } catch (_) { /* fall through */ }
+  }
+
+  // Strategy 1b: Image element + object URL (fallback native path)
   try {
     const objectUrl = URL.createObjectURL(file);
     const nativeResult = await new Promise((resolve) => {
@@ -5007,7 +5024,6 @@ async function heicToJpegDataUrl(file) {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0);
           const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-          // Verify the canvas actually produced JPEG (not a blank/error)
           if (dataUrl && dataUrl.length > 100 && dataUrl.startsWith('data:image/jpeg')) {
             resolve(dataUrl);
           } else {
@@ -5019,7 +5035,6 @@ async function heicToJpegDataUrl(file) {
         URL.revokeObjectURL(objectUrl);
       };
       img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(null); };
-      // Timeout — if the browser can't decode HEIC, onerror may never fire
       setTimeout(() => { URL.revokeObjectURL(objectUrl); resolve(null); }, 5000);
       img.src = objectUrl;
     });
@@ -5138,7 +5153,7 @@ async function attachPhotosToItem(itemLabel, fileList) {
   } catch (_) {}
 
   if (heicFailed > 0 && saved === 0) {
-    showToast(`Could not convert ${heicFailed} HEIC photo${heicFailed === 1 ? '' : 's'} — check network and retry`);
+    showToast(`Could not convert ${heicFailed} HEIC photo${heicFailed === 1 ? '' : 's'} — try converting to JPG in Preview first`);
   } else if (heicFailed > 0) {
     showToast(`Attached ${saved} photo${saved === 1 ? '' : 's'} • ${heicFailed} HEIC failed`);
   } else {
