@@ -12,6 +12,13 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2305 — 2026-04-16
+
+### Fixed
+- **Desktop Chrome crash on photo-heavy surveys (Aw Snap).** `loadAndDisplayPhotos()` previously loaded ALL photo thumbnails (full-resolution base64 data URLs) into the DOM simultaneously when a survey opened. With 360 photos this overwhelmed Chrome's memory. Replaced with lazy `loadCategoryThumbnails()` that only loads thumbnails for the currently expanded accordion category. Since only one category is open at a time, memory stays bounded. All three accordion-opening code paths (user click, accordion restore after re-render, jump-to-item from remaining list) now trigger the lazy loader.
+
+---
+
 ## v2304 — 2026-04-16
 
 ### Added

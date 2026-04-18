@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2304';
+const APP_VERSION = 'v2305';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -14503,6 +14503,8 @@ function _csExpandAccordionAndScroll(el) {
         _openAccordionCategory = titleSpan.textContent.replace(/^[^\w]*/, '').trim();
       }
       if (typeof updateCollapseButton === 'function') updateCollapseButton(true);
+      // v2305: lazy-load thumbnails for the expanded category
+      loadCategoryThumbnails(content);
     }
   }
   setTimeout(() => {
@@ -15739,20 +15741,25 @@ async function regenerateSafetyChecklist() {
   renderInspection(survey);
 }
 
-async function loadAndDisplayPhotos(survey) {
-  if (!survey.items) return;
-
-  for (const [itemLabel, itemData] of Object.entries(survey.items)) {
-    if (itemData.photos && itemData.photos.length > 0) {
-      for (const photoId of itemData.photos) {
-        const photo = await getPhotoById(photoId);
-        if (photo) {
-          const img = document.getElementById(`thumb-${photoId}`);
-          if (img) img.src = photo.dataUrl;
-        }
-      }
-    }
+// v2305: Lazy thumbnail loader — only loads photos for the currently visible
+// accordion category. Prevents Chrome "Aw Snap" crashes on surveys with
+// hundreds of photos by keeping memory bounded to one category at a time.
+async function loadCategoryThumbnails(accordionContentEl) {
+  if (!accordionContentEl) return;
+  const thumbs = accordionContentEl.querySelectorAll('img[id^="thumb-"]');
+  for (const img of thumbs) {
+    // Skip already-loaded thumbnails (loaded photos have data: URLs)
+    if (img.src && img.src.startsWith('data:')) continue;
+    const photoId = img.id.replace('thumb-', '');
+    const photo = await getPhotoById(photoId);
+    if (photo) img.src = photo.dataUrl;
   }
+}
+
+// Legacy wrapper kept for any external callers — now a no-op.
+// Thumbnails are loaded on-demand when each accordion opens.
+async function loadAndDisplayPhotos(_survey) {
+  // No-op — v2305 lazy loading handles this via toggleAccordion / restoreAccordionState
 }
 
 // Save a copy of the photo to the device (camera roll on iOS, downloads on desktop)
@@ -18885,6 +18892,9 @@ function toggleAccordion(button) {
   const titleSpan = button.querySelector('.category-title');
   _openAccordionCategory = isOpen ? null : (titleSpan ? titleSpan.textContent.replace(/^[^\w]*/, '').trim() : null);
 
+  // v2305: lazy-load thumbnails when opening a category
+  if (!isOpen) loadCategoryThumbnails(content);
+
   // Show/hide the floating collapse button
   updateCollapseButton(!isOpen);
 
@@ -18948,6 +18958,8 @@ function restoreAccordionState() {
           const chevron = header.querySelector('.accordion-chevron');
           if (chevron) chevron.textContent = '▾';
           updateCollapseButton(true);
+          // v2305: lazy-load thumbnails for the restored category
+          loadCategoryThumbnails(content);
           // Scroll back to it
           setTimeout(() => header.scrollIntoView({ behavior: 'auto', block: 'start' }), 50);
         }
