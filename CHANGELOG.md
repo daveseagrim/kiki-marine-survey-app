@@ -12,6 +12,9 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2311 — 2026-04-17
+- Fixed broken image placeholders for orphaned photos: thumbnails whose photo data no longer exists in IndexedDB are now hidden instead of showing a broken image icon.
+
 ## v2310 — 2026-04-17
 - Hull percussion B-rating action snippets: removed "at the next haul-out" from monitoring snippet; rewrote recheck snippet to "Recommend rechecking with visual inspection, impact and conductivity testing periodically."
 - Complete rewrite of Primer, barrier coat, anti-fouling snippets using correct hull layer model (anti-fouling → epoxy barrier coat → gelcoat → fibreglass). A-rating now covers gelcoat-exposed and fibreglass-exposed scenarios, plus anti-fouling applied without barrier coat or gelcoat. B-rating covers worn anti-fouling exposing epoxy barrier coat and legacy layer buildup. All "primer" and "coating system" references replaced with correct terminology.
