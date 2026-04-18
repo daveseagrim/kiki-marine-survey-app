@@ -17301,6 +17301,41 @@
       "phase": "observed",
       "severity": 1,
       "text": "The interior lighting functioned properly at the time of survey."
+    },
+    {
+      "section": "Interior lighting",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "[insert count] lights did not function in [insert location(s)]."
+    },
+    {
+      "section": "Interior lighting",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "[insert count] lights were loose in [insert location(s)]."
+    },
+    {
+      "section": "Interior lighting",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "[insert count] lights were missing from [insert location(s)], leaving only the wiring in place."
+    },
+    {
+      "section": "Interior lighting",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Repair of the affected light(s) is recommended to restore full illumination."
+    },
+    {
+      "section": "Interior lighting",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Installation of replacement light(s) at the affected locations is recommended to restore full illumination."
     }
   ],
   "Head": [
@@ -23577,6 +23612,41 @@
       "phase": "action",
       "severity": 1,
       "text": "No corrective action is recommended at this time."
+    },
+    {
+      "section": "Lighting (cabin)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "[insert count] lights did not function in [insert location(s)]."
+    },
+    {
+      "section": "Lighting (cabin)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "[insert count] lights were loose in [insert location(s)]."
+    },
+    {
+      "section": "Lighting (cabin)",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "[insert count] lights were missing from [insert location(s)], leaving only the wiring in place."
+    },
+    {
+      "section": "Lighting (cabin)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Repair of the affected light(s) is recommended to restore full illumination."
+    },
+    {
+      "section": "Lighting (cabin)",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Installation of replacement light(s) at the affected locations is recommended to restore full illumination."
     },
     {
       "section": "Generator",

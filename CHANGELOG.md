@@ -12,6 +12,18 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2346 — 2026-04-18
+### Added
+- Cabin lighting B-rating snippet set, added to both "Interior lighting" (Cabin and conveniences) and "Lighting (cabin)" (Electrical) so the same chips appear regardless of which template item is open:
+  - Observed: "[insert count] lights did not function in [insert location(s)]."
+  - Observed: "[insert count] lights were loose in [insert location(s)]."
+  - Observed: "[insert count] lights were missing from [insert location(s)], leaving only the wiring in place."
+  - Action: "Repair of the affected light(s) is recommended to restore full illumination."
+  - Action: "Installation of replacement light(s) at the affected locations is recommended to restore full illumination."
+- `[insert count]` placeholders render as inline number inputs and `[insert location(s)]` as inline text inputs (existing sentence-picker behaviour), so field entry is: tick → type count → type locations. Cabin lighting B has no `means` snippets — matches the cabin sole v2345 precedent where no generic sentence fits.
+
+---
+
 ## v2345 — 2026-04-18
 ### Changed
 - Removed the generic B-rating "means" filler — "This finding warrants attention in the near term." — from every section of `text_library.json` (191 occurrences across 190 sections, all rating B / phase `means`). Leaving the "What it means for this vessel" column empty for B-rated items rather than padding the report with a one-size-fits-all sentence that said nothing useful.
