@@ -21735,21 +21735,36 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     findings.B.forEach(f => { html += renderFinding(f, '#d97706', 'B'); });
   }
 
-  // v2373: Type C subsection fully removed from F&R. On a typical survey
-  // it was carrying 40+ serviceable items forward into pages 54–56 as a
-  // compact table, which (a) padded length with items that require no
-  // action and (b) diluted the B findings by surrounding them with a wall
-  // of serviceable rows. The at-a-glance count of C items is still in
-  // Findings Overview near the top, and the full per-item observations
-  // still live in Detailed Survey Findings. Predecessor versions:
-  // v2242 compacted C into a table; v2372 trimmed the intro disclaimer;
-  // v2373 drops the subsection entirely so F&R focuses on actionable
-  // findings only (A + B), with NT retained for transparency about what
-  // couldn't be verified.
+  // v2373: Type C subsection retained, streamlined to Finding + Item only.
+  // The old layout had a three-column table — Finding / Item / Notes —
+  // and the Notes column was (a) a truncated version of the same prose
+  // that appears in Detailed Survey Findings and (b) the reason the F&R
+  // section was padding pages 54–56 with serviceable-item noise. Dave's
+  // revised preference: keep the at-a-glance list of every C item (so
+  // the reader can see at a glance that everything else was serviceable)
+  // but drop the Notes column entirely so the table is a tight two-column
+  // index, not a prose wall. Full per-item observations still live in
+  // Detailed Survey Findings. Predecessors: v2242 compacted C into a
+  // three-column table; v2372 trimmed the intro disclaimer; v2373 drops
+  // the Notes column.
+  if (findings.C.length > 0) {
+    html += `<h3 style="color:#16a34a;">Findings &amp; Recommendations (Type C — Serviceable / General Notes)</h3>`;
+    html += `<p style="font-size:9pt;color:#555;margin-bottom:8px;">The following ${findings.C.length} items were found to be in serviceable condition.</p>`;
+    html += `<table style="font-size:9pt;"><tr><th style="width:60px;">Finding</th><th>Item</th></tr>`;
+    findings.C.forEach(f => {
+      html += `<tr>
+        <td style="font-weight:bold;color:#16a34a;">${f.code}</td>
+        <td>${esc(displayItemLabel(f.label, survey))}</td>
+      </tr>`;
+    });
+    html += `</table>`;
+  }
 
-  // v2242/v2373: NT and PO findings as compact tables. NT is retained
-  // (unlike C) because "not tested" items represent uncertainty that
-  // the reader may need to follow up on — it's an actionable signal.
+  // v2242/v2373: NT and PO findings as compact tables. NT and PO are
+  // retained with their Notes/Reason columns because "not tested" and
+  // "powered up only" represent uncertainty the reader may need to
+  // follow up on — the brief explanation is actionable signal, not
+  // duplicated prose.
   if (findings.NT.length > 0) {
     html += `<h3 style="color:#6b7280;">Not Tested / Not Verified</h3>`;
     // v2372: Dropped "Full details appear in the Detailed Survey Findings
