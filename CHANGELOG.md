@@ -12,6 +12,13 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2373 — 2026-04-18
+### Removed
+- **Findings & Recommendations: C (Serviceable) subsection removed entirely.** Dave's feedback on pages 54–56: the quick-reference recommendations section was carrying 46 C-rated (serviceable) items forward into a dedicated subsection, which made the report feel longer than the actual risk picture warranted and diluted the B findings by burying them in a long tail of green-light items. The C-rated items remain in the **Detailed Survey Findings** body section — they're still fully documented — they just no longer get a duplicated quick-reference table in F&R. Net effect: F&R now focuses on A (requires immediate attention) and B (requires attention in near future) findings, with NT (Not Tested) and Powered-Up-Only tables still included for completeness. Pages 54–56 will now show a materially shorter F&R section that actually reflects the risk picture instead of padding it.
+- Code change: replaced the entire C-table render block in `generateReport()` (app.js ~line 21738) with an explanatory comment block documenting the intentional omission. No data model change — `baseRating === 'C'` items are still collected, still rendered in Detailed Survey Findings, just not duplicated in F&R summary.
+
+---
+
 ## v2372 — 2026-04-18
 ### Changed
 - **Findings & Recommendations: trimmed the "full observations appear in the Detailed Survey Findings section" disclaimers.** Dave's feedback on pages 54–56: the F&R section was explicitly telling the reader that the full content lives elsewhere, which reads as an admission of duplication rather than as useful signposting. The reader has already read the Detailed Survey Findings body by the time they reach F&R — pointing them back to it is filler. Cut two sentences:

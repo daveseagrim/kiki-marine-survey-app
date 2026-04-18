@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2372';
+const APP_VERSION = 'v2373';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -21735,33 +21735,21 @@ ${survey.vesselDescription && !_excl('vesselDescription') ? `
     findings.B.forEach(f => { html += renderFinding(f, '#d97706', 'B'); });
   }
 
-  // v2242: Type C findings rendered as a compact table instead of
-  // individual blocks. These are all "serviceable / no action required"
-  // items — the full observation text is in Detailed Survey Findings.
-  // Listing them individually with first-sentence excerpts was adding
-  // 5+ pages of redundant text to the report.
-  html += `<h3 style="color:#16a34a;">Findings &amp; Recommendations (Type C — Serviceable / General Notes)</h3>`;
-  if (findings.C.length === 0) {
-    html += `<p>No Type C findings.</p>`;
-  } else {
-    // v2372: Dropped the "Full observations appear in the Detailed Survey
-    // Findings section" tail. Dave's critique: it's basically an admission
-    // of duplication — the reader knows where the body lives; restating it
-    // here reads as filler.
-    html += `<p style="font-size:9pt;color:#555;margin-bottom:8px;">The following ${findings.C.length} items were found to be in serviceable condition.</p>`;
-    html += `<table style="font-size:9pt;"><tr><th style="width:60px;">Finding</th><th>Item</th><th>Summary</th></tr>`;
-    findings.C.forEach(f => {
-      const _cBrief = pluralizeRudder(truncateForFR(cleanupTypos(depersonalise(dedup(f.text || '')))), survey.rudderCount);
-      html += `<tr>
-        <td style="font-weight:bold;color:#16a34a;">${f.code}</td>
-        <td>${esc(displayItemLabel(f.label, survey))}</td>
-        <td>${_cBrief ? esc(_cBrief) : '—'}</td>
-      </tr>`;
-    });
-    html += `</table>`;
-  }
+  // v2373: Type C subsection fully removed from F&R. On a typical survey
+  // it was carrying 40+ serviceable items forward into pages 54–56 as a
+  // compact table, which (a) padded length with items that require no
+  // action and (b) diluted the B findings by surrounding them with a wall
+  // of serviceable rows. The at-a-glance count of C items is still in
+  // Findings Overview near the top, and the full per-item observations
+  // still live in Detailed Survey Findings. Predecessor versions:
+  // v2242 compacted C into a table; v2372 trimmed the intro disclaimer;
+  // v2373 drops the subsection entirely so F&R focuses on actionable
+  // findings only (A + B), with NT retained for transparency about what
+  // couldn't be verified.
 
-  // v2242: NT and PO findings as compact tables (same rationale as C above)
+  // v2242/v2373: NT and PO findings as compact tables. NT is retained
+  // (unlike C) because "not tested" items represent uncertainty that
+  // the reader may need to follow up on — it's an actionable signal.
   if (findings.NT.length > 0) {
     html += `<h3 style="color:#6b7280;">Not Tested / Not Verified</h3>`;
     // v2372: Dropped "Full details appear in the Detailed Survey Findings
