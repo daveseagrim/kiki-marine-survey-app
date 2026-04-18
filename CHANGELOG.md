@@ -12,6 +12,18 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2348 — 2026-04-18
+### Changed
+- **Twin-engine `[side]` auto-fill.** On per-drive-line items — those prefixed `Port — `, `Starboard — `, or `#N — ` — snippets containing the `[side]` placeholder now auto-resolve to the item's side (port/starboard/#N) instead of rendering a port/starboard/both dropdown. The surveyor no longer has to pick a side on a card whose title already names it. Three sites updated in `app.js` so render, insert, and auto-check stay in sync:
+  - Render-time placeholder IIFE (the chip display): per-drive-line items get the auto-side as inline text; other items keep the existing dropdown (twin-drive) or strip (single-drive) behaviour.
+  - `_kkRebuildFromSentencePicker`: reads the item label from a new `data-item-label` attribute on `#sheet-sentence-picker`, derives `autoSide` as a fallback when the dropdown isn't present.
+  - `_kkAutoCheckSavedSentences`: when the notes sheet re-opens, saved text like "The port bellows were cracked" re-matches its chip by resolving `[side]` with `autoSide`, not by stripping.
+- Hull items with "Port hull — ", "Starboard hull — ", or "Centre hull — " prefixes are explicitly excluded from the side auto-fill (a catamaran's port hull isn't an engine side).
+- QC caught a subtle JS bug in the first draft: `itemLabel.match(X) && !itemLabel.match(Y)` collapses the first match into a boolean, so the `[1]` capture is lost. Reworked to capture the match array and the hull exclusion separately.
+- Applies to every snippet already using `[side]` — drive bellows, outdrive housing, lower seals, windshield wipers, rub rail, tilt-and-trim operation, etc. Existing singular/plural engine-condition chips (which don't use `[side]` yet) are unchanged this version; chip conversion is queued for a later pass.
+
+---
+
 ## v2347 — 2026-04-18
 ### Removed
 - **Fuel filter(s) and water separator(s)** removed from the Engine(s) and drive(s) section of `survey_template.json`. No app.js or report-generator references — clean removal. Continues the v2346 engine-section cleanup (duplicate items were already pulled; this one was Dave's decision to rate elsewhere or not at all).

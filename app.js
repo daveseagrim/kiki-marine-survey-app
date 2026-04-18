@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2347';
+const APP_VERSION = 'v2348';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -3944,12 +3944,19 @@ function showNotesSheet(itemLabel, categoryName) {
           const _ratingBadge = itemData.rating
             ? `<span style="display:inline-block;background:${RATING_COLORS[itemData.rating] || '#6b7280'};color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:5px;margin-right:8px;">${itemData.rating.charAt(0)}</span>`
             : '';
+          // v2348: stash the original item label on the picker element so that
+          // rebuild/auto-check helpers can detect per-drive-line prefixes
+          // ("Port — ", "Starboard — ", "#N — ") and auto-resolve [side] without
+          // a dropdown on items that already name the side.
+          const _itemLabelAttr = String(itemLabel)
+            .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;').replace(/>/g, '&gt;');
           sentencePickerHtml = `
             <div class="sheet-section-title" style="padding-top:8px;">
               ${_ratingBadge}Build observation
               <span style="color:#9ca3af;font-weight:400;font-size:11px;margin-left:6px;">tick sentences to compose</span>
             </div>
-            <div id="sheet-sentence-picker" style="padding:0;">
+            <div id="sheet-sentence-picker" data-item-label="${_itemLabelAttr}" style="padding:0;">
           `;
           let lastPhase = null;
           _pickerSentences.forEach((sObj, idx) => {
@@ -4001,7 +4008,19 @@ function showNotesSheet(itemLabel, categoryName) {
             // selection. Renders as a compact select. Only rendered when the
             // survey has >1 drive lines; otherwise the placeholder is dropped
             // (single-drive surveys don't need a side qualifier).
+            // v2348: per-drive-line items (labels prefixed "Port — ",
+            // "Starboard — ", "#N — ") auto-resolve [side] from the item
+            // prefix — no dropdown needed, no ambiguity. The hull-prefix
+            // exclusion matches the same rule in _kkAutoCheckSavedSentences.
             .replace(/\[side\]/gi, (() => {
+              // `match()` then `.test()` — doing `match && !match` would collapse
+              // the first match array into a boolean and the [1] capture would
+              // be lost.
+              const _sideMatch = itemLabel && itemLabel.match(/^(Port|Starboard|#\d+)\s*—\s*/);
+              const _isHull = itemLabel && /^(?:Port|Starboard|Centre) hull\s*—/.test(itemLabel);
+              if (_sideMatch && !_isHull) {
+                return _sideMatch[1].toLowerCase() + ' ';
+              }
               const dc = (survey && survey.driveLineCount) || 1;
               if (dc < 2) return '';
               return `<select class="kk-side-input" ` +
@@ -4633,16 +4652,30 @@ window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
     }
     // [side] → port / starboard / both
     const side = (lbl.querySelector('.kk-side-input') || {}).value || '';
+    // v2348: on per-drive-line items (label prefixed "Port — ", "Starboard — ",
+    // "#N — "), the side is known from the item prefix — no dropdown rendered,
+    // auto-resolve here. Explicit dropdown value (if present) still takes
+    // precedence. Read item label from the picker's data attribute so this
+    // doesn't need the surveyor's item label passed as a param.
+    let autoSide = '';
+    if (!side) {
+      const _picker = document.getElementById('sheet-sentence-picker');
+      const _itemLabel = _picker ? (_picker.getAttribute('data-item-label') || '') : '';
+      const _m = _itemLabel.match(/^(Port|Starboard|#\d+)\s*—\s*/);
+      const _isHull = /^(?:Port|Starboard|Centre) hull\s*—/.test(_itemLabel);
+      if (_m && !_isHull) autoSide = _m[1].toLowerCase();
+    }
+    const effectiveSide = side || autoSide;
     if (/\[side\]/i.test(text)) {
-      if (side === 'both') {
+      if (effectiveSide === 'both') {
         // "The [side] anodes" / "the [side] lower seals" → "Both anodes" /
         // "both lower seals" (strip preceding article).
         text = text.replace(/\bThe\s+\[side\]\s*/g, 'Both ');
         text = text.replace(/\bthe\s+\[side\]\s*/g, 'both ');
         // Any remaining bare [side] (e.g. "on [side] sides") → "both"
         text = text.replace(/\[side\]\s*/gi, 'both ');
-      } else if (side) {
-        text = text.replace(/\[side\]\s*/gi, `${side} `);
+      } else if (effectiveSide) {
+        text = text.replace(/\[side\]\s*/gi, `${effectiveSide} `);
       }
       // else leave placeholder visible so surveyor sees unfilled field
       // Clean up doubled spaces from the optional space
@@ -4701,10 +4734,17 @@ function _kkAutoCheckSavedSentences(sanitizedLabel, survey, itemLabel) {
   if (!picker) return;
 
   // Determine drive-line count for this item (per-drive-line items force singular)
-  const sideMatch = itemLabel.match(/^(Port|Starboard|#\d+)\s*—\s*/) &&
-                    !itemLabel.match(/^(?:Port|Starboard|Centre) hull\s*—/);
+  // Capture the match array separately from the hull-exclusion test so the [1]
+  // capture group survives — mixing `match()` with `!match()` via && collapses
+  // the first result to a boolean.
+  const _sideCap = itemLabel.match(/^(Port|Starboard|#\d+)\s*—\s*/);
+  const _isHullItem = /^(?:Port|Starboard|Centre) hull\s*—/.test(itemLabel);
+  const sideMatch = _sideCap && !_isHullItem;
   const dlc = sideMatch ? 1 : (parseInt(survey.driveLineCount, 10) || 1);
   const rc = parseInt(survey.rudderCount, 10) || 1;
+  // v2348: on per-drive-line items, [side] isn't stripped — it's auto-filled
+  // from the item prefix (matching the render-time and rebuild behaviour).
+  const autoSide = sideMatch ? _sideCap[1].toLowerCase() : '';
 
   const labels = Array.from(picker.querySelectorAll('label'));
   const savedText = ta.value.trim();
@@ -4729,8 +4769,14 @@ function _kkAutoCheckSavedSentences(sanitizedLabel, survey, itemLabel) {
       resolved = window.expandSnippetTokens(resolved, ctx);
     }
     resolved = pluralizeRudder(resolved, rc);
-    // Handle [side] placeholder — single-drive surveys strip it at insertion
-    if (dlc < 2) {
+    // Handle [side] placeholder.
+    //   - Per-drive-line items (Port/Starboard/#N prefix): auto-fill from prefix.
+    //   - Single-drive surveys: strip cleanly ("The engine" not "The  engine").
+    if (autoSide) {
+      resolved = resolved.replace(/\[side\]\s*/gi, `${autoSide} `)
+                         .replace(/\s{2,}/g, ' ')
+                         .replace(/\s+([.,;:])/g, '$1');
+    } else if (dlc < 2) {
       resolved = resolved.replace(/\bThe\s+\[side\]\s*/g, 'The ')
                          .replace(/\bthe\s+\[side\]\s*/g, 'the ')
                          .replace(/\[side\]\s*/gi, '')
