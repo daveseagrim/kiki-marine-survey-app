@@ -1655,14 +1655,42 @@
     {
       "section": "Exhaust discharge position and condition",
       "rating": "A",
-      "text": "The exhaust discharge is leaking, cracked, or positioned dangerously.",
+      "text": "Physical damage or corrosion was observed at the exhaust {count:outlet|outlets}.",
       "phase": "observed",
       "severity": 4
     },
     {
       "section": "Exhaust discharge position and condition",
       "rating": "A",
-      "text": "Immediate repair is required.",
+      "text": "Evidence of leakage was observed at the exhaust {count:outlet|outlets}.",
+      "phase": "observed",
+      "severity": 4
+    },
+    {
+      "section": "Exhaust discharge position and condition",
+      "rating": "A",
+      "text": "The exhaust discharge was blocked or restricted.",
+      "phase": "observed",
+      "severity": 4
+    },
+    {
+      "section": "Exhaust discharge position and condition",
+      "rating": "A",
+      "text": "The damaged or corroded exhaust outlet should be repaired or replaced immediately.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Exhaust discharge position and condition",
+      "rating": "A",
+      "text": "The source of the exhaust leak should be identified and repaired before the vessel is returned to service.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Exhaust discharge position and condition",
+      "rating": "A",
+      "text": "The exhaust discharge should be cleared of obstruction and inspected for underlying damage before the vessel is returned to service.",
       "phase": "action",
       "severity": 5
     },
@@ -1676,14 +1704,42 @@
     {
       "section": "Exhaust discharge position and condition",
       "rating": "B",
-      "text": "The discharge fitting shows corrosion or minor deterioration.",
+      "text": "Minor physical damage or surface corrosion was observed at the exhaust {count:outlet|outlets}.",
       "phase": "observed",
       "severity": 2
     },
     {
       "section": "Exhaust discharge position and condition",
       "rating": "B",
-      "text": "Service or replacement should be addressed in the near term.",
+      "text": "Evidence of minor leakage was observed at the exhaust {count:outlet|outlets}.",
+      "phase": "observed",
+      "severity": 2
+    },
+    {
+      "section": "Exhaust discharge position and condition",
+      "rating": "B",
+      "text": "The exhaust discharge appeared partially restricted.",
+      "phase": "observed",
+      "severity": 2
+    },
+    {
+      "section": "Exhaust discharge position and condition",
+      "rating": "B",
+      "text": "The exhaust outlet should be serviced or replaced in the near term to prevent further deterioration.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Exhaust discharge position and condition",
+      "rating": "B",
+      "text": "The exhaust leak should be investigated and repaired at the next scheduled maintenance.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Exhaust discharge position and condition",
+      "rating": "B",
+      "text": "The exhaust discharge should be inspected for obstruction and cleared as needed.",
       "phase": "action",
       "severity": 3
     },

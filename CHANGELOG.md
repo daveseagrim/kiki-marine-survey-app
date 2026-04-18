@@ -16,6 +16,8 @@ lets you roll back to a specific version with confidence.
 - Fixed "N left" counter mismatch: the category header counter could disagree with the "items left" popover list because the counter recalculated from the template (with filtering that drifted out of sync with the initial render). Now both the counter and the list read from the same DOM source, so they always agree.
 - Safety equipment camera rewrite: safety photo capture now uses the same batch camera overlay (getUserMedia with proper stream cleanup) as regular checklist sections, instead of a bare file input. Falls back to file picker if camera is unavailable.
 - Added exhaust port location snippet for A, B, and C ratings: "The exhaust {count:port was|ports were} located _________." Auto-adapts singular/plural based on engine count. Existing C-rated location snippets also converted to use count tokens.
+- Expanded exhaust discharge A and B snippets: three specific observed conditions (physical damage/corrosion, leakage, blockage/restriction) each with a matched action snippet. Outlet singular/plural uses count tokens.
+- Area photo grid now uses small 20px rotate (↻) and delete (✕) buttons matching the bottom sheet style, replacing the old oversized 30px delete buttons. Lazy-load thumbnail visibility also fixed for area photo wrappers.
 
 ## v2323 — 2026-04-18
 - Added % complete indicator: progress ring badge shown in both the inspection page header and intro/edit page header. "Complete" now requires rating + notes + at least one photo (or excluded). Tap the badge to see breakdown: Checklist %, Intro %, Overall %. Home page progress ring also uses the stricter definition. Intro completion tracks 20 core fields (vessel info, specs, engine, documentation, description, survey conditions).

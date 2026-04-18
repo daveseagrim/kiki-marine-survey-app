@@ -12533,10 +12533,13 @@ function renderInspection(survey) {
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
               ${photos.map(pid => `
-                <div style="position:relative;width:84px;">
+                <div class="area-photo-wrap" style="position:relative;width:84px;display:none;">
                   <img id="thumb-${pid}" src="" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
-                  <button onclick="event.stopPropagation();deleteAreaPhoto('${pid}', '${safeLabel}')" aria-label="Delete photo" style="position:absolute;top:-8px;right:-8px;background:#dc2626;color:white;border:2px solid white;border-radius:50%;width:30px;height:30px;font-size:16px;font-weight:700;cursor:pointer;line-height:26px;text-align:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,0.3);">×</button>
-                  <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#066aab;color:white;border:none;border-radius:6px;padding:6px 0;font-size:12px;font-weight:700;cursor:pointer;">Move ↗</button>
+                  <span onclick="event.stopPropagation();rotateAreaPhoto('${pid}','${safeLabel}')"
+                        style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↻</span>
+                  <span onclick="event.stopPropagation();deleteAreaPhoto('${pid}','${safeLabel}')"
+                        style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">✕</span>
+                  <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#066aab;color:white;border:none;border-radius:6px;padding:4px 0;font-size:11px;font-weight:700;cursor:pointer;">Move ↗</button>
                 </div>
               `).join('')}
             </div>
@@ -15892,7 +15895,7 @@ async function loadCategoryThumbnails(accordionContentEl) {
     // Skip already-loaded thumbnails (loaded photos have data: URLs)
     if (img.src && img.src.startsWith('data:')) {
       // v2316: ensure visible for already-loaded photos
-      const w = img.closest('.photo-item');
+      const w = img.closest('.photo-item') || img.closest('.area-photo-wrap');
       if (w) w.style.display = '';
       img.style.display = '';
       continue;
@@ -15902,7 +15905,7 @@ async function loadCategoryThumbnails(accordionContentEl) {
     if (photo && photo.dataUrl) {
       img.src = photo.dataUrl;
       // v2316: thumbnails start hidden — show only when data loads
-      const wrapper = img.closest('.photo-item');
+      const wrapper = img.closest('.photo-item') || img.closest('.area-photo-wrap');
       if (wrapper) wrapper.style.display = '';
       // Compact view: img itself is hidden (no .photo-item wrapper)
       img.style.display = '';
@@ -16172,6 +16175,19 @@ async function deleteAreaPhoto(photoId, mediaLabel) {
 }
 
 /**
+ * v2324: Rotate an area photo 90° clockwise and refresh its thumbnail in place.
+ */
+async function rotateAreaPhoto(photoId, mediaLabel) {
+  const photo = await getPhotoById(photoId);
+  if (!photo) return;
+  const rotated = await bakePhotoEdits(photo.dataUrl, 100, 100, 90);
+  photo.dataUrl = rotated;
+  await savePhoto(photo);
+  const img = document.getElementById(`thumb-${photoId}`);
+  if (img) img.src = rotated;
+}
+
+/**
  * Re-render the area photo grid + button for a specific media item.
  * Finds the container by its wrapper ID and rebuilds thumbnails + file input.
  */
@@ -16212,8 +16228,11 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
       ${photos.map(pid => `
         <div class="area-photo-wrap" style="position:relative;width:84px;display:none;">
           <img id="thumb-${pid}" src="" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
-          <button onclick="event.stopPropagation();deleteAreaPhoto('${pid}', '${safeLabel}')" aria-label="Delete photo" style="position:absolute;top:-8px;right:-8px;background:#dc2626;color:white;border:2px solid white;border-radius:50%;width:30px;height:30px;font-size:16px;font-weight:700;cursor:pointer;line-height:26px;text-align:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,0.3);">×</button>
-          <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#066aab;color:white;border:none;border-radius:6px;padding:6px 0;font-size:12px;font-weight:700;cursor:pointer;">Move ↗</button>
+          <span onclick="event.stopPropagation();rotateAreaPhoto('${pid}','${safeLabel}')"
+                style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↻</span>
+          <span onclick="event.stopPropagation();deleteAreaPhoto('${pid}','${safeLabel}')"
+                style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">✕</span>
+          <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#066aab;color:white;border:none;border-radius:6px;padding:4px 0;font-size:11px;font-weight:700;cursor:pointer;">Move ↗</button>
         </div>
       `).join('')}
     </div>
