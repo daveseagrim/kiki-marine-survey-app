@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2363';
+const APP_VERSION = 'v2364';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -17106,7 +17106,12 @@ async function removeAllDateStamps() {
   showToast('Removing date stamps from ' + total + ' photos...');
 
   let processed = 0;
-  const db = await openDatabase();
+  // v2364: use the global `db` (initialised once at app startup by initDB)
+  // instead of calling a non-existent `openDatabase()` helper. The previous
+  // code threw `ReferenceError: openDatabase is not defined` on the very
+  // first use, which meant the entire batch never ran — no photos were
+  // processed even when the detection logic was correct. This was the
+  // actual reason date stamps stayed on photos after Dave tapped the tool.
   for (const pid of photoIds) {
     try {
       // Open a fresh transaction per photo — IDB transactions expire after

@@ -12,6 +12,12 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2364 — 2026-04-18
+### Fixed
+- **`Remove Date Stamps` tool was throwing a ReferenceError and aborting before any photo was processed.** `removeAllDateStamps()` called `const db = await openDatabase();` — but no function named `openDatabase` is defined anywhere in the codebase. The global `db` is set once by `initDB()` at app startup (app.js line 97). The line threw `ReferenceError: openDatabase is not defined` on the very first call, the try/catch blocks in the per-photo loop never got a chance to catch it (the error was at the loop's preamble), and the whole batch bailed with no toast and no visible effect. This bug has been present since v2238 when the feature was added — every tap of the button for ~125 versions has been a silent no-op. That is the real reason date stamps persisted through v2362 and v2363; the detection-logic fixes in those versions were both correct but the function they lived inside was never reached. Fix: remove the `const db = await openDatabase();` line so the IDB transactions use the global `db` directly (same pattern every other function in the file uses).
+
+---
+
 ## v2363 — 2026-04-18
 ### Fixed
 - **"Remove Date Stamps" was silently skipping every photo with a bright background.** v2362 fixed the removal rectangle's geometry but kept the old stamp-detection rule: "strip only if the average brightness in the stamp region is below 100". That rule is wrong on any photo with a light bottom-right corner — which is most boat photos (white hulls, cabin bulkheads, headliners, sky). The math: the stamp's `rgba(0,0,0,0.7)` background alpha-blends to `0.3 × original_brightness`, so on a white (255) background the stamped rect averages 76. The white text glyphs (brightness 255) boost the region's overall average above 100 for any reasonably light background — pure-white tested at 118, yellow at 115, pink at 104. Every stamped photo with a light corner was getting a no-op from the function, which matched Dave's report that date stamps persisted after running the batch.
