@@ -2928,13 +2928,6 @@
     },
     {
       "section": "Through-hulls, strainers",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Through-hulls, strainers",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -2984,13 +2977,6 @@
     },
     {
       "section": "Stern tube(s) (external)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Stern tube(s) (external)",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -3030,13 +3016,6 @@
       "phase": "action",
       "severity": 1,
       "text": "No corrective action is recommended at this time."
-    },
-    {
-      "section": "Skeg(s)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Skeg(s)",
@@ -3103,13 +3082,6 @@
     },
     {
       "section": "Exhaust discharge position and condition",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Exhaust discharge position and condition",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -3121,13 +3093,6 @@
       "phase": "action",
       "severity": 1,
       "text": "No corrective action is recommended at this time."
-    },
-    {
-      "section": "Underwater lighting",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Underwater lighting",
@@ -3156,13 +3121,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Transom",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Transom",
@@ -3244,13 +3202,6 @@
     {
       "section": "Rub rail",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Rub rail",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -3275,13 +3226,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Hull–deck joint (exterior)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Hull–deck joint (exterior)",
@@ -3310,13 +3254,6 @@
       "phase": "observed",
       "severity": 5,
       "text": "A significant deficiency was observed."
-    },
-    {
-      "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
@@ -3793,13 +3730,6 @@
       "phase": "means",
       "severity": 2,
       "text": "These findings did not currently affect serviceability but warranted attention to prevent further deterioration."
-    },
-    {
-      "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Trim tabs (exterior tabs, actuators, mounts and anodes)",
@@ -5885,13 +5815,6 @@
     {
       "section": "Forestay (as inspected from the deck)",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Forestay (as inspected from the deck)",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -5916,13 +5839,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Spinnaker/whisker pole, uphaul and downhaul",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Spinnaker/whisker pole, uphaul and downhaul",
@@ -6039,13 +5955,6 @@
     {
       "section": "Mast partner, mast collar, mast step",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Mast partner, mast collar, mast step",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -6122,13 +6031,6 @@
     },
     {
       "section": "Deckline organizers, blocks, fairleads and clutches",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Deckline organizers, blocks, fairleads and clutches",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -6147,13 +6049,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Halyards",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Halyards",
@@ -6214,13 +6109,6 @@
     {
       "section": "Jib/genoa tracks/cars",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Jib/genoa tracks/cars",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -6245,13 +6133,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Main sheet",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Main sheet",
@@ -6304,13 +6185,6 @@
     },
     {
       "section": "Genoa 1 (largest)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Genoa 1 (largest)",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -6332,13 +6206,6 @@
     },
     {
       "section": "Genoa 2 (mid-size)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Genoa 2 (mid-size)",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -6360,13 +6227,6 @@
     },
     {
       "section": "Genoa 3 (smallest)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Genoa 3 (smallest)",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -6388,13 +6248,6 @@
     },
     {
       "section": "Staysail",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Staysail",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -6416,13 +6269,6 @@
     },
     {
       "section": "Misen",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Misen",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -6444,13 +6290,6 @@
     },
     {
       "section": "Sails - other",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Sails - other",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -6462,13 +6301,6 @@
       "phase": "action",
       "severity": 1,
       "text": "No corrective action is recommended at this time."
-    },
-    {
-      "section": "Mast(s)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Mast(s)",
@@ -6490,13 +6322,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Main",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Main",
@@ -6528,13 +6353,6 @@
     },
     {
       "section": "Spinnaker",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Spinnaker",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -6553,13 +6371,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Boom, gooseneck, boomvang, outhaul, and reefing lines",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Boom, gooseneck, boomvang, outhaul, and reefing lines",
@@ -7034,13 +6845,6 @@
     },
     {
       "section": "Aft deck impact and resonance testing",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Aft deck impact and resonance testing",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -7154,13 +6958,6 @@
     {
       "section": "Seating",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Seating",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -7195,13 +6992,6 @@
     },
     {
       "section": "Storage",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Storage",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -7220,13 +7010,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Lighting",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Lighting",
@@ -7255,13 +7038,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Drainage",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Drainage",
@@ -7300,13 +7076,6 @@
     },
     {
       "section": "Sink, faucet and drain",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Sink, faucet and drain",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -7325,13 +7094,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Condition (spider cracks, etc.)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Condition (spider cracks, etc.)",
@@ -7360,13 +7122,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Percussion testing",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Percussion testing",
@@ -7743,13 +7498,6 @@
     },
     {
       "section": "Outboard general condition and impression",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Outboard general condition and impression",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -7764,13 +7512,6 @@
     },
     {
       "section": "Engine mount",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Engine mount",
       "rating": "C",
       "phase": "action",
       "severity": 1,
@@ -7838,13 +7579,6 @@
       "phase": "action",
       "severity": 1,
       "text": "No corrective action is recommended at this time."
-    },
-    {
-      "section": "Outboard oil",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Outboard oil",
@@ -9400,13 +9134,6 @@
     },
     {
       "section": "Cockpit, floor, seats and coaming",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Cockpit, floor, seats and coaming",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -9428,13 +9155,6 @@
     },
     {
       "section": "Cockpit impact and resonance testing",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Cockpit impact and resonance testing",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -9446,13 +9166,6 @@
       "phase": "action",
       "severity": 1,
       "text": "No corrective action is recommended at this time."
-    },
-    {
-      "section": "Cockpit drains",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Cockpit drains",
@@ -9485,13 +9198,6 @@
     {
       "section": "Cockpit table",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Cockpit table",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -9519,13 +9225,6 @@
     },
     {
       "section": "Cockpit lighting",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Cockpit lighting",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -9544,13 +9243,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Cockpit lockers and lazarettes",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Cockpit lockers and lazarettes",
@@ -9583,13 +9275,6 @@
     {
       "section": "Steering wheel and steering",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Steering wheel and steering",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -9617,13 +9302,6 @@
     },
     {
       "section": "Binnacle",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Binnacle",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -9642,13 +9320,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Tiller",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Tiller",
@@ -9677,13 +9348,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Pushpit",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Pushpit",
@@ -9712,13 +9376,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Propane valve, regulator, gauge, storage compartment and vent",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Propane valve, regulator, gauge, storage compartment and vent",
@@ -9740,13 +9397,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "BBQ or grill",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "BBQ or grill",
@@ -9775,13 +9425,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Davits",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Davits",
@@ -9894,13 +9537,6 @@
       "text": "Have the cracked weld professionally repaired.",
       "phase": "action",
       "severity": 5
-    },
-    {
-      "section": "Pushpit/pulpit",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Pushpit/pulpit",
@@ -11530,13 +11166,6 @@
     },
     {
       "section": "AIS",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "AIS",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -11558,13 +11187,6 @@
     },
     {
       "section": "Bow thruster controls",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Bow thruster controls",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -11586,13 +11208,6 @@
     },
     {
       "section": "Stern thruster controls",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Stern thruster controls",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -11611,13 +11226,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Trim tab controls",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Trim tab controls",
@@ -11649,13 +11257,6 @@
     },
     {
       "section": "VHF",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "VHF",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -11674,13 +11275,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Entertainment/stereo",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Entertainment/stereo",
@@ -11704,25 +11298,11 @@
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
     },
     {
-      "section": "Wiper blade operation",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
       "section": "Horn/sound signal (powered)",
       "rating": "A",
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Horn/sound signal (powered)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Horn/sound signal (powered)",
@@ -11751,13 +11331,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Spotlight/searchlight",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Spotlight/searchlight",
@@ -13184,13 +12757,6 @@
     },
     {
       "section": "Remote compressor and condensing refrigeration unit",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Remote compressor and condensing refrigeration unit",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -13247,13 +12813,6 @@
     },
     {
       "section": "Arch",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Arch",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -13303,13 +12862,6 @@
     },
     {
       "section": "Sink, faucets and drain",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Sink, faucets and drain",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -13331,13 +12883,6 @@
     },
     {
       "section": "Flybridge ladder/staircase",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Flybridge ladder/staircase",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -13356,13 +12901,6 @@
       "phase": "observed",
       "severity": 5,
       "text": "A significant deficiency was observed."
-    },
-    {
-      "section": "Flybridge, floor, seats and coaming (spider cracks, etc.)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Flybridge, floor, seats and coaming (spider cracks, etc.)",
@@ -13479,13 +13017,6 @@
     {
       "section": "Safety rails",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Safety rails",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -13521,13 +13052,6 @@
     {
       "section": "Flybridge drains",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Flybridge drains",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -13555,13 +13079,6 @@
     },
     {
       "section": "Flybridge table",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Flybridge table",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -13583,13 +13100,6 @@
     },
     {
       "section": "Flybridge lighting",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Flybridge lighting",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -13611,13 +13121,6 @@
     },
     {
       "section": "Flybridge lockers and lazarettes",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Flybridge lockers and lazarettes",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -13639,13 +13142,6 @@
     },
     {
       "section": "Flybridge steering wheel, steering",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Flybridge steering wheel, steering",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -13664,13 +13160,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Safety rail",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Safety rail",
@@ -13811,13 +13300,6 @@
       "phase": "observed",
       "severity": 5,
       "text": "A significant deficiency was observed."
-    },
-    {
-      "section": "Flybridge Radar dome",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Flybridge Radar dome",
@@ -13846,13 +13328,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Flybridge Refrigerator/cooler",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Flybridge Refrigerator/cooler",
@@ -13920,13 +13395,6 @@
     {
       "section": "Flybridge Storage locker(s)",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Flybridge Storage locker(s)",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -13958,13 +13426,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Flybridge splash shield/windshield",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Flybridge splash shield/windshield",
@@ -14031,13 +13492,6 @@
     },
     {
       "section": "Flybridge Sink, faucet and drain",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Flybridge Sink, faucet and drain",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -14056,13 +13510,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Flybridge Safety rails",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Flybridge Safety rails",
@@ -15055,13 +14502,6 @@
     },
     {
       "section": "Engine start and stop",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Engine start and stop",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -15080,13 +14520,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Engine gauges",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Engine gauges",
@@ -15118,13 +14551,6 @@
     },
     {
       "section": "Engine gearshift and throttle",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Engine gearshift and throttle",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -15136,13 +14562,6 @@
       "phase": "action",
       "severity": 1,
       "text": "No corrective action is recommended at this time."
-    },
-    {
-      "section": "Outdrive tilt",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Outdrive tilt",
@@ -15167,13 +14586,6 @@
     },
     {
       "section": "Trim tabs",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Trim tabs",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -15192,13 +14604,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Anchor windlass controls",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Anchor windlass controls",
@@ -15286,13 +14691,6 @@
     },
     {
       "section": "Depth sounder",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Depth sounder",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -15346,13 +14744,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Search light",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Search light",
@@ -15384,13 +14775,6 @@
     },
     {
       "section": "Radar",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Radar",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -15412,13 +14796,6 @@
     },
     {
       "section": "Log",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Log",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -15440,13 +14817,6 @@
     },
     {
       "section": "12V or USB outlets",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "12V or USB outlets",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -15468,13 +14838,6 @@
     },
     {
       "section": "Flood lights and deck lights",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Flood lights and deck lights",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -15493,13 +14856,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Flybridge Stereo and speakers",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Flybridge Stereo and speakers",
@@ -17038,13 +16394,6 @@
     },
     {
       "section": "Stereo and speakers",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Stereo and speakers",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -17073,13 +16422,6 @@
     },
     {
       "section": "Signs of water ingress",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Signs of water ingress",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -17108,13 +16450,6 @@
     },
     {
       "section": "Hull deck joint (interior)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Hull deck joint (interior)",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -17137,13 +16472,6 @@
     {
       "section": "Chainplates (interior)",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Chainplates (interior)",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -17178,13 +16506,6 @@
     },
     {
       "section": "Cabin lining and ceiling",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Cabin lining and ceiling",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -17206,13 +16527,6 @@
     },
     {
       "section": "Deck hatches, windows and portholes – interior observations",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Deck hatches, windows and portholes – interior observations",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -17235,13 +16549,6 @@
     {
       "section": "Cabin lights",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Cabin lights",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -17276,13 +16583,6 @@
     },
     {
       "section": "Woodwork, doors and framing",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Woodwork, doors and framing",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -17305,13 +16605,6 @@
     {
       "section": "Upholstery",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Upholstery",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -17367,13 +16660,6 @@
     },
     {
       "section": "Navigation table",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Navigation table",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -17395,13 +16681,6 @@
     },
     {
       "section": "Storage, galley cabinets, drawers and galley counter",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Storage, galley cabinets, drawers and galley counter",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -17423,13 +16702,6 @@
     },
     {
       "section": "Galley faucet, sink and drain",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Galley faucet, sink and drain",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -17451,13 +16723,6 @@
     },
     {
       "section": "Seawater pump for galley sink",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Seawater pump for galley sink",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -17476,13 +16741,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Refrigerator / icebox",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Refrigerator / icebox",
@@ -17504,13 +16762,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Stove",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Stove",
@@ -17549,13 +16800,6 @@
     },
     {
       "section": "Microwave",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Microwave",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -17574,13 +16818,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Cabin fan or fans",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Cabin fan or fans",
@@ -17609,13 +16846,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Floor and carpet",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Floor and carpet",
@@ -17654,13 +16884,6 @@
     },
     {
       "section": "Bulkheads",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Bulkheads",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -17686,13 +16909,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Keel bolts",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Keel bolts",
@@ -17773,13 +16989,6 @@
     },
     {
       "section": "Heating and/or air conditioning system",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Heating and/or air conditioning system",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -17801,13 +17010,6 @@
     },
     {
       "section": "Television",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Television",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -17826,13 +17028,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Cabin sole",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Cabin sole",
@@ -17865,13 +17060,6 @@
     {
       "section": "Berths and upholstery",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Berths and upholstery",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -17896,13 +17084,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Interior lighting",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Interior lighting",
@@ -17942,13 +17123,6 @@
     {
       "section": "Cabin windows and hatches (interior observations)",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Cabin windows and hatches (interior observations)",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -17976,13 +17150,6 @@
     },
     {
       "section": "Refrigerator/freezer",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Refrigerator/freezer",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -18001,13 +17168,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Sink, faucet and drain (galley)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Sink, faucet and drain (galley)",
@@ -18092,6 +17252,41 @@
       "phase": "observed",
       "severity": 1,
       "text": "The cabin sole was sound and in good order at the time of survey."
+    },
+    {
+      "section": "Cabin sole",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The cabin sole was structurally sound but the finish was worn and in need of refinishing."
+    },
+    {
+      "section": "Cabin sole",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Localized rot was observed in the cabin sole at [describe area(s)]."
+    },
+    {
+      "section": "Cabin sole",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "The cabin sole was broken at [describe area(s)], compromising the finish and, potentially, the underlying structure."
+    },
+    {
+      "section": "Cabin sole",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Refinishing is recommended to restore appearance and protect the substrate from moisture ingress."
+    },
+    {
+      "section": "Cabin sole",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Repair and refinishing, or replacement of affected sections, is recommended to restore safe footing and preserve the surrounding structure."
     },
     {
       "section": "Floor and carpet",
@@ -18328,13 +17523,6 @@
     },
     {
       "section": "Head, toilet and seacock",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Head, toilet and seacock",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -18356,13 +17544,6 @@
     },
     {
       "section": "Head, faucet, sink and drain",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Head, faucet, sink and drain",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -18384,13 +17565,6 @@
     },
     {
       "section": "Head, shower, drain, sump and pump",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Head, shower, drain, sump and pump",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -18409,13 +17583,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Shower, sump and drain",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Shower, sump and drain",
@@ -19233,13 +18400,6 @@
     },
     {
       "section": "Hot water tank(s), plumbing and electrical",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Hot water tank(s), plumbing and electrical",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -19261,13 +18421,6 @@
     },
     {
       "section": "Black water tank(s) and plumbing",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Black water tank(s) and plumbing",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -19289,13 +18442,6 @@
     },
     {
       "section": "Black water gauge",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Black water gauge",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -19317,13 +18463,6 @@
     },
     {
       "section": "Freshwater tank and plumbing",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Freshwater tank and plumbing",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -19345,13 +18484,6 @@
     },
     {
       "section": "Freshwater pump",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Freshwater pump",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -19373,13 +18505,6 @@
     },
     {
       "section": "Deck wash pump, plumbing and electrical",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Deck wash pump, plumbing and electrical",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -19401,13 +18526,6 @@
     },
     {
       "section": "Black water vacuum pump(s)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Black water vacuum pump(s)",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -19429,13 +18547,6 @@
     },
     {
       "section": "Black water macerator(s)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Black water macerator(s)",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -19454,13 +18565,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Freshwater level gauge",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Freshwater level gauge",
@@ -20566,13 +19670,6 @@
     {
       "section": "Engine condition",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Engine condition",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -20590,13 +19687,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Cooling water intake seacock(s) and strainer(s)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Cooling water intake seacock(s) and strainer(s)",
@@ -20632,13 +19722,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Manifolds and risers",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Manifolds and risers",
@@ -20726,13 +19809,6 @@
     },
     {
       "section": "Coolant level and quality",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Coolant level and quality",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -20783,13 +19859,6 @@
     {
       "section": "Anti-vibration mounts",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Anti-vibration mounts",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -20825,13 +19894,6 @@
     {
       "section": "Hoses",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Hoses",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -20863,13 +19925,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Gearbox general condition and impressions",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Gearbox general condition and impressions",
@@ -20940,13 +19995,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Bilge, stringers and ribs – accessible from engine bay",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Bilge, stringers and ribs – accessible from engine bay",
@@ -21010,13 +20058,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Automatic engine compartment fire extinguishing system",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Automatic engine compartment fire extinguishing system",
@@ -21248,13 +20289,6 @@
       "phase": "observed",
       "severity": 3,
       "text": "The exhaust system was functional but showed signs of corrosion or minor leaking at connection points."
-    },
-    {
-      "section": "Exhaust condition",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Exhaust condition",
@@ -21982,13 +21016,6 @@
     },
     {
       "section": "Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -22077,13 +21104,6 @@
       "phase": "observed",
       "severity": 5,
       "text": "A significant deficiency was observed."
-    },
-    {
-      "section": "Trim tab mechanism (interior)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Trim tab mechanism (interior)",
@@ -23755,13 +22775,6 @@
     },
     {
       "section": "Shore power overcurrent protection",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Shore power overcurrent protection",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -23811,13 +22824,6 @@
     },
     {
       "section": "Inverter/charger",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Inverter/charger",
       "rating": "C",
       "phase": "action",
       "severity": 1,
@@ -23829,13 +22835,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Battery charger",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Battery charger",
@@ -23857,13 +22856,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Battery selector switch, combiner, VSR",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Battery selector switch, combiner, VSR",
@@ -23892,13 +22884,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Battery ventilation",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Battery ventilation",
@@ -23997,13 +22982,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Battery(ies) overcurrent protection",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Battery(ies) overcurrent protection",
@@ -24025,13 +23003,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Distribution panel 12V",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Distribution panel 12V",
@@ -24053,13 +23024,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Distribution panel 110V",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Distribution panel 110V",
@@ -24088,13 +23052,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Voltmeter/ammeter",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Voltmeter/ammeter",
@@ -24123,13 +23080,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Bundling support and wiring",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Bundling support and wiring",
@@ -24158,13 +23108,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "AC outlets",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "AC outlets",
@@ -24200,13 +23143,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Shore power cable(s)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Shore power cable(s)",
@@ -24228,13 +23164,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Shore power receptacle",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Shore power receptacle",
@@ -24263,13 +23192,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Solar panel(s)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Solar panel(s)",
@@ -24344,13 +23266,6 @@
     {
       "section": "Galvanic isolator",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Galvanic isolator",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -24375,13 +23290,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Isolation transformer",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Isolation transformer",
@@ -24410,13 +23318,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Battery hydrometer test",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Battery hydrometer test",
@@ -24455,13 +23356,6 @@
     },
     {
       "section": "Battery load test",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Battery load test",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -24490,13 +23384,6 @@
     },
     {
       "section": "Reverse polarity light",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Reverse polarity light",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -24518,13 +23405,6 @@
     },
     {
       "section": "Heating and air conditioning",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Heating and air conditioning",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -24543,13 +23423,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Electrical – other features",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Electrical – other features",
@@ -24666,13 +23539,6 @@
     {
       "section": "Navigation lights",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Navigation lights",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -24690,13 +23556,6 @@
       "phase": "action",
       "severity": 1,
       "text": "No corrective action is recommended at this time."
-    },
-    {
-      "section": "Lighting (cabin)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Lighting (cabin)",
@@ -25430,13 +24289,6 @@
     },
     {
       "section": "Emergency tiller",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Emergency tiller",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -25462,13 +24314,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Watertight flashlight",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Watertight flashlight",
@@ -25504,13 +24349,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Lifejackets and PFDs",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Lifejackets and PFDs",
@@ -25609,13 +24447,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Bilge pump, manual",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Bilge pump, manual",
@@ -25717,13 +24548,6 @@
     },
     {
       "section": "LPG cut off solenoid valve switch",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "LPG cut off solenoid valve switch",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -25763,13 +24587,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "EPIRB",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "EPIRB",
@@ -25840,13 +24657,6 @@
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Propane gas detector",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Propane gas detector",
@@ -27273,13 +26083,6 @@
     },
     {
       "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
       "rating": "C",
       "phase": "action",
       "severity": 1,
@@ -27378,13 +26181,6 @@
     },
     {
       "section": "Pulpit",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Pulpit",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -27476,13 +26272,6 @@
     },
     {
       "section": "Windlass",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Windlass",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -27501,13 +26290,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Anchor locker",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Anchor locker",
@@ -27564,13 +26346,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Fuel and water fill ports and waste deck pump-out port",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Fuel and water fill ports and waste deck pump-out port",
@@ -27602,13 +26377,6 @@
     },
     {
       "section": "Mooring cleats and chocks",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Mooring cleats and chocks",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -27627,13 +26395,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Toerail and gunwale",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Toerail and gunwale",
@@ -27673,13 +26434,6 @@
     {
       "section": "Brightwork",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Brightwork",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -27708,13 +26462,6 @@
     {
       "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Deck hatches, windows, and portholes – exterior observations",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -27732,13 +26479,6 @@
       "phase": "action",
       "severity": 1,
       "text": "No corrective action is recommended at this time."
-    },
-    {
-      "section": "Windshield, pilothouse windows, frames, and studs",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Windshield, pilothouse windows, frames, and studs",
@@ -27771,13 +26511,6 @@
     {
       "section": "Arch – external condition and equipment",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Arch – external condition and equipment",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -27802,13 +26535,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
@@ -27840,13 +26566,6 @@
     },
     {
       "section": "Shore water hookup",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Shore water hookup",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -27865,13 +26584,6 @@
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Toerail/gunwale",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Toerail/gunwale",
@@ -27925,13 +26637,6 @@
     {
       "section": "Windshield, pilot house windows, frames and seals",
       "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
-    },
-    {
-      "section": "Windshield, pilot house windows, frames and seals",
-      "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
@@ -27949,13 +26654,6 @@
       "phase": "action",
       "severity": 1,
       "text": "No corrective action is recommended at this time."
-    },
-    {
-      "section": "Deck hatch(es), windows and portholes (exterior observations)",
-      "rating": "B",
-      "phase": "means",
-      "severity": 3,
-      "text": "This finding warrants attention in the near term."
     },
     {
       "section": "Deck hatch(es), windows and portholes (exterior observations)",

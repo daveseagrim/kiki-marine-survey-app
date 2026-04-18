@@ -12,6 +12,20 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2345 — 2026-04-18
+### Changed
+- Removed the generic B-rating "means" filler — "This finding warrants attention in the near term." — from every section of `text_library.json` (191 occurrences across 190 sections, all rating B / phase `means`). Leaving the "What it means for this vessel" column empty for B-rated items rather than padding the report with a one-size-fits-all sentence that said nothing useful.
+### Added
+- Cabin sole (group "Cabin and conveniences") B-rating snippet set fleshed out for the three conditions Dave most commonly sees:
+  - Observed: "The cabin sole was structurally sound but the finish was worn and in need of refinishing."
+  - Observed: "Localized rot was observed in the cabin sole at [describe area(s)]."
+  - Observed: "The cabin sole was broken at [describe area(s)], compromising the finish and, potentially, the underlying structure."
+  - Action: "Refinishing is recommended to restore appearance and protect the substrate from moisture ingress."
+  - Action: "Repair and refinishing, or replacement of affected sections, is recommended to restore safe footing and preserve the surrounding structure."
+- Cabin sole intentionally has no B-rating `means` snippets — none of the generic options fit.
+
+---
+
 ## v2344 — 2026-04-18
 ### Fixed
 - App was blank on load due to syntax error in the sentence-picker render chain. The v2343 patch added `.replace(/\[appliance\]/gi, ...)` and `.replace(/\[compressor\]/gi, ...)` after the `[side]` IIFE, but the existing `})());` terminated the `let rendered = escSnippet(s).replace(...)` chain before them, orphaning the new calls. Removed the stray `;` so the chain continues through the appliance/compressor replacements.
