@@ -12,6 +12,14 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2340 — 2026-04-18
+### Fixed
+- Desktop drag-and-drop photos onto checklist items was defined but never wired up; added `setupChecklistDragDrop()` call in `renderInspection()` and `.drag-target` CSS for visual feedback.
+- Hand-typed text was overwritten when ticking a sentence picker chip; prefix is now re-derived on every chip tick by stripping already-checked sentences from the current textarea value.
+- Capitalized 28 snippets in `text_library.json` that started with a lowercase letter (e.g., "the installation appeared serviceable." → "The installation appeared serviceable.").
+
+---
+
 ## v2339 — 2026-04-18
 
 - **Windshield wiper standard corrected.** Changed from ABYC E-11

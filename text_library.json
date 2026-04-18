@@ -4625,7 +4625,7 @@
     {
       "section": "Forestay (as inspected from the deck)",
       "rating": "Not tested",
-      "text": "at the base, the appropriate retaining pins were in place.",
+      "text": "At the base, the appropriate retaining pins were in place.",
       "phase": "observed",
       "severity": 3
     },
@@ -4681,7 +4681,7 @@
     {
       "section": "Shrouds, swages and turnbuckles",
       "rating": "A - no retaining pins. Needs tuning.",
-      "text": "the turnbuckles lacked retaining pins, posing a risk of shroud release.",
+      "text": "The turnbuckles lacked retaining pins, posing a risk of shroud release.",
       "phase": "observed",
       "severity": 3
     },
@@ -5066,7 +5066,7 @@
     {
       "section": "Boom, gooseneck, boom vang, outhaul, and reefing lines",
       "rating": "C - mast furling",
-      "text": "the boom vang, outhaul, and gooseneck all functioned properly.",
+      "text": "The boom vang, outhaul, and gooseneck all functioned properly.",
       "phase": "observed",
       "severity": 3
     },
@@ -5220,7 +5220,7 @@
     {
       "section": "Jib/genoa tracks/cars",
       "rating": "B",
-      "text": "the blocks are showing some age and degradation and, although not urgent, could benefit from replacement.",
+      "text": "The blocks are showing some age and degradation and, although not urgent, could benefit from replacement.",
       "phase": "observed",
       "severity": 3
     },
@@ -8328,7 +8328,7 @@
     {
       "section": "Steering wheel and steering",
       "rating": "B",
-      "text": "the steering friction control was not working.",
+      "text": "The steering friction control was not working.",
       "phase": "observed",
       "severity": 3
     },
@@ -8400,7 +8400,7 @@
     {
       "section": "Tiller",
       "rating": "B",
-      "text": "the extension could benefit cosmetically from refinishing.",
+      "text": "The extension could benefit cosmetically from refinishing.",
       "phase": "observed",
       "severity": 3
     },
@@ -10299,7 +10299,7 @@
     {
       "section": "Autopilot",
       "rating": "Powered up - out of water",
-      "text": "the vessel was out of the water, and the system was not tested in operation.",
+      "text": "The vessel was out of the water, and the system was not tested in operation.",
       "phase": "observed",
       "severity": 3
     },
@@ -10369,7 +10369,7 @@
     {
       "section": "MFD or Chartplotter",
       "rating": "Powered up - out of water",
-      "text": "the vessel was out of the water, and the system was not tested in operation.",
+      "text": "The vessel was out of the water, and the system was not tested in operation.",
       "phase": "observed",
       "severity": 3
     },
@@ -10432,7 +10432,7 @@
     {
       "section": "Depth sounder",
       "rating": "Powered up - out of water",
-      "text": "the vessel was out of the water, and the system was not tested in operation.",
+      "text": "The vessel was out of the water, and the system was not tested in operation.",
       "phase": "observed",
       "severity": 3
     },
@@ -10509,7 +10509,7 @@
     {
       "section": "VHF",
       "rating": "Powered up",
-      "text": "not all features were tested.",
+      "text": "Not all features were tested.",
       "phase": "observed",
       "severity": 3
     },
@@ -12331,7 +12331,7 @@
     {
       "section": "Safety rail",
       "rating": "C",
-      "text": "the safety rail was solidly mounted to the transom coaming and was in satisfactory condition.",
+      "text": "The safety rail was solidly mounted to the transom coaming and was in satisfactory condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -14321,7 +14321,7 @@
     {
       "section": "Autopilot",
       "rating": "Powered up",
-      "text": "the vessel was out of the water, and the system was not tested in operation.",
+      "text": "The vessel was out of the water, and the system was not tested in operation.",
       "phase": "observed",
       "severity": 3
     },
@@ -14363,7 +14363,7 @@
     {
       "section": "MFD or Chartplotter",
       "rating": "Powered up",
-      "text": "the vessel was out of the water, and the system was not tested in operation.",
+      "text": "The vessel was out of the water, and the system was not tested in operation.",
       "phase": "observed",
       "severity": 3
     },
@@ -14398,7 +14398,7 @@
     {
       "section": "Depth sounder",
       "rating": "Powered up",
-      "text": "the vessel was out of the water, and the system was not tested in operation.",
+      "text": "The vessel was out of the water, and the system was not tested in operation.",
       "phase": "observed",
       "severity": 3
     },
@@ -14475,7 +14475,7 @@
     {
       "section": "VHF",
       "rating": "C",
-      "text": "not all features were tested.",
+      "text": "Not all features were tested.",
       "phase": "observed",
       "severity": 3
     },
@@ -15716,7 +15716,7 @@
     {
       "section": "Chainplates (interior)",
       "rating": "Not inspected",
-      "text": "decorative covers prevented access to two of the chainplates.",
+      "text": "Decorative covers prevented access to two of the chainplates.",
       "phase": "observed",
       "severity": 3
     },
@@ -15982,7 +15982,7 @@
     {
       "section": "Stove",
       "rating": "Not tested - no propane but properly connected",
-      "text": "the installation appeared serviceable.",
+      "text": "The installation appeared serviceable.",
       "phase": "observed",
       "severity": 1
     },
@@ -15996,7 +15996,7 @@
     {
       "section": "Stove",
       "rating": "Not tested - disconnected propane",
-      "text": "the installation appeared serviceable.",
+      "text": "The installation appeared serviceable.",
       "phase": "observed",
       "severity": 1
     },
@@ -18084,7 +18084,7 @@
     {
       "section": "Head, toilet and seacock",
       "rating": "A",
-      "text": "a disused seacock—likely part of the waste discharge system—was found uncapped.",
+      "text": "A disused seacock—likely part of the waste discharge system—was found uncapped.",
       "phase": "observed",
       "severity": 3
     },
@@ -18126,7 +18126,7 @@
     {
       "section": "Head, toilet and seacock",
       "rating": "Not tested",
-      "text": "no leakage was observed, and the intake seacock was securely attached and turned easily.",
+      "text": "No leakage was observed, and the intake seacock was securely attached and turned easily.",
       "phase": "observed",
       "severity": 3
     },
@@ -18147,7 +18147,7 @@
     {
       "section": "Head, faucet, sink and drain",
       "rating": "Not tested",
-      "text": "no leakage was observed, and the intake seacock was securely attached and turned easily.",
+      "text": "No leakage was observed, and the intake seacock was securely attached and turned easily.",
       "phase": "observed",
       "severity": 3
     },
@@ -18554,6 +18554,69 @@
     },
     {
       "section": "Hot water tank(s), plumbing and electrical",
+      "rating": "A - pressure relief valve wrong",
+      "text": "Professional assessment and repair are recommended before the vessel is returned to service.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Hot water tank(s), plumbing and electrical",
+      "rating": "A - exposed electrical connections",
+      "text": "The electrical connections to the hot water tank were not properly covered or enclosed.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Hot water tank(s), plumbing and electrical",
+      "rating": "A - exposed electrical connections",
+      "text": "Exposed connections in a wet environment create a risk of short circuit, corrosion, and potential fire.",
+      "phase": "means",
+      "severity": 5
+    },
+    {
+      "section": "Hot water tank(s), plumbing and electrical",
+      "rating": "A - exposed electrical connections",
+      "text": "ABYC E-11.16.3 requires that all electrical connections be protected from exposure to moisture and the marine environment.",
+      "phase": "means",
+      "severity": 5
+    },
+    {
+      "section": "Hot water tank(s), plumbing and electrical",
+      "rating": "A - exposed electrical connections",
+      "text": "All electrical connections to the hot water tank should be enclosed in appropriate junction boxes or heat-shrink connectors rated for the marine environment.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Hot water tank(s), plumbing and electrical",
+      "rating": "A - household wiring",
+      "text": "The hot water tank was wired with household-grade (Romex/NM) wiring rather than marine-grade tinned copper conductors.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Hot water tank(s), plumbing and electrical",
+      "rating": "A - household wiring",
+      "text": "Household wiring uses solid-core untinned copper that corrodes rapidly in the marine environment and is prone to fatigue failure from vibration.",
+      "phase": "means",
+      "severity": 5
+    },
+    {
+      "section": "Hot water tank(s), plumbing and electrical",
+      "rating": "A - household wiring",
+      "text": "ABYC E-11.16.1 requires that all conductors on boats be stranded tinned copper with marine-grade insulation rated for the environment.",
+      "phase": "means",
+      "severity": 5
+    },
+    {
+      "section": "Hot water tank(s), plumbing and electrical",
+      "rating": "A - household wiring",
+      "text": "The household wiring should be replaced with properly sized marine-grade tinned copper conductors and appropriate terminal connections before the vessel is returned to service.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Hot water tank(s), plumbing and electrical",
       "rating": "C",
       "text": "The hot water tank was located in the [insert location].",
       "phase": "observed",
@@ -18632,7 +18695,7 @@
     {
       "section": "Black water tank(s) and plumbing",
       "rating": "C - not visible but looks right",
-      "text": "the installation appeared proper with ASTM D3262 hose fitted.",
+      "text": "The installation appeared proper with ASTM D3262 hose fitted.",
       "phase": "observed",
       "severity": 3
     },
@@ -19810,7 +19873,7 @@
     {
       "section": "Gearbox oil",
       "rating": "B",
-      "text": "gearbox oil often shows less colouring than engine oil.",
+      "text": "Gearbox oil often shows less colouring than engine oil.",
       "phase": "observed",
       "severity": 3
     },
@@ -19880,7 +19943,7 @@
     {
       "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
       "rating": "A",
-      "text": "the stuffing box dripped considerably with the shaft stationary.",
+      "text": "The stuffing box dripped considerably with the shaft stationary.",
       "phase": "observed",
       "severity": 3
     },
@@ -19943,7 +20006,7 @@
     {
       "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
       "rating": "Not tested - dripless",
-      "text": "all appeared serviceable.",
+      "text": "All appeared serviceable.",
       "phase": "observed",
       "severity": 1
     },
@@ -19964,7 +20027,7 @@
     {
       "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
       "rating": "Not tested - stuffing box",
-      "text": "all appeared serviceable.",
+      "text": "All appeared serviceable.",
       "phase": "observed",
       "severity": 1
     },
@@ -22027,7 +22090,7 @@
     {
       "section": "Shore power overcurrent protection",
       "rating": "C - not tested",
-      "text": "because the boat was not plugged into shore power, it was not tested.",
+      "text": "Because the boat was not plugged into shore power, it was not tested.",
       "phase": "observed",
       "severity": 3
     },
@@ -22097,7 +22160,7 @@
     {
       "section": "Inverter/charger",
       "rating": "Not tested",
-      "text": "because the boat was not plugged into shore power, it was not tested.",
+      "text": "Because the boat was not plugged into shore power, it was not tested.",
       "phase": "observed",
       "severity": 3
     },
@@ -22671,7 +22734,7 @@
     {
       "section": "Distribution panel 110V",
       "rating": "Not tested",
-      "text": "the system was not tested because the vessel was not connected to AC power.",
+      "text": "The system was not tested because the vessel was not connected to AC power.",
       "phase": "observed",
       "severity": 3
     },
@@ -24885,7 +24948,7 @@
     {
       "section": "Bilge pump, automatic float",
       "rating": "Not tested",
-      "text": "the float switch was integrated into the pump and was not tested.",
+      "text": "The float switch was integrated into the pump and was not tested.",
       "phase": "observed",
       "severity": 3
     },

@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2339';
+const APP_VERSION = 'v2340';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4506,14 +4506,50 @@ window._kkStampCheckOrder = function(chip) {
   if (chip.checked) {
     _kkCheckOrderCounter++;
     chip.setAttribute('data-check-order', _kkCheckOrderCounter);
-    // v2309/v2329: capture hand-typed text on first chip tick for this item.
-    // Always set the prefix (even if empty) so hasOwnProperty is true and
-    // subsequent ticks don't re-capture rebuilt snippet text as prefix —
-    // that was the root cause of the first-sentence duplication bug.
+    // v2340: always re-derive the prefix from the current textarea by
+    // stripping out text from already-checked sentences. This preserves
+    // hand-typed text the user added AFTER the sheet opened (the old
+    // hasOwnProperty guard captured the prefix once and never updated it,
+    // so later typing was lost on rebuild).
     const key = chip.getAttribute('data-picker-key') || '';
-    if (key && !_kkManualTextPrefix.hasOwnProperty(key)) {
+    if (key) {
       const ta = document.getElementById('sheet-text-' + key);
-      _kkManualTextPrefix[key] = (ta ? ta.value.trim() : '');
+      if (ta) {
+        const picker = document.getElementById('sheet-sentence-picker');
+        let working = (ta.value || '').trim();
+        // Strip text from all previously-checked sentences (not this one —
+        // it hasn't been rebuilt yet).
+        if (picker) {
+          const entries = (window._sentencePicker && window._sentencePicker[key]) || [];
+          const survey = window._currentSurveyCache || {};
+          const rc = parseInt(survey.rudderCount, 10) || 1;
+          picker.querySelectorAll('.kk-sentence-chip:checked').forEach(c => {
+            if (c === chip) return; // skip the one just ticked
+            const idx = parseInt(c.getAttribute('data-sentence-idx'), 10);
+            const entry = entries[idx];
+            if (!entry || !entry.text) return;
+            let resolved = entry.text;
+            // Minimal resolution to match what's in the textarea
+            if (typeof resolveCountTokens === 'function') {
+              const sideMatch = false; // simplified — we just need rough match
+              const dlc = parseInt(survey.driveLineCount, 10) || 1;
+              resolved = resolveCountTokens(resolved, dlc);
+            }
+            if (typeof window.expandSnippetTokens === 'function') {
+              const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
+                ? window.KikiSnippetTokens.contextFromSurvey(survey) : {};
+              resolved = window.expandSnippetTokens(resolved, ctx);
+            }
+            resolved = pluralizeRudder(resolved, rc);
+            // Strip placeholder tokens that were resolved at insertion
+            resolved = resolved.replace(/\[side\]\s*/gi, '').replace(/\s{2,}/g, ' ').trim();
+            if (resolved && working.includes(resolved)) {
+              working = working.replace(resolved, '').replace(/\s{2,}/g, ' ').trim();
+            }
+          });
+        }
+        _kkManualTextPrefix[key] = working;
+      }
     }
   } else {
     chip.setAttribute('data-check-order', '');
@@ -13032,6 +13068,9 @@ function renderInspection(survey) {
 
   // Restore the previously open accordion so the user doesn't lose their place
   restoreAccordionState();
+
+  // v2340: wire up desktop drag-and-drop (drop photo files onto item cards)
+  setupChecklistDragDrop();
 }
 
 function ensureReportButton() {
