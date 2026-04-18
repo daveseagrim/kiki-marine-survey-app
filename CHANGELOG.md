@@ -12,6 +12,17 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2366 — 2026-04-18
+### Added
+- **Safety Equipment section now accepts drag-and-drop and Import photos, matching the rest of the checklist.** Previously the TC TP 511 Safety Equipment items had only the 📷 camera button — the "Import photos from Library or Files" flow and the desktop drag-and-drop-from-Finder flow were both unavailable for safety items, so any photos originating from an existing library (e.g., a backup of a prior survey, or photos captured on a camera and transferred via AirDrop) had to be re-captured one by one. Two changes:
+  1. **Import button** added next to each safety item's camera button. Opens the OS file picker in multi-select mode (same picker that the regular checklist items use via `importPhotosForItem`). HEIC files are converted to JPEG automatically via the existing `heicToJpegDataUrl` helper.
+  2. **Drag-and-drop from Finder/Explorer** extended to safety items. Each safety row is now wrapped in `.safety-item-wrapper[data-safety-idx]`, and the shared `setupChecklistDragDrop()` event-delegation handler routes drops to a new `attachPhotosToSafetyItem(idx, fileList)` function instead of the regular `attachPhotosToItem(itemLabel, fileList)`. Skipped safety items (marked with `data-safety-skipped="1"`) are excluded from the valid-target check so a user can't accidentally dump photos onto a skipped row.
+- Thumbnail grid and the 📷 count badge are updated in-place after import/drop — no full re-render needed, so the user keeps their scroll position in the Safety Equipment accordion.
+- Photos saved this way get IDs prefixed `safety_` (matches the existing convention from `captureSafetyPhoto` → `openBatchCamera`), are stored under `survey.safetyEquipment[idx].photos[]`, and inherit the safety item's `name` as their `itemLabel` so report generation and photo-move flows can look them up consistently.
+- Shared visual treatment: same `drag-target` outline/background (dashed #066aab border, #eff6ff fill) as the regular checklist items, wired up via a new `.safety-item-wrapper.drag-target` CSS rule in index.html.
+
+---
+
 ## v2365 — 2026-04-18
 ### Fixed
 - **`Remove Date Stamps` was running without error but stamps were still visible in photos.** After v2364 unblocked the function (the `openDatabase` ReferenceError), the batch ran through all photos and showed the completion toast, but stamps on Dave's real photos were still there. Isolated unit tests showed the structural-signature detection (darkPct > 30 AND brightPct > 1.5) correctly identified stamped canvas-drawn photos across every tested background, but something about Dave's real-world photos — HEIC→JPEG colour shifts, EXIF rotation side effects, or edge-of-stamp JPEG bleed from multiple compression rounds — was keeping the detection from firing.

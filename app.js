@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2365';
+const APP_VERSION = 'v2366';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -5340,15 +5340,28 @@ function setupPhotoSortable(gridEl, itemLabel) {
 // Attach drag-drop handlers to the inspection app. Uses event delegation
 // so items added after render (hull expansion, drive-line expansion) work
 // without re-wiring.
+// v2366: also handles .safety-item-wrapper[data-safety-idx] drops, routing
+// those to attachPhotosToSafetyItem. Same visual drag-target treatment.
 function setupChecklistDragDrop() {
   const app = document.getElementById('app');
   if (!app || app.dataset.dragDropWired === 'true') return;
   app.dataset.dragDropWired = 'true';
 
+  // Find the nearest valid drop target (checklist item OR safety item).
+  // Skipped safety items (data-safety-skipped="1") are not valid targets.
+  const findWrapper = (el) => {
+    if (!el || !el.closest) return null;
+    const compact = el.closest('.compact-item-wrapper');
+    if (compact) return compact;
+    const safety = el.closest('.safety-item-wrapper[data-safety-idx]');
+    if (safety && safety.getAttribute('data-safety-skipped') !== '1') return safety;
+    return null;
+  };
+
   let lastTarget = null;
 
   app.addEventListener('dragover', (e) => {
-    const wrapper = e.target && e.target.closest ? e.target.closest('.compact-item-wrapper') : null;
+    const wrapper = findWrapper(e.target);
     if (!wrapper) return;
     e.preventDefault();
     if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
@@ -5360,7 +5373,7 @@ function setupChecklistDragDrop() {
   });
 
   app.addEventListener('dragleave', (e) => {
-    const wrapper = e.target && e.target.closest ? e.target.closest('.compact-item-wrapper') : null;
+    const wrapper = findWrapper(e.target);
     if (!wrapper) return;
     if (!e.relatedTarget || !wrapper.contains(e.relatedTarget)) {
       wrapper.classList.remove('drag-target');
@@ -5369,15 +5382,24 @@ function setupChecklistDragDrop() {
   });
 
   app.addEventListener('drop', async (e) => {
-    const wrapper = e.target && e.target.closest ? e.target.closest('.compact-item-wrapper') : null;
+    const wrapper = findWrapper(e.target);
     if (!wrapper) return;
     e.preventDefault();
     wrapper.classList.remove('drag-target');
     lastTarget = null;
-    const itemLabel = wrapper.getAttribute('data-item-label');
-    if (!itemLabel) return;
     const files = (e.dataTransfer && e.dataTransfer.files) || [];
     if (files.length === 0) return;
+    // Route to the right handler based on which wrapper class matched.
+    if (wrapper.classList.contains('safety-item-wrapper')) {
+      const idxAttr = wrapper.getAttribute('data-safety-idx');
+      const idx = parseInt(idxAttr, 10);
+      if (!Number.isNaN(idx)) {
+        await attachPhotosToSafetyItem(idx, files);
+      }
+      return;
+    }
+    const itemLabel = wrapper.getAttribute('data-item-label');
+    if (!itemLabel) return;
     await attachPhotosToItem(itemLabel, files);
   });
 
@@ -5385,7 +5407,7 @@ function setupChecklistDragDrop() {
   // valid target (e.g. dragged over a survey but released between cards).
   window.addEventListener('dragover', (e) => { e.preventDefault(); });
   window.addEventListener('drop', (e) => {
-    if (!e.target || !e.target.closest || !e.target.closest('.compact-item-wrapper')) {
+    if (!findWrapper(e.target)) {
       e.preventDefault();
     }
   });
@@ -13015,40 +13037,50 @@ function renderInspection(survey) {
       const safetyPhotoCount = (eq.photos && eq.photos.length) || 0;
       const isCustom = eq.custom ? true : false;
       if (itemSkipped) {
+        // v2366: still wrap skipped items so drag-and-drop targets remain
+        // stable — skipped items accept no drops (guarded in the drop handler)
+        // but keeping the wrapper avoids DOM-shuffling when toggled.
         html += `
-          <div class="rated-item" style="border-left: 4px solid #d1d5db; background:#f9fafb; padding: 8px 10px; margin-bottom: 8px; opacity:0.65;">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-              <div style="font-size:13px;color:#6b7280;">⊘ <strong>${eq.name}</strong> — skipped${safetyPhotoCount > 0 ? ` (${safetyPhotoCount} photo${safetyPhotoCount === 1 ? '' : 's'} retained)` : ''}</div>
-              <button onclick="toggleSafetyItemSkip(${idx}, false)" style="background:white;color:#066aab;border:1px solid #066aab;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">Unskip</button>
+          <div class="safety-item-wrapper" data-safety-idx="${idx}" data-safety-skipped="1">
+            <div class="rated-item" style="border-left: 4px solid #d1d5db; background:#f9fafb; padding: 8px 10px; margin-bottom: 8px; opacity:0.65;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                <div style="font-size:13px;color:#6b7280;">⊘ <strong>${eq.name}</strong> — skipped${safetyPhotoCount > 0 ? ` (${safetyPhotoCount} photo${safetyPhotoCount === 1 ? '' : 's'} retained)` : ''}</div>
+                <button onclick="toggleSafetyItemSkip(${idx}, false)" style="background:white;color:#066aab;border:1px solid #066aab;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">Unskip</button>
+              </div>
             </div>
           </div>`;
         return;
       }
       html += `
-      <div class="rated-item" style="border-left: 4px solid ${eq.checked ? '#16a34a' : '#2563eb'}; padding: 8px 10px; margin-bottom: 8px; ${subSkipped ? 'opacity:0.55;' : ''}">
-        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
-          <input type="checkbox" ${checkedAttr} ${subSkipped ? 'disabled' : ''}
-                 onchange="toggleSafetyItem(${idx}, this.checked)"
-                 style="margin-top:3px;width:18px;height:18px;accent-color:#2563eb;" />
-          <div style="flex:1;">
-            <strong>${eq.name}</strong>
-            ${isCustom ? '<span style="display:inline-block;background:#f59e0b;color:white;font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;">Custom</span>' : `<span style="display:inline-block;background:#2563eb;color:white;font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;">Req: ${eq.requirement}</span>`}
-            <span data-safety-status="1">${eq.checked ? '<span style="color:#16a34a;font-weight:bold;margin-left:6px;">✓ On board</span>' : '<span style="color:#dc2626;font-size:11px;margin-left:6px;">Not verified</span>'}</span>
+      <div class="safety-item-wrapper" data-safety-idx="${idx}">
+        <div class="rated-item" style="border-left: 4px solid ${eq.checked ? '#16a34a' : '#2563eb'}; padding: 8px 10px; margin-bottom: 8px; ${subSkipped ? 'opacity:0.55;' : ''}">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+            <input type="checkbox" ${checkedAttr} ${subSkipped ? 'disabled' : ''}
+                   onchange="toggleSafetyItem(${idx}, this.checked)"
+                   style="margin-top:3px;width:18px;height:18px;accent-color:#2563eb;" />
+            <div style="flex:1;">
+              <strong>${eq.name}</strong>
+              ${isCustom ? '<span style="display:inline-block;background:#f59e0b;color:white;font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;">Custom</span>' : `<span style="display:inline-block;background:#2563eb;color:white;font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;">Req: ${eq.requirement}</span>`}
+              <span data-safety-status="1">${eq.checked ? '<span style="color:#16a34a;font-weight:bold;margin-left:6px;">✓ On board</span>' : '<span style="color:#dc2626;font-size:11px;margin-left:6px;">Not verified</span>'}</span>
+            </div>
+            <button type="button" onclick="event.preventDefault();event.stopPropagation();toggleSafetyItemSkip(${idx}, true)" title="Skip this item" style="background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:600;cursor:pointer;">⊘ Skip</button>
+            ${isCustom ? `<button onclick="event.preventDefault();removeCustomSafetyItem(${idx})" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;padding:0 4px;" title="Remove">✕</button>` : ''}
+          </label>
+          <div style="margin-top:4px;margin-left:28px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="text" placeholder="Notes (condition, expiry date, location...)"
+                   value="${(eq.notes || '').replace(/"/g, '&quot;')}"
+                   onchange="updateSafetyNote(${idx}, this.value)"
+                   ${subSkipped ? 'disabled' : ''}
+                   style="flex:1;min-width:160px;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;" />
+            <button onclick="captureSafetyPhoto(${idx})" ${subSkipped ? 'disabled' : ''} style="background:#2563eb;color:white;border:none;border-radius:4px;padding:4px 8px;font-size:11px;white-space:nowrap;cursor:pointer;${subSkipped ? 'opacity:0.5;' : ''}">
+              📷${safetyPhotoCount > 0 ? ` ${safetyPhotoCount}` : ''}
+            </button>
+            <button onclick="importPhotosForSafetyItem(${idx})" ${subSkipped ? 'disabled' : ''} title="Import photos from Library or Files" style="background:white;color:#066aab;border:1px solid #066aab;border-radius:4px;padding:4px 8px;font-size:11px;white-space:nowrap;cursor:pointer;${subSkipped ? 'opacity:0.5;' : ''}">
+              Import
+            </button>
           </div>
-          <button type="button" onclick="event.preventDefault();event.stopPropagation();toggleSafetyItemSkip(${idx}, true)" title="Skip this item" style="background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:600;cursor:pointer;">⊘ Skip</button>
-          ${isCustom ? `<button onclick="event.preventDefault();removeCustomSafetyItem(${idx})" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;padding:0 4px;" title="Remove">✕</button>` : ''}
-        </label>
-        <div style="margin-top:4px;margin-left:28px;display:flex;gap:8px;align-items:center;">
-          <input type="text" placeholder="Notes (condition, expiry date, location...)"
-                 value="${(eq.notes || '').replace(/"/g, '&quot;')}"
-                 onchange="updateSafetyNote(${idx}, this.value)"
-                 ${subSkipped ? 'disabled' : ''}
-                 style="flex:1;padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;" />
-          <button onclick="captureSafetyPhoto(${idx})" ${subSkipped ? 'disabled' : ''} style="background:#2563eb;color:white;border:none;border-radius:4px;padding:4px 8px;font-size:11px;white-space:nowrap;cursor:pointer;${subSkipped ? 'opacity:0.5;' : ''}">
-            📷${safetyPhotoCount > 0 ? ` ${safetyPhotoCount}` : ''}
-          </button>
+          <div id="safety-thumbs-${idx}" style="margin-top:4px;margin-left:28px;display:flex;flex-wrap:wrap;gap:4px;"></div>
         </div>
-        <div id="safety-thumbs-${idx}" style="margin-top:4px;margin-left:28px;display:flex;flex-wrap:wrap;gap:4px;"></div>
       </div>
     `;
     });
@@ -15809,6 +15841,127 @@ async function loadAllSafetyThumbnails() {
       loadSafetyThumbnails(idx, eq.photos);
     }
   });
+}
+
+// v2366: Attach dragged/imported photos to a safety equipment item.
+// Mirrors attachPhotosToItem but stores photo IDs under
+// survey.safetyEquipment[idx].photos rather than survey.items[label].photos.
+async function attachPhotosToSafetyItem(idx, fileList) {
+  const files = Array.from(fileList || []).filter(f => {
+    if (!f) return false;
+    if (f.type && f.type.startsWith('image/')) return true;
+    return /\.(heic|heif)$/i.test(f.name || '');
+  });
+  if (files.length === 0) {
+    showToast('No image files selected');
+    return 0;
+  }
+
+  const heicCount = files.filter(isHeicFile).length;
+  if (heicCount > 0) {
+    showToast(`Converting ${heicCount} HEIC photo${heicCount === 1 ? '' : 's'}…`);
+  } else if (files.length > 1) {
+    showToast(`Saving ${files.length} photos…`);
+  }
+
+  // Resolve the safety item name up front for labeling photo records.
+  const preSurvey = await getSurvey(currentSurveyId);
+  if (!preSurvey || !preSurvey.safetyEquipment || !preSurvey.safetyEquipment[idx]) {
+    showToast('Safety item not found');
+    return 0;
+  }
+  const eqName = preSurvey.safetyEquipment[idx].name || `Safety item ${idx}`;
+
+  let saved = 0;
+  let heicFailed = 0;
+  for (const file of files) {
+    await new Promise(async (resolve) => {
+      try {
+        let dataUrl = null;
+        if (isHeicFile(file)) {
+          dataUrl = await heicToJpegDataUrl(file);
+          if (!dataUrl) { heicFailed++; resolve(); return; }
+        } else {
+          dataUrl = await new Promise((res) => {
+            const reader = new FileReader();
+            reader.onload = (ev) => res(ev.target.result);
+            reader.onerror = () => res(null);
+            reader.readAsDataURL(file);
+          });
+          if (!dataUrl) { resolve(); return; }
+        }
+
+        const stamped = (typeof addDateStampToPhoto === 'function')
+          ? await addDateStampToPhoto(dataUrl)
+          : dataUrl;
+
+        if (!/^data:image\/(jpeg|jpg|png|webp|gif)[;,]/i.test(stamped)) {
+          console.error('attachPhotosToSafetyItem: refusing to save non-renderable format', stamped.substring(0, 40));
+          heicFailed++;
+          resolve();
+          return;
+        }
+
+        const photoId = `safety_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+        const photo = {
+          id: photoId,
+          surveyId: currentSurveyId,
+          itemLabel: eqName,
+          dataUrl: stamped,
+          annotated: false,
+          createdAt: new Date().toISOString()
+        };
+        await savePhoto(photo);
+        // Re-fetch inside the loop so concurrent saves don't clobber each
+        // other's photo-array updates.
+        const survey = await getSurvey(currentSurveyId);
+        if (!survey.safetyEquipment || !survey.safetyEquipment[idx]) { resolve(); return; }
+        if (!Array.isArray(survey.safetyEquipment[idx].photos)) {
+          survey.safetyEquipment[idx].photos = [];
+        }
+        survey.safetyEquipment[idx].photos.push(photoId);
+        await saveSurvey(survey);
+        saved++;
+      } catch (err) {
+        console.error('attachPhotosToSafetyItem error:', err);
+      }
+      resolve();
+    });
+  }
+
+  // Refresh thumbnails and the 📷 count badge without a full re-render.
+  try {
+    const survey = await getSurvey(currentSurveyId);
+    const photos = (survey.safetyEquipment[idx] && survey.safetyEquipment[idx].photos) || [];
+    loadSafetyThumbnails(idx, photos);
+    // Update the camera button count — it's the button inside the wrapper
+    // that calls captureSafetyPhoto(idx). Match by onclick attribute.
+    const wrapper = document.querySelector(`.safety-item-wrapper[data-safety-idx="${idx}"]`);
+    if (wrapper) {
+      const camBtn = wrapper.querySelector(`button[onclick="captureSafetyPhoto(${idx})"]`);
+      if (camBtn) camBtn.innerHTML = `📷${photos.length > 0 ? ` ${photos.length}` : ''}`;
+    }
+  } catch (_) {}
+
+  if (heicFailed > 0 && saved === 0) {
+    showToast(`Could not convert ${heicFailed} HEIC photo${heicFailed === 1 ? '' : 's'} — try converting to JPG in Preview first`);
+  } else if (heicFailed > 0) {
+    showToast(`Attached ${saved} photo${saved === 1 ? '' : 's'} • ${heicFailed} HEIC failed`);
+  } else {
+    showToast(`Attached ${saved} photo${saved === 1 ? '' : 's'}`);
+  }
+  return saved;
+}
+
+// v2366: File picker for safety-equipment items (Photo Library + Files app).
+function importPhotosForSafetyItem(idx) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.multiple = true;
+  input.onchange = () => attachPhotosToSafetyItem(idx, input.files);
+  if (typeof setCameraActive === 'function') setCameraActive(true);
+  input.click();
 }
 
 // ── Instruments & Electronics Functions ─────────────────────────────────
