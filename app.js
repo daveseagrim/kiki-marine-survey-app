@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2323';
+const APP_VERSION = 'v2324';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -15233,73 +15233,14 @@ async function removeCustomSafetyItem(idx) {
   showToast('Removed: ' + name);
 }
 
-// Capture photo for a safety equipment item
+// v2324: Capture photo for a safety equipment item — now uses the same
+// batch camera overlay as regular checklist sections (getUserMedia with
+// proper stream cleanup). Falls back to file picker if camera unavailable.
 async function captureSafetyPhoto(idx) {
-  if (window._safetyPhotoBusy) return;
-  window._safetyPhotoBusy = true;
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-  input.multiple = true;  // allow multiple selection from camera roll
-  // No capture attribute — allows camera roll, files, or camera
-
-  // v2320: clean up helper — clears busy flag, camera state, removes orphaned input
-  function _safetyPhotoCleanup() {
-    window._safetyPhotoBusy = false;
-    setCameraActive(false);
-    try { input.remove(); } catch (_e) {}
-  }
-
-  input.onchange = async (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length === 0) { _safetyPhotoCleanup(); return; }
-
-    showToast(`Saving ${files.length} photo${files.length > 1 ? 's' : ''}...`);
-
-    const survey = await getSurvey(currentSurveyId);
-    if (!survey || !survey.safetyEquipment[idx]) { _safetyPhotoCleanup(); return; }
-
-    if (!survey.safetyEquipment[idx].photos) {
-      survey.safetyEquipment[idx].photos = [];
-    }
-
-    // Process ALL selected files sequentially
-    let saved = 0;
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      try {
-        const dataUrl = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (re) => resolve(re.target.result);
-          reader.onerror = () => reject(new Error('Read failed'));
-          reader.readAsDataURL(file);
-        });
-        const stampedDataUrl = await addDateStampToPhoto(dataUrl, 2048);
-        const photoId = `safety_${currentSurveyId}_${idx}_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 4)}`;
-        const photo = {
-          id: photoId,
-          surveyId: currentSurveyId,
-          itemLabel: `safety_eq_${idx}`,
-          dataUrl: stampedDataUrl,
-          annotated: false,
-          createdAt: new Date().toISOString()
-        };
-        await savePhoto(photo);
-        survey.safetyEquipment[idx].photos.push(photoId);
-        saved++;
-      } catch (err) {
-        console.error('Safety photo save failed', err);
-      }
-    }
-    await saveSurvey(survey);
-    showToast(`${saved} photo${saved !== 1 ? 's' : ''} saved`);
-    loadSafetyThumbnails(idx, survey.safetyEquipment[idx].photos);
-    _safetyPhotoCleanup();
-  };
-  setCameraActive(true);
-  input.click();
-  // v2320: release ALL state if user cancels (no onchange fires)
-  setTimeout(() => { _safetyPhotoCleanup(); }, 60000);
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !survey.safetyEquipment[idx]) return;
+  const eqName = survey.safetyEquipment[idx].name || `Safety item ${idx}`;
+  openBatchCamera(eqName, { safetyIdx: idx });
 }
 
 // Load thumbnails for a safety equipment item — with view/delete buttons
@@ -17923,134 +17864,30 @@ function updateCategoryHeader(survey, categoryName) {
   const header = accordion.querySelector('.accordion-header');
   if (!header) return;
 
-  // Get category items from template (with sail-only and conditional filtering)
-  const activeTemplate = getTemplateForSurvey(survey);
-  const sailOnlyCategories = ['Spars and rigging', 'Sails'];
-  const isPowerboat = (survey.vesselType || '').toLowerCase() === 'power';
-  const isSailboat = (survey.vesselType || '').toLowerCase() === 'sail';
-  let categoryItems = [];
+  // v2324: count completion from the DOM wrappers — the same source the
+  // "items left" popover reads — so the "N left" badge and the popover
+  // list can never disagree. The previous template-based recalculation
+  // had filtering that drifted out of sync with the initial render,
+  // causing phantom items in the count.
+  const wrappers = accordion.querySelectorAll('.compact-item-wrapper');
+  let totalItems = 0;
+  let completionCount = 0;
+  let excludedCount = 0;
+  let flaggedCount = 0;
+  wrappers.forEach(w => {
+    const lbl = w.getAttribute('data-item-label');
+    if (!lbl) return;
+    totalItems++;
+    const data = survey.items[lbl];
+    if (data && data.excluded) { completionCount++; excludedCount++; }
+    else if (data && data.rating) { completionCount++; }
+    if (data && data.flagged) { flaggedCount++; }
+  });
 
-  // Drive type filtering arrays
-  const driveType = survey.driveType || '';
-  const SHAFT_ONLY_LABELS = [
-    'Cutlass bearing(s)', 'Propeller shaft(s)', 'Propeller(s)',
-    'Propeller/drive anode(s)', 'Stern tube(s) (external)', 'Skeg(s)'
-  ];
-  const OUTDRIVE_ONLY_LABELS = [
-    'Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows'
-  ];
-  const SAILDRIVE_ONLY_LABELS = [
-    'Sail drive(s) - (external), corrosion, propeller(s), anode(s)'
-  ];
-  const IPS_ONLY_LABELS = [
-    'IPS pod drive(s)'
-  ];
+  if (totalItems === 0) return;
 
-  function shouldShowHeaderItem(item) {
-    if (isPowerboat && item.sailOnly) return false;
-    if (isSailboat && item.powerOnly) return false;
-    if (isPowerboat && item.rudderItem) {
-      // v2210: derive hasRudder from driveType when explicit field is absent
-      // (existing surveys have no hasRudder). Outdrive/saildrive/IPS → no rudder;
-      // shaft drive → has rudder. Explicit survey.hasRudder (boolean) still wins.
-      const _hasRudder = (typeof survey.hasRudder === 'boolean')
-        ? survey.hasRudder
-        : !['outdrive','saildrive','ips'].includes((survey.driveType||'').toLowerCase());
-      if (!_hasRudder) return false;
-    }
-    if (isPowerboat && ['Keel and keel joint', 'Keel bolts'].includes(item.label)) return false;
-    // Drive type filtering
-    if (driveType) {
-      if (driveType === 'outdrive') {
-        if (SAILDRIVE_ONLY_LABELS.includes(item.label)) return false;
-        if (SHAFT_ONLY_LABELS.includes(item.label)) return false;
-      } else if (driveType === 'saildrive') {
-        if (OUTDRIVE_ONLY_LABELS.includes(item.label)) return false;
-        if (SHAFT_ONLY_LABELS.includes(item.label)) return false;
-      } else if (driveType === 'shaft') {
-        if (OUTDRIVE_ONLY_LABELS.includes(item.label)) return false;
-        if (SAILDRIVE_ONLY_LABELS.includes(item.label)) return false;
-      }
-    }
-    if (item.conditional) {
-      const thrusterRating = survey.items['Bow thruster']?.rating;
-      const sternThrusterRating = survey.items['Stern thruster']?.rating;
-      const propaneRating = survey.items['Propane valve, regulator, gauge, storage compartment and vent']?.rating;
-      if (item.conditional === 'bowThruster' && (!thrusterRating || thrusterRating === 'Not applicable')) return false;
-      if (item.conditional === 'sternThruster' && (!sternThrusterRating || sternThrusterRating === 'Not applicable')) return false;
-      if (item.conditional === 'propane' && (!propaneRating || propaneRating === 'Not applicable')) return false;
-    }
-    return true;
-  }
-
-  for (const section of activeTemplate) {
-    if (section.name === 'Kiki Marine Survey' && section.categories) {
-      for (const category of section.categories) {
-        if (category.name === categoryName) {
-          if (isPowerboat && sailOnlyCategories.includes(category.name)) return;
-          categoryItems = category.items ? category.items.filter(i => i.type === 'list' && shouldShowHeaderItem(i)) : [];
-          break;
-        }
-      }
-    }
-  }
-
-  if (categoryItems.length === 0) return;
-
-  // Expand / singularise drive line items for header progress tracking
-  const headerDriveLineCount = survey.driveLineCount || 1;
-  if (headerDriveLineCount === 1) {
-    categoryItems = categoryItems.map(item => {
-      if (item.driveLineItem) return { ...item, label: item.label.replace(/\(s\)/g, '') };
-      return item;
-    });
-  } else {
-    const dlLabels = headerDriveLineCount === 2
-      ? ['Port', 'Starboard']
-      : Array.from({ length: headerDriveLineCount }, (_, i) => `#${i + 1}`);
-    const expanded = [];
-    categoryItems.forEach(item => {
-      if (!item.driveLineItem) { expanded.push(item); }
-      else {
-        const base = item.label.replace(/\(s\)/g, '');
-        for (let t = 0; t < headerDriveLineCount; t++) {
-          expanded.push({ ...item, label: `${dlLabels[t]} — ${base.trim()}` });
-        }
-      }
-    });
-    categoryItems = expanded;
-  }
-
-  // Expand / singularise hull items for header progress tracking
-  const headerHullCount = inferHullCount(survey);
-  if (headerHullCount === 1) {
-    categoryItems = categoryItems.map(item => {
-      if (item.hullItem) return { ...item, label: item.label.replace(/\(s\)/g, '') };
-      return item;
-    });
-  } else {
-    const hullLabels = headerHullCount === 2
-      ? ['Port hull', 'Starboard hull']
-      : ['Port hull', 'Centre hull', 'Starboard hull'];
-    const expanded = [];
-    categoryItems.forEach(item => {
-      if (!item.hullItem) { expanded.push(item); }
-      else {
-        const base = item.label.replace(/\(s\)/g, '').replace(/^Hull\s+/, 'Hull ');
-        for (let h = 0; h < headerHullCount; h++) {
-          expanded.push({ ...item, label: `${hullLabels[h]} — ${base.trim()}` });
-        }
-      }
-    });
-    categoryItems = expanded;
-  }
-
-  const completionCount = categoryItems.filter(item =>
-    survey.items[item.label]?.rating || survey.items[item.label]?.excluded
-  ).length;
-  const excludedCount = categoryItems.filter(item => survey.items[item.label]?.excluded).length;
-  const allExcluded = excludedCount === categoryItems.length && categoryItems.length > 0;
-  const completionPct = Math.round((completionCount / categoryItems.length) * 100);
+  const allExcluded = excludedCount === totalItems;
+  const completionPct = Math.round((completionCount / totalItems) * 100);
   const isComplete = completionPct === 100;
   const progressColor = allExcluded ? '#9ca3af' : (isComplete ? '#16a34a' : '#dc2626');
 
@@ -18064,7 +17901,7 @@ function updateCategoryHeader(survey, categoryName) {
   // button that opens the "items left" list. When Done or fully Skipped,
   // a plain span is enough. Because we swap element types, replace
   // outerHTML rather than just setting textContent.
-  const remaining = categoryItems.length - completionCount;
+  const remaining = totalItems - completionCount;
   const progressText = allExcluded ? 'Skipped' : (isComplete ? 'Done' : `${remaining} left`);
   const progressHtml = (allExcluded || isComplete)
     ? `<span class="category-progress" style="color:${progressColor};margin-left:auto;flex-shrink:0;white-space:nowrap;">${progressText}</span>`
@@ -18075,8 +17912,12 @@ function updateCategoryHeader(survey, categoryName) {
   }
 
   // Update flagged/excluded badges in title
-  const flaggedItems = categoryItems.filter(item => survey.items[item.label]?.flagged);
-  const flaggedCount = flaggedItems.length;
+  // Build flagged labels from DOM wrappers (consistent with the new DOM-based counting)
+  const flaggedLabels = [];
+  wrappers.forEach(w => {
+    const lbl = w.getAttribute('data-item-label');
+    if (lbl && survey.items[lbl]?.flagged) flaggedLabels.push(lbl);
+  });
   // Build subtitle badges (flagged info shown in yellow summary bar below header)
   let badges = '';
   if (excludedCount > 0 && !allExcluded) {
@@ -18093,7 +17934,7 @@ function updateCategoryHeader(survey, categoryName) {
   // Update flagged summary below header
   let summaryEl = accordion.querySelector('.flagged-summary');
   if (flaggedCount > 0) {
-    const summaryHtml = `🚩 ${flaggedCount} flagged: ${flaggedItems.map(i => i.label).join(', ')}`;
+    const summaryHtml = `🚩 ${flaggedCount} flagged: ${flaggedLabels.join(', ')}`;
     if (summaryEl) {
       summaryEl.innerHTML = summaryHtml;
     } else {
@@ -23472,6 +23313,8 @@ async function openBatchCamera(itemLabel, opts) {
   bc.isArea = !!opts.isArea;
   bc.categoryName = opts.categoryName || '';
   bc.editingIndex = -1;
+  // v2324: safety equipment photo support
+  bc.safetyIdx = (opts.safetyIdx !== undefined) ? opts.safetyIdx : undefined;
 
   // Feature-detect
   const canUseCamera = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
@@ -23634,7 +23477,47 @@ async function openBatchCamera(itemLabel, opts) {
 
 function _batchCameraFallback(itemLabel, opts) {
   // Fall back to existing multi-file picker flow
-  if (opts.isArea) {
+  if (opts.safetyIdx !== undefined) {
+    // v2324: safety equipment fallback — file picker that saves to safetyEquipment[idx].photos
+    const idx = opts.safetyIdx;
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.multiple = true;
+    input.onchange = async () => {
+      const files = Array.from(input.files);
+      if (files.length === 0) { setCameraActive(false); return; }
+      if (files.length > 1) showToast(`Saving ${files.length} photos...`);
+      for (const file of files) {
+        await new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = async (e) => {
+            const stamped = await addDateStampToPhoto(e.target.result);
+            const photoId = `safety_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+            const photo = { id: photoId, surveyId: currentSurveyId, itemLabel: `safety_eq_${idx}`, dataUrl: stamped, annotated: false, createdAt: new Date().toISOString(), isDocPhoto: true };
+            await savePhoto(photo);
+            const survey = await getSurvey(currentSurveyId);
+            if (survey && survey.safetyEquipment && survey.safetyEquipment[idx]) {
+              if (!Array.isArray(survey.safetyEquipment[idx].photos)) survey.safetyEquipment[idx].photos = [];
+              survey.safetyEquipment[idx].photos.push(photoId);
+              await saveSurvey(survey);
+            }
+            resolve();
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+      setCameraActive(false);
+      const survey = await getSurvey(currentSurveyId);
+      if (survey && survey.safetyEquipment && survey.safetyEquipment[idx]) {
+        if (typeof loadSafetyThumbnails === 'function') loadSafetyThumbnails(idx, survey.safetyEquipment[idx].photos);
+      }
+      showToast(files.length + ' photo' + (files.length === 1 ? '' : 's') + ' saved');
+    };
+    setCameraActive(true);
+    input.click();
+  } else if (opts.isArea) {
     // Build a hidden input and hand off to handleAreaPhotoCapture.
     // v2198: set `capture="environment"` so mobile browsers open the
     // rear camera directly instead of a file picker. Users who want to
@@ -23792,11 +23675,25 @@ async function commitStagedPhotos() {
     closeBatchCameraOverlay();
     return;
   }
-  if (!survey.items[bc.itemLabel]) {
-    survey.items[bc.itemLabel] = { rating: '', text: '', standards: [], photos: [] };
-  }
-  if (!Array.isArray(survey.items[bc.itemLabel].photos)) {
-    survey.items[bc.itemLabel].photos = [];
+
+  // v2324: safety equipment photos go to survey.safetyEquipment[idx].photos
+  const isSafety = bc.safetyIdx !== undefined;
+
+  if (isSafety) {
+    if (!survey.safetyEquipment || !survey.safetyEquipment[bc.safetyIdx]) {
+      closeBatchCameraOverlay();
+      return;
+    }
+    if (!Array.isArray(survey.safetyEquipment[bc.safetyIdx].photos)) {
+      survey.safetyEquipment[bc.safetyIdx].photos = [];
+    }
+  } else {
+    if (!survey.items[bc.itemLabel]) {
+      survey.items[bc.itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+    }
+    if (!Array.isArray(survey.items[bc.itemLabel].photos)) {
+      survey.items[bc.itemLabel].photos = [];
+    }
   }
 
   // Snapshot the staged list before we start awaiting, then clear it so any
@@ -23807,17 +23704,25 @@ async function commitStagedPhotos() {
   for (let i = 0; i < toCommit.length; i++) {
     try {
       const stamped = await addDateStampToPhoto(toCommit[i].dataUrl, 2048);
-      const photoId = currentSurveyId + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+      const photoId = isSafety
+        ? `safety_${currentSurveyId}_${bc.safetyIdx}_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 4)}`
+        : currentSurveyId + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+      const itemLabelForPhoto = isSafety ? `safety_eq_${bc.safetyIdx}` : bc.itemLabel;
       const photo = {
         id: photoId,
         surveyId: currentSurveyId,
-        itemLabel: bc.itemLabel,
+        itemLabel: itemLabelForPhoto,
         dataUrl: stamped,
         annotated: false,
         createdAt: new Date().toISOString()
       };
+      if (isSafety) photo.isDocPhoto = true;
       await savePhoto(photo);
-      survey.items[bc.itemLabel].photos.push(photoId);
+      if (isSafety) {
+        survey.safetyEquipment[bc.safetyIdx].photos.push(photoId);
+      } else {
+        survey.items[bc.itemLabel].photos.push(photoId);
+      }
     } catch (err) {
       console.error('Failed to commit staged photo', i, err);
     }
@@ -23828,7 +23733,12 @@ async function commitStagedPhotos() {
   closeBatchCameraOverlay();
 
   // Refresh whichever UI this came from
-  if (bc.isArea) {
+  if (isSafety) {
+    // Reload safety thumbnails for this item
+    if (typeof loadSafetyThumbnails === 'function') {
+      loadSafetyThumbnails(bc.safetyIdx, survey.safetyEquipment[bc.safetyIdx].photos);
+    }
+  } else if (bc.isArea) {
     refreshAreaPhotoGrid(survey, bc.itemLabel);
   } else {
     updateItemInPlace(survey, bc.itemLabel);

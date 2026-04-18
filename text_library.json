@@ -997,7 +997,7 @@
     {
       "section": "Exhaust discharge position and condition",
       "rating": "C",
-      "text": "The exhaust ports were located below the waterline at the transom.",
+      "text": "The exhaust {count:port was|ports were} located below the waterline at the transom.",
       "phase": "observed",
       "severity": 3
     },
@@ -1011,14 +1011,14 @@
     {
       "section": "Exhaust discharge position and condition",
       "rating": "C",
-      "text": "The exhaust port was located above the waterline at the transom and was functioning as intended.",
+      "text": "The exhaust {count:port was|ports were} located above the waterline at the transom and {count:was|were} functioning as intended.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Exhaust discharge position and condition",
       "rating": "C",
-      "text": "The exhaust ports were located at the aft corners of the transom.",
+      "text": "The exhaust {count:port was|ports were} located at the aft corners of the transom.",
       "phase": "observed",
       "severity": 3
     },
@@ -1648,6 +1648,13 @@
     {
       "section": "Exhaust discharge position and condition",
       "rating": "A",
+      "text": "The exhaust {count:port was|ports were} located _________.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Exhaust discharge position and condition",
+      "rating": "A",
       "text": "The exhaust discharge is leaking, cracked, or positioned dangerously.",
       "phase": "observed",
       "severity": 4
@@ -1658,6 +1665,13 @@
       "text": "Immediate repair is required.",
       "phase": "action",
       "severity": 5
+    },
+    {
+      "section": "Exhaust discharge position and condition",
+      "rating": "B",
+      "text": "The exhaust {count:port was|ports were} located _________.",
+      "phase": "observed",
+      "severity": 1
     },
     {
       "section": "Exhaust discharge position and condition",
