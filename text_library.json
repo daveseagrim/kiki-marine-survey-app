@@ -2126,63 +2126,77 @@
       "rating": "A",
       "phase": "observed",
       "severity": 1,
-      "text": "The primer, barrier coat, and anti-fouling were inspected below the waterline."
-    },
-    {
-      "section": "Primer, barrier coat, anti-fouling",
-      "rating": "A",
-      "phase": "observed",
-      "severity": 5,
-      "text": "The anti-fouling had failed or was missing over large areas of the hull."
-    },
-    {
-      "section": "Primer, barrier coat, anti-fouling",
-      "rating": "A",
-      "phase": "observed",
-      "severity": 5,
-      "text": "The barrier coat was compromised and the underlying laminate was exposed."
+      "text": "The anti-fouling, epoxy barrier coat, and gelcoat were inspected below the waterline."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "A",
       "phase": "observed",
       "severity": 4,
-      "text": "The primer had flaked off extensively, leaving the gelcoat unprotected."
+      "text": "The anti-fouling and epoxy barrier coat were worn or damaged in [describe area(s)], exposing the gelcoat."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The anti-fouling, epoxy barrier coat, and gelcoat were worn or damaged in [describe area(s)], exposing the fibreglass laminate."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 4,
+      "text": "The anti-fouling appears to have been applied without an epoxy barrier coat, directly over the gelcoat."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "The anti-fouling appears to have been applied directly onto the fibreglass laminate without an epoxy barrier coat or gelcoat."
+    },
+    {
+      "section": "Primer, barrier coat, anti-fouling",
+      "rating": "A",
+      "phase": "means",
+      "severity": 4,
+      "text": "With the gelcoat exposed, the hull is vulnerable to moisture ingress and the onset of osmotic blistering."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "A",
       "phase": "means",
       "severity": 5,
-      "text": "The hull was at risk of osmotic damage without immediate protection."
+      "text": "With the fibreglass laminate exposed, the hull is at immediate risk of water absorption, osmotic damage, and structural degradation."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "A",
       "phase": "means",
       "severity": 5,
-      "text": "These findings compromised the proper layers of hull protection and the ability to protect the laminate."
+      "text": "Without an epoxy barrier coat, the hull has no effective protection against osmotic blistering and moisture ingress below the waterline."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "A",
       "phase": "action",
       "severity": 4,
-      "text": "Strip the failed layers of hull protection back to sound substrate, reapply primer, barrier coat, and anti-fouling before relaunching the vessel."
+      "text": "Strip the damaged layers back to sound substrate, reapply epoxy barrier coat and anti-fouling before relaunching the vessel."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "A",
       "phase": "action",
       "severity": 5,
-      "text": "The vessel should not be returned to the water until the proper layers of hull protection are restored."
+      "text": "The vessel should not be returned to the water until all layers of hull protection are restored."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "B",
       "phase": "observed",
       "severity": 1,
-      "text": "The primer, barrier coat, and anti-fouling were inspected below the waterline."
+      "text": "The anti-fouling, epoxy barrier coat, and gelcoat were inspected below the waterline."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
@@ -2196,28 +2210,21 @@
       "rating": "B",
       "phase": "observed",
       "severity": 2,
-      "text": "The anti-fouling was worn off in [describe area(s)], exposing the barrier coat."
+      "text": "The anti-fouling was worn through in [describe area(s)], exposing the epoxy barrier coat."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "Multiple legacy layers of anti-fouling have built up and were flaking in [describe area(s)]."
-    },
-    {
-      "section": "Primer, barrier coat, anti-fouling",
-      "rating": "B",
-      "phase": "observed",
-      "severity": 2,
-      "text": "The barrier coat remained intact but localized repairs to the anti-fouling are advisable."
+      "text": "Multiple legacy layers of anti-fouling have built up and were chipping away in [describe area(s)]."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "B",
       "phase": "means",
       "severity": 2,
-      "text": "The proper layers of hull protection were in overall sound condition but attention was required to maintain protection."
+      "text": "The epoxy barrier coat remained intact and was providing protection, but the anti-fouling requires attention to maintain hull coverage."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
@@ -2249,31 +2256,24 @@
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
-      "rating": "B",
-      "phase": "action",
-      "severity": 2,
-      "text": "Carry out localized repairs to the primer, barrier coat, and anti-fouling as required."
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The anti-fouling, epoxy barrier coat, and gelcoat were inspected below the waterline."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The primer, barrier coat, and anti-fouling were inspected below the waterline."
+      "text": "The anti-fouling, epoxy barrier coat, and gelcoat were intact and in good order."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The primer, barrier coat, and anti-fouling were intact and in good order."
-    },
-    {
-      "section": "Primer, barrier coat, anti-fouling",
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "The primer, barrier coat, and anti-fouling were intact and in acceptable condition."
+      "text": "The anti-fouling, epoxy barrier coat, and gelcoat were intact and in acceptable condition."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
@@ -2287,7 +2287,7 @@
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The proper layers of hull protection were providing effective protection to the hull."
+      "text": "All layers of hull protection were providing effective coverage."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",

@@ -14,8 +14,7 @@ lets you roll back to a specific version with confidence.
 
 ## v2310 — 2026-04-17
 - Hull percussion B-rating action snippets: removed "at the next haul-out" from monitoring snippet; rewrote recheck snippet to "Recommend rechecking with visual inspection, impact and conductivity testing periodically."
-- Moved "The barrier coat was compromised…" from "What it means" to "What was observed" phase.
-- Replaced all "coating system" references with "proper layers of hull protection" across primer/barrier coat/anti-fouling snippets (5 occurrences).
+- Complete rewrite of Primer, barrier coat, anti-fouling snippets using correct hull layer model (anti-fouling → epoxy barrier coat → gelcoat → fibreglass). A-rating now covers gelcoat-exposed and fibreglass-exposed scenarios, plus anti-fouling applied without barrier coat or gelcoat. B-rating covers worn anti-fouling exposing epoxy barrier coat and legacy layer buildup. All "primer" and "coating system" references replaced with correct terminology.
 
 ## v2309 — 2026-04-17
 - Hand-typed text preservation: typing in the observation textarea before ticking a snippet no longer overwrites your text — snippets append after what you wrote.
