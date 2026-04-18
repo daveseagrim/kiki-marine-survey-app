@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2367';
+const APP_VERSION = 'v2368';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -20887,7 +20887,7 @@ async function generateReport() {
     <span style="color:white;font-size:11pt;font-weight:bold;">Kiki Marine — Survey Report</span>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button onclick="window.close(); if(!window.closed) history.back();" style="background:#4ade80;color:#066aab;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">← Back to Inspection</button>
-      <button onclick="window.print()" style="background:#fff;color:#066aab;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">🖨️ Print / PDF</button>
+      <button onclick="(function(){try{if(window.parent&&window.parent.printReportIframe){window.parent.printReportIframe();return;}}catch(_){}try{window.print();}catch(_){}})()" style="background:#fff;color:#066aab;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">🖨️ Print / PDF</button>
       <button onclick="exportToWord()" style="background:#f0c040;color:#066aab;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">📥 Download as Word</button>
       <button onclick="toggleProseMode()" id="proseModeBtn" style="background:#e5e7eb;color:#333;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">📝 Prose Mode</button>
     </div>
@@ -22084,20 +22084,43 @@ function toggleProseMode() {
   }
 }
 
+// v2368: exposed on window so the in-iframe "Print / PDF" button can reach
+// it via window.parent.printReportIframe(). Prints only the iframe content
+// (not the parent page header), which is what the user actually wants.
+window.printReportIframe = function printReportIframe() {
+  const iframe = document.getElementById('reportFrame');
+  if (!iframe || !iframe.contentWindow) {
+    try { window.print(); } catch (_) {}
+    return;
+  }
+  try {
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+  } catch (_) {
+    try { window.print(); } catch (_) {}
+  }
+};
+
 function renderReportInPage(html) {
   const previousView = currentView;
   currentView = 'report'; persistViewState();
   history.pushState({ view: 'report' }, '');
 
   const app = document.getElementById('app');
+  // v2368: Removed the redundant green "Print/PDF" button that lived on the
+  // parent-page header. It called `window.print()` on the parent — which
+  // printed the host page with the iframe rendered as a single element,
+  // so the browser's print pipeline only emitted the visible (first) page
+  // of the iframe. The in-iframe "Print / PDF" button (inside exportToolbar)
+  // is the correct entry point; it's been fixed so it targets the iframe
+  // directly via window.parent.printReportIframe().
   app.innerHTML = `
     <div style="position:fixed;top:0;left:0;right:0;z-index:100;background:#066aab;padding:12px 16px;display:flex;align-items:center;gap:12px;">
       <button onclick="history.back()" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">←</button>
       <span style="color:white;font-weight:600;">Survey Report</span>
-      <button onclick="window.print()" style="margin-left:auto;background:#16a34a;color:white;border:none;padding:8px 16px;border-radius:6px;font-size:14px;cursor:pointer;">🖨️ Print/PDF</button>
     </div>
     <div style="margin-top:56px;">
-      <iframe id="reportFrame" style="width:100%;border:none;min-height:100vh;" sandbox="allow-same-origin allow-scripts"></iframe>
+      <iframe id="reportFrame" style="width:100%;border:none;min-height:100vh;" sandbox="allow-same-origin allow-scripts allow-modals allow-popups"></iframe>
     </div>
   `;
 

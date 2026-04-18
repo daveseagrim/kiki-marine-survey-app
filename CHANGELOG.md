@@ -12,6 +12,17 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2368 — 2026-04-18
+### Fixed / Removed
+- **Survey Report: two broken Print/PDF buttons reduced to one working button.** Two problems, both printing-related:
+  1. **Parent-page top-right green "Print/PDF" button was only emitting page 1.** The report renders inside an iframe (`#reportFrame`) under a fixed parent header. That top-right button called `window.print()` on the *parent* window — so the browser's print pipeline treated the iframe as one element on the parent page and sent only the parent's current visible area to the printer. Result: page 1 prints, the rest of the report vanishes. **Fix: removed that button entirely** — the inside-iframe toolbar already has a Print / PDF button and a Word export, so the parent-header button was redundant.
+  2. **Inside-iframe "Print / PDF" button wasn't triggering any print dialog.** The iframe was declared with `sandbox="allow-same-origin allow-scripts"` — without the `allow-modals` token, browsers block `window.print()` (and `alert`/`confirm`) calls from inside the sandboxed frame. So the button click fired, the handler executed, but the print dialog was silently suppressed. **Fix (two parts):**
+     - Added `allow-modals` and `allow-popups` to the iframe sandbox so the print dialog isn't suppressed.
+     - Belt-and-braces: the inside button now calls a new `window.printReportIframe()` helper on the parent (which targets `iframe.contentWindow.print()` directly), with a fallback to the original `window.print()` if the parent call fails. That sidesteps any residual sandbox suppression on older iOS Safari and makes the call context explicit about which document to print.
+- Result: users now have exactly one Print / PDF button (inside the iframe's blue toolbar, next to Back to Inspection, Download as Word, and Prose Mode), and it prints the full multi-page report — not just page 1.
+
+---
+
 ## v2367 — 2026-04-18
 ### Fixed
 - **Check Survey (preflight) was flagging just-rated C items as "C rated but no notes" when notes had in fact been typed.** The bug was a save-order race: inspection-view textareas persist via the textarea's `onblur` → `autoSaveItemText()` handler, but if the user tapped the floating Check Survey button while a textarea was still focused (keyboard still up on iPhone), the click fired before the blur event completed — so the latest keystrokes never made it into IndexedDB. `checkSurvey()` then called `getSurvey()`, read the pre-edit snapshot with `data.text === ''`, hit the `baseRating === 'C' && !data.text` guard (app.js line 13935), and added a "Missing Notes" warning even though the notes were visibly on-screen. Same mechanism affected A/B ratings (line 13928) and the unreplaced-placeholder check (line 13940) — any preflight path that inspects `data.text` was reading stale data.
