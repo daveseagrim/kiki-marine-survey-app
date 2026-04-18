@@ -5016,12 +5016,12 @@ function showMediaSheet(itemLabel, categoryName) {
                  title="Drag to reorder \u2022 Tap to edit"
                  style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;"
                  onclick="showPhotoActionOverlay('${photoId}', '${safeLabel}', '${safeCat}')" />
-            <button onclick="event.stopPropagation();_sheetRotatePhoto('${photoId}','${safeLabel}','${safeCat}')"
-                    style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:25px;height:25px;font-size:14px;line-height:25px;text-align:center;cursor:pointer;padding:0;backdrop-filter:blur(2px);"
-                    title="Rotate 90\u00b0">↻</button>
-            <button onclick="event.stopPropagation();_sheetDeletePhoto('${photoId}','${safeLabel}','${safeCat}')"
-                    style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border:none;border-radius:50%;width:25px;height:25px;font-size:14px;line-height:25px;text-align:center;cursor:pointer;padding:0;backdrop-filter:blur(2px);"
-                    title="Delete photo">✕</button>
+            <span onclick="event.stopPropagation();_sheetRotatePhoto('${photoId}','${safeLabel}','${safeCat}')"
+                  style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:22px;height:22px;font-size:13px;line-height:22px;text-align:center;cursor:pointer;display:inline-block;backdrop-filter:blur(2px);-webkit-tap-highlight-color:transparent;"
+                  title="Rotate 90\u00b0">↻</span>
+            <span onclick="event.stopPropagation();_sheetDeletePhoto('${photoId}','${safeLabel}','${safeCat}')"
+                  style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:13px;line-height:22px;text-align:center;cursor:pointer;display:inline-block;backdrop-filter:blur(2px);-webkit-tap-highlight-color:transparent;"
+                  title="Delete photo">✕</span>
           </div>
         `;
       });
