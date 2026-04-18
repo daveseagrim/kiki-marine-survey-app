@@ -12,6 +12,14 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2343 — 2026-04-18
+### Added
+- `[appliance]` placeholder renders as dropdown: icebox / refrigerator / freezer / refrigerator/freezer.
+- `[compressor]` placeholder renders as dropdown: remote compressor / internal compressor / no compressor (icebox only). Selecting "no compressor" strips the entire compressor clause from the sentence.
+- Refrigerator/icebox and Refrigerator/freezer snippets rewritten with `[appliance]` and `[compressor]` dropdowns for C, B, and Not tested ratings.
+
+---
+
 ## v2342 — 2026-04-18
 ### Changed
 - Removed "Engine alignment" from survey template (not something Dave surveys).

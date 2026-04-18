@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2342';
+const APP_VERSION = 'v2343';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4014,6 +4014,29 @@ function showNotesSheet(itemLabel, categoryName) {
                   `<option value="both">both</option>` +
                 `</select>`;
             })());
+            // v2342: [appliance] placeholder for refrigerator/icebox/freezer type
+            .replace(/\[appliance\]/gi,
+              `<select class="kk-appliance-input" ` +
+                `onchange="_kkRebuildFromSentencePicker('${sanitizedLabel}')" ` +
+                `onclick="event.stopPropagation();" ` +
+                `style="padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">` +
+                  `<option value="">— type —</option>` +
+                  `<option value="icebox">icebox</option>` +
+                  `<option value="refrigerator">refrigerator</option>` +
+                  `<option value="freezer">freezer</option>` +
+                  `<option value="refrigerator/freezer">refrigerator/freezer</option>` +
+                `</select>`)
+            // v2342: [compressor] placeholder for cooling type
+            .replace(/\[compressor\]/gi,
+              `<select class="kk-compressor-input" ` +
+                `onchange="_kkRebuildFromSentencePicker('${sanitizedLabel}')" ` +
+                `onclick="event.stopPropagation();" ` +
+                `style="padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;font-size:13px;">` +
+                  `<option value="">— cooling —</option>` +
+                  `<option value="remote compressor">remote compressor</option>` +
+                  `<option value="internal compressor">internal compressor</option>` +
+                  `<option value="none">no compressor (icebox only)</option>` +
+                `</select>`)
             // v2291: store base rendered HTML in data-base-html so that
             // _kkRefreshMastLabels() can re-interpolate when dropdowns change.
             // Initial display gets mast desc applied from saved itemData.
@@ -4625,6 +4648,22 @@ window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
       // Clean up doubled spaces from the optional space
       text = text.replace(/\s{2,}/g, ' ').replace(/\s+([.,;:])/g, '$1');
     }
+    // v2342: [appliance] → icebox / refrigerator / freezer / refrigerator/freezer
+    const appliance = (lbl.querySelector('.kk-appliance-input') || {}).value || '';
+    if (/\[appliance\]/i.test(text)) {
+      text = text.replace(/\[appliance\]/gi, appliance || '[appliance]');
+    }
+    // v2342: [compressor] → remote compressor / internal compressor / omit
+    const compressor = (lbl.querySelector('.kk-compressor-input') || {}).value || '';
+    if (/\[compressor\]/i.test(text)) {
+      if (compressor === 'none') {
+        // Strip the entire compressor clause (e.g., ", cooled by a [compressor],")
+        text = text.replace(/,?\s*cooled by an?\s*\[compressor\]\s*,?/gi, '');
+      } else if (compressor) {
+        text = text.replace(/\[compressor\]/gi, compressor);
+      }
+      text = text.replace(/\s{2,}/g, ' ').replace(/\s+([.,;:])/g, '$1');
+    }
     // v2276: pluralize rudder references based on rudderCount
     const _rc = (window._currentSurveyCache && window._currentSurveyCache.rudderCount) || 1;
     text = pluralizeRudder(text, _rc);
@@ -4703,7 +4742,7 @@ function _kkAutoCheckSavedSentences(sanitizedLabel, survey, itemLabel) {
     resolved = _kkInterpolateWinchDesc(resolved);
 
     // Skip sentences that still have unfilled placeholders — can't reliably match
-    if (/\[(?:insert |describe |side\])/i.test(resolved)) return;
+    if (/\[(?:insert |describe |side\]|appliance\]|compressor\])/i.test(resolved)) return;
 
     candidates.push({ chip, resolved: resolved.trim() });
   });

@@ -15905,35 +15905,28 @@
     {
       "section": "Refrigerator / icebox",
       "rating": "C",
-      "text": "The icebox appeared serviceable.",
+      "text": "The [appliance], cooled by a [compressor], appeared serviceable and was clean.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Refrigerator / icebox",
       "rating": "C",
-      "text": "The icebox lid showed no signs of deterioration and appeared to seal tightly.",
+      "text": "The [appliance], cooled by a [compressor], appeared serviceable but required cleaning.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Refrigerator / icebox",
+      "rating": "C",
+      "text": "The lid showed no signs of deterioration and appeared to seal tightly.",
       "phase": "observed",
       "severity": 1
     },
     {
       "section": "Refrigerator / icebox",
-      "rating": "C",
-      "text": "Cooling was from a remote compressor that worked properly.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Refrigerator / icebox",
-      "rating": "C",
-      "text": "The refrigerator appeared sound and well-maintained and required cleaning.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Refrigerator / icebox",
       "rating": "Not tested",
-      "text": "The refrigerator was not running due to a lack of power.",
+      "text": "The [appliance] was not running due to a lack of power.",
       "phase": "observed",
       "severity": 3
     },
@@ -16920,7 +16913,7 @@
     {
       "section": "Refrigerator/freezer",
       "rating": "A",
-      "text": "The refrigerator or freezer was non-functional or broken.",
+      "text": "The [appliance] was non-functional.",
       "phase": "observed",
       "severity": 3
     },
@@ -16934,7 +16927,7 @@
     {
       "section": "Refrigerator/freezer",
       "rating": "B",
-      "text": "The refrigerator or freezer operated but with reduced cooling capacity or intermittent function.",
+      "text": "The [appliance], cooled by a [compressor], operated but with reduced cooling capacity.",
       "phase": "observed",
       "severity": 3
     },
@@ -16948,7 +16941,14 @@
     {
       "section": "Refrigerator/freezer",
       "rating": "C",
-      "text": "The refrigerator and freezer operated properly, maintaining appropriate cooling temperatures.",
+      "text": "The [appliance], cooled by a [compressor], appeared serviceable and was clean.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Refrigerator/freezer",
+      "rating": "C",
+      "text": "The [appliance], cooled by a [compressor], appeared serviceable but required cleaning.",
       "phase": "observed",
       "severity": 3
     },
