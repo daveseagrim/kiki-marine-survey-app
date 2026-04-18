@@ -3545,6 +3545,27 @@
     {
       "section": "Rudder(s) condition",
       "rating": "A",
+      "phase": "observed",
+      "severity": 5,
+      "text": "Moisture testing of the rudder indicated significant water saturation throughout the blade. The rudder core has absorbed water, compromising its structural integrity."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "A water-saturated rudder is at risk of internal delamination, freeze damage in cold climates, and progressive structural failure. This condition represents a significant concern for the vessel's safe operation."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "A",
+      "phase": "action",
+      "severity": 5,
+      "text": "The rudder should be removed, professionally assessed, and either dried and resealed or replaced before the vessel is returned to service."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "A",
       "phase": "means",
       "severity": 5,
       "text": "A compromised rudder represents a loss-of-steering risk and is a significant concern for the vessel's safe operation."
@@ -3583,6 +3604,20 @@
       "phase": "observed",
       "severity": 2,
       "text": "Minor weeping was observed at the rudder stuffing box; this is common when the vessel has been out of the water."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Moisture testing of the rudder indicated elevated readings in localized areas, suggesting early-stage water ingress into the core."
+    },
+    {
+      "section": "Rudder(s) condition",
+      "rating": "B",
+      "phase": "means",
+      "severity": 3,
+      "text": "Localized moisture in the rudder core, if left unaddressed, can progress to full saturation, internal delamination, and freeze damage."
     },
     {
       "section": "Rudder(s) condition",
