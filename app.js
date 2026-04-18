@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2369';
+const APP_VERSION = 'v2370';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -20871,12 +20871,13 @@ async function generateReport() {
     .checklist-table .violation-yes { color: #dc2626; font-weight: bold; }
     .checklist-table .violation-no { color: #16a34a; }
     .checklist-table .text-snippet { white-space: normal; word-break: break-word; font-size: 8.5pt; line-height: 1.35; }
-    /* v2227: uniform report photo size (60% reduction vs the old 800×600).
-       Applied everywhere photos render in the body: item photos, finding
-       photos, nameplates, HIN/compliance plates, four-corner overview. */
-    .report-photo { width: 260px; height: 195px; object-fit: cover; border: 1px solid #d1d5db; border-radius: 4px; display: block; }
+    /* v2370: uniform report photo size — reduced a further 10% from v2227's
+       260×195 baseline, yielding 234×176. Applied everywhere photos render
+       in the body: item photos, finding photos, nameplates, HIN/compliance
+       plates, four-corner overview, safety equipment, instruments. */
+    .report-photo { width: 234px; height: 176px; object-fit: cover; border: 1px solid #d1d5db; border-radius: 4px; display: block; }
     .report-photo-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; margin-top: 6px; }
-    .report-photo-card { display: inline-block; vertical-align: top; width: 260px; }
+    .report-photo-card { display: inline-block; vertical-align: top; width: 234px; }
     .report-photo-card .caption { font-size: 8pt; color: #4b5563; margin-top: 2px; font-style: italic; text-align: center; }
   </style>
 </head>

@@ -12,6 +12,12 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2370 — 2026-04-18
+### Changed
+- **Report photos are now 10% smaller across the board — new standard.** The `.report-photo` CSS class drops from the previous 260×195 baseline (established in v2227) down to **234×176 px**. `.report-photo-card` width drops from 260 → 234 to match. This change applies uniformly everywhere photos render in the generated report body: per-item inspection photos, findings photos, safety-equipment photos, instrument-panel photos, nameplates, HIN and compliance plates, and the four-corner overview grid. Aspect ratio (4:3) is preserved so photos taken in portrait/landscape don't squash; `object-fit: cover` continues to handle non-4:3 source photos cleanly. Net effect: tighter page layout, fewer awkward wraps across grid rows, a few more photos fit per page in the Findings section. No code change required at any photo call site — all inserts go through the shared `.report-photo` class, so every current and future photo location picks up the new size automatically.
+
+---
+
 ## v2369 — 2026-04-18
 ### Fixed
 - **Report generation's "Date integrity issue" modal suggested a remedy that doesn't actually remedy anything.** The modal fires when any photo's capture timestamp (decoded from the photo record's ID — `Date.now()` embedded at photo creation) is later than the survey's declared certification date. The old modal text listed two options, one of which was: "Use 'Remove Date Stamps' from the overflow menu." That was misleading on two counts:
