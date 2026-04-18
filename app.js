@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2374';
+const APP_VERSION = 'v2375';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -9646,7 +9646,9 @@ function editSurveyDetails(surveyId) {
         transmission2Make: survey.transmission2Make,
         transmission2Model: survey.transmission2Model,
         transmission2Serial: survey.transmission2Serial,
-        vesselDescription: survey.vesselDescription,
+        // v2375: scrub any legacy TC TP 511 safety-equipment sentence so it
+        // never appears in the textarea on load.
+        vesselDescription: _stripLegacySafetyFromDescription(survey.vesselDescription),
         hinNumber: survey.hinNumber,
         tcLicenseType: survey.tcLicenseType,
         tcLicense: survey.tcLicense,
@@ -10902,6 +10904,32 @@ function lookupEngineType(makeName, modelName) {
   return mdl ? (mdl.engineType || '') : '';
 }
 
+// v2375: Strip legacy safety-equipment sentences from a saved vessel
+// description. Older versions of the app auto-injected a TC TP 511 summary
+// and/or a fallback "Safety equipment included [N] fire extinguisher(s)..."
+// sentence into paragraph 4 of the description. We now keep that data out of
+// the narrative entirely. This migration removes the sentence (and any
+// following "Missing: ..." clause) while preserving the condition sentence
+// that used to follow it. It is idempotent and safe to call on descriptions
+// that never contained the legacy text.
+function _stripLegacySafetyFromDescription(text) {
+  if (!text || typeof text !== 'string') return text || '';
+  let out = text;
+  // 1. TC TP 511 variant: "Safety equipment per Transport Canada TP 511: X of Y required items verified on board." + optional " Missing: ...."
+  out = out.replace(
+    /Safety equipment per Transport Canada TP 511:[^.]*\.(?:\s*Missing:[^.]*\.)?\s*/g,
+    ''
+  );
+  // 2. Fallback variant (including the placeholder template form):
+  //    "Safety equipment included [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device."
+  //    and any plain "Safety equipment included ...." sentence.
+  out = out.replace(/Safety equipment included[^.]*\.\s*/g, '');
+  // 3. Tidy the paragraph break that used to precede the safety sentence so
+  //    the condition sentence does not start with extra whitespace.
+  out = out.replace(/\n\n\s+At the time of the survey/g, '\n\nAt the time of the survey');
+  return out;
+}
+
 // v2252: Shared condition-sentence builder used by all three vessel-
 // description generators. Reads the surveyor's BUC grade first; falls
 // back to a rating-distribution heuristic when no grade is set.
@@ -11099,19 +11127,9 @@ async function generateVesselDescription() {
     electronicsDesc = parts.join(' ');
   }
 
-  // Build safety equipment summary from TC TP 511 checklist (exclude skipped)
-  let safetyDesc = '';
-  if (survey?.safetyEquipment && survey.safetyEquipment.length > 0) {
-    const _safeSkipCats1 = survey.safetySubcategoriesSkipped || {};
-    const _activeSafe1 = survey.safetyEquipment.filter(e => !e.skipped && !_safeSkipCats1[e.category]);
-    const onBoard = _activeSafe1.filter(e => e.checked).length;
-    const missing = _activeSafe1.length - onBoard;
-    safetyDesc = `Safety equipment per Transport Canada TP 511: ${onBoard} of ${_activeSafe1.length} required items verified on board.`;
-    if (missing > 0) {
-      const missingNames = _activeSafe1.filter(e => !e.checked).map(e => e.name);
-      safetyDesc += ` Missing: ${missingNames.join(', ')}.`;
-    }
-  }
+  // v2375: safety equipment summary removed from Overall Description of Vessel.
+  // TC TP 511 details belong in the Safety Equipment section of the report,
+  // not in the narrative description.
 
   const constructionStr = construction || '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
   const hullTypeStr = hullType || '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
@@ -11161,14 +11179,15 @@ async function generateVesselDescription() {
     desc += `Navigation and communication equipment included [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
   }
 
-  // ── Para 4: Safety equipment and overall condition ──
+  // ── Para 4: Overall condition (v2375: safety equipment summary removed) ──
   desc += '\n\n';
-  desc += safetyDesc || `Safety equipment included [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
   // v2252: condition sentence now uses shared _buildConditionSentence()
   // Builder 1 works from DOM fields, not a survey object — fetch the
   // saved survey so the function can read overallCondition and items.
   const _surveyForCond = currentSurveyId ? (await getSurvey(currentSurveyId) || {}) : {};
-  desc += _buildConditionSentence(_surveyForCond);
+  // _buildConditionSentence returns a string starting with a leading space.
+  // Strip that leading space so the paragraph starts cleanly at its first word.
+  desc += _buildConditionSentence(_surveyForCond).replace(/^\s+/, '');
 
   const textarea = document.getElementById('vesselDescription');
   if (textarea) {
@@ -11329,19 +11348,8 @@ async function regenerateDescriptionFromInspection() {
     electronicsDesc = parts.join(' ');
   }
 
-  // Safety equipment from TC TP 511 (exclude skipped)
-  let safetyDesc = '';
-  if (survey.safetyEquipment && survey.safetyEquipment.length > 0) {
-    const _safeSkipCatsD = survey.safetySubcategoriesSkipped || {};
-    const _activeSafeD = survey.safetyEquipment.filter(e => !e.skipped && !_safeSkipCatsD[e.category]);
-    const onBoard = _activeSafeD.filter(e => e.checked).length;
-    const missing = _activeSafeD.length - onBoard;
-    safetyDesc = `Safety equipment per Transport Canada TP 511: ${onBoard} of ${_activeSafeD.length} required items verified on board.`;
-    if (missing > 0) {
-      const missingNames = _activeSafeD.filter(e => !e.checked).map(e => e.name);
-      safetyDesc += ` Missing: ${missingNames.join(', ')}.`;
-    }
-  }
+  // v2375: TC TP 511 safety equipment summary removed from Overall Description
+  // of Vessel. Safety equipment details belong in the dedicated report section.
 
   const constructionStr = construction || '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
   const hullTypeStr = hullType || '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
@@ -11383,9 +11391,10 @@ async function regenerateDescriptionFromInspection() {
     desc += `Navigation and communication equipment included [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
   }
   desc += '\n\n';
-  desc += safetyDesc || `Safety equipment included [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
   // v2251: condition sentence driven by overallCondition (same logic as generateVesselDescription)
-  desc += _buildConditionSentence(survey);
+  // v2375: safety summary removed; condition sentence leads this paragraph,
+  // so strip its leading space.
+  desc += _buildConditionSentence(survey).replace(/^\s+/, '');
 
   // Confirm before overwriting
   if (survey.vesselDescription && survey.vesselDescription.trim()) {
@@ -11539,19 +11548,8 @@ function buildDescriptionFromSurvey(survey) {
     electronicsDesc = parts.join(' ');
   }
 
-  // Safety equipment from TC TP 511 (exclude skipped)
-  let safetyDesc = '';
-  if (survey.safetyEquipment && survey.safetyEquipment.length > 0) {
-    const _safeSkipCatsD = survey.safetySubcategoriesSkipped || {};
-    const _activeSafeD = survey.safetyEquipment.filter(e => !e.skipped && !_safeSkipCatsD[e.category]);
-    const onBoard = _activeSafeD.filter(e => e.checked).length;
-    const missing = _activeSafeD.length - onBoard;
-    safetyDesc = `Safety equipment per Transport Canada TP 511: ${onBoard} of ${_activeSafeD.length} required items verified on board.`;
-    if (missing > 0) {
-      const missingNames = _activeSafeD.filter(e => !e.checked).map(e => e.name);
-      safetyDesc += ` Missing: ${missingNames.join(', ')}.`;
-    }
-  }
+  // v2375: TC TP 511 safety equipment summary removed from Overall Description
+  // of Vessel. Safety equipment details belong in the dedicated report section.
 
   const constructionStr = construction || '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
   const hullTypeStr = hullType || '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
@@ -11593,9 +11591,10 @@ function buildDescriptionFromSurvey(survey) {
     desc += `Navigation and communication equipment included [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
   }
   desc += '\n\n';
-  desc += safetyDesc || `Safety equipment included [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device.`;
   // v2251: condition sentence driven by overallCondition (same logic as generateVesselDescription)
-  desc += _buildConditionSentence(survey);
+  // v2375: safety summary removed; condition sentence leads this paragraph,
+  // so strip its leading space.
+  desc += _buildConditionSentence(survey).replace(/^\s+/, '');
 
   return desc;
 }
@@ -21248,13 +21247,21 @@ async function generateReport() {
     ${!_excl('compliancePlate') && (survey.compliancePlate || compliancePhotoDataUrl) ? `<tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || ''}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>` : ''}
   </table>
 
-${survey.vesselDescription && !_excl('vesselDescription') ? `
+${(() => {
+  // v2375: scrub legacy TC TP 511 safety-equipment sentence before the
+  // description is rendered into the report so older saved surveys don't
+  // show the safety text. Auto-regenerated descriptions never include it
+  // from v2375 forward; this guard covers historical + manually-edited data.
+  const _desc = _stripLegacySafetyFromDescription(survey.vesselDescription);
+  if (!_desc || _excl('vesselDescription')) return '';
+  return `
   <!-- ═══ VESSEL DESCRIPTION ═══ -->
   <h2>VESSEL DESCRIPTION</h2>
   <div class="scope-text">
-    <p>${esc(cleanupPlaceholders(survey.vesselDescription)).replace(/\.([A-Z])/g, '. $1').replace(/\n/g, '</p><p>')}</p>
+    <p>${esc(cleanupPlaceholders(_desc)).replace(/\.([A-Z])/g, '. $1').replace(/\n/g, '</p><p>')}</p>
   </div>
-` : ''}
+`;
+})()}
 
   <!-- ═══ USE OF RATINGS (v2240: moved here from before TOC) ═══ -->
   <h2>USE OF RATINGS</h2>
@@ -22587,6 +22594,33 @@ async function initApp() {
       }
     } catch (migErr2) {
       console.warn('v2252 migration error (non-fatal):', migErr2);
+    }
+
+    // ── v2375 one-time migration: strip auto-injected TC TP 511 safety-
+    // equipment sentences from existing vessel descriptions. Earlier
+    // versions of the app appended a "Safety equipment per Transport Canada
+    // TP 511: X of Y required items verified on board." sentence (plus an
+    // optional "Missing: ..." clause) to every auto-generated description.
+    // The safety summary now lives solely in its dedicated report section.
+    try {
+      const _migKey3 = '_v2375_safety_sentence_stripped';
+      if (!localStorage.getItem(_migKey3)) {
+        const _allSurveys3 = await getAllSurveys();
+        let _strippedCount = 0;
+        for (const s of _allSurveys3) {
+          if (!s.vesselDescription) continue;
+          const cleaned = _stripLegacySafetyFromDescription(s.vesselDescription);
+          if (cleaned !== s.vesselDescription) {
+            s.vesselDescription = cleaned;
+            await saveSurvey(s);
+            _strippedCount++;
+          }
+        }
+        localStorage.setItem(_migKey3, '1');
+        console.log('v2375 migration: safety sentence stripped from', _strippedCount, 'survey(s)');
+      }
+    } catch (migErr3) {
+      console.warn('v2375 migration error (non-fatal):', migErr3);
     }
 
     // Kick off dictionary load in the background — no await, so startup

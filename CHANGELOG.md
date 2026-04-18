@@ -12,6 +12,15 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2375 — 2026-04-18
+### Changed
+- **Safety equipment removed from Overall Description of Vessel.** Dave's feedback: the auto-injected sentence "Safety equipment per Transport Canada TP 511: X of Y required items verified on board. Missing: …" was appearing in the Overall Description of Vessel textarea on the Edit Intro page and in the report's Vessel Description paragraph. That information belongs in the dedicated TC TP 511 Safety Equipment section of the report, not in the narrative description. Fix: the narrative no longer includes any safety-equipment summary. Paragraph 4 of the auto-built description now opens directly with the overall-condition sentence ("At the time of the survey the vessel was in …").
+- Code scope: three near-identical description builders (`generateVesselDescription` — the DOM-based Describe button, `regenerateDescriptionFromInspection` — the Regenerate flow, and `buildDescriptionFromSurvey` — the pure function used by the auto-regen hook on every save) all had the same `safetyDesc` block and the same `desc += '\n\n'; desc += safetyDesc || '[fallback]';` pattern. All three are now stripped. The `\n\n` paragraph break is kept so paragraph 4 still renders as its own block.
+- **Legacy data migration.** Existing saved surveys whose `vesselDescription` already contained the auto-injected safety sentence (from earlier versions) are cleaned up in two places: a one-time startup migration (`_v2375_safety_sentence_stripped` localStorage key) walks every saved survey and rewrites the description in IndexedDB, and a just-in-time scrubber (`_stripLegacySafetyFromDescription`) is applied when the description is loaded into the Edit Intro textarea and when it's rendered into the report. Both paths use the same regex-based stripper so behaviour is consistent. The stripper handles both the TP 511 variant ("Safety equipment per Transport Canada TP 511: …") and the fallback variant ("Safety equipment included [N] fire extinguisher(s), …") and preserves any condition sentence that follows.
+- Does not change: TC TP 511 Safety Equipment report section, Findings Overview safety row, the safety checklist on the inspection page, or the BUC grading / condition-sentence logic that still lives in paragraph 4.
+
+---
+
 ## v2374 — 2026-04-18
 ### Changed
 - **Report: no information entered = no blank space.** Dave's rule — the report should not render `N/A`, `$0 – $0`, "Not yet assessed", or other placeholder text for fields he hasn't filled in. Across the entire report, rows and sections now suppress themselves when the underlying data is empty rather than emitting a blank or placeholder row. Specifically:
