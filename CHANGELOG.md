@@ -12,6 +12,28 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2358 — 2026-04-18
+### Added
+- **Dictionary: accepted-vocabulary additions.** The client-side spell-check (which underlines words not found in `dictionary.json` and offers inline suggestions) was flagging several domain-specific terms as typos. Added: `odour`, `odours`, `odourless` (Canadian English — the word was flagged even though `colour`, `labour`, `behaviour` etc. were already present); `flybridge` (marine term, was flagged in the Flybridge Storage locker chip screenshot); `romex` (brand/generic name for household solid-core non-marine wiring referenced in the ABYC E-11 chip set added in v2353); `untinned` (antonym of tinned, used throughout marine wiring findings). Dictionary total: 128,581 → 128,587 entries. All new entries lowercase per the file's case-insensitive convention — the spell-checker normalises to lowercase before lookup, so `Flybridge`, `FLYBRIDGE`, and `flybridge` will all pass.
+
+---
+
+## v2357 — 2026-04-18
+### Changed
+- **Past-tense sweep across observed chips.** Surveyor-report convention is past tense (the inspection is a historical record, not a live status), but a number of observed-phase chips had slipped in using present tense. Screenshot-flagged example was the `Flybridge Storage locker(s)` C-chip reading "Flybridge storage lockers **are** in satisfactory condition with properly functioning latches and hinges." Converted 47 chips across 16 sections, including:
+  - `are/is in satisfactory condition` → `were/was in satisfactory condition`
+  - `is in working order` / `is in acceptable condition` → `was in working order` / `was in acceptable condition`
+  - `is properly mounted and functional` → `was properly mounted and functional`
+  - `is operational and functions properly` → `was operational and functioned properly`
+  - `X operates but shows signs of Y` → `X operated but showed signs of Y` (refrigeration, microwave, head pump, gearbox, inverter, shore-power cables, windlass, etc.)
+  - `X is present but shows signs of Y` → `X was present but showed signs of Y` (galvanic isolator, battery overcurrent protection, propane gas detector, emergency tiller, isolation transformer)
+  - `floor or carpet is severely damaged` → `floor or carpet was severely damaged`
+  - `Keel bolts are secure` → `Keel bolts were secure`
+  - `Plumbing is in working order` → `Plumbing was in working order` (across Aft Deck, Cockpit, Flybridge)
+- All changes confined to chips with `phase: "observed"`. Means and action phases kept in present/imperative form as appropriate. No new chips added, none removed; 38 + 9 updates across a first and cleanup pass.
+
+---
+
 ## v2356 — 2026-04-18
 ### Added
 - **`Flybridge Bimini/dodger/hardtop` — hardtop-specific chip set.** Previously the chip panel for this item pulled only from the fuzzy-matched `Bimini, dodger and canvas enclosure` section, which is written for soft canvas structures — zippers, snaps, fabric wear. Hardtops are rigid (fibreglass, aluminum, composite) and have none of those features. Added 15 hardtop-focused chips covering the conditions an ABYC-trained surveyor actually assesses on a rigid top:
