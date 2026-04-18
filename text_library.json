@@ -348,7 +348,7 @@
       "rating": "B",
       "phase": "action",
       "severity": 2,
-      "text": "Monitor the affected areas at the next haul-out."
+      "text": "Recommend monitoring the affected areas."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",
@@ -362,7 +362,7 @@
       "rating": "B",
       "phase": "action",
       "severity": 3,
-      "text": "Recheck with impact testing at the next scheduled haul-out."
+      "text": "Recommend rechecking with visual inspection, impact and conductivity testing periodically."
     },
     {
       "section": "Hull and rudder(s) impact and resonance testing",

@@ -12,6 +12,14 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2310 — 2026-04-17
+- Hull percussion B-rating action snippets: removed "at the next haul-out" from monitoring snippet; rewrote recheck snippet to "Recommend rechecking with visual inspection, impact and conductivity testing periodically."
+
+## v2309 — 2026-04-17
+- Hand-typed text preservation: typing in the observation textarea before ticking a snippet no longer overwrites your text — snippets append after what you wrote.
+- Fixed: click-order counter and manual-text prefix now reset each time a notes sheet opens, preventing stale text from carrying over between items.
+- Fixed: operator precedence bug in first-tick capture condition.
+
 ## v2308 — 2026-04-16
 
 ### Fixed

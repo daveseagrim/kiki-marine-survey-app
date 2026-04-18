@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2308';
+const APP_VERSION = 'v2309';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -3590,6 +3590,12 @@ function showNotesSheet(itemLabel, categoryName) {
   const existing = document.getElementById('bottomSheetOverlay');
   if (existing) existing.remove();
 
+  // v2309: reset click-order counter and manual-text prefix for this item
+  // so each notes sheet opens fresh (no stale prefixes carrying over)
+  _kkCheckOrderCounter = 0;
+  const _resetKey = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
+  delete _kkManualTextPrefix[_resetKey];
+
   getSurvey(currentSurveyId).then(survey => {
     const itemData = survey.items[itemLabel] || { rating: '', text: '', standards: [], photos: [] };
     const safeLabel = itemLabel.replace(/'/g, "\\'");
@@ -4444,12 +4450,32 @@ function _kkRefreshMastLabels(sanitizedLabel) {
 
 // v2307: track click order so sentences compose in the order ticked
 let _kkCheckOrderCounter = 0;
+// v2308: preserve hand-typed text when snippets are added
+let _kkManualTextPrefix = {};
 window._kkStampCheckOrder = function(chip) {
   if (chip.checked) {
     _kkCheckOrderCounter++;
     chip.setAttribute('data-check-order', _kkCheckOrderCounter);
+    // v2309: capture hand-typed text on first chip tick for this item
+    const key = chip.getAttribute('data-picker-key') || '';
+    if (key && !_kkManualTextPrefix.hasOwnProperty(key)) {
+      const ta = document.getElementById('sheet-text-' + key);
+      if (ta) {
+        const existing = ta.value.trim();
+        if (existing) {
+          _kkManualTextPrefix[key] = existing;
+        }
+      }
+    }
   } else {
     chip.setAttribute('data-check-order', '');
+    // If all chips unchecked, clear the prefix so it doesn't re-prepend
+    const key = chip.getAttribute('data-picker-key') || '';
+    if (key) {
+      const picker = document.getElementById('sheet-sentence-picker');
+      const stillChecked = picker ? picker.querySelectorAll('.kk-sentence-chip:checked').length : 0;
+      if (stillChecked === 0) delete _kkManualTextPrefix[key];
+    }
   }
 };
 
@@ -4524,7 +4550,11 @@ window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
     text = _kkInterpolateWinchDesc(text);
     parts.push(text);
   });
-  ta.value = parts.join(' ');
+  // v2308: prepend any hand-typed text the user wrote before ticking snippets
+  const _manualKey = sanitizedLabel;
+  const _prefix = (_kkManualTextPrefix[_manualKey] || '').trim();
+  const snippetText = parts.join(' ');
+  ta.value = _prefix ? (_prefix + ' ' + snippetText) : snippetText;
   ta.style.height = 'auto';
   ta.style.height = ta.scrollHeight + 'px';
   try { ta.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
