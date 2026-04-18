@@ -12,6 +12,9 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2319 — 2026-04-18
+- Complete text library phase audit: 268 snippets reclassified across all 16 categories to ensure every snippet is accurately categorized as "observed" (what was seen), "means" (what it means for the vessel), or "action" (what should be done). Fixed five recurring patterns: action directives labeled as observations, recommendations labeled as observations, standards citations labeled as observations instead of means, physical observations labeled as means, and consequence statements labeled as observations instead of means.
+
 ## v2318 — 2026-04-17
 - Fixed data-loss risk: generateReport() and exportSurvey() now call saveAllInspectionData() before loading the survey from IndexedDB. Previously, last-minute textarea edits, bilge pump changes, or comparable updates could be missing from the generated report if the user hadn't navigated away first.
 

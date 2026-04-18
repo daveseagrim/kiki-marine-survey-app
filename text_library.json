@@ -521,14 +521,14 @@
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
-      "phase": "means",
+      "phase": "action",
       "text": "These findings suggested early-stage moisture absorption that should be addressed proactively.",
       "severity": 3
     },
     {
       "section": "Hull and rudder(s) conductivity testing",
       "rating": "B",
-      "phase": "means",
+      "phase": "observed",
       "text": "No softness or delamination was observed at the time of survey.",
       "severity": 1
     },
@@ -641,7 +641,7 @@
       "section": "Keel and keel joint",
       "rating": "B",
       "text": "Retorquing the keel bolts while the vessel is in the cradle is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -704,14 +704,14 @@
       "section": "Transducers (speed, depth, etc.)",
       "rating": "B",
       "text": "Per ABYC E-11, wiring should be supported at intervals not exceeding 18 inches, approximately 455 mm.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Transducers (speed, depth, etc.)",
       "rating": "B",
       "text": "Add supports and secure the run.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 1
     },
     {
@@ -893,7 +893,7 @@
       "section": "Cutlass bearing(s)",
       "rating": "B",
       "text": "Plan replacement in the near term.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -991,7 +991,7 @@
       "section": "Sail drive(s) - (external), corrosion, propeller(s), anode(s)",
       "rating": "B",
       "text": "Gasket replacement should be planned.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -1432,7 +1432,7 @@
       "section": "Hull side windows and portholes (exterior observations)",
       "rating": "B",
       "text": "Resealing should be planned within the next season.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -1474,7 +1474,7 @@
       "section": "Propeller shaft(s)",
       "rating": "B",
       "text": "The shaft should be inspected by a qualified marine mechanic and reconditioned or replaced as necessary.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -1844,7 +1844,7 @@
     {
       "section": "Outdrive(s) - (external), corrosion, anodes, propeller(s), boots and bellows",
       "rating": "B",
-      "phase": "means",
+      "phase": "action",
       "severity": 3,
       "text": "Bellows failure is a common cause of sinking in sterndrive vessels — hardening bellows should be replaced at the next service."
     },
@@ -1985,7 +1985,7 @@
       "section": "Stern thruster",
       "rating": "A",
       "text": "Structural integrity is compromised and immediate professional inspection and repair is required before the vessel can be operated.",
-      "phase": "means",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -1999,7 +1999,7 @@
       "section": "Stern thruster",
       "rating": "B",
       "text": "Corrosion was evident and should be monitored.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -2062,7 +2062,7 @@
       "section": "Transducers (speed, depth, etc.)",
       "rating": "A",
       "text": "Replacement is required to restore navigation system capability.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -2083,7 +2083,7 @@
       "section": "Underwater lighting",
       "rating": "C",
       "text": "The underwater lighting functioned properly and provided adequate illumination.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 1
     },
     {
@@ -2097,7 +2097,7 @@
       "section": "Rub rail",
       "rating": "A",
       "text": "Replacement or professional repair is required to protect the hull and maintain protection.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -4479,7 +4479,7 @@
       "section": "Jib/genoa furler, furling line and tackle",
       "rating": "B",
       "text": "The line should be replaced and the furler serviced to restore smooth operation.",
-      "phase": "means",
+      "phase": "action",
       "severity": 1
     },
     {
@@ -4612,7 +4612,7 @@
       "section": "Shrouds, swages and turnbuckles",
       "rating": "A - no retaining pins. Needs tuning.",
       "text": "Additionally, rigging tension on some shrouds was below optimal and should be adjusted by a professional rigger.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -4633,7 +4633,7 @@
       "section": "Shrouds, swages and turnbuckles",
       "rating": "B",
       "text": "However, the tension should be checked and adjusted by a professional rigger.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -4654,7 +4654,7 @@
       "section": "Shrouds, swages and turnbuckles",
       "rating": "B",
       "text": "These should be replaced.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -4703,7 +4703,7 @@
       "section": "Shrouds, swages and turnbuckles",
       "rating": "C - tool marks",
       "text": "However, this should be inspected by a qualified rigger for confirmation.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -4780,7 +4780,7 @@
       "section": "Chainplates (exterior)pins and bolts",
       "rating": "A",
       "text": "Structural integrity is compromised and immediate replacement is required.",
-      "phase": "means",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -4794,7 +4794,7 @@
       "section": "Chainplates (exterior)pins and bolts",
       "rating": "B",
       "text": "The bolts and fasteners should be inspected for crevice corrosion, and the deck sealant should be renewed.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -4843,7 +4843,7 @@
       "section": "Spreaders/boots",
       "rating": "Not tested - too high to see",
       "text": "However, a closer inspection is required to confirm integrity.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -4962,7 +4962,7 @@
       "section": "Mast partner, mast collar, mast step",
       "rating": "B",
       "text": "Resealing is recommended to prevent moisture damage.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -4997,7 +4997,7 @@
       "section": "Winch (main mast)",
       "rating": "B",
       "text": "Although all winches ran without binding, there was some stiffness, indicating they should be disassembled, cleaned and greased.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -5039,7 +5039,7 @@
       "section": "Deckline organizers, blocks, fairleads and clutches",
       "rating": "A",
       "text": "Although the majority of clutches operated smoothly and appeared to hold their lines firmly, there were [insert details] clutches with broken handles that should be replaced to prevent any sudden release or difficulty locking.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -5116,7 +5116,7 @@
       "section": "Winch(es) and cleats (cabin-top and cockpit)",
       "rating": "B",
       "text": "Although all winches ran without binding, they showed some stiffness, indicating they should be disassembled, cleaned, and greased.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -5179,7 +5179,7 @@
       "section": "Main sheet",
       "rating": "A",
       "text": "This is a safety hazard.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 5
     },
     {
@@ -5242,14 +5242,14 @@
       "section": "Backstay, turnbuckle(s), retaining rings/pins and chainplate(s)/tang(s)",
       "rating": "A",
       "text": "Additionally, the rigging tension was not optimal and should be adjusted by a professional rigger.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Backstay, turnbuckle(s), retaining rings/pins and chainplate(s)/tang(s)",
       "rating": "C",
       "text": "The backstay was firmly attached at the transom, and all required pins were present.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -5557,7 +5557,7 @@
       "section": "Main",
       "rating": "A",
       "text": "Replacement or professional repair is required before sailing.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -5599,7 +5599,7 @@
       "section": "Spinnaker",
       "rating": "A",
       "text": "Replacement or professional repair is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -5739,7 +5739,7 @@
       "section": "Winch(es) and cleats (cabin-top and cockpit)",
       "rating": "A",
       "text": "Replacement is required to restore proper sheet handling capability.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -5774,7 +5774,7 @@
       "section": "Backstay, turnbuckle(s), retaining rings/pins and chainplate(s)/tang(s)",
       "rating": "B",
       "text": "Retaining pins should be verified to be in place.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -6511,7 +6511,7 @@
       "section": "Aft deck condition (spider cracks, etc.)",
       "rating": "B",
       "text": "The area remained serviceable and should be monitored.",
-      "phase": "means",
+      "phase": "action",
       "severity": 1
     },
     {
@@ -6588,7 +6588,7 @@
       "section": "Aft deck conductivity testing",
       "rating": "C",
       "text": "Conductivity testing of the aft deck produced readings consistent with proper condition with no elevated conductivity detected.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -6602,7 +6602,7 @@
       "section": "Aft deck conductivity testing",
       "rating": "B",
       "text": "Although these levels are typical for the vessel's age, they should be monitored between seasons for signs of saturation or delamination.",
-      "phase": "means",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -6637,7 +6637,7 @@
       "section": "Cover",
       "rating": "B",
       "text": "Repairs or replacement should be addressed in the near term to maintain adequate protection.",
-      "phase": "means",
+      "phase": "action",
       "severity": 1
     },
     {
@@ -6658,7 +6658,7 @@
       "section": "Seating",
       "rating": "A",
       "text": "This poses a safety hazard and should be repaired or replaced before use.",
-      "phase": "means",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -6672,7 +6672,7 @@
       "section": "Seating",
       "rating": "B",
       "text": "Restoration or replacement is recommended for improved comfort and appearance.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -6777,7 +6777,7 @@
       "section": "Drainage",
       "rating": "B",
       "text": "Cleaning and maintenance are recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -6917,7 +6917,7 @@
       "section": "Conductivity testing",
       "rating": "B",
       "text": "These areas should be monitored closely for developing softness or delamination.",
-      "phase": "means",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -6931,7 +6931,7 @@
       "section": "Conductivity testing",
       "rating": "C",
       "text": "Continued monitoring between seasons is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -7458,7 +7458,7 @@
       "section": "Engine mount",
       "rating": "C",
       "text": "The engine mount was securely attached and showed no abnormal movement.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -7528,7 +7528,7 @@
       "section": "Throttle, gearshift, choke",
       "rating": "B",
       "text": "Cables should be lubricated or adjusted if stiffness increases.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -7570,7 +7570,7 @@
       "section": "Outboard tilt",
       "rating": "B",
       "text": "Fluid level and condition should be checked and serviced if necessary.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -8282,14 +8282,14 @@
       "section": "Magnetic compass",
       "rating": "B - broken",
       "text": "The magnetic compass lens was broken and should be replaced.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Magnetic compass",
       "rating": "B - badly clouded replace",
       "text": "The magnetic compass was badly clouded and unreadable and should be replaced.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -8303,7 +8303,7 @@
       "section": "Magnetic compass",
       "rating": "B - slightly clouded",
       "text": "Replacement should be considered.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -8443,7 +8443,7 @@
       "section": "Swim platform shower",
       "rating": "B",
       "text": "The swim platform shower was damaged and should be repaired.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -8617,7 +8617,7 @@
     {
       "section": "Cockpit, floor, seats and coaming",
       "rating": "B",
-      "phase": "means",
+      "phase": "action",
       "severity": 2,
       "text": "Spider cracks are cosmetic but should be monitored to ensure they do not deepen and allow water ingress into the laminate."
     },
@@ -8653,7 +8653,7 @@
       "section": "Cockpit drains",
       "rating": "B",
       "text": "Cleaning is recommended to ensure proper drainage.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -8681,7 +8681,7 @@
       "section": "Cockpit table",
       "rating": "B",
       "text": "Refinishing or tightening is advisable.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -8751,7 +8751,7 @@
       "section": "Remote compressor and condensing refrigeration unit",
       "rating": "B",
       "text": "Servicing is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -8793,7 +8793,7 @@
       "section": "Magnetic compass",
       "rating": "A",
       "text": "Replacement is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -8912,14 +8912,14 @@
       "section": "BBQ or grill",
       "rating": "B",
       "text": "Cleaning or component replacement is advisable.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Arch",
       "rating": "A",
       "text": "The arch is structurally compromised or loose.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -9087,7 +9087,7 @@
       "section": "Emergency tiller",
       "rating": "A",
       "text": "Installation of an appropriate emergency tiller is required for safety compliance.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -9204,7 +9204,7 @@
     },
     {
       "rating": "B",
-      "phase": "means",
+      "phase": "action",
       "severity": 3,
       "text": "The values were high for the location and should be monitored for developing softness.",
       "section": "Cockpit conductivity testing"
@@ -10258,7 +10258,7 @@
       "section": "Autopilot",
       "rating": "B",
       "text": "The system should be recalibrated by a professional technician.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -10328,7 +10328,7 @@
       "section": "MFD or Chartplotter",
       "rating": "B",
       "text": "Updates or professional service should be arranged to restore reliable operation.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -11126,7 +11126,7 @@
       "section": "Entertainment/stereo",
       "rating": "C",
       "text": "The entertainment and stereo system functioned properly and provided good sound quality.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -11224,14 +11224,14 @@
       "section": "Spotlight/searchlight",
       "rating": "B",
       "text": "Bulb replacement and electrical inspection are recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Spotlight/searchlight",
       "rating": "C",
       "text": "The spotlight or searchlight functioned properly and provided adequate illumination.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 1
     },
     {
@@ -11702,7 +11702,7 @@
       "section": "Flybridge percussion testing",
       "rating": "B",
       "text": "Although they do not currently present any safety concerns, in order to mitigate the spread, these areas should be repaired.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -11730,14 +11730,14 @@
       "section": "Flybridge conductivity testing",
       "rating": "B",
       "text": "Values were high for the location and should be monitored for softness.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Flybridge conductivity testing",
       "rating": "B",
       "text": "Removal and replacement of the core in this area should be considered.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -11751,7 +11751,7 @@
       "section": "Flybridge conductivity testing",
       "rating": "C",
       "text": "This was not immediately concerning and should be monitored.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -11807,7 +11807,7 @@
       "section": "Safety rails",
       "rating": "B",
       "text": "Tightening and inspection are recommended to ensure safe operation.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -11961,14 +11961,14 @@
       "section": "Magnetic compass",
       "rating": "B",
       "text": "The magnetic compass lens was broken and should be replaced.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Magnetic compass",
       "rating": "B",
       "text": "The magnetic compass was badly clouded and unreadable and should be replaced.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -11982,7 +11982,7 @@
       "section": "Magnetic compass",
       "rating": "B",
       "text": "Replacement should be considered.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -12143,7 +12143,7 @@
       "section": "Flybridge drains",
       "rating": "B",
       "text": "Cleaning is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -12255,7 +12255,7 @@
       "section": "Magnetic compass",
       "rating": "A",
       "text": "Replacement is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -12311,7 +12311,7 @@
       "section": "Arch",
       "rating": "A",
       "text": "The arch is structurally compromised.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -12367,7 +12367,7 @@
       "section": "Flybridge - other features",
       "rating": "B",
       "text": "These should be addressed within the next season.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -12402,7 +12402,7 @@
       "section": "Flybridge 12V or USB",
       "rating": "B",
       "text": "These should be serviced or replaced.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -12437,7 +12437,7 @@
       "section": "Flybridge Arch",
       "rating": "B",
       "text": "Fasteners should be inspected and treated to prevent further degradation.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -12472,7 +12472,7 @@
       "section": "Flybridge Helm seat",
       "rating": "B",
       "text": "Tightening and reupholstering should be planned.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -12556,7 +12556,7 @@
       "section": "Flybridge Seating",
       "rating": "B",
       "text": "Flybridge seating upholstery is deteriorating and should be replaced.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -12633,7 +12633,7 @@
       "section": "Flybridge splash shield/windshield",
       "rating": "B",
       "text": "Monitoring is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -12647,7 +12647,7 @@
       "section": "Flybridge splash shield/windshield",
       "rating": "A",
       "text": "Replacement is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -12668,7 +12668,7 @@
       "section": "Flybridge Bimini/dodger/hardtop",
       "rating": "A",
       "text": "Replacement or significant repair is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -12682,7 +12682,7 @@
       "section": "Flybridge Bimini/dodger/hardtop",
       "rating": "B",
       "text": "Repairs or replacement should be planned to maintain adequate weather protection.",
-      "phase": "means",
+      "phase": "action",
       "severity": 1
     },
     {
@@ -12787,7 +12787,7 @@
       "section": "Flybridge Safety rails",
       "rating": "B",
       "text": "Tightening and inspection are recommended to ensure safe operation.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -15346,7 +15346,7 @@
       "section": "Chainplates (interior)",
       "rating": "B",
       "text": "Resealing is recommended to prevent moisture damage to bulkheads and structure.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -15493,7 +15493,7 @@
       "section": "Upholstery",
       "rating": "B",
       "text": "Cleaning and selective repair are recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -15626,7 +15626,7 @@
       "section": "Refrigerator / icebox",
       "rating": "C",
       "text": "The refrigerator appeared sound and well-maintained and required cleaning.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -15780,7 +15780,7 @@
       "section": "Floor and carpet",
       "rating": "C",
       "text": "The floor throughout the cabin was intact and in good order with wear consistent with age.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 1
     },
     {
@@ -15808,14 +15808,14 @@
       "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "A",
       "text": "This does not meet ABYC H-22 for electric bilge pump systems and ABYC E-11 for electrical systems.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
       "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "A",
       "text": "Pumps must be operational and able to keep the bilge reasonably dry to reduce flooding risk.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -15843,14 +15843,14 @@
       "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "B - water in bilge. Deck stepped mast.",
       "text": "Because the boat has a deck-stepped rig, water is likely entering the bilge from the deck.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
       "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "B - water in bilge. Deck stepped mast.",
       "text": "Further investigation is recommended by running water over the deck and checking for leaks.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -15864,7 +15864,7 @@
       "section": "Bilge, stringers and ribs – accessible from cabin",
       "rating": "C",
       "text": "From the cabin view, ribs and stringers appeared solid and in proper condition with no apparent damage consistent with a hard grounding.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -15899,7 +15899,7 @@
       "section": "Keel bolts",
       "rating": "A",
       "text": "An experienced Marine Service Technician should assess these bolts.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -15920,21 +15920,21 @@
       "section": "Keel bolts",
       "rating": "Not tested",
       "text": "Torque testing is recommended at least every five years while the boat is in the cradle.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Oven",
       "rating": "A",
       "text": "The oven is non-functional or there is a risk of gas leak.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
       "section": "Oven",
       "rating": "A",
       "text": "This is a safety hazard and requires immediate repair or replacement.",
-      "phase": "means",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -15955,7 +15955,7 @@
       "section": "Heating and/or air conditioning system",
       "rating": "A",
       "text": "The system is non-functional and requires repair or replacement.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -15990,7 +15990,7 @@
       "section": "Signs of water ingress",
       "rating": "A",
       "text": "Locate and repair the source immediately.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -16004,7 +16004,7 @@
       "section": "Hull deck joint (interior)",
       "rating": "A",
       "text": "Structural repair is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -16025,7 +16025,7 @@
       "section": "Cabin lining and ceiling",
       "rating": "A",
       "text": "Replacement is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -16095,7 +16095,7 @@
       "section": "Woodwork, doors and framing",
       "rating": "A",
       "text": "Replacement is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -16116,14 +16116,14 @@
       "section": "Upholstery",
       "rating": "A",
       "text": "Upholstery is severely torn or stained beyond use.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 4
     },
     {
       "section": "Upholstery",
       "rating": "A",
       "text": "Replacement is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -16277,7 +16277,7 @@
       "section": "Refrigerator / icebox",
       "rating": "B",
       "text": "Servicing or compressor inspection is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -16305,7 +16305,7 @@
       "section": "Stove",
       "rating": "B",
       "text": "Servicing or burner adjustment is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -16403,7 +16403,7 @@
       "section": "Floor and carpet",
       "rating": "A",
       "text": "Replacement is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -16417,7 +16417,7 @@
       "section": "Floor and carpet",
       "rating": "B",
       "text": "Cleaning or repair is advisable.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -16452,7 +16452,7 @@
       "section": "Keel bolts",
       "rating": "B",
       "text": "Inspection and potential re-torquing is advisable.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -16487,14 +16487,14 @@
       "section": "Cabin sole",
       "rating": "B",
       "text": "Monitoring and repair are recommended to prevent further deterioration.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Cabin sole",
       "rating": "C",
       "text": "The cabin sole presented no deficiencies and provided safe, dry footing throughout the cabin.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -16508,7 +16508,7 @@
       "section": "Berths and upholstery",
       "rating": "A",
       "text": "Reconstruction or replacement is required for safe sleeping accommodation.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -16522,14 +16522,14 @@
       "section": "Berths and upholstery",
       "rating": "B",
       "text": "Restoration or replacement is recommended for improved comfort and durability.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Berths and upholstery",
       "rating": "C",
       "text": "The berths and upholstery were functioning as intended and provided safe, comfortable sleeping accommodation.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -16557,14 +16557,14 @@
       "section": "Interior lighting",
       "rating": "B",
       "text": "Bulb replacement and electrical inspection are recommended to restore full illumination.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Interior lighting",
       "rating": "C",
       "text": "All interior lights functioned properly and provided adequate illumination throughout the cabin.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 1
     },
     {
@@ -16578,14 +16578,14 @@
       "section": "Cabin windows and hatches (interior observations)",
       "rating": "A",
       "text": "Water ingress is likely.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
       "section": "Cabin windows and hatches (interior observations)",
       "rating": "A",
       "text": "Replacement or significant repair is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -16599,7 +16599,7 @@
       "section": "Cabin windows and hatches (interior observations)",
       "rating": "B",
       "text": "Resealing is recommended to prevent water ingress.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -18199,7 +18199,7 @@
       "section": "Fuel tank(s)",
       "rating": "B",
       "text": "Although this installation predates the ABYC standard, adding a second corrosion-resistant clamp to each hose connection is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -18556,7 +18556,7 @@
       "section": "Black water tank(s) and plumbing",
       "rating": "A",
       "text": "The tank or plumbing is leaking or compromised.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -19111,7 +19111,7 @@
       "section": "Engine condition",
       "rating": "C",
       "text": "The engine was relatively clean with an appearance that suggested it had been maintained.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -19125,7 +19125,7 @@
       "section": "Cooling water intake seacock(s) and strainer(s)",
       "rating": "A",
       "text": "Replacement may be required and this must be corrected before launch.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19195,7 +19195,7 @@
       "section": "Manifolds and risers",
       "rating": "A",
       "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, immediate inspection and replacement by a licensed marine mechanic is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -19216,7 +19216,7 @@
       "section": "Manifolds and risers",
       "rating": "B",
       "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, service and confirmation by a licensed marine mechanic is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19244,7 +19244,7 @@
       "section": "Manual fuel pump(s)",
       "rating": "B",
       "text": "The manual fuel pump did not work and should be replaced.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -19265,7 +19265,7 @@
       "section": "Oil level and condition",
       "rating": "B",
       "text": "The engine oil appeared discoloured and should be changed as part of routine maintenance.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 2
     },
     {
@@ -19286,7 +19286,7 @@
       "section": "Oil level and condition",
       "rating": "C",
       "text": "Rechecking the oil level once the boat is afloat is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19342,7 +19342,7 @@
       "section": "Coolant level and quality",
       "rating": "C - on shore, check level at launch",
       "text": "Rechecking the coolant level once the boat is afloat is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19356,14 +19356,14 @@
       "section": "Belts and pulleys",
       "rating": "B",
       "text": "The alternator belt was worn with cracking and should be replaced.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
       "section": "Belts and pulleys",
       "rating": "B",
       "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, inspection and replacement by a licensed marine mechanic is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19377,7 +19377,7 @@
       "section": "Belts and pulleys",
       "rating": "B",
       "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, adjustment and confirmation by a licensed marine mechanic is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19419,7 +19419,7 @@
       "section": "Anti-vibration mounts",
       "rating": "B",
       "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, inspection and repair or replacement by a licensed marine mechanic is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19461,7 +19461,7 @@
       "section": "Hoses",
       "rating": "B",
       "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, inspection and replacement as needed by a licensed marine mechanic is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19524,7 +19524,7 @@
       "section": "Gearbox oil",
       "rating": "B",
       "text": "However, gearbox oil often shows less colouring than engine oil and should be changed at least as often as the engine oil.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19538,7 +19538,7 @@
       "section": "Gearbox oil",
       "rating": "B",
       "text": "The final level should be verified once the boat is afloat.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19559,14 +19559,14 @@
       "section": "Gearbox oil",
       "rating": "C",
       "text": "Rechecking the oil level once the boat is afloat is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Gearbox oil",
       "rating": "Not tested - nut to open",
       "text": "The gearbox oil port required a wrench to open and was therefore not inspected.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -19587,7 +19587,7 @@
       "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
       "rating": "A",
       "text": "Adjust the retaining nut and/or replace the internal flax as necessary.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19601,7 +19601,7 @@
       "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
       "rating": "A",
       "text": "Adjustment of the retaining nut and replacement of the internal flax are still recommended as necessary.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19629,7 +19629,7 @@
       "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
       "rating": "C - stuffing box works",
       "text": "The assembly appeared without deficiency and required no immediate attention.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 5
     },
     {
@@ -19706,14 +19706,14 @@
       "section": "Generator (if installed)",
       "rating": "B",
       "text": "The generator runs but requires servicing for optimal performance and safety.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
       "section": "Generator (if installed)",
       "rating": "C",
       "text": "The generator is operational and provides reliable power generation.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -19727,7 +19727,7 @@
       "section": "Engine condition",
       "rating": "A",
       "text": "Major repair or replacement is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 4
     },
     {
@@ -19741,7 +19741,7 @@
       "section": "Hoses",
       "rating": "A",
       "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, immediate inspection and replacement by a licensed marine mechanic is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -19769,7 +19769,7 @@
       "section": "Automatic engine compartment fire extinguishing system",
       "rating": "B",
       "text": "Servicing or replacement is advisable.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19790,7 +19790,7 @@
       "section": "Gearbox general condition and impressions",
       "rating": "A",
       "text": "Major repair or replacement is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 4
     },
     {
@@ -19832,7 +19832,7 @@
       "section": "Bilge, stringers and ribs – accessible from engine bay",
       "rating": "B",
       "text": "Cleaning is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19888,7 +19888,7 @@
       "section": "Drive coupling",
       "rating": "B",
       "text": "Fasteners should be checked for torque and the coupling alignment verified.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19909,7 +19909,7 @@
       "section": "Drive coupling",
       "rating": "A",
       "text": "The coupling requires immediate replacement or realignment to prevent shaft or transmission damage.",
-      "phase": "means",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -19958,7 +19958,7 @@
       "section": "Stuffing box/packing gland/dripless seal",
       "rating": "B - traditional packing",
       "text": "The packing should be repacked or the gland adjusted.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -19993,7 +19993,7 @@
       "section": "Stuffing box/packing gland/dripless seal",
       "rating": "A",
       "text": "The stuffing box or shaft seal was leaking significantly and requires immediate repair or replacement.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 5
     },
     {
@@ -20021,7 +20021,7 @@
       "section": "Generator valve and sea strainer",
       "rating": "B",
       "text": "The generator sea strainer is dirty and requires cleaning.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -20042,7 +20042,7 @@
       "section": "Generator valve and sea strainer",
       "rating": "A",
       "text": "The sea strainer is cracked or severely compromised.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 4
     },
     {
@@ -20063,7 +20063,7 @@
       "section": "Cooling water intake seacock(s) and strainer(s)",
       "rating": "B",
       "text": "Cleaning is recommended to maintain full water flow.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -20077,7 +20077,7 @@
       "section": "Oil level and condition",
       "rating": "A",
       "text": "An oil change is required immediately before further operation.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -20091,7 +20091,7 @@
       "section": "Belts and pulleys",
       "rating": "A",
       "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, immediate inspection and replacement by a licensed marine mechanic is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -20105,7 +20105,7 @@
       "section": "Anti-vibration mounts",
       "rating": "A",
       "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, inspection and replacement by a licensed marine mechanic is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -20119,7 +20119,7 @@
       "section": "Gearbox oil",
       "rating": "A",
       "text": "An oil change and seal inspection are required immediately.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -20133,7 +20133,7 @@
       "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
       "rating": "B",
       "text": "The stuffing box or dripless seal was functional but should be monitored.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -20804,7 +20804,7 @@
     {
       "section": "Exhaust condition",
       "rating": "A",
-      "phase": "means",
+      "phase": "action",
       "severity": 3,
       "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, full inspection by a licensed marine mechanic is recommended."
     },
@@ -20853,7 +20853,7 @@
     {
       "section": "Exhaust condition",
       "rating": "B",
-      "phase": "means",
+      "phase": "action",
       "severity": 3,
       "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, service and confirmation by a licensed marine mechanic is recommended."
     },
@@ -20895,7 +20895,7 @@
     {
       "section": "Exhaust condition",
       "rating": "C",
-      "phase": "means",
+      "phase": "action",
       "severity": 2,
       "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, confirmation of serviceability by a licensed marine mechanic is recommended."
     },
@@ -20923,7 +20923,7 @@
     {
       "section": "Exhaust condition",
       "rating": "Not tested - covered in insulation",
-      "phase": "means",
+      "phase": "action",
       "severity": 3,
       "text": "As the surveyor's observations are visual only and do not constitute a mechanical assessment, full inspection by a licensed marine mechanic is recommended."
     },
@@ -21396,14 +21396,14 @@
       "section": "Hydraulic steering (hoses, fittings, steering cylinder, tiller arm or tie bar, rudder post and stuffing box, etc.)",
       "rating": "B",
       "text": "After launch, monitor the rudder stuffing boxes.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Hydraulic steering (hoses, fittings, steering cylinder, tiller arm or tie bar, rudder post and stuffing box, etc.)",
       "rating": "B",
       "text": "Light weeping is common as the flax saturates.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -21431,7 +21431,7 @@
       "section": "Outdrive trim/tilt hydraulic pump and system",
       "rating": "B",
       "text": "The hydraulic fluid level appeared low and should be topped up and the system bled as required.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -21494,7 +21494,7 @@
       "section": "Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)",
       "rating": "A",
       "text": "The steering system is broken or severely compromised.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 4
     },
     {
@@ -21536,7 +21536,7 @@
       "section": "Trim tab mechanism (interior)",
       "rating": "A",
       "text": "The trim tab mechanism was broken or severely compromised.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 4
     },
     {
@@ -21783,7 +21783,7 @@
       "section": "Inverter/charger",
       "rating": "C",
       "text": "No abnormal sounds, overheating, or wiring issues were observed, and the system appeared in satisfactory condition.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -21951,7 +21951,7 @@
       "section": "Starter battery(ies)",
       "rating": "A",
       "text": "Cover ungrounded terminals with insulating material to prevent accidental short circuits.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -21965,7 +21965,7 @@
       "section": "Starter battery(ies)",
       "rating": "A - singular, no box, no protection on positive",
       "text": "Fit an insulating cover to prevent accidental short circuits.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -21979,7 +21979,7 @@
       "section": "Starter battery(ies)",
       "rating": "A",
       "text": "Restrain the batteries to prevent movement under vessel motion and fit terminal protection to reduce short circuit risk.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22070,14 +22070,14 @@
       "section": "Starter battery(ies)",
       "rating": "Pre-purchase battery survey",
       "text": "Suggest attaching a trickle charger (solar or otherwise) to maintain battery health.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Starter battery(ies)",
       "rating": "Pre-purchase battery survey",
       "text": "It should be noted that typical lead-acid batteries last approximately four to six years.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22105,14 +22105,14 @@
       "section": "Starter battery(ies)",
       "rating": "B",
       "text": "The battery should be load-tested and the terminals cleaned.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Starter battery(ies)",
       "rating": "B",
       "text": "Replacement may be required within one season.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22126,7 +22126,7 @@
       "section": "House battery(ies)",
       "rating": "A",
       "text": "Fit insulating covers to reduce short circuit risk.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22147,7 +22147,7 @@
       "section": "House battery(ies)",
       "rating": "A - multiple conductors",
       "text": "It was recommended that the smaller conductors be relocated to a fused distribution block or provided with individual fuses within 7 inches of the battery connection.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22161,7 +22161,7 @@
       "section": "House battery(ies)",
       "rating": "B - no restraint or protection",
       "text": "Restrain batteries and fit terminal protection to meet best practice.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22175,14 +22175,14 @@
       "section": "House battery(ies)",
       "rating": "B",
       "text": "The battery voltage is marginal and the unit should be load-tested.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "House battery(ies)",
       "rating": "B",
       "text": "Replacement may be needed within one season.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22273,14 +22273,14 @@
       "section": "House battery(ies)",
       "rating": "pre-purchase battery survey",
       "text": "Suggest attaching a trickle charger (solar or otherwise) to maintain battery health.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "House battery(ies)",
       "rating": "pre-purchase battery survey",
       "text": "It should be noted that typical lead-acid batteries last approximately four to six years.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22427,14 +22427,14 @@
       "section": "Bundling support and wiring",
       "rating": "A",
       "text": "Conductors should be supported to prevent chafe, strain, and vibration and secured at intervals not exceeding 18 inches.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Bundling support and wiring",
       "rating": "A",
       "text": "Re route and fasten wiring with marine grade clamps or cable ties to improve reliability.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22448,7 +22448,7 @@
       "section": "Bundling support and wiring",
       "rating": "A",
       "text": "Correct routing, support, and corrosion resistant terminations are recommended to reduce risk of chafe, short circuits, or failure.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22462,14 +22462,14 @@
       "section": "Bundling support and wiring",
       "rating": "A",
       "text": "Connections should be mechanically secure and electrically conductive with terminals designed for marine use and proper strain relief.",
-      "phase": "means",
+      "phase": "action",
       "severity": 1
     },
     {
       "section": "Bundling support and wiring",
       "rating": "A",
       "text": "Non compliance increases the risk of faults, overheating, and failure.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -22518,7 +22518,7 @@
       "section": "AC outlets",
       "rating": "A",
       "text": "This condition may energize appliance housings or internal components even when the appliance is switched off, increasing the risk of electrical shock.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -22532,7 +22532,7 @@
       "section": "AC outlets",
       "rating": "A",
       "text": "The wiring should be corrected by a qualified marine electrician before the vessel is used or connected to shore power.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22658,14 +22658,14 @@
       "section": "Generator",
       "rating": "B",
       "text": "The generator operates but requires servicing for optimal performance and safety.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
       "section": "Generator",
       "rating": "C",
       "text": "The generator is operational and provides reliable power generation.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -22679,7 +22679,7 @@
       "section": "Shore power overcurrent protection",
       "rating": "A",
       "text": "Installation or repair is critical.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -22707,7 +22707,7 @@
       "section": "Galvanic isolator",
       "rating": "A",
       "text": "Installation or repair is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22721,7 +22721,7 @@
       "section": "Galvanic isolator",
       "rating": "B",
       "text": "Testing or replacement is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22742,7 +22742,7 @@
       "section": "Isolation transformer",
       "rating": "A",
       "text": "Installation or repair is required for safe shore power connection.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22847,7 +22847,7 @@
       "section": "Battery ventilation",
       "rating": "A",
       "text": "Installation or unblocking is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22861,7 +22861,7 @@
       "section": "Battery ventilation",
       "rating": "B",
       "text": "Cleaning or improvement is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22875,7 +22875,7 @@
       "section": "Battery hydrometer test",
       "rating": "A",
       "text": "Charging or replacement is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22889,7 +22889,7 @@
       "section": "Battery hydrometer test",
       "rating": "B",
       "text": "Charging and equalisation may help.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22910,7 +22910,7 @@
       "section": "Battery load test",
       "rating": "A",
       "text": "Replacement is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -22945,7 +22945,7 @@
       "section": "Battery(ies) overcurrent protection",
       "rating": "A",
       "text": "Installation or repair is critical for fire safety.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -23001,7 +23001,7 @@
       "section": "Reverse polarity light",
       "rating": "A",
       "text": "Installation or repair is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -23134,7 +23134,7 @@
       "section": "Battery(ies), house",
       "rating": "A",
       "text": "Replacement is required to restore electrical power to the vessel.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -23148,7 +23148,7 @@
       "section": "Battery(ies), house",
       "rating": "B",
       "text": "The battery should be load-tested and replacement may be needed within one season.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -23169,21 +23169,21 @@
       "section": "Battery(ies), starter",
       "rating": "A",
       "text": "Replacement is required immediately.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Battery(ies), starter",
       "rating": "B",
       "text": "The starter battery had reduced capacity and should be load-tested.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Battery(ies), starter",
       "rating": "B",
       "text": "Replacement may be required within one season.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -23204,7 +23204,7 @@
       "section": "Protected positive battery lugs and positive bus bars",
       "rating": "A",
       "text": "Insulating covers or shrouds must be installed immediately.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -23218,7 +23218,7 @@
       "section": "Protected positive battery lugs and positive bus bars",
       "rating": "B",
       "text": "Protection should be verified and renewed to reduce short circuit risk.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -23239,7 +23239,7 @@
       "section": "Shore power receptacle",
       "rating": "B",
       "text": "Cleaning and inspection are recommended to ensure safe connection.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -23281,7 +23281,7 @@
       "section": "Bundling support and wiring",
       "rating": "B",
       "text": "Tightening and inspection are recommended to prevent chafe and ensure proper routing.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -23295,14 +23295,14 @@
       "section": "Navigation lights",
       "rating": "A",
       "text": "This is a safety concern that should be addressed before the vessel is next underway.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Navigation lights",
       "rating": "B",
       "text": "The navigation lights were functional but showed signs of deterioration including {any:discolouration of lenses|corrosion at the base fittings|loose mounting hardware|cracked housing}. Replacement is recommended in the near future to maintain compliance with the Collision Regulations.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 4
     },
     {
@@ -24333,14 +24333,14 @@
       "section": "Watertight flashlight",
       "rating": "A",
       "text": "Transport Canada Small Vessel Regulations require a watertight flashlight as mandatory safety equipment.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
       "section": "Watertight flashlight",
       "rating": "A",
       "text": "Provide a compliant unit.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -24361,14 +24361,14 @@
       "section": "Lifejackets and PFDs",
       "rating": "A",
       "text": "Transport Canada Small Vessel Regulations require an approved and properly sized device for each person.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
       "section": "Lifejackets and PFDs",
       "rating": "A",
       "text": "Provide compliant PFDs immediately.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -24396,21 +24396,21 @@
       "section": "Life ring or heaving line",
       "rating": "A",
       "text": "Provide a compliant unit.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Life ring or heaving line",
       "rating": "B",
       "text": "A Type IV lifebuoy was present but was not fitted with the required length of buoyant heaving line.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
       "section": "Life ring or heaving line",
       "rating": "B",
       "text": "Fit a minimum 15-metre floating line, such as polypropylene.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -24494,7 +24494,7 @@
       "section": "Extra anchor, chain and rode",
       "rating": "A",
       "text": "Provide a properly sized anchor and adequate rode.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 1
     },
     {
@@ -24606,7 +24606,7 @@
       "section": "Flares",
       "rating": "A",
       "text": "Provide compliant signals.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -24641,7 +24641,7 @@
       "section": "Fire extinguisher",
       "rating": "A",
       "text": "Provide at least the required rating for the vessel and mount it in an accessible location.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -24669,7 +24669,7 @@
       "section": "Carbon monoxide detector(s)",
       "rating": "A",
       "text": "Transport Canada and ABYC require functional CO detection where accumulation may occur.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -24760,7 +24760,7 @@
       "section": "Navigation lights (port, starboard, anchor, steaming, other)",
       "rating": "A",
       "text": "This does not meet ABYC A-16 guidance and COLREGS Rules 20 and 21 for visibility.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -24830,7 +24830,7 @@
       "section": "EPIRB",
       "rating": "B",
       "text": "Plan for replacement or servicing in the near term.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -24851,14 +24851,14 @@
       "section": "Radar reflector",
       "rating": "A",
       "text": "Installation is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Radar reflector",
       "rating": "B",
       "text": "The radar reflector is damaged and should be repaired or replaced to maintain radar visibility.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -24879,7 +24879,7 @@
       "section": "Watertight flashlight",
       "rating": "B",
       "text": "Battery replacement or service is recommended.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -24893,7 +24893,7 @@
       "section": "Lifejackets and PFDs",
       "rating": "B",
       "text": "Replacement or repair is advisable.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -24935,7 +24935,7 @@
       "section": "Propane gas detector",
       "rating": "A",
       "text": "Installation or replacement is required for safety.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -24949,7 +24949,7 @@
       "section": "Propane gas detector",
       "rating": "B",
       "text": "Battery replacement or service is advisable.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -24998,7 +24998,7 @@
       "section": "Emergency tiller",
       "rating": "A",
       "text": "Installation or repair is required for emergency steering.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -25490,7 +25490,7 @@
       "section": "Deck and coachroof/pilothouse condition",
       "rating": "C",
       "text": "The deck and coachroof presented well with no cracking, crazing, or signs of structural movement.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 1
     },
     {
@@ -25532,7 +25532,7 @@
       "section": "deck and coachroof/pilothouse impact and resonance testing",
       "rating": "B",
       "text": "Although they do not currently present any safety concerns, in order to mitigate the spread, these areas should be repaired.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -25581,14 +25581,14 @@
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "A",
       "text": "Close monitoring for softness was recommended in the area indicated as 999.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "A",
       "text": "Removal and replacement of decking and any saturated material should be considered.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -25602,14 +25602,14 @@
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "B - some significantly wet places",
       "text": "The pictured areas should be watched closely this season for any softness.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "B - some significantly wet places",
       "text": "Where saturation is significant, removal and replacement of decking and wet material should be considered.",
-      "phase": "means",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -25623,14 +25623,14 @@
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "C - some small areas",
       "text": "Although these levels are typical for the vessel's age, they should be monitored between seasons for signs of saturation or delamination.",
-      "phase": "means",
+      "phase": "action",
       "severity": 5
     },
     {
       "section": "Deck and coachroof/pilothouse conductivity testing",
       "rating": "C - no conductivity",
       "text": "Conductivity testing of the deck and coachroof produced readings consistent with a sound laminate, with no elevated conductivity detected.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -25672,7 +25672,7 @@
       "section": "Bow roller",
       "rating": "B",
       "text": "The bow roller showed wear at the roller component and should be replaced.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -25707,7 +25707,7 @@
       "section": "Primary anchor, chain and rode",
       "rating": "B",
       "text": "Retaining wire should be fitted on the main shackle that attaches the chain to the anchor.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -25721,7 +25721,7 @@
       "section": "Primary anchor, chain and rode",
       "rating": "B",
       "text": "As a guide, chain length should be approximately equal to the vessel length.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -25784,7 +25784,7 @@
       "section": "Lifelines and safety rail",
       "rating": "B",
       "text": "The pelican clip at the boarding position was difficult to release and close and should be adjusted or replaced.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -25812,7 +25812,7 @@
       "section": "Fuel and water fill ports and waste deck pump-out port",
       "rating": "B",
       "text": "Fit retaining chains to prevent loss of caps and possible water ingress.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -25833,14 +25833,14 @@
       "section": "Fuel and water fill ports and waste deck pump-out port",
       "rating": "B",
       "text": "Fit retaining chains on all caps to prevent loss.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Fuel and water fill ports and waste deck pump-out port",
       "rating": "C",
       "text": "Fuel, water, and deck pump-out ports were properly sealed and fitted with the required safety chains.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -26015,7 +26015,7 @@
       "section": "Deck and coachroof/pilothouse condition",
       "rating": "A",
       "text": "The deck or pilothouse shows significant cracking, delamination, or structural compromise.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 5
     },
     {
@@ -26071,21 +26071,21 @@
       "section": "Bow roller",
       "rating": "A",
       "text": "Replacement is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
       "section": "Primary anchor, chain and rode",
       "rating": "A",
       "text": "The anchor, chain, or rode is damaged or corroded beyond safe use.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
       "section": "Primary anchor, chain and rode",
       "rating": "A",
       "text": "Replacement or significant repair is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -26176,7 +26176,7 @@
       "section": "Mooring cleats and chocks",
       "rating": "A",
       "text": "Replacement is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -26218,7 +26218,7 @@
       "section": "Brightwork",
       "rating": "A",
       "text": "Replacement is required.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -26239,7 +26239,7 @@
       "section": "Arch – external condition and equipment",
       "rating": "A",
       "text": "The arch is structurally compromised, bent, or showing signs of failure.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 3
     },
     {
@@ -26274,7 +26274,7 @@
       "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
       "rating": "B",
       "text": "Monitoring and repair planning is recommended to prevent further deterioration.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -26302,7 +26302,7 @@
       "section": "Shore water hookup",
       "rating": "A",
       "text": "Installation or repair is required for shore water connection capability.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -26351,7 +26351,7 @@
       "section": "Toerail/gunwale",
       "rating": "B",
       "text": "Tightening and monitoring are recommended to prevent further deterioration.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -26386,7 +26386,7 @@
       "section": "Fuel and water fill ports, and waste deck pump-out port",
       "rating": "B",
       "text": "Seals should be inspected and replaced as needed to prevent leakage.",
-      "phase": "means",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -26400,14 +26400,14 @@
       "section": "Windshield, pilot house windows, frames and seals",
       "rating": "A",
       "text": "The windshield or pilot house windows were cracked, damaged, or the seals were severely compromised.",
-      "phase": "means",
+      "phase": "observed",
       "severity": 4
     },
     {
       "section": "Windshield, pilot house windows, frames and seals",
       "rating": "A",
       "text": "Water ingress is likely.",
-      "phase": "observed",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -26428,7 +26428,7 @@
       "section": "Windshield, pilot house windows, frames and seals",
       "rating": "B",
       "text": "Resealing is recommended to prevent water ingress and improve clarity.",
-      "phase": "observed",
+      "phase": "action",
       "severity": 3
     },
     {
@@ -26477,7 +26477,7 @@
       "section": "Deck hatch(es), windows and portholes (exterior observations)",
       "rating": "B",
       "text": "Deck hatches, windows, and portholes were visually inspected from the exterior. {any:One or more seals showed deterioration and should be replaced|Crazing on one or more hatch lenses was significant and replacement is recommended|A hatch frame was loose and should be re-bedded|Corrosion was noted around one or more porthole frames}.",
-      "phase": "means",
+      "phase": "action",
       "severity": 5
     },
     {
@@ -27750,7 +27750,7 @@
     {
       "section": "Deck hatch(es), windows and portholes (exterior observations)",
       "rating": "B",
-      "phase": "means",
+      "phase": "action",
       "severity": 3,
       "text": "Failing sealant allows water ingress below deck and should be addressed before it causes further damage."
     },
