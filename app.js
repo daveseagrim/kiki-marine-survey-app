@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2307';
+const APP_VERSION = 'v2308';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -5227,8 +5227,11 @@ function deletePhotoFromSheet(photoId, itemLabel, categoryName) {
 // v2306: inline delete from grid — confirm then refresh the sheet
 window._sheetDeletePhoto = function(photoId, itemLabel, categoryName) {
   if (!confirm('Delete this photo?')) return;
+  // v2308: immediately hide the thumbnail wrapper for instant visual feedback
+  const thumb = document.getElementById('sheet-thumb-' + photoId);
+  if (thumb && thumb.parentElement) thumb.parentElement.style.display = 'none';
   deletePhotoAndRefresh(photoId);
-  setTimeout(() => showMediaSheet(itemLabel, categoryName), 300);
+  setTimeout(() => showMediaSheet(itemLabel, categoryName), 600);
 };
 
 // v2306: inline rotate from grid — rotate 90° CW, bake into data, refresh

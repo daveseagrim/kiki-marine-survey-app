@@ -12,6 +12,13 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2308 — 2026-04-16
+
+### Fixed
+- **Photo grid delete visual glitch.** Deleted photo thumbnails now hide immediately on tap rather than showing a broken placeholder until the grid refreshes. Also increased refresh delay from 300ms to 600ms to ensure the database operation completes before rebuilding the grid.
+
+---
+
 ## v2307 — 2026-04-16
 
 ### Changed
