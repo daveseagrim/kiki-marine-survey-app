@@ -12228,7 +12228,7 @@ function renderInspection(survey) {
   // Vessel type toggle — always shown so the surveyor can switch at any time
   const currentVesselType = survey.vesselType || '';
   html += `
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:8px 12px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:6px 10px;">
       <span style="font-size:13px;font-weight:600;color:#475569;line-height:1.2;">Vessel<br>Type:</span>
       <div style="display:flex;gap:6px;">
         <button onclick="setVesselTypeFromInspection('sail')"
@@ -12294,7 +12294,7 @@ function renderInspection(survey) {
     html += `
       <div class="category-accordion" data-category-name="${categoryName.replace(/"/g, '&quot;')}">
         <div class="accordion-header" role="button" tabindex="0" onclick="toggleAccordion(this)">
-          <span class="accordion-chevron" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;font-size:22px;color:#64748b;flex-shrink:0;margin-left:-12px;transition:transform 0.2s;">▾</span>
+          <span class="accordion-chevron" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;font-size:22px;color:#94a3b8;flex-shrink:0;margin-left:-8px;transition:transform 0.2s;">▾</span>
           ${incompleteDot}
           <span class="category-title">${categoryName}${badges}</span>
           ${progressHtml}
@@ -12533,13 +12533,14 @@ function renderInspection(survey) {
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
               ${photos.map(pid => `
-                <div class="area-photo-wrap" style="position:relative;width:84px;display:none;">
+                <div class="area-photo-wrap" style="position:relative;width:84px;height:84px;display:none;">
                   <img id="thumb-${pid}" src="" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
                   <span onclick="event.stopPropagation();rotateAreaPhoto('${pid}','${safeLabel}')"
-                        style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↻</span>
+                        style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↻</span>
                   <span onclick="event.stopPropagation();deleteAreaPhoto('${pid}','${safeLabel}')"
-                        style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">✕</span>
-                  <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#066aab;color:white;border:none;border-radius:6px;padding:4px 0;font-size:11px;font-weight:700;cursor:pointer;">Move ↗</button>
+                        style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">✕</span>
+                  <span onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')"
+                        style="position:absolute;bottom:3px;right:3px;background:rgba(6,106,171,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↗</span>
                 </div>
               `).join('')}
             </div>
@@ -16226,13 +16227,14 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
       ${photos.map(pid => `
-        <div class="area-photo-wrap" style="position:relative;width:84px;display:none;">
+        <div class="area-photo-wrap" style="position:relative;width:84px;height:84px;display:none;">
           <img id="thumb-${pid}" src="" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
           <span onclick="event.stopPropagation();rotateAreaPhoto('${pid}','${safeLabel}')"
-                style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↻</span>
+                style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↻</span>
           <span onclick="event.stopPropagation();deleteAreaPhoto('${pid}','${safeLabel}')"
-                style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">✕</span>
-          <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#066aab;color:white;border:none;border-radius:6px;padding:4px 0;font-size:11px;font-weight:700;cursor:pointer;">Move ↗</button>
+                style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">✕</span>
+          <span onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')"
+                style="position:absolute;bottom:3px;right:3px;background:rgba(6,106,171,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↗</span>
         </div>
       `).join('')}
     </div>
