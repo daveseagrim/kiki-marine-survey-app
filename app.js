@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2340';
+const APP_VERSION = 'v2341';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4990,7 +4990,43 @@ function isHeicFile(file) {
 }
 
 // Convert a HEIC File/Blob to a JPEG dataUrl. Returns null on failure.
+// v2341: try native canvas conversion first (macOS Chrome/Safari decode HEIC
+// natively via the OS codec — much faster and more reliable). Falls back to
+// the heic2any JS library if native decoding fails.
 async function heicToJpegDataUrl(file) {
+  // Strategy 1: native canvas (works on macOS Chrome 117+, Safari 17+)
+  try {
+    const objectUrl = URL.createObjectURL(file);
+    const nativeResult = await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          // Verify the canvas actually produced JPEG (not a blank/error)
+          if (dataUrl && dataUrl.length > 100 && dataUrl.startsWith('data:image/jpeg')) {
+            resolve(dataUrl);
+          } else {
+            resolve(null);
+          }
+        } catch (e) {
+          resolve(null);
+        }
+        URL.revokeObjectURL(objectUrl);
+      };
+      img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(null); };
+      // Timeout — if the browser can't decode HEIC, onerror may never fire
+      setTimeout(() => { URL.revokeObjectURL(objectUrl); resolve(null); }, 5000);
+      img.src = objectUrl;
+    });
+    if (nativeResult) return nativeResult;
+  } catch (_) { /* fall through to heic2any */ }
+
+  // Strategy 2: heic2any JS library (slower, works on any browser)
   try {
     const heic2any = await loadHeic2any();
     const jpegBlob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
@@ -5002,7 +5038,7 @@ async function heicToJpegDataUrl(file) {
       reader.readAsDataURL(blob);
     });
   } catch (err) {
-    console.error('heicToJpegDataUrl failed:', err);
+    console.error('heicToJpegDataUrl failed (both native and heic2any):', err);
     return null;
   }
 }

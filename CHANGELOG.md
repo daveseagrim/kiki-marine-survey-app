@@ -12,6 +12,12 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2341 — 2026-04-18
+### Fixed
+- HEIC drag-and-drop conversion: now tries native canvas conversion first (macOS Chrome/Safari decode HEIC via OS codec), falls back to heic2any library only if native fails. Much faster and more reliable.
+
+---
+
 ## v2340 — 2026-04-18
 ### Fixed
 - Desktop drag-and-drop photos onto checklist items was defined but never wired up; added `setupChecklistDragDrop()` call in `renderInspection()` and `.drag-target` CSS for visual feedback.
