@@ -5429,9 +5429,12 @@ function updateCompactItem(survey, itemLabel, categoryName) {
   if (itemData.photos && itemData.photos.length > 0) {
     itemData.photos.forEach(photoId => {
       getPhotoById(photoId).then(photo => {
-        if (photo) {
+        if (photo && photo.dataUrl) {
           const img = document.getElementById(`thumb-${photoId}`);
-          if (img) img.src = photo.dataUrl;
+          if (img) {
+            img.src = photo.dataUrl;
+            img.style.display = '';
+          }
         }
       });
     });
@@ -15831,20 +15834,23 @@ async function loadCategoryThumbnails(accordionContentEl) {
   for (const img of thumbs) {
     // Skip already-loaded thumbnails (loaded photos have data: URLs)
     if (img.src && img.src.startsWith('data:')) {
-      // v2316: ensure wrapper is visible for already-loaded photos
+      // v2316: ensure visible for already-loaded photos
       const w = img.closest('.photo-item');
       if (w) w.style.display = '';
+      img.style.display = '';
       continue;
     }
     const photoId = img.id.replace('thumb-', '');
     const photo = await getPhotoById(photoId);
     if (photo && photo.dataUrl) {
       img.src = photo.dataUrl;
-      // v2316: photo-items start hidden — show only when data loads
+      // v2316: thumbnails start hidden — show only when data loads
       const wrapper = img.closest('.photo-item');
       if (wrapper) wrapper.style.display = '';
+      // Compact view: img itself is hidden (no .photo-item wrapper)
+      img.style.display = '';
     }
-    // Otherwise wrapper stays hidden (its default state since v2316)
+    // Otherwise stays hidden (default state since v2316)
   }
 }
 
@@ -16147,7 +16153,7 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
       ${photos.map(pid => `
-        <div style="position:relative;width:84px;">
+        <div class="area-photo-wrap" style="position:relative;width:84px;display:none;">
           <img id="thumb-${pid}" src="" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
           <button onclick="event.stopPropagation();deleteAreaPhoto('${pid}', '${safeLabel}')" aria-label="Delete photo" style="position:absolute;top:-8px;right:-8px;background:#dc2626;color:white;border:2px solid white;border-radius:50%;width:30px;height:30px;font-size:16px;font-weight:700;cursor:pointer;line-height:26px;text-align:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,0.3);">×</button>
           <button onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')" style="display:block;width:100%;margin-top:4px;background:#066aab;color:white;border:none;border-radius:6px;padding:6px 0;font-size:12px;font-weight:700;cursor:pointer;">Move ↗</button>
@@ -16172,9 +16178,14 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
   // Load thumbnails from IndexedDB
   photos.forEach(photoId => {
     getPhotoById(photoId).then(photo => {
-      if (photo) {
+      if (photo && photo.dataUrl) {
         const img = document.getElementById(`thumb-${photoId}`);
-        if (img) img.src = photo.dataUrl;
+        if (img) {
+          img.src = photo.dataUrl;
+          // v2316: show wrapper once data loads
+          const wrap = img.closest('.area-photo-wrap');
+          if (wrap) wrap.style.display = '';
+        }
       }
     });
   });
@@ -17455,7 +17466,7 @@ function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
   if (photoCount > 0) {
     html += `<div class="compact-photo-thumbs" style="display:flex;gap:4px;padding:2px 12px 4px 12px;flex-wrap:wrap;">`;
     itemData.photos.forEach(pid => {
-      html += `<img id="thumb-${pid}" src="" style="width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid #ddd;cursor:pointer;" onclick="showMediaSheet('${safeLabel}', '${safeCat}')" />`;
+      html += `<img id="thumb-${pid}" src="" style="width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid #ddd;cursor:pointer;display:none;" onclick="showMediaSheet('${safeLabel}', '${safeCat}')" />`;
     });
     html += `</div>`;
   }
