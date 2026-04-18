@@ -20534,6 +20534,42 @@
       "phase": "observed",
       "severity": 2,
       "text": "No manual controller was fitted at the helm."
+    },
+    {
+      "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
+      "rating": "Not tested - out of water",
+      "phase": "observed",
+      "text": "The drive coupling, propeller shaft, and stuffing box or dripless seal were not tested because the vessel was out of the water."
+    },
+    {
+      "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
+      "rating": "Not tested - out of water",
+      "phase": "action",
+      "text": "Recommend testing the drive coupling, propeller shaft, and stuffing box or dripless seal when the vessel is commissioned for the season."
+    },
+    {
+      "section": "Drive coupling",
+      "rating": "Not tested - out of water",
+      "phase": "observed",
+      "text": "The drive coupling was not tested because the vessel was out of the water."
+    },
+    {
+      "section": "Drive coupling",
+      "rating": "Not tested - out of water",
+      "phase": "action",
+      "text": "Recommend testing the drive coupling when the vessel is commissioned for the season."
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "Not tested - out of water",
+      "phase": "observed",
+      "text": "The stuffing box or dripless seal was not tested because the vessel was out of the water."
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "Not tested - out of water",
+      "phase": "action",
+      "text": "Recommend testing the stuffing box or dripless seal when the vessel is commissioned for the season."
     }
   ],
   "Steering & Hydraulics": [
@@ -21656,6 +21692,30 @@
       "text": "Non compliance increases the risk of faults, overheating, and failure.",
       "phase": "means",
       "severity": 3
+    },
+    {
+      "section": "Bundling support and wiring",
+      "rating": "A",
+      "phase": "observed",
+      "text": "Non-marine-grade (household-type, solid-core untinned) wiring was observed at [insert location(s)]."
+    },
+    {
+      "section": "Bundling support and wiring",
+      "rating": "A",
+      "phase": "observed",
+      "text": "Romex-type solid-core household wiring was used in place of marine-grade stranded tinned copper at [insert location(s)]."
+    },
+    {
+      "section": "Bundling support and wiring",
+      "rating": "A",
+      "phase": "means",
+      "text": "Marine environments demand stranded, tinned copper conductors to resist vibration fatigue and galvanic corrosion. Solid-core untinned wiring is not permitted by ABYC E-11 and presents elevated fire and electrical-shock hazards as it ages in service."
+    },
+    {
+      "section": "Bundling support and wiring",
+      "rating": "A",
+      "phase": "action",
+      "text": "Replace the non-marine-grade conductors with tinned stranded copper wiring and marine-rated terminations in accordance with ABYC E-11."
     },
     {
       "section": "Bundling support and wiring",

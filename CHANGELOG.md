@@ -12,6 +12,33 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2353 — 2026-04-18
+### Added
+- **`Bundling support and wiring` — A-rating non-marine-grade wiring chip set.** Four new chips for the common ABYC E-11 finding where household (Romex-type) solid-core untinned wiring has been installed instead of marine-grade tinned stranded copper. Uses `[insert location(s)]` so the surveyor can point to panels, bilge, head, or specific runs as appropriate:
+  - Observed: `Non-marine-grade (household-type, solid-core untinned) wiring was observed at [insert location(s)].`
+  - Observed: `Romex-type solid-core household wiring was used in place of marine-grade stranded tinned copper at [insert location(s)].`
+  - Means: `Marine environments demand stranded, tinned copper conductors to resist vibration fatigue and galvanic corrosion. Solid-core untinned wiring is not permitted by ABYC E-11 and presents elevated fire and electrical-shock hazards as it ages in service.`
+  - Action: `Replace the non-marine-grade conductors with tinned stranded copper wiring and marine-rated terminations in accordance with ABYC E-11.`
+- Chips are additive to the existing A-rating content (chafe/support/bundling chips stay) and inserted immediately after the existing A-means so the "What it means for this vessel" column can offer the surveyor either the generic fault-risk framing or the specific ABYC E-11 non-compliance narrative.
+
+---
+
+## v2352 — 2026-04-18
+### Added
+- **"Not tested - out of water" chip set added to three drive-line sections**, using the canonical phrasing already used across the rest of the survey (toilet/seacock, engine start and stop, gearshift, outdrive tilt, bow thruster, autopilot, etc.): past-tense observed + "Recommend testing … when the vessel is commissioned for the season." action.
+  - `Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)` (bundled section):
+    - Observed: `The drive coupling, propeller shaft, and stuffing box or dripless seal were not tested because the vessel was out of the water.`
+    - Action: `Recommend testing the drive coupling, propeller shaft, and stuffing box or dripless seal when the vessel is commissioned for the season.`
+  - `Drive coupling` (singular):
+    - Observed: `The drive coupling was not tested because the vessel was out of the water.`
+    - Action: `Recommend testing the drive coupling when the vessel is commissioned for the season.`
+  - `Stuffing box/packing gland/dripless seal`:
+    - Observed: `The stuffing box or dripless seal was not tested because the vessel was out of the water.`
+    - Action: `Recommend testing the stuffing box or dripless seal when the vessel is commissioned for the season.`
+- Rating is `Not tested - out of water`, which matches the existing "starts-with 'Not tested'" rule in `findTextVariants` so the chips appear alongside the `Not tested - dripless` and `Not tested - stuffing box` chip sets when the surveyor picks `Not tested/not verified` as the item rating. Surveyor now has an out-of-the-box canonical chip for the common "vessel on shore at time of survey" case without having to declare whether the rig is dripless or traditional.
+
+---
+
 ## v2351 — 2026-04-18
 ### Added
 - **`Distribution panel 110V` — A-rating reverse-polarity indicator chip set.** Three new chips covering the specific A-severity finding when an AC panel lacks a reverse-polarity indicator. Wording mirrors the adjacent protective-guard chip pair (past-tense observed, imperative action), uses Canadian English, and avoids the informal "this device" framing:
