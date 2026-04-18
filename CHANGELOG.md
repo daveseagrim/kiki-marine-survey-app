@@ -12,6 +12,14 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2371 — 2026-04-18
+### Added
+- **Check Survey now flags duplicate photos.** Dave noticed the report sometimes felt photo-heavy and suspected the same image was being attached to multiple places (same photo imported twice, same shot dragged onto two items, camera fires twice and both land, etc.). Preflight now scans every photo on the survey — checklist items, safety equipment, instruments/electronics, HIN plate, compliance plate, cover photo, TC licence, four-corner overview, engine and transmission photos — computes a SHA-256 digest of each photo's dataUrl, groups by digest, and any bucket with two or more photos is reported as a warning under a new **"Duplicate Photos"** category. The warning body reads `Same photo appears in N places: <Location A> • <Location B> • ...`, and the Go button (when navigable) jumps to the first item-based location so Dave can review and delete the extras.
+- Match criterion is **exact pixel match** only (byte-identical dataUrl). This guarantees zero false positives — two legitimately similar but distinct photos (e.g., two different bilge pumps shot from similar angles) will never be flagged. Perceptual / near-identical matching was considered and rejected because the false-positive cost on a survey that contains, say, eight engine-compartment shots is too high.
+- Runs inside the existing `checkSurvey()` async flow, after the current photo-ref collection pass, in parallel via `Promise.all` for speed. Per-photo load failures are tolerated (a missing photo record just gets skipped rather than aborting the scan), and the whole duplicate pass is guarded in a try/catch so a crypto-subtle-missing environment silently skips duplicate detection without breaking the rest of preflight.
+
+---
+
 ## v2370 — 2026-04-18
 ### Changed
 - **Report photos are now 10% smaller across the board — new standard.** The `.report-photo` CSS class drops from the previous 260×195 baseline (established in v2227) down to **234×176 px**. `.report-photo-card` width drops from 260 → 234 to match. This change applies uniformly everywhere photos render in the generated report body: per-item inspection photos, findings photos, safety-equipment photos, instrument-panel photos, nameplates, HIN and compliance plates, and the four-corner overview grid. Aspect ratio (4:3) is preserved so photos taken in portrait/landscape don't squash; `object-fit: cover` continues to handle non-4:3 source photos cleanly. Net effect: tighter page layout, fewer awkward wraps across grid rows, a few more photos fit per page in the Findings section. No code change required at any photo call site — all inserts go through the shared `.report-photo` class, so every current and future photo location picks up the new size automatically.

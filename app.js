@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2370';
+const APP_VERSION = 'v2371';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -13794,6 +13794,81 @@ async function checkSurvey() {
     if (data.photos && data.photos.length > 0) {
       data.photos.forEach(pid => allPhotoRefs.push({ id: pid, label: label, isDoc: false }));
     }
+  }
+  // v2371: Also scan safety equipment and instruments/electronics photos so
+  // duplicate detection covers every photo source on the survey. These live
+  // outside survey.items so the earlier loop misses them.
+  (survey.safetyEquipment || []).forEach((eq, idx) => {
+    if (eq && Array.isArray(eq.photos) && eq.photos.length > 0) {
+      const safeLabel = `Safety: ${eq.name || `item ${idx + 1}`}`;
+      const navTarget = `safety-thumbs-${idx}`;
+      eq.photos.forEach(pid => allPhotoRefs.push({ id: pid, label: safeLabel, isDoc: false, navId: navTarget, isSafety: true }));
+    }
+  });
+  (survey.instrumentsElectronics || []).forEach((ie, idx) => {
+    if (ie && Array.isArray(ie.photos) && ie.photos.length > 0) {
+      const ieLabel = `Instrument: ${ie.name || `device ${idx + 1}`}`;
+      ie.photos.forEach(pid => allPhotoRefs.push({ id: pid, label: ieLabel, isDoc: false, isInstrument: true }));
+    }
+  });
+
+  // ── 3c. DUPLICATE PHOTO DETECTION (v2371) ──────────────────────────────
+  // Dave asked to surface duplicate photos because he suspected the same
+  // image was getting attached to multiple items (e.g., re-photographing
+  // the bilge pump across two inspection items, or a single import run
+  // landing copies on both the item and safety sections). Flag exact
+  // pixel-level duplicates only — a SHA-256 over each photo's dataUrl
+  // gives a zero-false-positive match with no risk of flagging
+  // visually-similar but legitimately distinct photos. Perceptual
+  // matching was considered and rejected as too prone to false flags.
+  //
+  // Implementation: hash every photo's dataUrl, group by digest, and any
+  // bucket with >1 entry is a duplicate set. Tolerates per-photo load
+  // failures (missing photos are skipped rather than aborting the scan)
+  // and silently no-ops on browsers without crypto.subtle (none exist in
+  // our target matrix, but defensive guard doesn't hurt).
+  try {
+    if (allPhotoRefs.length > 1 && typeof crypto !== 'undefined' && crypto.subtle && crypto.subtle.digest) {
+      const _dupEnc = new TextEncoder();
+      const _hashResults = await Promise.all(allPhotoRefs.map(async (ref) => {
+        try {
+          const p = await getPhotoById(ref.id);
+          if (!p || !p.dataUrl) return null;
+          const _buf = await crypto.subtle.digest('SHA-256', _dupEnc.encode(p.dataUrl));
+          const _hex = Array.from(new Uint8Array(_buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+          return { hash: _hex, ref };
+        } catch (_e) {
+          return null;
+        }
+      }));
+      const _buckets = {};
+      for (const r of _hashResults) {
+        if (!r) continue;
+        (_buckets[r.hash] = _buckets[r.hash] || []).push(r.ref);
+      }
+      for (const _h of Object.keys(_buckets)) {
+        const _bucket = _buckets[_h];
+        if (_bucket.length < 2) continue;
+        // Pick a nav target: first item-based location (for Go button to
+        // jump to that item). Fall back to the first doc location, then
+        // the first safety location, else leave navigation off.
+        const _itemBased = _bucket.find(b => !b.isDoc && !b.isSafety && !b.isInstrument);
+        const _docBased  = _bucket.find(b => b.isDoc);
+        const _safeBased = _bucket.find(b => b.isSafety);
+        const _target = _itemBased || _docBased || _safeBased || _bucket[0];
+        const _locations = _bucket.map(b => b.label).join(' • ');
+        add(
+          'warning',
+          'Duplicate Photos',
+          `Same photo appears in ${_bucket.length} places: ${_locations}`,
+          _itemBased ? _itemBased.label : null,
+          (!_itemBased && _target && _target.navId) ? _target.navId : null
+        );
+      }
+    }
+  } catch (_e) {
+    // Crypto unavailable or scan failed — skip duplicate detection silently.
+    // The rest of the preflight is unaffected.
   }
 
   // ── 4. CHECKLIST COMPLETION ─────────────────────────────────────────────
