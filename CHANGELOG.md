@@ -12,6 +12,9 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2313 — 2026-04-17
+- Fixed photo placeholder check: now verifies `photo.dataUrl` exists (not just the photo record). Photos that exist as Firebase stubs without image data are now hidden instead of showing broken placeholders. Applies to both accordion thumbnails and media sheet grid.
+
 ## v2312 — 2026-04-17
 - Fixed orphaned photo placeholders in the media sheet grid (the popup with delete/rotate buttons). Same hide-if-missing logic as v2311 but for the second code path.
 

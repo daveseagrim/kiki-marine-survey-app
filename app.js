@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2312';
+const APP_VERSION = 'v2313';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -5112,10 +5112,11 @@ function showMediaSheet(itemLabel, categoryName) {
       itemData.photos.forEach(photoId => {
         getPhotoById(photoId).then(photo => {
           const img = document.getElementById(`sheet-thumb-${photoId}`);
-          if (photo && img) {
+          if (photo && photo.dataUrl && img) {
             img.src = photo.dataUrl;
           } else if (img) {
-            // v2311: hide orphaned photo (deleted but ID still in survey)
+            // v2312: hide orphaned or stub photo (deleted, or Firebase stub
+            // without image data)
             const wrapper = img.closest('[data-photo-idx]');
             if (wrapper) wrapper.style.display = 'none';
           }
@@ -15833,11 +15834,11 @@ async function loadCategoryThumbnails(accordionContentEl) {
     if (img.src && img.src.startsWith('data:')) continue;
     const photoId = img.id.replace('thumb-', '');
     const photo = await getPhotoById(photoId);
-    if (photo) {
+    if (photo && photo.dataUrl) {
       img.src = photo.dataUrl;
     } else {
-      // v2311: hide orphaned photo placeholders (photo was deleted but ID
-      // lingered in the survey's photos array)
+      // v2311: hide orphaned or stub photo placeholders (photo was deleted,
+      // or exists only as a Firebase stub without image data)
       const wrapper = img.closest('.photo-item');
       if (wrapper) wrapper.style.display = 'none';
     }
