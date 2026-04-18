@@ -12,6 +12,12 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2323 — 2026-04-18
+- Added % complete indicator: progress ring badge shown in both the inspection page header and intro/edit page header. "Complete" now requires rating + notes + at least one photo (or excluded). Tap the badge to see breakdown: Checklist %, Intro %, Overall %. Home page progress ring also uses the stricter definition. Intro completion tracks 20 core fields (vessel info, specs, engine, documentation, description, survey conditions).
+
+## v2322 — 2026-04-18
+- Fixed ABYC standard for propeller shafting items: propeller, propeller shaft, cutlass bearing, stern tube, drive coupling, stuffing box, packing gland, and dripless seal now correctly cite ABYC P-7 (Propeller Shafting Systems) instead of ABYC P-4 (Inboard Engines). P-7 added to Hull exterior and Engine standards checkbox lists.
+
 ## v2321 — 2026-04-18
 - Changed auto-generated N/A text from "fitted" to "installed": "No hull anodes were installed on this vessel" instead of "No hull anodes were fitted on this vessel." Applies to all auto-generated Not Applicable snippets across the entire app.
 

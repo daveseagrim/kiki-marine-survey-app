@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2321';
+const APP_VERSION = 'v2323';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -537,6 +537,7 @@ const STANDARDS_BY_CATEGORY = {
     'ABYC TH-27 - Seacocks/Through-Hull Fittings',
     'ABYC P-1 - Installation of Exhaust Systems',
     'ABYC P-4 - Inboard Engines',
+    'ABYC P-7 - Propeller Shafting Systems',
     'ABYC E-2 - Cathodic Protection',
     'ABYC E-13 - Cathodic Protection'
   ],
@@ -650,6 +651,7 @@ const STANDARDS_BY_CATEGORY = {
   'Engine': [
     'ABYC P-1 - Installation of Exhaust Systems',
     'ABYC P-4 - Inboard Engines',
+    'ABYC P-7 - Propeller Shafting Systems',
     'ABYC H-24 - Gasoline Fuel Systems',
     'ABYC H-33 - Diesel Fuel Systems',
     'ABYC H-2 - Ventilation of Boats Using Gasoline',
@@ -5478,6 +5480,9 @@ function updateCompactItem(survey, itemLabel, categoryName) {
       });
     });
   }
+
+  // v2323: refresh completion badge after any item update
+  updateCompletionBadge();
 }
 
 // Find applicable standards for a category/rating
@@ -5511,8 +5516,8 @@ const ITEM_STANDARD_MAP = {
   'Keel and keel joint': 'TP1332 - Construction Standards for Small Vessels',
   'Hull anodes': 'ABYC E-2 - Cathodic Protection',
   'Propeller/drive anode': 'ABYC E-2 - Cathodic Protection',
-  'Cutlass bearing': 'ABYC P-4 - Inboard Engines',
-  'Propeller': 'ABYC P-4 - Inboard Engines',
+  'Cutlass bearing': 'ABYC P-7 - Propeller Shafting Systems',
+  'Propeller': 'ABYC P-7 - Propeller Shafting Systems',
   'Outdrive': ['ABYC P-4 - Inboard Engines', 'ABYC E-2 - Cathodic Protection'],
   'Sail drive': ['ABYC P-4 - Inboard Engines', 'ABYC E-2 - Cathodic Protection'],
   'Bow thruster': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
@@ -5523,8 +5528,8 @@ const ITEM_STANDARD_MAP = {
   'Swim platform': 'ABYC E-2 - Cathodic Protection',
   'Transom': 'TP1332 - Construction Standards for Small Vessels',
   'Hull-deck joint': 'TP1332 - Construction Standards for Small Vessels',
-  'Stern tube': 'ABYC P-4 - Inboard Engines',
-  'Propeller shaft': 'ABYC P-4 - Inboard Engines',
+  'Stern tube': 'ABYC P-7 - Propeller Shafting Systems',
+  'Propeller shaft': 'ABYC P-7 - Propeller Shafting Systems',
   'Trim tab': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
   'Rub rail': 'TP1332 - Construction Standards for Small Vessels',
 
@@ -5616,10 +5621,10 @@ const ITEM_STANDARD_MAP = {
   'Anti-vibration': 'ABYC P-4 - Inboard Engines',
   'Hose': 'ABYC P-4 - Inboard Engines',
   'Gearbox': 'ABYC P-4 - Inboard Engines',
-  'Drive coupling': 'ABYC P-4 - Inboard Engines',
-  'Stuffing box': 'ABYC P-4 - Inboard Engines',
-  'Packing gland': 'ABYC P-4 - Inboard Engines',
-  'Dripless seal': 'ABYC P-4 - Inboard Engines',
+  'Drive coupling': 'ABYC P-7 - Propeller Shafting Systems',
+  'Stuffing box': 'ABYC P-7 - Propeller Shafting Systems',
+  'Packing gland': 'ABYC P-7 - Propeller Shafting Systems',
+  'Dripless seal': 'ABYC P-7 - Propeller Shafting Systems',
 
   // Steering and trim
   'Mechanical steering': 'ABYC P-11 - Steering Systems',
@@ -7555,17 +7560,18 @@ function createNewSurvey(formData) {
   return survey;
 }
 
-// Calculate completion percentage (excludes fully-excluded categories from the count)
-function getCompletionPercentage(survey) {
-  if (!survey) return 0;
+// v2323: Calculate completion percentage.
+// "Complete" = has rating + has notes (text) + has at least one photo, OR is excluded.
+// Returns an object { checklist, intro, overall } with percentages, or just the
+// overall number when called from contexts that expect a single integer (backward compat).
+function getCompletionPercentage(survey, detailed) {
+  if (!survey) return detailed ? { checklist: 0, intro: 0, overall: 0 } : 0;
 
-  // If totalRatedItems was already calculated (from inspection view), use it
+  // --- Checklist completion ---
   let total = survey.totalRatedItems;
-
-  // Otherwise, calculate from the template on the fly
   if (!total) {
     const template = getTemplateForSurvey(survey);
-    if (!template || template.length === 0) return 0;
+    if (!template || template.length === 0) return detailed ? { checklist: 0, intro: 0, overall: 0 } : 0;
 
     const isPowerboat = (survey.vesselType || '').toLowerCase() === 'power';
     const sailOnlyCategories = ['Spars and rigging', 'Sails'];
@@ -7581,14 +7587,69 @@ function getCompletionPercentage(survey) {
         });
       }
     });
-
-    total = count || 1; // avoid divide by zero
+    total = count || 1;
   }
 
-  // Count items that are rated OR excluded
+  // Count fully complete items: rating + text + photo, OR excluded
   const completedOrExcluded = Object.values(survey.items || {})
-    .filter(item => (item.rating && item.rating !== '') || item.excluded).length;
-  return Math.min(100, Math.round((completedOrExcluded / total) * 100));
+    .filter(item => {
+      if (item.excluded) return true;
+      const hasRating = item.rating && item.rating !== '';
+      const hasText = item.text && item.text.trim() !== '';
+      const hasPhoto = item.photos && item.photos.length > 0;
+      return hasRating && hasText && hasPhoto;
+    }).length;
+  const checklistPct = Math.min(100, Math.round((completedOrExcluded / total) * 100));
+
+  if (!detailed) return checklistPct;
+
+  // --- Intro completion ---
+  // Core fields a surveyor must fill in before generating a report
+  const introFields = [
+    'vesselName', 'yearMakeModel', 'clientName', 'surveyDate', 'location',
+    'surveyType', 'vesselType', 'loa', 'beam', 'maxDraft', 'hullType',
+    'construction', 'hinNumber', 'engineMake', 'engineModel', 'fuelType',
+    'vesselDescription', 'onLandOrWater', 'personsInAttendance', 'weather'
+  ];
+  let introFilled = 0;
+  for (const f of introFields) {
+    const val = survey[f];
+    if (val && String(val).trim() !== '' && val !== 'Select') introFilled++;
+  }
+  const introPct = Math.round((introFilled / introFields.length) * 100);
+
+  // Overall = weighted average (checklist 70%, intro 30%)
+  const overall = Math.round(checklistPct * 0.7 + introPct * 0.3);
+
+  return { checklist: checklistPct, intro: introPct, overall };
+}
+
+// v2323: Render/update the completion badge (progress ring + percentage) in headers
+async function updateCompletionBadge() {
+  const el = document.getElementById('completionBadge');
+  if (!el || !currentSurveyId) return;
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  const pct = getCompletionPercentage(survey, true);
+  const colour = pct.overall >= 80 ? '#22c55e' : pct.overall >= 50 ? '#eab308' : '#ef4444';
+  const dashLen = (pct.overall / 100) * 69.1;
+  el.innerHTML = `
+    <div style="position:relative;width:34px;height:34px;cursor:pointer;" title="Checklist ${pct.checklist}%  Intro ${pct.intro}%  Overall ${pct.overall}%" onclick="showCompletionDetail()">
+      <svg width="34" height="34" viewBox="0 0 34 34">
+        <circle cx="17" cy="17" r="11" fill="none" stroke="#e2e8f0" stroke-width="3"/>
+        <circle cx="17" cy="17" r="11" fill="none" stroke="${colour}" stroke-width="3"
+                stroke-dasharray="${dashLen} 69.1" stroke-linecap="round" transform="rotate(-90 17 17)"/>
+      </svg>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:${colour};">${pct.overall}%</div>
+    </div>`;
+}
+
+// v2323: Show completion detail toast when tapping the badge
+async function showCompletionDetail() {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  const pct = getCompletionPercentage(survey, true);
+  showToast(`Checklist: ${pct.checklist}%  ·  Intro: ${pct.intro}%  ·  Overall: ${pct.overall}%`, 3000);
 }
 
 // UI Rendering Functions
@@ -9178,12 +9239,16 @@ function editSurveyDetails(surveyId) {
           <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${(survey.vesselName || 'Survey').replace(/</g, '&lt;')}</div>
           <div class="header-subtitle">Edit Vessel Information — <span onclick="forceAppUpdate()" style="cursor:pointer;text-decoration:underline dotted;color:#3b82f6;" title="Tap to check for updates">${APP_VERSION}</span></div>
         </div>
+        <div id="completionBadge" style="flex-shrink:0;margin-right:4px;"></div>
         <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
       `;
     }
 
     // Refresh sync status dot for this view
     if (typeof FirebaseSync !== 'undefined') FirebaseSync.refreshUI();
+
+    // v2323: render completion badge on intro page
+    updateCompletionBadge();
 
     // Change form action buttons
     const formActions = document.querySelector('.form-actions');
@@ -11944,6 +12009,7 @@ function renderInspection(survey) {
         <div class="header-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#066aab;font-size:17px;">${esc(survey.vesselName)}</div>
         <div style="font-size:10px;color:#9ca3af;"><span onclick="forceAppUpdate()" style="cursor:pointer;text-decoration:underline dotted;color:#3b82f6;" title="Tap to check for updates">${APP_VERSION}</span></div>
       </div>
+      <div id="completionBadge" style="flex-shrink:0;margin-right:4px;"></div>
       <div id="syncStatusIndicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:help;" title="Sync status"></div>
     </div>
     ${surveyTypeBanner}
@@ -12852,6 +12918,9 @@ function renderInspection(survey) {
   ensureReportButton();
   // Fallback: if button didn't appear (e.g. timing issue), retry after DOM settles
   setTimeout(() => ensureReportButton(), 500);
+
+  // v2323: render completion badge in header
+  updateCompletionBadge();
 
   // Restore the previously open accordion so the user doesn't lose their place
   restoreAccordionState();
