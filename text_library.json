@@ -18667,7 +18667,7 @@
     {
       "section": "Black water tank(s) and plumbing",
       "rating": "C",
-      "text": "The black water tank was mounted in the [insert location].",
+      "text": "The black water tank was mounted [insert location].",
       "phase": "observed",
       "severity": 3
     },
