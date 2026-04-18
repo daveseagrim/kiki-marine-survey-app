@@ -12,6 +12,15 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2336 — 2026-04-18
+
+- **Skip-with-data warning.** Tapping ⊘ Skip on an item that already has
+  a rating, notes, or standards now shows a confirmation dialog. On
+  confirm, the rating, notes, standards, and variant text are all cleared
+  so the item reverts to a clean unrated/excluded state. Photos are
+  retained. Unskipping never prompts. The bottom sheet also auto-closes
+  when skipping from within it.
+
 ## v2335 — 2026-04-18
 
 - **Progress circle enlarged.** The completion percentage ring in the

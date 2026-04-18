@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2335';
+const APP_VERSION = 'v2336';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -18357,19 +18357,31 @@ async function toggleExclude(itemLabel) {
   }
   const item = survey.items[itemLabel];
   const willSkip = !item.excluded;
-  // v2195: if the surveyor is about to skip an item that has saved notes,
-  // confirm — and clear the notes on confirmation. Prevents accidental
-  // skip-with-stale-text. Unskipping is always safe and doesn't prompt.
-  if (willSkip && item.text && item.text.trim()) {
-    const confirmed = await showConfirm(
-      `This item has saved notes. Skipping will mark it excluded from the report and clear the text. Continue?`,
-      'Skip and clear', 'Cancel'
-    );
-    if (!confirmed) return;
-    item.text = '';
+  // v2195/v2335: if the surveyor is about to skip an item that already has
+  // a rating, notes, or standards, confirm first. On confirmation clear ALL
+  // data so the item reverts to a clean unrated state. Unskipping is always
+  // safe and doesn't prompt.
+  if (willSkip) {
+    const hasRating = !!(item.rating && item.rating.trim());
+    const hasText = !!(item.text && item.text.trim());
+    const hasStandards = !!(item.standards && item.standards.length > 0);
+    if (hasRating || hasText || hasStandards) {
+      const confirmed = await showConfirm(
+        `This item already has data (rating, notes, or standards). Skipping will clear all selections and exclude the item from the report. Continue?`,
+        'Skip and clear', 'Cancel'
+      );
+      if (!confirmed) return;
+      item.rating = '';
+      item.text = '';
+      item.standards = [];
+      item.variantText = '';
+    }
   }
   item.excluded = willSkip;
   await saveSurvey(survey);
+  // v2335: close the bottom sheet if it's open (skip from within sheet)
+  const overlay = document.getElementById('bottomSheetOverlay');
+  if (overlay) overlay.remove();
   updateItemInPlace(survey, itemLabel);
 }
 
