@@ -12,6 +12,13 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2307 — 2026-04-16
+
+### Changed
+- **Text library: present-tense recommendations and consistency pass.** Applied 1,329 snippet updates across 104 unique replacements. Key changes: "No action required" → "No corrective action is recommended"; "was noted" → "was observed"; "This represents a significant concern" → "This condition represents a significant concern"; "The finding should be monitored and addressed" → "This finding warrants attention"; "is required" → "are recommended" (subject-verb agreement). All custom snippets (escutcheons, spreader boots, conductivity readings, `{specify:}` tokens) preserved.
+
+---
+
 ## v2306 — 2026-04-16
 
 ### Added
