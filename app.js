@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2338';
+const APP_VERSION = 'v2339';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -5688,7 +5688,7 @@ const ITEM_STANDARD_MAP = {
   'AIS': 'TP14693 - Navigation Safety Regulations (SOR/2005-134)',
   'Horn': 'Small Vessel Regulations (SOR/2010-91)',
   'Spotlight': 'ABYC A-16 - Electrical Navigation Lights',
-  'Windshield wiper': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Windshield wiper': 'TP1332 - Construction Standards for Small Vessels',
 
   // Cabin
   'Cabin sole': 'TP1332 - Construction Standards for Small Vessels',
@@ -18280,10 +18280,11 @@ function selectRating(itemLabel, categoryName, rating) {
         compactDiv.innerHTML = buildCompactItemHTML(itemLabel, categoryName, itemData, options);
         // Load photo thumbnails for inline display
         // v2327: also unhide — thumbnails start display:none for lazy loading
+        // v2338: guard on photo.dataUrl to prevent broken images when data is missing
         if (itemData.photos && itemData.photos.length > 0) {
           itemData.photos.forEach(photoId => {
             getPhotoById(photoId).then(photo => {
-              if (photo) {
+              if (photo && photo.dataUrl) {
                 const img = document.getElementById(`thumb-${photoId}`);
                 if (img) {
                   img.src = photo.dataUrl;
@@ -18482,12 +18483,16 @@ function updateItemInPlace(survey, itemLabel) {
     const itemData = survey.items[itemLabel] || { rating: '', text: '', standards: [], photos: [] };
     compactDiv.innerHTML = buildCompactItemHTML(itemLabel, categoryName, itemData, options);
     // Load photo thumbnails
+    // v2338: also unhide — thumbnails start display:none for lazy loading
     if (itemData.photos && itemData.photos.length > 0) {
       itemData.photos.forEach(photoId => {
         getPhotoById(photoId).then(photo => {
-          if (photo) {
+          if (photo && photo.dataUrl) {
             const img = document.getElementById(`thumb-${photoId}`);
-            if (img) img.src = photo.dataUrl;
+            if (img) {
+              img.src = photo.dataUrl;
+              img.style.display = '';
+            }
           }
         });
       });

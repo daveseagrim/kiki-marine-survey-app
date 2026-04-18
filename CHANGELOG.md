@@ -12,6 +12,21 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2339 — 2026-04-18
+
+- **Windshield wiper standard corrected.** Changed from ABYC E-11
+  (electrical) to TP1332 (construction standards) — E-11 is not the
+  appropriate standard for wiper operation.
+- **Windshield wiper snippets expanded.** All three ratings (A, B, C)
+  now offer port/starboard/both options via `[side]` placeholder. Added
+  A-rating snippets for wiper blades needing replacement even when the
+  mechanism works. Added means and action snippets for all ratings.
+  Updated across Gauges, Pilot house, and Flybridge sheets.
+- **Thumbnail dataUrl guard.** All thumbnail-loading paths now check
+  `photo.dataUrl` before unhiding the image, preventing broken image
+  placeholders when photo data is missing from IndexedDB.
+  `updateItemInPlace` now also unhides thumbnails after setting src.
+
 ## v2338 — 2026-04-18
 
 - **Photo preview navigation arrows.** When tapping a photo thumbnail in

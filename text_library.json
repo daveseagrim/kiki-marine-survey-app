@@ -10529,29 +10529,106 @@
     },
     {
       "section": "Wiper blade operation",
+      "rating": "A",
+      "text": "The [side] windshield wiper was non-functional.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "text": "Both windshield wipers were non-functional.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "text": "Although the [side] wiper mechanism operated, the wiper blade was deteriorated and needs to be replaced.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "text": "Although both wiper mechanisms operated, the wiper blades were deteriorated and need to be replaced.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "text": "Non-functional wipers compromise forward visibility in rain and spray, creating a serious safety hazard.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "text": "Repair or replacement of the wiper motor and blades is required for safe forward visibility.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "text": "Replace the deteriorated wiper blades.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
       "rating": "B",
-      "text": "The windshield wipers were not working.",
+      "text": "The [side] windshield wiper was not working.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Wiper blade operation",
       "rating": "B",
-      "text": "While not explicitly required by ABYC on all powerboats, wipers are an important safety feature for visibility.",
+      "text": "Both windshield wipers were not working.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "B",
+      "text": "The [side] windshield wiper operated but with sluggish or streaking performance.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "B",
+      "text": "Both windshield wipers operated but with sluggish or streaking performance.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "B",
+      "text": "Wipers are an important safety feature for forward visibility in rain and spray.",
       "phase": "means",
       "severity": 3
     },
     {
       "section": "Wiper blade operation",
       "rating": "B",
-      "text": "Service is recommended.",
+      "text": "Service and blade replacement are recommended to restore effective operation.",
       "phase": "action",
       "severity": 3
     },
     {
       "section": "Wiper blade operation",
       "rating": "C",
-      "text": "The windshield wipers functioned properly and the blades were in acceptable condition.",
+      "text": "The [side] windshield wiper functioned properly and the blade was in acceptable condition.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "C",
+      "text": "Both windshield wipers functioned properly and the blades were in acceptable condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -11209,22 +11286,85 @@
     {
       "section": "Wiper blade operation",
       "rating": "A",
-      "text": "The windshield wipers were non-functional or the motor was broken.",
+      "text": "The [side] windshield wiper was non-functional.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Wiper blade operation",
       "rating": "A",
-      "text": "Repair or replacement is required for safe forward visibility during rain.",
+      "text": "Both windshield wipers were non-functional.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "text": "Although the [side] wiper mechanism operated, the wiper blade was deteriorated and needs to be replaced.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "text": "Although both wiper mechanisms operated, the wiper blades were deteriorated and need to be replaced.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "text": "Non-functional wipers compromise forward visibility in rain and spray, creating a serious safety hazard.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "text": "Repair or replacement of the wiper motor and blades is required for safe forward visibility.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "text": "Replace the deteriorated wiper blades.",
       "phase": "action",
       "severity": 3
     },
     {
       "section": "Wiper blade operation",
       "rating": "B",
-      "text": "The windshield wipers operated but with sluggish or streaking performance.",
+      "text": "The [side] windshield wiper was not working.",
       "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "B",
+      "text": "Both windshield wipers were not working.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "B",
+      "text": "The [side] windshield wiper operated but with sluggish or streaking performance.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "B",
+      "text": "Both windshield wipers operated but with sluggish or streaking performance.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "B",
+      "text": "Wipers are an important safety feature for forward visibility in rain and spray.",
+      "phase": "means",
       "severity": 3
     },
     {
@@ -11237,7 +11377,21 @@
     {
       "section": "Wiper blade operation",
       "rating": "C",
-      "text": "The windshield wipers operated smoothly and effectively cleared the windshield.",
+      "text": "The [side] windshield wiper functioned properly and the blade was in acceptable condition.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "C",
+      "text": "Both windshield wipers functioned properly and the blades were in acceptable condition.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "Not tested",
+      "text": "Wiper operation was not tested.",
       "phase": "observed",
       "severity": 3
     },
@@ -11694,35 +11848,105 @@
       "rating": "A",
       "phase": "observed",
       "severity": 4,
-      "text": "The windshield wiper was non-functional or the motor was broken."
+      "text": "The [side] windshield wiper was non-functional."
     },
     {
       "section": "Wiper blade operation",
-      "rating": "B",
+      "rating": "A",
       "phase": "observed",
-      "severity": 2,
-      "text": "The windshield wiper operated but with sluggish or streaking performance."
+      "severity": 4,
+      "text": "Both windshield wipers were non-functional."
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Although the [side] wiper mechanism operated, the wiper blade was deteriorated and needs to be replaced."
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Although both wiper mechanisms operated, the wiper blades were deteriorated and need to be replaced."
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "phase": "means",
+      "severity": 4,
+      "text": "Non-functional wipers compromise forward visibility in rain and spray, creating a serious safety hazard."
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "phase": "action",
+      "severity": 4,
+      "text": "Repair or replacement of the wiper motor and blades is required for safe forward visibility."
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "A",
+      "phase": "action",
+      "severity": 3,
+      "text": "Replace the deteriorated wiper blades."
     },
     {
       "section": "Wiper blade operation",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "One of the two windshield wipers was not working; the other operated correctly."
+      "text": "The [side] windshield wiper was not working."
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 3,
+      "text": "Both windshield wipers were not working."
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "The [side] windshield wiper operated but with sluggish or streaking performance."
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "B",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Both windshield wipers operated but with sluggish or streaking performance."
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "B",
+      "phase": "means",
+      "severity": 2,
+      "text": "Wipers are an important safety feature for forward visibility in rain and spray."
+    },
+    {
+      "section": "Wiper blade operation",
+      "rating": "B",
+      "phase": "action",
+      "severity": 2,
+      "text": "Service and blade replacement are recommended to restore effective operation."
     },
     {
       "section": "Wiper blade operation",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The windshield wiper functioned properly and the blade was in acceptable condition."
+      "text": "The [side] windshield wiper functioned properly and the blade was in acceptable condition."
     },
     {
       "section": "Wiper blade operation",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The windshield wiper operated smoothly and effectively cleared the windshield."
+      "text": "Both windshield wipers functioned properly and the blades were in acceptable condition."
     },
     {
       "section": "Entertainment/stereo",
