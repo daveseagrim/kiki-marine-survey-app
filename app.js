@@ -5017,11 +5017,9 @@ function showMediaSheet(itemLabel, categoryName) {
                  style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;"
                  onclick="showPhotoActionOverlay('${photoId}', '${safeLabel}', '${safeCat}')" />
             <span onclick="event.stopPropagation();_sheetRotatePhoto('${photoId}','${safeLabel}','${safeCat}')"
-                  style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:22px;height:22px;font-size:13px;line-height:22px;text-align:center;cursor:pointer;display:inline-block;backdrop-filter:blur(2px);-webkit-tap-highlight-color:transparent;"
-                  title="Rotate 90\u00b0">↻</span>
+                  style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;min-height:20px;max-width:20px;max-height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box;backdrop-filter:blur(2px);-webkit-text-size-adjust:none;-webkit-tap-highlight-color:transparent;">↻</span>
             <span onclick="event.stopPropagation();_sheetDeletePhoto('${photoId}','${safeLabel}','${safeCat}')"
-                  style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:13px;line-height:22px;text-align:center;cursor:pointer;display:inline-block;backdrop-filter:blur(2px);-webkit-tap-highlight-color:transparent;"
-                  title="Delete photo">✕</span>
+                  style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;min-height:20px;max-width:20px;max-height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box;backdrop-filter:blur(2px);-webkit-text-size-adjust:none;-webkit-tap-highlight-color:transparent;">✕</span>
           </div>
         `;
       });
