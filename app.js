@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2354';
+const APP_VERSION = 'v2355';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -9665,6 +9665,20 @@ function editSurveyDetails(surveyId) {
           const modelEl = document.getElementById('engineModel');
           if (modelEl) modelEl.value = survey.engineModel;
         }
+        // v2355 BUG FIX: onEngineMakeChange() clears engineHP and fuelType
+        // as a side effect (correct when the user manually changes the make
+        // and the old values no longer apply; wrong when we're restoring a
+        // saved survey). Re-restore them from the saved survey here. Without
+        // this, engine 1 HP + fuel type appear on load, flash empty, and
+        // then the next auto-save writes the empty values back to IDB.
+        if (survey.engineHP) {
+          const hpEl = document.getElementById('engineHP');
+          if (hpEl) hpEl.value = survey.engineHP;
+        }
+        if (survey.fuelType) {
+          const fEl = document.getElementById('fuelType');
+          if (fEl) fEl.value = survey.fuelType;
+        }
       }
       if (survey.transmissionMake) {
         onTransmissionMakeChange();  // Populates transmission model dropdown
@@ -9695,6 +9709,16 @@ function editSurveyDetails(surveyId) {
             if (survey.engine2Model) {
               const m2 = document.getElementById('engine2Model');
               if (m2) m2.value = survey.engine2Model;
+            }
+            // v2355 BUG FIX: same side-effect as Engine 1 — onEngine2MakeChange()
+            // wipes engine2HP and fuelType2. Re-restore them from the saved survey.
+            if (survey.engine2HP) {
+              const hp2 = document.getElementById('engine2HP');
+              if (hp2) hp2.value = survey.engine2HP;
+            }
+            if (survey.fuelType2) {
+              const f2 = document.getElementById('fuelType2');
+              if (f2) f2.value = survey.fuelType2;
             }
           }
           if (survey.transmission2Make && typeof onTransmission2MakeChange === 'function') {

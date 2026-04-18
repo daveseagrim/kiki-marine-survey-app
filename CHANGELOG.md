@@ -12,6 +12,14 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2355 — 2026-04-18
+### Fixed
+- **BUG: Engine 1 horsepower and fuel type were disappearing on every load.** On opening the Edit Intro view for a saved survey, the restore code set all fields from the stored survey (including `engineHP` and `fuelType`) and then called `onEngineMakeChange()` to cascade-populate the engine model dropdown. That cascade handler clears `engineHP` and `fuelType` as a side effect — intended when the user manually changes the make (old HP/fuel no longer apply) but wrong when we're just restoring saved data. The model field was being re-restored after the cascade; HP and fuel were not. Result: fields flashed in briefly then went blank, and the next auto-save wrote the blank strings back to IDB. Engine 2 had the same bug via the same pattern.
+- Fix: after each `onEngine{,2}MakeChange()` call in the form-restore path, re-assign `engineHP`/`fuelType` (and `engine2HP`/`fuelType2`) from the saved survey, mirroring how `engineModel`/`engine2Model` are already re-restored.
+- No changes to the "user changes make" codepath — when the user picks a different make from the dropdown, HP and fuel still clear (as intended) and the model's own change handler repopulates them from the database.
+
+---
+
 ## v2354 — 2026-04-18
 ### Changed
 - **Check Survey (pre-flight) Back button — silent return when nothing changed.** After tapping `Go → Fix` on a flagged issue, the Back button used to always evaluate the issue; if it was still broken the surveyor would get hit with a "⚠️ Not yet resolved" modal even if they had only glanced at the item and hadn't edited anything. Now, on entry, we snapshot the issue's state (rating, notes text, standards, photo count, flagged, excluded — or for header fields, the referenced survey-level field). On Back, we compare the current state to that snapshot:
