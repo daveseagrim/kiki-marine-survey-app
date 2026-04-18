@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2316';
+const APP_VERSION = 'v2317';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -3419,15 +3419,52 @@ async function validatePhotoIntegrity() {
       const items = survey.items || {};
       let referenced = 0;
       let missing = 0;
+      let cleaned = 0;
 
-      for (const item of Object.values(items)) {
+      // v2317: collect orphan IDs so we can check Firebase recoverability
+      const orphanIds = []; // { pid, itemKey }
+
+      for (const [itemKey, item] of Object.entries(items)) {
         if (item.photos) {
           for (const pid of item.photos) {
             referenced++;
             const photo = await getPhotoById(pid);
-            if (!photo || !photo.dataUrl) missing++;
+            if (!photo || !photo.dataUrl) {
+              orphanIds.push({ pid, itemKey });
+            }
           }
         }
+      }
+
+      // v2317: for orphans, check if Firebase has a storageRef (recoverable).
+      // If not, silently remove the orphan ID from the survey — it's unrecoverable.
+      if (orphanIds.length > 0 && typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled() && window.fsDb) {
+        for (const { pid, itemKey } of orphanIds) {
+          try {
+            const doc = await window.fsDb.collection('photos').doc(pid).get();
+            if (doc.exists && doc.data().storageRef) {
+              // Recoverable via Firebase download — count as missing
+              missing++;
+            } else {
+              // Not in Firebase or no storageRef — unrecoverable orphan, clean it
+              const item = survey.items[itemKey];
+              if (item && item.photos) {
+                item.photos = item.photos.filter(id => id !== pid);
+                cleaned++;
+              }
+            }
+          } catch (_fbErr) {
+            // Firebase lookup failed — assume recoverable to be safe
+            missing++;
+          }
+        }
+        if (cleaned > 0) {
+          await saveSurvey(survey);
+          console.log(`[Photo Integrity] Cleaned ${cleaned} unrecoverable orphan photo IDs from ${survey.vesselName}`);
+        }
+      } else {
+        // No Firebase — count all orphans as missing
+        missing = orphanIds.length;
       }
 
       if (missing > 0) {

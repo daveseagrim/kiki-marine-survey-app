@@ -12,6 +12,9 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2317 — 2026-04-17
+- Firebase "photos on another device" banner: now checks if each missing photo is actually recoverable (has a storageRef in Firebase). Unrecoverable orphan photo IDs are silently cleaned from the survey data. Banner only appears if there are genuinely downloadable photos.
+
 ## v2316 — 2026-04-17
 - Photo placeholders: found the real culprit — the compact card view (buildCompactItemHTML) and the area photo grid (refreshAreaPhotoGrid) had their own thumbnail rendering paths that were never patched. All THREE thumbnail templates (compact cards, accordion detail, area photos) plus the media sheet now start thumbnails hidden and only show them when valid image data loads from IndexedDB.
 
