@@ -12,6 +12,36 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2383 — 2026-04-18
+### Fixed
+- **EMERGENCY — comparables still getting wiped despite v2377.** Dave reported this is the third+ time he's lost his comparables array. The v2377 guards (undefined-as-DOM-absent-sentinel, plus checks at the three known save sites) handle the "container not rendered" case but left a gap: any path where the container IS rendered but empty would still overwrite a non-empty saved value with `[]`. That happens whenever a debounced auto-save fires after Edit Intro has been torn down partially, or when a rendering race has the container present but not yet populated. Rather than keep hunting for the exact sequence (Dave is losing billable work each time), v2383 blocks the whole class of bug with two layers of defence.
+
+### Added
+- **`guardedAssignComparables(survey, newValue, caller)`** — single chokepoint that every `survey.comparables = X` now goes through. The rule: if the new value is empty AND the saved value has real content (at least one entry with vessel / price / source / notes) AND `skipComparables` is not true, the assignment is **refused**. A `console.warn` labelled `[v2383] REFUSED` logs the caller name — useful diagnostic if this ever fires in production. If the user genuinely wants to clear, they tick "Skip comparables" first, which flips the guard off.
+- **Per-session sessionStorage backup.** Every successful assignment of non-empty comparables also writes a JSON copy to `sessionStorage['kkComparablesBackup:' + surveyId]`. Scoped per PWA instance, so tab-local. No cross-device concerns.
+- **One-tap restore banner on Edit Intro.** If Dave opens a survey whose saved comparables is empty but a sessionStorage backup exists for that surveyId, a yellow banner appears above the Comparable Vessels section: "N comparable(s) from earlier this session — looks like they were cleared" with **Restore** and **Dismiss** buttons. Restore writes the backup back into `survey.comparables`, saves, and repopulates the DOM entries. Dismiss removes the backup. This is the last-resort safety net — if somehow a wipe still slips past the guard, the data is still recoverable in the same session.
+
+### Scope
+- Three direct `survey.comparables = ...` sites rewritten: `saveEditFormSilently` (~line 10102), `saveComparablesFromInspection` (~line 15900), `saveAllInspectionData` (~line 20712).
+- `saveSurveyDetails` (~line 10020) was doing `Object.assign(survey, updates)` — added a special-case that runs `guardedAssignComparables` first and removes the `comparables` key from `updates` if the guard refused. Also lifts `skipComparables` out of `updates` before the guard runs so the guard sees the user's current intent.
+
+### Non-goals
+- Does not change comparables data model or the Edit Intro UI beyond the banner.
+- Does not prevent a user who ticks "Skip comparables" from clearing — that's an explicit intent and should still work.
+- Does not touch cloud-sync (Firebase) paths — pushes continue to send whatever is in the local survey record, which is now protected by the guard upstream.
+
+---
+
+## v2382 — 2026-04-18
+### Changed
+- **Date-integrity one-tap fix now shows a confirmation before generating.** v2381 silently promoted `survey.surveyDate` and opened the report — Dave reported the report came up but there was no indication the date had actually been updated. He'd have to navigate back to the intro page or scrutinise the report cover to know it worked. Now after the promotion and save, a `showAlert` dismisses with "✓ Survey date updated to YYYY-MM-DD. The report will reflect this date." — the user explicitly acknowledges before the report window opens.
+- The message is single-line because `showAlert`'s `<p>` doesn't use `white-space:pre-wrap`, so embedded `\n` characters would collapse to whitespace and render nothing useful. Kept local to this call rather than mutating `showAlert`'s template (other callers may rely on its current behaviour).
+
+### Why not a toast
+- A toast would also solve the feedback gap, but Dave is often working on iPhone in bright daylight where a 3-second auto-dismissing banner could be missed. A modal with an OK button forces an acknowledgement before generation continues — slower by one tap, but zero chance of missing the confirmation.
+
+---
+
 ## v2381 — 2026-04-18
 ### Added
 - **Date-integrity modal now has a one-tap fix.** The existing warning (v2244) already catches photos captured after the survey/report date and offers "Generate Anyway" / "Go Back and Fix." That's fine when the surveyor genuinely wants to backdate the certification, but when the real issue is that the survey date wasn't updated after a late photo was added, fixing it meant leaving the modal, navigating back to the intro page, editing the date, and re-running the report. Now a third button — **"Use YYYY-MM-DD as survey date"** — promotes the latest photo's local calendar date to `survey.surveyDate`, saves, and continues generation in one tap.

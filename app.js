@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2381';
+const APP_VERSION = 'v2383';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -9833,6 +9833,34 @@ function editSurveyDetails(surveyId) {
             if (entry.querySelector('.compNotes')) entry.querySelector('.compNotes').value = comp.notes || '';
           }
         });
+      } else {
+        // v2383: If saved comparables is empty but a same-session backup
+        // exists in sessionStorage, show a one-tap restore banner. This is
+        // the last-resort safety net that catches any wipe path that slips
+        // past guardedAssignComparables.
+        try {
+          const _backupKey = 'kkComparablesBackup:' + survey.id;
+          const _backupRaw = sessionStorage.getItem(_backupKey);
+          if (_backupRaw) {
+            const _backup = JSON.parse(_backupRaw);
+            if (Array.isArray(_backup) && _backup.some(c => c && (c.vessel || c.price || c.source || c.notes))) {
+              const section = document.getElementById('comparablesSection');
+              if (section && !document.getElementById('kkComparablesRestore')) {
+                const banner = document.createElement('div');
+                banner.id = 'kkComparablesRestore';
+                banner.style.cssText = 'background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px;color:#78350f;';
+                banner.innerHTML = `
+                  <div style="margin-bottom:6px;"><strong>${_backup.length} comparable${_backup.length === 1 ? '' : 's'} from earlier this session</strong> — looks like they were cleared.</div>
+                  <button onclick="restoreComparablesFromBackup('${survey.id}')"
+                          style="background:#f59e0b;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">Restore</button>
+                  <button onclick="document.getElementById('kkComparablesRestore').remove();sessionStorage.removeItem('${_backupKey}');"
+                          style="background:transparent;color:#78350f;border:1px solid #f59e0b;padding:6px 12px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;margin-left:6px;">Dismiss</button>
+                `;
+                section.insertBefore(banner, section.firstChild);
+              }
+            }
+          }
+        } catch(_) {}
       }
       // Auto-save: debounced save on every field change
       let _editAutoSaveTimer = null;
@@ -10020,6 +10048,17 @@ function saveSurveyDetails(surveyId) {
     for (const k of Object.keys(updates)) {
       if (updates[k] === undefined) delete updates[k];
     }
+    // v2383: route comparables through the guarded assignment BEFORE the
+    // broad Object.assign. If the guard refuses the update (empty-over-
+    // nonempty while skipComparables is false), remove the key so the
+    // Object.assign below doesn't overwrite survey.comparables.
+    if ('comparables' in updates) {
+      // Reflect the skip flag that's part of this same update first so the
+      // guard sees the intent the user just expressed.
+      if ('skipComparables' in updates) survey.skipComparables = updates.skipComparables;
+      const applied = guardedAssignComparables(survey, updates.comparables, 'saveSurveyDetails');
+      if (!applied) delete updates.comparables;
+    }
     Object.assign(survey, updates);
 
     // Clean up incompatible drive settings when vessel type changes from intro.
@@ -10097,10 +10136,11 @@ async function saveEditFormSilently() {
   }
   // v2377: collectComparables() returns undefined when the DOM container
   // is absent — skip the assignment to preserve the saved comparables.
-  // Only overwrite when the container is rendered (legitimate empty is fine).
+  // v2383: additionally guarded by guardedAssignComparables — refuses
+  // empty-over-nonempty unless skipComparables is explicitly set.
   try {
     const _comps = collectComparables();
-    if (_comps !== undefined) survey.comparables = _comps;
+    if (_comps !== undefined) guardedAssignComparables(survey, _comps, 'saveEditFormSilently');
   } catch(e) {}
   // v2377: skipComparables lives alongside the comparables section; only
   // write it when the checkbox exists on screen.
@@ -12400,6 +12440,47 @@ function addBilgePumpEntry() {
 }
 
 // ─── Comparable vessel entries ──────────────────────────────────────────
+// v2383: Restore comparables from sessionStorage backup when the banner
+// offers it on Edit Intro. Writes the backup to survey.comparables, saves
+// the survey, repopulates the DOM, and removes the banner.
+async function restoreComparablesFromBackup(surveyId) {
+  try {
+    const backupKey = 'kkComparablesBackup:' + surveyId;
+    const raw = sessionStorage.getItem(backupKey);
+    if (!raw) return;
+    const backup = JSON.parse(raw);
+    if (!Array.isArray(backup) || backup.length === 0) return;
+    const survey = await getSurvey(surveyId);
+    if (!survey) return;
+    // Use guarded assignment — this is a restore from backup, which is
+    // always non-empty, so the guard will accept it.
+    guardedAssignComparables(survey, backup, 'restoreComparablesFromBackup');
+    await saveSurvey(survey);
+    // Rebuild the DOM entries to match
+    const container = document.getElementById('comparablesEntries');
+    if (container) container.innerHTML = '';
+    backup.forEach(comp => {
+      addComparableEntry();
+      const allEntries = document.querySelectorAll('#comparablesEntries > div');
+      if (allEntries.length > 0) {
+        const entry = allEntries[allEntries.length - 1];
+        if (entry.querySelector('.compSource')) entry.querySelector('.compSource').value = comp.source || '';
+        if (entry.querySelector('.compVessel')) entry.querySelector('.compVessel').value = comp.vessel || '';
+        if (entry.querySelector('.compPrice')) entry.querySelector('.compPrice').value = comp.price || '';
+        if (entry.querySelector('.compLocation')) entry.querySelector('.compLocation').value = comp.location || '';
+        if (entry.querySelector('.compDate')) entry.querySelector('.compDate').value = comp.date || '';
+        if (entry.querySelector('.compWater')) entry.querySelector('.compWater').value = comp.water || '';
+        if (entry.querySelector('.compNotes')) entry.querySelector('.compNotes').value = comp.notes || '';
+      }
+    });
+    const banner = document.getElementById('kkComparablesRestore');
+    if (banner) banner.remove();
+    showToast(`Restored ${backup.length} comparable${backup.length === 1 ? '' : 's'}`);
+  } catch (e) {
+    console.error('restoreComparablesFromBackup failed', e);
+  }
+}
+
 function addComparableEntry() {
   const container = document.getElementById('comparablesEntries');
   if (!container) return;
@@ -12483,6 +12564,53 @@ function collectComparables() {
     });
   });
   return comps;
+}
+
+// v2383: Defensive wrapper around every `survey.comparables = X` assignment.
+// Dave has lost comparables multiple times despite the v2377 undefined-sentinel
+// guard. Rather than keep hunting for the exact leak path, we refuse any
+// assignment that would SHRINK a non-empty array to empty unless the user
+// has explicitly ticked "Skip comparables" (survey.skipComparables === true).
+//
+// Additionally, on every successful assign of a non-empty array, we stash
+// a JSON copy in sessionStorage keyed by `kkComparablesBackup:${surveyId}`.
+// If a future session ever finds itself looking at a survey whose
+// comparables is empty AND has a backup keyed with that surveyId, code in
+// Edit Intro can offer a one-tap restore.
+//
+// Parameters:
+//   survey       — the survey object being mutated
+//   newValue     — the candidate new comparables array (must be Array)
+//   caller       — short string naming the caller (for console diagnostics)
+// Returns: true if assignment was applied, false if refused.
+function guardedAssignComparables(survey, newValue, caller) {
+  if (!survey) return false;
+  if (!Array.isArray(newValue)) return false;
+  const oldValue = Array.isArray(survey.comparables) ? survey.comparables : [];
+  const _oldHasContent = oldValue.some(c => c && (c.vessel || c.price || c.source || c.notes));
+  const _newHasContent = newValue.some(c => c && (c.vessel || c.price || c.source || c.notes));
+  // v2383 guard: refuse empty-over-nonempty unless the user is skipping
+  // comparables (an explicit intentional-clear signal).
+  if (!_newHasContent && _oldHasContent && !survey.skipComparables) {
+    try {
+      console.warn(
+        `[v2383] REFUSED comparables wipe from ${caller || 'unknown'} — ` +
+        `would have replaced ${oldValue.length} saved comparable(s) with empty. ` +
+        `Preserving saved data. Toggle "Skip comparables" if you intended to clear.`
+      );
+    } catch (_) {}
+    return false;
+  }
+  survey.comparables = newValue;
+  // Stash a backup whenever we save non-empty content. Keyed by surveyId so
+  // backups from different surveys don't collide. sessionStorage is scoped
+  // per tab/PWA instance — good enough for a same-session undo.
+  if (_newHasContent && survey.id) {
+    try {
+      sessionStorage.setItem('kkComparablesBackup:' + survey.id, JSON.stringify(newValue));
+    } catch (_) {}
+  }
+  return true;
 }
 
 // v2231: toggle comparables section visibility and persist the flag
@@ -15896,8 +16024,10 @@ function saveComparablesFromInspection() {
     // v2377: guard against destructive no-op save when the comparables DOM
     // isn't rendered on the current view. Only overwrite when we actually
     // collected something from the DOM.
+    // v2383: route through guardedAssignComparables so an accidentally
+    // empty DOM can't erase saved content.
     const _comps = collectComparables();
-    if (_comps !== undefined) survey.comparables = _comps;
+    if (_comps !== undefined) guardedAssignComparables(survey, _comps, 'saveComparablesFromInspection');
     // Also save valuation fields if they exist in the inspection view
     const lowEl = document.getElementById('inspValLow');
     const highEl = document.getElementById('inspValHigh');
@@ -20709,12 +20839,12 @@ async function saveAllInspectionData() {
   // when we can't see the DOM. The old guard (`.length > 0 || saved.length > 0`)
   // was actually the BUG — it fired whenever the saved array was non-empty,
   // so an absent DOM returning `[]` overwrote real data.
+  // v2383: route through guardedAssignComparables so even if the DOM is
+  // unexpectedly rendered-but-empty, a non-empty saved array survives.
   const comparables = collectComparables();
   if (comparables !== undefined) {
-    if (comparables.length > 0 || (survey.comparables && survey.comparables.length > 0)) {
-      survey.comparables = comparables;
-      changed = true;
-    }
+    const _applied = guardedAssignComparables(survey, comparables, 'saveAllInspectionData');
+    if (_applied) changed = true;
   }
 
   if (changed) {
@@ -20824,6 +20954,9 @@ async function generateReport() {
         if (_choice === 'primary') {
           survey.surveyDate = _latestLocalISO;
           await saveSurvey(survey);
+          // v2382: Explicit confirmation so Dave knows the fix was applied
+          // before the report window opens.
+          await showAlert(`✓ Survey date updated to ${_latestLocalISO}. The report will reflect this date.`);
         }
         // 'secondary' → fall through and generate with existing dates
       }
