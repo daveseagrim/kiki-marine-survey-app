@@ -12,6 +12,30 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2392 — 2026-04-19
+### Changed
+- **Service worker install is now atomic on critical files.** Phase 3 of the 3-part cache-reliability programme (v2390 button, v2391 auto-heal, v2392 prevention). The install handler in `sw.js` previously wrapped every `cache.add(url)` call in `.catch(warn)`, which meant a single flaky network fetch during install would log a console warning and then happily activate the service worker with a partially-populated cache. That half-populated cache was the root cause of the v2387 iPhone Safari crash: index.html was fresh, some of the JSON files were fresh, but app.js was still the old version — Dave's "mixed-version chaos" scenario. v2392 splits `URLS_TO_CACHE` into `CRITICAL_URLS` (HTML, JS, JSON — all the files that parse or read each other) and `OPTIONAL_URLS` (icons, logos, external Firebase SDK from gstatic). Critical files are cached with `Promise.all` and NO per-file catch, so the first failure rejects the whole install and the browser keeps the previous (working) service worker active. Optional files retain per-file tolerance — individual icon failures don't block anything and network fallback covers them at runtime.
+
+### Why this exists
+- v2390 and v2391 are recovery mechanisms — they let Dave heal from drift after it has already corrupted a session. v2392 is prevention at the source: a service worker can no longer publish a partial cache. The only way a `CACHE_NAME = 'kiki-marine-vNNNN'` bucket becomes active is if every critical file under that version successfully cached in the same install pass. Mixed-version caches become impossible by construction, which removes the failure mode rather than papering over it.
+
+### Design
+- `CRITICAL_URLS`: `./`, `index.html`, `app.js`, the six `src/core/*.js` modules, `manifest.json`, both survey templates, `text_library.json`, and the five database JSONs (`boat_specs_db`, `boat_values_db`, `engine_db`, `outdrive_db`, `winch_db`, `dictionary`). These are every file the app parses or reads during startup and normal operation — if any one of them is a different version than the others, app.js's contracts against the JSON schemas can drift silently.
+- `OPTIONAL_URLS`: the seven PNG assets (`apple-touch-icon`, `icon-192`, `icon-512`, `icon-192-maskable`, `icon-512-maskable`, `signature.png`, `new_logo.png`) and the four external `gstatic.com` Firebase SDK URLs. These either display fine when missing (icons fall back to platform defaults), are fetched live when cache misses (Firebase SDK via network), or are surface-only and can be loaded on next successful install.
+- Install flow: `caches.open(CACHE_NAME) → Promise.all(CRITICAL_URLS.map(cache.add))` with NO catch. Rejection in the try block deletes the incomplete `CACHE_NAME` bucket (so the next install attempt starts clean rather than partially pre-filled), then rethrows — the rethrow is what rejects `event.waitUntil`, which tells the browser the SW install failed. Browser keeps the previous SW active. On success, `OPTIONAL_URLS` cache with per-file `.catch(warn)` tolerance, then `self.skipWaiting()` fires. `skipWaiting` was moved INSIDE the async IIFE (was outside `event.waitUntil` previously) so that a failed install can't accidentally promote a broken SW.
+- The old global `URLS_TO_CACHE` constant is removed. No other code in sw.js referenced it.
+
+### Scope
+- No app.js change beyond the version bump. All prevention logic lives in sw.js.
+- `activate` handler is unchanged — still deletes old caches whose names don't match the current `CACHE_NAME`, still calls `self.clients.claim()`. Activation only runs when a new SW successfully installed, which (post-v2392) guarantees the new cache is complete, so the old cache can be safely deleted.
+- The `fetch` handler is unchanged. Network-first for `.json` and `app.js`, cache-first for the gstatic Firebase SDK, stale-while-revalidate for everything else — same as v2391.
+- Does NOT retry failed installs automatically. If a critical file fails to cache (e.g. Dave has flaky wifi at a boatyard), the old SW stays active and the next page load will re-attempt install. Once network recovers, install succeeds and the new version activates.
+
+### Related
+- Closes the 3-part cache-reliability programme: #64 (v2390 button) → #65 (v2391 auto-heal) → #66 (v2392 atomic install). The root-cause task #63 (iPhone Safari crash) is now mitigated by v2390, auto-healed by v2391, and prevented at source by v2392.
+
+---
+
 ## v2391 — 2026-04-19
 ### Added
 - **Startup version handshake — automatic self-heal on cache drift.** On every app load, app.js reads `<meta name="app-version">` from index.html and compares it to the `APP_VERSION` constant. If the two don't match, app.js silently invokes the v2390 reset path (unregister service workers, delete CacheStorage, reload) before any other startup code runs. The user never sees the drift symptom — no crash, no white screen, no manual tap on the Reset button — just a brief page reload that heals the cache and brings everything in sync.

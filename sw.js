@@ -1,5 +1,20 @@
-const CACHE_NAME = 'kiki-marine-v2391';
-const URLS_TO_CACHE = [
+const CACHE_NAME = 'kiki-marine-v2392';
+
+// v2392: Split cache targets into CRITICAL vs OPTIONAL to prevent "cache
+// drift" — the bug class that crashed iPhone Safari in v2387.  Previously
+// the install handler used cache.add(url).catch(warn) on every file, so a
+// single flaky fetch could leave some files at vN and others at vN-1 inside
+// the same cache bucket.  On next load the app would execute a mixed-version
+// app.js against a mixed-version index.html → corrupted state → iOS kill.
+//
+// New contract:
+//   • CRITICAL_URLS must ALL cache successfully or the install is aborted
+//     and the incomplete cache bucket is deleted. Browser keeps the previous
+//     (working) cache active; SW retries install on next page load.
+//   • OPTIONAL_URLS are cached with tolerance — individual failures log a
+//     warning but don't block install. Network falls back to origin fetch
+//     on demand, which is fine for icons and the external Firebase SDK.
+const CRITICAL_URLS = [
   './',
   'index.html',
   'app.js',
@@ -19,6 +34,8 @@ const URLS_TO_CACHE = [
   'outdrive_db.json',
   'winch_db.json',
   'dictionary.json',
+];
+const OPTIONAL_URLS = [
   'apple-touch-icon.png',
   'icon-192.png',
   'icon-512.png',
@@ -39,21 +56,40 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Install event - cache essential files (tolerates individual failures
-// so one missing file cannot prevent the service worker from installing)
+// Install event — v2392 atomic install.
+// CRITICAL files are cached under Promise.all without per-file .catch, so the
+// first failure rejects the whole install.  On rejection we delete the
+// incomplete CACHE_NAME bucket so the next install attempt starts from a
+// clean slate instead of building on a half-populated cache.  Browser keeps
+// the previous working SW active in the meantime.
+// OPTIONAL files still tolerate per-file failures.
+// skipWaiting() is called only after all critical files cache successfully —
+// no point promoting a broken SW.
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return Promise.all(
-        URLS_TO_CACHE.map((url) =>
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+      try {
+        // Atomic: first rejection kills the whole Promise.all
+        await Promise.all(CRITICAL_URLS.map((url) => cache.add(url)));
+      } catch (err) {
+        console.error('SW: critical file failed to cache — aborting install', err);
+        // Clean up the incomplete cache bucket so next attempt starts fresh
+        try { await caches.delete(CACHE_NAME); } catch (_) {}
+        throw err; // reject install → old SW stays active
+      }
+      // Optional files: per-file .catch so individual failures don't block
+      await Promise.all(
+        OPTIONAL_URLS.map((url) =>
           cache.add(url).catch((err) => {
-            console.warn('SW: failed to cache', url, err);
+            console.warn('SW: failed to cache optional', url, err);
           })
         )
       );
-    })
+      // Only skip waiting if we got here — critical files all cached
+      self.skipWaiting();
+    })()
   );
-  self.skipWaiting();
 });
 
 // Activate event - clean up old caches and reload all clients
