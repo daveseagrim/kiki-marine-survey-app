@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2390';
+const APP_VERSION = 'v2391';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -310,18 +310,14 @@ async function forceAppUpdate() {
 // CRITICAL: IndexedDB is untouched. Surveys and photos survive the reset.
 // Only HTTP cache entries (JSON, JS, images) are deleted. iOS Safari's
 // "Clear Website Data" wipes IndexedDB too — this is the safer alternative.
-async function resetAppCache() {
-  const ok = confirm(
-    'Reset the app cache?\n\n' +
-    'This clears cached files and reloads the app fresh from the server. ' +
-    'Your surveys and photos are stored separately and are NOT affected — ' +
-    'they will still be here after the reset.\n\n' +
-    'Use this if the app is crashing or behaving strangely.'
-  );
-  if (!ok) return;
-
+//
+// v2391: Split into a private `_doResetAppCache(silent)` helper so the
+// startup version handshake can invoke the same reset without the confirm
+// dialog / toasts / alert — silent mode is for "we detected cache drift,
+// auto-healing now" and must not interrupt the user with prompts.
+async function _doResetAppCache(silent) {
   try {
-    showToast('Resetting app cache…');
+    if (!silent) showToast('Resetting app cache…');
     persistViewState();
 
     // Unregister every service-worker registration for this origin.
@@ -346,8 +342,11 @@ async function resetAppCache() {
       }
     }
 
-    showToast('Reloading…');
-    await new Promise(r => setTimeout(r, 400));
+    if (!silent) showToast('Reloading…');
+    // Silent path reloads almost immediately so the user sees nothing
+    // beyond a momentary page reload indicator. Explicit path waits a
+    // beat so the "Reloading…" toast actually renders before nav.
+    await new Promise(r => setTimeout(r, silent ? 50 : 400));
 
     // Hard reload with a cache-buster query. This forces the browser's
     // own HTTP cache (separate from CacheStorage above) to bypass its
@@ -357,12 +356,82 @@ async function resetAppCache() {
     );
   } catch (err) {
     console.error('[ResetAppCache] Error:', err);
-    alert(
-      'Reset failed: ' + (err && err.message ? err.message : 'unknown error') +
-      '\n\nTry closing Safari completely and reopening the app.'
-    );
+    if (!silent) {
+      alert(
+        'Reset failed: ' + (err && err.message ? err.message : 'unknown error') +
+        '\n\nTry closing Safari completely and reopening the app.'
+      );
+    }
+    // Silent path can't recover — rethrow so the handshake caller can log
+    // and let the page continue loading with whatever cache state exists.
+    throw err;
   }
 }
+
+// Public entry point — asks before nuking.
+async function resetAppCache() {
+  const ok = confirm(
+    'Reset the app cache?\n\n' +
+    'This clears cached files and reloads the app fresh from the server. ' +
+    'Your surveys and photos are stored separately and are NOT affected — ' +
+    'they will still be here after the reset.\n\n' +
+    'Use this if the app is crashing or behaving strangely.'
+  );
+  if (!ok) return;
+  try { await _doResetAppCache(false); } catch (_) { /* handled inside */ }
+}
+
+// ── v2391: Startup version handshake — auto-heal on cache drift ─────────
+// Compares the version injected into index.html (`<meta name="app-version">`)
+// against APP_VERSION in app.js. A mismatch means the browser served a fresh
+// index.html but a stale app.js (or the reverse) — exactly the drift pattern
+// that v2390 was added to repair. Here we repair it automatically, before
+// any other startup code runs, so the user never sees a crash caused by
+// mixed-version files in cache.
+//
+// Safety — the sessionStorage flag prevents a reload loop if the mismatch
+// somehow persists across the reset (e.g. CDN returning stale files). First
+// detection attempts the heal; second detection in the same session just
+// logs and lets the app load as best it can. The flag clears when the tab
+// is closed, so a fresh session gets a fresh attempt.
+async function _checkVersionHandshake() {
+  try {
+    const meta = document.querySelector('meta[name="app-version"]');
+    if (!meta) return; // older index.html — no meta tag, nothing to compare
+    const indexVersion = (meta.getAttribute('content') || '').trim();
+    const appVersion = (typeof APP_VERSION === 'string' ? APP_VERSION : '').trim();
+    if (!indexVersion || !appVersion) return;
+    // Normalize both sides: strip leading 'v' so 'v2391' and '2391' both match.
+    const norm = s => s.replace(/^v/i, '').trim();
+    if (norm(indexVersion) === norm(appVersion)) return;
+
+    const alreadyTried = (() => {
+      try { return sessionStorage.getItem('_versionHandshakeAttempted') === '1'; }
+      catch (_) { return false; }
+    })();
+    if (alreadyTried) {
+      console.warn(
+        `[VersionHandshake] Mismatch persists after prior heal attempt: ` +
+        `index=${indexVersion} vs app=${appVersion}. Not retrying in this session.`
+      );
+      return;
+    }
+    try { sessionStorage.setItem('_versionHandshakeAttempted', '1'); } catch (_) {}
+
+    console.warn(
+      `[VersionHandshake] Cache drift detected: index.html=${indexVersion} ` +
+      `vs app.js=${appVersion}. Auto-healing…`
+    );
+    await _doResetAppCache(true);
+  } catch (e) {
+    console.error('[VersionHandshake] error:', e);
+  }
+}
+// Fire-and-forget at module load so the handshake runs as early as possible —
+// before renderHome, IndexedDB open, service-worker register, etc. If we
+// detect drift, the reload happens before any of that initializes and the
+// old code's state never gets rehydrated on top of a stale cache.
+_checkVersionHandshake();
 
 // ── Photo compression for reports ──────────────────────────────────────
 // Resizes a dataUrl image to fit within maxDim (default 1200px) and

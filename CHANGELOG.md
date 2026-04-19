@@ -12,6 +12,32 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2391 — 2026-04-19
+### Added
+- **Startup version handshake — automatic self-heal on cache drift.** On every app load, app.js reads `<meta name="app-version">` from index.html and compares it to the `APP_VERSION` constant. If the two don't match, app.js silently invokes the v2390 reset path (unregister service workers, delete CacheStorage, reload) before any other startup code runs. The user never sees the drift symptom — no crash, no white screen, no manual tap on the Reset button — just a brief page reload that heals the cache and brings everything in sync.
+
+### Why this exists
+- v2390 gave Dave a button to self-heal when cache drift caused visible problems. But by the time he notices the drift (crash, UI weirdness), the session is already broken and the survey-in-progress is at risk. v2391 closes the gap — the moment the app loads with mismatched versions, it heals itself before the user can touch anything. In the common case (versions match), the handshake runs once, returns in microseconds, and is invisible.
+
+### Design
+- `<meta name="app-version" content="v2391">` added to index.html `<head>`. Bumped on every version bump (same cadence as the cache-buster query strings). When index.html is fresh-from-server and app.js is stale-from-cache, the meta tag reflects the server's current version and `APP_VERSION` reflects the cached version — the mismatch exposes the drift.
+- `_checkVersionHandshake()` (app.js, immediately after `resetAppCache` ~line 372) — reads the meta, strips any leading `v`, compares normalized values. On mismatch, sets a `sessionStorage` guard flag and invokes `_doResetAppCache(true)` (silent mode). The flag prevents a reload loop: if the mismatch somehow persists across the heal (e.g. CDN returning stale files), the second detection in the same tab session just logs a warning and lets the app continue loading with whatever cache state exists — better than a reload loop that locks Dave out.
+- `resetAppCache()` refactored into a private `_doResetAppCache(silent)` helper called by both the public entry (with confirm dialog + toasts + error alert) and the new handshake (no prompts, shorter delay, rethrows on failure so the caller can log). No behaviour change for the v2390 user-facing button.
+- Call site: `_checkVersionHandshake()` fires at module load, as early as possible in app.js — before any initApp, before IndexedDB opens, before the service worker registers. This means: if drift is detected, the reload triggers before the old code's state gets rehydrated against a stale cache, so none of the broken interactions that drift normally causes ever happen in that tab.
+
+### Scope
+- Detection is one-way: version string equality. No version comparison (less-than / greater-than) — the heal path is the same whether the cache is ahead or behind of index.html. This keeps the handshake simple and robust.
+- Leading `v` is stripped before comparison, so `v2391` (what's in APP_VERSION) and `2391` (what could appear in meta content) both match. Current build uses `v2391` on both sides but the normalization future-proofs against format drift.
+- Does NOT add any new UI. The reset is silent — the only visible effect is a page reload, which iOS Safari and Chrome already indicate via their own loading indicators. Toast messages are suppressed because a visible toast right before `location.replace` is confusing (it flashes and vanishes).
+- IndexedDB remains untouched (same as v2390). Surveys and photos survive every auto-heal.
+- Does NOT modify the service worker. v2392 is the SW change.
+
+### Related
+- Phase 1 of 3: v2390 button (task #64). This ships Phase 2 (task #65). Phase 3: v2392 atomic SW install (not yet created — will be task #66 when started).
+- Root cause of the 3-phase plan: today's iPhone vessel-name crash (#63). v2390 let Dave recover in one tap. v2391 means future drifts recover with no taps. v2392 will stop drift from ever happening by refusing to activate a SW that couldn't cache every critical file.
+
+---
+
 ## v2390 — 2026-04-19
 ### Added
 - **"Reset App Cache" button in the home-screen three-dot menu.** Self-heal for the drifted-service-worker-cache failure mode. Dave hit it today: on a cached iPhone Safari session the app crashed to the home screen every time he typed into the Vessel Name field on a new survey. Desktop Chrome worked fine, Safari Private Mode worked fine — which isolated the fault to the iPhone's service-worker cache holding a mixed-version set of files (likely a newer index.html alongside an older app.js, because the SW's install handler currently tolerates per-file `cache.add` failures and activates with partial caches). The fix required clearing Website Data via iOS Settings → Safari → Advanced — a multi-step ritual that also wipes IndexedDB and risks local-only survey data. One button in the app itself turns that into a single tap.
