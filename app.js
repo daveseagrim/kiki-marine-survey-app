@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2395';
+const APP_VERSION = 'v2396';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -22260,9 +22260,17 @@ ${(() => {
               <img src="${url}" alt="${esc(label)}" class="report-photo" />
               <div class="caption">${esc(label)}</div>
             </div>`;
+          // v2396: render engine + transmission info as .item blocks so this
+          // section visually matches Detailed Survey Findings and the
+          // Instruments & Electronics inventory.  Previous 2-column <table>
+          // layout stood out as the only table-formatted block in the
+          // Detailed Survey Findings section (Dave's field feedback).  Each
+          // engine/transmission is now a left-rail bordered card with a bold
+          // title, an italic grey spec line joined by em-dashes, and a
+          // photo row below — identical to the pattern used everywhere else
+          // in this section.
           let specTableHtml = '';
           if (hasAnyEngine) {
-            // Engine 1 block
             const e1Photos = (enginePhotos || []).map(u => nameplateImg(u, 'Engine')).join('');
             const e1Plates = (enginePlatePhotos || []).map(u => nameplateImg(u, 'Engine data plate')).join('');
             const e2Photos = (engine2Photos || []).map(u => nameplateImg(u, 'Engine 2')).join('');
@@ -22271,31 +22279,81 @@ ${(() => {
             const t1Plates = (transmissionPlatePhotos || []).map(u => nameplateImg(u, 'Transmission serial plate')).join('');
             const t2Photos = (transmission2Photos || []).map(u => nameplateImg(u, 'Transmission 2')).join('');
             const t2Plates = (transmission2PlatePhotos || []).map(u => nameplateImg(u, 'Transmission 2 serial plate')).join('');
-            specTableHtml = `
-              <table style="margin-bottom:10px;">
-                ${survey.engineMake ? `<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">${hasTwin ? 'Engine 1 (Port)' : 'Engine'}</td></tr>` : ''}
-                ${survey.engineMake ? `<tr><td style="width:40%;"><strong>Make / Model</strong></td><td>${esc(survey.engineMake)} ${esc(survey.engineModel || '')}</td></tr>` : ''}
-                ${survey.engineSerial ? `<tr><td><strong>Serial No.</strong></td><td>${esc(survey.engineSerial)}</td></tr>` : ''}
-                ${survey.engineHP ? `<tr><td><strong>Power Rating</strong></td><td>${esc(survey.engineHP)}</td></tr>` : ''}
-                ${survey.engineHours ? `<tr><td><strong>Engine Hours</strong></td><td>${esc(survey.engineHours)}</td></tr>` : ''}
-                ${survey.fuelType ? `<tr><td><strong>Fuel Type</strong></td><td>${esc(survey.fuelType)}</td></tr>` : ''}
-                ${(e1Photos || e1Plates) ? `<tr><td><strong>Photos</strong></td><td>${e1Photos}${e1Plates}</td></tr>` : ''}
-                ${survey.engine2Make ? `<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Engine 2 (Starboard)</td></tr>` : ''}
-                ${survey.engine2Make ? `<tr><td><strong>Make / Model</strong></td><td>${esc(survey.engine2Make)} ${esc(survey.engine2Model || '')}</td></tr>` : ''}
-                ${survey.engine2Serial ? `<tr><td><strong>Serial No.</strong></td><td>${esc(survey.engine2Serial)}</td></tr>` : ''}
-                ${survey.engine2HP ? `<tr><td><strong>Power Rating</strong></td><td>${esc(survey.engine2HP)}</td></tr>` : ''}
-                ${survey.engine2Hours ? `<tr><td><strong>Engine Hours</strong></td><td>${esc(survey.engine2Hours)}</td></tr>` : ''}
-                ${survey.fuelType2 ? `<tr><td><strong>Fuel Type</strong></td><td>${esc(survey.fuelType2)}</td></tr>` : ''}
-                ${(e2Photos || e2Plates) ? `<tr><td><strong>Photos</strong></td><td>${e2Photos}${e2Plates}</td></tr>` : ''}
-                ${survey.transmissionMakeModel ? `<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">${survey.transmission2MakeModel ? 'Transmission 1 (Port)' : 'Transmission'}</td></tr>` : ''}
-                ${survey.transmissionMakeModel ? `<tr><td><strong>Make / Model</strong></td><td>${esc(survey.transmissionMakeModel)}</td></tr>` : ''}
-                ${survey.transmissionSerial ? `<tr><td><strong>Serial No.</strong></td><td>${esc(survey.transmissionSerial)}</td></tr>` : ''}
-                ${(t1Photos || t1Plates) ? `<tr><td><strong>Photos</strong></td><td>${t1Photos}${t1Plates}</td></tr>` : ''}
-                ${survey.transmission2MakeModel ? `<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">Transmission 2 (Starboard)</td></tr>` : ''}
-                ${survey.transmission2MakeModel ? `<tr><td><strong>Make / Model</strong></td><td>${esc(survey.transmission2MakeModel)}</td></tr>` : ''}
-                ${survey.transmission2Serial ? `<tr><td><strong>Serial No.</strong></td><td>${esc(survey.transmission2Serial)}</td></tr>` : ''}
-                ${(t2Photos || t2Plates) ? `<tr><td><strong>Photos</strong></td><td>${t2Photos}${t2Plates}</td></tr>` : ''}
-              </table>`;
+
+            // Per-unit .item renderer. Uses the same #066aab border-left
+            // colour that the default (unrated) item block falls back to,
+            // so informational blocks visually group with the checklist
+            // items that follow in the same section.
+            const propulsionItem = (title, specParts, photoCards) => {
+              const specLine = (specParts || []).filter(Boolean).join(' — ');
+              const photoHtml = photoCards
+                ? `<div class="report-photo-row">${photoCards}</div>`
+                : '';
+              return `
+  <div class="item" style="border-left-color: #066aab;">
+    <p><strong>${esc(title)}</strong></p>
+    ${specLine ? `<p style="font-size:9pt;color:#555;"><em>${esc(specLine)}</em></p>` : ''}
+    ${photoHtml}
+  </div>`;
+            };
+
+            const blocks = [];
+
+            const hasE1 = survey.engineMake || survey.engineModel || survey.engineSerial
+              || survey.engineHP || survey.engineHours || survey.fuelType
+              || e1Photos || e1Plates;
+            if (hasE1) {
+              const title = hasTwin ? 'Engine 1 (Port)' : 'Engine';
+              const mkMod = [survey.engineMake, survey.engineModel].filter(Boolean).join(' ').trim();
+              const specs = [
+                mkMod,
+                survey.engineSerial ? `Serial ${survey.engineSerial}` : '',
+                survey.engineHP,
+                survey.engineHours ? `${survey.engineHours} hrs` : '',
+                survey.fuelType,
+              ];
+              blocks.push(propulsionItem(title, specs, e1Photos + e1Plates));
+            }
+
+            const hasE2 = survey.engine2Make || survey.engine2Model || survey.engine2Serial
+              || survey.engine2HP || survey.engine2Hours || survey.fuelType2
+              || e2Photos || e2Plates;
+            if (hasE2) {
+              const title = 'Engine 2 (Starboard)';
+              const mkMod = [survey.engine2Make, survey.engine2Model].filter(Boolean).join(' ').trim();
+              const specs = [
+                mkMod,
+                survey.engine2Serial ? `Serial ${survey.engine2Serial}` : '',
+                survey.engine2HP,
+                survey.engine2Hours ? `${survey.engine2Hours} hrs` : '',
+                survey.fuelType2,
+              ];
+              blocks.push(propulsionItem(title, specs, e2Photos + e2Plates));
+            }
+
+            const hasT1 = survey.transmissionMakeModel || survey.transmissionSerial
+              || t1Photos || t1Plates;
+            if (hasT1) {
+              const title = survey.transmission2MakeModel ? 'Transmission 1 (Port)' : 'Transmission';
+              const specs = [
+                survey.transmissionMakeModel,
+                survey.transmissionSerial ? `Serial ${survey.transmissionSerial}` : '',
+              ];
+              blocks.push(propulsionItem(title, specs, t1Photos + t1Plates));
+            }
+
+            const hasT2 = survey.transmission2MakeModel || survey.transmission2Serial
+              || t2Photos || t2Plates;
+            if (hasT2) {
+              const title = 'Transmission 2 (Starboard)';
+              const specs = [
+                survey.transmission2MakeModel,
+                survey.transmission2Serial ? `Serial ${survey.transmission2Serial}` : '',
+              ];
+              blocks.push(propulsionItem(title, specs, t2Photos + t2Plates));
+            }
+
+            specTableHtml = blocks.join('');
           }
           propulsionHeaderHtml = narrHtml + specTableHtml;
         }
