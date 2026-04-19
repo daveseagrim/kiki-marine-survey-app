@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2400';
+const APP_VERSION = 'v2401';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -1563,14 +1563,27 @@ const ITEM_SNIPPET_MAP = {
 };
 
 // Init IndexedDB
+//
+// v2401: bumped schema 2 → 3 to add the `writeJournal` store.  onupgradeneeded
+// runs once per user when they move to v2401; existing `surveys` and `photos`
+// stores are left untouched (the `if (!contains)` guards make the upgrade
+// path additive, not destructive).  Schema history:
+//   v1: surveys
+//   v2: + photos (with surveyId index)
+//   v3: + writeJournal (with surveyId + epoch indexes) — v2401
 async function initDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('KikiSurveyDB', 2);
+    const request = indexedDB.open('KikiSurveyDB', 3);
 
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
       db = request.result;
       resolve(db);
+    };
+    request.onblocked = () => {
+      // Another tab has an older version of the DB open. Warn but don't
+      // reject — the upgrade will fire as soon as the other tab closes.
+      console.warn('[DB] Upgrade blocked — close other Kiki tabs if this stalls.');
     };
 
     request.onupgradeneeded = (event) => {
@@ -1581,6 +1594,15 @@ async function initDB() {
       if (!db.objectStoreNames.contains('photos')) {
         const photoStore = db.createObjectStore('photos', { keyPath: 'id' });
         photoStore.createIndex('surveyId', 'surveyId', { unique: false });
+      }
+      // v2401 — writeJournal: forensic trail of every survey save.  Auto-
+      // increment id keyPath (we don't care about the id value, only that
+      // entries are totally ordered). Indexes on surveyId (for per-survey
+      // replay) and epoch (for ring-buffer pruning oldest-first).
+      if (!db.objectStoreNames.contains('writeJournal')) {
+        const journal = db.createObjectStore('writeJournal', { keyPath: 'id', autoIncrement: true });
+        journal.createIndex('surveyId', 'surveyId', { unique: false });
+        journal.createIndex('epoch', 'epoch', { unique: false });
       }
     };
   });
@@ -1710,9 +1732,28 @@ async function saveSurvey(survey) {
   }
 
   _kkSaveInProgress = true;
+
+  // v2401: capture the caller and the pre-write record once, before
+  // the IDB transaction. Stack inference runs once per save — cheap,
+  // and lets every downstream call site get labelled in the journal
+  // without a caller-arg refactor across 30+ invocations.
+  const _v2401Caller = _inferSaveCaller();
+
   return new Promise((resolve, reject) => {
     const tx = db.transaction(['surveys'], 'readwrite');
     const store = tx.objectStore('surveys');
+
+    // v2401: read the existing record FIRST in the same transaction so
+    // we can record beforeSize in the journal entry. A same-tx serial
+    // get → put is slightly slower than a raw put, but the extra read
+    // is O(1) and the savepath is already doing expensive work
+    // (stringify, auto-regen) so this is noise. Falls through to a
+    // plain put if the get fails.
+    let beforeRecord = null;
+    const getReq = store.get(survey.id);
+    getReq.onsuccess = () => { beforeRecord = getReq.result || null; };
+    getReq.onerror = () => { beforeRecord = null; };
+
     const request = store.put(survey);
     request.onerror = () => {
       _kkSaveInProgress = false;
@@ -1724,10 +1765,240 @@ async function saveSurvey(survey) {
       window._hasUnsavedBackup = true;
       _kkSaveInProgress = false;
       _checkDeferredUpdate();
+      // v2401: fire-and-forget journal write. Runs in a separate tx so
+      // journal pressure never blocks the save resolve.
+      _journalSurveyWrite(survey, _v2401Caller, beforeRecord);
       resolve(survey.id);
     };
   });
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// v2401 — Survey write journal
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Purpose
+// ───────
+// Append a one-line audit record to IDB on every successful survey save.
+// Gives us a replayable trail of *who* mutated a survey, *when*, and *by
+// how much* (beforeSize / afterSize / delta).  If a survey disappears or
+// mysteriously shrinks in the future, we can query the journal for that
+// surveyId and see exactly which caller was responsible for the drop.
+//
+// Motivation: the 2026-04-19 Ex-Ta-Sea incident surfaced that we had no
+// forensic trail for survey writes — the record just "was gone" from the
+// April 11 master backup onwards, with no way to reconstruct what happened.
+// v2399 closed the write-destruction class at the guarded-merge layer;
+// v2401 adds the observability so next time we can answer the "why" within
+// minutes instead of days.
+//
+// Schema (writeJournal object store, auto-incrementing id)
+// ──────────────────────────────────────────────────────
+//   { id:         <auto>
+//   , epoch:      <Date.now() ms>
+//   , timestamp:  <ISO string>
+//   , surveyId:   <survey.id, numeric>
+//   , vesselName: <for human-readable grep>
+//   , caller:     <function name inferred from stack, or "unknown">
+//   , beforeSize: <JSON.stringify length of pre-write record, 0 if new>
+//   , afterSize:  <JSON.stringify length of post-write record>
+//   , delta:      <afterSize - beforeSize>
+//   , itemCount:  <Object.keys(survey.items).length, 0 if none>
+//   , isNew:      <boolean — no record existed before>
+//   , lastModified:  <copy of survey.lastModified at save time>
+//   , ageDaysAtSave: <days since lastModified, null if unstamped>
+//   }
+//
+// Ring buffer
+// ───────────
+// Capped at 500 entries to bound IDB growth.  Prune runs fire-and-forget
+// after each write and deletes oldest-first via the `epoch` index.  At
+// ~500 entries * ~300 bytes/entry = ~150 KB total — negligible vs photo
+// storage. Older entries fall off; that's fine for forensics because the
+// most useful window is the last few days of activity.
+//
+// Inspection API — available in the DevTools console as `window.kkJournal`
+// ──────────────────────────────────────────────────────────────────────
+//   kkJournal.recent(n = 50)    → last N entries, newest first
+//   kkJournal.forSurvey(id)     → all entries for a given surveyId
+//   kkJournal.suspicious(pct)   → entries where afterSize shrank by ≥ pct%
+//                                 (default 20%) — the smoking-gun filter
+//   kkJournal.dump()            → download full journal as JSON
+//
+// Robustness contract
+// ───────────────────
+//   • Journal failures NEVER block saves.  Every write is wrapped in a
+//     try/catch that swallows errors silently (console.debug only).
+//   • If the writeJournal store doesn't exist yet (e.g., user opened v2401
+//     in a tab where the v3 upgrade hasn't finished), every call short-
+//     circuits via the `objectStoreNames.contains` guard.
+//   • Stack inference is best-effort.  If the runtime doesn't produce a
+//     readable stack, caller is recorded as "unknown" and everything
+//     else still works.
+function _inferSaveCaller() {
+  try {
+    const stack = (new Error()).stack || '';
+    const lines = stack.split('\n');
+    // Match both Chrome-style ("    at funcName (...)") and Safari-style
+    // ("funcName@..."). Skip known frames we don't want to report.
+    const SKIP = new Set(['Error', '_inferSaveCaller', 'saveSurvey', '_originalSaveSurvey', 'Promise', 'promise']);
+    for (const line of lines) {
+      const m = line.match(/at\s+([A-Za-z_$][\w$.<>]*)/) || line.match(/^\s*([A-Za-z_$][\w$.<>]*)@/);
+      if (!m) continue;
+      const name = m[1];
+      if (SKIP.has(name)) continue;
+      // Strip trailing angle-bracket markers (Firefox uses < for anonymous)
+      return name.replace(/[<>]/g, '') || 'unknown';
+    }
+  } catch (_) {}
+  return 'unknown';
+}
+
+async function _journalSurveyWrite(survey, caller, beforeRecord) {
+  if (!db || !db.objectStoreNames.contains('writeJournal')) return;
+  try {
+    const now = Date.now();
+    const afterSize = JSON.stringify(survey).length;
+    const beforeSize = beforeRecord ? JSON.stringify(beforeRecord).length : 0;
+    const lmMs = survey.lastModified ? new Date(survey.lastModified).getTime() : 0;
+    const ageDaysAtSave = lmMs ? (now - lmMs) / 86400000 : null;
+    const entry = {
+      epoch: now,
+      timestamp: new Date(now).toISOString(),
+      surveyId: survey.id,
+      vesselName: survey.vesselName || '',
+      caller: caller || 'unknown',
+      beforeSize,
+      afterSize,
+      delta: afterSize - beforeSize,
+      itemCount: survey.items ? Object.keys(survey.items).length : 0,
+      isNew: !beforeRecord,
+      lastModified: survey.lastModified || null,
+      ageDaysAtSave: ageDaysAtSave !== null && isFinite(ageDaysAtSave) ? +ageDaysAtSave.toFixed(2) : null,
+    };
+    await new Promise((resolve) => {
+      try {
+        const tx = db.transaction(['writeJournal'], 'readwrite');
+        tx.objectStore('writeJournal').add(entry);
+        tx.oncomplete = resolve;
+        tx.onerror = resolve;   // never block
+        tx.onabort = resolve;
+      } catch (_) { resolve(); }
+    });
+    _pruneJournal(); // fire-and-forget
+  } catch (err) {
+    // Journal failures MUST NOT break save paths. Log at debug level only.
+    try { console.debug('[Journal] write failed (non-fatal):', err && err.message); } catch (_) {}
+  }
+}
+
+async function _pruneJournal() {
+  if (!db || !db.objectStoreNames.contains('writeJournal')) return;
+  try {
+    const count = await new Promise((r) => {
+      try {
+        const tx = db.transaction(['writeJournal'], 'readonly');
+        const req = tx.objectStore('writeJournal').count();
+        req.onsuccess = () => r(req.result || 0);
+        req.onerror = () => r(0);
+      } catch (_) { r(0); }
+    });
+    if (count <= 500) return;
+    const toDelete = count - 500;
+    let deleted = 0;
+    await new Promise((r) => {
+      try {
+        const tx = db.transaction(['writeJournal'], 'readwrite');
+        const req = tx.objectStore('writeJournal').index('epoch').openCursor(); // oldest first (ascending)
+        req.onsuccess = (e) => {
+          const c = e.target.result;
+          if (!c || deleted >= toDelete) return;
+          c.delete();
+          deleted++;
+          c.continue();
+        };
+        req.onerror = () => {};
+        tx.oncomplete = r;
+        tx.onerror = r;
+        tx.onabort = r;
+      } catch (_) { r(); }
+    });
+  } catch (_) {}
+}
+
+// Public console API — queryable from DevTools without touching internals.
+window.kkJournal = {
+  async recent(n = 50) {
+    if (!db || !db.objectStoreNames.contains('writeJournal')) return [];
+    return new Promise((r) => {
+      try {
+        const tx = db.transaction(['writeJournal'], 'readonly');
+        const req = tx.objectStore('writeJournal').index('epoch').openCursor(null, 'prev'); // newest first
+        const out = [];
+        req.onsuccess = (e) => {
+          const c = e.target.result;
+          if (!c || out.length >= n) return r(out);
+          out.push(c.value);
+          c.continue();
+        };
+        req.onerror = () => r(out);
+      } catch (_) { r([]); }
+    });
+  },
+  async forSurvey(id) {
+    if (!db || !db.objectStoreNames.contains('writeJournal')) return [];
+    return new Promise((r) => {
+      try {
+        const tx = db.transaction(['writeJournal'], 'readonly');
+        const req = tx.objectStore('writeJournal').index('surveyId').getAll(IDBKeyRange.only(id));
+        req.onsuccess = () => {
+          const out = req.result || [];
+          out.sort((a, b) => a.epoch - b.epoch);
+          r(out);
+        };
+        req.onerror = () => r([]);
+      } catch (_) { r([]); }
+    });
+  },
+  async suspicious(thresholdPct = 20) {
+    const all = await this.recent(500);
+    return all.filter(e => !e.isNew && e.beforeSize > 0
+      && ((e.beforeSize - e.afterSize) / e.beforeSize * 100) >= thresholdPct)
+      .map(e => ({
+        timestamp: e.timestamp,
+        vesselName: e.vesselName,
+        caller: e.caller,
+        shrinkPct: +((e.beforeSize - e.afterSize) / e.beforeSize * 100).toFixed(1),
+        beforeSize: e.beforeSize,
+        afterSize: e.afterSize,
+        surveyId: e.surveyId,
+      }));
+  },
+  async dump() {
+    const entries = await this.recent(500);
+    const blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'kiki-write-journal-' + new Date().toISOString().replace(/[:.]/g, '-') + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return entries.length;
+  },
+  async count() {
+    if (!db || !db.objectStoreNames.contains('writeJournal')) return 0;
+    return new Promise((r) => {
+      try {
+        const tx = db.transaction(['writeJournal'], 'readonly');
+        const req = tx.objectStore('writeJournal').count();
+        req.onsuccess = () => r(req.result || 0);
+        req.onerror = () => r(0);
+      } catch (_) { r(0); }
+    });
+  },
+};
 
 // Warn before leaving if there are unsaved backup changes
 window.addEventListener('beforeunload', (e) => {

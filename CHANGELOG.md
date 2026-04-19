@@ -12,6 +12,45 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2401 — 2026-04-19
+### Added
+- **Survey write journal — forensic trail of every save.** New `writeJournal` IndexedDB object store (schema v2 → v3, additive upgrade) captures a one-line audit record on every successful `saveSurvey()` call: epoch, ISO timestamp, surveyId, vesselName, caller (inferred from stack), beforeSize (JSON length of the pre-write record), afterSize, delta, itemCount, isNew, lastModified, ageDaysAtSave. Capped at 500 entries via ring-buffer pruning (oldest-first, indexed on `epoch`).
+- Console inspection API at `window.kkJournal`:
+  - `kkJournal.recent(n=50)` — last N entries, newest first.
+  - `kkJournal.forSurvey(id)` — all entries for a given surveyId, chronological.
+  - `kkJournal.suspicious(pct=20)` — entries where `afterSize` shrank by ≥ pct% vs `beforeSize`. The smoking-gun filter for "why did my survey lose content?".
+  - `kkJournal.dump()` — download the entire journal as JSON (timestamped filename).
+  - `kkJournal.count()` — total journal entries.
+- `_inferSaveCaller()` helper extracts the calling function name from `(new Error()).stack` — matches both Chrome (`at funcName (...)`) and Safari (`funcName@...`) formats, skips known frames (`Error`, `_inferSaveCaller`, `saveSurvey`, `_originalSaveSurvey`, `Promise`), falls back to `"unknown"` if the stack is unreadable. No call-site refactor needed — every one of the ~30 `saveSurvey()` invocations in app.js gets labelled automatically.
+
+### Why this exists
+- The 2026-04-19 Ex-Ta-Sea incident revealed we had zero forensic trail for survey writes. The record was present in the April 11 master backup and gone some days later, with no way to reconstruct when it disappeared or what caller was responsible. v2399 closed the write-destruction class at the merge layer; v2401 adds the observability layer so next time we can answer "when did it shrink, and who did it?" in under a minute via `kkJournal.suspicious()`.
+- Size-delta tracking (beforeSize / afterSize / delta) is the single most useful signal: legitimate edits grow or leave the survey size roughly constant; silent data loss shows up as a sharp drop. The `suspicious()` filter surfaces drops of ≥ 20% so the surveyor (or future debugger) can spot them without reading every entry.
+- Stack-inference captures caller names without requiring a cross-codebase refactor. This matters because `saveSurvey` has ~30 invocations (several in async callbacks with no convenient place to thread a caller arg); retrofitting them one-by-one would multiply review surface for no benefit.
+
+### Design
+- Journal writes fire-and-forget AFTER `store.put(survey)` resolves — journal pressure never blocks the save resolve. Separate IDB transaction (`['writeJournal']`) so the save path doesn't wait on journal I/O. Errors inside `_journalSurveyWrite` are swallowed at `console.debug` level; journal failures MUST NOT break saves.
+- `beforeSize` is captured by reading the pre-existing record inside the same save transaction (`store.get(survey.id)` serial-to-`store.put(survey)`). One extra O(1) read per save; negligible vs the stringify + auto-regen cost already on the path.
+- Ring buffer prune runs after every write via a cursor on the `epoch` index (ascending = oldest-first). At 500 × ~300 B/entry = ~150 KB — noise vs photo storage. Double-prune races from concurrent saves are harmless (cursor.delete is idempotent per key).
+- Schema upgrade (v2 → v3) is additive only: existing `surveys` and `photos` stores unchanged, new `writeJournal` store created with `autoIncrement` id and indexes on `surveyId` (for per-survey replay) and `epoch` (for newest-first retrieval and oldest-first pruning). `onblocked` handler warns if another open tab is holding v2.
+
+### Scope
+- No behaviour change on any save path. `saveSurvey` adds one pre-put `get` (same tx) and one post-put fire-and-forget call; both are additive. If the `writeJournal` store is missing (e.g., upgrade didn't run), every journal entry point short-circuits via `objectStoreNames.contains('writeJournal')` and saves proceed unchanged.
+- Only `saveSurvey` is instrumented. `savePhoto` is not journaled — photo writes are less forensically interesting (binary content, no field-level data loss to diagnose) and would bloat the journal at the volume they run.
+- Cache version bumped (v2400 → v2401) along with APP_VERSION, the HTML meta tag, and all seven cache-busters — standard atomic-version routine.
+
+### Usage
+- `kkJournal.recent(20)` — quick peek at what's been saved lately.
+- `kkJournal.suspicious()` — any shrinks ≥ 20%? Empty array = healthy.
+- `kkJournal.forSurvey(<surveyId>)` — full save history for one vessel, chronological.
+- `kkJournal.dump()` — download a JSON file; attach to an issue or email when filing a data-integrity bug.
+
+### Related
+- Answers the forensic half of task #74 (Ex-Ta-Sea disappearance) — the original incident is unrecoverable (journal wasn't running), but any future occurrence is now diagnosable.
+- Completes the v2399 / v2400 / v2401 trio shipped 2026-04-19: v2399 prevents silent survey writes, v2400 prevents photo-download corruption, v2401 records everything that makes it through for after-the-fact analysis.
+
+---
+
 ## v2400 — 2026-04-19
 ### Fixed
 - **`pullPhotosForSurvey` no longer saves Firebase Storage error responses as photos.** Three guards added before `savePhoto`: (1) `response.ok` check — reject any non-2xx HTTP status from Storage up front; (2) `blob.type.startsWith('image/')` — reject JSON error envelopes, HTML error pages, and any other non-image Content-Type; (3) magic-byte sniff on the first 4 bytes of the blob — verify JPEG (`FF D8`), PNG (`89 50 4E 47`), or WebP (`52 49 46 46`) signature before persisting.
