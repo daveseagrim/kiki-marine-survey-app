@@ -12,6 +12,26 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2393 — 2026-04-19
+### Added
+- **🧹 Reset App Cache button now lives on the survey-page ⋯ menu too.** Cache drift doesn't wait for you to be on the home screen. The original v2387 iPhone crash hit while Dave was mid-typing in Vessel Name, i.e. inside a survey — so the self-heal needs to be reachable from inside a survey. v2390 added the button to `homeOverflowMenu`; v2393 mirrors the same entry onto `inspOverflowMenu`, directly below Force Update. Red text (`#dc2626`) matches the home-menu styling, and the `title` attribute ("Clears app cache and reloads — surveys and photos are preserved") carries through so the hover hint reminds Dave (and anyone he hands the app to) that data is safe.
+
+### Why this exists
+- Dave noticed the survey-page ⋯ menu was missing the Reset App Cache entry even though the same failure mode (drift → crash mid-survey) is much more likely to surface while a survey is open than while staring at the home list. Forcing a round-trip back to home to reach the self-heal wastes time at exactly the moment the app has gone sideways. Mirroring the button keeps the fix one tap away wherever drift shows up.
+
+### Design
+- Button appended in `renderInspection` right after the existing `updateOpt` (app.js ~line 14277). Uses `document.createElement('button')` + `onclick = () => { overflowMenu.style.display = 'none'; resetAppCache(); }` — same pattern as the surrounding menu entries. Styling matches the home-menu entry verbatim (same padding, font size, weight, red `#dc2626`), so the two menus present an identical Reset experience.
+- `resetAppCache()` itself is unchanged from v2390/v2391 — still wraps `_doResetAppCache(false)` (interactive mode: confirm dialog, toasts, error alert on failure). Surveys and photos survive every invocation because `_doResetAppCache` deliberately skips IndexedDB.
+
+### Scope
+- Only the inspection ⋯ menu changes. Home menu already had the button from v2390. No other pages currently have overflow menus — Edit Intro and Boat Info rely on the tappable version-number text in the header for access to `forceAppUpdate`. If those pages grow a ⋯ menu later, this same button should go onto them.
+- Does NOT change the page-specific items on either menu (Generate Report / Pre-Flight Check / Edit Vessel Info / Recover Photos / Remove Date Stamps on inspection; Export All / Import / Force Update on home). Those stay where they belong since they only make sense in their respective contexts.
+
+### Related
+- Completes the cache-reliability user-facing surface: v2390 put the button on home, v2391 made the heal happen automatically on version mismatch, v2392 prevented drift at source in the SW install, v2393 makes sure the manual fallback is reachable wherever the user happens to be.
+
+---
+
 ## v2392 — 2026-04-19
 ### Changed
 - **Service worker install is now atomic on critical files.** Phase 3 of the 3-part cache-reliability programme (v2390 button, v2391 auto-heal, v2392 prevention). The install handler in `sw.js` previously wrapped every `cache.add(url)` call in `.catch(warn)`, which meant a single flaky network fetch during install would log a console warning and then happily activate the service worker with a partially-populated cache. That half-populated cache was the root cause of the v2387 iPhone Safari crash: index.html was fresh, some of the JSON files were fresh, but app.js was still the old version — Dave's "mixed-version chaos" scenario. v2392 splits `URLS_TO_CACHE` into `CRITICAL_URLS` (HTML, JS, JSON — all the files that parse or read each other) and `OPTIONAL_URLS` (icons, logos, external Firebase SDK from gstatic). Critical files are cached with `Promise.all` and NO per-file catch, so the first failure rejects the whole install and the browser keeps the previous (working) service worker active. Optional files retain per-file tolerance — individual icon failures don't block anything and network fallback covers them at runtime.

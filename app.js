@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2392';
+const APP_VERSION = 'v2393';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -14275,6 +14275,20 @@ function ensureReportButton() {
   updateOpt.innerHTML = '↻ Force Update';
   updateOpt.onclick = () => { overflowMenu.style.display = 'none'; forceAppUpdate(); };
   overflowMenu.appendChild(updateOpt);
+
+  // v2393: Reset App Cache option — mirrors the entry on homeOverflowMenu so
+  // the self-heal button is reachable from inside a survey, not just the
+  // home page. Cache drift tends to manifest mid-survey (Dave's original
+  // v2387 crash happened while typing into Vessel Name), so surfacing the
+  // heal right where the failure happens saves a round-trip back to home.
+  // Surveys and photos survive — resetAppCache() only touches CacheStorage
+  // and service worker registrations, never IndexedDB.
+  const resetCacheOpt = document.createElement('button');
+  resetCacheOpt.style.cssText = 'border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#dc2626;';
+  resetCacheOpt.title = 'Clears app cache and reloads — surveys and photos are preserved';
+  resetCacheOpt.innerHTML = '🧹 Reset App Cache';
+  resetCacheOpt.onclick = () => { overflowMenu.style.display = 'none'; resetAppCache(); };
+  overflowMenu.appendChild(resetCacheOpt);
 
   moreWrap.appendChild(overflowMenu);
   bottomBar.appendChild(moreWrap);
