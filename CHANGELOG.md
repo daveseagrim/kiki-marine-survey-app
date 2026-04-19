@@ -12,6 +12,37 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2398 — 2026-04-19
+### Changed
+- **P0.1 audit pass: added a comprehensive write-site inventory comment block above `saveSurveyDetails` in app.js.** No executable code change, no behaviour change — inventory only. The block catalogues every top-level `survey.X = Y` assignment in app.js (~55 sites) plus the single `Object.assign(survey, updates)` call at line ~10453, groups them into 10 categories (bulk-merge / per-field guarded writes / vessel-type derived / auto-prose / safety rebuilds / photo-slot sync / engine-field migrations / single-field UI writes / timestamp-admin / fully-guarded), ranks them by blast-radius risk, and names the highest-risk sites by line number so v2399's `guardedSurveyUpdate` chokepoint can replace them with precision.
+
+### Why this exists
+- Three separate emergency data-loss patches have shipped in the last week — v2377 (strip `undefined` before Object.assign), v2383 (`guardedAssignComparables` empty-over-nonempty refusal), v2386 (lastModified timestamp for Firebase merges). Each was reactive: the bug surfaced, then we wrapped one specific write site. The stability-first roadmap (saved 2026-04-19) calls for a single guarded chokepoint (`guardedSurveyUpdate(survey, updates, caller)`) in v2399 that replaces the scattered defenses with one place-to-trust. Landing that chokepoint without first inventorying every write site risks missing a category; landing it WITH an inventory lets every subsequent tranche (v2400-v2402) point at specific line numbers to migrate. The inventory is the scaffold for everything in the P0 block of the roadmap.
+
+### Design
+- Pure documentation. The comment block is ~180 lines of pure `//` text wedged between the preceding `}` (end of the Edit Intro builder) and the `function saveSurveyDetails(surveyId) {` declaration at app.js line ~10345. Location chosen because `saveSurveyDetails` is both the highest-blast-radius write path (80+ intro fields via Object.assign) and the home of v2399's guarded chokepoint — readers asking "why this function?" will find the audit right above it.
+- Structure: (a) Motivation — cite v2377 / v2383 / v2386 incident trail; (b) Scope — top-level writes only; item-scoped writes out of scope; (c) Save-path entry points — the 5 functions that actually persist to IndexedDB via `saveSurvey(...)`; (d) Classified write sites in 10 categories A–J, each with approximate line numbers and a one-line risk note; (e) Risk ranking 1–5 highest-first; (f) v2399 plan naming the target function signature and which categories get routed through it.
+- Every line number annotated `~NNNN` (approximate) because minor refactors shift line numbers and we don't want the comment to go stale if the next version touches lines above 10345. The category labels (A, B, C, …) are stable references — future audits can point to "category A bulk-merge" without a line number.
+- Chose to leave item-scoped writes (`survey.items[label].X = Y`, ~40 sites) OUT of this pass. Those mutate a per-item record, not the survey-top-level shape that the save chokepoint persists. A separate audit pass will cover them if item-level data loss ever surfaces; no evidence today that any item-scoped write has been destructive.
+
+### Scope
+- Zero behaviour change. Zero DOM change. Zero save-path change. Zero data-model change. Every function and every `survey.X = Y` line operates identically to v2397.
+- Cache version bumped (v2397 → v2398) along with APP_VERSION, the HTML meta tag, and all seven cache-busters — standard atomic-version routine. No other edits beyond the comment block.
+- This is the first of the P0.1 "audit + guarded chokepoint" pair. v2399 lands the actual `guardedSurveyUpdate(survey, updates, caller)` function and flips the Object.assign site at line ~10453 to route through it. v2400-v2402 then migrate the `saveEditFormSilently` loop, the `safetyEquipment` rebuilds, and the `_syncEnginePhotosFromBody` mutations onto the guarded path in separate one-feature-per-version tranches.
+
+### Risk ranking (reproduced from the inventory for roadmap readers)
+- **1 (HIGH)** `Object.assign(survey, updates)` at ~10453 — 80+ intro keys. Guarded against `undefined` (v2377) and `.comparables` wipe (v2383), but plain `''` and `[]` still pass through. v2399 target.
+- **2 (HIGH)** `survey[f] = el.value` loop at ~10512 in `saveEditFormSilently`. No new-vs-old compare. v2400-v2402 target.
+- **3 (MED)** `survey.safetyEquipment = result.checklist` at 13712 / 17398 / 17425. Safe today; empty-over-nonempty not explicitly refused.
+- **4 (MED)** `_syncEnginePhotosFromBody` (20409-20425). Can null intro photo slots during a delete-and-reupload window. P0.3 scope.
+- **5 (LOW)** Everything else. Narrow surface, well-guarded today.
+
+### Related
+- Sits at the head of the P0.1 thread per the stability-first roadmap: v2398 = audit → v2399 = guarded chokepoint → v2400-v2402 = migrate write sites in tranches → v2403-v2405 = P0.2 iPhone storage control UI → v2406-v2408 = P0.3 canonical photo state machine → v2409-v2410 = P0.4 regression checklist.
+- Builds on v2377 (undefined-key strip in saveSurveyDetails), v2383 (`guardedAssignComparables`), and v2386 (`lastModified` timestamp in saveSurvey override) — the three reactive patches the inventory cites as motivation. The inventory exists so v2399 can retire all three as the scattered defenses of record and replace them with one canonical path.
+
+---
+
 ## v2397 — 2026-04-19
 ### Changed
 - **Report now ends within the last ~20% of the final printed 8.5×11 page instead of stranding the Surveyor's Certification near the top of a mostly-empty sheet.** Dave flagged that on several recent reports the signature block (SURVEYOR'S CERTIFICATION header + six certification bullets + logo + signature + contact line) rendered at the top of the final printed page with 4–6 inches of white space below it — unprofessional for a client deliverable and inconsistent with how formal marine-survey reports are traditionally laid out (signature anchored to the bottom). Now the cert block is forced onto its own dedicated last page and pushed to the bottom edge so the final printed line sits in the bottom ~20% zone of the sheet.

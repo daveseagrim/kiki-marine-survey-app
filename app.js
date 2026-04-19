@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2397';
+const APP_VERSION = 'v2398';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -10341,6 +10341,186 @@ function editSurveyDetails(surveyId) {
     document.body.appendChild(editBar);
   });
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// v2398: SURVEY WRITE-SITE INVENTORY (P0.1 audit — NO BEHAVIOUR CHANGE)
+// ─────────────────────────────────────────────────────────────────────────
+// Motivation
+//   Over the past week we've shipped three emergency data-loss patches:
+//     v2377 — strip `undefined` keys before Object.assign so an un-rendered
+//             DOM collector (getColourValue / collectComparables / plain
+//             `document.getElementById(...)?.value`) can't silently wipe a
+//             saved value.
+//     v2383 — `guardedAssignComparables(survey, newValue, caller)` chokepoint;
+//             refuses empty-over-nonempty unless `skipComparables === true`.
+//     v2386 — add `lastModified` timestamp to survive Firebase-sync merges.
+//   Each of those was reactive — the bug surfaced, then we wrapped one
+//   specific write. v2398 is a one-shot inventory pass over every site in
+//   app.js that mutates `survey.X`, classified by risk, so v2399 can land a
+//   single guarded chokepoint (`guardedSurveyUpdate`) that replaces the
+//   scattered defenses with one place-to-trust.
+//
+// Scope
+//   Top-level `survey.X = Y` writes ONLY. Item-scoped writes
+//   (`survey.items[label].X = Y`, ~40 sites) are out of scope — those
+//   mutate a per-item record, not the survey-top-level shape that the
+//   save chokepoint persists. If item-level data loss surfaces, a separate
+//   audit pass will cover them.
+//
+// Save-path entry points (every persisted write flows through one of these)
+//   1. `saveSurvey(survey)` — line ~1632. The only site that calls
+//      `store.put(survey)`. Also auto-regenerates vesselDescription
+//      (1669-1670) and propulsionNarrative (1701-1702) on every save when
+//      the surveyor isn't actively typing in the textarea.
+//   2. `saveSurveyDetails(surveyId)` — THIS function. Edit Intro "Save"
+//      button. Does `Object.assign(survey, updates)` at line ~10453 after
+//      a v2377 undefined-strip and v2383 comparables pre-guard. Highest-
+//      value, highest-blast-radius write path — 80+ intro fields merged
+//      in one shot.
+//   3. `saveEditFormSilently()` — line ~10493. Called on back-nav from
+//      Edit Intro. Iterates a hard-coded field list and writes
+//      `survey[f] = el.value` only when `el` exists; follow-up writes at
+//      10515-10548 are each individually gated by a v2377-style
+//      container-existence check.
+//   4. `saveAllInspectionData()` — line ~21250. Silent-save of textareas,
+//      bilgePumps, and comparables. Comparables routed through
+//      `guardedAssignComparables` (v2383).
+//   5. `saveSurvey` override — line ~25450. Firebase-sync wrapper that
+//      appends `survey.lastModified = new Date().toISOString()` before
+//      delegating to the original. Append-only; no read-modify-write risk.
+//
+// Classified top-level write sites (line numbers approximate — see git
+// blame for ground truth; layout reflects app.js state at v2397).
+//
+//   A. BULK-MERGE (highest risk — the chokepoint v2399 will replace)
+//      • 10453  Object.assign(survey, updates)          saveSurveyDetails
+//               — 80+ intro fields. Guarded v2377 (strip undefined) +
+//                 v2383 (pre-guard comparables). STILL the #1 risk site:
+//                 any future collector that returns '' or [] when the DOM
+//                 is absent would clobber a saved value (plain '' and []
+//                 currently pass through the v2377 strip; only `undefined`
+//                 is filtered).
+//      • 10512  survey[f] = el.value                    saveEditFormSilently
+//               — loop over hard-coded field list. Guarded by `if (el)`
+//                 existence check, but does NOT compare new-vs-old before
+//                 writing, so an empty input field overwrites a saved
+//                 value. Lower-risk than 10453 because the field list is
+//                 smaller and every write is a plain string, but still
+//                 exposed to "field removed from conditional DOM render"
+//                 regressions.
+//
+//   B. PER-FIELD INTRO WRITES WITH v2377-STYLE DEFENSE (safe today)
+//      • 10515-10517  locationLat / locationLon / exchangeRate
+//               — OR-fallback preserves existing survey value when the
+//                 window flag / DOM input is absent. Pattern to emulate.
+//      • 10525-10526  valuationSources / valuationSource
+//               — gated by `_valSourceContainer` existence check.
+//      • 10540  skipComparables           gated by #skipComparables exists
+//      • 10548  excludedIntroFields       gated by `.excl-toggle` exists
+//      • 16457-16459, 16473-16475  valuationLow / valuationHigh /
+//               overallCondition — each `if (el) survey.X = el.value`.
+//
+//   C. VESSEL-TYPE / DRIVE DERIVED (deterministic, low risk)
+//      • 10463-10474  saveSurveyDetails post-merge rudder/drive auto-derive
+//      • 20097, 20102-20112, 20124, 20133, 20138-20148, 20158
+//               — setVesselTypeFromInspection / updateDriveLineCount /
+//                 updateDriveType / toggleHasRudder (inspection-page
+//                 dropdowns). Each fires in response to a direct user
+//                 interaction; no undefined-DOM exposure.
+//      • 21113  openSurvey auto-correct vesselType from boat_specs_db.
+//
+//   D. AUTO-GENERATED PROSE (guarded by descriptionAutoGenerated flag)
+//      • 1669-1670, 1701-1702  saveSurvey auto-regen chokepoint.
+//      • 10479-10480           saveSurveyDetails post-merge regen.
+//      • 12049-12050, 12434    explicit Regenerate buttons.
+//      • 20197-20213           propulsion narrative manual-edit +
+//                              explicit Regenerate.
+//        — All paths respect `descriptionAutoGenerated` / focus / sticky
+//          editing flag. Safe.
+//
+//   E. SAFETY EQUIPMENT REBUILDS (deterministic from LOA + vessel type)
+//      • 13712-13714, 17398-17400, 17425-17427
+//               — `survey.safetyEquipment = result.checklist` etc.
+//                 `getSafetyChecklistForVessel(...)` is deterministic; if
+//                 it ever returned [] prematurely, it would wipe the full
+//                 TC TP 511 checklist *with user ratings preserved by
+//                 label-merge inside the helper*. Worth validating the
+//                 helper never returns empty for a valid LOA — and worth
+//                 routing through guardedSurveyUpdate with an empty-over-
+//                 nonempty refusal in v2399.
+//      • 13879, 16554, 16875, 16932, 16980
+//               — lazy initializers (`if (!survey.X) survey.X = []/{}`).
+//                 Idempotent.
+//      • 16545  safetyEquipmentSkipped — boolean from toggle. Safe.
+//
+//   F. PHOTO-SLOT SYNC (body → intro — MEDIUM RISK)
+//      • 20409-20425  _syncEnginePhotosFromBody
+//               — when the body item exists but has no photos, NULLS the
+//                 intro photo slot. Intended behaviour, but a delete-and-
+//                 reupload sequence could momentarily expose an empty body
+//                 and wipe the intro. Candidate for a v2383-style empty-
+//                 over-nonempty guard in a future version (roadmap v2406
+//                 "canonical photo state machine").
+//      • 14370, 14376  migrator writes (guarded by `if (!survey.X)`).
+//
+//   G. ENGINE-FIELD MIGRATIONS (idempotent; guarded by `if (!survey.X)`)
+//      • 14328, 14332-14345, 14352-14376
+//               — v2258 migration: backfill engine/fuel/hours/HP fields
+//                 from the Engine Data ratedItem text when intro fields
+//                 are blank. Every write gated by `if (!survey.X)`, so
+//                 re-running the migrator is a no-op. Safe.
+//      • 1799   `_labelVersion` one-shot migration flag.
+//      • 13338  `totalRatedItems` — recomputed on every render, safe.
+//
+//   H. SINGLE-FIELD UI-TRIGGERED WRITES (narrow, low blast radius)
+//      • 20078 headCount, 20087 hullCount, 20353 engineHours,
+//        21275 bilgePumps, 20179 engine narrative fields
+//               — all one-field writes in response to a specific user
+//                 interaction. Safe.
+//
+//   I. TIMESTAMP / ADMIN WRITES
+//      • 21398  surveyDate = _latestLocalISO      date-integrity fix
+//               — user-confirmed via showThreeOptionConfirm before write.
+//      • 25453  lastModified = new Date().toISOString()   sync wrapper
+//               — append-only; runs on every saveSurvey.
+//
+//   J. ALREADY FULLY GUARDED
+//      • 10450  guardedAssignComparables(survey, updates.comparables, caller)
+//      • 12995  survey.comparables = newValue     INSIDE the guard itself
+//      • 12960-13005  guardedAssignComparables — canonical v2383 pattern
+//
+// Risk ranking (highest-first)
+//   1. (HIGH)  Object.assign(survey, updates) at 10453. Mitigated by v2377
+//              + v2383 but 80+ keys at a time. v2399 target.
+//   2. (HIGH)  survey[f] = el.value loop at 10512. No new-vs-old compare.
+//              v2400-v2402 target (after guarded chokepoint lands).
+//   3. (MED)   survey.safetyEquipment = result.checklist (13712 / 17398 /
+//              17425). Safe today but empty-over-nonempty not explicitly
+//              refused. Route through guardedSurveyUpdate.
+//   4. (MED)   _syncEnginePhotosFromBody (20409-20425). Can null intro
+//              slots during a delete-and-reupload window. Addressed as
+//              part of P0.3 (canonical photo state machine, v2406-v2408).
+//   5. (LOW)   Everything else. Narrow surface, well-guarded today.
+//
+// v2399 plan (next version)
+//   function guardedSurveyUpdate(survey, updates, caller):
+//     • strip `undefined` keys (reproduce v2377)
+//     • for whitelisted high-value keys (comparables, valuationSources,
+//       safetyEquipment, vesselDescription, propulsionNarrative, every
+//       *Photo slot, excludedIntroFields), apply v2383-style empty-over-
+//       nonempty refusal
+//     • log every refusal with caller tag + key name
+//     • fold in `lastModified` timestamp refresh (currently in the sync
+//       wrapper at ~25453)
+//     • telemetry hook for ancient-survey migration rejections (P0.1
+//       roadmap item folded in from the 2026-04-19 review)
+//   Replace Object.assign at ~10453 with guardedSurveyUpdate(...).
+//   Tranches v2400-v2402 migrate the saveEditFormSilently loop + the
+//   safetyEquipment rebuilds + the photo-slot sync to the guarded path.
+//
+// No code in this audit pass — inventory only. Zero behaviour change
+// from v2397.
+// ─────────────────────────────────────────────────────────────────────────
 
 function saveSurveyDetails(surveyId) {
   _kkLastAction = 'saveSurveyDetails:' + surveyId;
