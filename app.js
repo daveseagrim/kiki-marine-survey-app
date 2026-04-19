@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2393';
+const APP_VERSION = 'v2394';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -22533,9 +22533,11 @@ ${(() => {
   // Findings; F&R carries a cross-reference pointing the reader there.
   // See git history if a compact photo-thumbnail F&R variant is wanted.
 
-  // v2236: truncate observation text to its first sentence for F&R.
-  // The full text + photos already live in Detailed Survey Findings;
-  // F&R is an action list, not a second verbatim copy.
+  // v2236/v2394: truncate observation text to its first sentence for F&R.
+  // Still used by the PO (Powered Up Only) table which displays Notes in a
+  // compact column. A and B findings no longer truncate — they show full
+  // observation text (with any action sentence moved into the recommendation
+  // so it doesn't appear twice) via extractActionFromObservation below.
   function truncateForFR(text) {
     if (!text) return '';
     const t = text.trim();
@@ -22547,32 +22549,62 @@ ${(() => {
     return first;
   }
 
-  // Helper: build a specific recommendation line citing the item's standards
-  function buildRecommendation(f, severity) {
+  // v2394: Split observation text into a descriptive body and an optional
+  // trailing action sentence. If the last sentence of a multi-sentence
+  // observation contains a recognized repair/inspect verb AND is not a
+  // disclaimer, it is pulled out as `action` and removed from `body`. The
+  // caller renders `body` in the observation paragraph and passes `action`
+  // into buildRecommendation, which uses it in place of the boilerplate
+  // recommendation when present. Single-sentence observations are never
+  // split (otherwise the observation would be empty and the reader would
+  // lose context) — they keep the whole sentence as body and the
+  // recommendation falls back to boilerplate.
+  function extractActionFromObservation(text) {
+    if (!text) return { body: '', action: '' };
+    const cleaned = text.trim().replace(/\s+/g, ' ');
+    const sentences = cleaned.match(/[^.!?]+[.!?]+/g);
+    if (!sentences || sentences.length < 2) return { body: cleaned, action: '' };
+    const last = sentences[sentences.length - 1].trim();
+    const isDisclaimer = /\b(visual observation only|does not constitute|confirmation of serviceability)\b/i.test(last);
+    const isAction = /\b(replace|repair|service|inspect|reapply|address|correct|install|secure|test|recommend)\b/i.test(last);
+    if (isDisclaimer || !isAction) return { body: cleaned, action: '' };
+    // Join everything except the last sentence as the body. Each subsequent
+    // sentence already carries its leading space from the regex match, so
+    // join with '' (not ' ') to avoid doubling whitespace.
+    const body = sentences.slice(0, -1).join('').trim();
+    return { body, action: last };
+  }
+
+  // Helper: build a recommendation line citing the item's standards.
+  // v2394 rules (per Dave):
+  //   • If an action sentence was detected in the observation, the
+  //     recommendation is just "<action> <standards>" — NO boilerplate.
+  //   • If no action was detected, the recommendation falls back to the
+  //     standard boilerplate ("Schedule repairs…" for B, "Immediate
+  //     correction required…" for A) + standards cite.
+  // The action arrives here already stripped from the observation body so
+  // the reader never sees it twice.
+  function buildRecommendation(f, severity, action) {
     const _frMerged = (severity === 'A' || severity === 'B') ? mergeTextStandards(f.standards, f.text) : [];
     const stdCite = _frMerged.length > 0 ? ` (${_frMerged.join('; ')})` : '';
+    // Helper: rebuild "<action text> (standards)." with the original
+    // terminator preserved (period for most actions, but respect ! or ?).
+    function actionWithCite(s) {
+      const trail = s.match(/[.!?]+$/);
+      const term = trail ? trail[0] : '.';
+      const stripped = s.replace(/[.!?]+$/, '').trim();
+      return `${stripped}${stdCite}${term}`;
+    }
     if (severity === 'A') {
-      return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> Immediate correction required before the vessel is next underway${stdCite}. This finding represents a direct safety risk or code violation.</em></p>`;
+      const body = action
+        ? actionWithCite(action)
+        : `Immediate correction required before the vessel is next underway${stdCite}. This finding represents a direct safety risk or code violation.`;
+      return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> ${body}</em></p>`;
     } else if (severity === 'B') {
-      // v2241: extract the last action-oriented sentence from the
-      // observation text (it usually contains the specific repair
-      // instruction the surveyor wrote). Append it to the standard
-      // recommendation so the reader sees the actionable detail.
-      let specificAction = '';
-      if (f.text) {
-        const sentences = f.text.trim().replace(/\s+/g, ' ').match(/[^.!?]+[.!?]+/g);
-        if (sentences && sentences.length >= 2) {
-          // Last sentence is typically the action ("Replace the
-          // anodes before relaunching."). Skip if it's just a
-          // disclaimer-style sentence.
-          const last = sentences[sentences.length - 1].trim();
-          const isDisclaimer = /\b(visual observation only|does not constitute|confirmation of serviceability)\b/i.test(last);
-          if (!isDisclaimer && /\b(replace|repair|service|inspect|reapply|address|correct|install|secure|test|recommend)\b/i.test(last)) {
-            specificAction = ' ' + last;
-          }
-        }
-      }
-      return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong>${specificAction} Schedule repairs in the near future to maintain compliance with applicable codes, regulations, standards, or recommended practices${stdCite}.</em></p>`;
+      const body = action
+        ? actionWithCite(action)
+        : `Schedule repairs in the near future to maintain compliance with applicable codes, regulations, standards, or recommended practices${stdCite}.`;
+      return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> ${body}</em></p>`;
     } else {
       // v2240: C-rated items don't get a generic recommendation line —
       // the observation text alone is sufficient for maintenance items.
@@ -22581,20 +22613,20 @@ ${(() => {
   }
 
   // Helper to render a single finding entry.
-  // v2228: photos removed from Findings & Recommendations. They used to
-  // render here AND inside Detailed Survey Findings, doubling every photo
-  // in the report. Now F&R is a concise action list — finding code +
-  // item + observation text + recommendation — with a cross-reference
-  // pointing the reader to the full observation + photos in the Detailed
-  // Survey Findings section above.
+  // v2394: Observation is now shown in full (no first-sentence truncation).
+  // If the last sentence is a repair/inspect instruction, it's pulled out
+  // and rendered as the recommendation instead — keeping observation and
+  // recommendation complementary rather than overlapping. v2228 note
+  // preserved: F&R renders no photos (they live in Detailed Survey Findings
+  // once, not twice). v2240 note preserved: no "See full observation…"
+  // cross-reference — the reader can locate the item by code.
   function renderFinding(f, color, severity) {
-    const briefText = pluralizeRudder(truncateForFR(cleanupTypos(depersonalise(dedup(f.text || '')))), survey.rudderCount);
-    // v2240: cross-reference sentences removed ("See full observation and
-    // N photos in Detailed Survey Findings → ...") — unnecessary on paper.
+    const cleaned = pluralizeRudder(cleanupTypos(depersonalise(dedup(f.text || ''))), survey.rudderCount);
+    const { body, action } = extractActionFromObservation(cleaned);
     return `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid ${color};">
       <strong style="color:${color};">Finding ${f.code}</strong> — ${esc(displayItemLabel(f.label, survey))}
-      ${briefText ? `<p style="margin:3px 0;">${esc(briefText)}</p>` : ''}
-      ${buildRecommendation(f, severity)}
+      ${body ? `<p style="margin:3px 0;">${esc(body)}</p>` : ''}
+      ${buildRecommendation(f, severity, action)}
     </div>`;
   }
 
