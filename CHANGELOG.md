@@ -12,6 +12,27 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2390 — 2026-04-19
+### Added
+- **"Reset App Cache" button in the home-screen three-dot menu.** Self-heal for the drifted-service-worker-cache failure mode. Dave hit it today: on a cached iPhone Safari session the app crashed to the home screen every time he typed into the Vessel Name field on a new survey. Desktop Chrome worked fine, Safari Private Mode worked fine — which isolated the fault to the iPhone's service-worker cache holding a mixed-version set of files (likely a newer index.html alongside an older app.js, because the SW's install handler currently tolerates per-file `cache.add` failures and activates with partial caches). The fix required clearing Website Data via iOS Settings → Safari → Advanced — a multi-step ritual that also wipes IndexedDB and risks local-only survey data. One button in the app itself turns that into a single tap.
+
+### Why this exists
+- Cache drift has happened "several times" on Dave's field iPhone. Each recovery burned 10+ minutes and required walking away from whatever survey he was mid-stream. A dedicated Reset button removes the Settings-app dance AND keeps IndexedDB intact, so the surveyor's data never gets collateral-damaged by a cache fix. This is the field-survival fix.
+
+### Design
+- `resetAppCache()` (app.js, right after `forceAppUpdate` ~line 302) — single async function, nuclear by design. Confirms with a dialog that calls out what is and isn't affected ("surveys and photos are NOT affected"), then: unregisters every `serviceWorker` registration for the origin (so a stale SW can't re-populate caches from its fetch handler on first offline request), deletes every `CacheStorage` bucket returned by `caches.keys()` (current + stale from prior versions), and hard-reloads with a `?_reset=<timestamp>` query so the browser's own HTTP cache (a separate thing from CacheStorage) is bypassed when re-fetching index.html. IndexedDB is deliberately untouched — no call to `indexedDB.deleteDatabase` anywhere in the path.
+- Menu entry added to the existing `homeOverflowMenu` in `renderHome` (app.js ~line 8384), immediately after "Force Update". Same button styling as its siblings; the label is rendered in `#dc2626` (red) to signal this is a bigger action than Force Update, with a `title` hover explaining surveys are preserved.
+
+### Scope
+- This is the first of three planned cache-reliability layers. v2391 will add an automatic version-handshake on app load (compares `APP_VERSION` in the parsed app.js to a version injected into index.html; mismatch auto-triggers `resetAppCache()` silently — no button press needed). v2392 will change the service-worker install from "tolerate per-file failures" to all-or-nothing (fail install if any critical file can't be cached, so a broken cache never activates in the first place). Shipping one per version per Dave's workflow discipline.
+- Does NOT delete any IndexedDB object store, localStorage key, sessionStorage key, or cookie. Does NOT touch Drive. Does NOT sign Dave out of Firebase Auth (that state lives in IndexedDB).
+- Does NOT modify the service worker itself. `sw.js` is unchanged in this version other than `CACHE_NAME` being bumped to `kiki-marine-v2390`. The atomic-install fix belongs to v2392.
+
+### Related
+- Diagnostic path for the iPhone crash that prompted this: task #63. Follow-up tasks for the 3-phase plan: #64 (this one), #65 (v2391 handshake), #66 (v2392 atomic install). #65 and #66 will be created when they're ready to start.
+
+---
+
 ## v2389 — 2026-04-18
 ### Fixed
 - **Subject-verb agreement in the "Head, faucet, sink and drain — Not tested" snippet.** Dave caught: "There is a grammar error in head faucet sink and drain. One of the sentences uses 'was' when it should say 'were'." The observed-phase snippet read "The head, faucet, sink and drain **was** not tested because the vessel was on shore and winterized at the time of survey." Compound subject with four members ("head, faucet, sink and drain") takes a plural verb — changed to **were**.

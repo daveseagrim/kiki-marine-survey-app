@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2389';
+const APP_VERSION = 'v2390';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -295,6 +295,71 @@ async function forceAppUpdate() {
     persistViewState();
     window.location.replace(
       window.location.origin + window.location.pathname + '?_cb=' + Date.now()
+    );
+  }
+}
+
+// ── v2390: Self-heal — nuclear cache reset ─────────────────────────────
+// Clears the full service-worker cache and reloads fresh from the server.
+// Used when the cache has drifted out of sync with the latest deployed code
+// (e.g. partial SW installs on flaky networks leave mixed-version files
+// in cache, causing mysterious crashes — most recently the iOS Safari
+// crash on the vessel-name input that only fresh-install or Private Mode
+// could bypass).
+//
+// CRITICAL: IndexedDB is untouched. Surveys and photos survive the reset.
+// Only HTTP cache entries (JSON, JS, images) are deleted. iOS Safari's
+// "Clear Website Data" wipes IndexedDB too — this is the safer alternative.
+async function resetAppCache() {
+  const ok = confirm(
+    'Reset the app cache?\n\n' +
+    'This clears cached files and reloads the app fresh from the server. ' +
+    'Your surveys and photos are stored separately and are NOT affected — ' +
+    'they will still be here after the reset.\n\n' +
+    'Use this if the app is crashing or behaving strangely.'
+  );
+  if (!ok) return;
+
+  try {
+    showToast('Resetting app cache…');
+    persistViewState();
+
+    // Unregister every service-worker registration for this origin.
+    // Without this, the old SW keeps serving stale cache even after we
+    // delete the caches — a fresh page load would re-populate from the
+    // old SW's fetch handler on the first offline request.
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const reg of regs) {
+        try { await reg.unregister(); } catch (_) {}
+      }
+    }
+
+    // Delete every CacheStorage bucket. `caches.keys()` returns ALL cache
+    // names (current + stale from prior versions). Deleting them all puts
+    // us in the same state as a brand-new Safari install for this origin,
+    // minus IndexedDB.
+    if ('caches' in window) {
+      const names = await caches.keys();
+      for (const n of names) {
+        try { await caches.delete(n); } catch (_) {}
+      }
+    }
+
+    showToast('Reloading…');
+    await new Promise(r => setTimeout(r, 400));
+
+    // Hard reload with a cache-buster query. This forces the browser's
+    // own HTTP cache (separate from CacheStorage above) to bypass its
+    // cached copy of index.html and re-fetch from the server.
+    window.location.replace(
+      window.location.origin + window.location.pathname + '?_reset=' + Date.now()
+    );
+  } catch (err) {
+    console.error('[ResetAppCache] Error:', err);
+    alert(
+      'Reset failed: ' + (err && err.message ? err.message : 'unknown error') +
+      '\n\nTry closing Safari completely and reopening the app.'
     );
   }
 }
@@ -8382,6 +8447,7 @@ function renderHome() {
             <button onclick="document.getElementById('homeOverflowMenu').style.display='none';exportAllSurveys()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#066aab;">📦 Export All Surveys</button>
             <button onclick="document.getElementById('homeOverflowMenu').style.display='none';importSurvey()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#066aab;">📥 Import Survey</button>
             <button onclick="document.getElementById('homeOverflowMenu').style.display='none';forceAppUpdate()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#64748b;">↻ Force Update</button>
+            <button onclick="document.getElementById('homeOverflowMenu').style.display='none';resetAppCache()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#dc2626;" title="Clears app cache and reloads — surveys and photos are preserved">🧹 Reset App Cache</button>
           </div>
         </div>
       </div>`;
