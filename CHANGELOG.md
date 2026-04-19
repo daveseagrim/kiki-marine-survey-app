@@ -12,6 +12,30 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2404 — 2026-04-19
+### Fixed — Save-path completion flush
+- `saveEverywhere()` (inspection-view Save pill) now calls `saveAllInspectionData()` before re-saving the survey when the inspection view is active. Before: the inspection-view branch did `await getSurvey(...); await saveSurvey(survey)` without flushing DOM state first, so a Save tap that happened while the surveyor was mid-textarea (before `onblur` had fired) read the stale IDB copy and silently dropped the fresh keystrokes on the next reload.
+- `saveSurveyWithProgress()` (per-survey progress dialog) now does the same flush, gated on `currentView === 'inspection' && currentSurveyId === surveyId` so that a home-screen save of a *different* survey doesn't accidentally touch unrelated DOM state.
+- New `visibilitychange`→hidden and `pagehide` handlers fire-and-forget `saveAllInspectionData()` so that mid-typing textareas are flushed when iOS backgrounds the tab (user hits home, switches apps, gets a call, screen locks). IDB honours in-flight transactions even after the JS context suspends, so the fire-and-forget pattern is safe here — an `await` would never resume.
+
+### Why this exists
+- External review flagged item 1 of a batch as "the single most important fix." Independent verification against the codebase confirmed it: the stale-save path existed at `app.js:3030–3033` and again at `app.js:3300–3302` (pre-v2404 line numbers). Matches the pattern Dave has hit in the field when "I swear I typed that" notes disappear after a reload.
+- The `pagehide`/`visibilitychange` handler closes the companion gap: iPhone Safari and the iOS PWA shell can suspend the tab with almost no notice, and nothing in the existing event handlers was flushing text on that transition. The v2383 guarded-assign paths (comparables, colours) already prevent destructive writes on empty DOM reads, so firing on `pagehide` is safe even if the DOM is mid-tear-down when the handler runs.
+
+### Scope
+- Three edits in `app.js` (saveEverywhere branch, saveSurveyWithProgress prelude, new hide handler at module scope near the existing `beforeunload` handler). Atomic version bump only (v2403 → v2404): `APP_VERSION`, `CACHE_NAME`, `app-version` meta, seven `?v=2404` cache-busters.
+- Zero DB schema change, zero migration, zero change to the successful-keystroke path. Purely additive safety.
+- Pairs with v2403 (FileReader hang hardening) as the two halves of "close the data-loss paths on iPhone before tomorrow's field survey."
+
+### Related
+- v2399 `guardedSurveyUpdate` chokepoint — prevented destructive no-op writes.
+- v2400 `pullPhotosForSurvey` three-guard validation — prevented photo corruption.
+- v2401 write journal — made the write history forensically recoverable.
+- v2403 FileReader hang hardening — prevented photo-capture UI wedge.
+- v2404 (this) — closes the unsaved-DOM-state save-path gap.
+
+---
+
 ## v2403 — 2026-04-19
 ### Fixed — Photo-capture hang hardening
 - Six photo-capture call sites now wrap the `FileReader.onload` async body in `try/catch` and attach a `FileReader.onerror` handler that resolves the surrounding Promise. Before: a thrown error inside the async `onload` was a silent unhandled rejection, and `FileReader` failures (corrupt EXIF, truncated HEIC, out-of-memory on a large pick) had no `onerror` handler at all — the Promise never settled, the `for (const file of files)` loop blocked forever, and the "Saving X photos…" toast wedged the UI. On iPhone this was indistinguishable from a crash.

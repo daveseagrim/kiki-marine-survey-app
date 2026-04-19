@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2403';
+const APP_VERSION = 'v2404';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -2008,6 +2008,39 @@ window.addEventListener('beforeunload', (e) => {
   }
 });
 
+// v2404: Flush unsaved DOM state when the page is hidden or unloaded.
+// iPhone PWAs can suspend the tab at any moment (user switches app, hits
+// the home button, takes a call, screen locks). If a textarea is mid-edit
+// when that happens, the onblur flush hasn't fired yet and the IDB copy
+// is stale — those keystrokes are lost on next reload.
+//
+//   • `visibilitychange` → hidden catches the "app backgrounded" case.
+//   • `pagehide` catches the "tab unloaded" case (BFCache or full unload).
+//
+// We don't await — at pagehide the browser is already tearing down and any
+// pending await would never resume. IDB transactions that are in-flight at
+// pagehide are honoured by the browser even after the JS context suspends
+// (that's the whole point of IDB's transactional guarantee). Fire-and-
+// forget is the correct pattern here.
+//
+// saveAllInspectionData() early-returns if no currentSurveyId, and the
+// v2383 guarded-assign paths (comparables, colours) skip destructive
+// writes on empty DOM reads, so this is safe even if the page is already
+// mid-tear-down when the handler fires.
+function _flushOnHide() {
+  try {
+    if (currentView === 'inspection' &&
+        currentSurveyId &&
+        typeof saveAllInspectionData === 'function') {
+      saveAllInspectionData().catch(() => {});
+    }
+  } catch (_) {}
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') _flushOnHide();
+});
+window.addEventListener('pagehide', _flushOnHide);
+
 // ── Item label migration map ────────────────────────────────────────────
 // When template labels change (e.g., items get split or renamed), old
 // survey data is stored under the old key.  This map moves data forward
@@ -3028,7 +3061,18 @@ async function saveEverywhere() {
         (currentView === 'edit-survey' || currentView === 'new-survey')) {
       await saveEditFormSilently();
     } else {
-      // On inspection screen — just re-save the current survey
+      // v2404: On inspection screen, flush unsaved DOM state (textareas,
+      // bilge pumps, comparables) into the survey before re-saving.
+      // Before: a mid-typing Save tap read the IDB copy, which still held
+      // the pre-blur text — the fresh keystrokes were silently lost on the
+      // next reload. `saveAllInspectionData()` is the same flush path that
+      // `backToHome()` and `generateReport()` already use.
+      if (currentView === 'inspection' && typeof saveAllInspectionData === 'function') {
+        try { await saveAllInspectionData(); }
+        catch (e) { console.warn('[SaveEverywhere] saveAllInspectionData failed:', e); }
+      }
+      // Re-save (idempotent — the flush above already persisted any
+      // changes; this ensures the timestamp reflects the Save tap).
       const survey = await getSurvey(currentSurveyId);
       if (survey) await saveSurvey(survey);
     }
@@ -3272,6 +3316,18 @@ async function saveSurveyWithProgress(surveyId) {
   if (!surveyId) return;
   window._backupActive = true;
   _kkBackupInFlight = true;
+
+  // v2404: If this is the survey currently being inspected, flush unsaved
+  // DOM state first (same rationale as saveEverywhere). Without this, a
+  // Save tap from inside inspection view would read stale IDB and lose
+  // keystrokes not yet blurred. Only flushes if we are actually in the
+  // inspection view for THIS surveyId — guards against a home-screen save
+  // of a different survey trying to flush unrelated DOM state.
+  if (currentView === 'inspection' && currentSurveyId === surveyId &&
+      typeof saveAllInspectionData === 'function') {
+    try { await saveAllInspectionData(); }
+    catch (e) { console.warn('[saveSurveyWithProgress] saveAllInspectionData failed:', e); }
+  }
 
   const survey = await getSurvey(surveyId);
   if (!survey) { showToast('Survey not found'); window._backupActive = false; _kkBackupInFlight = false; _checkDeferredUpdate(); return; }
