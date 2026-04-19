@@ -12,6 +12,16 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2380 — 2026-04-18
+### Changed
+- **Report: USE OF RATINGS — "C — Serviceable" definition rewritten.** Dave's call, same legal-hedging pass as v2379. Old text claimed the item "currently meets all applicable safety and performance standards" — an overclaim, since a visual non-destructive inspection can't establish standards compliance. New text:
+  - *Definition:* "The item appeared to be in generally serviceable condition based on a visual, non-destructive inspection, with no material deficiency noted at the time of survey."
+  - *Action:* "No corrective action was recommended."
+- "Appeared to be in generally serviceable condition" matches the observational stance the rest of the report takes (it's an opinion on appearance, not a compliance certification). "Based on a visual, non-destructive inspection" makes the methodology explicit inside the rating definition itself. "No material deficiency noted at the time of survey" scopes the rating to observations on inspection day.
+- Code scope: single `<li>` replacement in `generateReport()` in the USE OF RATINGS block (`app.js` around line 21521). Colour chip, A/B/NT/PO/Safety definitions, and all downstream rating logic (findings bucketing, table rendering, rating-priority constants) are unchanged. The inspection-page hover tooltip in `getRatingTooltip()` (app.js line 12341) is intentionally left short and informal; it's UI scaffolding, not the formal report definition.
+
+---
+
 ## v2379 — 2026-04-18
 ### Changed
 - **Report: Purpose and Scope preamble rewritten to SAMS-style language.** Dave's call — the original preamble ("This surveyor attended aboard the vessel to determine its physical condition and market value…") had three legal exposures the new language closes:

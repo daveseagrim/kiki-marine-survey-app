@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2379';
+const APP_VERSION = 'v2380';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -21519,8 +21519,8 @@ ${(() => {
         <em>Definition:</em> Moderate deficiencies; not immediately hazardous but should be addressed.<br/>
         <em>Action:</em> Schedule repairs.</li>
       <li><span style="background:#16a34a;color:white;padding:2px 8px;font-weight:bold;">C — Serviceable</span><br/>
-        <em>Definition:</em> Currently meets all applicable safety and performance standards.<br/>
-        <em>Action:</em> No corrective work required.</li>
+        <em>Definition:</em> The item appeared to be in generally serviceable condition based on a visual, non-destructive inspection, with no material deficiency noted at the time of survey.<br/>
+        <em>Action:</em> No corrective action was recommended.</li>
       <li><span style="background:#6b7280;color:white;padding:2px 8px;font-weight:bold;">Not Tested / Not Verified</span><br/>
         <em>Definition:</em> A comprehensive inspection was attempted, but was not possible due to constraints imposed upon the surveyor (e.g., no power available, inability to remove panels, requirements not to conduct destructive tests, or limitations on the inspection time).</li>
       <li><span style="background:#6b7280;color:white;padding:2px 8px;font-weight:bold;">Powered Up Only (PO)</span><br/>
