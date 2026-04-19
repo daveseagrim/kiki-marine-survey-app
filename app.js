@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2398';
+const APP_VERSION = 'v2399';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -10606,31 +10606,15 @@ function saveSurveyDetails(surveyId) {
       excludedIntroFields: collectExcludedIntroFields()
     };
 
-    // v2377: data-loss guard. Previously `Object.assign(survey, updates)`
-    // copied every key — including `undefined` — so if any DOM-backed
-    // collector (getColourValue, collectComparables, or any
-    // `document.getElementById(...)?.value` whose element wasn't on screen)
-    // returned undefined, it silently wiped the saved value. Now we strip
-    // `undefined` keys from `updates` before merging, and preserve the
-    // existing survey value in their place. Plain empty strings and empty
-    // arrays ARE still assigned — those represent legitimate intentional
-    // clears (user blanked the field on Edit Intro). Only the
-    // "DOM-wasn't-rendered" sentinel (undefined) is skipped.
-    for (const k of Object.keys(updates)) {
-      if (updates[k] === undefined) delete updates[k];
-    }
-    // v2383: route comparables through the guarded assignment BEFORE the
-    // broad Object.assign. If the guard refuses the update (empty-over-
-    // nonempty while skipComparables is false), remove the key so the
-    // Object.assign below doesn't overwrite survey.comparables.
-    if ('comparables' in updates) {
-      // Reflect the skip flag that's part of this same update first so the
-      // guard sees the intent the user just expressed.
-      if ('skipComparables' in updates) survey.skipComparables = updates.skipComparables;
-      const applied = guardedAssignComparables(survey, updates.comparables, 'saveSurveyDetails');
-      if (!applied) delete updates.comparables;
-    }
-    Object.assign(survey, updates);
+    // v2399: single-chokepoint merge. Replaces the historically layered
+    // v2377 undefined-strip loop, the v2383 comparables routing, AND the
+    // terminal Object.assign with one call. All three concerns now live
+    // inside guardedSurveyUpdate (defined near guardedAssignComparables)
+    // so any future save-path entry point gets the same protections by
+    // default instead of copy-pasting the three defensive blocks. See
+    // v2398's audit comment above for the full inventory of writes this
+    // is replacing and the migration plan for remaining call sites.
+    guardedSurveyUpdate(survey, updates, 'saveSurveyDetails');
 
     // Clean up incompatible drive settings when vessel type changes from intro.
     // B-09 (v2162): auto-derive hasRudder from vesselType + driveType.
@@ -13182,6 +13166,124 @@ function guardedAssignComparables(survey, newValue, caller) {
     } catch (_) {}
   }
   return true;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// v2399 — guardedSurveyUpdate: central chokepoint for top-level survey.X = Y
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Purpose
+// ───────
+// Replace ad-hoc `Object.assign(survey, updates)` and `survey[f] = el.value`
+// loops with a single validated merge path.  Follows the audit block above
+// `saveSurveyDetails` (v2398) — specifically the HIGH-risk sites at ~10633
+// (Object.assign) and ~10512 (per-field loop).  This version migrates the
+// Object.assign site; v2400 migrates the per-field loop.
+//
+// Guarantees
+// ──────────
+//   1. `undefined` values are NEVER written.  Protects every future caller
+//      from the v2377 class of bug (missing-DOM collectors returning
+//      `undefined` silently wiping saved values).  Previously the guard
+//      was duplicated in each call site as a `delete updates[k]` loop — now
+//      it's central.
+//   2. `comparables` is routed through guardedAssignComparables (v2383),
+//      inheriting the empty-over-nonempty refusal.  Callers that pass
+//      comparables in the same update batch get the guard for free.  If the
+//      batch also includes skipComparables, that flag is applied FIRST so
+//      the comparables guard sees the user's intent.
+//   3. Every call logs a caller name.  Surveys older than 30 days or
+//      missing lastModified (the v2386 timestamp) get a console.info noting
+//      their age — ancient-survey telemetry, so we can spot long-dormant
+//      records being mutated.  One-shot per call, not per-field.
+//   4. Empty strings and empty arrays are STILL assigned.  These represent
+//      legitimate user-intent clears ("I emptied the field").  Distinguishing
+//      clear-intent from missing-DOM is the caller's responsibility:
+//      callers pass `undefined` for missing-DOM, empty-string for cleared.
+//
+// Signature
+// ─────────
+//   guardedSurveyUpdate(survey, updates, caller) → { applied, skipped }
+//     survey   — survey object to mutate (mutated in place)
+//     updates  — plain object of field → value pairs
+//     caller   — short string naming the caller (REQUIRED for diagnostics)
+//   Returns: { applied: number, skipped: string[] }
+//     applied  — count of keys assigned
+//     skipped  — list of keys NOT assigned (undefined-valued, or comparables
+//                refused by guardedAssignComparables)
+//
+// Why this exists (not just for ergonomics)
+// ────────────────────────────────────────
+// v2377, v2383, and v2386 were each reactive patches placed at individual
+// save-path entry points.  A new entry point added later (e.g., a future
+// auto-save or sync-pull) would bypass those protections by default.  With
+// guardedSurveyUpdate, every new entry point gets all three guards merely
+// by using the chokepoint — no copy-pasted `for k of keys; if undefined
+// delete` loops to maintain.
+//
+// Explicit non-goals (intentionally out of scope)
+// ──────────────────────────────────────────────
+//   • Per-item writes (survey.items[label].X = Y) are NOT routed through
+//     this function.  Items have their own mutation patterns — see v2398's
+//     audit block.
+//   • This function does NOT call saveSurvey/persist.  Callers persist
+//     when they were going to persist.  This is a merge primitive only.
+//   • This function does NOT deep-clone updates.  Array values are assigned
+//     by reference, matching the prior Object.assign semantics exactly.
+function guardedSurveyUpdate(survey, updates, caller) {
+  if (!survey || !updates || typeof updates !== 'object') {
+    return { applied: 0, skipped: [] };
+  }
+  const callerName = caller || 'unknown';
+
+  // Ancient-survey telemetry — one-shot per call, not per-field.
+  // Surveys predating v2386 don't have lastModified. Surveys older than 30
+  // days are worth flagging: either they're long-dormant and suddenly being
+  // mutated (worth noting) or the timestamp never got written (bug worth
+  // catching).  Infinity handles the no-timestamp case.
+  try {
+    const lm = survey.lastModified ? new Date(survey.lastModified).getTime() : 0;
+    const ageDays = lm ? (Date.now() - lm) / 86400000 : Infinity;
+    if (!lm || ageDays > 30) {
+      console.info(
+        '[v2399] guardedSurveyUpdate: ancient/unstamped survey ' +
+        (survey.id || '<no id>') + ' (lastModified: ' +
+        (survey.lastModified || 'MISSING') + ', age: ' +
+        (isFinite(ageDays) ? ageDays.toFixed(0) + 'd' : 'unknown') +
+        ') being updated by ' + callerName
+      );
+    }
+  } catch (_) {}
+
+  const skipped = [];
+  let applied = 0;
+
+  // Route comparables through the v2383 guard FIRST, then remove from the
+  // updates object so the generic loop below doesn't clobber what the guard
+  // just decided.  If skipComparables is in the same update, reflect it
+  // onto survey first so the guard sees the user's intent.
+  if ('comparables' in updates) {
+    if ('skipComparables' in updates) {
+      survey.skipComparables = updates.skipComparables;
+    }
+    const ok = guardedAssignComparables(survey, updates.comparables, callerName);
+    if (ok) applied++; else skipped.push('comparables');
+    delete updates.comparables;
+  }
+
+  // Generic merge — undefined values skipped, everything else assigned.
+  // Matches Object.assign semantics for non-undefined values: shallow,
+  // by-reference for arrays/objects, overwrites existing keys.
+  for (const k of Object.keys(updates)) {
+    if (updates[k] === undefined) {
+      skipped.push(k);
+      continue;
+    }
+    survey[k] = updates[k];
+    applied++;
+  }
+
+  return { applied, skipped };
 }
 
 // v2231: toggle comparables section visibility and persist the flag

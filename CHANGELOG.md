@@ -12,6 +12,31 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2399 — 2026-04-19
+### Added
+- **`guardedSurveyUpdate(survey, updates, caller)` — central chokepoint for top-level survey writes.** New ~50-line function in app.js (with ~60-line docblock) routes every bulk survey mutation through one place-to-trust. Three guarantees: (1) `undefined` values never written (v2377 class), (2) `comparables` routed through `guardedAssignComparables` with `skipComparables` pre-applied so the v2383 empty-over-nonempty refusal sees the user's intent, (3) ancient-survey telemetry — surveys with `lastModified` > 30 days or missing get a `console.info` line naming the caller, so dormant-record mutations show up in logs. Empty strings and empty arrays are still assigned (they represent legitimate user-intent clears; caller distinguishes by passing `undefined` vs `''`/`[]`).
+- `saveSurveyDetails` migrated to the chokepoint: replaces the historically layered v2377 undefined-strip loop + v2383 comparables pre-guard + terminal `Object.assign(survey, updates)` trio with a single `guardedSurveyUpdate(survey, updates, 'saveSurveyDetails')` call. One of the 5 HIGH-risk sites inventoried in v2398's audit block; remaining 4 (per-field loop in `saveEditFormSilently`, `safetyEquipment` rebuilds, `_syncEnginePhotosFromBody`, auto-prose writers) get migrated in v2400–v2402.
+
+### Why this exists
+- v2377 / v2383 / v2386 were each reactive patches wrapping ONE specific save-path entry point. A new entry point added later (e.g., a future auto-save, sync pull, or AI-assisted writer) would bypass those protections by default. The chokepoint flips the polarity: new entry points get all three guards just by using `guardedSurveyUpdate` — no copy-pasted defensive loops to maintain. This is the P0 deliverable from the 2026-04-19 stability-first roadmap.
+- Today's recovery of Ex-Ta-Sea surfaced the broader pattern: multiple ways existed to silently destroy a survey record, and the only forensic evidence was "it's gone". The chokepoint plus its ancient-survey telemetry gives us both prevention (guards) and visibility (caller logging) on the highest-risk path.
+
+### Design
+- Function declared at app.js line ~13233 (immediately after `guardedAssignComparables` at ~13141). Both are hoisted function declarations, so call order in source is irrelevant.
+- Signature returns `{ applied, skipped }` — applied count and the list of keys skipped (undefined-valued or comparables-refused). Call sites that want to log or alert on skips can read the return; `saveSurveyDetails` currently ignores it.
+- Ordering inside the function: ancient-survey telemetry (one-shot) → comparables routing (with skipComparables pre-apply, then delete from updates) → generic undefined-safe merge loop. Matches the pre-existing ordering at `saveSurveyDetails` so behaviour is identical.
+- Explicit non-goals: per-item writes (`survey.items[label].X = Y`) stay out of scope — they have their own mutation patterns and no evidence of item-level data loss. The function also does NOT persist (no `saveSurvey` call) and does NOT deep-clone (shallow Object.assign semantics preserved by reference).
+
+### Scope
+- `saveSurveyDetails` write-path behaviour is semantically identical to v2398 — the trio it replaces did the same three things in the same order. Only the code locality changed.
+- Cache version bumped (v2398 → v2399) along with APP_VERSION, the HTML meta tag, and all seven cache-busters — standard atomic-version routine.
+- 4 HIGH/MED risk sites from v2398's audit remain un-migrated: `saveEditFormSilently` per-field loop (~10512), `safetyEquipment` rebuilds (13712 / 17398 / 17425), `_syncEnginePhotosFromBody` (20409-20425), auto-prose writers. These land in v2400–v2402 per the one-feature-per-version rule.
+
+### Related
+- Ex-Ta-Sea recovery: survey record restored from April 11 master backup; 158 photos re-imported from batch zips (`.kikisurvey` archives 1–11). Incident also surfaced a separate bug in `pullPhotosForSurvey` — Firebase Storage 404 JSON responses were being saved as `dataUrl` and overwriting real photos. That fix lands as v2400 (`pullPhotosForSurvey` blob-type validation).
+
+---
+
 ## v2398 — 2026-04-19
 ### Changed
 - **P0.1 audit pass: added a comprehensive write-site inventory comment block above `saveSurveyDetails` in app.js.** No executable code change, no behaviour change — inventory only. The block catalogues every top-level `survey.X = Y` assignment in app.js (~55 sites) plus the single `Object.assign(survey, updates)` call at line ~10453, groups them into 10 categories (bulk-merge / per-field guarded writes / vessel-type derived / auto-prose / safety rebuilds / photo-slot sync / engine-field migrations / single-field UI writes / timestamp-admin / fully-guarded), ranks them by blast-radius risk, and names the highest-risk sites by line number so v2399's `guardedSurveyUpdate` chokepoint can replace them with precision.
