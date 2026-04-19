@@ -12,6 +12,35 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2405 — 2026-04-19
+### Fixed — Engine/drive pluralisation and missing HP unit
+
+Three cosmetic text bugs surfaced while Dave was preparing the Ex-Ta-Sea report on a twin-engine sterndrive vessel. Internal data model unchanged; display-layer only.
+
+**1. "Engine(s) and drive(s)" section title → "Engine and drive" / "Engines and drives"**
+- New `displayCategoryName(categoryName, survey)` helper resolves the `(s)` marker at render time using `survey.engine2Make` as the single-vs-twin signal (same field used by every other propulsion-text builder).
+- Wired into both the inspection accordion title (line ~14024) and the report `<h2>` header (line ~23051, chained after the existing `pluralizeRudder`).
+- `category.name` stays literal (`'Engine(s) and drive(s)'`) in the template JSON and in IDB — the 8+ identity-matching sites (`isEngineCategory`, propulsion-chip injection, `pullPhotosForSurvey` mapping, etc.) keep working against the stable key.
+
+**2. Propulsion narrative — "rated at 300 each" → "rated at 300 hp each"**
+- `buildPropulsionNarrative` now runs `engineHP` through a new `_fmtHP()` helper before interpolating into the opener sentence. Smart-append: bare numbers get `" hp"` suffixed; strings that already contain `hp` / `HP` / `h.p.` / `bhp` / `horsepower` / `kW` pass through unchanged so surveyors who type "300 hp" or "220 kW (300 hp)" don't end up duplicating the unit.
+- Only touches the narrative builder. The three `generateEngineDescription` variants already use `${engineHP} horsepower` and are unaffected.
+
+**3. Propulsion narrative — "outdrive (sterndrive)s" → "sterndrives"**
+- Changed the `driveLabel` map entry for `'outdrive'` from `'outdrive (sterndrive)'` to `'sterndrive'`. The simple `${driveLabel}s` pluralisation now emits "sterndrives" cleanly.
+- Brings the narrative builder into alignment with the `_driveLabelMap1/2` map used by `generateEngineDescription` (line ~12183), which already used `'sterndrive'`. One terminology, one place.
+
+### Scope
+- Two small additions in the helper region of `app.js` (post-`pluralizeRudder`): `displayCategoryName`, `_fmtHP`.
+- Four edits in existing builders: narrative opener, drive map, inspection title, report title.
+- Atomic version bump (v2404 → v2405): `APP_VERSION`, `CACHE_NAME`, `app-version` meta, seven `?v=2405` cache-busters.
+- Zero DB / template changes, zero migration.
+
+### Not included
+- The drive-line migration helper (v2406 candidate) is still on deck behind this. Keeping v2405 to text fixes only so it can ship immediately without waiting on the migration review.
+
+---
+
 ## v2404 — 2026-04-19
 ### Fixed — Save-path completion flush
 - `saveEverywhere()` (inspection-view Save pill) now calls `saveAllInspectionData()` before re-saving the survey when the inspection view is active. Before: the inspection-view branch did `await getSurvey(...); await saveSurvey(survey)` without flushing DOM state first, so a Save tap that happened while the surveyor was mid-textarea (before `onblur` had fired) read the stale IDB copy and silently dropped the fresh keystrokes on the next reload.

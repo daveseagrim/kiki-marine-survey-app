@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2404';
+const APP_VERSION = 'v2405';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -81,6 +81,41 @@ function pluralizeRudder(text, rudderCount) {
   });
 
   return text;
+}
+
+// v2405: Display-only transform for category names that carry "(s)" markers
+// because the underlying survey template can't know in advance whether the
+// vessel has a single or twin engine. Internal category.name strings stay
+// literal ("Engine(s) and drive(s)") so identity-matching code (report
+// builder, propulsion-chip injection, engine-photo sync) keeps working
+// against a stable key. Callers pipe the rendered title through this helper
+// to get reader-facing copy.
+//
+// hasTwin is resolved via engine2Make because that field is the single source
+// of truth for "is this a twin-engine vessel" everywhere else in the app
+// (propulsion narrative, engine-description template, report section header).
+// Stays consistent if the surveyor toggles Engine 2 on/off mid-survey.
+function displayCategoryName(categoryName, survey) {
+  if (!categoryName) return categoryName;
+  if (categoryName === 'Engine(s) and drive(s)') {
+    const hasTwin = !!(survey && survey.engine2Make);
+    return hasTwin ? 'Engines and drives' : 'Engine and drive';
+  }
+  return categoryName;
+}
+
+// v2405: smart-append "hp" to a raw horsepower string. If the value already
+// contains a recognisable power unit (hp, HP, h.p., bhp, horsepower, kW) it
+// is returned unchanged so surveyors who type "300 hp", "300hp", or
+// "220 kW (300 hp)" don't end up with duplicated units.  No \b word
+// boundaries on the unit tokens — "300hp" (no space between number and
+// unit) has digit-letter transition that \b wouldn't catch, and the field
+// is explicitly a horsepower value so substring false-matches aren't a
+// realistic risk.
+function _fmtHP(s) {
+  if (!s) return s;
+  if (/(hp|h\.p\.|horsepower|kw|bhp)/i.test(s)) return s;
+  return `${s} hp`;
 }
 
 // Global error handlers — catch crashes on iOS and show a message instead of silently dying
@@ -12768,9 +12803,13 @@ function buildPropulsionNarrative(survey) {
   // Avoids "A Evinrude" or "A Acadia" in the report.
   const firstLetter = (enginePhrase || '').trim().charAt(0);
   const articleAn = /^[aeiouAEIOU]/.test(firstLetter);
+  // v2405: force "hp" unit when surveyor typed a bare number (e.g. "300")
+  // so the narrative reads "rated at 300 hp each" instead of "rated at 300
+  // each". Idempotent — existing "300 hp" / "220 kW" strings pass through.
+  const eHPFmt = _fmtHP(eHP);
   const opener = hasTwin
-    ? `Twin ${enginePhrase}${eHP ? ` rated at ${eHP} each` : ''}`
-    : (makeModel ? `${articleAn ? 'An' : 'A'} ${enginePhrase}${eHP ? ` rated at ${eHP}` : ''}` : `The vessel's engine`);
+    ? `Twin ${enginePhrase}${eHPFmt ? ` rated at ${eHPFmt} each` : ''}`
+    : (makeModel ? `${articleAn ? 'An' : 'A'} ${enginePhrase}${eHPFmt ? ` rated at ${eHPFmt}` : ''}` : `The vessel's engine`);
 
   // ── Location / access ─────────────────────────────────────────────
   // v2299: lowercase the first character of user-entered location/access
@@ -12796,10 +12835,15 @@ function buildPropulsionNarrative(survey) {
   const tModel = (survey.transmissionModel || '').trim();
   const tMakeModel = [tMake, tModel].filter(Boolean).join(' ');
   const driveTypeLower = (survey.driveType || '').toLowerCase();
+  // v2405: "outdrive" label was "outdrive (sterndrive)" which broke the
+  // simple pluralisation below (`${driveLabel}s` → "outdrive (sterndrive)s").
+  // Dave's preference is "sterndrive" / "sterndrives" — dropping the
+  // parenthetical clears the plural form and keeps the terminology
+  // consistent with the generateEngineDescription builders (line ~12183).
   const driveLabel = {
     'saildrive': 'saildrive',
     'shaft': 'prop shaft',
-    'outdrive': 'outdrive (sterndrive)',
+    'outdrive': 'sterndrive',
     'ips': 'IPS pod drive'
   }[driveTypeLower] || '';
   // Use "Each engine is coupled to a … transmission driving through a …"
@@ -14021,7 +14065,7 @@ function renderInspection(survey) {
         <div class="accordion-header" role="button" tabindex="0" onclick="toggleAccordion(this)">
           <span class="accordion-chevron" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;font-size:22px;color:#94a3b8;flex-shrink:0;margin-left:-8px;transition:transform 0.2s;">▾</span>
           ${incompleteDot}
-          <span class="category-title">${categoryName}${badges}</span>
+          <span class="category-title">${displayCategoryName(categoryName, survey)}${badges}</span>
           ${progressHtml}
         </div>
         ${flaggedCount > 0 ? `<div class="flagged-summary" style="padding:4px 12px 6px 28px;font-size:12px;color:#92400e;background:#fffbeb;border-bottom:1px solid #fcd34d;">🚩 ${flaggedCount} flagged: ${flaggedItems.map(i => i.label).join(', ')}</div>` : ''}
@@ -23048,7 +23092,7 @@ ${(() => {
           propulsionHeaderHtml = narrHtml + specTableHtml;
         }
 
-        html += `<h2>${esc(pluralizeRudder(category.name, survey.rudderCount))}</h2>${propulsionHeaderHtml}`;
+        html += `<h2>${esc(pluralizeRudder(displayCategoryName(category.name, survey), survey.rudderCount))}</h2>${propulsionHeaderHtml}`;
 
         completedItems.forEach(item => {
           const itemData = survey.items[item.label];
