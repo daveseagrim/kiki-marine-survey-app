@@ -12,6 +12,21 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2381 — 2026-04-18
+### Added
+- **Date-integrity modal now has a one-tap fix.** The existing warning (v2244) already catches photos captured after the survey/report date and offers "Generate Anyway" / "Go Back and Fix." That's fine when the surveyor genuinely wants to backdate the certification, but when the real issue is that the survey date wasn't updated after a late photo was added, fixing it meant leaving the modal, navigating back to the intro page, editing the date, and re-running the report. Now a third button — **"Use YYYY-MM-DD as survey date"** — promotes the latest photo's local calendar date to `survey.surveyDate`, saves, and continues generation in one tap.
+- The button label shows the actual target date so Dave sees exactly what he's agreeing to before tapping (e.g. "Use 2026-04-18 as survey date").
+
+### Changed
+- `showConfirm` is still the default two-button modal. Added a sibling helper `showThreeOptionConfirm(message, primary, secondary, tertiary)` that stacks buttons vertically — three side-by-side buttons would either overflow a 320px phone width or squish the "Use 2026-04-18 as survey date" label into two lines. Resolves to `'primary' | 'secondary' | 'tertiary'` rather than a boolean so future three-option prompts can reuse it.
+
+### Technical notes
+- Latest-photo date is computed from the **local** calendar day (`getFullYear` / `getMonth` / `getDate`), not the UTC ISO string. A photo captured at 8pm EDT would land on the next UTC day; using UTC would jump the survey date a day forward of what the surveyor actually remembers.
+- `reportDate` continues to default to today. Only `surveyDate` is promoted — matching the meaning "the day I was on the vessel" rather than "the day I wrote the report."
+- Scope is a single block in `generateReport()` in `app.js` around line 20805, plus the new modal helper beside `showConfirm`. No data-model change; surveys without a `surveyDate` still follow the pre-v2244 path (the check is skipped when `_certifiedISO` is empty).
+
+---
+
 ## v2380 — 2026-04-18
 ### Changed
 - **Report: USE OF RATINGS — "C — Serviceable" definition rewritten.** Dave's call, same legal-hedging pass as v2379. Old text claimed the item "currently meets all applicable safety and performance standards" — an overclaim, since a visual non-destructive inspection can't establish standards compliance. New text:

@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2380';
+const APP_VERSION = 'v2381';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -3555,6 +3555,33 @@ function showConfirm(message, confirmLabel, cancelLabel) {
                   style="flex:1;padding:12px;background:#e5e7eb;color:#374151;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">${cancelLabel || 'Cancel'}</button>
           <button onclick="document.getElementById('customModalOverlay').remove();window._modalResolve&&window._modalResolve(true);"
                   style="flex:1;padding:12px;background:#dc2626;color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">${confirmLabel || 'OK'}</button>
+        </div>
+      </div>`;
+    window._modalResolve = resolve;
+    document.body.appendChild(overlay);
+  });
+}
+
+// v2381: Three-option modal for date-integrity flow (primary / secondary / tertiary).
+// Buttons stack vertically so long labels (e.g. "Use 2026-04-18 as survey date") fit
+// on mobile. Resolves to 'primary' | 'secondary' | 'tertiary'.
+function showThreeOptionConfirm(message, primaryLabel, secondaryLabel, tertiaryLabel) {
+  return new Promise((resolve) => {
+    let overlay = document.getElementById('customModalOverlay');
+    if (overlay) overlay.remove();
+    overlay = document.createElement('div');
+    overlay.id = 'customModalOverlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.innerHTML = `
+      <div style="background:white;border-radius:14px;padding:20px 24px;max-width:340px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,0.3);text-align:center;">
+        <p style="font-size:15px;color:#333;margin:0 0 18px 0;line-height:1.4;white-space:pre-wrap;">${message}</p>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button onclick="document.getElementById('customModalOverlay').remove();window._modalResolve&&window._modalResolve('primary');"
+                  style="width:100%;padding:12px;background:#066aab;color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">${primaryLabel || 'OK'}</button>
+          <button onclick="document.getElementById('customModalOverlay').remove();window._modalResolve&&window._modalResolve('secondary');"
+                  style="width:100%;padding:12px;background:#dc2626;color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">${secondaryLabel || 'Continue'}</button>
+          <button onclick="document.getElementById('customModalOverlay').remove();window._modalResolve&&window._modalResolve('tertiary');"
+                  style="width:100%;padding:12px;background:#e5e7eb;color:#374151;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">${tertiaryLabel || 'Cancel'}</button>
         </div>
       </div>`;
     window._modalResolve = resolve;
@@ -20779,12 +20806,26 @@ async function generateReport() {
         const _latestDate = new Date(_latestPhotoMs);
         const _photoDateStr = _latestDate.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
         const _certDateStr = new Date(_certifiedISO + 'T12:00:00').toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
-        const _proceed = await showConfirm(
-          `⚠️ Date integrity issue\n\nThe report/survey date is ${_certDateStr}, but one or more photos were captured as late as ${_photoDateStr}.\n\nAn underwriter may reject a report whose certification date precedes the photographic evidence.\n\nThe only fix is to update the survey date to match your most recent photos, or generate anyway and explain the discrepancy in the cover letter.\n\nGenerate anyway?`,
+        // v2381: Local YYYY-MM-DD for the latest photo (not UTC — avoids
+        // timezone off-by-one where a photo taken at 8pm EDT lands on the
+        // following calendar day in UTC).
+        const _pad = (n) => String(n).padStart(2, '0');
+        const _latestLocalISO = `${_latestDate.getFullYear()}-${_pad(_latestDate.getMonth()+1)}-${_pad(_latestDate.getDate())}`;
+        // v2381: Three-button modal — one-tap fix promotes the survey date
+        // to the latest photo's calendar date so the certification can't
+        // precede the photographic evidence.
+        const _choice = await showThreeOptionConfirm(
+          `⚠️ Date integrity issue\n\nThe report/survey date is ${_certDateStr}, but one or more photos were captured as late as ${_photoDateStr}.\n\nAn underwriter may reject a report whose certification date precedes the photographic evidence.`,
+          `Use ${_latestLocalISO} as survey date`,
           'Generate Anyway',
           'Go Back and Fix'
         );
-        if (!_proceed) return;
+        if (_choice === 'tertiary') return;
+        if (_choice === 'primary') {
+          survey.surveyDate = _latestLocalISO;
+          await saveSurvey(survey);
+        }
+        // 'secondary' → fall through and generate with existing dates
       }
     }
   }
