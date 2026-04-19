@@ -12,6 +12,33 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2402 — 2026-04-19
+### Added — Tooling (non-app change)
+- **`TASKS.md`** — human-readable mirror of the session task-tool backlog, grouped by priority (in-flight, stability, polish, recently shipped). Includes the root cause and fix plan for task #48 (Duplicate Photos warning not clearing) so the next session can resume without re-investigation.
+- **`SESSION_NOTES.md`** — "current thread" doc updated at the end of every push. Captures last shipped version, what's next, open questions. Replaces the "current work" slice of the conversation summary that gets lost at context-window boundaries.
+- **`WORKING_AGREEMENTS.md`** — codified rules of engagement: non-negotiable safeguards (triple-check QC before every push, one feature per version, atomic version bumps, Canadian English except "labeled", hand push command to Dave) plus speed practices that preserve those safeguards (narrow reads, grep-before-read, batched independent tool calls, subsystem extraction when warranted, no bloviating).
+
+### Why this exists
+- Conversations across sessions were slowing down as `app.js` grew past ~26 K lines and context-summary boundaries kept erasing mid-investigation state. Dave flagged it directly: speed up without sacrificing QC.
+- The friction wasn't in the safeguards (triple-check costs <30 s and catches real bugs) — it was in time wasted re-deriving state (which task is in flight, what was the root cause we found last time, what's the exact next edit planned). Persisting that state in the repo fixes the recurring cost. Safeguards stay exactly as before.
+- Writing down the working agreements also makes it possible to point at the same text when asked to bundle versions or skip a triple-check — no relitigating.
+
+### Scope
+- Zero app-code change. `app.js`, `sw.js`, `index.html` receive the standard atomic version bump (v2401 → v2402) only — `APP_VERSION` string, `CACHE_NAME` string, `app-version` meta tag, and all seven `?v=2402` cache-busters. The cache bump forces the three new docs to propagate via the service worker's normal update path so iPhone PWAs pick them up.
+- `sw.js` CRITICAL_URLS / OPTIONAL_URLS lists are unchanged (the three new `.md` files are not cached — they're reference docs for Claude / Dave, not runtime assets).
+- No runtime behaviour or DB schema changes. No migration, no risk surface.
+
+### Usage
+- Start of any future session: read `SESSION_NOTES.md` first. It'll point at the current thread and any paused investigation.
+- When backlog changes meaningfully (new task, completed task, sub-divided task): update `TASKS.md` as part of that push.
+- When the agreements need a revision (new rule, retired rule): bump the "Last revised" line in `WORKING_AGREEMENTS.md` and include the change in the version's CHANGELOG entry.
+
+### Related
+- Direct response to Dave's 2026-04-19 request: "keep this conversation at high speed without sacrificing any safeguards regarding putting in flabby code or taking shortcuts."
+- Unblocks the #48 investigation (Duplicate Photos warning not clearing) by persisting the fix plan where the next session can read it in one file.
+
+---
+
 ## v2401 — 2026-04-19
 ### Added
 - **Survey write journal — forensic trail of every save.** New `writeJournal` IndexedDB object store (schema v2 → v3, additive upgrade) captures a one-line audit record on every successful `saveSurvey()` call: epoch, ISO timestamp, surveyId, vesselName, caller (inferred from stack), beforeSize (JSON length of the pre-write record), afterSize, delta, itemCount, isNew, lastModified, ageDaysAtSave. Capped at 500 entries via ring-buffer pruning (oldest-first, indexed on `epoch`).
