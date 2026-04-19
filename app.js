@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2387';
+const APP_VERSION = 'v2389';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -24094,6 +24094,68 @@ const DriveBackup = (() => {
     return _accessToken;
   }
 
+  // ── v2388: Silent proactive token refresh ─────────────────────────────
+  // Google access tokens expire at ~60 min. Pre-v2388 the app bailed auto-
+  // sync at the 55-min safety margin and required a manual re-sign-in.
+  // v2388 keeps the session alive by refreshing at 50 min via the existing
+  // `prompt: 'none'` flow in ensureToken(). Desktop only — on iOS a "silent
+  // refresh" is actually a visible redirect, so firing it mid-survey would
+  // be worse than letting the 55-min expiry stand; iOS still uses the
+  // manual re-auth path via the banner button.
+  const _PROACTIVE_REFRESH_AT = 3000000;   // 50 min — refresh if token is this old
+  const _PROACTIVE_HEARTBEAT  = 300000;    // 5 min heartbeat cadence
+
+  // Serialize refresh attempts so the heartbeat + user actions don't race.
+  // IMPORTANT: this path MUST NOT escalate to a full consent popup — it is
+  // fired by a background timer and by auto-sync throttling. A surprise
+  // popup mid-survey would be worse than a quiet failure. We inline the
+  // `prompt: 'none'` Firebase refresh here and throw on any failure so the
+  // caller can fall back to the existing expiry-banner behaviour.
+  let _refreshInFlight = null;
+  async function _safeRefresh() {
+    if (_refreshInFlight) return _refreshInFlight;
+    _refreshInFlight = (async () => {
+      try {
+        if (_useRedirect) throw new Error('silent refresh not supported on iOS/redirect flow');
+        if (!firebase || !firebase.auth) throw new Error('Firebase Auth not loaded');
+        const user = firebase.auth().currentUser;
+        if (!user) throw new Error('no signed-in Firebase user for silent refresh');
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope(DRIVE_SCOPE);
+        provider.setCustomParameters({ prompt: 'none', login_hint: user.email || 'daveseagrim@gmail.com' });
+        const result = await firebase.auth().signInWithPopup(provider);
+        if (!result || !result.credential || !result.credential.accessToken) {
+          throw new Error('silent refresh returned no credential');
+        }
+        _accessToken = result.credential.accessToken;
+        window._driveTokenTime = Date.now();
+        _persistToken();
+      } finally {
+        _refreshInFlight = null;
+      }
+    })();
+    return _refreshInFlight;
+  }
+
+  async function _proactiveRefreshIfNeeded() {
+    if (_useRedirect) return;                                       // iOS — skip (redirect would disrupt)
+    if (!_accessToken) return;                                      // not signed in
+    if (typeof document !== 'undefined' && document.hidden) return; // app not focused
+    const age = Date.now() - (window._driveTokenTime || 0);
+    if (age < _PROACTIVE_REFRESH_AT) return;                        // still fresh
+    try {
+      console.log('[Drive] Proactive refresh — token age', Math.round(age / 60000), 'min');
+      await _safeRefresh();
+      if (_accessToken) console.log('[Drive] Proactive refresh succeeded.');
+    } catch (e) {
+      console.warn('[Drive] Proactive refresh failed:', e.message);
+    }
+  }
+
+  if (typeof setInterval !== 'undefined') {
+    setInterval(_proactiveRefreshIfNeeded, _PROACTIVE_HEARTBEAT);
+  }
+
   // Find or create the root backup folder on Drive
   async function getOrCreateBackupFolder() {
     if (_backupFolderId) return _backupFolderId;
@@ -24491,15 +24553,29 @@ const DriveBackup = (() => {
   async function autoSyncJSON(survey) {
     if (!isSignedIn()) return;
     if (!survey || !survey.id) return;
-    // v2253: If the token is expired, don't trigger a re-auth flow from
-    // auto-sync — that would cause a disruptive redirect on iOS. Just skip.
+    // v2388: If the token is past the 55-min safety margin, attempt a
+    // silent refresh on desktop (Firebase prompt:'none') so auto-sync
+    // keeps working across hour boundaries. On iOS the "silent refresh"
+    // path triggers a visible redirect, so we still bail there and let
+    // Dave re-auth via the banner when he's ready.
     if ((Date.now() - (window._driveTokenTime || 0)) >= 3300000) {
-      _clearPersistedToken();
-      _accessToken = null;
-      console.log('[Drive] Auto-sync skipped — token expired.');
-      // v2254: show the expiry warning banner
-      if (typeof _showDriveExpiryWarning === 'function') _showDriveExpiryWarning();
-      return;
+      if (_useRedirect) {
+        _clearPersistedToken();
+        _accessToken = null;
+        console.log('[Drive] Auto-sync skipped — token expired (iOS/redirect flow).');
+        if (typeof _showDriveExpiryWarning === 'function') _showDriveExpiryWarning();
+        return;
+      }
+      // Desktop — attempt silent refresh (single-flight)
+      try {
+        await _safeRefresh();
+        if (!_accessToken) throw new Error('refresh returned no token');
+        console.log('[Drive] Auto-sync refreshed token silently; continuing.');
+      } catch (e) {
+        console.log('[Drive] Auto-sync silent refresh failed:', e.message);
+        if (typeof _showDriveExpiryWarning === 'function') _showDriveExpiryWarning();
+        return;
+      }
     }
 
     const vesselName = survey.vesselName || 'Unnamed';

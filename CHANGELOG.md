@@ -12,6 +12,40 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2389 — 2026-04-18
+### Fixed
+- **Subject-verb agreement in the "Head, faucet, sink and drain — Not tested" snippet.** Dave caught: "There is a grammar error in head faucet sink and drain. One of the sentences uses 'was' when it should say 'were'." The observed-phase snippet read "The head, faucet, sink and drain **was** not tested because the vessel was on shore and winterized at the time of survey." Compound subject with four members ("head, faucet, sink and drain") takes a plural verb — changed to **were**.
+
+### Scope
+- Only the one snippet at `text_library.json` ~line 17494 changed. Parallel patterns in other sections (e.g. "The head, toilet and seacock was not tested…" at line 17480, "The sink, faucet and drain was not tested…" at line 7173) share the same grammatical structure and are likely the same error — flagged for Dave's decision rather than swept together, because he asked specifically about the head faucet/sink/drain line.
+
+---
+
+## v2388 — 2026-04-18
+### Added
+- **Drive token stays alive across the hour boundary on desktop.** Dave: "it would be great if the 55 min token did not expire or at least lasted longer." Google's OAuth access tokens are capped at ~60 minutes server-side, so the previous 55-min safety margin cannot be extended upward — but the app no longer *has* to hit the margin. Two changes make the 55-min expiry effectively invisible on desktop: a 5-minute heartbeat that proactively refreshes the token once it crosses 50 minutes of age, and a new fallback in `autoSyncJSON` that attempts a silent refresh instead of bailing when an auto-sync lands past the 55-min mark.
+
+### Why this exists
+- Auto-sync previously gave up the moment the token crossed the 55-min safety margin (`3300000` ms), cleared the cached token, showed an expiry banner, and required Dave to hit "Sign In" to get back to work. Long survey sessions reliably hit this — Dave would work for an hour, save something, and discover silently-skipped Drive writes. With the proactive heartbeat, a desktop session that stays open and focused will refresh around minute 50 before any user operation ever hits the 55-min wall. With the auto-sync fallback, even a session that wasn't focused at minute 50 (laptop lid closed, background tab) recovers automatically on the next save.
+
+### Design
+- `_proactiveRefreshIfNeeded()` (app.js, after `ensureToken` ~line 24097) — fired by a 5-minute `setInterval`. Skips when `_useRedirect` is true (iOS PWA — the "silent" refresh there is a visible redirect, so triggering it mid-survey would be worse than letting the existing expiry banner stand), when no access token is cached (not signed in), or when `document.hidden` is true (background tab — don't burn a refresh on a tab the user isn't looking at). Fires only once token age exceeds `_PROACTIVE_REFRESH_AT` (50 min / `3000000` ms), giving a 10-minute window before the 55-min hard cutoff.
+- `_safeRefresh()` (same block) — single-flight guard that does its own inline `prompt: 'none'` Firebase refresh rather than delegating to `ensureToken()`. This is deliberate: `ensureToken()` falls back to a full `signIn()` (which opens a consent popup) when the silent path fails, and a background heartbeat must never surprise Dave with an unsolicited consent popup mid-survey. `_safeRefresh()` throws instead so callers fall back to the existing expiry-banner behaviour. The browser popup window that `signInWithPopup` opens does briefly flash even in the `prompt: 'none'` case — it closes automatically on success — but that is acceptable background noise compared to the old "silently-dropped save, see you in an hour" behaviour.
+- `autoSyncJSON` (app.js ~line 24496) — on desktop, when token age >= 55 min, calls `_safeRefresh()` and retries instead of bailing. On iOS the pre-v2388 bail behaviour is preserved intentionally to avoid a disruptive redirect mid-survey. Failures in the desktop silent refresh fall back to the banner and bail, matching the old behaviour.
+
+### Where Drive backups actually live
+- Top-level folder `"Kiki Marine Survey Backups"` in My Drive (name defined at app.js:23949, scoped to `drive.file`). One subfolder per vessel named after `survey.vesselName` — so "Riverdance", "Ahoy Vey", "Grace O'Malley", "Ex Ta Sea". Inside each vessel folder: a `<vessel>_autosync.json` file plus one image per photo with a deterministic filename (`<label>_<slug>.jpg` / `.png`). Deterministic names let the B-01 resume logic skip photos already uploaded when a previous backup was interrupted.
+
+### Scope
+- Desktop only for the proactive refresh path. iOS continues to use the existing manual re-auth flow via the banner button — documented here so future-me remembers why the heartbeat has an iOS early-return.
+- Does not raise the 55-min safety margin in `ensureToken` itself (the margin is Google-side, not ours — raising it past ~60 min would mean uploading with an already-expired token and getting 401s). The refresh just happens earlier and silently.
+- Does not change the Firebase scope (`drive.file`), the consent parameters, or the redirect-vs-popup detection.
+
+### Known limitations
+- The `signInWithPopup` call inside `_safeRefresh` is subject to the browser's popup blocker. Chrome generally allows popups from same-origin Firebase Auth flows once the user has previously granted one (which Dave has), but a pop-up initiated from `setInterval` or a throttled auto-sync timer has no "user gesture" link, so it can be intercepted in some browser configurations. When that happens `_safeRefresh` throws, the caller falls back to the pre-v2388 expiry-banner behaviour, and Dave's experience is no worse than before. If this turns out to be common in the field, the follow-up is to switch the refresh path from Firebase Auth's popup flow to Google Identity Services' TokenClient with a hidden iframe (which does not require a popup).
+
+---
+
 ## v2387 — 2026-04-18
 ### Added
 - **Light grammatical polish on snippet chip taps.** Dave: "i want to implement the grammatical corrections to make proper sentences out of snippets." Scope confirmed via clarifying questions: live trigger on every chip tap, light dedupe only (no rewriting), preserve exact tap order. The polish drops sentences that are strict prefixes of another sentence already in the note (so tapping "Impact and resonance testing was carried out across the hull." then "Impact and resonance testing was carried out across the hull and rudder(s)." leaves only the longer, more-specific sentence), collapses exact case-insensitive duplicates while keeping the FIRST occurrence, and tidies double spaces / space-before-punctuation. No capitalization, no rewriting — hand-typed text is never reformatted and polish only fires on the chip-tap insertion paths.
