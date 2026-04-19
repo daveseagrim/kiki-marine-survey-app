@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2383';
+const APP_VERSION = 'v2384';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4414,6 +4414,7 @@ function showNotesSheet(itemLabel, categoryName) {
           <div id="sheet-text-${sanitizedLabel}-chipstrip" style="display:none;flex-wrap:wrap;gap:6px;margin-top:6px;padding:8px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;"></div>
         </div>
         ${snippetsHtml}
+        ${window.renderTimingChipsHtml(itemLabel, itemData) || ''}
         ${standardsHtml}
         <div class="sheet-btn-row">
           <button onclick="closeNotesSheet('${safeLabel}');" style="background:#e5e7eb;color:#374151;">Cancel</button>
@@ -4877,6 +4878,105 @@ function _kkAutoCheckSavedSentences(sanitizedLabel, survey, itemLabel) {
   _kkManualTextPrefix[sanitizedLabel] = workingText;
   _kkCheckOrderCounter = orderCounter;
 }
+
+// v2384: Timing chips for B and C rated items. Two mutually-exclusive
+// phrases the surveyor can append to the notes to qualify WHEN the
+// repair needs to happen. Tapping one replaces the other if present.
+// Works against whichever textarea is live — the bottom-sheet
+// sheet-text-* takes precedence; the inline text-* is the fallback.
+window.KK_TIMING_PHRASES = {
+  wait:   'This repair can wait until next season.',
+  launch: 'Must do before launch.'
+};
+window.insertTimingChip = function(itemLabel, kind, btnEl) {
+  const phrase = window.KK_TIMING_PHRASES[kind];
+  if (!phrase) return;
+  const sanitized = itemLabel.replace(/[^a-zA-Z0-9]/g, '_');
+  const sheetTa = document.getElementById('sheet-text-' + sanitized);
+  const inlineTa = document.getElementById('text-' + sanitized);
+  const textarea = sheetTa || inlineTa;
+  if (!textarea) return;
+
+  // Strip any existing timing phrase (both variants) before appending the
+  // chosen one. This makes the two chips mutually exclusive — tapping
+  // "wait" after "launch" replaces rather than compounds.
+  let body = textarea.value || '';
+  Object.values(window.KK_TIMING_PHRASES).forEach(p => {
+    const esc = p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    body = body.replace(new RegExp('\\s*' + esc + '\\s*', 'g'), ' ');
+  });
+  body = body.replace(/[ \t]+/g, ' ').trim();
+
+  // Append the chosen phrase, separating with a space if body has content.
+  textarea.value = body ? (body + ' ' + phrase) : phrase;
+  // Auto-resize to fit
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+
+  // Toggle active visual state across the pair of timing buttons for
+  // this item. btnEl is the button the user tapped; its sibling is the
+  // other timing chip.
+  const container = btnEl && btnEl.parentElement;
+  if (container) {
+    container.querySelectorAll('[data-timing-chip]').forEach(b => {
+      if (b.dataset.timingChip === kind) {
+        b.style.background = '#d1fae5';
+        b.style.borderLeft = '4px solid #16a34a';
+      } else {
+        b.style.background = '#fffbeb';
+        b.style.borderLeft = '';
+      }
+    });
+  }
+
+  // Trigger an input event so any chip-strip/tone-check listeners refresh.
+  try { textarea.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
+
+  // For the inline path there's no explicit Save button — persist the
+  // new textarea value to the survey directly. The bottom-sheet path
+  // persists on Save Notes (saveNotesFromSheet), matching how regular
+  // snippet taps behave in the sheet.
+  if (!sheetTa && inlineTa) {
+    getSurvey(currentSurveyId).then(survey => {
+      if (!survey) return;
+      if (!survey.items[itemLabel]) {
+        survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+      }
+      survey.items[itemLabel].text = textarea.value;
+      saveSurvey(survey);
+    }).catch(_ => {});
+  }
+};
+
+// v2384: Render the two timing chips for a B or C rated item. Returns an
+// empty string for any other rating so the caller can splat it into a
+// template literal unconditionally.
+window.renderTimingChipsHtml = function(itemLabel, itemData) {
+  const letter = (itemData && itemData.rating) ? itemData.rating.charAt(0) : '';
+  if (letter !== 'B' && letter !== 'C') return '';
+  const waitText = window.KK_TIMING_PHRASES.wait;
+  const launchText = window.KK_TIMING_PHRASES.launch;
+  const current = (itemData && itemData.text) || '';
+  const isWaitActive = current.includes(waitText);
+  const isLaunchActive = current.includes(launchText);
+  const safe = itemLabel.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const activeStyle = 'background:#d1fae5;border-left:4px solid #16a34a;';
+  const inactiveStyle = 'background:#fffbeb;';
+  const btnBase = 'display:block;width:100%;text-align:left;appearance:none;-webkit-appearance:none;border:none;border-bottom:1px solid #fde68a;padding:10px 20px;cursor:pointer;font:inherit;color:#92400e;font-size:13px;line-height:1.5;';
+  return `
+    <div class="sheet-section-title" style="color:#92400e;border-top:1px solid #fde68a;">
+      Timing (tap to add)
+    </div>
+    <button type="button" data-timing-chip="wait" onclick="insertTimingChip('${safe}', 'wait', this)"
+      style="${btnBase}${isWaitActive ? activeStyle : inactiveStyle}">
+      ⏳ ${waitText}
+    </button>
+    <button type="button" data-timing-chip="launch" onclick="insertTimingChip('${safe}', 'launch', this)"
+      style="${btnBase}${isLaunchActive ? activeStyle : inactiveStyle}">
+      ⚠️ ${launchText}
+    </button>
+  `;
+};
 
 // overlay's delegated click listener. Reads variants from the cache
 // stashed by showNotesSheet and dispatches to insertSnippetFromSheet.
@@ -19124,6 +19224,24 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options, su
         </div>
       `;
     }
+  }
+
+  // v2384: Timing chips — "wait until next season" / "must do before launch"
+  // for B and C rated items. Rendered below the snippet cards, above the
+  // notes textarea so the surveyor can tap-add a timing qualifier after
+  // composing the descriptive sentence(s).
+  const _timingChipsHtml = (typeof window.renderTimingChipsHtml === 'function')
+    ? window.renderTimingChipsHtml(itemLabel, itemData)
+    : '';
+  if (_timingChipsHtml) {
+    html += `
+      <div class="form-group">
+        <label class="form-label">Timing (tap to add)</label>
+        <div style="border:1px solid #fde68a;border-radius:8px;background:#fffbeb;overflow:hidden;">
+          ${_timingChipsHtml.replace(/<div class="sheet-section-title"[\s\S]*?<\/div>/, '')}
+        </div>
+      </div>
+    `;
   }
 
   // Text field

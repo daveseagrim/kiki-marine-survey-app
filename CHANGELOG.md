@@ -12,6 +12,28 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2384 — 2026-04-18
+### Added
+- **Timing chips on every B and C rated item.** Dave requested two quick-tap options to qualify when a recommended repair needs to happen: "This repair can wait until next season." and "Must do before launch." The chips render in an amber-tinted block — under the snippet cards in the bottom-sheet notes editor, and above the notes textarea in the inline item form. Only appear for B (Needs Attention) and C (Serviceable) ratings. Tapping appends the phrase to the notes; tapping the other chip swaps it (mutually exclusive). The emoji marker (⏳ wait / ⚠️ launch) makes the two options instantly distinguishable without reading.
+
+### Why two fixed phrases instead of free text
+- These sentences appear verbatim across Dave's reports dozens of times per survey. Hard-coding them as chips eliminates the typing tax and guarantees exact wording — so the grouping logic in Findings & Recommendations can one day key off them to sort "must do before launch" items above "can wait until next season" items automatically.
+
+### Design
+- `window.KK_TIMING_PHRASES` — single source of truth. Both the render and the strip-and-replace logic in `insertTimingChip` read from this object, so changing a phrase in one place updates everywhere (chips, strip regex, active-state detection).
+- `window.insertTimingChip(itemLabel, kind, btnEl)` — strips both phrases out of the current notes first, then appends the chosen one. Makes the two chips mutually exclusive and idempotent (double-tap of the same chip is a no-op). Dispatches an `input` event so tone-check and chip-strip listeners refresh. Saves immediately on the inline path (no explicit save button there); bottom-sheet path relies on Save Notes.
+- `window.renderTimingChipsHtml(itemLabel, itemData)` — returns the chip HTML, or empty string for non-B/C ratings. Active state (green highlight) is derived from `itemData.text.includes(phrase)` at render time.
+
+### Scope
+- New render call in the bottom-sheet overlay: between `${snippetsHtml}` and `${standardsHtml}` at ~line 4416.
+- New render call in the inline `renderItemFormHtml`: between the snippet card section and the Notes textarea, at ~line 19128. A regex strips the shared helper's `.sheet-section-title` header since the inline form uses its own `.form-label` styling.
+
+### Non-goals
+- Does not change the snippet library itself — these are interaction chips, not snippets. They don't appear in `findTextVariants` output.
+- Does not yet influence Findings & Recommendations ordering. Wiring these phrases into report grouping is a later ticket.
+
+---
+
 ## v2383 — 2026-04-18
 ### Fixed
 - **EMERGENCY — comparables still getting wiped despite v2377.** Dave reported this is the third+ time he's lost his comparables array. The v2377 guards (undefined-as-DOM-absent-sentinel, plus checks at the three known save sites) handle the "container not rendered" case but left a gap: any path where the container IS rendered but empty would still overwrite a non-empty saved value with `[]`. That happens whenever a debounced auto-save fires after Edit Intro has been torn down partially, or when a rendering race has the container present but not yet populated. Rather than keep hunting for the exact sequence (Dave is losing billable work each time), v2383 blocks the whole class of bug with two layers of defence.
