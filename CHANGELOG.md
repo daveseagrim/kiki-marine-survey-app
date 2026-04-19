@@ -12,6 +12,26 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2397 — 2026-04-19
+### Changed
+- **Report now ends within the last ~20% of the final printed 8.5×11 page instead of stranding the Surveyor's Certification near the top of a mostly-empty sheet.** Dave flagged that on several recent reports the signature block (SURVEYOR'S CERTIFICATION header + six certification bullets + logo + signature + contact line) rendered at the top of the final printed page with 4–6 inches of white space below it — unprofessional for a client deliverable and inconsistent with how formal marine-survey reports are traditionally laid out (signature anchored to the bottom). Now the cert block is forced onto its own dedicated last page and pushed to the bottom edge so the final printed line sits in the bottom ~20% zone of the sheet.
+
+### Design
+- Wrapped the existing Surveyor's Certification `.footer` block (app.js ~line 22955) in a new `<div class="report-end-page">` container. Print-only CSS rules added inside the existing `@media print` block (app.js ~line 21768) do three things in combination: (a) `page-break-before: always` + `break-before: page` force the wrapper onto a new printed page — guarantees the cert is never split across the page boundary and never shares a page with the preceding Valuation Worksheet / Comparables table; (b) `min-height: calc(100vh - 1mm)` claims the full printable page height so the flex layout has vertical room to distribute children; (c) `display: flex; flex-direction: column; justify-content: flex-end` with a belt-and-suspenders `margin-top: auto` on the child `.footer` pushes the entire cert block to the bottom of the page. Screen view is untouched — all rules are inside `@media print` so Dave's in-browser report preview still flows naturally for scrolling.
+- Kept both legacy (`page-break-before: always`) and modern (`break-before: page`) declarations for the same reason v2395 kept both: Chrome, Safari, and Firefox all honour the legacy spec, and the modern CSS Fragmentation Module spelling is the path forward. Including both is idempotent — browsers collapse them to a single break.
+- Chose forced page break over a "push to bottom only if room allows" heuristic. The heuristic variant (e.g. wrapper with `break-inside: avoid` but no forced break-before) would have left the cert on the preceding page when it happened to fit, with possibly several inches of trailing whitespace above the signature. Forcing a dedicated final page gives a predictable, professional result: one clean signature page regardless of how the preceding Valuation Worksheet / Comparables table filled out. In the edge case where the preceding content already ended near the top of a page, we trade a little extra whitespace on the penultimate page for a correctly-anchored signature on the last page — the correct trade-off for a client-facing document.
+
+### Scope
+- Print layout only. No change to the in-browser report view, the Word export path, the PDF export button, or any data-generation logic — the cert HTML itself is identical to v2396's, just nested inside one additional wrapper div.
+- Applies to every generated report regardless of length. A one-page report (rare but possible for a very short valuation-only survey) would still push the cert to the bottom of page two since the wrapper forces a break; a ten-page report behaves the same way on page ten. No length-dependent branching.
+- Complements v2395 (eliminated the blank page between Safety and F&amp;R) and v2374 (suppressed empty rows inside sections). Together these three changes cover the full vertical-whitespace audit of the generated report: no blank pages BETWEEN sections (v2395), no empty rows WITHIN sections (v2374), no orphaned trailing content on the final sheet (v2397).
+
+### Related
+- v2396 announced this in its `Related` note ("v2397 will tune end-of-report page balance so the final page fills most of its vertical space"). Delivered.
+- Part of the broader report-polish thread that also includes v2368 (Print/PDF button rationalization), v2370 (uniform photo sizing), and v2227 (cert block flush alignment + reviewer-flagged page numbering).
+
+---
+
 ## v2396 — 2026-04-19
 ### Changed
 - **Engine + transmission info in Detailed Survey Findings now renders as `.item` blocks instead of a 2-column `<table>`.** Dave flagged that the engine/transmission/gearbox section was visually different from every other block in the Detailed Survey Findings section — a boxed table with `Make / Model / Serial No. / Power Rating / Engine Hours / Fuel Type / Photos` rows, surrounded by `.item` divs for every actual checklist item. The inconsistency made the propulsion header look like a separate sub-report glued into the section. Now each engine and transmission renders as its own left-rail bordered `.item` card, matching the pattern used by the Instruments &amp; Electronics inventory and by every rated item in this section.

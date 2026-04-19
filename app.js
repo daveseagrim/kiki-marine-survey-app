@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2396';
+const APP_VERSION = 'v2397';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -21769,6 +21769,23 @@ async function generateReport() {
       .page-break { page-break-after: always; }
       body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       #exportToolbar { display: none !important; }
+      /* v2397: anchor the Surveyor's Certification to the bottom of its own
+         dedicated last page so the report ends within the last ~20% of the
+         final printed 8.5x11 sheet. Previously the cert block could render
+         at the top of a final page, leaving 4–6 inches of white space below
+         the signature. Forcing a page break before the .report-end-page
+         wrapper + flex-column + justify-flex-end pushes the whole cert to
+         the bottom edge. min-height claims the full page height so the
+         flex-end has space to work with. */
+      .report-end-page {
+        page-break-before: always;
+        break-before: page;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        min-height: calc(100vh - 1mm);
+      }
+      .report-end-page > .footer { margin-top: auto; }
     }
     /* v2225: report brand aligned to kikimarine.ca (primary #066aab) */
     body { font-family: Arial, Helvetica, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; color: #1f2937; line-height: 1.6; font-size: 11pt; }
@@ -22953,7 +22970,12 @@ ${(() => {
   })();
 
   // ── SURVEYOR'S CERTIFICATION ───────────────────────────────────────
+  // v2397: wrap in .report-end-page so print CSS (see @media print block
+  // above) forces this onto a dedicated final page with the cert anchored
+  // to the bottom — the report now ends within the last ~20% of the sheet
+  // instead of stranding the cert near the top of a mostly-empty page.
   html += `
+  <div class="report-end-page">
   <div class="footer">
     <h2>SURVEYOR'S CERTIFICATION</h2>
     <div class="scope-text">
@@ -22985,6 +23007,7 @@ ${(() => {
       <span style="font-size:8.5pt;color:#066aab;letter-spacing:0.5px;">KIKI MARINE &nbsp;&bull;&nbsp; (647) 289-7876 &nbsp;&bull;&nbsp; dave@kikimarine.ca &nbsp;&bull;&nbsp; kikimarine.ca</span>
       <div style="font-size:8pt;color:#6b7280;margin-top:4px;font-style:italic;">Based in Toronto serving marinas and boatyards from Niagara to Pickering, Muskokas, Simcoe and the Kawarthas.</div>
     </div>
+  </div>
   </div>
   `;
 
