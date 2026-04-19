@@ -12,6 +12,25 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2395 — 2026-04-19
+### Fixed
+- **Blank page no longer appears between Safety Equipment and Findings &amp; Recommendations.** Dave flagged a visibly empty page in the Marty Selnick report wedged between the TC TP 511 safety inventory and F&amp;R. Root cause: the Safety Equipment section ends with `<div class="page-break"></div>` (a zero-height div with `page-break-after: always;`), and the F&amp;R section was starting with ANOTHER identical `<div class="page-break"></div>`. Chrome and Safari interpret stacked empty page-break divs differently on different content lengths — when the preceding section almost exactly filled its printable page, the double break produced a truly blank sheet between sections. Same stacking problem existed between Instruments &amp; Electronics (if present) and F&amp;R.
+
+### Design
+- Removed the leading `<div class="page-break"></div>` from the F&amp;R section (app.js ~line 22525). The preceding Safety Equipment and Instruments &amp; Electronics sections each already emit their own trailing page-break, so the second one was always redundant.
+- Moved the "F&amp;R must start on a new page" guarantee onto the H2 itself via inline `page-break-before: always; break-before: page;`. This covers the edge case where BOTH preceding sections happen to be absent (extremely rare — every Canadian pleasure-craft survey populates Safety Equipment — but the guarantee is preserved). Modern browsers consolidate `page-break-before` against a preceding `page-break-after` into a single break, so the fix is idempotent: exactly one blank page boundary between the preceding content and F&amp;R, no more, no less.
+- Used both `page-break-before` (legacy spec, still honoured by Chrome/Safari/Firefox) and `break-before: page` (modern CSS Fragmentation Module). Either property alone would work in every browser Dave uses, but including both is cheap insurance against future deprecation.
+
+### Scope
+- Only affects the transition INTO Findings &amp; Recommendations. Other section transitions (Detailed Survey Findings → Safety Equipment, Safety Equipment → Instruments &amp; Electronics, F&amp;R → Rating &amp; Valuation, etc.) are unchanged — those were already emitting single breaks because each section trails with one page-break div and the next section has no leading page-break.
+- Does NOT remove the trailing page-break divs from Safety or Instruments. They're still correct — they ensure Safety flows onto its own page (after Detailed Survey Findings), and Instruments (if present) flows onto its own. Removing them would run Safety directly into F&amp;R in the case where Instruments is empty, which is worse than the original bug.
+- Pure cosmetic report-layout fix. No data model, no save path, no offline cache logic touched. Safe to ship under the atomic-install SW (v2392) that's already active.
+
+### Related
+- Complements v2374 (suppress empty rows/sections so no blank space within a section) — v2374 trims vertical whitespace INSIDE sections, v2395 trims blank pages BETWEEN sections. Same reader-experience goal: a polished, professional report with no filler.
+
+---
+
 ## v2394 — 2026-04-19
 ### Changed
 - **Findings &amp; Recommendations now shows the full observation text, and the recommendation reflects the surveyor's prescribed action when one exists.** Two related changes reported together because they interact: (1) Observation text in F&amp;R is no longer clipped to its first sentence + "…". Dave: "I don't think A or B recommendations should be abbreviated in the findings and recommendations. It is important the purchaser or insurance company can read all of this." The full multi-sentence observation is now rendered verbatim so the reader can read the complete description without cross-referencing Detailed Survey Findings. (2) If the last sentence of the observation is a recognised repair/inspect instruction, that sentence is pulled OUT of the observation and used AS the recommendation — with the standards citation appended and NO generic "Schedule repairs in the near future…" boilerplate. If no action sentence is detected, the observation stays intact and the recommendation uses the boilerplate + standards citation (same text the report already used). Dave: "I don't want that action sentence to appear twice. If I recommend an action, then there should be no boilerplate. Only my action plus the appropriate ABYC or TC standard stated. If I do not prescribe an action, then the boilerplate plus the ABYC TC info should be appended."

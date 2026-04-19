@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2394';
+const APP_VERSION = 'v2395';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -22522,8 +22522,17 @@ ${(() => {
   }
 
   // ── FINDINGS & RECOMMENDATIONS ────────────────────────────────────
-  html += `<div class="page-break"></div>`;
-  html += `<h2 style="background: #dc2626; font-size: 14pt;">FINDINGS &amp; RECOMMENDATIONS</h2>`;
+  // v2395: Removed the leading `<div class="page-break"></div>` because the
+  // preceding Safety Equipment and Instruments sections each already emit a
+  // trailing page-break div (lines ~22458 and ~22520). Stacking two empty
+  // page-break divs back-to-back produced a visibly blank page in the Marty
+  // Selnick report between Safety Equipment and F&R. Instead, the H2 now
+  // carries `page-break-before: always;` inline so F&R still starts on a new
+  // page when BOTH preceding sections happen to be absent (edge case — every
+  // Canadian survey should populate Safety Equipment, but the guarantee is
+  // preserved for safety). `break-before: page` added as the modern CSS
+  // equivalent for browsers that have deprecated `page-break-before`.
+  html += `<h2 style="background: #dc2626; font-size: 14pt; page-break-before: always; break-before: page;">FINDINGS &amp; RECOMMENDATIONS</h2>`;
 
   // v2252: explanatory text removed — rating definitions already appear
   // in the "Use of Ratings" section near the top of the report.
