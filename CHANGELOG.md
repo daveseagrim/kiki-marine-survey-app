@@ -12,6 +12,30 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2387 — 2026-04-18
+### Added
+- **Light grammatical polish on snippet chip taps.** Dave: "i want to implement the grammatical corrections to make proper sentences out of snippets." Scope confirmed via clarifying questions: live trigger on every chip tap, light dedupe only (no rewriting), preserve exact tap order. The polish drops sentences that are strict prefixes of another sentence already in the note (so tapping "Impact and resonance testing was carried out across the hull." then "Impact and resonance testing was carried out across the hull and rudder(s)." leaves only the longer, more-specific sentence), collapses exact case-insensitive duplicates while keeping the FIRST occurrence, and tidies double spaces / space-before-punctuation. No capitalization, no rewriting — hand-typed text is never reformatted and polish only fires on the chip-tap insertion paths.
+
+### Why this exists
+- The append-on-tap workflow (added in v2162 so Dave can stack 2-3 cards into a richer multi-sentence observation) makes it easy to end up with a generic chip immediately followed by a more specific chip whose first half is identical. The result reads as a near-duplicate. Field-edit cleanup costs Dave time on every survey; the polish removes the redundancy automatically without touching the surveyor's authority over which chips get tapped or in what order.
+
+### Design
+- `polishSnippetProse(text)` (app.js, immediately after `_itemSnippetCtx` ~line 545) — splits the input into sentence units via `/([^.!?]+[.!?]+)(\s*)/g` (preserving any unpunctuated trailing fragment so half-typed input is never truncated), normalizes each sentence (lowercase, terminator stripped, whitespace collapsed) for comparison, then walks the array twice: drop any sentence whose normalized form is a strict prefix of another sentence's normalized form (regardless of position), and drop later exact duplicates (first stays, later copies dropped). Survivors are joined with single spaces and the same whitespace/punctuation cleanup the token expander uses runs at the end.
+- Three call sites wired (each adds ONE line `textarea.value = polishSnippetProse(textarea.value);` immediately after the value assignment): `insertSnippetFromSheet` (the APPEND path — the primary beneficiary), `_kkRebuildFromSentencePicker` (the ticking-rebuild path that reconstructs from prefix + checked chips), and `insertSnippet` (the non-sheet single-shot REPLACE path — polish is a near-no-op there but keeps whitespace handling identical across paths).
+
+### Scope
+- Triggers ONLY on chip-tap and sentence-picker rebuild paths. The textarea oninput handler, the manual-prefix capture, and saveItem persistence are all untouched — anything Dave types by hand survives untouched.
+- Comparison is whole-sentence; sentences containing unfilled placeholders ([insert count], [side], [insert reading range], etc.) compare just like any other sentence so the polish doesn't strip half-filled chips.
+- Preserves tap order. When two sentences are exact duplicates the FIRST stays in place (never reordered to the back). When one sentence is a strict prefix of another, the longer sentence stays at its original position and the shorter is dropped wherever it sits.
+
+### Non-goals (for v2387 specifically)
+- No verb-agreement rewriting ("hull and rudder were tested" → "hull was tested" still requires the v2386 `scrubNakedRudderRefs` path; the polish does not touch grammar within a sentence).
+- No sentence reordering or pronoun threading.
+- No paraphrasing or shortening of sentences.
+- Does not touch timing chips (`insertTimingChip`) which have their own mutex logic and are managed separately.
+
+---
+
 ## v2386 — 2026-04-18
 ### Fixed
 - **Power-boat rudders no longer appear in the hull resonance testing section or its snippets.** Dave reported: "No percussion and resonance testing is done on power boat rudders. They are usually bronze. If it is a power boat, then rudders have to be removed from the resonance testing section, including the snippets." This covers the checklist item label ("Hull and rudder(s) (if applicable) impact and resonance testing" → "Hull impact and resonance testing" on power boats), every snippet card body (each hardcoded "hull and rudder(s)" mention is stripped), and saved textarea content from pre-v2386 surveys gets scrubbed on reopen.

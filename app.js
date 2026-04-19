@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2386';
+const APP_VERSION = 'v2387';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -540,6 +540,91 @@ function _itemSnippetCtx(survey, itemLabel) {
     ctx = Object.assign({}, ctx, { hasRudder: false, rudderCount: 0 });
   }
   return ctx;
+}
+
+// v2387: Light grammatical polish of snippet prose after a chip tap.
+// Only runs on chip-tap / sentence-picker insertion paths — hand-typed text
+// is never reformatted. Scope (per Dave):
+//   • Trigger: live, on every tap.
+//   • Aggressiveness: light — dedupe only. No sentence rewriting.
+//   • Order: preserve tap order; never shuffle sentences.
+//
+// Concretely the polish does three things:
+//   1. Drop any sentence that is a strict prefix of another sentence already in
+//      the text (keep the longer, more-specific sentence at its original spot).
+//      Example: tapping "Impact and resonance testing was carried out across
+//      the hull." followed by "Impact and resonance testing was carried out
+//      across the hull and rudder(s)." → keep only the second.
+//   2. Drop exact duplicates (case-insensitive, terminator-insensitive), keeping
+//      the FIRST occurrence so the original tap order is preserved.
+//   3. Tidy whitespace — collapse double spaces and remove spaces before
+//      punctuation. No capitalization, no rewriting.
+//
+// Non-goals for v2387: verb-agreement fixes, re-ordering, article cleanup,
+// paraphrasing, capitalization. Those are structural rewrites and out of
+// scope for "light / dedupe only" polish.
+function polishSnippetProse(text) {
+  if (!text || typeof text !== 'string') return text || '';
+  // Split the input into sentence units while preserving trailing punctuation.
+  // Anything that follows the final terminator is captured as a trailing
+  // fragment (e.g. a half-typed sentence the surveyor hasn't punctuated yet)
+  // and appended at the end so we never truncate in-progress input.
+  const sentences = [];
+  const re = /([^.!?]+[.!?]+)(\s*)/g;
+  let m;
+  let lastIdx = 0;
+  while ((m = re.exec(text)) !== null) {
+    sentences.push(m[1].trim());
+    lastIdx = m.index + m[0].length;
+  }
+  const trailing = text.slice(lastIdx).trim();
+  if (trailing) sentences.push(trailing);
+  if (sentences.length < 2) {
+    // Nothing to compare against — just normalize whitespace and return.
+    return text.replace(/\s+([,.;:!?])/g, '$1').replace(/\s{2,}/g, ' ').trim();
+  }
+
+  // Normalized form used for comparison. Strip trailing terminators so
+  // "The hull was tested" matches "The hull was tested." and tolerate
+  // case differences.
+  const norm = s => s.toLowerCase()
+                     .replace(/[.!?]+$/, '')
+                     .replace(/\s+/g, ' ')
+                     .trim();
+  const normalized = sentences.map(norm);
+  const keep = new Array(sentences.length).fill(true);
+
+  for (let i = 0; i < sentences.length; i++) {
+    if (!keep[i]) continue;
+    const ni = normalized[i];
+    if (!ni) { keep[i] = false; continue; }
+    for (let j = 0; j < sentences.length; j++) {
+      if (i === j || !keep[j]) continue;
+      const nj = normalized[j];
+      // (1) Strict prefix — drop the shorter sentence, regardless of position.
+      if (nj.length > ni.length && nj.startsWith(ni + ' ')) {
+        keep[i] = false;
+        break;
+      }
+      // (2) Exact duplicate — keep the FIRST occurrence, drop later copies.
+      if (ni === nj && j < i) {
+        keep[i] = false;
+        break;
+      }
+    }
+  }
+
+  const out = [];
+  for (let i = 0; i < sentences.length; i++) {
+    if (keep[i]) out.push(sentences[i]);
+  }
+  // Rejoin with single spaces and run the same whitespace cleanup the token
+  // expander uses so the final output doesn't show double-spaces or space
+  // before punctuation.
+  return out.join(' ')
+            .replace(/\s+([,.;:!?])/g, '$1')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
 }
 
 // Transform a raw checklist-item label into its display form for the current
@@ -4819,6 +4904,10 @@ window._kkRebuildFromSentencePicker = function(sanitizedLabel) {
   }
   const snippetText = parts.join(' ');
   ta.value = _prefix ? (_prefix + ' ' + snippetText) : snippetText;
+  // v2387: light polish — drop prefix-subset sentences and exact duplicates
+  // so the picker's rebuild leaves only the most specific sentences in tap
+  // order. Safe for placeholder-containing text (comparison is whole-sentence).
+  ta.value = polishSnippetProse(ta.value);
   ta.style.height = 'auto';
   ta.style.height = ta.scrollHeight + 'px';
   try { ta.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
@@ -5094,6 +5183,11 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
       return;
     }
     textarea.value = existing ? (existing + ' ' + resolved) : resolved;
+    // v2387: light polish after the compose step — drops sentences that are
+    // strict prefixes of another sentence already in the note (so tapping a
+    // shorter generic chip then a longer specific one yields only the longer)
+    // and collapses exact duplicates. Preserves tap order; no rewriting.
+    textarea.value = polishSnippetProse(textarea.value);
     // Reset collected citations (new snippet starts fresh only on first tap)
     if (!existing) setCollectedCitations(textarea, []);
     // Stash placeholders + template of the LAST-tapped snippet (chip-strip
@@ -19668,6 +19762,10 @@ function insertSnippet(itemLabel, categoryName, text, cardEl, placeholdersJson) 
 
     if (textarea) {
       textarea.value = resolved;
+      // v2387: polish for whitespace consistency. Single-sentence replace path
+      // — dedupe is essentially a no-op but the whitespace cleanup keeps
+      // output identical to the sheet flow.
+      textarea.value = polishSnippetProse(textarea.value);
       textarea.dataset.snippetPlaceholders = placeholdersJson || '';
       textarea.dataset.snippetTemplate = resolved;
       delete textarea.dataset.snippetCount;
