@@ -12,6 +12,18 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2379 — 2026-04-18
+### Changed
+- **Report: Purpose and Scope preamble rewritten to SAMS-style language.** Dave's call — the original preamble ("This surveyor attended aboard the vessel to determine its physical condition and market value…") had three legal exposures the new language closes:
+  - "Physical condition" → **"apparent physical condition"**. SAMS-standard hedge — the surveyor's opinion is on what was apparent, not on the true underlying state. Mirrors Norm Behring / Cali Quigley reference reports.
+  - "In accordance with ABYC standards…" → **"Reference was made, where applicable, to… relevant ABYC standards, and applicable Transport Canada requirements as inspection guidelines."** The new phrasing makes clear the standards informed the inspection; it does not certify the vessel's compliance with them. Critical distinction in any ABYC-non-compliance dispute.
+  - "Surveyor's unbiased opinion as of the inspection date" → **"surveyor's opinion only as to the visible and accessible condition of the vessel on the date of inspection."** Explicitly scopes the opinion to visible/accessible condition. "Unbiased" removed — the word invites the question rather than closing it, and SAMS-style reports don't rely on it.
+- Also added: **"visually inspected on a non-destructive basis"** (defines methodology upfront), and **"superstructure"** and **"spars and rigging (if applicable)"** in the scope list so the preamble covers both sail and power vessels. The original only listed "rigging" which skewed sail; the new scope is neutral.
+- Preserved verbatim: the second paragraph (bold disclaimer) about pre-standard boats. That paragraph is load-bearing — it protects the surveyor when a later party cites ABYC non-compliance against a vessel built before the code existed. Not touched.
+- Code scope: single replacement in `generateReport()` around line 21264 in `app.js`. No data model change. Service worker cache bumped so the report body refreshes on Dave's devices next launch.
+
+---
+
 ## v2378 — 2026-04-18
 ### Added
 - **Auto-delete pixel-identical photos within the same survey section.** Dave's request: when the same photo ends up attached to a single item twice (rapid double-tap on the shutter, picking the same file from the library twice, re-running a batch import), the app should silently drop the duplicate instead of requiring him to find and delete it in Check Survey. This is now automatic.

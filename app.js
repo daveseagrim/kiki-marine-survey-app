@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2378';
+const APP_VERSION = 'v2379';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -21264,10 +21264,17 @@ async function generateReport() {
   <!-- ═══ PURPOSE AND SCOPE ═══ -->
   <!-- v2250: trimmed to a concise statement of intent. Detailed methods,
        limitations, and disclaimers now live exclusively in
-       Methodology and Limitations (previously duplicated here). -->
+       Methodology and Limitations (previously duplicated here).
+       v2379: Preamble rewritten to SAMS-style language — "apparent
+       physical condition," "accessible" systems, "visually inspected
+       on a non-destructive basis," standards cited "as inspection
+       guidelines," and the opinion scoped to "visible and accessible
+       condition." Scope list now includes "spars and rigging (if
+       applicable)" so sail and power vessels are both covered. The
+       pre-standard caveat paragraph is preserved verbatim. -->
   <h2>PURPOSE AND SCOPE</h2>
   <div class="scope-text">
-    <p>This surveyor attended aboard the vessel to determine its physical condition and market value. The hull, deck, rigging, mechanical and electrical systems, and safety equipment were evaluated in accordance with ABYC standards and applicable Transport Canada regulations. This report reflects the surveyor's unbiased opinion as of the inspection date and is intended solely for the client and any associated lenders or underwriters. It is not assignable.</p>
+    <p>This survey was conducted to determine the apparent physical condition and fair market value of the vessel as observed on the date of inspection. The accessible hull, deck, superstructure, spars and rigging (if applicable), propulsion, mechanical, electrical, and safety-related systems were visually inspected on a non-destructive basis. Reference was made, where applicable, to generally accepted marine-survey practice, relevant ABYC standards, and applicable Transport Canada requirements as inspection guidelines. This report reflects the surveyor's opinion only as to the visible and accessible condition of the vessel on the date of inspection and is intended solely for the client and associated lenders or underwriters. It is not assignable.</p>
 
     <div class="bold-disclaimer">It should be noted that although the vessel's structure and components were evaluated against ABYC and Transport Canada standards, many boats were built before these codes were established or enforced and therefore may not be subject to them. Furthermore, when a boat or its components predate current standards, those standards may only become applicable if the boat or its systems are modified. It is not within the scope of this surveyor's responsibilities to determine the relevance or enforceability of these standards.</div>
   </div>
