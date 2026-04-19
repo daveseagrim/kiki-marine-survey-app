@@ -12,6 +12,19 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2378 — 2026-04-18
+### Added
+- **Auto-delete pixel-identical photos within the same survey section.** Dave's request: when the same photo ends up attached to a single item twice (rapid double-tap on the shutter, picking the same file from the library twice, re-running a batch import), the app should silently drop the duplicate instead of requiring him to find and delete it in Check Survey. This is now automatic.
+- **Scope is intentionally narrow.** Dedup runs only within the same location on the survey — one item's `photos` array, one safety-equipment slot's `photos` array, one instrument/electronics slot's `photos` array. A photo legitimately attached to two different items (for example the same bilge pump photo on both "Bilge pump" and "Automatic bilge pump switch") is preserved. Cross-section duplicates continue to be surfaced by the Duplicate Photos warning in Check Survey (v2371) for the surveyor to resolve manually.
+- **How duplicates are detected.** SHA-256 over each photo's `dataUrl`. Photos are identified as duplicates only when their bytes are byte-for-byte identical — no perceptual matching, zero false positives. Photos re-encoded between captures (even of the same subject) will have different hashes and will not be deduped.
+- **When it runs.**
+  - At the capture site, right after the new photo ID is pushed into the scope's `photos` array. The older photo wins — the newly-pushed duplicate is dropped and its IndexedDB photo record is deleted. Hooks are in place at every push site: `attachPhotosToItem` (multi-import), `movePhoto` (cross-item move), the single-photo capture flow, the area-photo (media) capture flow, the confirm-photo-preview path, the safety-equipment capture (both overlay and fallback paths), the instrument/electronics capture, and the batch camera commit (for both items and safety items).
+  - One-time startup migration (`_v2378_photo_dedup_migrated` localStorage key) that walks every existing survey and dedupes all three photo scopes in place. Removed duplicates are deleted from IndexedDB; the survey is saved once if anything changed. Failures are logged and the sweep continues.
+- **New helpers in `app.js`:** `dedupePhotosWithinArray(photoIds)` returns `{ kept, removed }` for a single photo-ID array (hashes each photo's dataUrl, keeps the first occurrence of each hash, deletes the duplicate photo records). `dedupeSurveyPhotosInPlace(survey)` walks a survey's items, safetyEquipment, and instrumentsElectronics, deduping each scope and returning the total removed count.
+- **Tolerant of failure.** Every dedup call is wrapped in `try/catch`. If the Web Crypto API is unavailable, if a photo can't be loaded, or if a delete fails, the original array is kept — the app prefers to ship a duplicate rather than lose a photo. Per-scope and per-survey failures don't abort the broader walk.
+
+---
+
 ## v2377 — 2026-04-18
 ### Fixed
 - **EMERGENCY: destructive no-op save pattern wiping comparables and hull/boot-stripe/deck colours.** The root cause of the recurring data-loss incidents Dave experienced (4 comparables wiped earlier today, hull/boot-stripe/deck colours wiped again minutes later while he was trying to send a report): every save path that collected form data from the DOM returned a zero-value (`[]` for comparables, `''` for colours) whenever the collector ran on a view where the form fields weren't mounted. The guards `(arr.length > 0 || survey.arr.length > 0)` in `saveAllInspectionData()` and unconditional assignments in `saveEditFormSilently()` / `saveSurveyDetails()` then wrote that empty value over the saved data, silently wiping it. This could fire whenever the surveyor tapped ANY Save button from a view other than Edit Intro — the inspection page, Check Survey page, etc.

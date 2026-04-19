@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2377';
+const APP_VERSION = 'v2378';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -5251,6 +5251,11 @@ async function attachPhotosToItem(itemLabel, fileList) {
           survey.items[itemLabel].photos = [];
         }
         survey.items[itemLabel].photos.push(photoId);
+        // v2378: drop pixel-identical duplicates within this item's photos
+        try {
+          const _dd = await dedupePhotosWithinArray(survey.items[itemLabel].photos);
+          survey.items[itemLabel].photos = _dd.kept;
+        } catch (_) {}
         await saveSurvey(survey);
         saved++;
       } catch (err) {
@@ -5759,6 +5764,11 @@ async function executeMovePhoto(photoId, sourceItemLabel, sourceCategoryName, ta
     survey.items[target.label].photos = [];
   }
   survey.items[target.label].photos.push(photoId);
+  // v2378: drop pixel-identical duplicates within target item's photos
+  try {
+    const _dd = await dedupePhotosWithinArray(survey.items[target.label].photos);
+    survey.items[target.label].photos = _dd.kept;
+  } catch (_) {}
 
   // Update the photo record's itemLabel in IndexedDB
   const photo = await getPhotoById(photoId);
@@ -10974,6 +10984,135 @@ function _stripLegacySafetyFromDescription(text) {
   return out;
 }
 
+// v2378: Auto-delete pixel-identical photos within the same survey section.
+// Hashes each photo's dataUrl with SHA-256, groups by hash within one scope
+// (a single item's photos array, a single safety-equipment slot's photos
+// array, a single instrument/electronics slot's photos array), keeps the
+// first occurrence of each hash, and deletes the duplicate photo records
+// from IndexedDB. Returns the number of duplicates removed so callers can
+// show a toast.
+//
+// Scope is intentionally narrow: we only dedupe within the same location on
+// the survey. A photo legitimately attached to both "Bilge pump" and
+// "Automatic bilge pump switch" is preserved — Dave asked for
+// "same photo in the same section" dedup, not global dedup. The preflight
+// Duplicate Photos warning still surfaces cross-section duplicates for the
+// surveyor to resolve manually.
+//
+// Idempotent — safe to re-run on a survey that's already been deduped.
+async function dedupePhotosWithinArray(photoIds) {
+  if (!Array.isArray(photoIds) || photoIds.length < 2) {
+    return { kept: photoIds || [], removed: [] };
+  }
+  if (typeof crypto === 'undefined' || !crypto.subtle || !crypto.subtle.digest) {
+    return { kept: photoIds, removed: [] };
+  }
+  const enc = new TextEncoder();
+  const seenHashes = new Set();
+  const kept = [];
+  const removed = [];
+  // Track photo IDs we've already kept (in case the same ID appears twice)
+  const seenIds = new Set();
+  for (const pid of photoIds) {
+    if (pid == null) continue;
+    if (seenIds.has(pid)) {
+      // Same ID duplicated in array — strip the extra reference but don't
+      // delete the underlying record (it's still referenced once).
+      removed.push(pid);
+      continue;
+    }
+    seenIds.add(pid);
+    let photo = null;
+    try {
+      photo = await getPhotoById(pid);
+    } catch (_) {
+      // If we can't load the photo, keep the reference rather than lose data
+      kept.push(pid);
+      continue;
+    }
+    if (!photo || !photo.dataUrl) {
+      // No dataUrl means we can't hash — keep it.
+      kept.push(pid);
+      continue;
+    }
+    let hex;
+    try {
+      const buf = await crypto.subtle.digest('SHA-256', enc.encode(photo.dataUrl));
+      hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (_) {
+      kept.push(pid);
+      continue;
+    }
+    if (seenHashes.has(hex)) {
+      // Pixel-identical duplicate — delete the photo record and drop the id.
+      try { await deletePhoto(pid); } catch (_) {}
+      removed.push(pid);
+    } else {
+      seenHashes.add(hex);
+      kept.push(pid);
+    }
+  }
+  return { kept, removed };
+}
+
+// v2378: Walk every photo-bearing scope on a survey and dedupe each in turn.
+// Returns the total count of duplicates removed so callers can decide
+// whether to notify the user. Never throws — per-scope failures are logged
+// and the walk continues.
+async function dedupeSurveyPhotosInPlace(survey) {
+  if (!survey) return 0;
+  let totalRemoved = 0;
+  // 1. Checklist items (survey.items[label].photos)
+  if (survey.items && typeof survey.items === 'object') {
+    for (const label of Object.keys(survey.items)) {
+      const item = survey.items[label];
+      if (!item || !Array.isArray(item.photos) || item.photos.length < 2) continue;
+      try {
+        const { kept, removed } = await dedupePhotosWithinArray(item.photos);
+        if (removed.length > 0) {
+          item.photos = kept;
+          totalRemoved += removed.length;
+        }
+      } catch (e) {
+        console.warn('v2378 dedupe failed for item', label, e);
+      }
+    }
+  }
+  // 2. Safety equipment (survey.safetyEquipment[idx].photos)
+  if (Array.isArray(survey.safetyEquipment)) {
+    for (let i = 0; i < survey.safetyEquipment.length; i++) {
+      const eq = survey.safetyEquipment[i];
+      if (!eq || !Array.isArray(eq.photos) || eq.photos.length < 2) continue;
+      try {
+        const { kept, removed } = await dedupePhotosWithinArray(eq.photos);
+        if (removed.length > 0) {
+          eq.photos = kept;
+          totalRemoved += removed.length;
+        }
+      } catch (e) {
+        console.warn('v2378 dedupe failed for safety item', i, e);
+      }
+    }
+  }
+  // 3. Instruments/electronics (survey.instrumentsElectronics[idx].photos)
+  if (Array.isArray(survey.instrumentsElectronics)) {
+    for (let i = 0; i < survey.instrumentsElectronics.length; i++) {
+      const ie = survey.instrumentsElectronics[i];
+      if (!ie || !Array.isArray(ie.photos) || ie.photos.length < 2) continue;
+      try {
+        const { kept, removed } = await dedupePhotosWithinArray(ie.photos);
+        if (removed.length > 0) {
+          ie.photos = kept;
+          totalRemoved += removed.length;
+        }
+      } catch (e) {
+        console.warn('v2378 dedupe failed for instrument', i, e);
+      }
+    }
+  }
+  return totalRemoved;
+}
+
 // v2252: Shared condition-sentence builder used by all three vessel-
 // description generators. Reads the surveyor's BUC grade first; falls
 // back to a rating-distribution heuristic when no grade is set.
@@ -16076,6 +16215,11 @@ async function attachPhotosToSafetyItem(idx, fileList) {
           survey.safetyEquipment[idx].photos = [];
         }
         survey.safetyEquipment[idx].photos.push(photoId);
+        // v2378: drop pixel-identical duplicates within this safety item's photos
+        try {
+          const _dd = await dedupePhotosWithinArray(survey.safetyEquipment[idx].photos);
+          survey.safetyEquipment[idx].photos = _dd.kept;
+        } catch (_) {}
         await saveSurvey(survey);
         saved++;
       } catch (err) {
@@ -16356,6 +16500,11 @@ async function captureInstrumentPhoto(idx) {
         console.error('Instrument photo save failed', err);
       }
     }
+    // v2378: drop pixel-identical duplicates within this instrument's photos
+    try {
+      const _dd = await dedupePhotosWithinArray(survey.instrumentsElectronics[idx].photos);
+      survey.instrumentsElectronics[idx].photos = _dd.kept;
+    } catch (_) {}
     await saveSurvey(survey);
     showToast(`${saved} photo${saved !== 1 ? 's' : ''} saved`);
     loadInstrumentThumbnails(idx, survey.instrumentsElectronics[idx].photos);
@@ -16893,6 +17042,11 @@ async function capturePhoto(itemLabel, event) {
           survey.items[itemLabel].photos = [];
         }
         survey.items[itemLabel].photos.push(photoId);
+        // v2378: drop pixel-identical duplicates within this item's photos
+        try {
+          const _dd = await dedupePhotosWithinArray(survey.items[itemLabel].photos);
+          survey.items[itemLabel].photos = _dd.kept;
+        } catch (_) {}
         await saveSurvey(survey);
         resolve();
       };
@@ -16952,6 +17106,11 @@ async function handleAreaPhotoCapture(mediaLabel, inputEl) {
           survey.items[mediaLabel].photos = [];
         }
         survey.items[mediaLabel].photos.push(photoId);
+        // v2378: drop pixel-identical duplicates within this area photo group
+        try {
+          const _dd = await dedupePhotosWithinArray(survey.items[mediaLabel].photos);
+          survey.items[mediaLabel].photos = _dd.kept;
+        } catch (_) {}
         await saveSurvey(survey);
         resolve();
       };
@@ -18208,6 +18367,11 @@ async function confirmPhotoPreview(fieldKey, label) {
       survey.items[itemLabel].photos = [];
     }
     survey.items[itemLabel].photos.push(photoId);
+    // v2378: drop pixel-identical duplicates within this item's photos
+    try {
+      const _dd = await dedupePhotosWithinArray(survey.items[itemLabel].photos);
+      survey.items[itemLabel].photos = _dd.kept;
+    } catch (_) {}
     await saveSurvey(survey);
 
     // Update just this item in place (no full re-render)
@@ -22696,6 +22860,39 @@ async function initApp() {
       console.warn('v2375 migration error (non-fatal):', migErr3);
     }
 
+    // ── v2378 one-time migration: sweep every existing survey and auto-
+    // delete pixel-identical photos within the same scope (item, safety
+    // equipment slot, instrument/electronics slot). Fresh captures are
+    // deduped at the push site — this cleans up duplicates that were
+    // already attached before v2378 shipped.
+    //
+    // Runs once per device. Protected by a localStorage key. Failures are
+    // logged but never block startup.
+    try {
+      const _migKey4 = '_v2378_photo_dedup_migrated';
+      if (!localStorage.getItem(_migKey4)) {
+        const _allSurveys4 = await getAllSurveys();
+        let _totalDups = 0;
+        let _touchedSurveys = 0;
+        for (const s of _allSurveys4) {
+          try {
+            const removed = await dedupeSurveyPhotosInPlace(s);
+            if (removed > 0) {
+              _totalDups += removed;
+              _touchedSurveys++;
+              await saveSurvey(s);
+            }
+          } catch (perSurveyErr) {
+            console.warn('v2378 dedupe failed for survey', s && s.id, perSurveyErr);
+          }
+        }
+        localStorage.setItem(_migKey4, '1');
+        console.log('v2378 migration: removed', _totalDups, 'duplicate photo(s) across', _touchedSurveys, 'survey(s)');
+      }
+    } catch (migErr4) {
+      console.warn('v2378 migration error (non-fatal):', migErr4);
+    }
+
     // Kick off dictionary load in the background — no await, so startup
     // isn't blocked by the 1.5MB file. Spell-check warnings will begin
     // firing as soon as it finishes loading.
@@ -24703,6 +24900,11 @@ function _batchCameraFallback(itemLabel, opts) {
             if (survey && survey.safetyEquipment && survey.safetyEquipment[idx]) {
               if (!Array.isArray(survey.safetyEquipment[idx].photos)) survey.safetyEquipment[idx].photos = [];
               survey.safetyEquipment[idx].photos.push(photoId);
+              // v2378: drop pixel-identical duplicates within this safety item
+              try {
+                const _dd = await dedupePhotosWithinArray(survey.safetyEquipment[idx].photos);
+                survey.safetyEquipment[idx].photos = _dd.kept;
+              } catch (_) {}
               await saveSurvey(survey);
             }
             resolve();
@@ -24930,6 +25132,17 @@ async function commitStagedPhotos() {
       console.error('Failed to commit staged photo', i, err);
     }
   }
+
+  // v2378: drop pixel-identical duplicates within the touched scope
+  try {
+    if (isSafety) {
+      const _dd = await dedupePhotosWithinArray(survey.safetyEquipment[bc.safetyIdx].photos);
+      survey.safetyEquipment[bc.safetyIdx].photos = _dd.kept;
+    } else {
+      const _dd = await dedupePhotosWithinArray(survey.items[bc.itemLabel].photos);
+      survey.items[bc.itemLabel].photos = _dd.kept;
+    }
+  } catch (_) {}
 
   await saveSurvey(survey);
 
