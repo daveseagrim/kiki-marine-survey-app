@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2402';
+const APP_VERSION = 'v2403';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -17420,41 +17420,53 @@ function rapidCaptureInstruments() {
       }
 
       const file = files[0];
+      // v2403: FileReader hang hardening — failure here must still continue
+      // the rapid-capture flow (reopen camera) so the surveyor isn't stranded.
       const reader = new FileReader();
       reader.onload = async (re) => {
-        const stampedDataUrl = await addDateStampToPhoto(re.target.result, 2048);
-        const survey = await getSurvey(currentSurveyId);
-        if (!survey) return;
-        if (!survey.instrumentsElectronics) survey.instrumentsElectronics = [];
+        try {
+          const stampedDataUrl = await addDateStampToPhoto(re.target.result, 2048);
+          const survey = await getSurvey(currentSurveyId);
+          if (!survey) return;
+          if (!survey.instrumentsElectronics) survey.instrumentsElectronics = [];
 
-        const idx = survey.instrumentsElectronics.length;
-        const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-        const photo = {
-          id: photoId,
-          surveyId: currentSurveyId,
-          itemLabel: `instrument_${idx}`,
-          dataUrl: stampedDataUrl,
-          annotated: false,
-          createdAt: new Date().toISOString()
-        };
-        await savePhoto(photo);
+          const idx = survey.instrumentsElectronics.length;
+          const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+          const photo = {
+            id: photoId,
+            surveyId: currentSurveyId,
+            itemLabel: `instrument_${idx}`,
+            dataUrl: stampedDataUrl,
+            annotated: false,
+            createdAt: new Date().toISOString()
+          };
+          await savePhoto(photo);
 
-        survey.instrumentsElectronics.push({
-          name: '',
-          make: '',
-          model: '',
-          year: '',
-          working: null,
-          notes: '',
-          photos: [photoId],
-          aiIdentified: false,
-          aiDetails: ''
-        });
-        await saveSurvey(survey);
-        count++;
-        showToast(`Photo ${count} saved — take next or cancel to finish`);
-
-        // Immediately reopen camera for next shot
+          survey.instrumentsElectronics.push({
+            name: '',
+            make: '',
+            model: '',
+            year: '',
+            working: null,
+            notes: '',
+            photos: [photoId],
+            aiIdentified: false,
+            aiDetails: ''
+          });
+          await saveSurvey(survey);
+          count++;
+          showToast(`Photo ${count} saved — take next or cancel to finish`);
+        } catch (err) {
+          console.error('rapidCaptureInstruments: failed to process photo', err);
+          showToast('⚠️ One instrument photo failed — continuing');
+        } finally {
+          // Always reopen camera for next shot, even on failure
+          setTimeout(() => takeNext(), 300);
+        }
+      };
+      reader.onerror = () => {
+        console.error('rapidCaptureInstruments: FileReader error', reader.error);
+        showToast('⚠️ Could not read photo — continuing');
         setTimeout(() => takeNext(), 300);
       };
       reader.readAsDataURL(file);
@@ -17484,34 +17496,46 @@ async function addInstrumentByPhoto() {
     if (!survey) return;
     if (!survey.instrumentsElectronics) survey.instrumentsElectronics = [];
 
+    // v2403: FileReader hang hardening — see capturePhoto for rationale.
     for (const file of files) {
       await new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = async (re) => {
-          const stampedDataUrl = await addDateStampToPhoto(re.target.result, 2048);
-          const idx = survey.instrumentsElectronics.length;
-          const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-          const photo = {
-            id: photoId,
-            surveyId: currentSurveyId,
-            itemLabel: `instrument_${idx}`,
-            dataUrl: stampedDataUrl,
-            annotated: false,
-            createdAt: new Date().toISOString()
-          };
-          await savePhoto(photo);
+          try {
+            const stampedDataUrl = await addDateStampToPhoto(re.target.result, 2048);
+            const idx = survey.instrumentsElectronics.length;
+            const photoId = `instrument_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+            const photo = {
+              id: photoId,
+              surveyId: currentSurveyId,
+              itemLabel: `instrument_${idx}`,
+              dataUrl: stampedDataUrl,
+              annotated: false,
+              createdAt: new Date().toISOString()
+            };
+            await savePhoto(photo);
 
-          survey.instrumentsElectronics.push({
-            name: '',
-            make: '',
-            model: '',
-            year: '',
-            working: null,
-            notes: '',
-            photos: [photoId],
-            aiIdentified: false,
-            aiDetails: ''
-          });
+            survey.instrumentsElectronics.push({
+              name: '',
+              make: '',
+              model: '',
+              year: '',
+              working: null,
+              notes: '',
+              photos: [photoId],
+              aiIdentified: false,
+              aiDetails: ''
+            });
+          } catch (err) {
+            console.error('addInstrumentByPhoto: failed to process photo', err);
+            showToast('⚠️ One instrument photo failed — continuing');
+          } finally {
+            resolve();
+          }
+        };
+        reader.onerror = () => {
+          console.error('addInstrumentByPhoto: FileReader error', reader.error);
+          showToast('⚠️ Could not read photo — continuing');
           resolve();
         };
         reader.readAsDataURL(file);
@@ -18148,38 +18172,54 @@ async function capturePhoto(itemLabel, event) {
   if (files.length > 1) showToast(`Saving ${files.length} photos...`);
 
   // Process all selected photos — save directly with date stamp, no preview modal
+  // v2403: FileReader hang hardening — wrap onload body in try/catch and add
+  // onerror so a single corrupt/unreadable file can never wedge the for-loop.
+  // Before: async onload that threw was a silent unhandled rejection, and
+  // FileReader errors (no onerror handler) left the Promise unresolved → UI
+  // stuck in "Saving X photos..." forever on iPhone.
   for (const file of files) {
     await new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = async (e) => {
-        const stampedDataUrl = await addDateStampToPhoto(e.target.result);
-        const photoId = `${currentSurveyId}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-        const photo = {
-          id: photoId,
-          surveyId: currentSurveyId,
-          itemLabel: itemLabel,
-          dataUrl: stampedDataUrl,
-          annotated: false,
-          createdAt: new Date().toISOString()
-        };
-
-        await savePhoto(photo);
-
-        // Update survey
-        const survey = await getSurvey(currentSurveyId);
-        if (!survey.items[itemLabel]) {
-          survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
-        }
-        if (!survey.items[itemLabel].photos) {
-          survey.items[itemLabel].photos = [];
-        }
-        survey.items[itemLabel].photos.push(photoId);
-        // v2378: drop pixel-identical duplicates within this item's photos
         try {
-          const _dd = await dedupePhotosWithinArray(survey.items[itemLabel].photos);
-          survey.items[itemLabel].photos = _dd.kept;
-        } catch (_) {}
-        await saveSurvey(survey);
+          const stampedDataUrl = await addDateStampToPhoto(e.target.result);
+          const photoId = `${currentSurveyId}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+          const photo = {
+            id: photoId,
+            surveyId: currentSurveyId,
+            itemLabel: itemLabel,
+            dataUrl: stampedDataUrl,
+            annotated: false,
+            createdAt: new Date().toISOString()
+          };
+
+          await savePhoto(photo);
+
+          // Update survey
+          const survey = await getSurvey(currentSurveyId);
+          if (!survey.items[itemLabel]) {
+            survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+          }
+          if (!survey.items[itemLabel].photos) {
+            survey.items[itemLabel].photos = [];
+          }
+          survey.items[itemLabel].photos.push(photoId);
+          // v2378: drop pixel-identical duplicates within this item's photos
+          try {
+            const _dd = await dedupePhotosWithinArray(survey.items[itemLabel].photos);
+            survey.items[itemLabel].photos = _dd.kept;
+          } catch (_) {}
+          await saveSurvey(survey);
+        } catch (err) {
+          console.error('capturePhoto: failed to process photo', err);
+          showToast('⚠️ One photo failed to save — continuing');
+        } finally {
+          resolve();
+        }
+      };
+      reader.onerror = () => {
+        console.error('capturePhoto: FileReader error', reader.error);
+        showToast('⚠️ Could not read photo — continuing');
         resolve();
       };
       reader.readAsDataURL(file);
@@ -18213,37 +18253,49 @@ async function handleAreaPhotoCapture(mediaLabel, inputEl) {
 
   if (files.length > 1) showToast(`Saving ${files.length} photos...`);
 
+  // v2403: FileReader hang hardening — see capturePhoto for the pattern rationale.
   for (const file of files) {
     await new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = async (e) => {
-        const stampedDataUrl = await addDateStampToPhoto(e.target.result);
-        const photoId = `${currentSurveyId}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-        const photo = {
-          id: photoId,
-          surveyId: currentSurveyId,
-          itemLabel: mediaLabel,
-          dataUrl: stampedDataUrl,
-          annotated: false,
-          createdAt: new Date().toISOString()
-        };
-
-        await savePhoto(photo);
-
-        const survey = await getSurvey(currentSurveyId);
-        if (!survey.items[mediaLabel]) {
-          survey.items[mediaLabel] = { rating: '', text: '', standards: [], photos: [] };
-        }
-        if (!survey.items[mediaLabel].photos) {
-          survey.items[mediaLabel].photos = [];
-        }
-        survey.items[mediaLabel].photos.push(photoId);
-        // v2378: drop pixel-identical duplicates within this area photo group
         try {
-          const _dd = await dedupePhotosWithinArray(survey.items[mediaLabel].photos);
-          survey.items[mediaLabel].photos = _dd.kept;
-        } catch (_) {}
-        await saveSurvey(survey);
+          const stampedDataUrl = await addDateStampToPhoto(e.target.result);
+          const photoId = `${currentSurveyId}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+          const photo = {
+            id: photoId,
+            surveyId: currentSurveyId,
+            itemLabel: mediaLabel,
+            dataUrl: stampedDataUrl,
+            annotated: false,
+            createdAt: new Date().toISOString()
+          };
+
+          await savePhoto(photo);
+
+          const survey = await getSurvey(currentSurveyId);
+          if (!survey.items[mediaLabel]) {
+            survey.items[mediaLabel] = { rating: '', text: '', standards: [], photos: [] };
+          }
+          if (!survey.items[mediaLabel].photos) {
+            survey.items[mediaLabel].photos = [];
+          }
+          survey.items[mediaLabel].photos.push(photoId);
+          // v2378: drop pixel-identical duplicates within this area photo group
+          try {
+            const _dd = await dedupePhotosWithinArray(survey.items[mediaLabel].photos);
+            survey.items[mediaLabel].photos = _dd.kept;
+          } catch (_) {}
+          await saveSurvey(survey);
+        } catch (err) {
+          console.error('handleAreaPhotoCapture: failed to process photo', err);
+          showToast('⚠️ One photo failed to save — continuing');
+        } finally {
+          resolve();
+        }
+      };
+      reader.onerror = () => {
+        console.error('handleAreaPhotoCapture: FileReader error', reader.error);
+        showToast('⚠️ Could not read photo — continuing');
         resolve();
       };
       reader.readAsDataURL(file);
@@ -18819,13 +18871,25 @@ async function captureDocPhoto(fieldKey, label, event) {
   // v2338: clear photo nav — new capture has no prev/next
   window._photoNavList = null;
 
+  // v2403: FileReader hang hardening — wrap onload body in try/catch, add
+  // onerror so a failed HIN / compliance plate read shows a toast instead of
+  // silently leaving the surveyor staring at an unopened preview modal.
   const reader = new FileReader();
   reader.onload = async (e) => {
-    // Add date stamp to the photo
-    const stampedDataUrl = await addDateStampToPhoto(e.target.result);
+    try {
+      // Add date stamp to the photo
+      const stampedDataUrl = await addDateStampToPhoto(e.target.result);
 
-    // Show preview modal
-    showPhotoPreviewModal(fieldKey, label, stampedDataUrl, file.type);
+      // Show preview modal
+      showPhotoPreviewModal(fieldKey, label, stampedDataUrl, file.type);
+    } catch (err) {
+      console.error('captureDocPhoto: failed to process photo', err);
+      showToast('⚠️ Could not process that photo — try again');
+    }
+  };
+  reader.onerror = () => {
+    console.error('captureDocPhoto: FileReader error', reader.error);
+    showToast('⚠️ Could not read photo — try again');
   };
 
   reader.readAsDataURL(file);
@@ -26324,25 +26388,37 @@ function _batchCameraFallback(itemLabel, opts) {
       const files = Array.from(input.files);
       if (files.length === 0) { setCameraActive(false); return; }
       if (files.length > 1) showToast(`Saving ${files.length} photos...`);
+      // v2403: FileReader hang hardening — see capturePhoto for rationale.
       for (const file of files) {
         await new Promise(resolve => {
           const reader = new FileReader();
           reader.onload = async (e) => {
-            const stamped = await addDateStampToPhoto(e.target.result);
-            const photoId = `safety_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-            const photo = { id: photoId, surveyId: currentSurveyId, itemLabel: `safety_eq_${idx}`, dataUrl: stamped, annotated: false, createdAt: new Date().toISOString(), isDocPhoto: true };
-            await savePhoto(photo);
-            const survey = await getSurvey(currentSurveyId);
-            if (survey && survey.safetyEquipment && survey.safetyEquipment[idx]) {
-              if (!Array.isArray(survey.safetyEquipment[idx].photos)) survey.safetyEquipment[idx].photos = [];
-              survey.safetyEquipment[idx].photos.push(photoId);
-              // v2378: drop pixel-identical duplicates within this safety item
-              try {
-                const _dd = await dedupePhotosWithinArray(survey.safetyEquipment[idx].photos);
-                survey.safetyEquipment[idx].photos = _dd.kept;
-              } catch (_) {}
-              await saveSurvey(survey);
+            try {
+              const stamped = await addDateStampToPhoto(e.target.result);
+              const photoId = `safety_${currentSurveyId}_${idx}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+              const photo = { id: photoId, surveyId: currentSurveyId, itemLabel: `safety_eq_${idx}`, dataUrl: stamped, annotated: false, createdAt: new Date().toISOString(), isDocPhoto: true };
+              await savePhoto(photo);
+              const survey = await getSurvey(currentSurveyId);
+              if (survey && survey.safetyEquipment && survey.safetyEquipment[idx]) {
+                if (!Array.isArray(survey.safetyEquipment[idx].photos)) survey.safetyEquipment[idx].photos = [];
+                survey.safetyEquipment[idx].photos.push(photoId);
+                // v2378: drop pixel-identical duplicates within this safety item
+                try {
+                  const _dd = await dedupePhotosWithinArray(survey.safetyEquipment[idx].photos);
+                  survey.safetyEquipment[idx].photos = _dd.kept;
+                } catch (_) {}
+                await saveSurvey(survey);
+              }
+            } catch (err) {
+              console.error('safety photo capture: failed to process photo', err);
+              showToast('⚠️ One safety photo failed — continuing');
+            } finally {
+              resolve();
             }
+          };
+          reader.onerror = () => {
+            console.error('safety photo capture: FileReader error', reader.error);
+            showToast('⚠️ Could not read photo — continuing');
             resolve();
           };
           reader.readAsDataURL(file);

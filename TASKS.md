@@ -5,7 +5,7 @@ the session task tool; this file mirrors it so future sessions (and Dave)
 can read the backlog without any tool access, and so the state survives
 context-window summarization.
 
-**Snapshot date:** 2026-04-19 (after v2401 push)
+**Snapshot date:** 2026-04-19 (after v2403 push)
 
 Regenerate this file when meaningful task state changes. Add a new
 "Snapshot date" header; don't rewrite history inline.
@@ -14,8 +14,25 @@ Regenerate this file when meaningful task state changes. Add a new
 
 ## In flight
 
+### v2404 — Save-path completion flush (companion to v2403)
+- **State:** designed, ready to implement after Dave clears v2403 field test
+- **Why:** Verified real bug. `saveEverywhere()` at `app.js:3022` and
+  `saveSurveyWithProgress()` at `app.js:3270` both call `getSurvey()` →
+  `saveSurvey()` without first calling `saveAllInspectionData()`. When
+  a Save / Cloud Backup tap happens while the surveyor is mid-textarea
+  in the inspection view (before `onblur` has fired), the write flushes
+  stale IDB state — the fresh keystrokes are lost on next reload.
+- **Scope:**
+  1. `saveEverywhere()` — `if (currentView === 'inspection') await saveAllInspectionData();`
+     at top.
+  2. `saveSurveyWithProgress()` — same.
+  3. `pagehide` / `visibilitychange` handler to flush on iOS tab-suspend.
+- **Ships as:** v2404 after tomorrow's field survey (2026-04-20) clears.
+
 ### #48 — Duplicate photo warning not clearing after one copy deleted
-- **State:** investigation, root cause identified
+- **State:** deferred (post-field-survey). Investigation complete, root
+  cause identified, fix designed. Parked behind v2403/v2404 stability
+  work.
 - **Root cause (found 2026-04-19):** `_csCheckSingleIssue` in `app.js` at
   ~line 16828 switches on `issue.category` but has no branch for
   `'Duplicate Photos'`. When the surveyor deletes one copy and clicks
@@ -38,7 +55,7 @@ Regenerate this file when meaningful task state changes. Add a new
      - Find the bucket whose location overlap with the original labels
        is maximal; if `overlap < 2`, return `{ fixed: true }`.
      - Else return `{ fixed: false, reason: ... }`.
-- **Ships as:** v2403 (next version after this housekeeping push).
+- **Ships as:** v2405 (or later — reassess after field survey).
 
 ---
 
@@ -100,6 +117,8 @@ Abbreviated — see `CHANGELOG.md` for full entries.
 
 | Version | Task | Summary |
 |---------|------|---------|
+| v2403 | #79 | Photo-capture hang hardening (6 sites: try/catch + onerror) |
+| v2402 | #78 | Tooling — TASKS.md, SESSION_NOTES.md, WORKING_AGREEMENTS.md |
 | v2401 | #77 | Survey write journal (forensics) |
 | v2400 | #76 | pullPhotosForSurvey blob-type validation (3 guards) |
 | v2399 | #75 | guardedSurveyUpdate chokepoint |

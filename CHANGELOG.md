@@ -12,6 +12,25 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2403 — 2026-04-19
+### Fixed — Photo-capture hang hardening
+- Six photo-capture call sites now wrap the `FileReader.onload` async body in `try/catch` and attach a `FileReader.onerror` handler that resolves the surrounding Promise. Before: a thrown error inside the async `onload` was a silent unhandled rejection, and `FileReader` failures (corrupt EXIF, truncated HEIC, out-of-memory on a large pick) had no `onerror` handler at all — the Promise never settled, the `for (const file of files)` loop blocked forever, and the "Saving X photos…" toast wedged the UI. On iPhone this was indistinguishable from a crash.
+- Call sites patched: `capturePhoto` (item-level camera), `handleAreaPhotoCapture` (area photo strips), `rapidCaptureInstruments` (rapid capture loop), `addInstrumentByPhoto` (multi-select instrument import), `captureDocPhoto` (HIN / compliance plate), and the safety-equipment photo handler.
+- Failure mode now: a warning toast ("⚠️ One photo failed to save — continuing") and the loop moves to the next file. For the rapid-capture loop, the camera still reopens on failure so the surveyor isn't stranded mid-session. For the single-shot HIN / compliance plate path, the toast tells the surveyor to retry instead of leaving them staring at an unopened preview modal.
+
+### Why this exists
+- Tomorrow's field survey (2026-04-20) is on iPhone, which is exactly the device class where a corrupt HEIC or transient iOS memory pressure on a FileReader read is most likely to fire. A hang in this path is the worst failure mode: the surveyor thinks the photo is saving, taps again, and the app is unresponsive. Hardening the six sites is cheap insurance against a mid-survey wedge.
+- Independently confirmed during a field-readiness audit earlier today — the pattern (async onload with no try/catch and no onerror) was consistent across all six sites.
+
+### Scope
+- Purely additive error handling. No change to the successful-read path, no change to photo format, no change to IndexedDB write ordering, no change to the date-stamp pipeline. Atomic version bump only (v2402 → v2403) — `APP_VERSION`, `CACHE_NAME`, `app-version` meta, seven `?v=2403` cache-busters.
+- No DB schema change, no migration.
+
+### Follow-up
+- v2404 will add the complementary save-path fix: force `saveAllInspectionData()` at the top of `saveEverywhere()` / `saveSurveyWithProgress()` when in the inspection view, plus a `pagehide`/`visibilitychange` flush handler to close the iOS tab-suspend gap. Split out so the two changes can be reverted independently if either misbehaves in the field.
+
+---
+
 ## v2402 — 2026-04-19
 ### Added — Tooling (non-app change)
 - **`TASKS.md`** — human-readable mirror of the session task-tool backlog, grouped by priority (in-flight, stability, polish, recently shipped). Includes the root cause and fix plan for task #48 (Duplicate Photos warning not clearing) so the next session can resume without re-investigation.
