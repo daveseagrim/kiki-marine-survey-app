@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2399';
+const APP_VERSION = 'v2400';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -25370,7 +25370,38 @@ const FirebaseSync = (() => {
     } catch (e) { return false; }
   }
 
-  // Pull all photos for a survey from Firebase Storage into IndexedDB
+  // Pull all photos for a survey from Firebase Storage into IndexedDB.
+  //
+  // v2400 HARDENING — blob-type validation before savePhoto.
+  // ─────────────────────────────────────────────────────────
+  // Root cause of the 2026-04-19 Ex-Ta-Sea photo corruption:
+  //   Firebase Storage.getDownloadURL() returned a signed URL for a
+  //   photo whose binary was missing (stale ref / deleted blob / never
+  //   uploaded).  fetch() resolved to a 200-shaped response carrying a
+  //   JSON error body ({"error":{"code":404,"message":"Not Found"}}).
+  //   response.blob() produced a blob with type="application/json".
+  //   blobToDataUrl() base64-encoded it and we called savePhoto with a
+  //   dataUrl of "data:application/json;base64,ewogICJlcnJvciI6…".
+  //   That record overwrote the real photo in IDB (keyPath 'id').
+  //
+  //   The v2385-era "if (local && local.dataUrl) continue" guard did
+  //   NOT protect us because the first import sometimes lands AFTER
+  //   the sync pull fires — so local.dataUrl was still empty at the
+  //   moment the overwrite happened.
+  //
+  // Three guards added below, cheapest first:
+  //   1. response.ok check — a 404 from Storage is not "data we should
+  //      persist".  Reject it up front.
+  //   2. blob.type startsWith("image/") — catches cases where the
+  //      response HTTP status is 200 but the body is an HTML error
+  //      page or JSON envelope (Firebase will sometimes do this for
+  //      signed URL expiry).
+  //   3. Magic-byte sniff on the first 4 bytes — belt-and-suspenders
+  //      against blobs with a spoofed/empty Content-Type.  JPEG = FFD8,
+  //      PNG = 89504E47.  Anything else = rejected.
+  //
+  // A rejection logs a warn and skips; it does NOT throw up the chain,
+  // so one bad photo in a batch doesn't abort the rest of the pull.
   async function pullPhotosForSurvey(survey) {
     if (!_syncEnabled || !window.fsDb || !window.fsStorage) return;
     try {
@@ -25390,7 +25421,37 @@ const FirebaseSync = (() => {
             const ref = window.fsStorage.ref(meta.storageRef);
             const url = await ref.getDownloadURL();
             const response = await fetch(url);
+
+            // v2400 guard #1: HTTP status must be 2xx. Reject error
+            // responses before we even touch the body.
+            if (!response.ok) {
+              throw new Error(`Storage fetch ${response.status} ${response.statusText}`);
+            }
+
             let blob = await response.blob();
+
+            // v2400 guard #2: Content-Type must advertise an image.
+            // Rejects application/json (the exact bug class that
+            // corrupted Ex-Ta-Sea), text/html error pages, etc.
+            if (!blob.type || !blob.type.startsWith('image/')) {
+              throw new Error(`Non-image blob type: "${blob.type || 'empty'}"`);
+            }
+
+            // v2400 guard #3: Magic-byte sniff. Verify the first 4
+            // bytes match a known image container. JPEG=FFD8, PNG=
+            // 89504E47, WEBP starts with "RIFF"(52 49 46 46).
+            //   Read first 4 bytes via slice() — cheap, doesn't
+            //   materialize the whole blob into a buffer.
+            const headerBuf = await blob.slice(0, 4).arrayBuffer();
+            const hdr = new Uint8Array(headerBuf);
+            const isJpeg = hdr[0] === 0xFF && hdr[1] === 0xD8;
+            const isPng  = hdr[0] === 0x89 && hdr[1] === 0x50 && hdr[2] === 0x4E && hdr[3] === 0x47;
+            const isWebp = hdr[0] === 0x52 && hdr[1] === 0x49 && hdr[2] === 0x46 && hdr[3] === 0x46;
+            if (!isJpeg && !isPng && !isWebp) {
+              const hex = Array.from(hdr).map(b => b.toString(16).padStart(2, '0')).join(' ');
+              throw new Error(`Bad image magic bytes: ${hex}`);
+            }
+
             let dataUrl = await blobToDataUrl(blob);
             blob = null; // release blob before saving
             const photo = { ...meta, dataUrl };

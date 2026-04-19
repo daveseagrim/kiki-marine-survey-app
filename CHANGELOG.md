@@ -12,6 +12,34 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2400 — 2026-04-19
+### Fixed
+- **`pullPhotosForSurvey` no longer saves Firebase Storage error responses as photos.** Three guards added before `savePhoto`: (1) `response.ok` check — reject any non-2xx HTTP status from Storage up front; (2) `blob.type.startsWith('image/')` — reject JSON error envelopes, HTML error pages, and any other non-image Content-Type; (3) magic-byte sniff on the first 4 bytes of the blob — verify JPEG (`FF D8`), PNG (`89 50 4E 47`), or WebP (`52 49 46 46`) signature before persisting.
+- Each rejected download logs a `console.warn` naming the cause (HTTP status, Content-Type, or hex of the bad header) and skips that photo without aborting the rest of the batch pull.
+
+### Why this exists
+- Root cause of the 2026-04-19 Ex-Ta-Sea photo corruption. Firebase Storage returned a 200-shaped response whose body was a JSON 404 envelope (`{"error":{"code":404,"message":"Not Found"}}`) for photos whose binary had never been uploaded or had been deleted. The pre-v2400 code did `blob = await response.blob()` then `blobToDataUrl(blob)` without validation, producing `dataUrl = "data:application/json;base64,ewogICJlcnJvciI6…"` and calling `savePhoto({...meta, dataUrl})`. That record overwrote the real photo in IndexedDB (shared `id` keyPath), silently turning 131 of 158 Ex-Ta-Sea photos into JSON error strings.
+- The existing `if (local && local.dataUrl) continue` guard at the top of the pull loop did NOT protect us — when a fresh restore lands a new survey record, `pullPhotosForSurvey` can fire BEFORE the batch-import photos have been written to IDB, so `local.dataUrl` is still empty at the moment of the overwrite.
+- Manual recovery: sync disabled via console snippet, all 11 batch `.kikisurvey` zips re-imported through `import.html` (which writes dataUrls directly without touching Firebase), one orphan JSON record deleted via cursor. 158 of 158 photos now valid. v2400 prevents the recurrence.
+
+### Design
+- Guards ordered cheapest-first: HTTP status check (no body read) → Content-Type string match (one property read) → 4-byte magic sniff (smallest possible blob.slice().arrayBuffer()). Rejection at any stage skips the photo without materialising the rest of the body.
+- Magic-byte sniff uses `blob.slice(0, 4).arrayBuffer()` — reads only 4 bytes from the blob, not the whole payload. Costs nothing vs the pre-v2400 path which was already reading the entire blob anyway.
+- Exceptions caught by the existing per-photo `try/catch`. One corrupt entry in a batch of 150 photos no longer aborts the whole pull; pre-v2400 behaviour is preserved for the happy path.
+- No signature change. No new dependencies. No telemetry beyond the existing `[Sync] Downloaded photo` / `[Sync] Could not download photo` log lines — just the cause strings are more actionable now.
+
+### Scope
+- Only `pullPhotosForSurvey` at app.js line ~25374 is touched. The companion `pushPhoto` write path is not symmetric (no non-image source — photos come from the camera or the annotation canvas, both of which produce real image blobs by construction).
+- The v2385 `local.dataUrl` dedupe guard is unchanged. It still short-circuits re-downloads when a valid photo is already in IDB — v2400 only adds protection for the case when that guard doesn't apply.
+- `blobToDataUrl` itself is untouched. The validation runs before it, so the helper never sees a non-image blob.
+- Cache version bumped (v2399 → v2400) along with APP_VERSION, the HTML meta tag, and all seven cache-busters — standard atomic-version routine.
+
+### Related
+- v2399 (`guardedSurveyUpdate` chokepoint) and v2400 (photo download validation) are the two sibling fixes for the 2026-04-19 incident. v2399 closes the "survey record disappears" category; v2400 closes the "photos get clobbered by sync" category.
+- v2401 (planned) will add a survey write journal — the forensic trail we wish we'd had when Ex-Ta-Sea first disappeared.
+
+---
+
 ## v2399 — 2026-04-19
 ### Added
 - **`guardedSurveyUpdate(survey, updates, caller)` — central chokepoint for top-level survey writes.** New ~50-line function in app.js (with ~60-line docblock) routes every bulk survey mutation through one place-to-trust. Three guarantees: (1) `undefined` values never written (v2377 class), (2) `comparables` routed through `guardedAssignComparables` with `skipComparables` pre-applied so the v2383 empty-over-nonempty refusal sees the user's intent, (3) ancient-survey telemetry — surveys with `lastModified` > 30 days or missing get a `console.info` line naming the caller, so dormant-record mutations show up in logs. Empty strings and empty arrays are still assigned (they represent legitimate user-intent clears; caller distinguishes by passing `undefined` vs `''`/`[]`).
