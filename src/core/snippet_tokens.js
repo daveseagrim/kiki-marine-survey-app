@@ -153,7 +153,12 @@
 
     // 4. Inline: strip "and rudder(s)" / "and the rudder" / "and rudders"
     //    (covers "hull and rudder was tested" → "hull was tested" too)
-    t = t.replace(/\s+and\s+(?:the\s+)?rudders?(?:\(s\))?\b/gi, '');
+    // v2386: switched the right-hand boundary from `\b` to an explicit
+    // punctuation/space/end lookahead. The old `\b` prevented the optional
+    // `(?:\(s\))?` from matching because `)` is non-word — so "hull and
+    // rudder(s)" only matched " and rudder" and left "(s)" orphaned onto
+    // "hull", producing the ungrammatical "hull(s) was tested."
+    t = t.replace(/\s+and\s+(?:the\s+)?rudders?(?:\(s\))?(?=[\s.,;:!?)]|$)/gi, '');
 
     // 5. Strip leading "rudder(s) and " before another noun
     t = t.replace(/\b(?:the\s+)?rudders?(?:\(s\))?\s+and\s+/gi, '');
@@ -230,7 +235,7 @@
     return label.replace(pattern, ` and ${word} `).replace(/\s{2,}/g, ' ').trim();
   }
 
-  const API = { expandTokens, contextFromSurvey, transformLabelForDisplay };
+  const API = { expandTokens, contextFromSurvey, transformLabelForDisplay, scrubNakedRudderRefs };
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = API;
@@ -239,5 +244,9 @@
     // Also expose individual functions for easier use in app.js
     window.expandSnippetTokens = expandTokens;
     window.transformLabelForDisplay = transformLabelForDisplay;
+    // v2386: exposed so app.js can scrub naked rudder refs on specific items
+    // (e.g., power-boat hull resonance testing — bronze rudders aren't
+    // percussion-tested even though the vessel has a rudder).
+    window.scrubNakedRudderRefs = scrubNakedRudderRefs;
   }
 })();

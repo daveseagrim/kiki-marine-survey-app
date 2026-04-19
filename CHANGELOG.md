@@ -12,6 +12,48 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2386 — 2026-04-18
+### Fixed
+- **Power-boat rudders no longer appear in the hull resonance testing section or its snippets.** Dave reported: "No percussion and resonance testing is done on power boat rudders. They are usually bronze. If it is a power boat, then rudders have to be removed from the resonance testing section, including the snippets." This covers the checklist item label ("Hull and rudder(s) (if applicable) impact and resonance testing" → "Hull impact and resonance testing" on power boats), every snippet card body (each hardcoded "hull and rudder(s)" mention is stripped), and saved textarea content from pre-v2386 surveys gets scrubbed on reopen.
+
+### Why rudders leak into this section on power boats
+- The contextFromSurvey helper derives hasRudder from drive type: outdrive / IPS / saildrive → no rudder; shaft drive (or unknown) → assume rudder. Shaft-driven power boats have rudders, so hasRudder was returning true and the rudder-gating tokens / label transforms kept rudder verbiage. But the relevant distinction for *this specific item* isn't "does the vessel have a rudder" — it's "is the rudder percussion-testable". Power-boat rudders are typically bronze castings, not fibreglass laminates, so they're not subject to impact/resonance testing at all. The fix is to override hasRudder to false for this item specifically on power boats, independent of the real-world rudder count.
+
+### Design
+- `isPowerBoatRudderResonanceItem(survey, label)` (app.js ~line 512) — returns true when the survey's vesselType is 'power' AND the label matches "Hull and rudder..." plus "impact and resonance testing" or "percussion testing". Matches both the raw template form and the ITEM_SNIPPET_MAP resolved section form, plus legacy "percussion testing" phrasing in case any surveyed templates still use it.
+- `_itemSnippetCtx(survey, itemLabel)` (app.js ~line 533) — drop-in replacement for the inline `contextFromSurvey(survey)` + fallback pattern that appears at every snippet-expansion site. When the helper above returns true, overrides `ctx.hasRudder = false, ctx.rudderCount = 0`. Downstream `expandSnippetTokens` then calls `scrubNakedRudderRefs` automatically (it already fires on hasRudder=false).
+- `findTextVariants` post-process (app.js ~line 6666) — after vesselType filtering, if this is the power-boat hull-resonance item, clone each match and run `scrubNakedRudderRefs` on `match.text`. Using a clone so we never mutate the shared textLibrary cache.
+- `displayItemLabel` override (app.js ~line 545) — when `isPowerBoatRudderResonanceItem` returns true, forces hasRudder=false in the ctx passed to `transformLabelForDisplay`, which drops " and rudder(s) (if applicable)" from the label. Also skips the subsequent `pluralizeRudder` call so we don't re-insert a rudder word into a label we just stripped.
+- `scrubNakedRudderRefs` is now exposed on `window` from `src/core/snippet_tokens.js` so app.js can call it directly from `findTextVariants`.
+
+### Fixed (regex bug in scrubNakedRudderRefs)
+- **Orphaned "(s)" after inline rudder strip.** Found while testing the v2386 path: `scrubNakedRudderRefs` was stripping " and rudder" from "hull and rudder(s)" but leaving "(s)" behind on "hull", producing the ungrammatical "Impact and resonance testing was carried out across the hull(s)." Root cause: the inline-strip regex ended in `\b`, which prevented the optional `(?:\(s\))?` group from ever matching — `\b` requires a word/non-word transition, and `)` → `.` is non-word → non-word so `\b` failed. The regex engine backed off to the shorter match " and rudder", leaving "(s)" dangling. Fix: replaced `\b` with an explicit lookahead `(?=[\s.,;:!?)]|$)` so the `(s)` suffix is captured and stripped as part of the match. This also improves the outdrive/IPS/saildrive scrubbing path that was already live — those vessels now get clean "hull" sentences instead of "hull(s)" too.
+
+### Scope
+- Affects ONLY power-boat surveys. Sail-boat and human-powered surveys are unchanged — fibreglass sail-boat rudders are still impact-tested and still show rudder snippets normally.
+- Affects ONLY the hull resonance testing item. Other hull-related items (hull conductivity testing, hull exterior above/below waterline, etc.) still respect the survey's actual rudder configuration.
+- Updates six snippet-expansion call sites to pass itemLabel into the ctx derivation: initial textarea expansion on sheet open, sheet variant display, variant text for display, stored-token cleanup, insertSnippetFromSheet, and insertSnippet. Also skips pluralizeRudder on the resolved snippet in insertSnippetFromSheet to avoid re-inserting rudder words.
+
+### Non-goals
+- Doesn't change the text library itself — the snippets still read "hull and rudder(s)" in the source data. That's deliberate: sail boats must continue to see the full phrasing. Stripping happens at display time, keyed off vesselType.
+- Doesn't affect the "Rudder(s) condition" item (a separate visual-inspection item), the hull and rudder conductivity testing section, or anywhere else a power-boat surveyor would still want to document the rudder. This change is surgical to percussion/resonance testing specifically.
+
+---
+
+## v2385 — 2026-04-18
+### Fixed
+- **Check Survey overlay no longer flashes the inspection view during re-render.** Dave reported: "In the survey quality check, when I check off an item, I am briefly routed to the survey page and then back to the survey quality check page." Root cause: the check-off handler (`_csToggleReviewed`, `_csSkipItem`, and the animate-resolve block) was calling `document.getElementById('checkSurveyOverlay').remove()` BEFORE calling `checkSurvey()` to re-render. For the duration of the async rebuild — which on iPhone PWA can span a handful of paint frames — the underlying inspection view was visible, causing the "route to survey then back" effect.
+
+### How
+- **Build-first-then-swap pattern in `checkSurvey()`** (~line 15213). The new overlay is created with a pending id (`checkSurveyOverlay_pending`) and appended to `document.body` while the old overlay is still attached. Both are `position:fixed;inset:0` with `z-index:9999`, so the later-in-DOM-order overlay paints on top — the swap is visually seamless. Only THEN is the old overlay removed, and the new one renamed to the canonical id. No frame of the inspection view is ever exposed.
+- **Dropped preemptive `.remove()` calls** from the four call sites that immediately follow with `checkSurvey()`: both branches of `_csToggleReviewed` (~line 15317 / 15325), `_csSkipItem` (~line 15384), and the animate-resolve block (~line 15475). Also the engine-migration button onclick (~line 15038). All of these now let `checkSurvey()` handle the overlay transition atomically.
+
+### Non-goals
+- The Close button (top-right X) still removes the overlay synchronously — that's a user-initiated dismiss, not a re-render, so no swap is needed.
+- The `_csRemoveOverlay` fade-out helper (used when navigating AWAY to fix a specific item) is unchanged — the fade is intentional there to signal leaving the QC view.
+
+---
+
 ## v2384 — 2026-04-18
 ### Added
 - **Timing chips on every B and C rated item.** Dave requested two quick-tap options to qualify when a recommended repair needs to happen: "This repair can wait until next season." and "Must do before launch." The chips render in an amber-tinted block — under the snippet cards in the bottom-sheet notes editor, and above the notes textarea in the inline item form. Only appear for B (Needs Attention) and C (Serviceable) ratings. Tapping appends the phrase to the notes; tapping the other chip swaps it (mutually exclusive). The emoji marker (⏳ wait / ⚠️ launch) makes the two options instantly distinguishable without reading.

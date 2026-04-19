@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2384';
+const APP_VERSION = 'v2386';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -509,6 +509,39 @@ function classifyRatingForReport(rating) {
   return { code: (r.charAt(0) || '?').toUpperCase(), label: r || '—', color: '#6b7280', cssClass: 'rating-nt' };
 }
 
+// v2386: On power boats, the rudder (if any) is typically bronze and is NOT
+// subject to impact/percussion/resonance testing the way a fibreglass sail-boat
+// rudder would be. For the hull-and-rudder resonance testing item specifically,
+// treat the vessel as if it had no rudder so the label, snippet chips, and
+// saved-text expansion all drop rudder verbiage.
+function isPowerBoatRudderResonanceItem(survey, label) {
+  if (!survey || !label) return false;
+  if (String(survey.vesselType || '').toLowerCase() !== 'power') return false;
+  // Matches both the raw template form ("Hull and rudder(s) (if applicable)
+  // impact and resonance testing") and the library section form ("Hull and
+  // rudder(s) impact and resonance testing"), plus any legacy "percussion
+  // testing" phrasing that survived earlier template renames.
+  return /^hull\s+and\s+rudder/i.test(label) &&
+         /(impact\s+and\s+resonance|percussion)\s+testing/i.test(label);
+}
+
+// v2386: Return the snippet-expansion context for a specific item, applying
+// the power-boat hull-resonance override. Drop-in replacement for the inline
+// `contextFromSurvey(survey)` calls at snippet-expansion sites — just pass
+// the item label so the override can fire when appropriate. When itemLabel
+// is omitted or the override doesn't apply, behaviour matches the original
+// inline pattern exactly.
+function _itemSnippetCtx(survey, itemLabel) {
+  let ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
+    ? window.KikiSnippetTokens.contextFromSurvey(survey)
+    : { hasRudder: survey && survey.hasRudder !== false,
+        rudderCount: (survey && parseInt(survey.rudderCount, 10)) || 1 };
+  if (survey && itemLabel && isPowerBoatRudderResonanceItem(survey, itemLabel)) {
+    ctx = Object.assign({}, ctx, { hasRudder: false, rudderCount: 0 });
+  }
+  return ctx;
+}
+
 // Transform a raw checklist-item label into its display form for the current
 // survey — applies rudder-gating so "Hull and rudder(s) (if applicable) X"
 // becomes "Hull X" on no-rudder vessels, "Hull and rudder X" on single-rudder,
@@ -522,11 +555,18 @@ function displayItemLabel(rawLabel, survey) {
   // v2275: apply rudder pluralization to labels even without transformLabelForDisplay
   let label = rawLabel;
   if (typeof window.transformLabelForDisplay === 'function') {
-    const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
+    let ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
       ? window.KikiSnippetTokens.contextFromSurvey(s)
       : { hasRudder: s.hasRudder !== false, rudderCount: parseInt(s.rudderCount, 10) || 1 };
+    // v2386: force no-rudder for the power-boat hull resonance testing item
+    if (isPowerBoatRudderResonanceItem(s, rawLabel)) {
+      ctx = Object.assign({}, ctx, { hasRudder: false, rudderCount: 0 });
+    }
     label = window.transformLabelForDisplay(rawLabel, ctx);
   }
+  // v2386: if we just forced no-rudder, skip rudder pluralization so we don't
+  // re-insert rudders into a label we deliberately stripped.
+  if (isPowerBoatRudderResonanceItem(s, rawLabel)) return label;
   return pluralizeRudder(label, s.rudderCount);
 }
 
@@ -3693,9 +3733,10 @@ function showNotesSheet(itemLabel, categoryName) {
       ? applyWritingFixups(itemData.text || '')
       : (itemData.text || '');
     if (initialTextareaText && typeof window.expandSnippetTokens === 'function') {
-      const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
-        ? window.KikiSnippetTokens.contextFromSurvey(survey)
-        : { hasRudder: survey.hasRudder !== false, rudderCount: parseInt(survey.rudderCount, 10) || 1 };
+      // v2386: _itemSnippetCtx applies the power-boat hull-resonance override
+      // so saved text from pre-v2386 surveys has stale rudder refs scrubbed
+      // on reopen.
+      const ctx = _itemSnippetCtx(survey, itemLabel);
       initialTextareaText = window.expandSnippetTokens(initialTextareaText, ctx);
     }
 
@@ -3801,9 +3842,11 @@ function showNotesSheet(itemLabel, categoryName) {
         // preview on no-rudder vessels because the diff-highlighter
         // operates on `v.text` directly. The original `variant.text` is
         // preserved on the real objects for insertion-time expansion.
-        const _expandCtx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
-          ? window.KikiSnippetTokens.contextFromSurvey(survey)
-          : { hasRudder: survey && survey.hasRudder !== false, rudderCount: (survey && parseInt(survey.rudderCount, 10)) || 1 };
+        // v2386: pass itemLabel so power-boat hull-resonance expansion runs
+        // with hasRudder=false (defensive — findTextVariants has already
+        // scrubbed these snippet texts, but re-expansion here would re-apply
+        // `{if-rudder:...}` with hasRudder=true otherwise).
+        const _expandCtx = _itemSnippetCtx(survey, itemLabel);
         const sheetVariantsForDisplay = (typeof window.expandSnippetTokens === 'function')
           ? sheetVariants.map(v => Object.assign({}, v, { text: window.expandSnippetTokens(v.text, _expandCtx) }))
           : sheetVariants;
@@ -4159,9 +4202,9 @@ function showNotesSheet(itemLabel, categoryName) {
           // and isActive comparison works against the clean text.
           let variantTextForDisplay = variant.text;
           if (typeof window.expandSnippetTokens === 'function' && survey) {
-            const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
-              ? window.KikiSnippetTokens.contextFromSurvey(survey)
-              : { hasRudder: survey.hasRudder !== false, rudderCount: parseInt(survey.rudderCount, 10) || 1 };
+            // v2386: itemLabel-aware context applies rudder override for
+            // power-boat hull resonance item.
+            const ctx = _itemSnippetCtx(survey, itemLabel);
             variantTextForDisplay = window.expandSnippetTokens(variant.text, ctx);
           }
           // v2275: Pluralize plain-text rudder references based on rudderCount
@@ -4453,9 +4496,9 @@ function showNotesSheet(itemLabel, categoryName) {
     // re-appears on subsequent opens.
     if (ta && ta.value && /\{if-(?:rudder|no-rudder):/.test(ta.value) &&
         typeof window.expandSnippetTokens === 'function') {
-      const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
-        ? window.KikiSnippetTokens.contextFromSurvey(survey)
-        : { hasRudder: survey.hasRudder !== false, rudderCount: parseInt(survey.rudderCount, 10) || 1 };
+      // v2386: itemLabel-aware context so power-boat hull-resonance saved
+      // text gets rudder refs stripped alongside token cleanup.
+      const ctx = _itemSnippetCtx(survey, itemLabel);
       const cleaned = window.expandSnippetTokens(ta.value, ctx);
       if (cleaned !== ta.value) {
         ta.value = cleaned;
@@ -5021,13 +5064,18 @@ function insertSnippetFromSheet(itemLabel, categoryName, text, cardEl, placehold
     // so hull-and-rudder snippets drop the rudder clause on no-rudder
     // vessels (B-07).
     if (typeof window.expandSnippetTokens === 'function' && survey) {
-      const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
-        ? window.KikiSnippetTokens.contextFromSurvey(survey)
-        : { hasRudder: survey.hasRudder !== false, rudderCount: parseInt(survey.rudderCount, 10) || 1 };
+      // v2386: pass itemLabel so the power-boat hull-resonance override
+      // applies (the text coming in is already scrubbed by findTextVariants,
+      // but this is defensive for direct callers).
+      const ctx = _itemSnippetCtx(survey, itemLabel);
       resolved = window.expandSnippetTokens(resolved, ctx);
     }
-    // v2275: Pluralize plain-text rudder references based on rudderCount
-    if (survey) resolved = pluralizeRudder(resolved, survey.rudderCount);
+    // v2275: Pluralize plain-text rudder references based on rudderCount.
+    // v2386: skip pluralizeRudder for the power-boat hull-resonance item
+    // so we don't re-insert rudder words into a sentence we just scrubbed.
+    if (survey && !isPowerBoatRudderResonanceItem(survey, itemLabel)) {
+      resolved = pluralizeRudder(resolved, survey.rudderCount);
+    }
     // For per-drive-line expanded items, inject the side qualifier into
     // the first instance of the subject noun so the sentence reads
     // "The port propeller..." instead of "The propeller...".
@@ -6650,6 +6698,20 @@ function findTextVariants(categoryName, itemLabel, surveyRating, survey) {
     matches = matches.filter(entry => {
       if (!entry.vesselType) return true;
       return entry.vesselType.toLowerCase() === vt;
+    });
+  }
+
+  // v2386: power-boat rudders aren't percussion/resonance tested (they're
+  // typically bronze, not fibreglass). Strip naked rudder references from
+  // every library snippet for this specific item on power boats. Uses a
+  // CLONED entry so we never mutate the shared textLibrary cache.
+  if (survey && isPowerBoatRudderResonanceItem(survey, itemLabel) &&
+      typeof window.scrubNakedRudderRefs === 'function') {
+    matches = matches.map(entry => {
+      if (!entry || !entry.text) return entry;
+      const scrubbed = window.scrubNakedRudderRefs(entry.text);
+      if (scrubbed === entry.text) return entry;
+      return Object.assign({}, entry, { text: scrubbed });
     });
   }
 
@@ -15035,7 +15097,7 @@ async function checkSurvey() {
     html += `
       <div style="background:#eff6ff;border:2px solid #3b82f6;border-radius:10px;padding:12px;margin-bottom:16px;text-align:center;">
         <div style="font-size:13px;color:#1e40af;margin-bottom:8px;">Engine data found in checklist items but missing from header fields.</div>
-        <button onclick="migrateEngineData().then(()=>{document.getElementById('checkSurveyOverlay')?.remove(); checkSurvey();})"
+        <button onclick="migrateEngineData().then(()=>{checkSurvey();})"
                 style="background:#3b82f6;color:white;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;">
           ⚙️ Migrate Engine Data to Header
         </button>
@@ -15211,15 +15273,22 @@ async function checkSurvey() {
   }
 
   // ── DISPLAY FULL-SCREEN OVERLAY ─────────────────────────────────────────
+  // v2385: Build-first-then-swap to eliminate the flash of the underlying
+  // survey view during re-render. The new overlay is appended with a
+  // pending id while the old one is still visible; since both are
+  // position:fixed;inset:0, the new one (later in DOM order) paints on top
+  // of the old one — seamless swap from the user's perspective. Only THEN
+  // do we remove the old overlay and rename the new one. This matters on
+  // iPhone PWA where the remove/append round-trip can span a couple of
+  // paint frames and expose the inspection view underneath.
   const existing = document.getElementById('checkSurveyOverlay');
-  if (existing) existing.remove();
 
   // Remove any lingering back button
   const existingBack = document.getElementById('csBackToCheckBtn');
   if (existingBack) existingBack.remove();
 
   const overlay = document.createElement('div');
-  overlay.id = 'checkSurveyOverlay';
+  overlay.id = existing ? 'checkSurveyOverlay_pending' : 'checkSurveyOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:white;z-index:9999;display:flex;flex-direction:column;';
   overlay.innerHTML = `
     <div style="flex-shrink:0;background:#066aab;color:white;padding:12px 16px calc(12px + env(safe-area-inset-top, 0px)) 16px;display:flex;align-items:center;justify-content:space-between;">
@@ -15231,6 +15300,14 @@ async function checkSurvey() {
     </div>
   `;
   document.body.appendChild(overlay);
+  // Now that the new overlay is painting on top, tear down the old one
+  // and promote the pending id. Any outstanding getElementById calls that
+  // fire between appendChild and here will hit the old overlay — that's
+  // acceptable because the old one still has all its handlers wired.
+  if (existing) {
+    existing.remove();
+    overlay.id = 'checkSurveyOverlay';
+  }
 
   // ── Show floating "Moved to Resolved" notification ──────────────────
   // This floats at the top of the scroll area so it's visible regardless of scroll position
@@ -15314,8 +15391,10 @@ async function checkSurvey() {
       // Find the item's display message from its data-cs-msg attribute
       const itemMsg = row ? row.getAttribute('data-cs-msg') : null;
       if (itemMsg) window._csJustResolved = itemMsg;
+      // v2385: don't preemptively remove the overlay — checkSurvey()
+      // swaps atomically so the user never sees the inspection view
+      // flash behind the QC screen.
       setTimeout(async () => {
-        document.getElementById('checkSurveyOverlay')?.remove();
         await checkSurvey();
       }, 1200);
     } else {
@@ -15323,7 +15402,7 @@ async function checkSurvey() {
       const scrollEl = document.getElementById('csScrollContainer');
       const scrollPos = scrollEl ? scrollEl.scrollTop : 0;
       setTimeout(async () => {
-        document.getElementById('checkSurveyOverlay')?.remove();
+        // v2385: atomic overlay swap inside checkSurvey() — no preemptive remove
         await checkSurvey();
         const newScroll = document.getElementById('csScrollContainer');
         if (newScroll) newScroll.scrollTop = scrollPos;
@@ -15381,8 +15460,8 @@ async function checkSurvey() {
     if (nextMsg) window._csScrollTargetMsg = nextMsg;
     const itemMsg = row ? row.getAttribute('data-cs-msg') : null;
     if (itemMsg) window._csJustResolved = itemMsg;
+    // v2385: atomic overlay swap inside checkSurvey() — no preemptive remove
     setTimeout(async () => {
-      document.getElementById('checkSurveyOverlay')?.remove();
       await checkSurvey();
     }, 1200);
   };
@@ -15473,7 +15552,7 @@ async function checkSurvey() {
         window._csJustResolved = animateResolve.itemLabel || animateResolve.message;
         window._csScrollTargetMsg = window._csNextScrollMsg || null;
         window._csNextScrollMsg = null;
-        document.getElementById('checkSurveyOverlay')?.remove();
+        // v2385: atomic overlay swap inside checkSurvey() — no preemptive remove
         await checkSurvey();
       }, 700);
     }, 2000);
@@ -19579,9 +19658,8 @@ function insertSnippet(itemLabel, categoryName, text, cardEl, placeholdersJson) 
     let resolved = resolveCountTokens(text, dlc);
     // Expand rudder-gating tokens (B-07)
     if (typeof window.expandSnippetTokens === 'function' && survey) {
-      const ctx = (window.KikiSnippetTokens && window.KikiSnippetTokens.contextFromSurvey)
-        ? window.KikiSnippetTokens.contextFromSurvey(survey)
-        : { hasRudder: survey.hasRudder !== false, rudderCount: parseInt(survey.rudderCount, 10) || 1 };
+      // v2386: itemLabel-aware context for the power-boat hull-resonance override.
+      const ctx = _itemSnippetCtx(survey, itemLabel);
       resolved = window.expandSnippetTokens(resolved, ctx);
     }
     if (sideWord) {
