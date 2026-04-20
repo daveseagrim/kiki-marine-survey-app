@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2405';
+const APP_VERSION = 'v2406';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -9574,17 +9574,6 @@ function renderNewSurveyForm() {
       </div>
 
       <div class="form-group">
-        <label class="form-label">Independent Surveys</label>
-        <textarea id="independentSurveys" rows="2" placeholder="e.g. Engine survey by Joe Smith, Marine Diesel Ltd., 2026-03-15 — or leave as the default statement if none." autocapitalize="sentences"></textarea>
-        <div style="font-size:12px;color:#6b7280;margin-top:4px;">SAMS requires a statement of any independent surveys (engine, electrical, ultrasonic gauging, etc.) conducted alongside this inspection. If none, the default "No independent surveys…" statement is used.</div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Report Completion Date</label>
-        <input type="date" id="reportDate">
-      </div>
-
-      <div class="form-group">
         <label class="form-label">Weather</label>
         <div style="display:flex;gap:8px;align-items:center;">
           <input type="text" id="weather" placeholder="e.g., Clear, 15 knots" style="flex:1;">
@@ -9886,6 +9875,11 @@ function renderNewSurveyForm() {
         <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Add comparable sales from BUCValu, Soldboats.com, YachtWorld, and current listings to support your valuation.</div>
         <div id="comparablesEntries"></div>
         <button class="btn-secondary" style="font-size:12px;padding:6px 12px;margin-top:8px;" onclick="addComparableEntry()">+ Add Comparable</button>
+      </div>
+
+      <div class="form-group" style="margin-top:16px;">
+        <label class="form-label">Report Completion Date</label>
+        <input type="date" id="reportDate">
       </div>
 
       <div class="form-actions">
@@ -10919,7 +10913,10 @@ function saveSurveyDetails(surveyId) {
       electricalSystem: document.getElementById('electricalSystem')?.value || '',
       changesToPlan: document.getElementById('changesToPlan')?.value || '',
       personsInAttendance: document.getElementById('personsInAttendance')?.value || '',
-      independentSurveys: document.getElementById('independentSurveys')?.value || '',
+      // v2406: field removed from intro form. Preserve any existing value so
+      // the SAMS default "No independent surveys…" sentence in the report row
+      // (22787) continues to render if the survey had no prior value.
+      independentSurveys: document.getElementById('independentSurveys')?.value || survey.independentSurveys || '',
       reportDate: document.getElementById('reportDate')?.value || '',
       weather: document.getElementById('weather')?.value || '',
       onLandOrWater: document.getElementById('onLandOrWater')?.value || '',
@@ -15629,10 +15626,8 @@ async function checkSurvey() {
     // Laid-up status was explicitly flagged in the SAMS review
     add('info', 'Report Metadata', 'Consider adding storage / observation details (e.g. "laid up for winter storage on cradle")', null, 'storageDetails');
   }
-  // Independent surveys (engine survey, electrical survey, gauging, etc.)
-  if (!survey.independentSurveys || !survey.independentSurveys.trim()) {
-    add('info', 'Report Metadata', 'Consider listing any independent surveys conducted alongside (engine, electrical, ultrasonic gauging, etc.)', null, 'independentSurveys');
-  }
+  // v2406: Independent surveys preflight removed — the field is no longer in
+  // the intro form. The SAMS default sentence still renders in the report row.
 
   // Propulsion — identity and narrative completeness
   if (survey.vesselType && (survey.vesselType.toLowerCase() !== 'human')) {

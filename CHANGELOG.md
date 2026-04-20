@@ -12,6 +12,33 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2406 — 2026-04-19
+### Changed — Intro form cleanup
+
+**Remove Independent Surveys field from the intro form.**
+- The "Independent Surveys" textarea (engine/electrical/gauging statement) is gone from both the New Survey form and the Edit Intro view.
+- Dave: *"Remove the section about 'independent surveys' on the intro page. This will likely never happen."*
+- The report row at `_row('independentSurveys', ...)` still renders the SAMS-required default sentence (*"No independent surveys (engine, electrical, ultrasonic gauging, etc.) were conducted in conjunction with this inspection."*) when the field is empty, so the report output is unchanged.
+- `saveSurveyDetails` now preserves any pre-existing `survey.independentSurveys` value via a `|| survey.independentSurveys || ''` fallback — a save on an old survey that had a value won't wipe it just because the DOM field is gone.
+- The preflight check (`Consider listing any independent surveys…`) is removed — without a visible field there's nowhere for Dave to act on it.
+
+**Move Report Completion Date to the bottom of the intro form.**
+- Previously sat next to Weather / On Land or In Water in the Survey Specs section. Now sits below the Comparable Vessels block, right before the Cancel / Start Survey action row.
+- Dave: *"Report completion date should be moved to the bottom of that page, beneath 'comparable vessels'"*.
+- Field `id="reportDate"` is unchanged, so every downstream reader (report cover page, XLSX export, etc.) keeps working. Data model untouched.
+
+### Scope
+- Three edits in `app.js`: remove the two form-groups from `renderNewSurveyForm` (~9576-9585), add the Report Completion Date form-group after the Comparables section (~9880), preserve `independentSurveys` value in `saveSurveyDetails` (~10922).
+- Remove the preflight info entry in `runPreflight` (~15632-15635).
+- Atomic version bump (v2405 → v2406): `APP_VERSION`, `CACHE_NAME`, `app-version` meta, seven `?v=2406` cache-busters.
+- Zero DB / template changes, zero migration.
+
+### Not included
+- v2407 (check-survey pill auto-dismiss + shrink + reposition) is on deck next.
+- v2408 (page header consistency — subsequent pages should match the title-page survey type) queued behind that.
+
+---
+
 ## v2405 — 2026-04-19
 ### Fixed — Engine/drive pluralisation and missing HP unit
 
