@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2413';
+const APP_VERSION = 'v2414';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -2743,9 +2743,8 @@ async function pullPhotosFromFirebase() {
     return;
   }
 
-  // Remove the banner nag — the dialog is taking over as the source of truth
-  const warn = document.getElementById('photo-integrity-warn');
-  if (warn) warn.remove();
+  // v2414: the old yellow "photos on another device" banner was removed
+  // entirely, so there is no longer a #photo-integrity-warn node to dismiss.
 
   // Show persistent progress dialog (same one used by backup)
   BackupProgress.show();
@@ -2882,7 +2881,8 @@ async function pullPhotosFromFirebase() {
     console.groupEnd();
   }
 
-  window._photoWarnDismissed = true;
+  // v2414: _photoWarnDismissed was a session flag read only by the yellow
+  // banner that v2414 removed. No longer setting it.
   if (downloaded > 0 && currentView === 'surveys') renderHome();  // v2247: guard against bouncing user off non-home views
 }
 
@@ -4140,31 +4140,23 @@ async function validatePhotoIntegrity() {
       }
     }
 
+    // v2414 — Yellow "photos on another device" banner removed entirely.
+    //
+    // Reason: the banner was firing on every startup because its dismissal
+    // used window._photoWarnDismissed (session-only) and the dismissal state
+    // never survived a page reload or SW update.  More fundamentally, the
+    // premise "photo referenced but not in local IndexedDB → show a warning"
+    // becomes incorrect once we flip to lazy-cache photo storage (v2415+):
+    // "only in cloud, not local" is the NEW DEFAULT for surveys Dave isn't
+    // actively working on — not a condition that should surface a banner.
+    //
+    // validatePhotoIntegrity itself is preserved for now — it still walks
+    // surveys and still logs orphan counts + Firebase recoverability to the
+    // console for forensics.  Once v2420 ships a new integrity check that
+    // flags "missing from BOTH local AND cloud", this whole function can be
+    // retired.
     if (warnings.length > 0) {
-      console.warn('[Photo Integrity] Missing photos detected:', warnings);
-      // Check if user dismissed this warning already this session
-      if (window._photoWarnDismissed) return;
-      // Show warning on home screen
-      setTimeout(() => {
-        const homeEl = document.getElementById('homeContent') || document.body;
-        const existing = document.getElementById('photo-integrity-warn');
-        if (existing) existing.remove();
-
-        const warn = document.createElement('div');
-        warn.id = 'photo-integrity-warn';
-        warn.style.cssText = 'margin:12px 16px;padding:14px 16px;background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;font-size:13px;color:#92400e;position:relative;';
-        const totalMissing = warnings.reduce((s, w) => s + w.missing, 0);
-        let html = '<button onclick="document.getElementById(\'photo-integrity-warn\').remove();window._photoWarnDismissed=true;" style="position:absolute;top:8px;right:10px;background:none;border:none;font-size:18px;color:#92400e;cursor:pointer;padding:0;line-height:1;">✕</button>';
-        html += `<strong>📷 ${totalMissing} photos on another device</strong><br>`;
-        html += '<span style="font-size:12px;color:#78716c;">These photos exist in Firebase but haven\'t been downloaded to this device yet.</span><br>';
-        for (const w of warnings) {
-          html += `<br>• <strong>${w.name}</strong>: ${w.missing} of ${w.referenced}`;
-        }
-        html += `<br><br><button onclick="pullPhotosFromFirebase()" style="padding:8px 16px;background:#f59e0b;color:white;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">☁️ Download from Firebase</button>`;
-        html += ` <button onclick="document.getElementById('photo-integrity-warn').remove();window._photoWarnDismissed=true;" style="padding:8px 16px;background:transparent;border:1px solid #fcd34d;border-radius:6px;font-size:13px;cursor:pointer;color:#92400e;">Dismiss</button>`;
-        warn.innerHTML = html;
-        homeEl.insertBefore(warn, homeEl.firstChild);
-      }, 500);
+      console.warn('[Photo Integrity] Orphan photo references detected (UI banner suppressed in v2414):', warnings);
     } else {
       console.log('[Photo Integrity] All photos accounted for ✓');
     }

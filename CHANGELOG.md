@@ -12,6 +12,30 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2414 — 2026-04-19
+### Changed — Kill the yellow "photos on another device" banner
+
+The yellow `#photo-integrity-warn` banner (app.js:4143) fired on every app startup whenever `validatePhotoIntegrity` found any photo ID in a survey that didn't have a local IndexedDB blob. Its dismissal was session-only (`window._photoWarnDismissed`) so every page reload and every service-worker update reset it. Dave's field workflow involves many reloads, so the banner became a constant distraction while conducting surveys.
+
+Deeper than the UX issue: the banner's core premise — "photo referenced but not local = warning" — stops being correct in the lazy-cache photo architecture shipping across v2415-v2420, where "only in cloud, not on device" becomes the **default** state for any survey Dave isn't actively working on. Keeping the banner and making it smarter would mean patching it again in v2420, so it's getting removed now and the new integrity check will be built from scratch for the new world.
+
+**What changed**
+
+- The banner render block (app.js ≈4143-4170) is gone. No more DOM insert, no more dismiss button, no more session-flag dance.
+- `validatePhotoIntegrity` still walks every survey on startup, still counts orphan photo IDs, still pings Firestore for each orphan to check recoverability. All that output now goes to `console.warn` / `console.log` only — zero user-visible UI.
+- Read-only guarantees from v2413 are preserved: this function never mutates `survey.items[].photos[]`, never calls `saveSurvey()`.
+
+**What's next** (see roadmap in this changelog)
+
+- v2415: thumbnail pipeline (256px thumbs stored alongside full images)
+- v2416: survey-exit purge (60-second deferred delete of full-res for non-current surveys; thumbs stay)
+- v2417: on-demand pull (full-res downloaded from Firebase when a purged survey is reopened)
+- v2418: report pre-pull gate (`generateReport` blocks until every photo is local)
+- v2419: "Free up space" tool in Settings with per-survey breakdown
+- v2420: new integrity check — only flags photos missing from BOTH local AND cloud
+
+---
+
 ## v2413 — 2026-04-19
 ### Fixed (EMERGENCY) — `validatePhotoIntegrity` no longer silently strips photo IDs from surveys on startup
 
