@@ -12,6 +12,35 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2425 — 2026-04-20
+### Added — Persistent storage request + QuotaExceededError surfacing (P0 hotfix, iPhone-only survey day)
+
+Second stability hotfix of the morning, ahead of Dave's iPhone-only field survey today. v2424 closed the stale-write regression class; v2425 closes two remaining silent-loss risks on the capture path.
+
+**1. `navigator.storage.persist()` request on startup (app.js initApp, line 24257)**
+
+On iOS Safari, IndexedDB storage is subject to eviction under storage pressure. A 6-8h field survey generating hundreds of photos can push the iPhone into the eviction window without any user-visible signal — Dave would only notice when a photo "wasn't there anymore." The Storage Standard's `persist()` API promotes the origin's IDB to "persistent," meaning the browser must not evict it without user action.
+
+The call is fire-and-forget: it returns a Promise resolving to `true` (granted) or `false` (denied). PWAs installed to the iOS home screen are typically granted persistence automatically, so Dave's installed app gets this for free; the explicit call is a belt-and-braces guarantee for the non-installed Safari case (e.g. if he ever opens the site in a browser tab directly). Wrapped in try/catch so any exception or missing-API environment falls through silently — persist() is pure upside and must never block startup.
+
+**2. `_v2425HandleQuotaError` — QuotaExceededError surfacing in savePhoto + saveSurvey (app.js)**
+
+Before v2425, a QuotaExceededError on `store.put()` in either savePhoto (line 2393) or saveSurvey (the `_performPut` helper inside the v2424 freshness-guarded Promise at line 1889) would reject the promise and log. From Dave's perspective in the field, the only visible signal was "the photo didn't appear" or "my save didn't stick" — the first clue that storage filled could be silent photo loss hours later.
+
+`_v2425HandleQuotaError(err, context)` is a shared helper called from both IDB onerror handlers we own. It sniffs for the three common quota-error names (`QuotaExceededError` on Chromium/WebKit, `NS_ERROR_DOM_QUOTA_REACHED` on Gecko, plus any `/quota/i` match in the message) and surfaces a prominent toast when detected:
+
+`STORAGE FULL - back up to Drive and free iPhone space before continuing.`
+
+The original reject still fires so upstream error handling (SaveStatus.markError, _kkSaveInProgress cleanup, promise rejection) is unchanged — v2425 is purely additive surfacing on top of the existing error path. The helper is wrapped in its own try/catch so a failure in the surfacing layer can never block the reject.
+
+**Out of scope for v2425** (deferred so the surface area stays small on a same-day ship):
+- Visible storage-usage banner driven by `navigator.storage.estimate()` — planned for a future version, would show a yellow banner if iPhone free space falls below ~500MB. Requires UI work; skipped today to minimise regression risk.
+- Pre-save free-space check with a refuse-and-warn path — same reason; today's fix catches the quota error when it happens rather than anticipating it.
+
+**Atomic cache bump**: APP_VERSION (app.js:8), CACHE_NAME (sw.js:1), meta app-version (index.html:9), 6 core module cache-busters + app.js cache-buster (index.html:714-720) all to v2425.
+
+---
+
 ## v2424 — 2026-04-20
 ### Added — Stale-write freshness guard on saveSurvey (P0 hotfix)
 

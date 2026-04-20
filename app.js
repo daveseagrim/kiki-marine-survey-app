@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2424';
+const APP_VERSION = 'v2425';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -1686,6 +1686,46 @@ function getTemplateForSurvey(survey) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// v2425 — QuotaExceededError surfacing
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Before v2425, a QuotaExceededError on store.put() in either savePhoto or
+// saveSurvey would reject the promise and log an error — but from Dave's
+// perspective in the field, the only visible signal was "photo didn't
+// appear" or "save didn't stick". On a 6-8h iPhone survey, the first clue
+// that storage filled could be silent photo loss hours later.
+//
+// _v2425HandleQuotaError is called from every IDB onerror handler we own.
+// When the error is a quota error (Chromium, WebKit, Firefox all name it
+// differently — we sniff for QuotaExceededError, NS_ERROR_DOM_QUOTA_REACHED,
+// and any /quota/i in the message), we show a prominent toast so Dave
+// knows to back up to Drive and free space immediately. The original
+// reject still fires so upstream error handling is unchanged — this is
+// purely additive surfacing.
+// ═══════════════════════════════════════════════════════════════════════════
+function _v2425HandleQuotaError(err, context) {
+  try {
+    if (!err) return;
+    const name = err.name || '';
+    const msg = err.message || '';
+    const isQuota = name === 'QuotaExceededError' ||
+                    name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+                    /quota/i.test(msg);
+    if (!isQuota) return;
+    if (typeof console !== 'undefined') {
+      console.error('[v2425] QuotaExceededError in ' + context, err);
+    }
+    try {
+      if (typeof showToast === 'function') {
+        showToast('STORAGE FULL — back up to Drive and free iPhone space before continuing.');
+      }
+    } catch (_) { /* toast is cosmetic */ }
+  } catch (_) {
+    // Never let the error handler itself throw — upstream reject must still fire.
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // v2424 — Stale-write freshness guard (P0 hotfix)
 // ═══════════════════════════════════════════════════════════════════════════
 //
@@ -1890,6 +1930,8 @@ async function saveSurvey(survey) {
       request.onerror = () => {
         _kkSaveInProgress = false;
         _checkDeferredUpdate();
+        // v2425: surface quota errors to Dave with a prominent toast.
+        _v2425HandleQuotaError(request.error, 'saveSurvey');
         reject(request.error);
       };
       request.onsuccess = () => {
@@ -2396,7 +2438,12 @@ async function savePhoto(photo) {
     const tx = db.transaction(['photos'], 'readwrite');
     const store = tx.objectStore('photos');
     const request = store.put(photo);
-    request.onerror = () => { if (typeof SaveStatus !== 'undefined') SaveStatus.markError(request.error && request.error.message); reject(request.error); };
+    request.onerror = () => {
+      if (typeof SaveStatus !== 'undefined') SaveStatus.markError(request.error && request.error.message);
+      // v2425: surface quota errors to Dave with a prominent toast.
+      _v2425HandleQuotaError(request.error, 'savePhoto');
+      reject(request.error);
+    };
     request.onsuccess = () => resolve(photo.id);
   });
   if (typeof SaveStatus !== 'undefined') {
@@ -24255,6 +24302,31 @@ if ('serviceWorker' in navigator) {
 // Init app
 async function initApp() {
   try {
+    // ── v2425: Request persistent storage ──────────────────────────────
+    // Ask the browser to promote IndexedDB to "persistent" so it cannot
+    // be evicted by storage pressure heuristics. iOS Safari is especially
+    // aggressive about reclaiming cached data from long-idle origins;
+    // during a 6-8h field survey, photo capture can push IDB past the
+    // eviction threshold without warning. PWAs installed to the home
+    // screen are granted persistence automatically by most browsers, but
+    // this call is a belt-and-braces guarantee for the non-installed
+    // case. Fire-and-forget — the browser grants or denies silently and
+    // we log the result. Any exception is swallowed; persist() is pure
+    // upside and must never block startup.
+    try {
+      if (navigator.storage && typeof navigator.storage.persist === 'function') {
+        navigator.storage.persist().then(granted => {
+          if (typeof console !== 'undefined') {
+            console.log('[v2425] persistent storage:', granted ? 'GRANTED' : 'DENIED');
+          }
+        }).catch(e => {
+          if (typeof console !== 'undefined') console.warn('[v2425] persist request failed:', e);
+        });
+      }
+    } catch (e) {
+      if (typeof console !== 'undefined') console.warn('[v2425] persist unavailable:', e);
+    }
+
     // Suppress iOS autofill bar (keys, credit card, location, checkmark)
     // by setting autocomplete="off" on all inputs as they're created
     const disableAutofill = (el) => {
