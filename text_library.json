@@ -18901,6 +18901,13 @@
             },
             {
                   "section": "Anti-vibration mounts",
+                  "rating": "C - just changed",
+                  "text": "They showed virtually no corrosion or cracking and appeared in satisfactory condition.",
+                  "phase": "observed",
+                  "severity": 3
+            },
+            {
+                  "section": "Anti-vibration mounts",
                   "rating": "C",
                   "text": "The anti-vibration mounts showed very little corrosion or cracking and appeared in acceptable condition.",
                   "phase": "observed",
@@ -18917,13 +18924,6 @@
                   "section": "Anti-vibration mounts",
                   "rating": "C - just changed",
                   "text": "According to the owner, the anti-vibration mounts had been changed recently.",
-                  "phase": "observed",
-                  "severity": 3
-            },
-            {
-                  "section": "Anti-vibration mounts",
-                  "rating": "C - just changed",
-                  "text": "They showed virtually no corrosion or cracking and appeared in satisfactory condition.",
                   "phase": "observed",
                   "severity": 3
             },

@@ -12,6 +12,26 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2423 — 2026-04-20
+### Changed — Anti-vibration mounts C observed chip order
+
+Dave flagged that on the anti-vibration mounts C-rating chip list, "They showed virtually no corrosion or cracking and appeared in satisfactory condition." should be the first snippet in the list. Previous order surfaced the more technical "very little corrosion" / "visual observation only" chips first, with the positive confirmation chips at the bottom.
+
+New order in `text_library.json`:
+
+1. "They showed virtually no corrosion or cracking and appeared in satisfactory condition." (C - just changed)
+2. "The anti-vibration mounts showed very little corrosion or cracking and appeared in acceptable condition." (C)
+3. "As this was a visual observation only and did not constitute a mechanical assessment, serviceability could not be confirmed." (C)
+4. "According to the owner, the anti-vibration mounts had been changed recently." (C - just changed)
+
+All four entries already live under the `"section": "Anti-vibration mounts"` bucket in text_library.json so the chip picker renders them in file order. `isRatingMatch` in `findTextVariants` (app.js:7220) uses first-char match for C, so both "C" and "C - just changed" variants surface on a C-rated item — ordering is preserved as Dave sees it in the UI.
+
+No wording changes — this is strictly a reorder so Dave's most common selection is a single-tap away. The "They" pronoun in chip 1 is intentional: in Dave's workflow the chip combines naturally with the owner-confirmation chip (#4) when both are tapped, producing a full sentence pair. When tapped alone, Dave routinely adjusts the leading pronoun in the note textbox before saving.
+
+text_library.json is fetched network-first by the service worker (sw.js:154), so the new order propagates on next survey open without needing a cache bump — the CACHE_NAME bump to v2423 is standard atomic-release practice.
+
+---
+
 ## v2422 — 2026-04-19
 ### Fixed — Round X delete buttons on photo thumbnails (iOS)
 
