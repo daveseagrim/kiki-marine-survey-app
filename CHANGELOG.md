@@ -12,6 +12,45 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2422 — 2026-04-19
+### Fixed — Round X delete buttons on photo thumbnails (iOS)
+
+Photo-thumbnail delete X buttons rendered as horizontal ovals on iPhone/iPad Safari instead of the clean round circles they are on desktop Chrome. Dave flagged this multiple times across versions — the fix was deferred because it kept getting bumped behind snippet work. Addressed comprehensively across all four thumbnail-delete call sites.
+
+Root cause varied per site:
+
+- **`<button>` sites** — iOS Safari applies `-webkit-appearance: button` by default to every `<button>` element. That stylesheet rule layers a native-button chrome (rounded-rect pill on iOS) on top of any author CSS, so `width: 28px; height: 28px; border-radius: 50%` gets quietly overridden into an oval the width of the button's computed minimum plus native padding.
+- **`<span>` sites** — spans don't have the webkit-appearance issue, but they did not have `min-width` / `max-width` / `min-height` / `max-height` constraints. Under flex layout (and the occasional iOS font-metric quirk on emoji-adjacent glyphs like ✕), the intrinsic content width of the ✕ glyph could force the span slightly wider than `width: 22px` on some font-size renderings.
+
+Fixes applied at four sites:
+
+1. **app.js:14347** — Area-photo initial render delete X (main category loop). `<span>`: added `min-width / max-width / min-height / max-height: 22px` matching the existing `width / height`, plus `overflow:hidden`, `box-sizing:border-box`, `line-height:22px`, `text-align:center`, `-webkit-text-size-adjust:none`, `-webkit-tap-highlight-color:transparent`.
+2. **app.js:18559** — Area-photo `refreshAreaPhotoGrid` delete X (re-render after reorder / toggle). Same `<span>` fix as above so both render paths stay in sync. (The initial render and the refresh must match verbatim — divergence here would mean thumbnails render round the first time and oval after a reorder, or vice versa.)
+3. **app.js:20395** — Form-view photo-item delete X (post-save / renderInspection form). `<button>`: added `-webkit-appearance:none; appearance:none;`, `type="button"`, `aria-label`, `min-width / max-width / min-height / max-height: 28px`, `padding:0`, `line-height:1`, `display:flex / align-items:center / justify-content:center` so the × glyph centres regardless of native-button padding. This is the bigger 28px button with a negative `top: -8px; right: -8px;` that sits on the corner of each photo card.
+4. **app.js:26798** — Batch camera strip delete X (in-camera staged-photo strip). `<button>`: added `-webkit-appearance:none; appearance:none;`, `type="button"`, plus `min/max width/height 18px`, `overflow:hidden`, `-webkit-tap-highlight-color:transparent`. This is the small 18x18 button with a `2px solid #111` border that sits on the top-right of each staged thumbnail in the batch cam strip.
+
+All four sites now use the same idiom:
+
+```
+-webkit-appearance:none;appearance:none;  /* only on <button> — overrides iOS native chrome */
+width:Npx;height:Npx;
+min-width:Npx;min-height:Npx;
+max-width:Npx;max-height:Npx;
+border-radius:50%;
+box-sizing:border-box;
+overflow:hidden;
+display:flex;align-items:center;justify-content:center;
+-webkit-tap-highlight-color:transparent;   /* kills the grey tap flash on iOS */
+```
+
+No visual change on desktop Chrome where `-webkit-appearance: button` wasn't overriding author CSS anyway. On iOS PWA / Safari the delete X's now render as clean red circles at every size.
+
+`type="button"` added on the two `<button>` sites to prevent any stray form submission if these end up inside a `<form>` ancestor — defensive hardening.
+
+Remaining queue after this push: v2423 anti-vibration reorder, v2424 black water chip cleanup, v2425 hot water singular, v2426 stove fuel-type picker, v2427 shore power NT snippets, v2428 aft deck conductivity mirror.
+
+---
+
 ## v2421 — 2026-04-19
 ### Added — Drop files onto category area-photo grids
 

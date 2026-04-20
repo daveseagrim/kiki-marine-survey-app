@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2421';
+const APP_VERSION = 'v2422';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -14364,7 +14364,7 @@ function renderInspection(survey) {
                     <span onclick="event.stopPropagation();rotateAreaPhoto('${pid}','${safeLabel}')"
                           style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↻</span>
                     <span onclick="event.stopPropagation();deleteAreaPhoto('${pid}','${safeLabel}')"
-                          style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">✕</span>
+                          style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:22px;height:22px;min-width:22px;min-height:22px;max-width:22px;max-height:22px;font-size:12px;line-height:22px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box;backdrop-filter:blur(2px);-webkit-text-size-adjust:none;-webkit-tap-highlight-color:transparent;">✕</span>
                     <span onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')"
                           style="position:absolute;bottom:3px;right:3px;background:rgba(6,106,171,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↗</span>
                   </div>
@@ -18574,7 +18574,7 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
             <span onclick="event.stopPropagation();rotateAreaPhoto('${pid}','${safeLabel}')"
                   style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↻</span>
             <span onclick="event.stopPropagation();deleteAreaPhoto('${pid}','${safeLabel}')"
-                  style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">✕</span>
+                  style="position:absolute;top:3px;right:3px;background:rgba(220,38,38,0.75);color:#fff;border-radius:50%;width:22px;height:22px;min-width:22px;min-height:22px;max-width:22px;max-height:22px;font-size:12px;line-height:22px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box;backdrop-filter:blur(2px);-webkit-text-size-adjust:none;-webkit-tap-highlight-color:transparent;">✕</span>
             <span onclick="event.stopPropagation();moveAreaPhoto('${pid}', '${safeLabel}', '${safeCat}')"
                   style="position:absolute;bottom:3px;right:3px;background:rgba(6,106,171,0.75);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↗</span>
           </div>
@@ -20410,9 +20410,8 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options, su
         <div class="photo-item" style="position: relative; display:none;">
           <img src="" id="thumb-${photoId}" class="photo-thumbnail"
                onclick="editSavedPhoto('${photoId}', '${safeLabel}')" />
-          <button style="position: absolute; top: -8px; right: -8px; width: 28px; height: 28px;
-                       border-radius: 50%; background: #dc2626; color: white; border: none;
-                       font-weight: bold; cursor: pointer;"
+          <button type="button" aria-label="Delete photo"
+                  style="-webkit-appearance:none;appearance:none;position:absolute;top:-8px;right:-8px;width:28px;height:28px;min-width:28px;min-height:28px;max-width:28px;max-height:28px;border-radius:50%;background:#dc2626;color:white;border:none;font-weight:bold;font-size:14px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;box-sizing:border-box;overflow:hidden;-webkit-tap-highlight-color:transparent;"
                   onclick="deletePhotoAndRefresh('${photoId}')">×</button>
         </div>
       `;
@@ -26812,9 +26811,9 @@ function refreshBatchCamStrip() {
     <div style="position:relative;flex:0 0 auto;">
       <img src="${p.dataUrl}" onclick="editStagedPhoto(${i})"
            style="width:56px;height:56px;object-fit:cover;border-radius:6px;border:2px solid #333;cursor:pointer;">
-      <button onclick="event.stopPropagation();removeStagedPhoto(${i})"
+      <button type="button" onclick="event.stopPropagation();removeStagedPhoto(${i})"
               aria-label="Remove"
-              style="position:absolute;top:-5px;right:-5px;box-sizing:border-box;width:18px;height:18px;border-radius:50%;background:#dc2626;color:#fff;border:2px solid #111;font-size:11px;font-weight:700;cursor:pointer;padding:0;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>
+              style="-webkit-appearance:none;appearance:none;position:absolute;top:-5px;right:-5px;box-sizing:border-box;width:18px;height:18px;min-width:18px;min-height:18px;max-width:18px;max-height:18px;border-radius:50%;background:#dc2626;color:#fff;border:2px solid #111;font-size:11px;font-weight:700;cursor:pointer;padding:0;line-height:1;display:flex;align-items:center;justify-content:center;overflow:hidden;-webkit-tap-highlight-color:transparent;">×</button>
     </div>
   `).join('');
   // Scroll strip to show the latest
