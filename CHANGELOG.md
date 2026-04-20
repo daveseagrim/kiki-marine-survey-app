@@ -12,6 +12,25 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2418 — 2026-04-19
+### Fixed — Aft deck percussion snippet: removed incorrect "coachroof" reference
+
+The C-rated observed chip for "Aft deck impact and resonance testing" read:
+
+> "Percussion testing of the aft deck and coachroof produced a clear and even tone with no indications of delamination or voids."
+
+The aft deck is structurally separate from the coachroof — they are tested as independent areas and warrant their own sections. The chip was likely copy-pasted from the "Deck and coachroof/pilot percussion testing" section when the aft deck section was created and never edited to match its new scope. Dave flagged it during a live survey.
+
+Changed to:
+
+> "Percussion testing of the aft deck produced a clear and even tone with no indications of delamination or voids."
+
+Left the adjacent "Both areas presented no deficiencies." chip alone — "both areas" in this context could reasonably refer to the port and starboard halves of the aft deck or to aft deck vs. cockpit sole if the surveyor is composing across scopes. Flag for future review only if Dave reports it reads wrong in the field.
+
+No code touched, no downstream refactors — isolated text_library.json edit. Roadmap slides by one: previous v2418 (rotate button on photo lightbox) → v2420+, previous v2419 (snippet disappearance on pluralized labels) → v2421+. Round-oval-X iOS fix from the interrupted earlier task moves to v2419.
+
+---
+
 ## v2417 — 2026-04-19
 ### Fixed — Deck percussion testing: removed two duplicate "clear tone" chips
 
