@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2412';
+const APP_VERSION = 'v2413';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4072,36 +4072,68 @@ async function validatePhotoIntegrity() {
         }
       }
 
-      // v2317: for orphans, check if Firebase has a storageRef (recoverable).
-      // If not, silently remove the orphan ID from the survey — it's unrecoverable.
+      // v2413 — EMERGENCY FIX: never auto-strip photo IDs from a survey.
+      //
+      // PRIOR BEHAVIOUR (v2317 → v2412):
+      //   For every orphan photo ID (referenced in survey.items[k].photos but
+      //   missing a local blob), we'd ask Firebase "do you have a storageRef
+      //   for this?". If Firestore said "no" OR the metadata doc existed but
+      //   had no storageRef field, we'd DELETE the photo ID from the survey
+      //   AND immediately saveSurvey(survey). Permanent, destructive.
+      //
+      // WHY THIS WAS WRONG (the 2026-04-19 Ex-Ta-Sea photo-wipe):
+      //   After v2412 deployed, Dave re-imported Ex-Ta-Sea-RESTORE.json. On
+      //   the next startup, this block ran against 51 of 137 photos whose
+      //   local blobs weren't in IndexedDB yet (pullPhotosFromFirebase hadn't
+      //   finished). For many of those, Firebase Storage had already lost the
+      //   underlying blob (object-not-found earlier in the session), so the
+      //   Firestore metadata doc had no usable storageRef. This code then
+      //   silently stripped every one of those photo IDs from the survey's
+      //   items[] arrays and saved it — wiping Dave's photo references on
+      //   disk permanently. Same destructive-action-on-unreliable-remote-state
+      //   pattern as the v2412 sync-delete cascade.
+      //
+      // NEW BEHAVIOUR:
+      //   • We STILL detect orphans (local blob missing).
+      //   • We STILL count them so the yellow warning banner surfaces, so Dave
+      //     knows how many photos need a download or a manual re-import.
+      //   • We NEVER mutate survey.items[k].photos based on Firebase lookups.
+      //   • We NEVER call saveSurvey() from this path.
+      //
+      // Recovery flow for "truly unrecoverable" photo references is now a
+      // deliberate user action (future: surface a "Clean missing photo
+      // references" button after the user explicitly confirms), not a silent
+      // side-effect of an app reload.
+      missing = orphanIds.length;
+      // Optional: still ping Firebase so we can log recoverability in console
+      // for forensics, but do NOT act on the result.
       if (orphanIds.length > 0 && typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled() && window.fsDb) {
-        for (const { pid, itemKey } of orphanIds) {
+        let recoverable = 0;
+        let unrecoverable = 0;
+        for (const { pid } of orphanIds) {
           try {
             const doc = await window.fsDb.collection('photos').doc(pid).get();
-            if (doc.exists && doc.data().storageRef) {
-              // Recoverable via Firebase download — count as missing
-              missing++;
-            } else {
-              // Not in Firebase or no storageRef — unrecoverable orphan, clean it
-              const item = survey.items[itemKey];
-              if (item && item.photos) {
-                item.photos = item.photos.filter(id => id !== pid);
-                cleaned++;
-              }
-            }
+            if (doc.exists && doc.data().storageRef) recoverable++;
+            else unrecoverable++;
           } catch (_fbErr) {
-            // Firebase lookup failed — assume recoverable to be safe
-            missing++;
+            recoverable++; // assume recoverable on error — never destructive
           }
         }
-        if (cleaned > 0) {
-          await saveSurvey(survey);
-          console.log(`[Photo Integrity] Cleaned ${cleaned} unrecoverable orphan photo IDs from ${survey.vesselName}`);
+        if (unrecoverable > 0) {
+          console.warn(
+            `[Photo Integrity] ${survey.vesselName}: ${unrecoverable} photo IDs appear unrecoverable ` +
+            `(no Firebase storageRef). Leaving the references intact — NOT auto-stripping. ` +
+            `Use manual recovery if needed.`
+          );
         }
-      } else {
-        // No Firebase — count all orphans as missing
-        missing = orphanIds.length;
+        if (recoverable > 0) {
+          console.log(
+            `[Photo Integrity] ${survey.vesselName}: ${recoverable} photos recoverable via Firebase download.`
+          );
+        }
       }
+      // `cleaned` stays 0 by design — this function no longer mutates surveys.
+      void cleaned;
 
       if (missing > 0) {
         warnings.push({ name: survey.vesselName || 'Unnamed', id: survey.id, referenced, missing });

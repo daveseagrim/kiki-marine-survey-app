@@ -12,6 +12,51 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2413 — 2026-04-19
+### Fixed (EMERGENCY) — `validatePhotoIntegrity` no longer silently strips photo IDs from surveys on startup
+
+Minutes after v2412 deployed and Dave re-imported Ex-Ta-Sea from the Drive RESTORE.json, the photos disappeared from the survey entirely ("No photos in ex ta sea now"). The survey record itself was intact this time — the v2412 sync-delete fix held — but every `items[k].photos[]` array had been emptied. Same pattern of harm, different code path. Still destructive-action-on-unreliable-remote-state.
+
+**Root cause at `app.js:4075-4100` (the v2317 block inside `validatePhotoIntegrity`).**
+
+On every app startup, this function walks every survey, finds photo IDs whose local blob is missing from IndexedDB ("orphans"), and for each orphan it asks Firestore "do you have a `storageRef` for this?". If the metadata doc didn't exist or had no `storageRef` field, the code ran:
+
+```js
+item.photos = item.photos.filter(id => id !== pid);
+cleaned++;
+// ...and then:
+await saveSurvey(survey);
+```
+
+— silently stripping the photo ID reference from the survey and persisting the stripped version to IndexedDB. Permanent, no user prompt, no undo.
+
+This bit Ex-Ta-Sea because: (1) the fresh import loaded 137 photo references into IndexedDB, (2) `pullPhotosFromFirebase` hadn't finished hydrating the blobs yet, so most IDs were "orphans" by definition at the moment `validatePhotoIntegrity` ran, and (3) many of the corresponding Firestore metadata docs had no usable `storageRef` (Dave's earlier session logged `storage/object-not-found` errors for dozens of photos — the Storage blobs had been lost upstream for reasons still under investigation). The combination turned an app reload into a mass photo-reference wipe.
+
+**The fix — `validatePhotoIntegrity` is now strictly read-only.**
+
+- It still scans surveys and counts orphans so the yellow "photos on another device" banner still surfaces.
+- It still pings Firestore for each orphan so we can log recoverable-vs-unrecoverable counts for forensics.
+- It no longer calls `filter(...)` on `item.photos`. It no longer calls `saveSurvey(survey)`. No code path in this function mutates persisted survey data.
+- `cleaned` stays 0 by design; the variable is preserved only to keep downstream conditionals stable without a wider refactor.
+
+A future "Clean missing photo references" recovery tool can reintroduce a deliberate cleanup path — gated by an explicit user confirmation and a dry-run preview — but it will never be automatic on startup.
+
+**Why this passed review before (v2317) and still was wrong.**
+
+At the time the block was written, the failure mode it was designed to handle — an orphan ID that truly had no recoverable copy anywhere — is real and rare, and the "clean it up" response looked tidy. But it implicitly trusted Firebase's response as authoritative ("if Firestore says no `storageRef`, the blob is gone forever") when Firebase's response is just a point-in-time query against a system that can itself be out-of-sync, in the middle of a write, returning a stale proxy cache, or — as happened here — missing Storage blobs for reasons unrelated to the survey's local integrity. The general rule, same as v2412: **never let a destructive local mutation hinge on a remote lookup that can be wrong.**
+
+### Scope
+- Single block rewritten at `app.js:4075-4100` — orphan check no longer mutates `survey.items[k].photos`, no longer calls `saveSurvey`. Warning banner still surfaces, forensics still logged.
+- Atomic version bump (v2412 → v2413): `APP_VERSION`, `CACHE_NAME`, `app-version` meta, seven `?v=2413` cache-busters.
+- No behavioural change to any other code path.
+
+### Not included
+- Surfacing a user-gated "Clean missing photo references" action — queued as a future UX item.
+- Forensics on why the Firebase Storage blobs for Ex-Ta-Sea photos went `object-not-found` (upload-path investigation — separate thread).
+- v2414 (vessel description auto-regen — propeller + missed fields), v2415 (preflight undo toast), v2416 (report page header survey-type), v2417 (compound-subject NT grammar) — queue reordered by one.
+
+---
+
 ## v2412 — 2026-04-19
 ### Fixed (EMERGENCY) — Firebase sync-delete cascade: cloud-driven 'removed' events no longer wipe local surveys
 
