@@ -12,6 +12,32 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2421 — 2026-04-19
+### Added — Drop files onto category area-photo grids
+
+v2419 added drag-to-reorder inside the area-photo thumbnails but did **not** add file-drop from the OS into those grids — Dave flagged the miss in the field ("I'm not seeing the photo changes (drag and drop and drag in one place…)"). v2421 finishes the job: dragging image files from Finder/Files app / the Photos app / a desktop folder directly onto a category area-photo section (e.g. "Deck and coachroof/pilot house photos", "Flybridge photos") now attaches those files to that media item and refreshes the grid in place.
+
+Implementation reuses the existing checklist drop pipeline — `setupChecklistDragDrop` already event-delegates drops on `.compact-item-wrapper` and `.safety-item-wrapper`. Extended three seams:
+
+1. **`findWrapper`** (app.js:6156) — added a third `el.closest('[id^="area-photo-wrap-"]')` check after compact and safety. Wrappers marked `data-media-excluded="1"` (skipped media sections) are rejected so drops can't land in a skipped bucket.
+2. **Drop-handler routing** (app.js:6199+) — new branch for wrappers whose `id` starts with `area-photo-wrap-`: reads the media label from `data-media-label` and forwards to the existing `attachPhotosToItem(mediaLabel, files)`. `attachPhotosToItem` already has an area-photo tail at app.js:6063 that calls `refreshAreaPhotoGrid` when it detects an area wrapper exists for the label, so the new photos appear in the grid immediately without a full re-render.
+3. **Wrapper attributes** — `data-media-label` (HTML-escaped via existing `escapeHtml` helper) added to both branches of the initial render in the main category loop (app.js:14327 excluded, app.js:14336 normal). `data-media-excluded="1"` added only on the excluded branch. `refreshAreaPhotoGrid` now syncs both attributes on every re-render (app.js:18509+) so toggling Skip / Unskip correctly enables / disables drops without re-running the main category loop.
+
+Visual feedback uses a new CSS rule `[id^="area-photo-wrap-"].drag-target` in index.html:502 — same dashed #066aab outline + #eff6ff fill as `.compact-item-wrapper.drag-target` so drag feedback is uniform across checklist items, safety items, and area-photo sections.
+
+HTML-attribute escaping: the legacy `safeLabel` variable replaces `'` with `\'` for JavaScript string interpolation inside `onclick="fn('${safeLabel}')"` — that escaping is wrong for a plain HTML attribute value, so `data-media-label` goes through `escapeHtml()` (app.js:8498) which only escapes `&`, `<`, `>`, `"`. Standard media labels like "Cockpit photos" / "Foredeck photos" have no special characters, but the defensive escape survives if a template label ever acquires `&`.
+
+Tested paths:
+- Desktop Chrome: drag one or more JPG/PNG/HEIC files from Finder onto a category "📷 X photos" section → files attach, thumbnails appear, photo count badge updates.
+- iPhone Safari (PWA): drag photos from the Photos app onto the area-photo card → same result via the file-drop event.
+- Skipped section: dragging onto a "⊘ X — skipped" card does nothing (findWrapper rejects `data-media-excluded="1"`). No toast, no phantom attach.
+
+No new state, no IndexedDB schema changes. Existing surveys behave identically except that area-photo sections are now drop targets.
+
+Roadmap: round-oval X's on photo thumbnails (iOS) ships as v2422 next.
+
+---
+
 ## v2420 — 2026-04-19
 ### Added — Flybridge Magnetic compass chip set (A/B/C/N-A/Not tested)
 

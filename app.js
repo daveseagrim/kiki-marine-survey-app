@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2420';
+const APP_VERSION = 'v2421';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -6151,14 +6151,21 @@ function setupChecklistDragDrop() {
   if (!app || app.dataset.dragDropWired === 'true') return;
   app.dataset.dragDropWired = 'true';
 
-  // Find the nearest valid drop target (checklist item OR safety item).
-  // Skipped safety items (data-safety-skipped="1") are not valid targets.
+  // Find the nearest valid drop target (checklist item OR safety item OR
+  // category area-photo grid). Skipped safety items (data-safety-skipped="1")
+  // and skipped area-photo sections (data-media-excluded="1") are not valid
+  // targets.
+  // v2421: area-photo wrappers (id prefix "area-photo-wrap-") accept file
+  // drops the same way compact-item-wrappers do — the drop handler routes to
+  // attachPhotosToItem using the mediaLabel stashed on data-media-label.
   const findWrapper = (el) => {
     if (!el || !el.closest) return null;
     const compact = el.closest('.compact-item-wrapper');
     if (compact) return compact;
     const safety = el.closest('.safety-item-wrapper[data-safety-idx]');
     if (safety && safety.getAttribute('data-safety-skipped') !== '1') return safety;
+    const area = el.closest('[id^="area-photo-wrap-"]');
+    if (area && area.getAttribute('data-media-excluded') !== '1') return area;
     return null;
   };
 
@@ -6199,6 +6206,17 @@ function setupChecklistDragDrop() {
       const idx = parseInt(idxAttr, 10);
       if (!Number.isNaN(idx)) {
         await attachPhotosToSafetyItem(idx, files);
+      }
+      return;
+    }
+    // v2421: category area-photo grid drop — drops go into the same
+    // media item whose photos are rendered in that grid. attachPhotosToItem
+    // already calls refreshAreaPhotoGrid when it detects an area wrapper
+    // exists for the label, so the new photos appear in place.
+    if (wrapper.id && wrapper.id.indexOf('area-photo-wrap-') === 0) {
+      const mediaLabel = wrapper.getAttribute('data-media-label');
+      if (mediaLabel) {
+        await attachPhotosToItem(mediaLabel, files);
       }
       return;
     }
@@ -14324,7 +14342,7 @@ function renderInspection(survey) {
       const sanitized = mediaItem.label.replace(/[^a-zA-Z0-9]/g, '_');
       if (isMediaExcluded) {
         html += `
-          <div id="area-photo-wrap-${sanitized}" style="margin-bottom:16px;padding:12px;background:#f3f4f6;border:1px dashed #d1d5db;border-radius:8px;opacity:0.75;">
+          <div id="area-photo-wrap-${sanitized}" data-media-label="${escapeHtml(mediaItem.label)}" data-media-excluded="1" style="margin-bottom:16px;padding:12px;background:#f3f4f6;border:1px dashed #d1d5db;border-radius:8px;opacity:0.75;">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
               <div style="font-weight:600;font-size:14px;color:#6b7280;">⊘ ${mediaItem.label} — skipped${photos.length > 0 ? ` (${photos.length} photo${photos.length === 1 ? '' : 's'} retained)` : ''}</div>
               <button onclick="toggleExclude('${safeLabel}')" style="background:white;color:#066aab;border:1px solid #066aab;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;">Unskip</button>
@@ -14333,7 +14351,7 @@ function renderInspection(survey) {
         `;
       } else {
         html += `
-          <div id="area-photo-wrap-${sanitized}" style="margin-bottom:16px;padding:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
+          <div id="area-photo-wrap-${sanitized}" data-media-label="${escapeHtml(mediaItem.label)}" style="margin-bottom:16px;padding:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;" onclick="toggleAreaPhotoCollapse('${sanitized}')">
               <div style="font-weight:600;font-size:14px;color:#0369a1;">📷 ${mediaItem.label}${photos.length > 0 ? ` (${photos.length})` : ''} <span id="area-chevron-${sanitized}" style="font-size:11px;color:#94a3b8;">▼</span></div>
               <button onclick="event.stopPropagation();toggleExclude('${safeLabel}')" style="background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;" title="Skip this photo section">⊘ Skip</button>
@@ -18520,8 +18538,15 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
   const catName = accordion ? (accordion.dataset.categoryName || '') : '';
   const safeCat = catName.replace(/'/g, "\\'");
 
+  // v2421: keep data-media-label in sync so file-drop handler can route the
+  // drop to the right media item even if the wrapper was rendered before
+  // this attribute existed.
+  wrapper.setAttribute('data-media-label', mediaLabel);
+
   // v2219: respect excluded state on media items
   if (isMediaExcluded) {
+    // v2421: mark excluded so the drag-drop findWrapper ignores this wrapper
+    wrapper.setAttribute('data-media-excluded', '1');
     wrapper.style.cssText = 'margin-bottom:16px;padding:12px;background:#f3f4f6;border:1px dashed #d1d5db;border-radius:8px;opacity:0.75;';
     wrapper.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
@@ -18533,6 +18558,8 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
   }
 
   // Not excluded — reset styling and render the full UI
+  // v2421: clear the excluded flag so drops are accepted again
+  wrapper.removeAttribute('data-media-excluded');
   wrapper.style.cssText = 'margin-bottom:16px;padding:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;';
   wrapper.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;" onclick="toggleAreaPhotoCollapse('${sanitized}')">

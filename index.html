@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#ffffff">
     <meta name="description" content="Marine vessel surveying app for Kiki Marine">
     <!-- v2391: version handshake — app.js compares this to APP_VERSION on startup and auto-heals the cache on mismatch -->
-    <meta name="app-version" content="v2420">
+    <meta name="app-version" content="v2421">
     <!-- iOS PWA support -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -505,6 +505,14 @@
             background: #eff6ff;
             border-radius: 6px;
         }
+        /* v2421: drag-target visual for category area-photo grids. id selector
+           avoids adding a new class to every wrapper — keeps the existing
+           render path unchanged. */
+        [id^="area-photo-wrap-"].drag-target {
+            outline: 2px dashed #066aab;
+            outline-offset: -2px;
+            background: #eff6ff !important;
+        }
         .compact-item-label {
             flex: 1;
             font-size: 14px;
@@ -703,12 +711,12 @@
     }
     </script>
     <!-- Pure-function core modules — also used by Node.js tests in tests/ -->
-    <script src="src/core/ratings.js?v=2420"></script>
-    <script src="src/core/placeholders.js?v=2420"></script>
-    <script src="src/core/skip_logic.js?v=2420"></script>
-    <script src="src/core/drive_backup.js?v=2420"></script>
-    <script src="src/core/snippet_tokens.js?v=2420"></script>
-    <script src="src/core/component_builder.js?v=2420"></script>
-    <script src="app.js?v=2420"></script>
+    <script src="src/core/ratings.js?v=2421"></script>
+    <script src="src/core/placeholders.js?v=2421"></script>
+    <script src="src/core/skip_logic.js?v=2421"></script>
+    <script src="src/core/drive_backup.js?v=2421"></script>
+    <script src="src/core/snippet_tokens.js?v=2421"></script>
+    <script src="src/core/component_builder.js?v=2421"></script>
+    <script src="app.js?v=2421"></script>
 </body>
 </html>
