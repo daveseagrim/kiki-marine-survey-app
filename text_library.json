@@ -24741,13 +24741,6 @@
                   "severity": 2
             },
             {
-                  "section": "Deck and coachroof/pilot percussion testing",
-                  "rating": "C",
-                  "text": "Percussion testing of the deck, and coachroof produced a clear and even tone with no indications of delamination or voids.",
-                  "phase": "observed",
-                  "severity": 5
-            },
-            {
                   "section": "Deck and coachroof/pilothouse conductivity testing",
                   "rating": "A",
                   "text": "The deck and coachroof returned readings between [insert details] and [insert details].",
@@ -25984,13 +25977,6 @@
                   "phase": "observed",
                   "severity": 1,
                   "text": "Impact and resonance testing was carried out across the deck and coachroof.",
-                  "section": "Deck and coachroof/pilot percussion testing"
-            },
-            {
-                  "rating": "C",
-                  "phase": "observed",
-                  "severity": 1,
-                  "text": "Most of the deck and coachroof produced a clear and even tone with no indications of core moisture, voids, or delamination.",
                   "section": "Deck and coachroof/pilot percussion testing"
             },
             {

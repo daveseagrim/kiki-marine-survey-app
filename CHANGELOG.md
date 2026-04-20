@@ -12,6 +12,21 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2417 — 2026-04-19
+### Fixed — Deck percussion testing: removed two duplicate "clear tone" chips
+
+The C-rating observed bucket for "Deck and coachroof/pilot percussion testing" had three chips saying essentially the same thing in three different ways:
+
+1. "Most of the deck and coachroof produced a clear and even tone with no indications of core moisture, voids, or delamination." (sev 1)
+2. "The deck and coachroof produced a clear and even tone throughout with no indications of core moisture, voids, or delamination." (sev 1)
+3. "Percussion testing of the deck, and coachroof produced a clear and even tone with no indications of delamination or voids." (sev 5, with a comma-splice typo before "and")
+
+Chips #1 and #3 were removed. Kept #2 as the canonical "all clear" phrasing because (a) "throughout" is the correct qualifier for an all-clear finding — "most of" implies some exceptions exist, (b) it reads cleanly without the typo in #3, and (c) the "no indications of core moisture, voids, or delamination" wording is more precise than "delamination or voids" alone.
+
+The alternative-phrasing chip "No dull thuds or ringing tones were detected during impact testing." is kept — it's phrased differently enough to let the surveyor compose a two-sentence observation like "Clear and even tone throughout… no dull thuds or ringing tones detected."
+
+---
+
 ## v2416 — 2026-04-19
 ### Fixed — Deck and coachroof spider cracks: removed misphased/redundant C-rating chip
 
