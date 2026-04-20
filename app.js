@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2409';
+const APP_VERSION = 'v2410';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -26568,6 +26568,69 @@ function _batchCameraFallback(itemLabel, opts) {
   }
 }
 
+// v2410: Synthesized shutter click for the batchCam capture path.
+// getUserMedia + canvas.drawImage() is silent — unlike the native camera
+// which the OS annotates with its own shutter sound. Dave needs clear
+// audible confirmation that a frame was captured.
+//
+// WebAudio-based so there's no asset to cache and no dependency on the
+// device's media volume setting (WebAudio routes through the "media" bus
+// on iOS, which is what we want — it's loud even when the ringer is
+// silenced, matching the behaviour of a purpose-built camera app).
+//
+// The context is lazily created inside the shutter click handler, which
+// counts as a user gesture — required for iOS Safari to unlock audio.
+// Once unlocked it stays unlocked for the session, so subsequent snaps
+// play immediately without re-acquiring the gesture.
+let _shutterAudioCtx = null;
+function playShutterClick() {
+  try {
+    if (!_shutterAudioCtx) {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      _shutterAudioCtx = new Ctx();
+    }
+    const ctx = _shutterAudioCtx;
+    // iOS Safari suspends the context when the camera overlay backgrounds
+    // it — resume on each play so the click still fires after returning.
+    if (ctx.state === 'suspended') {
+      try { ctx.resume(); } catch (_) {}
+    }
+    // 60 ms burst of band-filtered white noise with a sharp attack and
+    // exponential decay — sonically reads as a crisp mechanical "snap".
+    const duration = 0.06;
+    const frames = Math.floor(ctx.sampleRate * duration);
+    const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < frames; i++) {
+      const t = i / ctx.sampleRate;
+      const attack = Math.min(t / 0.002, 1);     // 2 ms attack ramp
+      const decay = Math.exp(-t / 0.015);        // 15 ms decay constant
+      data[i] = (Math.random() * 2 - 1) * attack * decay;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    // Bandpass centred at 3.5 kHz — gives the click its "snap" character
+    // without boomy low-end or harsh high-end. Q of 1 keeps it wide enough
+    // to sound like a mechanical click rather than a pure tone.
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 3500;
+    filter.Q.value = 1;
+    const gain = ctx.createGain();
+    gain.gain.value = 0.6;
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    src.start(0);
+  } catch (err) {
+    // Audio failure is non-fatal — the red shutter-flash visual feedback
+    // at snapStagedPhoto is still in place, so the surveyor sees a cue
+    // even on the rare device where WebAudio is unavailable.
+    console.warn('[Camera] playShutterClick failed:', err);
+  }
+}
+
 function snapStagedPhoto() {
   try {
   const bc = window._batchCam;
@@ -26597,6 +26660,10 @@ function snapStagedPhoto() {
 
   const id = 'staged_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
   bc.staged.push({ id, dataUrl, width: canvas.width, height: canvas.height });
+
+  // v2410: audible confirmation — fires only on successful capture so a
+  // silent failure (e.g. video not ready) never lies about the result.
+  playShutterClick();
 
   // Haptic-ish visual feedback: flash the shutter
   const sh = document.getElementById('batchCamShutter');

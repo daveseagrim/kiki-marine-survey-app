@@ -12,6 +12,36 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2410 — 2026-04-19
+### Added — Audible shutter click on in-app camera capture
+
+Dave: *"I need to clearly hear when I take a picture."* The in-app batchCam overlay (`snapStagedPhoto`) captures by drawing a `<video>` frame onto a canvas — a completely silent operation. Unlike the `<input type="file" capture="environment">` fallback path, which hands off to the native iOS/Android camera app and inherits its OS shutter sound, the in-app path had no auditory confirmation. Only a brief red flash on the shutter button, which is easy to miss when the surveyor is looking at the subject rather than the screen.
+
+**Added `playShutterClick()` — WebAudio-synthesized mechanical click.**
+- 60 ms burst of white noise through a bandpass filter centred at 3.5 kHz, with a 2 ms attack ramp and 15 ms exponential decay. Reads as a crisp mechanical "snap" without boomy low-end or harsh high-end.
+- No audio asset to cache or fetch — the sound is generated at the sample rate of the device on demand. Works offline, works on every supported browser.
+- Plays through WebAudio's media bus, so on iOS the click is audible even when the ringer switch is silent. Matches the behaviour of purpose-built camera apps.
+- Volume gain 0.6 — loud enough to cut through a marina's background noise without clipping through cheap phone speakers.
+
+**Wired into `snapStagedPhoto` success path.**
+- Called immediately after `dataUrl` is generated and pushed to `bc.staged`, before the visual flash. If the capture fails (e.g. `video.videoWidth` is 0 because the stream isn't ready), the click does NOT fire — the audio is a truth signal, not a placebo.
+
+**iOS Safari audio-unlock handling.**
+- The `AudioContext` is created lazily on the first shutter tap, so the tap itself counts as the user gesture required to unlock audio. Subsequent taps skip the unlock — the context stays live for the session.
+- `ctx.state === 'suspended'` is checked on every play and resumed on demand, because iOS can re-suspend the context when the camera overlay temporarily backgrounds (e.g. when the app shows the zoom slider constraint change or the surveyor switches tabs).
+
+### Scope
+- One new helper `playShutterClick()` with a module-level `_shutterAudioCtx` cache (~26571-26633 region).
+- One-line call `playShutterClick();` injected into `snapStagedPhoto` right after the staged photo is pushed.
+- Atomic version bump (v2409 → v2410): `APP_VERSION`, `CACHE_NAME`, `app-version` meta, seven `?v=2410` cache-busters.
+- Only affects the in-app batchCam overlay. The `<input type="file" capture="environment">` paths (`rapidCaptureInstruments`, `addInstrumentByPhoto`, `capturePhoto`, `handleAreaPhotoCapture`, `captureDocPhoto`, safety-equipment handler) continue to use the native camera app and its built-in shutter sound — intentionally unchanged so iPhone's camera behaviour is consistent where it hands off to the OS.
+
+### Not included
+- v2411 (preflight undo on green check-off toast) — next in queue. Dave flagged that the toast currently auto-dismisses the ticked item with no recovery path.
+- v2412 (report page header survey-type consistency), v2413 (grammar NT sweep), v2414 (Safety Equipment styling parity), v2415 (vessel description auto-regen — propeller + missed fields) queued behind that.
+
+---
+
 ## v2409 — 2026-04-19
 ### Fixed — Rudder snippets: sailboat stuffing-box false positives + weak action chip
 
