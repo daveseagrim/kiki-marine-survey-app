@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2423';
+const APP_VERSION = 'v2424';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -1685,6 +1685,101 @@ function getTemplateForSurvey(survey) {
   return surveyTemplate || [];
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// v2424 — Stale-write freshness guard (P0 hotfix)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Root cause of the 2026-04-19 Ex-Ta-Sea regression
+// ─────────────────────────────────────────────────
+// On the Mac, a visibilitychange/pagehide event fired _flushOnHide, which
+// persisted the page's in-memory survey object — but that object was a
+// *stale closure* from an earlier edit session, missing items and text
+// that had since arrived via the Firestore onSnapshot listener. The sync
+// wrapper (saveSurvey override below) then stamped a fresh lastModified
+// and pushed the shrunken record up to Firestore, which propagated back
+// to the iPhone. The existing richness-guard at app.js:25786 only fires
+// on a >20% shrink; Ex-Ta-Sea shrank ~5%, so the guard missed it.
+//
+// Design of the guard
+// ───────────────────
+// `_v2424DetectStaleRegression(existing, incoming)` is intentionally
+// conservative. It returns a truthy details object ONLY when ALL of:
+//   1. At least 2 items present in the existing record are missing from
+//      the incoming record (droppedItems ≥ 2).
+//   2. Either the vessel name changed (non-empty existingName → different
+//      incoming name), OR item-level text shrank by ≥ 200 chars total
+//      (sum of text lost from dropped keys plus per-item shrinkage on
+//      shared keys).
+//
+// Rationale for the thresholds:
+//   - droppedItems ≥ 2 — a surveyor can delete one item legitimately
+//     (misclick, re-labelled). Losing two-plus items in a single save is
+//     almost never intentional and matches the Ex-Ta-Sea pattern (3
+//     items dropped).
+//   - nameChanged — the regression renamed "Ex-Ta-Sea." back to an older
+//     value. Catches any write that silently reverts a confirmed name.
+//     Empty-existing-name is excluded so newly-saved surveys with a
+//     blank name can be filled in without tripping the guard.
+//   - textShrunk ≥ 200 chars — the Ex-Ta-Sea regression wiped 522 chars
+//     of narrative text. 200 is a wide enough margin to survive small
+//     grammar tweaks yet tight enough to catch the "wipe" class.
+//
+// On regression the save path:
+//   - Does NOT call store.put() — the transaction commits unchanged.
+//   - Journals the refusal via _journalSurveyWrite with a
+//     `":REFUSED_STALE"` caller suffix so the forensic trail shows it.
+//   - Shows a toast so Dave sees the refusal in the field.
+//   - Resolves the promise with `null` so the sync wrapper can short-
+//     circuit and avoid pushing the stale survey to Firestore/Drive.
+//
+// Fail-open behaviour: any exception inside the guard is caught and the
+// save is allowed through. Silently blocking a save on a guard-bug would
+// be worse than the original regression class.
+// ═══════════════════════════════════════════════════════════════════════════
+function _v2424DetectStaleRegression(existing, incoming) {
+  try {
+    if (!existing || !incoming) return null;
+    if (!existing.items || typeof existing.items !== 'object') return null;
+    if (!incoming.items || typeof incoming.items !== 'object') return null;
+
+    const existingKeys = Object.keys(existing.items);
+    const droppedKeys = existingKeys.filter(k => !(k in incoming.items));
+    const droppedItems = droppedKeys.length;
+    if (droppedItems < 2) return null;
+
+    const existingName = typeof existing.vesselName === 'string' ? existing.vesselName.trim() : '';
+    const incomingName = typeof incoming.vesselName === 'string' ? incoming.vesselName.trim() : '';
+    const nameChanged = existingName.length > 0 && existingName !== incomingName;
+
+    // Compute text shrinkage: chars lost on dropped keys + per-item shrinkage on shared keys.
+    let textShrunk = 0;
+    for (const k of droppedKeys) {
+      const it = existing.items[k];
+      const t = it && typeof it.text === 'string' ? it.text : '';
+      textShrunk += t.length;
+    }
+    for (const k of Object.keys(incoming.items)) {
+      if (k in existing.items) {
+        const e = existing.items[k];
+        const i = incoming.items[k];
+        const et = e && typeof e.text === 'string' ? e.text : '';
+        const it = i && typeof i.text === 'string' ? i.text : '';
+        if (et.length > it.length) textShrunk += (et.length - it.length);
+      }
+    }
+    const textShrunkEnough = textShrunk >= 200;
+
+    if (nameChanged || textShrunkEnough) {
+      return { droppedItems, droppedKeys, nameChanged, existingName, incomingName, textShrunk };
+    }
+    return null;
+  } catch (e) {
+    // Fail open — never block a save on a guard error.
+    if (typeof console !== 'undefined') console.warn('[v2424] freshness guard error (failing open):', e);
+    return null;
+  }
+}
+
 // Database operations
 async function saveSurvey(survey) {
   // Guard: can't put a survey without an id (keyPath='id'). This silently
@@ -1778,32 +1873,81 @@ async function saveSurvey(survey) {
     const tx = db.transaction(['surveys'], 'readwrite');
     const store = tx.objectStore('surveys');
 
-    // v2401: read the existing record FIRST in the same transaction so
-    // we can record beforeSize in the journal entry. A same-tx serial
-    // get → put is slightly slower than a raw put, but the extra read
-    // is O(1) and the savepath is already doing expensive work
-    // (stringify, auto-regen) so this is noise. Falls through to a
-    // plain put if the get fails.
-    let beforeRecord = null;
+    // v2401 + v2424: read the existing record FIRST in the same transaction.
+    // Two callers for the pre-read:
+    //   (a) v2401 journal — beforeSize needs the pre-write state so the
+    //       audit trail shows exactly how much a save grew/shrank.
+    //   (b) v2424 freshness guard — gates the store.put() on a content-
+    //       based regression check (see _v2424DetectStaleRegression).
+    // The put() is now strictly serial with the get(): it only fires
+    // inside getReq.onsuccess once the guard has cleared the save. If
+    // the get() fails (rare) we fall through to a plain put so the save
+    // path remains alive.
     const getReq = store.get(survey.id);
-    getReq.onsuccess = () => { beforeRecord = getReq.result || null; };
-    getReq.onerror = () => { beforeRecord = null; };
 
-    const request = store.put(survey);
-    request.onerror = () => {
-      _kkSaveInProgress = false;
-      _checkDeferredUpdate();
-      reject(request.error);
+    function _performPut(beforeRecord) {
+      const request = store.put(survey);
+      request.onerror = () => {
+        _kkSaveInProgress = false;
+        _checkDeferredUpdate();
+        reject(request.error);
+      };
+      request.onsuccess = () => {
+        // Mark that there are unsaved changes for backup reminder
+        window._hasUnsavedBackup = true;
+        _kkSaveInProgress = false;
+        _checkDeferredUpdate();
+        // v2401: fire-and-forget journal write. Runs in a separate tx so
+        // journal pressure never blocks the save resolve.
+        _journalSurveyWrite(survey, _v2401Caller, beforeRecord);
+        resolve(survey.id);
+      };
+    }
+
+    getReq.onerror = () => {
+      // Pre-read failed — no regression data to check against, fall
+      // through to a plain put() to keep the save path alive.
+      _performPut(null);
     };
-    request.onsuccess = () => {
-      // Mark that there are unsaved changes for backup reminder
-      window._hasUnsavedBackup = true;
-      _kkSaveInProgress = false;
-      _checkDeferredUpdate();
-      // v2401: fire-and-forget journal write. Runs in a separate tx so
-      // journal pressure never blocks the save resolve.
-      _journalSurveyWrite(survey, _v2401Caller, beforeRecord);
-      resolve(survey.id);
+    getReq.onsuccess = () => {
+      const beforeRecord = getReq.result || null;
+      // v2424 freshness guard — refuse writes that drop ≥2 items AND
+      // either rename the vessel or shrink item text by ≥200 chars.
+      // This catches the class of regression seen on 2026-04-19 where
+      // a stale _flushOnHide closure clobbered fresh IDB state.
+      if (beforeRecord) {
+        const regression = _v2424DetectStaleRegression(beforeRecord, survey);
+        if (regression) {
+          _kkSaveInProgress = false;
+          _checkDeferredUpdate();
+          // Journal the refusal so the forensic trail shows it.
+          try {
+            _journalSurveyWrite(survey, (_v2401Caller || '?') + ':REFUSED_STALE', beforeRecord);
+          } catch (_) { /* never block on journal failure */ }
+          if (typeof console !== 'undefined') {
+            console.warn('[v2424] save refused — stale regression detected:', {
+              id: survey.id,
+              caller: _v2401Caller,
+              droppedItems: regression.droppedItems,
+              droppedKeys: regression.droppedKeys,
+              nameChanged: regression.nameChanged,
+              existingName: regression.existingName,
+              incomingName: regression.incomingName,
+              textShrunk: regression.textShrunk,
+            });
+          }
+          try {
+            if (typeof showToast === 'function') {
+              showToast('⚠️ Save refused — stale data detected. Reload the page.');
+            }
+          } catch (_) { /* toast is cosmetic */ }
+          // Resolve with null so the sync wrapper can short-circuit and
+          // skip the Firestore push + Drive autosync.
+          resolve(null);
+          return;
+        }
+      }
+      _performPut(beforeRecord);
     };
   });
 }
@@ -26343,6 +26487,13 @@ saveSurvey = async function(survey) {
     survey.lastModified = new Date().toISOString();
   }
   const result = await _originalSaveSurvey(survey);
+  // v2424: If the freshness guard refused the write, _originalSaveSurvey
+  // resolves with null. Skip Firebase push + Drive autosync so the stale
+  // in-memory state never leaves this device. Without this short-circuit,
+  // the lastModified bump above would get pushed to Firestore with the
+  // unchanged IDB record stripped of its new items, which is exactly the
+  // regression class the guard exists to prevent.
+  if (result === null) return null;
   // Push to Firebase (non-blocking)
   if (FirebaseSync.isEnabled() && !FirebaseSync.isSuppressed()) {
     FirebaseSync.pushSurvey(survey).catch(err => console.error('[Sync] Push failed:', err));

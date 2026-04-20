@@ -12,6 +12,35 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2424 — 2026-04-20
+### Added — Stale-write freshness guard on saveSurvey (P0 hotfix)
+
+Post-mortem on the 2026-04-19 Ex-Ta-Sea regression identified Firestore two-way sync as the carrier. On the Mac, a visibilitychange/pagehide event fired `_flushOnHide` (app.js:2065), which persisted the page's in-memory survey object — but that object was a *stale closure* from an earlier edit session, missing items and text that had since arrived via the Firestore `onSnapshot` listener. The sync wrapper at app.js:26340 stamped a fresh `lastModified` and pushed the shrunken record to Firestore, which propagated back to the iPhone. The existing richness-guard at app.js:25786 only fires on a >20% shrink; Ex-Ta-Sea shrank ~5%, so the guard missed it.
+
+v2424 adds a content-based freshness guard inside `saveSurvey` itself, one layer below the sync wrapper so the refused write never even hits the Firestore push path.
+
+**Detection (app.js `_v2424DetectStaleRegression`)** — a write is treated as a stale regression when ALL of:
+
+1. **droppedItems ≥ 2** — at least two item keys present in the existing IDB record are missing from the incoming save payload. One dropped item is plausible (misclick, relabel); two-plus in a single save is almost never intentional and matches the Ex-Ta-Sea pattern (3 items dropped).
+2. **nameChanged OR textShrunk ≥ 200 chars** — either the vessel name changed from a non-empty existing value, OR item-level `text` shrank by ≥ 200 chars total (chars lost from dropped keys plus per-item shrinkage on shared keys). The Ex-Ta-Sea regression reverted the name "Ex-Ta-Sea." and wiped 522 chars of narrative — both signals light up.
+
+The thresholds are deliberately conservative to avoid blocking legitimate edits. Empty-existing-name is excluded so newly-saved surveys with a blank name can be filled in freely.
+
+**Enforcement (app.js `saveSurvey`, restructured)** — the existing `store.get(survey.id)` pre-read (from v2401 journaling) now gates the `store.put(survey)`. The put is only issued inside `getReq.onsuccess` after the guard has cleared the save. On regression:
+
+- `store.put()` is NOT called — the transaction commits unchanged, so IDB stays at the richer pre-save state.
+- The refusal is journaled via `_journalSurveyWrite(survey, _v2401Caller + ':REFUSED_STALE', beforeRecord)` so the forensic trail records the attempt, the caller, and the before/after sizes.
+- A toast — `⚠️ Save refused — stale data detected. Reload the page.` — surfaces the refusal to Dave in the field.
+- The promise resolves with `null`.
+
+**Sync short-circuit (app.js:26340 sync wrapper)** — the wrapper now checks `if (result === null) return null;` immediately after the `_originalSaveSurvey` call. This skips both the Firestore push and the Drive auto-sync, so the stale in-memory state never leaves this device. Without this short-circuit, the `lastModified` bump earlier in the wrapper would have been pushed to Firestore attached to the unchanged IDB record, and the regression would still leak across devices.
+
+**Fail-open behaviour** — every guard path is wrapped in try/catch. Any exception inside `_v2424DetectStaleRegression` or the journal/toast calls silently falls through to the normal save path. Silently blocking saves on a guard-bug would be worse than the original regression class.
+
+**Bundled with v2423** — v2423 (anti-vibration mounts C observed chip reorder) was staged but never pushed. Both changes ship together in the v2424 push. The atomic cache bump (app.js APP_VERSION, sw.js CACHE_NAME, index.html app-version meta + 7 module cache-busters) covers both.
+
+---
+
 ## v2423 — 2026-04-20
 ### Changed — Anti-vibration mounts C observed chip order
 
