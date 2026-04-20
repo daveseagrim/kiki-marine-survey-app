@@ -12,6 +12,19 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2415 — 2026-04-19
+### Changed — Hull-deck joint snippet: "satisfactory" → "serviceable"
+
+The C-rated observed chip for the "Hull-deck joint (exterior)" section in `text_library.json` read:
+
+> The hull and deck joint appeared intact and in satisfactory condition.
+
+Dave's preferred term throughout the report is **serviceable**, which also matches the C-rating legend ("C — Serviceable, routine maintenance"). Replaced the single word in-place — no structural changes to the entry, no rating or phase changes. Only one match in the library.
+
+**Roadmap shift:** the thumbnail/purge/lazy-cache work previously allocated to v2415-v2420 slides by one version (now v2416-v2421). The v2416 entry (Fix snippet disappearance on pluralized rudder labels) is now next in line and will be shipped separately.
+
+---
+
 ## v2414 — 2026-04-19
 ### Changed — Kill the yellow "photos on another device" banner
 

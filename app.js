@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2414';
+const APP_VERSION = 'v2415';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4146,13 +4146,13 @@ async function validatePhotoIntegrity() {
     // used window._photoWarnDismissed (session-only) and the dismissal state
     // never survived a page reload or SW update.  More fundamentally, the
     // premise "photo referenced but not in local IndexedDB → show a warning"
-    // becomes incorrect once we flip to lazy-cache photo storage (v2415+):
+    // becomes incorrect once we flip to lazy-cache photo storage (v2416+):
     // "only in cloud, not local" is the NEW DEFAULT for surveys Dave isn't
     // actively working on — not a condition that should surface a banner.
     //
     // validatePhotoIntegrity itself is preserved for now — it still walks
     // surveys and still logs orphan counts + Firebase recoverability to the
-    // console for forensics.  Once v2420 ships a new integrity check that
+    // console for forensics.  Once v2421 ships a new integrity check that
     // flags "missing from BOTH local AND cloud", this whole function can be
     // retired.
     if (warnings.length > 0) {
