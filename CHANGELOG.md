@@ -12,6 +12,36 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2407 — 2026-04-19
+### Fixed — "Back to Check Survey" pill: orphaned on home, overlap, size
+
+Three issues with the floating pill that surfaces when Check Survey hands off to an in-page element, all reported by Dave in one pass.
+
+**1. Pill stayed on screen after navigating to the home view.**
+- `_csShowBackButton` dropped the pill into `document.body` with an onclick handler that removed it only on the "return to Check Survey" path. Any other route home — the header logo, `backToHome`, back-button, programmatic `renderHome()` — left it floating on top of the home screen.
+- Fix: added `document.getElementById('csBackToCheckBtn')?.remove();` inside `renderHome()` itself, right next to the existing `inspectionBottomBar` and `SaveStatus.hide()` cleanup. `renderHome` is the single funnel for every "go home" path (16+ call sites — `backToHome`, history-popstate handlers, header logo, save-with-success, abandon-new-survey, Firebase onSnapshot, etc.) so one line covers them all. No per-caller edits needed.
+
+**2. Pill overlapped checklist items.**
+- Previous placement was `top: 12px; left: 50%; transform: translateX(-50%)` — top-centre — which sat directly over the first checklist item and the app header on iPhone. Dave: *"this should not overlap items."*
+- Fix: moved to `bottom: calc(70px + safe-area-inset-bottom); right: 12px` so it floats above the 56 px-tall inspection bottom bar with its safe-area padding, tucked into the right side where no checklist content lives.
+
+**3. Pill was too big.**
+- Shrunk dimensions ~25 %: padding `10 / 20` → `7 / 15`, font-size `14` → `11`, border-radius `20` → `15`, shadow softened from `4px 12px / 0.3` to `2px 8px / 0.25` so the smaller pill doesn't feel heavy.
+- z-index (10001) kept — still has to ride above the Check Survey overlay during its 200 ms fade-out.
+
+### Scope
+- One new line in `renderHome()` (~8847).
+- One `cssText` rewrite in `_csShowBackButton()` (~16514).
+- Atomic version bump (v2406 → v2407): `APP_VERSION`, `CACHE_NAME`, `app-version` meta, seven `?v=2407` cache-busters.
+- Zero data-model changes.
+
+### Not included
+- v2408 (page-header survey-type consistency) still next.
+- v2409 (compound-subject "was" → "were" NT grammar sweep) queued behind that.
+- v2410 (Safety Equipment report styling unification) and v2411 (vessel description propeller regen) filed after.
+
+---
+
 ## v2406 — 2026-04-19
 ### Changed — Intro form cleanup
 

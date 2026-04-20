@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2406';
+const APP_VERSION = 'v2407';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -8840,6 +8840,13 @@ function renderHome() {
   // Remove inspection bottom bar (Backup / Check Survey / Preview Report)
   const bottomBar = document.getElementById('inspectionBottomBar');
   if (bottomBar) bottomBar.remove();
+  // v2407: Dismiss the "← Back to Check Survey" pill if present. Previously
+  // only Check-Survey's own return path removed it, so navigating to the home
+  // screen via any other route (back button, backToHome, etc.) left the pill
+  // orphaned on top of the home view. renderHome is the single funnel for
+  // every "go home" path (16+ call sites), so cleaning it up here covers them
+  // all in one place.
+  document.getElementById('csBackToCheckBtn')?.remove();
   // Hide the save status pill on the home page (it's per-survey)
   if (typeof SaveStatus !== 'undefined') SaveStatus.hide();
   // Hide the floating collapse button (only relevant on inspection view)
@@ -16511,7 +16518,11 @@ async function checkSurvey() {
       // overlay is still in the DOM. Previously z-index was 200 which meant
       // the button was invisible on desktop (where the fade is perceptible)
       // even though on iPhone it flashed through fast enough to be noticed.
-      backBtn.style.cssText = 'position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));left:50%;transform:translateX(-50%);background:#066aab;color:white;border:none;border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;z-index:10001;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+      // v2407: Shrunk ~25% (padding 10/20→7/15, font 14→11, radius 20→15) and
+      // moved from top-center to bottom-right floating above the inspection
+      // bottom bar (~56px tall + safe-area inset). Previous placement overlapped
+      // checklist items and the app header, which Dave flagged.
+      backBtn.style.cssText = 'position:fixed;bottom:calc(70px + env(safe-area-inset-bottom, 0px));right:12px;background:#066aab;color:white;border:none;border-radius:15px;padding:7px 15px;font-size:11px;font-weight:600;cursor:pointer;z-index:10001;box-shadow:0 2px 8px rgba(0,0,0,0.25);';
       backBtn.onclick = async function() {
         backBtn.remove();
         await _csEvaluateAndReturn(scrollPos);
