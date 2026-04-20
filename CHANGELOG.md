@@ -12,6 +12,22 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2416 — 2026-04-19
+### Fixed — Deck and coachroof spider cracks: removed misphased/redundant C-rating chip
+
+The C-rated observed bucket for "Deck and coachroof/pilot house condition (spider cracks, etc.)" contained a chip that broke the SAMS observation → means → action flow:
+
+> "The condition appeared serviceable, with no immediate corrective action recommended."
+
+Two problems:
+
+1. **Mis-phased.** The chip was tagged `phase: "observed"` but the sentence contains both a "means" judgement ("condition appeared serviceable") and an "action" recommendation ("no immediate corrective action recommended"). It belongs nowhere in the observed bucket.
+2. **Redundant.** The content is already covered by the existing means chip ("No immediate concern was identified.") + the action chip ("No corrective action is recommended at this time.") — surveyors who want that combined meaning can tick those two phase-correct chips.
+
+Removed the single entry. The remaining C-rating observed chips now all state pure observations; the means and action phases hold the judgement and recommendation respectively. SAMS three-phase flow restored for this section.
+
+---
+
 ## v2415 — 2026-04-19
 ### Changed — Hull-deck joint snippet: "satisfactory" → "serviceable"
 

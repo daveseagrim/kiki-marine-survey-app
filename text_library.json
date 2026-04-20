@@ -25707,13 +25707,6 @@
                   "severity": 2
             },
             {
-                  "section": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
-                  "rating": "C",
-                  "text": "The condition appeared serviceable, with no immediate corrective action recommended.",
-                  "phase": "observed",
-                  "severity": 5
-            },
-            {
                   "section": "Shore water hookup",
                   "rating": "A",
                   "text": "The shore water hookup fitting was missing, damaged, or non-functional.",
