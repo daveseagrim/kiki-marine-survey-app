@@ -12,6 +12,29 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2420 — 2026-04-19
+### Added — Flybridge Magnetic compass chip set (A/B/C/N-A/Not tested)
+
+The "Flybridge Magnetic compass" item in the insurance survey template's "Flybridge gauges and instrumentation" category had no chips — empty observation buckets at every rating. Dave flagged missing C chips in the field; debugging showed the miss was at every rating, not just C.
+
+Why the chip picker was empty: `ITEM_SNIPPET_MAP` at app.js:1550 redirects `'Flybridge Magnetic compass' → 'Magnetic compass'`, and because `hadExplicitMap` is true in `findTextVariants` (app.js:7265), the function returns the exact-match result without falling through to fuzzy matching. The library sheet `"Flybridge gauges and instrument"` had zero `"Magnetic compass"` entries, so the exact match was empty and no chips rendered.
+
+Fix: 14 new entries added to the `"Flybridge gauges and instrument"` sheet in `text_library.json`, all with `section: "Magnetic compass"` so the explicit map redirect hits them:
+
+- **A (3 chips)** — observed: "The flybridge magnetic compass was non-functional or severely damaged." (sev 4); means: "A non-functional compass at the flybridge helm removes a primary navigation reference." (sev 5); action: "Replacement of the flybridge magnetic compass is required before the vessel is returned to service." (sev 5).
+- **B (6 chips)** — three observed/action pairs covering broken lens, badly clouded & unreadable, and slightly clouded. Severity 3 throughout.
+- **C (3 chips)** — observed: "The flybridge magnetic compass appeared securely mounted, easy to read, and worked correctly." (sev 3); means: "No immediate concern was identified." (sev 1); action: "No corrective action is recommended at this time." (sev 1).
+- **N/A (1 chip)** — observed: "No magnetic compass was installed at the flybridge helm station." (sev 3).
+- **Not tested (1 chip)** — observed: "The flybridge magnetic compass was not tested." (sev 3).
+
+All observed phrasing is past tense and specifically names "the flybridge magnetic compass" (not "the magnetic compass" generic) so the generated report is unambiguous about which helm station is being described. This matches the dual-helm insurance survey pattern where Pilot house Magnetic compass and cockpit Magnetic compass are separately rated.
+
+The generic `"Magnetic compass"` entries in the Cockpit and Gauges-and-Instrumentation sheets (cockpit/salon helm) are left untouched — each helm station now has its own chip set.
+
+No code changes, no UI changes — text_library.json data only. Picked up automatically on next survey open because sw.js network-first fetches `.json` files (sw.js:154).
+
+---
+
 ## v2419 — 2026-04-19
 ### Added — Drag-to-reorder on category area-photo grids
 

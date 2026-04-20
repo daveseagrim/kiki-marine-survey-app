@@ -14816,6 +14816,104 @@
                   "phase": "observed",
                   "severity": 4,
                   "text": "No VHF antenna was installed on this vessel."
+            },
+            {
+                  "section": "Magnetic compass",
+                  "rating": "A",
+                  "phase": "observed",
+                  "severity": 4,
+                  "text": "The flybridge magnetic compass was non-functional or severely damaged."
+            },
+            {
+                  "section": "Magnetic compass",
+                  "rating": "A",
+                  "phase": "means",
+                  "severity": 5,
+                  "text": "A non-functional compass at the flybridge helm removes a primary navigation reference."
+            },
+            {
+                  "section": "Magnetic compass",
+                  "rating": "A",
+                  "phase": "action",
+                  "severity": 5,
+                  "text": "Replacement of the flybridge magnetic compass is required before the vessel is returned to service."
+            },
+            {
+                  "section": "Magnetic compass",
+                  "rating": "B",
+                  "phase": "observed",
+                  "severity": 3,
+                  "text": "The flybridge magnetic compass lens was broken."
+            },
+            {
+                  "section": "Magnetic compass",
+                  "rating": "B",
+                  "phase": "action",
+                  "severity": 3,
+                  "text": "The flybridge magnetic compass lens should be replaced."
+            },
+            {
+                  "section": "Magnetic compass",
+                  "rating": "B",
+                  "phase": "observed",
+                  "severity": 3,
+                  "text": "The flybridge magnetic compass was badly clouded and unreadable."
+            },
+            {
+                  "section": "Magnetic compass",
+                  "rating": "B",
+                  "phase": "action",
+                  "severity": 3,
+                  "text": "The flybridge magnetic compass should be replaced."
+            },
+            {
+                  "section": "Magnetic compass",
+                  "rating": "B",
+                  "phase": "observed",
+                  "severity": 3,
+                  "text": "The flybridge magnetic compass was clouded and difficult to read."
+            },
+            {
+                  "section": "Magnetic compass",
+                  "rating": "B",
+                  "phase": "action",
+                  "severity": 3,
+                  "text": "Replacement of the flybridge magnetic compass should be considered."
+            },
+            {
+                  "section": "Magnetic compass",
+                  "rating": "C",
+                  "phase": "observed",
+                  "severity": 3,
+                  "text": "The flybridge magnetic compass appeared securely mounted, easy to read, and worked correctly."
+            },
+            {
+                  "section": "Magnetic compass",
+                  "rating": "C",
+                  "phase": "means",
+                  "severity": 1,
+                  "text": "No immediate concern was identified."
+            },
+            {
+                  "section": "Magnetic compass",
+                  "rating": "C",
+                  "phase": "action",
+                  "severity": 1,
+                  "text": "No corrective action is recommended at this time."
+            },
+            {
+                  "section": "Magnetic compass",
+                  "rating": "N/A",
+                  "phase": "observed",
+                  "severity": 3,
+                  "text": "No magnetic compass was installed at the flybridge helm station."
+            },
+            {
+                  "section": "Magnetic compass",
+                  "rating": "Not tested",
+                  "phase": "observed",
+                  "severity": 3,
+                  "text": "The flybridge magnetic compass was not tested."
             }
       ],
       "Cabin and conveniences": [
