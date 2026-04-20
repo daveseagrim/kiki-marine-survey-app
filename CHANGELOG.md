@@ -12,6 +12,82 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2412 — 2026-04-19
+### Fixed (EMERGENCY) — Firebase sync-delete cascade: cloud-driven 'removed' events no longer wipe local surveys
+
+Ex-Ta-Sea disappeared from Dave's home screen twice — once on 2026-04-10 and again today on 2026-04-19, mid-report. Both times the local IndexedDB `surveys` store lost the record while the `photos` store kept most of the referenced photos (86 of 137 photos survived locally today). The narrowness of the loss — survey gone, photos intact — was the tell: this was not storage-pressure eviction, not a cache wipe, not a corruption event. Something was deleting the surveys row specifically, by primary key, without touching anything else.
+
+**Root cause found at `app.js:25757-25765`.**
+
+The Firebase realtime listener (`FirebaseSync.startListening` → `onSnapshot` on `collection('surveys')`) handled `change.type === 'removed'` by unconditionally calling `deleteSurvey(remoteSurvey.id)` on the local device. Any cause of the remote Firestore doc going away — a stray tap on the trash button from a second device, a stale tab firing `removeSurvey` on re-auth, a Firestore infrastructure hiccup, a race between `pushSurvey` and `removeSurvey`, or even a transient listener re-snapshot bug — would cascade the deletion to every listening device, wiping the survey locally at each one. No guard. No confirmation. No richness check. Remote said "gone", local obeyed.
+
+The failure was genuinely recurrent: fired 2026-04-10, fired again 2026-04-19. Same mechanism both times. And because the 'removed' listener runs unconditionally whenever the app is open and online, there was no way for Dave to finish a report without the risk of it happening again mid-session. Airplane mode was the only interim protection.
+
+**The fix — deletion is now a user-initiated action only.**
+
+The 'removed' branch no longer calls `deleteSurvey` locally. Instead, when a cloud 'removed' event arrives for a survey that still exists locally, the listener logs a warning (`[Sync] REFUSED cloud-driven delete of "<vesselName>" — local copy preserved. Re-pushing to restore cloud.`) and calls `pushSurvey(localSurvey)` to put the local copy back into Firestore. This has three properties:
+
+1. **Local data is always safe.** There is no longer any code path by which Firestore can cause a local survey row to be deleted. The sole path to deletion is the user tapping the in-app Delete button, which routes through `deleteSurveyConfirm` and prompts for confirmation.
+2. **Cloud data self-heals.** If the Firestore doc disappears for any reason other than intentional user deletion, the local copy re-publishes automatically. The next device to connect sees an 'added' event and restores itself too.
+3. **Intentional deletes still work.** `deleteSurveyConfirm` → `deleteSurvey` (local) → `removeSurvey` (Firestore) executes in the same order as before. Other devices listening will see their own 'removed' events and — under the new rule — preserve local. That's fine: the deleting device has authoritative state, will re-push if needed, and the intent was to delete on the originating device only. If the user wants a multi-device delete, they run Delete on each device.
+
+**Why we can't use a richness guard here (unlike the 'modified' path).**
+
+The 'modified' listener at line 25713 compares `_scoreSurveyContent(local)` vs `_scoreSurveyContent(remote)` and refuses remote-over-local if local is substantially richer. That rescue doesn't translate to 'removed' — by the time a 'removed' event fires, the remote doc is already gone, so there is nothing to score against. A conservative refusal-with-repush is the only safe posture.
+
+**Shipped together (non-emergency, pre-staged before the incident).**
+
+Camera UI tweaks that were already edited and triple-checked for v2412 before the sync bug surfaced, bundled here as a one-time exception to the one-feature-per-version rule because reverting them would burn time Dave doesn't have and risk introducing new mistakes in a hotfix:
+
+- Portrait shutter grown another 10% (97 → 107 px, icon 42 → 46 pt). Ask: "please increase the camera button an additional 10%."
+- Landscape shutter matched (70 → 77 px, icon 32 → 35 pt).
+- Landscape DONE button absolute-positioned to bottom-right of the controls column (was vertically-centred). Creates a large dead zone between the centre-mounted shutter and the bottom-corner DONE. Ask: "I don't want to risk closing until I'm done."
+
+### Scope
+- One branch rewritten at `app.js:25757-25793` — 'removed' path refuses local delete, preserves local, re-pushes to heal Firestore.
+- Landscape CSS block at `app.js:26393-26411` — shutter 70→77, DONE absolute-positioned bottom-right.
+- Portrait shutter inline style at `app.js:26426-26432` — 97→107 px, 42→46 pt icon.
+- Atomic version bump (v2411 → v2412): `APP_VERSION`, `CACHE_NAME`, `app-version` meta, seven `?v=2412` cache-busters.
+- Task #74 (Forensics: why did Ex-Ta-Sea disappear) → root cause identified and closed by this fix.
+
+### Not included
+- v2413 (vessel description auto-regen — propeller + missed fields) — next in queue per Dave's priority flip.
+- v2414 (preflight undo on green check-off toast), v2415 (report page-header survey-type), v2416 (compound-subject NT grammar) queued behind that.
+- Yellow Firebase banner persistent-dismissal (the `_photoWarnDismissed` session-only flag). Separate follow-up — surfaced during this incident but not the emergency.
+- Autosync-JSON import path (raw-survey-wrapper detection in `importSurvey`). Surfaced when recovering Ex-Ta-Sea from `Ex-Ta-Sea-RESTORE.json`, which happened to be pre-wrapped — but the raw `Ex-Ta-Sea_2026-04-19.json` autosync would have required manual wrapping. Queued as a quality-of-life improvement.
+
+---
+
+## v2411 — 2026-04-19
+### Changed — Safety Equipment report section: styling unification
+
+Dave flagged that the Safety Equipment (TC TP 511) section of the generated report didn't look like it belonged with the rest of the document. The section-level banner and per-item cards already followed the standard pattern, but the per-category h3 subheader (e.g. "Personal Lifesaving Appliances", "Visual Signals", "Fire Fighting Equipment", "Navigation Equipment") rendered differently from every other h3 in the report.
+
+**The outlier.**
+The previous per-category h3 at `app.js:23221` overrode almost every default h3 property:
+- `font-size: 10pt` — against the report-wide default of 12pt (set in the inline stylesheet at `app.js:22517`).
+- `border-bottom: 1px solid #2563eb` — against the default of `1px solid #d1d5db` (neutral grey). The solid blue underline visually fought with the underlying items' left-rail borders.
+- `margin: 14px 0 6px` — tighter than the default 18px top margin, so the heading sat closer to the preceding item than to its own category contents.
+- `padding-bottom: 3px` — one pixel tighter than the default 4px.
+
+Meanwhile, every other h3 in the report — the Findings & Recommendations A/B/C/NT/PO subheaders at `app.js:23441–23503`, the Valuation Worksheet headings at `app.js:23624/23653`, the Bilge Pump Detail heading at `app.js:22935` — follows one pattern: override nothing but the text colour, and let the default h3 CSS supply size, margin, and border. Five sections using one convention, Safety Equipment using its own.
+
+**The fix.**
+Match the F&R convention: `<h3 style="color:#2563eb;">` — colour-only override. The "safety blue" accent is preserved so the section retains its visual identity, but the heading now reads at 12pt with the standard 18px top margin and the neutral-grey under-border, consistent with every other category subheader across the report.
+
+### Scope
+- One line change at `app.js:23221`, preserving the safety-theme colour and dropping the four non-conforming inline properties.
+- Atomic version bump (v2410 → v2411): `APP_VERSION`, `CACHE_NAME`, `app-version` meta, seven `?v=2411` cache-busters.
+- Does not touch the section-level h2 banner (already consistent — blue background, white text, standard 13pt banner weight).
+- Does not touch the per-item `<div class="item">` cards — already identical to Detailed Survey Findings + Instruments & Electronics.
+- Does not touch the summary paragraph (on-board/missing counters) — already at 10pt, matching Instruments & Electronics.
+
+### Not included
+- v2412 (vessel description auto-regen — propeller + missed fields) — next.
+- v2413 (preflight undo on green check-off toast), v2414 (report page-header survey-type consistency), v2415 (compound-subject NT grammar sweep) queued behind that.
+
+---
+
 ## v2410 — 2026-04-19
 ### Added — Audible shutter click on in-app camera capture
 

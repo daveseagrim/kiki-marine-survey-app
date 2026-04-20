@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2410';
+const APP_VERSION = 'v2412';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -23218,7 +23218,14 @@ ${(() => {
     });
 
     Object.keys(_safeCats).forEach(catName => {
-      html += `<h3 style="margin:14px 0 6px;color:#2563eb;font-size:10pt;border-bottom:1px solid #2563eb;padding-bottom:3px;">${esc(catName)}</h3>`;
+      // v2411: h3 styling unified with Findings & Recommendations — keep only
+      // the safety-theme colour override and let the default CSS (from
+      // line 22517: margin-top:18px, font-size:12pt, 1px #d1d5db bottom border,
+      // 4px padding-bottom) supply the rest. Previous override used 10pt with a
+      // solid #2563eb underline, which was the only h3 in the report that
+      // didn't follow the standard pattern and read as visually heavier than
+      // the section-level content it was introducing.
+      html += `<h3 style="color:#2563eb;">${esc(catName)}</h3>`;
 
       _safeCats[catName].forEach(eq => {
         const statusColor = eq.checked ? '#16a34a' : '#dc2626';
@@ -25748,13 +25755,42 @@ const FirebaseSync = (() => {
             }
           }
         } else if (change.type === 'removed') {
+          // v2412 — EMERGENCY FIX: never auto-delete local data in response to
+          // a Firestore 'removed' event.
+          //
+          // Root cause of the 2026-04-10 AND 2026-04-19 Ex-Ta-Sea disappearances:
+          // ────────────────────────────────────────────────────────────────────
+          // Prior code unconditionally called deleteSurvey() locally whenever
+          // Firestore reported change.type === 'removed' for a survey doc.
+          // ANY cause of the remote doc going away — a stray tap on the trash
+          // button from a second device, a stale tab firing removeSurvey on
+          // re-auth, a Firestore infra hiccup, a race between pushSurvey /
+          // removeSurvey — cascaded to every listening device and wiped the
+          // survey locally. The same failure mode fired twice on Ex-Ta-Sea
+          // (2026-04-10 and again on 2026-04-19).
+          //
+          // There is no "richness guard" that can rescue this: by the time the
+          // 'removed' event arrives, the remote is already gone, so there's
+          // nothing to compare against. The only safe posture is to refuse
+          // sync-driven deletion.
+          //
+          // New contract:
+          //   • Deletion is a user-initiated action only. deleteSurveyConfirm()
+          //     is the single legitimate entry point.
+          //   • If the cloud copy disappears for any other reason, preserve
+          //     local and re-push so the cloud copy is restored.
+          //   • Other devices that already ran the old listener and deleted
+          //     locally will receive the re-push as an 'added' event and
+          //     restore themselves.
           const localSurvey = await getSurvey(remoteSurvey.id);
           if (localSurvey) {
-            _suppressLocalWrite = true;
-            await deleteSurvey(remoteSurvey.id);
-            _suppressLocalWrite = false;
-            console.log(`[Sync] Deleted local survey: ${remoteSurvey.id}`);
-            if (!currentSurveyId) renderHome();
+            console.warn(
+              `[Sync] REFUSED cloud-driven delete of "${localSurvey.vesselName || localSurvey.id}" ` +
+              `— local copy preserved. Re-pushing to restore cloud.`
+            );
+            // Re-push local up so the cloud copy comes back. Closes the race
+            // where another device accidentally deleted and would otherwise win.
+            try { await pushSurvey(localSurvey); } catch (e) { console.warn('[Sync] Re-push after refused delete failed:', e); }
           }
         }
       });
@@ -26354,15 +26390,23 @@ async function openBatchCamera(itemLabel, opts) {
           justify-content: center !important;
           width: auto !important;
         }
-        /* v2408: Keep the 10%-larger-shutter / 20%-smaller-DONE proportions in
-           landscape. Pin DONE to its scaled size since the absolute-positioned
-           rule in portrait doesn't apply here (column layout reverts to flex
-           flow). */
+        /* v2412: Landscape shutter bumped another 10 % (70→77) matching the
+           portrait bump (97→107). Landscape DONE pinned to the BOTTOM of the
+           controls column via absolute positioning so there's a large dead
+           zone between shutter and DONE — Dave's field report: "I don't
+           want to risk closing until I'm done." Shutter remains in the
+           vertical centre of the column (sole flex child once DONE is
+           absolute-positioned), so the thumb-rest zone on the right edge
+           lands on the shutter, not on DONE. */
         #batchCamOverlay > [data-cam="controls"] #batchCamShutter {
-          width: 70px !important; height: 70px !important; font-size: 32px !important;
+          width: 77px !important; height: 77px !important; font-size: 35px !important;
         }
         #batchCamOverlay > [data-cam="controls"] #batchCamDone {
-          position: static !important; transform: none !important;
+          position: absolute !important;
+          bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+          right: calc(12px + env(safe-area-inset-right)) !important;
+          top: auto !important; left: auto !important;
+          transform: none !important;
           width: 51px !important; height: 51px !important; font-size: 11px !important;
         }
       }
@@ -26379,11 +26423,13 @@ async function openBatchCamera(itemLabel, opts) {
     </div>
     <div data-cam="strip" id="batchCamStrip" style="flex:0 0 auto;background:#111;padding:10px 12px;display:flex;gap:8px;overflow-x:auto;min-height:76px;align-items:center;"></div>
     <div data-cam="controls" style="flex:0 0 auto;background:#000;position:relative;display:flex;align-items:center;justify-content:center;padding:20px 0;padding-bottom:calc(20px + env(safe-area-inset-bottom));">
-      <!-- v2408: Shutter anchored to the true horizontal centre of the controls
-           row (10% larger, 88→97). DONE is absolutely positioned to the right
-           (20% smaller, 88→70) so it's clearly a secondary action and no longer
-           competes with the shutter for the centre of the frame. -->
-      <button id="batchCamShutter" aria-label="Take photo" style="width:97px;height:97px;border-radius:50%;background:#066aab;border:5px solid #f5b942;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:42px;padding:0;line-height:1;">📷</button>
+      <!-- v2412: Shutter bumped another 10 % (97→107, v2408 baseline was 88→97).
+           Dave's ask: "please increase the camera button an additional 10%."
+           Total growth from the pre-v2408 default is ~21 %. DONE stays at 70 px
+           (v2408 baseline) so the contrast between primary (shutter) and
+           secondary (DONE) actions widens further. Icon scaled proportionally:
+           42 → 46 pt. -->
+      <button id="batchCamShutter" aria-label="Take photo" style="width:107px;height:107px;border-radius:50%;background:#066aab;border:5px solid #f5b942;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:46px;padding:0;line-height:1;">📷</button>
       <button id="batchCamDone" aria-label="Done" style="position:absolute;top:50%;right:calc(24px + env(safe-area-inset-right));transform:translateY(-50%);width:70px;height:70px;border-radius:50%;background:#f5b942;color:#066aab;border:4px solid #066aab;box-shadow:0 3px 10px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;padding:0;line-height:1;letter-spacing:0.5px;">DONE</button>
     </div>
   `;
