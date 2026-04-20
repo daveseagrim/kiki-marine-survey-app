@@ -12,6 +12,47 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2426 — 2026-04-20
+### Changed — Bidirectional sync disabled; device handoff is now manual-only (P0 architecture change, follow-up to Legacy II recovery)
+
+Third ship of the day. v2424 closed stale-write; v2425 closed silent-quota; v2426 closes the cross-device auto-pull hazard that caused the Legacy II data-loss scare.
+
+**Why this ships now.** During the Legacy II recovery, an iPhone→Mac onSnapshot fired a pull that started to overwrite richer local state on the Mac with a thinner cloud snapshot. The richness guard (app.js:25992) refused the overwrite, but the fact that an automatic pull was even attempted is the underlying design flaw. Two devices editing the same Firestore document with onSnapshot is a race by construction. v2426 removes the race by removing the automatic pull path entirely.
+
+**The new rules (per Dave, 2026-04-20):**
+
+1. *No cross-device auto-sync, ever.* iPhone and Mac never pull each other's state without an explicit user action. Handoff between devices is always manual.
+
+2. *In-field auto-backup scoped to the CURRENT survey only.* While editing a survey, the device continues to push to Firebase and Drive for that one survey — that's belt-and-braces insurance against device loss. No other survey on the device is touched by auto-backup.
+
+3. *Non-blocking.* The backup path must not slow capture or cause crashes.
+
+**What changed in code.**
+
+- **`FirebaseSync.init()` (app.js:26505)** — Already rewritten. Sets `_syncEnabled = true` (so the push wrapper at line 26598 still fires on every `saveSurvey`) but skips `startListening()`, skips installing the 5-minute periodic timer, and skips the `visibilitychange` handler. One log line: `v2426: Bidirectional sync disabled. Pushes active. Call FirebaseSync.pullNow() for explicit pull.`
+
+- **`FirebaseSync.pullNow()` (app.js:26523)** — New explicit, user-initiated pull. Delegates to the existing `initialSync()` path so the richness guard and `lastModified` resolution still apply per-survey. Returns `{ ok: true }` or `{ error: ... }` so a console caller can see the result.
+
+- **`FirebaseSync` public API (app.js:26551)** — **Removed `periodicSync`** from the exports. `periodicSync()` iterates every local and remote survey and pulls each one, which directly violates Rule 2 (auto-backup must be scoped to the CURRENT survey). The function body is intentionally left in place in the module so the diff stays legible and so future rollback is cheap, but it has zero callers after this change. **Added `pullNow`** so manual pull is callable from the console.
+
+**What did NOT change.**
+
+- `pushSurvey` / `pushPhoto` hooks on `saveSurvey` (app.js:26598+) — still fire on every save. Rule 2 compliance: `saveSurvey` only ever writes one survey at a time, so the per-save push is inherently scoped to the survey being edited. No other survey is touched.
+- `_scheduleDriveAutoSync` (app.js:26574) — 30-second throttled Drive push per active survey. Same per-survey scope argument.
+- Idle-drain queue (app.js:2458) — local-only; no network; unaffected.
+- Richness guard (app.js:25992) — still in place as a second line of defence if a `pullNow()` is triggered against a thinner cloud snapshot.
+
+**Handoff workflow (interim, until v2430 "Device Roles" UI ships).**
+
+- *iPhone finish → Mac start:* run `FirebaseSync.pullNow()` in Mac DevTools console. Wait for `Manual pull complete`. Reload the Mac app. Verify the surveys in the home list match what was last on the iPhone.
+- *Mac finish → iPhone start:* same idea in reverse (iPhone Safari → Web Inspector → `FirebaseSync.pullNow()`). v2428 will introduce photo-placeholder pushes so the iPhone doesn't re-download hundreds of MB.
+
+**Pre-ship safety net.** Before this version shipped, `pre_v2426_full_backup.js` produced one stored-mode zip per survey in Mac IDB (`/Documents/Kiki Marine App/Backups/pre-v2426/`). If v2426 exposes a regression, roll back by re-running the reconstruction script from those zips.
+
+**Atomic cache bump**: APP_VERSION (app.js:8), CACHE_NAME (sw.js:1), meta app-version (index.html:9), 6 core module cache-busters + app.js cache-buster (index.html:714-720) all to v2426.
+
+---
+
 ## v2425 — 2026-04-20
 ### Added — Persistent storage request + QuotaExceededError surfacing (P0 hotfix, iPhone-only survey day)
 

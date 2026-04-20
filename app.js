@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2425';
+const APP_VERSION = 'v2426';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -26467,34 +26467,76 @@ const FirebaseSync = (() => {
   }
 
   // ── Public API ─────────────────────────────────────────────────────
+  //
+  // v2426 — Bidirectional sync disabled. Push-only + explicit pull.
+  // ─────────────────────────────────────────────────────────────────
+  // The 2026-04-19 Ex-Ta-Sea regression traced back to always-on
+  // bidirectional sync: Firestore was simultaneously cache AND source
+  // of truth, which is inherently race-prone. A stale closure on device
+  // A pushed shrunken state to Firestore; device B's onSnapshot listener
+  // pulled the regression and wrote it to local IDB. The v2424 freshness
+  // guard blunts the class but does not eliminate it — the design flaw
+  // is the implicit cross-device mutation channel.
+  //
+  // v2426 removes the implicit channel. The onSnapshot subscription,
+  // periodic 5-minute pull, and visibilitychange pull-on-resume are all
+  // disabled. The PUSH side of the sync wrapper (pushSurvey, pushPhoto,
+  // removeSurvey, removePhoto) remains active, so Firebase still receives
+  // every save as an insurance backup. Drive auto-sync is also unchanged.
+  //
+  // Cross-device pulls are now explicit: user calls `FirebaseSync.pullNow()`
+  // from the DevTools console (or the "Pull from Firebase" overflow
+  // button, once wired up) to perform a one-shot initialSync. The
+  // existing richness-guard at line 25992 still governs the per-survey
+  // merge, so a pull cannot silently overwrite a locally richer record.
+  //
+  // Intended workflow:
+  //   - Field device (iPhone): saves push to Firebase + Drive as they
+  //     happen. No incoming sync. Device is the local source of truth.
+  //   - Report device (Mac): user runs pullNow() once on startup to
+  //     load the latest state from Firebase into local IDB, then edits
+  //     freely. Edits push back to Firebase + Drive.
+  //   - Handoff is intentional: user chooses when to pull, never a race.
+  //
+  // This will be formalised as v2430 "Device Roles" with a proper UI
+  // (field-mode vs report-mode home-screen selector, explicit pull/push
+  // buttons, mode-specific icons). v2426 is the minimum-surface-area
+  // interim that removes the hazard without touching the UI layer.
   function init() {
     if (!window.fsDb) {
       console.warn('[Sync] Firebase not available — sync disabled');
       return;
     }
+    // v2426: keep _syncEnabled = true so the sync wrapper continues to
+    // push saves to Firebase (insurance backup). Only the PULL path is
+    // disabled — no onSnapshot, no periodic timer, no visibility pull.
     _syncEnabled = true;
-    updateSyncStatusUI('syncing', 'Connecting…');
-    startListening();
-    initialSync();
+    updateSyncStatusUI('idle', 'Push-only (pull is manual)');
+    console.log('[Sync] v2426: Bidirectional sync disabled. Pushes active. Call FirebaseSync.pullNow() for explicit pull.');
+  }
 
-    // v2259: periodic sync every 5 minutes — catches changes if the
-    // real-time listener disconnects (common on iOS background/foreground)
-    if (_periodicTimer) clearInterval(_periodicTimer);
-    _periodicTimer = setInterval(() => { periodicSync(); }, 5 * 60 * 1000);
-
-    // v2259: also sync when app comes back to foreground (iOS PWA resume)
-    // Use a named handler so we can remove it if init() is called again
-    if (_visibilityHandler) {
-      document.removeEventListener('visibilitychange', _visibilityHandler);
+  // v2426 — explicit, user-initiated pull from Firestore. Runs the
+  // same initialSync() path the old init() ran on startup, so the
+  // existing richness-guard and lastModified resolution still apply
+  // per-survey. Returns a result object so console callers can see
+  // whether the pull succeeded.
+  async function pullNow() {
+    if (!window.fsDb) {
+      console.warn('[Sync] Firebase not available');
+      return { error: 'firebase-unavailable' };
     }
-    _visibilityHandler = () => {
-      if (document.visibilityState === 'visible' && _syncEnabled) {
-        periodicSync(); // throttle guard inside prevents excessive calls
-      }
-    };
-    document.addEventListener('visibilitychange', _visibilityHandler);
-
-    console.log('[Sync] Firebase two-way sync enabled (5-min polling + foreground trigger)');
+    console.log('[Sync] v2426: Manual pull starting...');
+    updateSyncStatusUI('syncing', 'Pulling from Firebase...');
+    try {
+      await initialSync();
+      updateSyncStatusUI('synced', 'Pulled ' + new Date().toLocaleTimeString());
+      console.log('[Sync] v2426: Manual pull complete');
+      return { ok: true };
+    } catch (err) {
+      console.error('[Sync] v2426: Manual pull failed', err);
+      updateSyncStatusUI('error', (err && err.message) || 'Pull failed');
+      return { error: (err && err.message) || String(err) };
+    }
   }
 
   // Re-apply current sync status to a freshly rendered DOM element
@@ -26516,7 +26558,14 @@ const FirebaseSync = (() => {
     removePhoto,
     pullPhotosForSurvey,
     photoExistsInFirebase,
-    periodicSync,
+    // v2426: periodicSync intentionally REMOVED from public API.
+    // It iterates ALL local+remote surveys and pulls them — that violates
+    // Rule 2 (auto-backup must be scoped to the CURRENT survey only) and
+    // Rule 1 (no cross-device pulls without user request). The function
+    // body is still defined in the module so history/diff stays readable,
+    // but it has no callers left inside or outside the module.
+    // Explicit manual pull is exposed as pullNow() below.
+    pullNow,
     updateSyncStatusUI,
     refreshUI
   };
