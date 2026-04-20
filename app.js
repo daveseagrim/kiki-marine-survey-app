@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2407';
+const APP_VERSION = 'v2409';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -26354,10 +26354,17 @@ async function openBatchCamera(itemLabel, opts) {
           justify-content: center !important;
           width: auto !important;
         }
-        #batchCamOverlay > [data-cam="controls"] button {
-          width: 64px !important; height: 64px !important;
+        /* v2408: Keep the 10%-larger-shutter / 20%-smaller-DONE proportions in
+           landscape. Pin DONE to its scaled size since the absolute-positioned
+           rule in portrait doesn't apply here (column layout reverts to flex
+           flow). */
+        #batchCamOverlay > [data-cam="controls"] #batchCamShutter {
+          width: 70px !important; height: 70px !important; font-size: 32px !important;
         }
-        #batchCamOverlay > [data-cam="controls"] #batchCamDone { font-size: 12px !important; }
+        #batchCamOverlay > [data-cam="controls"] #batchCamDone {
+          position: static !important; transform: none !important;
+          width: 51px !important; height: 51px !important; font-size: 11px !important;
+        }
       }
     </style>
     <div data-cam="header" style="flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(0,0,0,0.55);color:#fff;padding-top:calc(14px + env(safe-area-inset-top));">
@@ -26371,9 +26378,13 @@ async function openBatchCamera(itemLabel, opts) {
       <button id="batchCamCloseLandscape" style="display:none;position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.65);border:none;color:#fff;font-size:22px;font-weight:700;cursor:pointer;padding:6px 12px;border-radius:999px;min-height:36px;">✕</button>
     </div>
     <div data-cam="strip" id="batchCamStrip" style="flex:0 0 auto;background:#111;padding:10px 12px;display:flex;gap:8px;overflow-x:auto;min-height:76px;align-items:center;"></div>
-    <div data-cam="controls" style="flex:0 0 auto;background:#000;display:flex;align-items:center;justify-content:center;gap:40px;padding:20px 0;padding-bottom:calc(20px + env(safe-area-inset-bottom));">
-      <button id="batchCamShutter" aria-label="Take photo" style="width:88px;height:88px;border-radius:50%;background:#066aab;border:5px solid #f5b942;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:38px;padding:0;line-height:1;">📷</button>
-      <button id="batchCamDone" aria-label="Done" style="width:88px;height:88px;border-radius:50%;background:#f5b942;color:#066aab;border:5px solid #066aab;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;padding:0;line-height:1;letter-spacing:0.5px;">DONE</button>
+    <div data-cam="controls" style="flex:0 0 auto;background:#000;position:relative;display:flex;align-items:center;justify-content:center;padding:20px 0;padding-bottom:calc(20px + env(safe-area-inset-bottom));">
+      <!-- v2408: Shutter anchored to the true horizontal centre of the controls
+           row (10% larger, 88→97). DONE is absolutely positioned to the right
+           (20% smaller, 88→70) so it's clearly a secondary action and no longer
+           competes with the shutter for the centre of the frame. -->
+      <button id="batchCamShutter" aria-label="Take photo" style="width:97px;height:97px;border-radius:50%;background:#066aab;border:5px solid #f5b942;box-shadow:0 4px 12px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:42px;padding:0;line-height:1;">📷</button>
+      <button id="batchCamDone" aria-label="Done" style="position:absolute;top:50%;right:calc(24px + env(safe-area-inset-right));transform:translateY(-50%);width:70px;height:70px;border-radius:50%;background:#f5b942;color:#066aab;border:4px solid #066aab;box-shadow:0 3px 10px rgba(0,0,0,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;padding:0;line-height:1;letter-spacing:0.5px;">DONE</button>
     </div>
   `;
   document.body.appendChild(overlay);
@@ -26619,7 +26630,7 @@ function refreshBatchCamStrip() {
            style="width:56px;height:56px;object-fit:cover;border-radius:6px;border:2px solid #333;cursor:pointer;">
       <button onclick="event.stopPropagation();removeStagedPhoto(${i})"
               aria-label="Remove"
-              style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#dc2626;color:#fff;border:2px solid #111;font-size:12px;font-weight:700;cursor:pointer;padding:0;line-height:18px;">×</button>
+              style="position:absolute;top:-5px;right:-5px;box-sizing:border-box;width:18px;height:18px;border-radius:50%;background:#dc2626;color:#fff;border:2px solid #111;font-size:11px;font-weight:700;cursor:pointer;padding:0;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>
     </div>
   `).join('');
   // Scroll strip to show the latest

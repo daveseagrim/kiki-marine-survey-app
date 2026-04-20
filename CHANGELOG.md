@@ -12,6 +12,67 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2409 — 2026-04-19
+### Fixed — Rudder snippets: sailboat stuffing-box false positives + weak action chip
+
+Dave flagged the "Rudder(s) condition" snippet picker on a sailboat survey. Two of the B-rating chips referenced a "rudder stuffing box" — a component only present on power-driven vessels. Sailboat rudders ride on a post through a bearing tube; there is no stuffing box to weep. The chips needed to disappear on sail surveys. Dave also pushed back on the vague action chip ("Inspect the rudder for moisture at the next haul-out and recondition the anti-fouling surface") — not an action, just a reminder to look again. He wanted an active remedy.
+
+**1. Sailboat filter on the two stuffing-box chips.**
+- Tagged both with `"vesselType": "power"` in `text_library.json` ("Rudder(s) condition" section):
+  - Observed/severity 2: *"Minor weeping was observed at the rudder stuffing box; this is common when the vessel has been out of the water."*
+  - Action/severity 3: *"Monitor the rudder stuffing box after launch; continued leakage beyond a few days warrants service."*
+- The existing vessel-type filter in `findTextVariants` (app.js ~7286-7292) drops any entry whose `vesselType` doesn't match `survey.vesselType` — chips without the tag still show for everyone, so no other rudder chips are affected.
+- Human-powered vessels (canoes, kayaks) also won't see these chips, which is correct.
+
+**2. Replaced the weak "inspect the rudder" action chip with a concrete remedy.**
+- Was: *"Inspect the rudder for moisture at the next haul-out and recondition the anti-fouling surface."* — describes preparation, not action; the moisture reading already happened and that's why the B rating exists.
+- Now: *"Consider drilling one or two holes in the rudder (one higher and one lower) after haul-out in an attempt to drain some of the water."* — Dave's own wording, which fits the actual repair sequence (haul → drain → dry → re-seal → paint).
+- No `vesselType` tag on this one — drilling drain holes is a legitimate remedy for a wet rudder core on either power or sail.
+- `pluralizeRudder` still adapts "the rudder" → "the rudders" on twin-rudder surveys.
+
+### Scope
+- `text_library.json`: three line edits in the "Rudder(s) condition" section (two `vesselType` tags added, one text replacement).
+- Atomic version bump (v2408 → v2409): `APP_VERSION`, `CACHE_NAME`, `app-version` meta, seven `?v=2409` cache-busters.
+- Zero app.js changes — filter infrastructure already in place from v2214.
+
+### Not included
+- v2410 (page-header survey-type consistency) — next in queue.
+- v2411 ("was" → "were" compound-subject NT grammar sweep), v2412 (Safety Equipment report styling parity), v2413 (vessel description auto-regen — propeller + other missed fields) queued behind that.
+
+---
+
+## v2408 — 2026-04-19
+### Changed — Camera UI polish (batchCam overlay)
+
+Three related tweaks to the in-app camera overlay, reported by Dave during the Ex-Ta-Sea hull-below-the-waterline capture. Screenshots showed the shutter and DONE button weighted equally in the centre of the controls row, and the thumbnail delete buttons rendering as horizontal ovals on iOS Safari.
+
+**1. Shutter button — centred and 10 % larger (88 → 97 px).**
+- Was flexed side-by-side with DONE via `justify-content:center; gap:40px`, which placed the shutter off-centre (to the left) and competing with DONE for the visual anchor.
+- Now the controls row is `position:relative`, with the shutter as the sole flex child at `justify-content:center` — it sits on the true horizontal centre line of the frame, where your thumb naturally lands.
+- Icon scaled proportionally: 38 → 42 px.
+
+**2. DONE button — moved to the right side and 20 % smaller (88 → 70 px).**
+- Re-anchored with `position:absolute; top:50%; right:calc(24px + env(safe-area-inset-right)); transform:translateY(-50%)` so it lives on the edge where a secondary action belongs and doesn't steal gravity from the shutter.
+- Border dropped 5 → 4 px, font 15 → 13 px, shadow softened 4/12 → 3/10 to match the reduced scale.
+- Right-side placement keeps it reachable with a right-thumb without crossing over the shutter; left-handed surveyors can still tap it — it's just out of the way.
+
+**3. Thumbnail remove-X — rendered as proper circles, and smaller (22 → 18 px).**
+- Old style: `width:22px; height:22px; border-radius:50%;` plus `line-height:18px; padding:0;`. On iOS Safari the baseline-aligned `×` glyph and the default `box-sizing:content-box` behaviour combined with the 2 px border could render the button slightly wider than tall — hence Dave's "oval" observation.
+- New style adds `box-sizing:border-box; display:flex; align-items:center; justify-content:center; line-height:1;` which forces a 1:1 box and centres the glyph cleanly at any DPR. Font 12 → 11 to suit the smaller button. `top/right` offsets adjusted -6 → -5 so the button stays anchored to the thumbnail corner at the new diameter.
+
+### Scope
+- One rewrite of the `data-cam="controls"` row (~26374-26377) covering both button styles.
+- One update of the landscape media-query override (~26357-26368) to keep the portrait proportions (shutter 70 px, DONE 51 px) in landscape.
+- One update to the thumbnail X markup in `refreshBatchCamStrip` (~26620-26622).
+- Atomic version bump (v2407 → v2408): `APP_VERSION`, `CACHE_NAME`, `app-version` meta, seven `?v=2408` cache-busters.
+- Zero data-model changes; no behavioural changes to snapping / discarding / committing photos.
+
+### Not included
+- v2409 (page-header survey-type consistency) is now next — the camera polish cut the line after Dave flagged it mid-session.
+- v2410 ("was" → "were" NT grammar sweep), v2411 (Safety Equipment report styling parity), v2412 (vessel description propeller regen) queued behind that.
+
+---
+
 ## v2407 — 2026-04-19
 ### Fixed — "Back to Check Survey" pill: orphaned on home, overlap, size
 

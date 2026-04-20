@@ -3582,7 +3582,8 @@
                   "rating": "B",
                   "phase": "observed",
                   "severity": 2,
-                  "text": "Minor weeping was observed at the rudder stuffing box; this is common when the vessel has been out of the water."
+                  "text": "Minor weeping was observed at the rudder stuffing box; this is common when the vessel has been out of the water.",
+                  "vesselType": "power"
             },
             {
                   "section": "Rudder(s) condition",
@@ -3610,14 +3611,15 @@
                   "rating": "B",
                   "phase": "action",
                   "severity": 2,
-                  "text": "Inspect the rudder for moisture at the next haul-out and recondition the anti-fouling surface."
+                  "text": "Consider drilling one or two holes in the rudder (one higher and one lower) after haul-out in an attempt to drain some of the water."
             },
             {
                   "section": "Rudder(s) condition",
                   "rating": "B",
                   "phase": "action",
                   "severity": 3,
-                  "text": "Monitor the rudder stuffing box after launch; continued leakage beyond a few days warrants service."
+                  "text": "Monitor the rudder stuffing box after launch; continued leakage beyond a few days warrants service.",
+                  "vesselType": "power"
             },
             {
                   "section": "Rudder(s) condition",
