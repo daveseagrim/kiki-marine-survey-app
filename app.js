@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2418';
+const APP_VERSION = 'v2419';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -6093,7 +6093,12 @@ function importPhotosForItem(itemLabel) {
 
 // Sortable thumbnails in the media sheet — reorder photos within an item
 // by dragging one thumbnail onto another. Reorder persists in IndexedDB.
-function setupPhotoSortable(gridEl, itemLabel) {
+//
+// v2419: third arg `reRender(survey)` is an optional callback that fires after
+// the reorder is persisted. When provided, it replaces the default media-sheet
+// reopen path. This lets area-photo grids (rendered by refreshAreaPhotoGrid)
+// reuse the same drag-reorder logic without opening the media sheet.
+function setupPhotoSortable(gridEl, itemLabel, reRender) {
   if (!gridEl) return;
   let dragIdx = -1;
   gridEl.querySelectorAll('[data-photo-idx]').forEach(thumb => {
@@ -6123,7 +6128,12 @@ function setupPhotoSortable(gridEl, itemLabel) {
       arr.splice(dropIdx, 0, moved);
       survey.items[itemLabel].photos = arr;
       await saveSurvey(survey);
-      // Re-render the media sheet to reflect new order
+      if (typeof reRender === 'function') {
+        // Area-photo path: caller re-renders its own container
+        reRender(survey);
+        return;
+      }
+      // Default path: re-render the media sheet to reflect new order
       const existingSheet = document.getElementById('bottomSheetOverlay');
       if (existingSheet) existingSheet.remove();
       showMediaSheet(itemLabel, (existingSheet && existingSheet.dataset && existingSheet.dataset.categoryName) || '');
@@ -18530,9 +18540,9 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
       <button onclick="event.stopPropagation();toggleExclude('${safeLabel}')" style="background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;" title="Skip this photo section">⊘ Skip</button>
     </div>
     <div id="area-photo-body-${sanitized}">
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,80px));gap:8px;margin-bottom:10px;">
-        ${photos.map(pid => `
-          <div class="area-photo-wrap" style="position:relative;display:none;">
+      <div id="area-photo-grid-${sanitized}" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,80px));gap:8px;margin-bottom:10px;">
+        ${photos.map((pid, i) => `
+          <div class="area-photo-wrap" data-photo-idx="${i}" title="Drag to reorder" style="position:relative;display:none;">
             <img id="thumb-${pid}" src="" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;" onclick="editSavedPhoto('${pid}', '${safeLabel}')">
             <span onclick="event.stopPropagation();rotateAreaPhoto('${pid}','${safeLabel}')"
                   style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);">↻</span>
@@ -18573,6 +18583,16 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
       }
     });
   });
+
+  // v2419: wire drag-to-reorder on area-photo thumbnails. Re-render via
+  // refreshAreaPhotoGrid (not showMediaSheet) so the reorder stays inside
+  // the in-page grid.
+  const areaGrid = document.getElementById(`area-photo-grid-${sanitized}`);
+  if (areaGrid) {
+    setupPhotoSortable(areaGrid, mediaLabel, (updatedSurvey) => {
+      refreshAreaPhotoGrid(updatedSurvey, mediaLabel);
+    });
+  }
 }
 
 /**

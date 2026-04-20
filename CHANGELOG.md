@@ -12,6 +12,28 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2419 — 2026-04-19
+### Added — Drag-to-reorder on category area-photo grids
+
+Categories like Deck, Flybridge, Aft deck, and Cockpit have a dedicated "area photos" section rendered by `refreshAreaPhotoGrid` (app.js:18499). These thumbnails are separate from the per-checklist-item photo grid — they attach to a media-type item on the category (e.g. "Flybridge photos") rather than to a specific inspection item. Until now, area-photo thumbnails rendered without drag handlers, so Dave could not reorder them once captured. The per-item media sheet has had drag-to-reorder since v2162, so this was a consistency gap.
+
+Minimal-surface fix — reuse the existing `setupPhotoSortable` pattern:
+
+1. Parameterized `setupPhotoSortable(gridEl, itemLabel, reRender)` (app.js:6096). The new optional third arg is a callback that fires after the reorder is persisted to IndexedDB. When provided, it replaces the default "remove & reopen the media sheet" re-render. The existing caller at app.js:6292 is untouched (no third arg → falls back to the media-sheet re-render path).
+2. Added `data-photo-idx="${i}"` to each `.area-photo-wrap` in `refreshAreaPhotoGrid` (app.js:18534). The drag-reorder logic walks `[data-photo-idx]` to find draggable thumbnails, so the attribute is required.
+3. Added `id="area-photo-grid-${sanitized}"` to the area-photo grid container (app.js:18533) so the drag wiring can find it after innerHTML assignment.
+4. After the innerHTML render + thumbnail load loop, `refreshAreaPhotoGrid` now calls `setupPhotoSortable(areaGrid, mediaLabel, survey => refreshAreaPhotoGrid(survey, mediaLabel))` (app.js:18581+). The re-render callback keeps the reorder in-page — no media sheet opens, no page scroll, just the grid snapping to the new order.
+
+Data path is unchanged: area photos are already persisted at `survey.items[mediaLabel].photos` (same schema as per-item photos), so `setupPhotoSortable`'s existing reorder logic works verbatim. The only behavioural difference is the re-render target.
+
+Desktop: drag one thumbnail onto another to swap their order. iOS: drag-to-reorder uses the same touch-drag pipeline as the media sheet — works on iPhone/iPad, press-and-hold to begin the drag. A `title="Drag to reorder"` tooltip appears on hover.
+
+No migration, no data reshaping. Existing surveys open with their area-photo order intact; reordering takes effect only when Dave drags.
+
+Roadmap slides: round-oval-X iOS fix moves from v2419 → v2420+.
+
+---
+
 ## v2418 — 2026-04-19
 ### Fixed — Aft deck percussion snippet: removed incorrect "coachroof" reference
 
