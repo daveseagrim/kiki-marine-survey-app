@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2457';
+const APP_VERSION = 'v2458';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -22707,8 +22707,9 @@ function openSurvey(surveyId) {
 
 // v2427: session-scoped dismiss memory. If Dave clicks "Keep local" on the
 // cloud-is-richer banner for a survey, we don't nag him again for that
-// survey this session. A reload clears it. A manual pullNow / pullSurvey
-// ALSO clears it (different function).
+// survey this session. A reload clears it. A manual pullSurvey (via the
+// ⬇️ Force pull from cloud overflow button) ALSO clears it (different
+// function). v2458: the old batch pullNow() that also cleared this is gone.
 const _cloudBannerDismissed = {};
 
 async function checkCloudRichnessBanner(survey) {
@@ -26754,10 +26755,10 @@ const FirebaseSync = (() => {
   // his explicit choice. The inverse button, "☁️ Pull from cloud", calls
   // pullSurvey() and replaces local with cloud. No scoring, no surprises.
   //
-  // Callers MUST ensure Dave asked for this (overflow menu, pullNow
-  // helpers that already suppress local writes, etc.). Do NOT restore
-  // any saveSurvey-wrapper auto-push — that is exactly the design flaw
-  // this version exists to eliminate.
+  // Callers MUST ensure Dave asked for this (overflow-menu ☁️ Force push
+  // to cloud, or pullSurvey helpers that already suppress local writes).
+  // Do NOT restore any saveSurvey-wrapper auto-push — that is exactly the
+  // design flaw this version exists to eliminate.
   async function pushSurvey(survey) {
     if (!_syncEnabled || !window.fsDb) return;
     const sid = String(survey.id);
@@ -27188,6 +27189,11 @@ const FirebaseSync = (() => {
   }
 
   // ── Initial Sync (push all local surveys to Firebase on first connect) ─
+  // v2458: ORPHANED. Only caller was pullNow(), which has been removed. Body
+  // kept for diff legibility / rollback (same treatment as periodicSync after
+  // v2426). Do NOT re-wire — it iterates ALL surveys, which violates the
+  // manual-per-survey model and would resurrect locally-deleted surveys after
+  // the v2456 delete-hook strip.
   async function initialSync() {
     if (!_syncEnabled || !window.fsDb) return;
     updateSyncStatusUI('syncing', 'Initial sync…');
@@ -27399,19 +27405,24 @@ const FirebaseSync = (() => {
   // removeSurvey, removePhoto) remains active, so Firebase still receives
   // every save as an insurance backup. Drive auto-sync is also unchanged.
   //
-  // Cross-device pulls are now explicit: user calls `FirebaseSync.pullNow()`
-  // from the DevTools console (or the "Pull from Firebase" overflow
-  // button, once wired up) to perform a one-shot initialSync. The
-  // existing richness-guard at line 25992 still governs the per-survey
-  // merge, so a pull cannot silently overwrite a locally richer record.
+  // Cross-device pulls are now explicit AND per-survey. v2458 removed the
+  // batch escape hatch (FirebaseSync.pullNow) after realising it would
+  // resurrect locally-deleted surveys once v2456 stripped the auto-delete
+  // hooks. The only pull surface is the per-survey ⬇️ Force pull from cloud
+  // overflow button, which calls FirebaseSync.pullSurvey(id) +
+  // pullPhotosForSurvey(id) with a confirm dialog showing the cloud
+  // snapshot before overwrite. The existing richness-guard at line 25992
+  // still governs the merge so a pull cannot silently overwrite a locally
+  // richer record.
   //
   // Intended workflow:
   //   - Field device (iPhone): saves push to Firebase + Drive as they
   //     happen. No incoming sync. Device is the local source of truth.
-  //   - Report device (Mac): user runs pullNow() once on startup to
-  //     load the latest state from Firebase into local IDB, then edits
-  //     freely. Edits push back to Firebase + Drive.
-  //   - Handoff is intentional: user chooses when to pull, never a race.
+  //   - Report device (Mac): user taps ⬇️ Force pull from cloud on the
+  //     specific surveys they want to continue editing, one at a time.
+  //     Edits push back to Firebase + Drive.
+  //   - Handoff is intentional: user chooses each pull per-survey, never
+  //     a batch race.
   //
   // This will be formalised as a future "Device Roles" version with a proper UI
   // (field-mode vs report-mode home-screen selector, explicit pull/push
@@ -27448,44 +27459,44 @@ const FirebaseSync = (() => {
     // (photos first, survey doc second, per-photo try/catch, structured
     // result) so partial failure cannot orphan Storage blobs.
     //
-    // Paths that still invoke Firebase after v2457 (audited with Dave):
+    // v2458 amendment: removes FirebaseSync.pullNow() (the batch-pull
+    // console escape hatch that delegated to initialSync). With v2456's
+    // delete-hook strip in place, pullNow was the one remaining path that
+    // could silently resurrect a locally-deleted survey on next console
+    // invocation. It was never wired to UI, the per-survey ⬇️ Force pull
+    // from cloud button covers every legitimate pull case, so the function
+    // body is deleted outright. initialSync() is now orphaned (its only
+    // caller was pullNow); the body stays for diff legibility like
+    // periodicSync. See the removal comment in-line.
+    //
+    // Paths that still invoke Firebase after v2458 (audited with Dave):
     //   USER-INITIATED:
     //     • backupAllEverywhere()            — home-screen "💾 Save All Surveys"
     //     • saveSurveyWithProgress()         — bottom-bar "💾 Save" button
     //     • "☁️ Force push to cloud"         — overflow-menu explicit push
     //     • "⬇️ Force pull from cloud"       — overflow-menu explicit pull
     //     • "🗑️ Delete cloud copy"           — overflow-menu explicit remove (v2457)
-    //   AUTO-PUSH (v2458+ scope — still fires during ordinary use):
+    //   AUTO-PUSH (future-version scope — still fires during ordinary use):
     //     • _processBackupQueue()            — 5s-idle after savePhoto(); pushes queued
     //                                          photos + their parent survey to Firebase
     _syncEnabled = true;
     updateSyncStatusUI('idle', 'Manual sync (use overflow menu)');
-    console.log('[Sync] v2457: Manual Firebase sync only. Saves/deletes do not auto-sync. Use overflow-menu ☁️ / ⬇️ / 🗑️ buttons.');
+    console.log('[Sync] v2458: Manual Firebase sync only. Saves/deletes do not auto-sync. Batch pullNow() removed — use per-survey ⬇️ Force pull from cloud.');
   }
 
-  // v2426 — explicit, user-initiated pull from Firestore. Runs the
-  // same initialSync() path the old init() ran on startup, so the
-  // existing richness-guard and lastModified resolution still apply
-  // per-survey. Returns a result object so console callers can see
-  // whether the pull succeeded.
-  async function pullNow() {
-    if (!window.fsDb) {
-      console.warn('[Sync] Firebase not available');
-      return { error: 'firebase-unavailable' };
-    }
-    console.log('[Sync] v2426: Manual pull starting...');
-    updateSyncStatusUI('syncing', 'Pulling from Firebase...');
-    try {
-      await initialSync();
-      updateSyncStatusUI('synced', 'Pulled ' + new Date().toLocaleTimeString());
-      console.log('[Sync] v2426: Manual pull complete');
-      return { ok: true };
-    } catch (err) {
-      console.error('[Sync] v2426: Manual pull failed', err);
-      updateSyncStatusUI('error', (err && err.message) || 'Pull failed');
-      return { error: (err && err.message) || String(err) };
-    }
-  }
+  // v2458 — pullNow() REMOVED. It was the batch-pull escape hatch (console-only,
+  // never wired to UI) that iterated ALL local+remote surveys via initialSync().
+  // Two reasons it had to go:
+  //   1. REDUNDANT — the per-survey ⬇️ Force pull from cloud overflow button
+  //      (wired to pullSurvey(id) + pullPhotosForSurvey(id)) covers every
+  //      legitimate pull use-case with explicit per-survey intent.
+  //   2. DANGEROUS in combination with v2456's delete-hook strip — a batch pull
+  //      would re-create any locally-deleted survey that still existed in the
+  //      cloud, reversing Dave's delete with no warning. pullNow was the ONE
+  //      remaining path that could resurrect a deliberate local delete.
+  // The body is gone entirely (not just unwired) so a future rename / accidental
+  // re-export can't reintroduce the risk. initialSync() below is now orphaned
+  // — kept for diff legibility / rollback, same treatment as periodicSync.
 
   // Re-apply current sync status to a freshly rendered DOM element
   function refreshUI() {
@@ -27518,8 +27529,13 @@ const FirebaseSync = (() => {
     // Rule 1 (no cross-device pulls without user request). The function
     // body is still defined in the module so history/diff stays readable,
     // but it has no callers left inside or outside the module.
-    // Explicit manual pull is exposed as pullNow() below.
-    pullNow,
+    //
+    // v2458: pullNow() ALSO REMOVED from public API (and its function body
+    // deleted — see the comment where it used to live). Same reasoning: it
+    // was a batch pull (delegated to initialSync) that would have silently
+    // resurrected locally-deleted surveys after the v2456 delete-hook strip.
+    // The per-survey ⬇️ Force pull from cloud overflow button (pullSurvey +
+    // pullPhotosForSurvey) is the only cross-device pull surface now.
     // v2427: single-survey helpers so openSurvey can ask "is cloud richer?"
     // and the richness banner can pull just one survey without triggering
     // the ALL-surveys initialSync path.

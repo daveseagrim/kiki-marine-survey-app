@@ -12,6 +12,117 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2458 — 2026-04-21
+### Removed — `FirebaseSync.pullNow()` batch-pull escape hatch (P0 correctness — closes v2456's one remaining delete-resurrection path)
+
+**Why this release exists.** v2456 stripped the auto-delete hooks so ordinary local deletes would stop silently wiping Firebase. v2457 added the `🗑️ Delete cloud copy` button and hardened the cascade so manual cloud cleanup actually works. But there was one piece left on Dave's original three-item stability priority: `FirebaseSync.pullNow()` — a console-only batch-pull escape hatch that iterated every local+remote survey and overwrote local from cloud via `initialSync()`. After v2456/v2457, that function became the single path that could still silently resurrect a deliberately-deleted survey: if Dave deleted a survey locally (which no longer touches the cloud) and then later typed `FirebaseSync.pullNow()` in DevTools for any unrelated reason, the cloud copy would re-create the local record with no warning. v2458 removes the function entirely.
+
+**Dave's original three-item priority (from v2455 audit).** ✅ `saveEverywhere` strip (v2455), ✅ delete-hook strip (v2456), ✅ 🗑️ Delete cloud copy button + cascade hardening (v2457), ✅ `pullNow()` removal (this commit). Manual-sync model is now complete.
+
+---
+
+### What `pullNow()` was and why it had to go
+
+`FirebaseSync.pullNow()` was added in v2426 as the console-level replacement for the bidirectional auto-sync that v2426 disabled. It delegated to the private `initialSync()` function, which pulls every survey from Firestore whose cloud timestamp beats local (and pushes the reverse). It was never wired to any UI — Dave ran it in Safari Web Inspector / Chrome DevTools on the Mac as a "load everything from iPhone" step when starting a report session.
+
+**Four reasons it had to go:**
+
+1. **Delete-resurrection risk.** This is the blocker. Post-v2456, a local delete no longer auto-propagates to Firebase (by design — cloud delete is now explicit via the 🗑️ button). So the cloud retains copies of deleted surveys until Dave manually removes them. If `pullNow()` ran for any reason against a cloud that still held a deleted survey, the survey would re-appear in local IDB. No confirm dialog, no warning. The one lingering path that could reverse a deliberate delete — gone.
+
+2. **Redundant with the per-survey pull.** v2428 introduced the per-survey `⬇️ Force pull from cloud` overflow button (calls `pullSurvey(id)` + `pullPhotosForSurvey(id)` with a confirm dialog showing rated-items / photo count / last-modified before overwrite). Every legitimate pull use-case is covered by that button with stronger guarantees: explicit per-survey intent, visible before-state, and no risk of touching other surveys as collateral.
+
+3. **Console-only surface invites forgotten invocations.** A console command with no UI means Dave could type it months from now after the mental model of "this is safe" has faded, and not remember that the cloud state it pulls from may no longer be authoritative. Removing the function means the DevTools autocomplete won't even offer it.
+
+4. **Violated the v2428 "manual sync, per-survey explicit" contract in spirit.** v2428 said all Firebase reads and writes should be per-survey and user-confirmed. `pullNow()` was a batch-all read that bypassed the confirm dialog. Keeping it while removing every other batch sync path was inconsistent.
+
+---
+
+### What changed in code
+
+**`app.js`:**
+
+- **Function deleted** — the entire `async function pullNow()` body at the former line 27471 is gone. Replaced with a comment block explaining the removal so anyone grep-ing for the name sees the rationale instead of wondering why it's missing.
+- **Public API export** — `pullNow` removed from the IIFE's return object (sat next to `periodicSync`'s equivalent v2426 removal comment, now gets its own v2458 removal comment for the same treatment).
+- **`initialSync()` marked orphaned** — its only caller was `pullNow`. Body stays for diff legibility / rollback (same treatment as `periodicSync` after v2426), with a clear comment that future re-wiring would recreate the delete-resurrection risk.
+- **Four doc/comment sites cleaned up** — the v2427 dismiss-memory comment no longer lists `pullNow` as a clearing path; the v2428 `pushSurvey` caller-contract comment no longer references `pullNow` as a caller; the v2426 cross-device-pulls paragraph rewritten around the per-survey ⬇️ button as the sole pull surface; the `init()` comment block gains a v2458 amendment explaining the removal in context of v2455/v2456/v2457.
+- **Startup log** — `[Sync] v2458: Manual Firebase sync only. Saves/deletes do not auto-sync. Batch pullNow() removed — use per-survey ⬇️ Force pull from cloud.` Replaces the v2457 string.
+
+**`sw.js`:** `CACHE_NAME` → `kiki-marine-v2458`.
+
+**`index.html`:** `<meta name="app-version">` → `v2458`; all 7 core-module cache-busters → `?v=2458`.
+
+---
+
+### Updated Firebase surface map (post-v2458)
+
+**USER-INITIATED (all confirm-gated, all per-survey or explicit batch):**
+
+- `backupAllEverywhere()` — home-screen "💾 Save All Surveys" button. Pushes every local survey to Firebase + Drive. Explicit action, progress UI, user-triggered.
+- `saveSurveyWithProgress()` — bottom-bar "💾 Save" on an open survey. Pushes the current survey to Firebase + Drive.
+- `☁️ Force push to cloud` (overflow menu) — per-survey push with peek + confirm showing cloud vs local scores.
+- `⬇️ Force pull from cloud` (overflow menu) — per-survey pull with peek + confirm. **The only cross-device pull surface after v2458.**
+- `🗑️ Delete cloud copy` (overflow menu, v2457) — per-survey destructive with peek + confirm.
+
+**AUTO-PUSH (still fires during ordinary use — future-version scope, not in v2458):**
+
+- `_processBackupQueue()` — 5-second idle timer after `savePhoto()`, pushes the queued photo(s) + parent survey to Firebase. This is the remaining auto-push seam; leaving it for a later release so v2458 stays single-feature.
+
+**REMOVED/ORPHANED (do NOT re-wire):**
+
+- `FirebaseSync.pullNow()` — removed outright in v2458.
+- `initialSync()` — orphaned in v2458; private, no callers, body kept for rollback only.
+- `periodicSync()` — orphaned in v2426; private, no callers, body kept for rollback only.
+- Auto-push on `saveSurvey` / `saveEverywhere` — stripped in v2455.
+- Auto-delete on `deletePhoto` / `deleteSurvey` — stripped in v2456.
+
+---
+
+### Locked-in requirement for v2430 Device Roles
+
+v2430 Device Roles (field-mode iPhone vs report-mode Mac) was originally going to wire `pullNow()` into the mode switcher — e.g., "entering report mode runs pullNow to load latest from cloud". That's now impossible (function doesn't exist) AND undesirable (would resurrect deleted surveys). v2430 MUST instead either: (a) list cloud surveys and let Dave tap per-survey Pull for each one he wants, or (b) if a batch pull is built, gate it on first asking "these N surveys were deleted locally — do you want them resurrected, or do you want to delete them from cloud first?" with the v2457 🗑️ Delete cloud copy button available in the same UI.
+
+---
+
+### What's left on the stability checklist
+
+✅ v2455 save-pill Firebase strip  
+✅ v2456 delete-hook Firebase strip  
+✅ v2457 🗑️ Delete cloud copy button + cascade hardening  
+✅ v2458 `pullNow()` removal (this commit)  
+
+All four items from Dave's v2455 audit are now landed. Remaining Firebase auto-push seams (separate tasks, future versions):
+
+- **Photo idle-backup queue** (`savePhoto` → `_pendingBackupIds` → `_processBackupQueue`, 5s-idle after capture). Still auto-pushes photos + parent survey to Firebase during ordinary field use. Largest remaining asymmetry vs. the "manual Firebase" model; will need its own design decision (surface-as-pending UI? or strip entirely and rely on the manual ☁️ Force push?).
+- **Bottom-bar "💾 Save" button** (`saveSurveyWithProgress`) still pushes to Firebase. User-initiated but asymmetric with the save-pill (which is local+Drive only post-v2455); UX polish task.
+
+---
+
+### How to verify
+
+*pullNow is actually gone:*
+
+1. Open Safari Web Inspector → Console. Type `FirebaseSync.pullNow` and press enter. Expect: `undefined` (or a ReferenceError if typed without the object prefix). Pre-v2458 it would have printed `async function pullNow()`.
+2. Type `FirebaseSync.pullNow()` and press enter. Expect: `TypeError: FirebaseSync.pullNow is not a function`. Do NOT expect any sync activity — no "Pulling from Firebase..." log, no network calls.
+3. Check `Object.keys(FirebaseSync)` in the console — `pullNow` is no longer in the list. `pullSurvey`, `pullPhotosForSurvey`, and the 🗑️ `removeSurvey` / `removePhoto` helpers are still there.
+
+*Per-survey pull still works (regression check):*
+
+4. Open a survey that has a richer cloud copy than local (e.g., push from iPhone, edit-and-save locally to make it thinner). Open `⋯` → tap `⬇️ Force pull from cloud`. Confirm dialog shows cloud snapshot. Tap Pull. Verify the survey reloads with the cloud state.
+5. No other surveys were touched. Navigate back to home, open a different survey — unchanged from before step 4.
+
+*Delete-resurrection path is actually closed (the whole point of v2458):*
+
+6. Delete a survey locally (via the overflow `🗑️ Delete survey` or home-screen swipe). Confirm it's gone from the home list.
+7. Verify the cloud copy still exists (it should, post-v2456): Firebase Console → Firestore → surveys collection → survey ID is still there.
+8. In the Safari Web Inspector console, attempt `FirebaseSync.pullNow()`. Expect the TypeError from step 2 — no pull happens, the deleted survey does NOT re-appear in IDB.
+9. (Optional — the other way to get the cloud copy back into local is per-survey pull, but the survey is deleted locally so there's no overflow menu to tap from; this is correct — the survey is deleted and staying deleted until Dave explicitly chooses to re-create it by running a push from another device that still has it, or by manually typing the ID.)
+
+*Startup log reflects the new state:*
+
+10. Hard-reload the app (Cmd-Shift-R or close the PWA and reopen). Console should show `[Sync] v2458: Manual Firebase sync only. Saves/deletes do not auto-sync. Batch pullNow() removed — use per-survey ⬇️ Force pull from cloud.`
+
+---
+
 ## v2457 — 2026-04-21
 ### Added — `🗑️ Delete cloud copy` overflow button + hardened `removeSurvey` / `removeAllPhotosForSurvey` cascade (P0 correctness — closes the gap v2456 opened)
 
