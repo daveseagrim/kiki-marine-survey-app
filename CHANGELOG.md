@@ -12,6 +12,36 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2429 — 2026-04-20
+### Changed — Unified conductivity chip set across Hull / Deck / Aft Deck / Flybridge; rudder scrub extended to cover conductivity on power boats
+
+Three closely related changes ship together as v2429. All four conductivity sections now share a consistent observation ladder (lead → rating-specific observed → means → action → NT block), with wording Dave approved 2026-04-20 in `reference-docs/CONDUCTIVITY_CHIP_AUDIT.md`. The rebuild is scripted and reproducible.
+
+**What this ships.**
+
+- **174 new conductivity chips, 103 old chips removed (scripted rebuild).** The script at `scripts/rebuild_conductivity_chips.py` strips every existing chip from these sections in `text_library.json` and writes the unified set in their place:
+  - Hull category → "Hull and rudder(s) conductivity testing" (+9 net)
+  - Deck category → "Deck and coachroof/pilothouse conductivity testing" (+24 net)
+  - Aft Deck category → "Aft deck conductivity testing" (+12 net; the "Conductivity testing" alias section is deleted from the library and routed via `SHEET_MAPPING` at app.js:1523)
+  - Flybridge category → "Flybridge conductivity testing" (+26 net)
+  - Cockpit conductivity testing is intentionally untouched (different surface, not in Dave's scope for this pass).
+
+- **Per-rating chip template.** For each of A / B / C, every section contains: 2 lead chips (always present) + 4 "observed" body chips + 3–4 "means" chips + 3–4 "action" chips. The NT (not tested) block has 1 lead, section-specific reason chips, 1 means, and section-specific action chips.
+
+- **Lead chip wording chosen to avoid subject/verb pitfalls.** Reworded from the previous "The {loc} was checked with a conductivity meter..." to **"Conductivity testing was carried out on the {loc} using a relative scale of 0 to 999."** The earlier form produced the ungrammatical "The hull and rudder(s) **was** checked..." on sailboats (compound subject takes a plural verb). The new form's subject is always "testing" (singular), so it reads naturally for every section, compound or not. The NT lead uses the same grammatical pattern: "Process / limitation: Conductivity testing of the {loc} was not carried out."
+
+- **Resolves task #121 ("remove redundant 'consistent with vessels of similar age' chip").** The pre-v2429 Hull section had two near-identical C-rating chips using "consistent with vessels of similar age and construction." Both are stripped in the rebuild. The replacement set keeps a single "within an expected range for a vessel of similar age and construction" chip that communicates the same surveyor intent more cleanly.
+
+- **Resolves task #122 ("conductivity testing: strip rudders from power boats (item + snippets)").** In `app.js`, renamed `isPowerBoatRudderResonanceItem` → **`isPowerBoatHullRudderTest`** and broadened the regex to also match "conductivity testing" alongside impact / resonance / percussion. The existing alias `const isPowerBoatRudderResonanceItem = isPowerBoatHullRudderTest;` keeps all current call sites working — `_itemSnippetCtx`, `displayItemLabel`, post-expand `pluralizeRudder` gate, and `findTextVariants` post-process scrub. Net effect: on a power boat, the Hull conductivity label displays as "Hull conductivity testing" (rudder stripped) and chip text like "Conductivity testing was carried out on the hull and rudder(s) using..." gets scrubbed by `scrubNakedRudderRefs` to "Conductivity testing was carried out on the hull using..." at chip-tap time. Rationale: a bronze power-boat rudder has no fibreglass laminate, so a moisture-meter reading on it is meaningless — the same logic Dave approved for resonance/percussion in v2386.
+
+**Script details.** `scripts/rebuild_conductivity_chips.py` is idempotent: re-running produces the same output (section chips are stripped and rewritten, not appended). `SECTION_CFG` holds per-section `{loc}` values, NT reasons, and NT actions. `OBSERVED`, `MEANS`, and `ACTION` dicts hold the shared, location-neutral body chip text per rating. `SEVERITY` maps rating → severity integer to match existing library conventions.
+
+**What did NOT change.** No changes to `findTextVariants` matching order, `ITEM_SNIPPET_MAP` routing, snippet token expansion, or any other code path. The library JSON change is section-scoped — everything outside the four conductivity sections is byte-identical to pre-v2429.
+
+**Files changed.** `app.js` (APP_VERSION → v2429; `isPowerBoatHullRudderTest` rename + conductivity regex), `sw.js` (CACHE_NAME → `kiki-marine-v2429`), `index.html` (meta + 7 cache-busters → v2429), `text_library.json` (174 chips added, 103 removed across 4 sections), `scripts/rebuild_conductivity_chips.py` (docstring + lead-wording update), this file.
+
+---
+
 ## v2428 — 2026-04-20
 ### Changed — Manual sync rollback: auto-push REMOVED, explicit Push / Pull buttons per survey (P0 correction to v2427)
 

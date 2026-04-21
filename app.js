@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2428';
+const APP_VERSION = 'v2429';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -683,16 +683,25 @@ function classifyRatingForReport(rating) {
 // rudder would be. For the hull-and-rudder resonance testing item specifically,
 // treat the vessel as if it had no rudder so the label, snippet chips, and
 // saved-text expansion all drop rudder verbiage.
-function isPowerBoatRudderResonanceItem(survey, label) {
+//
+// v2429: extended to cover conductivity testing too. A bronze rudder has no
+// fibreglass laminate, so a moisture-meter reading on it is meaningless. We
+// strip the rudder verbiage from the conductivity chip set on power boats
+// the same way we do for resonance — same predicate, same scrubber path.
+// Renamed isPowerBoatRudderResonanceItem → isPowerBoatHullRudderTest to
+// reflect the broader scope. (Old name kept as window alias for safety.)
+function isPowerBoatHullRudderTest(survey, label) {
   if (!survey || !label) return false;
   if (String(survey.vesselType || '').toLowerCase() !== 'power') return false;
   // Matches both the raw template form ("Hull and rudder(s) (if applicable)
-  // impact and resonance testing") and the library section form ("Hull and
-  // rudder(s) impact and resonance testing"), plus any legacy "percussion
-  // testing" phrasing that survived earlier template renames.
+  // X testing") and the library section form ("Hull and rudder(s) X testing"),
+  // plus any legacy "percussion testing" phrasing from earlier template renames.
   return /^hull\s+and\s+rudder/i.test(label) &&
-         /(impact\s+and\s+resonance|percussion)\s+testing/i.test(label);
+         /(impact\s+and\s+resonance|percussion|conductivity)\s+testing/i.test(label);
 }
+// v2386 alias — keep the old name resolvable in case any external/future code
+// references it. Internal call sites use the new name directly.
+const isPowerBoatRudderResonanceItem = isPowerBoatHullRudderTest;
 
 // v2386: Return the snippet-expansion context for a specific item, applying
 // the power-boat hull-resonance override. Drop-in replacement for the inline
