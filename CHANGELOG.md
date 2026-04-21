@@ -12,6 +12,76 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2437 — 2026-04-20
+### Fixed — NT snippet library: compound-subject "was" → "were" agreement
+
+v2389 fixed one compound-subject/singular-verb error in the NT ("Not tested") snippet library ("head, faucet, sink and drain was not tested"). Dave flagged that the same pattern existed in several other NT sections that weren't swept at the time. This pass audits every NT snippet across `text_library.json` and corrects subject/verb agreement where a compound subject is paired with a singular verb.
+
+**Audit approach.**
+
+1. Filtered `text_library.json` to entries whose `rating` field matches `/^(not tested|not verified|not inspected|nt\b)/i` — that's the rating strings Dave actually uses on NT chips ("Not tested", "Not tested - out of water", "Not tested/not verified", "Not tested - dripless", etc.).
+2. Within those, scanned text for patterns like `X, Y and Z was`, `X, Y, Z and W was`, and `plural-noun and plural-noun was`.
+3. Hand-classified each hit to separate true compound-subject errors from false positives where "was" is grammatically correct — two-clause constructions joined by "and" (e.g., "the vessel was on shore and the water tank was empty") and idiomatic singular-system names ("the outdrive trim and tilt hydraulic system was not tested" — one system named "trim and tilt", not two components).
+
+**Seven corrections applied.**
+
+| Section | Idx | Before | After |
+|---|---|---|---|
+| Aft Deck | 86 | sink, faucet and drain **was** not tested | **were** not tested |
+| Cabin and conveniences | 315 | cockpit sink, faucets and drain **was** not tested | **were** not tested |
+| Cabin and conveniences | 317 | fresh water tanks and plumbing **was** not tested | **were** not tested |
+| Head | 42 | head, toilet and seacock **was** not tested | **were** not tested |
+| Fuel & Tanks | 135 | hot water tanks, plumbing and electrical **was** not tested | **were** not tested |
+| Fuel & Tanks | 137 | black water tanks and plumbing **was** not tested | **were** not tested |
+| Engine & Powertrain | 221 | cooling water intake seacocks and strainers **was** not tested | **were** not tested |
+
+Each fix swaps exactly one instance of `and <last-element> was not tested` → `and <last-element> were not tested`, preserving the rest of the sentence ("...because the vessel was on shore and winterized at the time of survey." — the later "was"s are correct, their subjects are singular).
+
+**Not changed (false positives).**
+
+- Companion "Recommend testing..." snippets ("Recommend testing the sink, faucet and drain when the vessel **is** commissioned") — subject of "is" is "the vessel" (singular), correct as-is.
+- `[Cabin and conveniences] idx 42` — already uses "were" ("The faucet, sink, and drain were not tested...").
+- `[Head] idx 10, 13, 44` — already use "were".
+- `[Engine & Powertrain] idx 309` — already uses "were".
+- `[Steering & Hydraulics] idx 14` — "The outdrive trim and tilt hydraulic system was not tested" — "trim and tilt hydraulic system" is a singular named system; "was" is correct.
+- `[Deck] idx 33` — "The vessel was ashore and the windlass was not tested under load" — two independent clauses each with singular subject.
+- `[Deck] idx 386` — "Conductivity testing of the deck and coachroof was not carried out" — subject is "testing" (singular), "deck and coachroof" is a prepositional phrase.
+- `[Fuel & Tanks] idx 41` — "The installation appeared proper and no leakage was observed" — two clauses.
+
+**Side effect on existing reports.** Past surveys that already inserted the old phrasing into their notes are unaffected — the fix updates the library chip text, not any stored survey data. Dave can re-tap the corrected chip on existing surveys if he wants to overwrite the stored text with the grammatically correct version.
+
+**Files changed.** `text_library.json` (7 snippets corrected, identified by section+index in the table above), `app.js` (APP_VERSION → v2437), `sw.js` (CACHE_NAME → `kiki-marine-v2437`), `index.html` (meta + 7 cache-busters → v2437), this file.
+
+---
+
+## v2436 — 2026-04-20
+### Fixed — Report: running page header now matches the title page survey type
+
+The `@page @top-center` running header — the small grey line that repeats at the top of every printed page after the cover — was hardcoded to `"Report of Condition & Value Marine Survey"`. The cover page h1, by contrast, already picks between `"Insurance Marine Survey"` and `"Report of Condition & Value Marine Survey"` based on `survey.surveyType`. Consequence: when an Insurance Survey was printed, the cover said "Insurance Marine Survey" but pages 2..N all said "Report of Condition & Value Marine Survey" — an internal contradiction that readers noticed and that weakens the document.
+
+**Root cause.** Single static string in the print CSS at app.js:23301. Predates the Insurance template branch entirely — when Insurance support was added to the cover (see the `surveyType === 'Insurance survey'` check at app.js:23422) the running-header CSS was missed.
+
+**Fix.** Replace the static string with the same conditional the title-page h1 uses:
+
+```css
+@top-center {
+  content: "${survey.surveyType === 'Insurance survey' ? 'Insurance Marine Survey' : 'Report of Condition & Value Marine Survey'}";
+  ...
+}
+```
+
+Because this block lives inside the big template literal that builds the report HTML (`let html = \`...\``), the `${}` interpolation runs once at report-generation time — Chrome's print engine just sees the already-resolved literal string.
+
+**Why the two spots are now yoked.** If a future survey type is added (e.g. Appraisal gets its own h1 phrasing), the cover and the running header must be updated together to stay in lockstep. The inline comment added at app.js:23300 explicitly documents that constraint alongside the line number of the sibling branch.
+
+**Appraisal note.** Dave's current cover-page logic already treats `Appraisal` the same as `Pre-purchase survey` (both produce "Report of Condition & Value Marine Survey"), so the running header now does the same. This isn't a regression — it mirrors what the cover already does. If Appraisals should have their own phrasing ("Marine Survey Appraisal", "Appraisal Report", etc.) that's a separate task for a future version, and updating both sites at once is enforced by the comment.
+
+**What is not changed.** The `@bottom-left` contact strip, `@bottom-center` vessel name, and `@bottom-right` page X of Y are all correct already and stay as-is. The `@page :first { @top-center { content: none; } }` rule that suppresses the running header on the cover page (v2227) is also untouched — the cover's own h1 is the title on page 1. The Word (.doc) export has no running header so nothing to change there.
+
+**Files changed.** `app.js` (APP_VERSION → v2436; `@top-center` content replaced with conditional at app.js:23301 plus comment), `sw.js` (CACHE_NAME → `kiki-marine-v2436`), `index.html` (meta + 7 cache-busters → v2436), this file.
+
+---
+
 ## v2435 — 2026-04-20
 ### Fixed — Report: uniform vertical spacing between every section
 

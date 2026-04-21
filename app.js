@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2435';
+const APP_VERSION = 'v2437';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -23298,7 +23298,13 @@ async function generateReport() {
       size: letter;
       margin: 25mm 15mm 25mm 15mm;
       @top-center {
-        content: "Report of Condition & Value Marine Survey";
+        /* v2436: match the title-page h1 exactly. Before this fix the running
+           top-of-page header was hardcoded to "Report of Condition & Value
+           Marine Survey" on every printed page, which contradicted the cover
+           page whenever the survey type was Insurance (cover shows "Insurance
+           Marine Survey"). Same branch used on line 23422 so the two stay in
+           lockstep — any future survey-type additions get made in both spots. */
+        content: "${survey.surveyType === 'Insurance survey' ? 'Insurance Marine Survey' : 'Report of Condition & Value Marine Survey'}";
         font-size: 8pt;
         color: #666;
         font-family: Arial, Helvetica, sans-serif;
