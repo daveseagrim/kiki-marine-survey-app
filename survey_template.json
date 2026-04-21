@@ -1911,7 +1911,7 @@
           },
           {
             "type": "list",
-            "label": "Hot water tank(s), plumbing and electrical",
+            "label": "Hot water tank, plumbing and electrical",
             "options": [
               "A - Critical",
               "B - Needs Attention",

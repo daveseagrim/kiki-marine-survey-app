@@ -12,6 +12,45 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2438 — 2026-04-21
+### Fixed — "Hot water tank(s)" label made singular throughout
+
+Small polish pass. The checklist item under the Fuel & Tanks category was labelled `"Hot water tank(s), plumbing and electrical"`. The parenthetical `(s)` was a holdover from an earlier style; Dave wanted it dropped so the label reads cleanly as singular: `"Hot water tank, plumbing and electrical"`. Virtually every vessel Dave surveys has a single hot water tank, and when a survey does have two (rare), the surveyor writes it in prose.
+
+**Why this touches more than the template file.**
+
+`findTextVariants()` in `app.js` matches an item label to the relevant `section` field in `text_library.json` via an exact-match-then-contains fallback. If the template label was changed to the singular form but the library `section` strings still carried `(s)`, the contains fallback would break — the shorter singular label `"Hot water tank, plumbing and electrical"` is NOT a substring of `"Hot water tank(s), plumbing and electrical"`. Any snippet with `(s)` in its section field would silently fall out of the match set and no chips would appear on that item. This is the same failure mode documented under task #95 (snippet disappearance on pluralized labels) and must be avoided here.
+
+So the label change had to be applied atomically in lockstep across:
+
+| File | Change |
+|---|---|
+| `insurance_survey_template.json` | 1 label at L2237: `Hot water tank(s)...` → `Hot water tank...` |
+| `survey_template.json` | 1 label at L1914: same change |
+| `text_library.json` | 26 `section` field occurrences updated to the singular form |
+
+**Two snippet bodies also updated.**
+
+Within the Fuel & Tanks section, two NT-family chip texts referenced the plural noun "tanks" in running prose:
+
+| Idx | Before | After |
+|---|---|---|
+| 135 | "The hot water **tanks**, plumbing and electrical were not tested..." | "The hot water **tank**, plumbing and electrical were not tested..." |
+| 136 | "Recommend testing the hot water **tanks**, plumbing and electrical..." | "Recommend testing the hot water **tank**, plumbing and electrical..." |
+
+Index 135 composes cleanly with the v2437 compound-subject fix — the verb stays `were` because the subject is still compound (`The hot water tank, plumbing and electrical`). Index 136 uses singular `is` elsewhere in the sentence, which is correct with singular `tank` as the recipient of `testing`.
+
+**Not changed.**
+
+- `app.js` L6968 — `'Hot water tank': 'ABYC E-11 - AC and DC Electrical Systems on Boats'` — already keyed singular as the standards-mapping lookup key. No change needed.
+- `import_photos_riverdance.js` — a one-off photo-import script that references the old label string in two places. Not versioned, not user-facing; left alone to avoid churning unrelated files in a label-polish push. Will be cleaned up organically the next time that script is touched.
+
+**Side effect on existing reports.** Past surveys that already captured the item under the old `(s)` label will still show the chip text on re-open. `findTextVariants` reads the template label at render time, and the survey's stored per-item data is keyed by the label string used on creation. If a past survey still has a `Hot water tank(s), plumbing and electrical` key in its `items` object, the new template label won't match it and the saved notes could look "orphaned" on that survey until Dave re-opens the item and taps again. For Dave's active surveys this is fine — he'll re-hit the chip and the stored data will re-key to the singular form. Documented here so future-me doesn't panic if a very old survey looks sparse in that row.
+
+**Files changed.** `survey_template.json` (1 label), `insurance_survey_template.json` (1 label), `text_library.json` (26 section fields + 2 snippet bodies), `app.js` (APP_VERSION → v2438), `sw.js` (CACHE_NAME → `kiki-marine-v2438`), `index.html` (meta + 7 cache-busters → v2438), this file.
+
+---
+
 ## v2437 — 2026-04-20
 ### Fixed — NT snippet library: compound-subject "was" → "were" agreement
 

@@ -18044,133 +18044,133 @@
       "severity": 3
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "A - pressure relief valve wrong",
       "text": "The pressure-relief valve was located very close to electrical equipment and lacked a discharge line routed to the bilge.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "A - pressure relief valve wrong",
       "text": "ABYC H-27.7.1 requires that pressure-relief devices discharge where escaping fluid will not create a hazard, and ABYC E-11.1.2.2 requires means to divert any fluid above batteries to the bilge.",
       "phase": "means",
       "severity": 5
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "A - pressure relief valve wrong",
       "text": "The current arrangement did not meet these standards.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "A - pressure relief valve wrong",
       "text": "Professional assessment and repair are recommended before the vessel is returned to service.",
       "phase": "action",
       "severity": 5
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "A - exposed electrical connections",
       "text": "The electrical connections to the hot water tank were not properly covered or enclosed.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "A - exposed electrical connections",
       "text": "Exposed connections in a wet environment create a risk of short circuit, corrosion, and potential fire.",
       "phase": "means",
       "severity": 5
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "A - exposed electrical connections",
       "text": "ABYC E-11.16.3 requires that all electrical connections be protected from exposure to moisture and the marine environment.",
       "phase": "means",
       "severity": 5
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "A - exposed electrical connections",
       "text": "All electrical connections to the hot water tank should be enclosed in appropriate junction boxes or heat-shrink connectors rated for the marine environment.",
       "phase": "action",
       "severity": 5
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "A - household wiring",
       "text": "The hot water tank was wired with household-grade (Romex/NM) wiring rather than marine-grade tinned copper conductors.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "A - household wiring",
       "text": "Household wiring uses solid-core untinned copper that corrodes rapidly in the marine environment and is prone to fatigue failure from vibration.",
       "phase": "means",
       "severity": 5
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "A - household wiring",
       "text": "ABYC E-11.16.1 requires that all conductors on boats be stranded tinned copper with marine-grade insulation rated for the environment.",
       "phase": "means",
       "severity": 5
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "A - household wiring",
       "text": "The household wiring should be replaced with properly sized marine-grade tinned copper conductors and appropriate terminal connections before the vessel is returned to service.",
       "phase": "action",
       "severity": 5
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "C",
       "text": "The hot water tank was located in the [insert location].",
       "phase": "observed",
       "severity": 1
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "C",
       "text": "The tank appeared in satisfactory condition with no visible corrosion or damage.",
       "phase": "observed",
       "severity": 1
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "C",
       "text": "The plumbing connections were secure with no evidence of leakage at the fittings or hose clamps.",
       "phase": "observed",
       "severity": 1
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "C",
       "text": "The electrical supply to the hot water tank was properly installed with appropriate wire gauge and connections.",
       "phase": "observed",
       "severity": 1
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "C",
       "text": "The pressure relief valve was present and discharged to a lower point in the bilge, clear of batteries and other electronics.",
       "phase": "observed",
       "severity": 1
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "C",
       "text": "The hot water tank was also plumbed to the engine cooling system for heat exchange.",
       "phase": "observed",
       "severity": 2
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "C",
       "text": "No leakage was observed at any plumbing or electrical connection.",
       "phase": "observed",
@@ -18408,14 +18408,14 @@
       "severity": 3
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "B",
       "text": "The system operated but with reduced temperature or minor leaks.",
       "phase": "observed",
       "severity": 2
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "B",
       "text": "Service is recommended.",
       "phase": "action",
@@ -18688,21 +18688,21 @@
       "text": "No corrective action is recommended at this time."
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "A",
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "C",
       "phase": "means",
       "severity": 1,
       "text": "No immediate concern was identified."
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "C",
       "phase": "action",
       "severity": 1,
@@ -18877,18 +18877,18 @@
       "text": "No corrective action is recommended at this time."
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "Not tested/not verified",
       "phase": "observed",
       "severity": 1,
-      "text": "The hot water tanks, plumbing and electrical were not tested because the vessel was on shore and winterized at the time of survey."
+      "text": "The hot water tank, plumbing and electrical were not tested because the vessel was on shore and winterized at the time of survey."
     },
     {
-      "section": "Hot water tank(s), plumbing and electrical",
+      "section": "Hot water tank, plumbing and electrical",
       "rating": "Not tested/not verified",
       "phase": "action",
       "severity": 2,
-      "text": "Recommend testing the hot water tanks, plumbing and electrical when the vessel is commissioned for the season."
+      "text": "Recommend testing the hot water tank, plumbing and electrical when the vessel is commissioned for the season."
     },
     {
       "section": "Black water tank(s) and plumbing",
