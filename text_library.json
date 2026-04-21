@@ -8042,7 +8042,7 @@
     {
       "section": "Cockpit drains",
       "rating": "C",
-      "text": "The drains were free of debris and drained the cockpit properly.",
+      "text": "The drains were free of debris.",
       "phase": "observed",
       "severity": 1
     },

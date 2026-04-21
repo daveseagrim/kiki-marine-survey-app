@@ -12,6 +12,29 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2450 — 2026-04-21
+### Changed — Cockpit drains C chip: strip "and drained the cockpit properly"
+
+Dave's ask: *"Remove the words 'drained the cockpit properly' from the drain section."*
+
+**Before — Cockpit[18] C/observed (section: Cockpit drains).**
+
+> The drains were free of debris and drained the cockpit properly.
+
+**After.**
+
+> The drains were free of debris.
+
+**Why the trailing "and" also came out.** Removing just the four quoted words would leave the fragment "The drains were free of debris and." Dropping the connector keeps the sentence grammatical while stripping exactly what Dave flagged. Net change: 6 words removed (" and drained the cockpit properly") instead of 4, but the semantic cut matches his ask.
+
+**Why not replace "properly" with another adverb (smoothly, freely, readily).** Same pattern as `v2448` deck hatches and `v2446` grab rails: the library is moving away from adverbial value judgments in C-rated observed chips. "Drained properly" is a value claim — was it properly drained, or just drained? "Free of debris" is a concrete, observable state. If a surveyor wants to call out flow-test behaviour (e.g. slow drainage despite clear passages), the B-rated chips in the section cover that on a case-by-case basis.
+
+**Only one hit.** Grep for chips matching drain + cockpit + proper across the library returned exactly this chip. No other drain sections carried the phrasing.
+
+**Files changed.** `text_library.json` (Cockpit drains C/observed text trimmed), `app.js` (APP_VERSION → v2450), `sw.js` (CACHE_NAME → `kiki-marine-v2450`), `index.html` (meta + 7 cache-busters → v2450), this file.
+
+---
+
 ## v2449 — 2026-04-21
 ### Removed — Windshield: two redundant C/observed chips in `Windshield, pilothouse windows, frames, and studs`
 
