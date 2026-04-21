@@ -12,6 +12,34 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2452 — 2026-04-21
+### Changed — Propane N/A chips: present → past tense
+
+Dave's ask: *"Propane. The not applicable section has to be in the past tense."*
+
+**Before — two N/A chips, identical text.**
+
+> There is no propane system installed on this vessel.
+
+**After.**
+
+> There was no propane system installed on this vessel.
+
+**Locations.** Both instances share the identical string, so a single library-wide replacement hit both:
+
+- `Cockpit` › `Propane valve, regulator, gauge, storage compartment and vent` › N/A observed
+- `Safety & Nav Equipment` › `LPG cut off solenoid valve switch` › N/A observed
+
+The LPG solenoid section also carries a second N/A chip — *"There was an alcohol stove on board."* — which is already past tense and was not touched.
+
+**Why past tense matters.** The entire library is being migrated to past-tense observational reporting ("appeared", "was", "were", "opened") because the survey document a frozen observation at the time of inspection, not a claim about the vessel's current state. Present-tense N/A copy like "there is no X" leaks a live-state assertion into a historical report. Same pattern as `v2424` grammar sweep and the ongoing `v2420+` sweep (task #103).
+
+**Scope.** Two chip texts changed. Section chip counts unchanged. No other propane-related N/A chips flagged.
+
+**Files changed.** `text_library.json` (replace-all on the sentence), `app.js` (APP_VERSION → v2452), `sw.js` (CACHE_NAME → `kiki-marine-v2452`), `index.html` (meta + 7 cache-busters → v2452), this file.
+
+---
+
 ## v2451 — 2026-04-21
 ### Changed — Engine locker lid C chip: rewrite around hinges + open/close
 

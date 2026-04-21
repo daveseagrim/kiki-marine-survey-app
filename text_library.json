@@ -9811,7 +9811,7 @@
       "rating": "N/A",
       "phase": "observed",
       "severity": 1,
-      "text": "There is no propane system installed on this vessel."
+      "text": "There was no propane system installed on this vessel."
     },
     {
       "section": "Steering wheel and steering",
@@ -25072,7 +25072,7 @@
       "rating": "N/A",
       "phase": "observed",
       "severity": 1,
-      "text": "There is no propane system installed on this vessel."
+      "text": "There was no propane system installed on this vessel."
     }
   ],
   "Deck": [
