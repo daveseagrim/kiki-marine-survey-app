@@ -25597,21 +25597,7 @@
     {
       "section": "Windshield, pilothouse windows, frames, and studs",
       "rating": "C",
-      "text": "The windshield, pilothouse windows, frames, and studs were in acceptable condition.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Windshield, pilothouse windows, frames, and studs",
-      "rating": "C",
-      "text": "The windshield, pilothouse windows, frames, and seals were in good working order.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Windshield, pilothouse windows, frames, and studs",
-      "rating": "C",
-      "text": "The windshield, pilothouse windows, frames, and studs were structurally sound, solid, and without deficiency.",
+      "text": "The windshield, pilothouse windows, frames, and studs were in good working order.",
       "phase": "observed",
       "severity": 3
     },

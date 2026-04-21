@@ -12,6 +12,39 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2449 — 2026-04-21
+### Removed — Windshield: two redundant C/observed chips in `Windshield, pilothouse windows, frames, and studs`
+
+Dave's ask: *"Windshield. There are three snippets that say exactly the same thing."*
+
+**Audit finding.** The Deck section `Windshield, pilothouse windows, frames, and studs` carried three C/observed chips that all made the same claim — windshield assembly in fine shape — with different word choices:
+
+| Idx | Text | Issue |
+|---|---|---|
+| 74 | The windshield, pilothouse windows, frames, and studs were **in acceptable condition**. | "acceptable" — phrasing the library is moving away from |
+| 75 | The windshield, pilothouse windows, frames, and **seals** were in **good working order**. | Text says "seals"; section name says "studs" — word mismatch |
+| 76 | The windshield, pilothouse windows, frames, and studs were **structurally sound, solid, and without deficiency**. | Triple-redundant (sound = solid = without deficiency) |
+
+**After.** One consolidated C/observed chip:
+
+> The windshield, pilothouse windows, frames, and studs were in good working order.
+
+This is Deck[75]'s phrasing with the "seals" → "studs" bug fixed to match the section name. Deck[74] and Deck[76] removed.
+
+**Why this wording.** "Good working order" aligns with the v2448 "Good" chip pattern (deck hatches), uses concrete operational phrasing (working order, not condition), and reads naturally as a one-line inspector note.
+
+**Out of scope — near-duplicates in other sections kept intentionally.**
+- Flybridge[129] `Flybridge splash shield/windshield`: *"The Flybridge splash shield or windshield is in serviceable condition without deficiencies with no cracks or crazing."* — different section (Flybridge vs Deck), covers different hardware, one chip in its own section. Not redundant.
+- Deck[161] `Windshield, pilot house windows, frames and seals`: *"The windshield and pilot house windows were in proper working condition with clear visibility and secure frames."* — this is the *second* windshield section (note "pilot house" vs "pilothouse", "seals" vs "studs"), which appears to be a parallel section that evolved separately from v1. Contains "proper working condition" which is the exact phrasing v2448 targeted for deck hatches; candidate for future cleanup, but Dave's ask was scoped to the three identical chips, not a broader windshield polish.
+
+**Why two sections still exist.** The file has both `Windshield, pilothouse windows, frames, and studs` (8 chips, Deck[72-76, 235-237]) and `Windshield, pilot house windows, frames and seals` (10 chips, Deck[156-162, 256-258]). These are parallel copies from a data consolidation — the survey template probably only references one, but both are searched. Consolidating them is a separate cleanup (candidate for a future version after confirming which the survey template actually uses).
+
+**Net.** Section shrinks from 8 chips to 6 (B/observed x2, C/observed x1, B/action x1, C/means x1, C/action x1). Surveyor now has exactly one positive C-rated chip to tap for "windshield is fine."
+
+**Files changed.** `text_library.json` (two duplicate chips removed, one kept with seals→studs fix), `app.js` (APP_VERSION → v2449), `sw.js` (CACHE_NAME → `kiki-marine-v2449`), `index.html` (meta + 7 cache-busters → v2449), this file.
+
+---
+
 ## v2448 — 2026-04-21
 ### Changed — Deck hatches: remove "proper/properly"; surface a "Good" chip at top of C list
 
