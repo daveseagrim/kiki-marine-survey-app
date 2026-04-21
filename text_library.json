@@ -18185,8 +18185,8 @@
     },
     {
       "section": "Black water tank(s) and plumbing",
-      "rating": "C",
-      "text": "It appeared correctly installed with ASTM D3262 hose fitted.",
+      "rating": "C - not visible but looks right",
+      "text": "The black water tank was located in the [insert location] and not visible.",
       "phase": "observed",
       "severity": 3
     },
@@ -18194,13 +18194,6 @@
       "section": "Black water tank(s) and plumbing",
       "rating": "C",
       "text": "No leakage or unusual odour was observed.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Black water tank(s) and plumbing",
-      "rating": "C - not visible but looks right",
-      "text": "The black water tank was located in the [insert location] and not visible.",
       "phase": "observed",
       "severity": 3
     },

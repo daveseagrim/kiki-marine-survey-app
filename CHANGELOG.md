@@ -12,6 +12,45 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2440 — 2026-04-21
+### Fixed — Black water tank C-rated chip cleanup: dropped redundant ASTM chip, moved "not visible" chip adjacent to "was mounted"
+
+Polish pass on the Black water tank chip panel at the C ("Serviceable") rating. The panel currently surfaces every entry whose `rating` field starts with `C` — so both plain `"C"` chips and `"C - not visible but looks right"` chips render together in one panel, in JSON-file order. Before this pass, that order read awkwardly: a location chip, then a condition chip, then another condition chip, then a second location chip. After the pass, location chips are adjacent and condition chips follow.
+
+**Before (JSON order within Fuel & Tanks section).**
+
+| Idx | Rating | Text |
+|---|---|---|
+| 35 | C | The black water tank was mounted [insert location]. |
+| 36 | C | It appeared correctly installed with ASTM D3262 hose fitted. |
+| 37 | C | No leakage or unusual odour was observed. |
+| 38 | C - not visible but looks right | The black water tank was located in the [insert location] and not visible. |
+| 39 | C - not visible but looks right | The installation appeared proper with ASTM D3262 hose fitted. |
+
+**After.**
+
+| Idx | Rating | Text |
+|---|---|---|
+| 35 | C | The black water tank was mounted [insert location]. |
+| 36 | C - not visible but looks right | The black water tank was located in the [insert location] and not visible. |
+| 37 | C | No leakage or unusual odour was observed. |
+| 38 | C - not visible but looks right | The installation appeared proper with ASTM D3262 hose fitted. |
+
+Two changes:
+
+1. **Deleted** the old index 36 entry (`"It appeared correctly installed with ASTM D3262 hose fitted."` at rating `C`). It was redundant with the index 39 entry (`"The installation appeared proper with ASTM D3262 hose fitted."` at rating `C - not visible but looks right`) which expresses the same idea in slightly different prose. Dave flagged the first as the redundancy to drop.
+2. **Moved** the `"The black water tank was located in the [insert location] and not visible."` entry from its old index 38 position to sit immediately after the `"was mounted [insert location]"` entry. Result: the two location-describing chips render back-to-back in the UI before any condition chips.
+
+**Why these two variants both exist.** `"was mounted"` is the chip the surveyor taps when they physically saw the tank (it gets the visible location filled in — under the V-berth, in the lazarette, etc.). `"was located in the... and not visible"` is the chip the surveyor taps when a panel, liner, or cabinetry obscures direct view but the location is known. Keeping both adjacent lets Dave pick whichever wording matches field conditions without scrolling past a condition chip to reach the alternate location phrasing.
+
+**Rating-match note.** `findTextVariants` resolves the C rating through first-character comparison (see `isRatingMatch` in app.js L7438–7449), so both `"C"` and `"C - not visible but looks right"` entries continue to surface together when the surveyor picks `C - Serviceable` from the template's rating dropdown. No code change needed for the new order to render correctly.
+
+**Side effect on existing reports.** Past surveys that captured the deleted `"It appeared correctly installed with ASTM D3262 hose fitted."` chip still have that text stored in their `items[...].text` field — the delete only removes the chip from the insertable library, not from any stored note. Dave can edit those past surveys manually if he wants to replace the text with the surviving `"The installation appeared proper..."` variant; untouched surveys keep reading the way they already read.
+
+**Files changed.** `text_library.json` (1 entry deleted, 1 entry relocated within Fuel & Tanks array — 138 entries down from 139), `app.js` (APP_VERSION → v2440), `sw.js` (CACHE_NAME → `kiki-marine-v2440`), `index.html` (meta + 7 cache-busters → v2440), this file.
+
+---
+
 ## v2439 — 2026-04-21
 ### Changed — Valuation section cleanup: removed VALUATION WORKSHEET subsection, moved Final Concluded FMV to just before the Surveyor's Certificate
 
