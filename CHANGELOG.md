@@ -12,6 +12,80 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2455 — 2026-04-21
+### Fixed — `saveEverywhere()` no longer auto-pushes to Firebase (P0 correctness — manual sync model restored)
+
+**Dave's audit.** *"The save-status panel still says Firebase 'auto-syncs on every save,' and the save pill still calls `saveEverywhere()`, which explicitly pushes to Firebase and Drive. That clashes with the v2428 design, where normal saves were supposed to stay local + Drive, and Firebase pushes were supposed to happen only when you explicitly tap the force-push control. So a normal 'Save' tap can still perform cloud writes. That is not a freeze/crash problem, but it is a serious correctness/surprise problem."*
+
+**The bug.** `v2428` promised a manual-only Firebase sync model, but `saveEverywhere()` — the function the save pill invokes on every tap — still force-pushed the current survey to Firebase (at `app.js:3315-3323`) AND force-pushed to Drive (bypassing the throttle) on every Save tap. The Save-status hold-to-view panel explicitly advertised this: *"Connected · auto-syncs on every save"* and *"Saves happen automatically — local is instant, Firebase on every change, Drive every 30 seconds."* So in practice, the save pill was a **three-backend push button**, not the local-first checkpoint the v2428 redesign claimed. Cloud writes fired on every Save, contradicting both the UI promise (manual-sync overflow button) and the v2428 changelog.
+
+**What changed in v2455.**
+
+| Surface | Before | After |
+| --- | --- | --- |
+| `saveEverywhere()` (`app.js` ~3290) | Step 1 local save → **Step 2 force Firebase push** → Step 3 force Drive sync | Step 1 local save → Step 2 force Drive sync. Firebase block replaced with a comment explaining the removal and pointing at the overflow-menu Force push. |
+| Save-status hold panel, Firebase status line (`app.js` ~3264) | "Connected · auto-syncs on every save" | "Connected · manual push only" |
+| Save-status hold panel, footer advice (`app.js` ~3269-3274) | "Saves happen automatically — local is instant, Firebase on every change, Drive every 30 seconds." | "Local is instant; Drive auto-syncs every 30 seconds. Firebase pushes only when you tap ☁️ Force push to cloud in the overflow menu." |
+| Save-pill tap handler comment (`app.js` ~3165) | `// Short tap — save everywhere` | `// Short tap — save locally + trigger Drive auto-sync. v2455: no longer pushes to Firebase...` |
+| v2428 init() comment block (`app.js` ~27206-27216) | Claimed saveEverywhere "invokes pushSurvey explicitly" as if this were correct behaviour | Amended with a v2455 note explaining the stripped auto-push and listing the remaining paths that still invoke `FirebaseSync.pushSurvey` (backupAllEverywhere, saveSurveyWithProgress, explicit overflow-menu ☁️ Force push). Console log updated to cite v2455 rather than v2428. |
+
+**Drive is unchanged.** Drive auto-sync still fires on every Save (bypassing the 30-second throttle) and the save pill still reflects this in the UI — that was always the v2428 model: *local + Drive auto, Firebase manual*. This commit only removes the Firebase step that was contaminating that model.
+
+**What still pushes to Firebase.** Five paths remain. Three are clearly user-initiated; two fire during ordinary use and are candidates for v2456+ work. Dave explicitly audited this list before this commit landed — nothing below is hidden.
+
+1. **User-initiated — ☁️ Force push to cloud** (overflow-menu button, `app.js:15331`) — per-survey Firebase push with toast confirmation. This is the intended manual-sync affordance.
+2. **User-initiated — "💾 Save All Surveys"** (home-screen `backupAllEverywhere()`, `app.js:9142`) — deliberate batch maintenance tool. Dave's finding #4 flagged this as "fine as a deliberate maintenance tool" and it stays.
+3. **User-initiated — bottom-bar "💾 Save" button** (`saveSurveyWithProgress`, called from the inspection and edit screens at `app.js:10941` and `15239`). The user taps it explicitly, but it behaves *differently* than the save-pill: the pill is now local + Drive, the bottom-bar Save is local + Drive + Firebase. That UX asymmetry is real and needs a follow-up pass — keep it on the radar.
+4. **Auto-push — idle-triggered photo backup queue.** `savePhoto()` (`app.js:2444`) pushes the photo id into `_pendingBackupIds` and calls `_resetIdleTimer()`. 5 seconds after the user stops interacting, `_processBackupQueue()` (`app.js:2538`) wakes up and calls `FirebaseSync.pushPhoto()` on every queued photo, then pushes the parent survey alongside it. This fires during ordinary field use every time Dave takes a photo and pauses. **v2455 did NOT remove this path** — it only removed the save-pill push. Dave flagged this as a v2456 candidate.
+5. **Auto-push — delete hooks.** `_originalDeletePhoto` / `_originalDeleteSurvey` (`app.js:27382-27401`) still force-push deletes to Firebase. Dave's audit called this out: deletes shouldn't be more eager than creates. v2456 scope.
+
+**One other Firebase surface, listed for completeness.** `syncAllPhotosToFirebase()` (`app.js:2646`) also calls `FirebaseSync.pushPhoto` and `FirebaseSync.pushSurvey` (lines 2767 / 2776). It has no UI invocation in `index.html` and is not wired to any button — it's a console-only batch helper, effectively dormant during normal use. Not a user-facing auto-push. Flagged here so the audit inventory is complete.
+
+**What DOES change with v2455.**
+
+- Save-pill tap (the big one — every Save tap on the inspection screen, edit screen, and new-survey screen) no longer pushes to Firebase.
+- The save-status UI no longer misleads about Firebase being automatic on every save.
+
+**Why this is a stability fix, not a feature.** Silent cloud writes on every save were the exact behaviour that produced cross-device regressions (device A's stale closure pushing shrunken state, device B pulling it) — the class of bug the v2424 freshness guard and v2426/v2427/v2428 sync redesign were meant to eliminate. Leaving the save pill on auto-push kept that hazard alive, just narrowed. v2455 closes the last remaining auto-push seam.
+
+**Files changed.** `app.js` (4 edits: saveEverywhere body, status-panel text, tap-handler comment, init() comment), `sw.js` (CACHE_NAME → v2455), `index.html` (meta + 7 cache-busters → v2455), this file.
+
+**How to verify.**
+
+1. Open a survey on the iPhone. Tap the Save pill. Open DevTools / remote inspector on the device's console: no `[Sync]` push log. The Save-status panel (hold the pill) shows "🔥 Firebase: Connected · manual push only".
+2. Make a change. Tap Save. Open another browser tab or device. Do **not** pull. The change should be absent — it only exists locally and in Drive.
+3. Pull the same survey from the other device. Change is still absent (no Firebase push happened).
+4. Go back to the first device. Open the overflow menu, tap **☁️ Force push to cloud**. Get a confirmation toast. Pull from the other device. Change now arrives.
+
+**v2456/v2457 follow-up.** Two more sync-symmetry fixes are next in the queue per Dave's audit: v2456 strips the `deletePhoto`/`deleteSurvey` Firebase hooks (deletes shouldn't be more eager than creates), and v2457 removes `FirebaseSync.pullNow()` (batch pull should only exist inside the planned Device Roles feature, not as a console escape hatch).
+
+---
+
+## v2454 — 2026-04-21
+### Added — Hot water tank NT observed chip: "electrical and plumbing connections appeared serviceable"
+
+Dave's ask: *"For the hot water tank, put when not tested that electrical and plumbing connections appeared serviceable."*
+
+**New chip (Not tested/not verified, observed, severity 1).**
+
+> The electrical and plumbing connections appeared serviceable.
+
+**Where it sits.** Inserted in `text_library.json` between the existing NT/observed "…were not tested because the vessel was on shore and winterized…" chip and the NT/action "Recommend testing…when commissioned…" chip. Section chip count for "Hot water tank, plumbing and electrical" goes from 25 → 26; NT observed count 1 → 2.
+
+**Why this chip matters.** Most Ontario surveys happen with the vessel on the hard, winterized — the tank itself can't be energized or pressurized. But the surveyor can still visually inspect the wiring, junctions, supply line, discharge line, and connections. This chip lets the surveyor report that positive visual observation without contradicting the separate "could not be run because winterized" chip. Both can appear in the same report since they describe complementary observations (test status vs. connection condition).
+
+**Wording notes.**
+
+- "serviceable" matches the library's post-`v2415` direction (replaced "satisfactory" in the hull-deck joint chip for the same reason — more concrete, less value-laden).
+- "appeared" keeps it past-tense and hedged per the `v2420+` past-tense sweep.
+- Kept Dave's exact word order: "electrical and plumbing connections" rather than flipping to "plumbing and electrical connections" to match the section name. His ask specified the former.
+
+**Why NT and not C.** Dave was explicit that the chip should appear in the Not Tested list. A C-rating chip in this section already exists for "The electrical supply to the hot water tank was properly installed with appropriate wire gauge and connections" — but C requires the system to have been tested and found good. When the tank is winterized, C is not reachable; NT is.
+
+**Files changed.** `text_library.json` (1 new chip), `app.js` (APP_VERSION → v2454), `sw.js` (CACHE_NAME → `kiki-marine-v2454`), `index.html` (meta + 7 cache-busters → v2454), this file.
+
+---
+
 ## v2453 — 2026-04-21
 ### Removed — Tax Status + NMMA/CE/TC Compliance Plate fields
 

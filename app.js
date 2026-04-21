@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2453';
+const APP_VERSION = 'v2455';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -3162,7 +3162,9 @@ const SaveStatus = (() => {
       _longPressTimer = null;
     }
     if (!_didLongPress) {
-      // Short tap — save everywhere
+      // Short tap — save locally + trigger Drive auto-sync.
+      // v2455: no longer pushes to Firebase. Firebase is manual-only
+      // via the "☁️ Force push to cloud" overflow-menu button.
       if (typeof saveEverywhere === 'function') saveEverywhere();
     }
   }
@@ -3261,16 +3263,17 @@ const SaveStatus = (() => {
           <div style="padding-left:10px;">📷 ${_photoCount} photos in IndexedDB</div>
           <div style="padding-left:10px;">💾 Last save: ${_lastSaveAt ? new Date(_lastSaveAt).toLocaleTimeString() : 'no saves yet'}</div>
           <div style="margin-top:8px;"><strong>🔥 Firebase:</strong></div>
-          <div style="padding-left:10px;">${firebaseOk ? `<span style="color:#16a34a;">✓</span> Connected · auto-syncs on every save` : '<span style="color:#9ca3af;">○</span> Not connected'}</div>
+          <div style="padding-left:10px;">${firebaseOk ? `<span style="color:#16a34a;">✓</span> Connected · manual push only` : '<span style="color:#9ca3af;">○</span> Not connected'}</div>
           ${queued > 0 ? `<div style="padding-left:10px;color:#d97706;">⏳ ${queued} photos queued for upload</div>` : ''}
           <div style="margin-top:8px;"><strong>☁️ Google Drive:</strong></div>
           <div style="padding-left:10px;">${driveOk ? '<span style="color:#16a34a;">✓</span> Signed in · auto-syncs every 30s' : '<span style="color:#9ca3af;">○</span> Not signed in'}</div>
         </div>
         <div style="margin-top:12px;padding-top:10px;border-top:1px solid #e5e7eb;font-size:11px;color:#6b7280;">
-          <strong>Tap</strong> the save pill anytime to force an immediate save
-          to all connected backends. <strong>Hold</strong> to see this panel.
-          Saves happen automatically — local is instant, Firebase on every change,
-          Drive every 30 seconds.
+          <strong>Tap</strong> the save pill anytime to save locally and
+          refresh the Drive backup. <strong>Hold</strong> to see this panel.
+          Local is instant; Drive auto-syncs every 30 seconds.
+          Firebase pushes only when you tap <strong>☁️ Force push to cloud</strong>
+          in the overflow menu.
         </div>
       </div>
     `;
@@ -3283,10 +3286,16 @@ const SaveStatus = (() => {
   return { show, hide, markSaving, markSaved, markError, setPhotoCount, _placePill };
 })();
 
-// ── v2253: saveEverywhere — force-save to all three backends now ─────────
+// ── v2253: saveEverywhere — save locally and refresh the Drive backup ────
+// v2455: Firebase push removed. The save-pill tap now only writes to
+// IndexedDB and triggers an immediate Drive auto-sync (bypassing the 30s
+// throttle). Firebase is manual-only — user must tap "☁️ Force push to
+// cloud" in the overflow menu to propagate to Firebase. Restores the
+// symmetry the v2428 manual-sync redesign claimed but did not deliver.
+//
 // Called when the user taps the save pill. Collects current form data,
-// saves to IndexedDB, pushes to Firebase, and pushes survey JSON to Drive.
-// Non-blocking for cloud backends — local save is awaited, cloud is fire-and-forget.
+// saves to IndexedDB, and pushes survey JSON to Drive.
+// Non-blocking for Drive — local save is awaited, Drive is fire-and-forget.
 async function saveEverywhere() {
   if (!currentSurveyId) return;
   SaveStatus.markSaving();
@@ -3312,17 +3321,11 @@ async function saveEverywhere() {
       if (survey) await saveSurvey(survey);
     }
 
-    // 2. Force Firebase push (may already have happened via hook, but ensure it)
-    if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled()) {
-      const survey = await getSurvey(currentSurveyId);
-      if (survey) {
-        FirebaseSync.pushSurvey(survey).catch(err =>
-          console.warn('[SaveEverywhere] Firebase push failed:', err.message || err)
-        );
-      }
-    }
+    // v2455: Firebase push intentionally removed. Save-pill tap is
+    // local + Drive only. See "☁️ Force push to cloud" overflow button
+    // (wired at line ~15331) for the explicit Firebase propagation path.
 
-    // 3. Force immediate Drive auto-sync (bypass throttle)
+    // 2. Force immediate Drive auto-sync (bypass throttle)
     if (typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn()) {
       const survey = await getSurvey(currentSurveyId);
       if (survey) {
@@ -27206,14 +27209,27 @@ const FirebaseSync = (() => {
     // v2428: _syncEnabled stays true so the public pushSurvey / pullSurvey
     // / pushAllPhotosForSurvey helpers remain callable — but the saveSurvey
     // and savePhoto wrappers no longer fire them automatically. Sync is
-    // now ENTIRELY manual: Dave taps "☁️ Push to cloud" or "⬇️ Pull from
-    // cloud" in the overflow menu. The user-initiated batch paths
-    // (backupAllEverywhere, saveSurveyWithProgress, saveEverywhere) also
-    // still work — they invoke pushSurvey explicitly. Nothing about the
-    // save path auto-decides what to sync.
+    // now ENTIRELY manual: Dave taps "☁️ Force push to cloud" or "⬇️ Force
+    // pull from cloud" in the overflow menu.
+    //
+    // v2455 amendment: the save-pill tap (saveEverywhere) previously
+    // force-pushed to Firebase despite the v2428 design, which meant
+    // "manual sync" was a lie at the main save surface. v2455 strips the
+    // Firebase push from saveEverywhere so it is now local + Drive only.
+    //
+    // Paths that still invoke Firebase after v2455 (audited with Dave):
+    //   USER-INITIATED:
+    //     • backupAllEverywhere()            — home-screen "💾 Save All Surveys"
+    //     • saveSurveyWithProgress()         — bottom-bar "💾 Save" button
+    //     • "☁️ Force push to cloud"         — overflow-menu explicit push
+    //   AUTO-PUSH (v2456 scope — still fires during ordinary use):
+    //     • _processBackupQueue()            — 5s-idle after savePhoto(); pushes queued
+    //                                          photos + their parent survey to Firebase
+    //     • _originalDeletePhoto / _originalDeleteSurvey — force-remove from Firebase
+    //                                                      on local delete
     _syncEnabled = true;
     updateSyncStatusUI('idle', 'Manual sync (use overflow menu)');
-    console.log('[Sync] v2428: Manual sync only. Auto-push removed. Use overflow-menu buttons or FirebaseSync.pushSurvey / FirebaseSync.pullSurvey.');
+    console.log('[Sync] v2455: Manual Firebase sync only. saveEverywhere no longer auto-pushes. Use overflow-menu ☁️ Force push to cloud.');
   }
 
   // v2426 — explicit, user-initiated pull from Firestore. Runs the
