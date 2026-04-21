@@ -12,6 +12,27 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2444 — 2026-04-21
+### Changed — Trim tabs C-rated chip: removed "during limited trial run" clause
+
+Dave asked for the "limited trial run" mention to come out of the trim tabs section. An audit across the `Trim tabs (exterior tabs, actuators, mounts and anodes)` section found exactly one hit:
+
+**Before — Hull[496] C/observed.**
+
+> The trim tabs, actuators, and mounts appeared sound and well-maintained and functioned properly during limited trial run.
+
+**After.**
+
+> The trim tabs, actuators, and mounts appeared sound and well-maintained and functioned properly.
+
+**Why.** Trim tab function is not meaningfully evaluated in a "limited trial run" — the relevant test is actuator extension/retraction at the dock or on the hard, not underway manoeuvring. The phrase implied a sea-trial-style observation that wasn't actually the basis for the rating, which could confuse readers of the report.
+
+**Out of scope.** The phrase `limited trial run` appears in ~15 other chips across unrelated sections (Cutlass bearing, Outboard general impression, Engine gauges, Bow thruster, Autopilot, MFD/Chartplotter, Stuffing box, Windlass). Those all remain as-is — Dave's ask was scoped to the trim tabs section specifically. Each other section may or may not warrant its own edit based on whether a trial run genuinely informs the observation; that's a future conversation.
+
+**Files changed.** `text_library.json` (Hull[496] text at L3482 edited), `app.js` (APP_VERSION → v2444), `sw.js` (CACHE_NAME → `kiki-marine-v2444`), `index.html` (meta + 7 cache-busters → v2444), this file.
+
+---
+
 ## v2443 — 2026-04-21
 ### Changed — Transducer speed wheel chip: dropped "acceptable condition" clause, added standalone "serviceable condition" chip
 
