@@ -12,6 +12,89 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2456 — 2026-04-21
+### Fixed — `deletePhoto` / `deleteSurvey` no longer auto-delete from Firebase (P0 correctness — manual-sync symmetry restored)
+
+**Dave's audit.** After v2455 stripped the save-side Firebase auto-push, Dave audited the delete path and found that the symmetrical bug was still live: *"These two blocks violate [the local + Drive auto, Firebase manual-only rule]. They make deletes automatic to Firebase. Both hooks turn a local delete into a cloud delete without an explicit user action."*
+
+**The five problems with the prior hooks** (all caught by Dave's audit, all fixed in v2456):
+
+1. **Deletes were auto-syncing destructively.** `v2428` promised manual-only Firebase, but a local `deletePhoto` / `deleteSurvey` still force-removed the cloud copy without any explicit "yes, remove from cloud" confirmation. Direct contradiction of the v2428/v2455 contract.
+
+2. **`deletePhoto` was missing the suppression check.** `deleteSurvey` had `!FirebaseSync.isSuppressed()` guarding the cloud call; `deletePhoto` did not. During restore / rebuild / recovery flows where sync is supposed to be suppressed, a local photo delete could still hit Firebase. Real latent bug — would have bitten during any future bulk-recovery flow.
+
+3. **Local-first, cloud-second with silent `.catch`.** Both hooks deleted locally first, then fired-and-forgot the cloud delete with `.catch(err => console.error(...))`. Failures were invisible outside DevTools. Result: silent divergence — local record gone, cloud record stuck, no retry, no toast, no surface. If the survey or photo later got pulled from cloud somehow, it would resurrect with no explanation.
+
+4. **No explicit confirmation for a destructive cloud action.** The local delete confirmation dialog doesn't mention cloud. If Firebase pushes need a deliberate tap, Firebase deletes need the same bar. The symmetry argument from v2455 applies verbatim.
+
+5. **Partial-cascade orphan risk.** `FirebaseSync.removeSurvey(surveyId)` (`app.js:26657`) does cascade: it deletes the Firestore survey doc, then calls `removeAllPhotosForSurvey(surveyId)` to clean up Storage. Happy-path, no orphans. BUT: both are wrapped in a single try/catch with only `console.error`. If the Firestore doc delete succeeds and the Storage cascade fails partway (network hiccup, rate limit, one photo's delete rejects), you get: parent doc gone + some photos gone from Storage + **remaining photos orphaned with no Firestore parent and no retry/surface path**. Not *designed* to orphan, but not bulletproof either.
+
+**The fix.** Both hooks now run the local delete only and emit a `console.info` so Dave can see in DevTools that the cloud copy was deliberately left alone. The wrapper shape is preserved (not deleted entirely) so v2430's "☁️ Delete cloud copy" action has a hook point to graft onto. Both hooks include `!FirebaseSync.isSuppressed()` so no log spam during restore/rebuild flows — this corrects the pre-v2456 asymmetry where `deletePhoto` lacked that check.
+
+**Before (v2455):**
+
+```js
+const _originalDeletePhoto = deletePhoto;
+deletePhoto = async function(photoId) {
+  const photo = await getPhotoById(photoId);
+  const result = await _originalDeletePhoto(photoId);
+  if (FirebaseSync.isEnabled() && photo) {
+    FirebaseSync.removePhoto(photoId, photo.surveyId).catch(err => console.error('[Sync] Photo delete failed:', err));
+  }
+  return result;
+};
+```
+
+**After (v2456):**
+
+```js
+const _originalDeletePhoto = deletePhoto;
+deletePhoto = async function(photoId) {
+  const result = await _originalDeletePhoto(photoId);
+  if (FirebaseSync.isEnabled() && !FirebaseSync.isSuppressed()) {
+    console.info(`[Sync] Photo ${photoId} deleted locally. Cloud deletion will occur only if you confirm it manually.`);
+  }
+  return result;
+};
+```
+
+**Note on the `result &&` guard that's NOT in the final code.** Dave's first drafts proposed `if (result && FirebaseSync.isEnabled() && ...)` to gate the log on success. Investigation showed the base `deletePhoto` (app.js:3883-3891) and `deleteSurvey` (app.js:2372-2394) both `resolve()` with no value on success — `result` is always `undefined`, which means `result && ...` would always be falsy and the log would never fire. Dropped the `result` guard in favour of `await` semantics: if the base function throws the wrapper throws and the log is skipped; if `await` returns (even `undefined`) the local delete succeeded and the log is appropriate. Same behaviour, fewer moving parts, no need to change `deletePhoto`/`deleteSurvey` return signatures outside the v2456 scope.
+
+Same treatment for `deleteSurvey`. Full reasoning is preserved in the comment block above each hook (app.js:27381-27418) so future work can reference Dave's audit directly.
+
+**The re-add hazard (why v2456 ships safely today).** Once the auto-delete is gone, a locally-deleted survey still exists in Firebase. On its own this could be a problem if anything pulls from Firebase and resurrects the survey. Today it's safe because:
+
+- The live `onSnapshot` listener (`startListening`, app.js:26669) is **not** called from `init()` in the v2428+ manual-sync model. No 'added' event will resurrect a local delete.
+- `FirebaseSync.pullNow()` is console-only — not wired to any UI (v2457 will remove it entirely).
+- `initialSync()` isn't called from init() anymore either.
+
+**⚠️ BUT — locked-in requirement for v2430 Device Roles.** The moment Device Roles re-introduces any pull-on-startup flow (field-mode → report-mode handoff, etc.), deleted-locally-but-still-in-cloud surveys will come back on pull. v2430 MUST therefore include an explicit **"☁️ Remove from cloud"** action before re-enabling any pull path, otherwise deletes will feel like they didn't stick. This is the symmetrical "Force push to cloud" analogue and is the missing half of the manual-sync UX.
+
+**What else is left on the stability checklist.**
+
+Dave's original three-item priority (from his v2455 audit): ✅ saveEverywhere (v2455), ✅ delete hooks (this commit), ⏳ `pullNow()` (v2457 — next up).
+
+Two auto-push seams surfaced by the v2455 audit remain outside this commit's scope:
+
+- **Photo idle-backup queue** (`savePhoto` → `_pendingBackupIds` → `_processBackupQueue`, 5s-idle after capture). Still auto-pushes photos + parent survey to Firebase during ordinary field use. Separate task, future version.
+- **Bottom-bar "💾 Save" button** (`saveSurveyWithProgress`) still pushes to Firebase. User-initiated but asymmetric with the save-pill; UX polish task, future version.
+
+**Files changed.** `app.js` (delete hook rewrites + `APP_VERSION` bump), `sw.js` (`CACHE_NAME` → v2456), `index.html` (meta + 7 cache-busters → v2456), this file.
+
+**How to verify.**
+
+1. Open a survey. Confirm it exists in Firebase Console (Firestore → surveys collection).
+2. On iPhone, delete the survey locally (trash icon, confirm).
+3. Wait 10 seconds. Refresh the Firebase Console — survey doc should STILL be there. Before v2456, it would have vanished from cloud within a second or two.
+4. Same test with a single photo inside a survey: delete a photo locally, confirm the Firestore `photos/{id}` doc still exists.
+5. Remote DevTools console should show exactly ONE `[Sync]` info log after each local delete: `[Sync] Survey {id} deleted locally. Cloud deletion will occur only if you confirm it manually.` (or the photo equivalent). No `console.error` — the old `[Sync] Photo delete failed:` / `[Sync] Survey delete failed:` errors are gone because we don't talk to Firebase at all.
+6. Repeat step 4 while an `initialSync` or `pullPhotosForSurvey` is in progress (sync suppressed) — the log should NOT fire in that window. (Rare edge case, worth a spot-check; confirms the symmetric `!isSuppressed()` guard works.)
+7. To actually remove the cloud copy for now, manual curation in Firebase Console is the only surface — the explicit "Delete cloud copy" UI is v2430 scope (tracked on task #119).
+
+**v2457 preview.** Next up: remove `FirebaseSync.pullNow()`. With v2455 and v2456 landed, the app's Firebase read/write surfaces are: push via overflow "☁️ Force push to cloud"; pull via per-survey "⬇️ Force pull from cloud"; plus the batch tools (`backupAllEverywhere`, `saveSurveyWithProgress`) and the idle-backup queue. `pullNow()` as a console-only batch escape hatch is redundant with per-survey pull and dangerous in combination with the now-stripped delete path (it's the one thing that could resurrect a local delete). Gone in v2457.
+
+---
+
 ## v2455 — 2026-04-21
 ### Fixed — `saveEverywhere()` no longer auto-pushes to Firebase (P0 correctness — manual sync model restored)
 

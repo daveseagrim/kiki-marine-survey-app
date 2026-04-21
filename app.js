@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2455';
+const APP_VERSION = 'v2456';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -27378,24 +27378,49 @@ savePhoto = async function(photo) {
   return await _originalSavePhoto(photo);
 };
 
-// ── Hook deletePhoto to also remove from Firebase ────────────────────────────
+// ── Hook deletePhoto (v2456: Firebase auto-delete REMOVED) ───────────────────
+// v2456: Dave's audit caught that delete hooks were still auto-syncing
+// destructively to Firebase — a direct violation of the v2428 "local + Drive
+// automatic, Firebase manual only" contract. Five problems with the prior
+// behaviour (see CHANGELOG v2456 for the full reasoning):
+//   1. Local delete auto-pushed to cloud with no user confirmation.
+//   2. deletePhoto was missing the !FirebaseSync.isSuppressed() check that
+//      deleteSurvey had — so during restore/rebuild flows a local delete
+//      could still hit Firebase even with sync suppressed.
+//   3. Local-first then cloud-second with a silent console.error meant
+//      cloud-delete failures were invisible → silent divergence.
+//   4. No explicit "yes, delete from cloud too" surface — destructive cloud
+//      action hidden inside the normal delete path.
+//   5. If the cascade inside removeSurvey partially failed (doc deleted,
+//      storage cascade rejected on one photo), orphaned Storage blobs would
+//      remain with no Firestore parent and no retry/surface path.
+//
+// Fix: strip the Firebase removePhoto call. If the local delete succeeds
+// (await returns normally; on failure the wrapper throws and we never reach
+// the log), emit a console.info so Dave can see in DevTools that the cloud
+// copy is deliberately untouched. The log deliberately doesn't name a
+// specific UI control — the explicit "Delete cloud copy" action is v2430
+// Device Roles scope and the string stays valid before and after it lands.
+// The !FirebaseSync.isSuppressed() guard is added here symmetrically with
+// deleteSurvey — during restore/rebuild flows we don't want log spam.
 const _originalDeletePhoto = deletePhoto;
 deletePhoto = async function(photoId) {
-  // Get the photo first to know its surveyId
-  const photo = await getPhotoById(photoId);
   const result = await _originalDeletePhoto(photoId);
-  if (FirebaseSync.isEnabled() && photo) {
-    FirebaseSync.removePhoto(photoId, photo.surveyId).catch(err => console.error('[Sync] Photo delete failed:', err));
+  if (FirebaseSync.isEnabled() && !FirebaseSync.isSuppressed()) {
+    console.info(`[Sync] Photo ${photoId} deleted locally. Cloud deletion will occur only if you confirm it manually.`);
   }
   return result;
 };
 
-// ── Hook deleteSurvey to also remove from Firebase ───────────────────────────
+// ── Hook deleteSurvey (v2456: Firebase auto-delete REMOVED) ──────────────────
+// See deletePhoto hook above for full reasoning. Same treatment: strip the
+// Firebase removeSurvey call, log the local-only disposition, preserve the
+// wrapper as a hook point for the future v2430 "Delete cloud copy" action.
 const _originalDeleteSurvey = deleteSurvey;
 deleteSurvey = async function(id) {
   const result = await _originalDeleteSurvey(id);
   if (FirebaseSync.isEnabled() && !FirebaseSync.isSuppressed()) {
-    FirebaseSync.removeSurvey(id).catch(err => console.error('[Sync] Survey delete failed:', err));
+    console.info(`[Sync] Survey ${id} deleted locally. Cloud deletion will occur only if you confirm it manually.`);
   }
   return result;
 };
