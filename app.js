@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2459';
+const APP_VERSION = 'v2460';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -26850,125 +26850,27 @@ const FirebaseSync = (() => {
     return result;
   }
 
-  // Listen for real-time changes from other devices
+  // Listen for real-time changes from other devices.
+  //
+  // v2460: NEUTERED. The onSnapshot real-time sync engine was orphaned in
+  // v2426 (no callers) and stripped in v2460 (this release) because its body
+  // could, if accidentally re-wired, reintroduce bidirectional auto-sync —
+  // the exact failure mode responsible for the Ex-Ta-Sea disappearance
+  // (2026-04-10 and 2026-04-19). Keeping a dormant but complete onSnapshot
+  // body inside an orphaned function is a loaded footgun: a grep-to-rename,
+  // an overzealous refactor, or a future "let's re-enable real-time sync"
+  // could flip it back on without re-reviewing the richness guards, the
+  // delete-refusal branch, or the v2428 manual-sync contract.
+  //
+  // Loud-failure stub: if anything ever calls startListening() — directly,
+  // via a bound timer, via dead-code-elimination miss, or via a future
+  // maintainer not reading this comment — we throw synchronously so the
+  // call site is visible in the stack trace and can be rewritten around the
+  // per-survey pullSurvey / peekCloudSurvey surfaces introduced in v2428.
   function startListening() {
-    if (!window.fsDb) return;
-    _unsubscribeSurveys = window.fsDb.collection('surveys').onSnapshot(snapshot => {
-      snapshot.docChanges().forEach(async change => {
-        if (_suppressLocalWrite) return;  // Ignore our own writes
-
-        const remoteSurvey = change.doc.data();
-        remoteSurvey.id = change.doc.id;
-
-        // Skip echo from our own recent push (within 5 seconds)
-        const lastPush = _lastLocalPushTime[remoteSurvey.id] || 0;
-        if (Date.now() - lastPush < 5000) return;
-
-        if (change.type === 'added' || change.type === 'modified') {
-          // Check if remote is newer than local
-          const localSurvey = await getSurvey(remoteSurvey.id);
-          const remoteTime = new Date(remoteSurvey.lastModified || remoteSurvey.createdAt || 0).getTime();
-          const localTime = localSurvey
-            ? new Date(localSurvey.lastModified || localSurvey.createdAt || 0).getTime()
-            : 0;
-
-          if (!localSurvey || remoteTime > localTime) {
-            // v2167: regression guard. The remote-newer test relies on
-            // lastModified being current. If a local edit (or a manual
-            // IndexedDB migration) didn't bump that field, a stale cloud
-            // copy can overwrite richer local data. Before replacing,
-            // count the data on both sides — if local has substantially
-            // MORE saved content, refuse the overwrite and instead push
-            // local up so cloud catches up.
-            if (localSurvey) {
-              const lScore = _scoreSurveyContent(localSurvey);
-              const rScore = _scoreSurveyContent(remoteSurvey);
-              const localRicher =
-                lScore.textChars > rScore.textChars * 1.2 + 50 ||
-                lScore.photoCount > rScore.photoCount ||
-                lScore.ratedItems > rScore.ratedItems;
-              if (localRicher) {
-                console.warn(
-                  `[Sync] REFUSED overwrite of "${localSurvey.vesselName || localSurvey.id}" — ` +
-                  `local is richer (text=${lScore.textChars}ch vs ${rScore.textChars}ch, ` +
-                  `photos=${lScore.photoCount} vs ${rScore.photoCount}, ` +
-                  `rated=${lScore.ratedItems} vs ${rScore.ratedItems}). ` +
-                  `Pushing local to cloud instead.`
-                );
-                // Push local up to fix the cloud copy. saveSurvey will bump
-                // lastModified and trigger pushSurvey via the wrapper.
-                await saveSurvey(localSurvey);
-                return;
-              }
-            }
-
-            // Remote is newer AND not a regression — save locally
-            // (skip re-syncing to Firebase)
-            _suppressLocalWrite = true;
-            await saveSurvey(remoteSurvey);
-            _suppressLocalWrite = false;
-            console.log(`[Sync] Updated local survey: ${remoteSurvey.vesselName || remoteSurvey.id}`);
-
-            // Pull photos from Storage — but NOT if device is under memory
-            // pressure (camera active, backup running). Photos will catch up
-            // on the next explicit Save or app restart.
-            if (!window._cameraActive && !window._backupActive) {
-              await pullPhotosForSurvey(remoteSurvey);
-            }
-
-            // Refresh UI if we're on the home page or viewing this survey
-            if (!currentSurveyId) {
-              renderHome();
-            } else if (currentSurveyId === remoteSurvey.id) {
-              // Show a subtle toast rather than disrupting the current view
-              showToast('Survey updated from another device', 2000);
-            }
-          }
-        } else if (change.type === 'removed') {
-          // v2412 — EMERGENCY FIX: never auto-delete local data in response to
-          // a Firestore 'removed' event.
-          //
-          // Root cause of the 2026-04-10 AND 2026-04-19 Ex-Ta-Sea disappearances:
-          // ────────────────────────────────────────────────────────────────────
-          // Prior code unconditionally called deleteSurvey() locally whenever
-          // Firestore reported change.type === 'removed' for a survey doc.
-          // ANY cause of the remote doc going away — a stray tap on the trash
-          // button from a second device, a stale tab firing removeSurvey on
-          // re-auth, a Firestore infra hiccup, a race between pushSurvey /
-          // removeSurvey — cascaded to every listening device and wiped the
-          // survey locally. The same failure mode fired twice on Ex-Ta-Sea
-          // (2026-04-10 and again on 2026-04-19).
-          //
-          // There is no "richness guard" that can rescue this: by the time the
-          // 'removed' event arrives, the remote is already gone, so there's
-          // nothing to compare against. The only safe posture is to refuse
-          // sync-driven deletion.
-          //
-          // New contract:
-          //   • Deletion is a user-initiated action only. deleteSurveyConfirm()
-          //     is the single legitimate entry point.
-          //   • If the cloud copy disappears for any other reason, preserve
-          //     local and re-push so the cloud copy is restored.
-          //   • Other devices that already ran the old listener and deleted
-          //     locally will receive the re-push as an 'added' event and
-          //     restore themselves.
-          const localSurvey = await getSurvey(remoteSurvey.id);
-          if (localSurvey) {
-            console.warn(
-              `[Sync] REFUSED cloud-driven delete of "${localSurvey.vesselName || localSurvey.id}" ` +
-              `— local copy preserved. Re-pushing to restore cloud.`
-            );
-            // Re-push local up so the cloud copy comes back. Closes the race
-            // where another device accidentally deleted and would otherwise win.
-            try { await pushSurvey(localSurvey); } catch (e) { console.warn('[Sync] Re-push after refused delete failed:', e); }
-          }
-        }
-      });
-      updateSyncStatusUI('synced', new Date().toLocaleTimeString());
-    }, err => {
-      console.error('Firestore listener error:', err);
-      updateSyncStatusUI('error', err.message);
-    });
+    console.error('[Sync] startListening() is no longer supported. The onSnapshot real-time sync engine has been removed. Firebase reads must be per-survey via pullSurvey/peekCloudSurvey.');
+    console.trace('[Sync] startListening call trace');
+    throw new Error('startListening removed — use per-survey pullSurvey/peekCloudSurvey');
   }
 
   // v2167: helper for the regression guard above. Counts content density
@@ -27210,60 +27112,20 @@ const FirebaseSync = (() => {
   }
 
   // ── Initial Sync (push all local surveys to Firebase on first connect) ─
-  // v2458: ORPHANED. Only caller was pullNow(), which has been removed. Body
-  // kept for diff legibility / rollback (same treatment as periodicSync after
-  // v2426). Do NOT re-wire — it iterates ALL surveys, which violates the
-  // manual-per-survey model and would resurrect locally-deleted surveys after
-  // the v2456 delete-hook strip.
+  // v2458: ORPHANED — only caller was pullNow(), which was removed.
+  // v2460: NEUTERED. The full reconcile loop body is replaced with a loud-
+  // failure stub for the same reason startListening() was neutered above: a
+  // dormant "walk every local+remote survey and reconcile" body is a latent
+  // bidirectional-sync engine. The v2428 manual-per-survey contract requires
+  // every Firebase read to be one explicit user action against one specific
+  // survey ID. A future accidental re-wire of initialSync would iterate all
+  // surveys and — post v2456's delete-hook strip — silently resurrect every
+  // survey Dave had deliberately deleted. The fix is to remove the blast
+  // radius, not just unwire the caller.
   async function initialSync() {
-    if (!_syncEnabled || !window.fsDb) return;
-    updateSyncStatusUI('syncing', 'Initial sync…');
-    try {
-      const localSurveys = await getAllSurveys();
-      const remoteSnap = await window.fsDb.collection('surveys').get();
-      const remoteSurveyMap = {};
-      remoteSnap.docs.forEach(doc => { remoteSurveyMap[doc.id] = doc.data(); });
-
-      // Push local surveys that are newer or missing from remote
-      for (const local of localSurveys) {
-        const remote = remoteSurveyMap[local.id];
-        const localTime = new Date(local.lastModified || local.createdAt || 0).getTime();
-        const remoteTime = remote ? new Date(remote.lastModified || remote.createdAt || 0).getTime() : 0;
-
-        if (!remote || localTime > remoteTime) {
-          await pushSurvey(local);
-          // Push all photos for this survey
-          await pushAllPhotosForSurvey(local);
-          console.log(`[Sync] Pushed survey to cloud: ${local.vesselName || local.id}`);
-        } else if (remoteTime > localTime) {
-          // Remote is newer — pull it
-          _suppressLocalWrite = true;
-          remote.id = local.id;
-          await saveSurvey(remote);
-          _suppressLocalWrite = false;
-          await pullPhotosForSurvey(remote);
-          console.log(`[Sync] Pulled survey from cloud: ${remote.vesselName || remote.id}`);
-        }
-        delete remoteSurveyMap[local.id];
-      }
-
-      // Pull any remote surveys that don't exist locally
-      for (const [id, remote] of Object.entries(remoteSurveyMap)) {
-        remote.id = id;
-        _suppressLocalWrite = true;
-        await saveSurvey(remote);
-        _suppressLocalWrite = false;
-        await pullPhotosForSurvey(remote);
-        console.log(`[Sync] Pulled new survey from cloud: ${remote.vesselName || id}`);
-      }
-
-      updateSyncStatusUI('synced', 'Initial sync complete');
-      _lastSyncTimestamp = Date.now();
-      if (currentView === 'surveys') renderHome();  // v2247: only refresh if user is still on home
-    } catch (err) {
-      console.error('Initial sync error:', err);
-      updateSyncStatusUI('error', err.message);
-    }
+    console.error('[Sync] initialSync() was removed in v2458. See CHANGELOG. This is a bug — the call path that reached here should be rewritten around pullSurvey/pushSurvey.');
+    console.trace('[Sync] initialSync call trace');
+    throw new Error('initialSync removed — use per-survey pullSurvey/pushSurvey');
   }
 
   // ── v2259: Periodic Sync — lightweight two-way pull/push every 5 min ───
@@ -27499,7 +27361,16 @@ const FirebaseSync = (() => {
     // stays in place but stops incrementing from this path; any future auto-push
     // would have to be a deliberate new code addition.
     //
-    // Paths that still invoke Firebase after v2459 (audited with Dave):
+    // v2460 amendment: neuters two orphaned functions that still held live
+    // bidirectional-sync bodies. `startListening()` (orphaned since v2426)
+    // and `initialSync()` (orphaned since v2458's pullNow removal) both had
+    // their full reconcile/onSnapshot implementations sitting in place for
+    // "diff legibility / rollback." That invited re-wiring. v2460 replaces
+    // both bodies with loud-failure stubs (console.error + console.trace +
+    // throw) so any future call site surfaces immediately with a stack
+    // trace. See CHANGELOG v2460 for the full reasoning.
+    //
+    // Paths that still invoke Firebase after v2460 (audited with Dave):
     //   USER-INITIATED (manual only — this is the full list):
     //     • backupAllEverywhere()            — home-screen "💾 Save All Surveys"
     //     • saveSurveyWithProgress()         — bottom-bar "💾 Save" button
@@ -27507,9 +27378,10 @@ const FirebaseSync = (() => {
     //     • "⬇️ Force pull from cloud"       — overflow-menu explicit pull
     //     • "🗑️ Delete cloud copy"           — overflow-menu explicit remove (v2457)
     //   AUTO-PUSH: (none — emptied in v2459)
+    //   NEUTERED STUBS (throw on call): startListening(), initialSync() — v2460
     _syncEnabled = true;
     updateSyncStatusUI('idle', 'Manual sync (use overflow menu)');
-    console.log('[Sync] v2459: Manual Firebase sync only. Photos auto-backup to Drive only; Firebase reached via 💾 Save / ☁️ Force push / ⬇️ Force pull / 🗑️ Delete cloud copy.');
+    console.log('[Sync] v2460: Manual Firebase sync only. Photos auto-backup to Drive only; Firebase reached via 💾 Save / ☁️ Force push / ⬇️ Force pull / 🗑️ Delete cloud copy. Orphaned sync engines (startListening, initialSync) throw on call.');
   }
 
   // v2458 — pullNow() REMOVED. It was the batch-pull escape hatch (console-only,

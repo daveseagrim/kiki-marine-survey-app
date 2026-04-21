@@ -12,6 +12,150 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2460 — 2026-04-21
+### Neutered — `startListening()` + `initialSync()` replaced with loud-failure stubs (P1 hardening — removes the last two dormant bidirectional-sync bodies so they cannot be accidentally re-wired)
+
+**Why this release exists.** v2426 through v2459 closed every live Firebase auto-sync path. But two orphaned functions — `startListening()` and `initialSync()` — still carried their full, working implementations inside the `FirebaseSync` IIFE. `startListening()` had the complete `onSnapshot` real-time sync engine (richness guard, cloud-delete-refusal, toast-on-remote-update). `initialSync()` had the complete "walk every local and remote survey, reconcile by timestamp, pull or push the delta" loop. Both were unreachable in v2459 — no callers, not exported, private to the IIFE — but their bodies sat there fully wired, one grep-to-rename or one well-meaning refactor away from flipping bidirectional auto-sync back on.
+
+The Ex-Ta-Sea disappearance (2026-04-10 and 2026-04-19) traced directly to the `change.type === 'removed'` branch inside `startListening`'s onSnapshot handler. That branch was fixed defensively in v2412 (refuses cloud-driven deletes, re-pushes local) — but the rest of the engine stayed dormant, not gone. A future re-wire could still reintroduce the richness-guard logic being wrong on a partial write, or the "pull remote when remote is newer" branch overwriting a fresh local edit whose `lastModified` wasn't bumped (e.g. during a schema migration). The fix is to delete the bodies entirely so the blast radius doesn't exist.
+
+---
+
+### Why loud-failure stubs instead of deletion
+
+Three options considered:
+
+1. **Delete the functions outright.** Cleanest. But if any code path anywhere (including future code, pasted console commands, or a stale bookmarklet) calls `FirebaseSync._private.startListening` via a reflection trick, the `undefined is not a function` error is cryptic and doesn't name v2460 or explain what to do instead.
+2. **Keep the body, add an `if (false) return;` guard.** Worst of both worlds: body still sits there, the guard is a diff readers will be tempted to remove.
+3. **Replace body with loud-failure stub (console.error + console.trace + throw).** This is what Dave drafted. The throw stops execution immediately. The `console.error` names the version and directs callers to the replacement API. The `console.trace` gives a stack breadcrumb naming the caller site. If a future contributor accidentally calls one of these, they see the error, open DevTools, and have everything they need in under 10 seconds: what was removed, why, and what to use instead.
+
+Went with option 3. Dave's drafted stubs (locked in via conversation, not changed):
+
+```js
+function startListening() {
+  console.error('[Sync] startListening() is no longer supported. The onSnapshot real-time sync engine has been removed. Firebase reads must be per-survey via pullSurvey/peekCloudSurvey.');
+  console.trace('[Sync] startListening call trace');
+  throw new Error('startListening removed — use per-survey pullSurvey/peekCloudSurvey');
+}
+
+async function initialSync() {
+  console.error('[Sync] initialSync() was removed in v2458. See CHANGELOG. This is a bug — the call path that reached here should be rewritten around pullSurvey/pushSurvey.');
+  console.trace('[Sync] initialSync call trace');
+  throw new Error('initialSync removed — use per-survey pullSurvey/pushSurvey');
+}
+```
+
+Note the deliberate asymmetry: `initialSync`'s message references v2458 (when it was first orphaned by the `pullNow` removal), while `startListening`'s message drops the version chatter and leads with what the caller should use instead. Per Dave: "lead with what the caller should use instead." `initialSync` keeps the one version tie to v2458 because its history has a clean anchor; `startListening` has been orphaned across multiple versions so a version tag would be noise.
+
+---
+
+### What changed in code
+
+**`app.js`:**
+
+- **`startListening()` (around line 26853)** — full onSnapshot body replaced with the three-line stub. Removed: the `onSnapshot` subscription, the `_unsubscribeSurveys` assignment, the `added`/`modified`/`removed` branches including the v2167 richness guard, the v2412 cloud-delete-refusal branch, the `updateSyncStatusUI('synced', ...)` / `('error', ...)` calls, the `updateSyncStatusUI` callback block. Kept: function signature, the enclosing IIFE scope. The comment block above the stub explains why the loaded bodies had to go (grep-to-rename risk, Ex-Ta-Sea failure-mode history).
+- **`initialSync()` (around line 27218)** — full reconcile loop replaced with the three-line stub. Removed: the `getAllSurveys` + `fsDb.collection('surveys').get()` dual-fetch, the local-newer push branch (including `pushAllPhotosForSurvey`), the remote-newer pull branch (including `pullPhotosForSurvey`), the orphan-remote-survey pull loop, the `updateSyncStatusUI('synced', 'Initial sync complete')` call. Kept: function signature as `async` so existing `await initialSync()` would still be valid syntax if anything (nothing currently) called it.
+- **`_unsubscribeSurveys` declaration (line 26646)** — left in place. It's now a dead let (startListening no longer assigns it), but removing it alongside the stub would drift into unrelated cleanup. The variable is private to the IIFE so it has no external footprint. Flagged for future module-level cleanup if we ever do a full sync-module rewrite.
+- **`init()` comment block (around line 27356)** — gains a v2460 amendment explaining the neutering. The Firebase-surface map inside that block grows a new line: `NEUTERED STUBS (throw on call): startListening(), initialSync() — v2460`.
+- **Startup console.log** — `[Sync] v2460: Manual Firebase sync only. Photos auto-backup to Drive only; Firebase reached via 💾 Save / ☁️ Force push / ⬇️ Force pull / 🗑️ Delete cloud copy. Orphaned sync engines (startListening, initialSync) throw on call.` Replaces the v2459 string.
+
+**`sw.js`:** `CACHE_NAME` → `kiki-marine-v2460`.
+
+**`index.html`:** `<meta name="app-version">` → `v2460`; all 7 core-module cache-busters → `?v=2460`.
+
+---
+
+### What about `periodicSync()`?
+
+Considered leaving `periodicSync()` alone (it's the third orphaned sync function, orphaned since v2426, body still live) vs. stubbing it in the same release. Kept it out of scope for v2460 because:
+
+1. Its body is ~70 lines of a single-loop pattern — smaller blast radius than `startListening`'s 120-line onSnapshot handler with three change-type branches.
+2. It already has a `_periodicSyncRunning` overlap guard, a `_backupActive` check, and a `_lastSyncTimestamp` throttle — three layers of self-gating that make accidental invocation less likely to cascade.
+3. One-feature-per-version is the rule. If `periodicSync` should also be stubbed, it gets its own version (v2461+) with its own three-pass QC.
+
+The v2460 comment block at `init()` does NOT claim `periodicSync` is neutered. It remains orphaned-but-live, same treatment as it had under v2459.
+
+---
+
+### Updated Firebase surface map (post-v2460)
+
+**USER-INITIATED (manual only — unchanged from v2459):**
+
+- `backupAllEverywhere()` — home-screen "💾 Save All Surveys" button.
+- `saveSurveyWithProgress()` — bottom-bar "💾 Save" on an open survey.
+- `☁️ Force push to cloud` (overflow menu) — per-survey push.
+- `⬇️ Force pull from cloud` (overflow menu) — per-survey pull.
+- `🗑️ Delete cloud copy` (overflow menu, v2457) — per-survey destructive.
+
+**AUTO-PUSH:** (none — emptied in v2459)
+
+**NEUTERED STUBS — throw on call (new in v2460):**
+
+- `startListening()` — was the onSnapshot real-time sync engine. Now throws `Error('startListening removed — use per-survey pullSurvey/peekCloudSurvey')`.
+- `initialSync()` — was the batch local+remote reconciler. Now throws `Error('initialSync removed — use per-survey pullSurvey/pushSurvey')`.
+
+**ORPHANED-BUT-LIVE (body still present, no callers — candidates for future stubbing):**
+
+- `periodicSync()` — ~70-line reconciler, orphaned since v2426. Scope for a future release.
+
+---
+
+### How to verify
+
+*Stubs actually throw:*
+
+1. Open Safari Web Inspector → Console. Type `FirebaseSync.startListening` and press enter. Expect: `undefined` — the function is private to the IIFE and never exposed on the public export. This is unchanged from before v2460 (it was always private).
+2. Type `Object.keys(FirebaseSync).includes('startListening')`. Expect: `false`.
+3. Same for `initialSync`. These two were never on the public API and still aren't. So from a Dave-facing console surface, nothing about the v2460 change is directly observable — which is the point. The change is about code-reachability inside the IIFE, not about what's exposed.
+
+*Nothing in the app calls them during normal use:*
+
+4. Hard-reload the app. Open DevTools Console. Expect: no `[Sync] startListening call trace` or `[Sync] initialSync call trace` entries. Normal startup should show only `[Sync] v2460: Manual Firebase sync only...`.
+5. Exercise the full manual-sync surface: open a survey, tap `💾 Save`, tap `☁️ Force push to cloud`, tap `⬇️ Force pull from cloud`, tap `🗑️ Delete cloud copy`, navigate home, tap `💾 Save All Surveys`. Expect: no stub-error traces at any point. Each manual path uses `pushSurvey` / `pullSurvey` / `peekCloudSurvey` / `removeSurvey` / `pushAllPhotosForSurvey` — none of them touches the neutered stubs.
+
+*Stubs remain callable (self-test):*
+
+6. If you want to prove the stubs work, you can reach into the IIFE via closure variables only if they were exported — which they aren't. So the stubs are effectively unreachable from the console. This is correct: the stubs are a defense against future code changes (accidental re-wire, automated refactor, copy/paste), not a user-facing feature.
+
+*Startup log reflects the new state:*
+
+7. Console should show `[Sync] v2460: Manual Firebase sync only. Photos auto-backup to Drive only; Firebase reached via 💾 Save / ☁️ Force push / ⬇️ Force pull / 🗑️ Delete cloud copy. Orphaned sync engines (startListening, initialSync) throw on call.`
+
+*Version atomicity:*
+
+8. `document.querySelector('meta[name=app-version]').content` → `v2460`. `caches.keys()` → `['kiki-marine-v2460']`. Inspect script tags in index.html → all core-module `?v=2460`. Console `APP_VERSION` → `v2460`.
+
+*Photo backup still works (regression check):*
+
+9. Capture 3 photos. Wait 6 seconds. Expect: 3 Drive uploads in the Network tab (`www.googleapis.com/upload/drive/v3/files`), zero Firebase Storage uploads. Badge turns green `☁️ 3/3`.
+
+*Manual push still works (regression check):*
+
+10. Tap bottom-bar `💾 Save`. Expect: Firestore writes + Storage uploads for any photos that weren't already in cloud. No stub-error traces.
+
+---
+
+### Risk analysis
+
+**What could break:**
+
+- Any code path that reaches `startListening()` or `initialSync()` will now throw instead of no-op-ing. In v2459 these were unreachable — no callers, not on the public API. In v2460 they remain unreachable. So the downside risk is zero under current code.
+- **If a future PR accidentally exposes or calls one of these,** the stub will throw immediately with a clear error and a stack trace. That's a feature: the failure mode is loud and easy to diagnose, vs. the v2459 behaviour where a newly-exposed `startListening` would silently re-enable auto-sync and we'd only notice when another Ex-Ta-Sea-style incident happened.
+
+**What can't break:**
+
+- Manual-sync surfaces (all five buttons). They never called these functions.
+- Photo idle backup (`_processBackupQueue`). Drive-only since v2459; doesn't touch Firebase at all.
+- Startup sequence. `FirebaseSync.init()` only sets `_syncEnabled = true` and logs; it never called `startListening` or `initialSync`.
+
+---
+
+### Locked-in requirement for v2430 Device Roles
+
+v2430 Device Roles cannot use either of these stubs as building blocks. If a "report mode" wants batch-like reconciliation behaviour, it must implement it via iteration over per-survey `pullSurvey(id)` calls with an explicit per-survey confirm — not by re-enabling `initialSync`. Same for a "field mode" that might want real-time updates: that would need a fresh design against `pullSurvey` + a UI that shows the user exactly what's about to change, not a resurrection of `onSnapshot`.
+
+---
+
 ## v2459 — 2026-04-21
 ### Removed — Firebase auto-push from `_processBackupQueue` (P0 correctness — closes the last auto-push seam; photos auto-backup to Drive only, Firebase is now manual-only end to end)
 
