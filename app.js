@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2458';
+const APP_VERSION = 'v2459';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -2418,7 +2418,12 @@ function _checkDeferredUpdate() {
 // pauses activity for 5 seconds, taps Backup, or comes back online.
 // This means zero network activity while you're snapping photos or typing.
 let _photosSinceLastBackup = 0;
-let _backupStats = { firebase: 0, session: 0, queued: 0 };
+// v2459: `drive` counter added because the idle backup path is now Drive-only.
+// `firebase` stays defined so legacy readers (the detail-panel _showDetailPanel
+// declares an `fbBacked` local from it; status-pill code may grow a Firebase
+// column again if the v2430 Device Roles work reintroduces an auto-push mode)
+// don't explode. The idle queue no longer increments it.
+let _backupStats = { firebase: 0, drive: 0, session: 0, queued: 0 };
 let _pendingBackupIds = [];   // Photo IDs waiting to be uploaded
 let _backupRunning = false;   // True while the upload loop is active
 let _idleTimer = null;        // Timer that triggers backup after 5s of inactivity
@@ -2534,15 +2539,24 @@ function _hideBackupBanner(message) {
   }, isSuccess ? 2500 : 3500);
 }
 
-// Process the pending backup queue — uploads one at a time during idle
+// Process the pending backup queue — uploads one at a time during idle.
+//
+// v2459: Firebase auto-push stripped from this path. Photos still auto-backup
+// to Google Drive (v2428 "local + Drive automatic" contract intact), but
+// Firebase is now MANUAL ONLY — reached exclusively via the home-screen
+// "💾 Save All Surveys" button, the open-survey bottom-bar "💾 Save", and
+// the per-survey overflow-menu "☁️ Force push to cloud" / "⬇️ Force pull
+// from cloud" / "🗑️ Delete cloud copy" buttons. This was the last auto-push
+// seam documented in the v2458 Firebase surface map. `_backupStats.firebase`
+// is intentionally left in place (it dormants at whatever value v2458 left
+// it at) so existing status-pill readers don't NaN on the field.
 async function _processBackupQueue() {
   if (_backupRunning || _pendingBackupIds.length === 0) return;
 
-  const firebaseOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled();
   const driveOk = typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn();
 
-  if (!firebaseOk && !driveOk) {
-    _showBackupWarning('No cloud backup connected', 'Connect Firebase or Google Drive');
+  if (!driveOk) {
+    _showBackupWarning('Drive backup not connected', 'Sign in to Google Drive to auto-backup photos');
     return;
   }
 
@@ -2570,14 +2584,15 @@ async function _processBackupQueue() {
       // Load ONE photo from IndexedDB
       let photo = await getPhotoById(photoId);
       if (photo && photo.dataUrl) {
-        // Upload to Firebase
-        if (firebaseOk) {
-          await FirebaseSync.pushPhoto(photo);
-          _backupStats.firebase++;
-        }
-        // Upload to Google Drive too (if signed in)
+        // v2459: Firebase push deliberately skipped here — auto-push was
+        // removed as part of closing the v2428 manual-sync contract. Firebase
+        // is reached only via the explicit Save / Force push / Force pull /
+        // Delete cloud copy buttons. See CHANGELOG v2459.
         if (driveOk) {
-          try { await DriveBackup.backupOnePhoto(photo); } catch (e) {
+          try {
+            await DriveBackup.backupOnePhoto(photo);
+            _backupStats.drive++;
+          } catch (e) {
             console.warn(`[Backup] Drive failed for ${photoId}:`, e.message);
           }
         }
@@ -2613,8 +2628,7 @@ async function _processBackupQueue() {
 
   _backupRunning = false;
   _kkBackupInFlight = false;
-  const destinations = [firebaseOk ? 'Firebase' : null, driveOk ? 'Drive' : null].filter(Boolean).join(' + ');
-  _hideBackupBanner(`✓ ${uploaded} photos backed up to ${destinations}`);
+  _hideBackupBanner(`✓ ${uploaded} photos backed up to Drive`);
   _updateBackupStatusUI();
   _checkDeferredUpdate();
 }
@@ -3729,16 +3743,20 @@ async function refreshSavePillPhotoCount(surveyId) {
   } catch (e) { /* swallow — non-essential */ }
 }
 
-// Update the backup status badge in the bottom bar
+// Update the backup status badge in the bottom bar.
+//
+// v2459: counts rewired to Drive instead of Firebase — the idle backup path
+// is Drive-only after v2459, so the badge's "backed up" count reflects that.
+// Firebase pushes (manual only via the 💾 Save / ☁️ Force push / 🗑️ buttons)
+// deliberately don't affect this badge; those actions have their own progress
+// UI in saveSurveyWithProgress and the overflow-menu confirm flows.
 function _updateBackupStatusUI() {
   const badge = document.getElementById('backupStatusBadge');
   if (!badge) return;
 
-  const firebaseOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled();
   const driveOk = typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn();
   const total = _backupStats.session;
-  const backed = _backupStats.firebase;
-  const failed = _backupStats.firebaseFail;
+  const backed = _backupStats.drive;
 
   const queued = _backupStats.queued || 0;
 
@@ -3749,23 +3767,23 @@ function _updateBackupStatusUI() {
 
   badge.style.display = 'inline-flex';
 
-  // Colour: green if all backed up, yellow if some queued, red if none backed up
-  if (queued === 0 && backed >= total && firebaseOk) {
+  // Colour: green if all backed up to Drive, yellow if some queued, red if none.
+  if (queued === 0 && backed >= total && driveOk) {
     badge.style.background = '#16a34a';
     badge.textContent = `☁️ ${backed}/${total}`;
-    badge.title = `All ${total} photos backed up to Firebase${driveOk ? ' + Drive' : ''}`;
+    badge.title = `All ${total} photos backed up to Drive`;
   } else if (queued > 0) {
     badge.style.background = '#d97706';
     badge.textContent = `⏳ ${queued} queued`;
-    badge.title = `${queued} photos waiting to upload — will sync when online`;
+    badge.title = `${queued} photos waiting to upload to Drive — will sync when idle`;
   } else if (backed > 0) {
     badge.style.background = '#d97706';
     badge.textContent = `☁️ ${backed}/${total}`;
-    badge.title = `${backed} of ${total} backed up`;
+    badge.title = `${backed} of ${total} backed up to Drive`;
   } else {
     badge.style.background = '#dc2626';
     badge.textContent = `🚨 0/${total}`;
-    badge.title = 'No photos backed up! Connect Firebase or Drive.';
+    badge.title = 'No photos backed up to Drive! Sign in to Google Drive.';
   }
 }
 
@@ -25508,18 +25526,21 @@ async function initApp() {
     // Run photo integrity check in background (non-blocking)
     validatePhotoIntegrity().catch(err => console.warn('Photo integrity check failed:', err));
 
-    // Check backup readiness after a short delay (let Firebase init settle)
+    // Check backup readiness after a short delay (let Firebase init settle).
+    // v2459: Drive is the only automatic backup path; Firebase is manual only.
+    // So the readiness check now asks "is Drive signed in?" — that's the
+    // question that actually matters for "will my photos be protected if I
+    // do nothing?" Firebase is still helpful (manual push for full-survey
+    // snapshots) but it's no longer sufficient on its own.
     setTimeout(() => {
       const firebaseOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isEnabled();
       const driveOk = typeof DriveBackup !== 'undefined' && DriveBackup.isSignedIn && DriveBackup.isSignedIn();
-      if (!firebaseOk && !driveOk) {
-        _showBackupWarning('No cloud backup connected', 'Sign in to Firebase or Google Drive to protect your photos');
+      if (!driveOk) {
+        _showBackupWarning('Drive backup not connected', 'Sign in to Google Drive so photos auto-backup as you work');
       } else if (!firebaseOk) {
-        console.warn('[Backup] Firebase not connected — Drive only');
-      } else if (!driveOk) {
-        console.warn('[Backup] Google Drive not connected — Firebase only');
+        console.log('[Backup] Drive connected; Firebase not connected — manual push disabled.');
       } else {
-        console.log('[Backup] Both Firebase and Google Drive connected ✓');
+        console.log('[Backup] Drive connected (auto) + Firebase connected (manual) ✓');
       }
     }, 3000);
   } catch (e) {
@@ -27469,19 +27490,26 @@ const FirebaseSync = (() => {
     // caller was pullNow); the body stays for diff legibility like
     // periodicSync. See the removal comment in-line.
     //
-    // Paths that still invoke Firebase after v2458 (audited with Dave):
-    //   USER-INITIATED:
+    // v2459 amendment: closes the last auto-push seam — the photo idle
+    // backup queue (`_processBackupQueue`) used to push each queued photo to
+    // Firebase on the 5-second idle tick. After v2459 that path is
+    // Drive-only. Photos still auto-backup to Google Drive (v2428 "local +
+    // Drive automatic" contract intact), but Firebase is now reached
+    // exclusively via the four manual surfaces listed below. `_backupStats.firebase`
+    // stays in place but stops incrementing from this path; any future auto-push
+    // would have to be a deliberate new code addition.
+    //
+    // Paths that still invoke Firebase after v2459 (audited with Dave):
+    //   USER-INITIATED (manual only — this is the full list):
     //     • backupAllEverywhere()            — home-screen "💾 Save All Surveys"
     //     • saveSurveyWithProgress()         — bottom-bar "💾 Save" button
     //     • "☁️ Force push to cloud"         — overflow-menu explicit push
     //     • "⬇️ Force pull from cloud"       — overflow-menu explicit pull
     //     • "🗑️ Delete cloud copy"           — overflow-menu explicit remove (v2457)
-    //   AUTO-PUSH (future-version scope — still fires during ordinary use):
-    //     • _processBackupQueue()            — 5s-idle after savePhoto(); pushes queued
-    //                                          photos + their parent survey to Firebase
+    //   AUTO-PUSH: (none — emptied in v2459)
     _syncEnabled = true;
     updateSyncStatusUI('idle', 'Manual sync (use overflow menu)');
-    console.log('[Sync] v2458: Manual Firebase sync only. Saves/deletes do not auto-sync. Batch pullNow() removed — use per-survey ⬇️ Force pull from cloud.');
+    console.log('[Sync] v2459: Manual Firebase sync only. Photos auto-backup to Drive only; Firebase reached via 💾 Save / ☁️ Force push / ⬇️ Force pull / 🗑️ Delete cloud copy.');
   }
 
   // v2458 — pullNow() REMOVED. It was the batch-pull escape hatch (console-only,

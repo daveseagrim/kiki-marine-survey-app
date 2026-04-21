@@ -12,6 +12,116 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2459 — 2026-04-21
+### Removed — Firebase auto-push from `_processBackupQueue` (P0 correctness — closes the last auto-push seam; photos auto-backup to Drive only, Firebase is now manual-only end to end)
+
+**Why this release exists.** v2455/v2456/v2457/v2458 landed the manual-sync contract across save, delete, and pull surfaces — but the photo idle-backup queue (5-second idle timer after `savePhoto()`) was still auto-pushing every captured photo to Firebase Storage on the way to Drive. That was explicitly flagged in the v2458 surface map as the remaining auto-push seam and deferred to its own release so v2458 stayed single-feature. v2459 is that release: `_processBackupQueue()` now uploads to Google Drive only. Firebase is reached exclusively through the explicit 💾 Save / ☁️ Force push / ⬇️ Force pull / 🗑️ Delete cloud copy buttons.
+
+The **v2428 "local + Drive automatic, Firebase manual only"** contract is now complete: every code path that writes to Firebase requires a deliberate button tap.
+
+---
+
+### What `_processBackupQueue` was doing before v2459
+
+`savePhoto()` writes a photo to IndexedDB instantly and queues its ID in `_pendingBackupIds`. A 5-second idle timer (`_resetIdleTimer()`) starts when the user stops activity. When the timer fires, `_processBackupQueue()` walks the queue and, for each photo: (a) loads it from IDB, (b) pushes to Firebase Storage if Firebase is connected, (c) pushes to Google Drive if Drive is signed in, (d) removes from the queue on success.
+
+The Firebase push (step b) was firing automatically on every photo capture — no confirm, no user action. That contradicted the v2428 contract and was the last remaining auto-push path after v2455/v2456.
+
+---
+
+### Four reasons to strip the Firebase auto-push (and keep Drive)
+
+1. **Contract consistency.** Every other Firebase write path is now manual (v2455 save-pill, v2456 delete wrappers, v2458 pullNow). The photo idle queue was the only remaining place where an ordinary user action (capturing a photo) silently triggered a Firebase write. Asymmetry like this is how Dave ended up surprised by unexpected cloud state in the first place.
+
+2. **Drive is a better fit for the idle auto-path.** Drive backup uses resumable uploads, survives token refresh, handles large photos in chunks, and offers a user-visible folder in the user's own Google account. Firebase Storage auto-pushes are less resilient, less visible, and less directly-controlled by Dave.
+
+3. **Firebase Storage cost + quota concerns.** Every auto-push consumes Storage bytes. Across a full survey (200+ photos) that adds up, and since the contract is "user explicitly pushes when they want a cloud snapshot," a silent auto-push is work (and cost) that wasn't asked for.
+
+4. **Delete-resurrection lite.** Photos auto-pushed to Firebase Storage persist until manually removed via the 🗑️ Delete cloud copy button. If a photo is deleted locally and the cloud copy is later pulled (via the per-survey ⬇️ Force pull from cloud), the resurrected cloud photo could surprise Dave — same pattern as the v2458 survey-resurrection fix but at photo granularity. Stripping the auto-push eliminates the seam.
+
+---
+
+### What changed in code
+
+**`app.js`:**
+
+- **`_processBackupQueue()` (around line 2537)** — the `firebaseOk` local is removed; the `!firebaseOk && !driveOk` guard becomes `!driveOk` with the warning `"Drive backup not connected — Sign in to Google Drive to auto-backup photos"`. The `if (firebaseOk) { await FirebaseSync.pushPhoto(photo); _backupStats.firebase++; }` block is deleted; a comment replaces it explaining that Firebase is reached only via the explicit buttons. The final "photos backed up" banner simplifies to `✓ N photos backed up to Drive`. The queue no longer references Firebase at all.
+- **`_backupStats` declaration** — adds a `drive: 0` counter alongside the existing `firebase: 0`. `_backupStats.drive` is incremented on each Drive success in the queue loop. `_backupStats.firebase` stays declared (legacy readers; a future Device Roles mode might bring it back) but the idle path no longer increments it.
+- **`_updateBackupStatusUI()` (around line 3739)** — the bottom-bar backup badge is rewired to count Drive instead of Firebase. Green when all queued photos have landed in Drive; amber if queued or partial; red if none backed up. Firebase connection state no longer affects the badge colour (Firebase is user-initiated elsewhere with its own progress UI).
+- **Startup backup-readiness check (around line 25530)** — the "no cloud backup connected" warning now fires when **Drive** isn't signed in (previously fired only when both were off). Drive is the automatic protection path now, so its absence is the actionable state. If Firebase is off but Drive is on, that's a normal state — `console.log` only.
+- **`init()` comment block (around line 27430)** — adds a v2459 amendment explaining this strip; the "Paths that still invoke Firebase" map's AUTO-PUSH section now reads `(none — emptied in v2459)`.
+- **Startup console.log** — `[Sync] v2459: Manual Firebase sync only. Photos auto-backup to Drive only; Firebase reached via 💾 Save / ☁️ Force push / ⬇️ Force pull / 🗑️ Delete cloud copy.` Replaces the v2458 string.
+
+**`sw.js`:** `CACHE_NAME` → `kiki-marine-v2459`.
+
+**`index.html`:** `<meta name="app-version">` → `v2459`; all 7 core-module cache-busters → `?v=2459`.
+
+---
+
+### Updated Firebase surface map (post-v2459 — final v2428 compliance)
+
+**USER-INITIATED (all confirm-gated or explicit button):**
+
+- `backupAllEverywhere()` — home-screen "💾 Save All Surveys" button. Pushes every local survey to Firebase + Drive. Explicit, user-triggered.
+- `saveSurveyWithProgress()` — bottom-bar "💾 Save" on an open survey. Pushes the current survey to Firebase + Drive.
+- `☁️ Force push to cloud` (overflow menu) — per-survey push with peek + confirm showing cloud vs local scores.
+- `⬇️ Force pull from cloud` (overflow menu) — per-survey pull with peek + confirm. The only cross-device pull surface.
+- `🗑️ Delete cloud copy` (overflow menu, v2457) — per-survey destructive with peek + confirm.
+
+**AUTO-PUSH:** (none — emptied in v2459 ✓)
+
+**REMOVED/ORPHANED (do NOT re-wire without re-auditing the manual-sync contract):**
+
+- `FirebaseSync.pullNow()` — removed outright in v2458.
+- `initialSync()` — orphaned in v2458; private, no callers, body kept for rollback only.
+- `startListening()` / `stopListening()` — orphaned since v2426; onSnapshot real-time sync is dead.
+- `periodicSync()` — orphaned in v2426; private, no callers, body kept for rollback only.
+- Auto-push on `saveSurvey` / `saveEverywhere` — stripped in v2455.
+- Auto-delete on `deletePhoto` / `deleteSurvey` — stripped in v2456.
+- Auto-push in `_processBackupQueue` — stripped in v2459 (this release).
+
+---
+
+### How to verify
+
+*Firebase auto-push is actually gone:*
+
+1. Open Safari Web Inspector → Console with the **Network** tab filtered for `firebasestorage.googleapis.com`. On iPhone: Settings → Safari → Advanced → Web Inspector, then connect via Mac.
+2. Capture 3 photos inside any checklist item. Do NOT tap any Save button. Wait 8 seconds (the 5s idle timer plus a couple of upload ticks).
+3. Expect: **zero** POST requests to `firebasestorage.googleapis.com`. Previously (v2458) you'd see 3 uploads to Firebase Storage within ~10 seconds of capture.
+4. If Drive is signed in, you WILL see POST requests to `www.googleapis.com/upload/drive/v3/files` for those 3 photos. The Drive backup still happens — it's the intended auto-path.
+
+*Manual Firebase push still works (regression check):*
+
+5. Open a survey with the 3 new photos. Tap the bottom-bar `💾 Save` button. Expect: Firebase Storage uploads for all 3 photos in the Network tab, plus the survey doc write to Firestore. This is the manual path — it should work.
+6. Tap the overflow `☁️ Force push to cloud`. Expect: confirm dialog, then the same upload pattern. Manual push surfaces are unchanged.
+
+*Bottom-bar backup badge reflects Drive, not Firebase:*
+
+7. With Drive signed OUT and Firebase connected: capture 2 photos. The badge should show red `🚨 0/2` (because Drive — the auto path — has backed up nothing). Tapping the badge or hovering shows `No photos backed up to Drive! Sign in to Google Drive.` Pre-v2459 it would have shown green if Firebase had completed.
+8. Sign in to Drive. Wait 6 seconds. Badge turns amber `⏳ 2 queued`, then green `☁️ 2/2 All 2 photos backed up to Drive` once the queue drains.
+
+*Startup warning fires on missing Drive:*
+
+9. With Drive signed out (Firebase state irrelevant), hard-reload the app. After 3 seconds expect the red warning bar at the top: `⚠️ Drive backup not connected — Sign in to Google Drive so photos auto-backup as you work`. Pre-v2459 this warning only fired when BOTH were off.
+10. Sign in to Drive. Hard-reload. Expect: no warning bar. Console shows `[Backup] Drive connected (auto) + Firebase connected (manual) ✓` (or the "manual push disabled" variant if Firebase is off — both are fine states).
+
+*Startup log reflects the new state:*
+
+11. Console should show `[Sync] v2459: Manual Firebase sync only. Photos auto-backup to Drive only; Firebase reached via 💾 Save / ☁️ Force push / ⬇️ Force pull / 🗑️ Delete cloud copy.`
+
+*Version atomicity:*
+
+12. In DevTools: `caches.keys()` → expect `['kiki-marine-v2459']`. `document.querySelector('meta[name=app-version]').content` → expect `v2459`. Inspect `<script>` tags in index.html → all core-module `?v=2459`. Console `APP_VERSION` → `v2459`.
+
+---
+
+### Locked-in requirement for v2430 Device Roles
+
+v2430 Device Roles (field-mode iPhone vs report-mode Mac) can now assume the Firebase surface is entirely manual. A future "field mode" that wanted to re-enable auto-push for photos would need to: (a) be explicit in the UI ("field mode auto-syncs photos to Firebase — you'll see network activity during capture"), (b) show a visible progress indicator per photo, and (c) not reuse `_processBackupQueue` — it would need its own code path so the Drive-only automatic behaviour remains the default for every other mode. The v2459 strip is intentionally simple: one code path, one destination.
+
+---
+
 ## v2458 — 2026-04-21
 ### Removed — `FirebaseSync.pullNow()` batch-pull escape hatch (P0 correctness — closes v2456's one remaining delete-resurrection path)
 
