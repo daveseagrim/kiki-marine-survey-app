@@ -12,6 +12,31 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2433 — 2026-04-20
+### Added — Skip toggle on Instruments & Electronics section (mirrors skipComparables)
+
+Dave's request: "I need to be able to skip the instruments and electronics section." Many surveys — especially dinghies, tenders, small day-sailers, and some charter turnovers where electronics are handled separately — have no meaningful I&E inventory to record. In those cases the surveyor doesn't want the accordion to demand a filled-in list, doesn't want the preflight to nag "No instruments or electronics listed," and doesn't want an empty INSTRUMENTS & ELECTRONICS INVENTORY section to appear in the report.
+
+**Pattern — soft-skip, not delete.** This copies the `skipComparables` pattern introduced earlier. Toggling the checkbox sets `survey.skipInstrumentsElectronics = true` and persists. Nothing is deleted — if Dave has already added instruments (with photos, working/not-working flags, etc.) and later ticks Skip, every item stays intact in storage. Un-ticking Skip restores the full UI with all data present. This is important because the Skip toggle is a late decision for some surveys: Dave may enter a handful of instruments, then realize the section is overkill for this vessel, skip it, and later un-skip if he changes his mind without losing work.
+
+**Three gates open when skip is true.**
+
+1. **Inspection view body.** The accordion header still shows (so the Skip checkbox is always reachable). The body renders a lavender "Instruments & Electronics section is skipped." notice with a preserved-count line if items exist, replacing the normal item list + capture UI. The progress badge reads `Skipped` instead of the usual `N instruments • M photos` counter.
+
+2. **Report generator.** The entire INSTRUMENTS & ELECTRONICS INVENTORY `<h2>` block at app.js:24108 is suppressed by adding `!survey.skipInstrumentsElectronics &&` to the existing length-gate. No title, no stats line, no inventory table — nothing appears between the sections that bracket I&E.
+
+3. **Preflight.** The "No instruments or electronics listed" warning at app.js:16296 is suppressed when skipped. Without this the skip would produce a paradox: Dave skips because there's nothing to inventory, preflight then nags about the absence. Warning is now gated on `!survey.skipInstrumentsElectronics`.
+
+**Checkbox plumbing.** The toggle is inline in the accordion header as `<label>…<input type="checkbox" onchange="toggleInstrumentsElectronicsSkip(this.checked)">`. Two `event.stopPropagation()` calls — one on the label's `onclick`, one on the input's `onclick` — prevent the accordion-toggle parent button from swallowing the tap. `toggleInstrumentsElectronicsSkip` is a new async function near the other instrument helpers (app.js:18398): fetches the current survey, sets the flag, saves via the normal `saveSurvey` pipeline (which goes through the freshness guard and guarded write chokepoint), and re-renders the inspection view.
+
+**Data model.** Initializer at app.js:8922 adds `skipInstrumentsElectronics: formData.skipInstrumentsElectronics || false,` — defaults to false so existing surveys load with the I&E section active, exactly as they did pre-v2433.
+
+**Push sync note.** The manual Push button still aggregates instrument photo IDs into the upload set regardless of the skip flag. Intentional — skipping the section must not orphan photos if Dave later un-skips on another device. Photos stay in the photo store; only the UI and report suppress them.
+
+**Files changed.** `app.js` (APP_VERSION → v2433; `skipInstrumentsElectronics` field on survey init; I&E accordion rewrite with header checkbox + skipped-body branch; new `toggleInstrumentsElectronicsSkip` function; preflight gate; report gate), `sw.js` (CACHE_NAME → `kiki-marine-v2433`), `index.html` (meta + 7 cache-busters → v2433), this file.
+
+---
+
 ## v2432 — 2026-04-20
 ### Changed — Comparables UI revision: Source is a real dropdown; price/currency swapped to currency-left/price-right
 

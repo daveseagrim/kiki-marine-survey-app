@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2432';
+const APP_VERSION = 'v2433';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -8920,6 +8920,13 @@ function createNewSurvey(formData) {
 
     // Instruments & Electronics inventory (photo-based with AI identification)
     instrumentsElectronics: [],
+    // v2433: Surveyor-controlled skip flag for the I&E section. When true,
+    // the accordion body collapses to a "Skipped" notice, the report omits
+    // the INSTRUMENTS & ELECTRONICS INVENTORY section entirely, and the
+    // preflight "No instruments listed" warning is suppressed. Photos saved
+    // on instruments are preserved (not deleted) so un-skipping restores
+    // everything intact.
+    skipInstrumentsElectronics: formData.skipInstrumentsElectronics || false,
 
     // Inspection items - will be populated as user rates items
     items: {},
@@ -15007,15 +15014,44 @@ function renderInspection(survey) {
   const ieTotal = ieItems.length;
   const ieRated = ieItems.filter(e => e.working !== null && e.working !== undefined).length;
   const iePct = ieTotal > 0 ? Math.round((ieRated / ieTotal) * 100) : 0;
+  // v2433: surveyor can skip the whole section. When set, the accordion
+  // body renders a compact "Skipped" notice instead of the item list +
+  // capture buttons, and the report + preflight warning are suppressed.
+  // Check stored on survey.skipInstrumentsElectronics. Checkbox click
+  // stops propagation so tapping it doesn't also toggle the accordion.
+  const ieSkipped = !!survey.skipInstrumentsElectronics;
 
   html += `
     <div class="category-accordion">
       <button class="accordion-header" onclick="toggleAccordion(this)" style="background: #7c3aed; color: white;">
         <span class="accordion-chevron" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;font-size:22px;color:rgba(255,255,255,0.8);flex-shrink:0;margin-left:-12px;transition:transform 0.2s;">▾</span>
         <span class="category-title">📡 Instruments &amp; Electronics</span>
-        <span class="category-progress">${ieTotal > 0 ? `${iePct}% (${ieRated}/${ieTotal})` : 'No items'}</span>
+        <span class="category-progress">${ieSkipped ? 'Skipped' : (ieTotal > 0 ? `${iePct}% (${ieRated}/${ieTotal})` : 'No items')}</span>
+        <label style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:rgba(255,255,255,0.95);cursor:pointer;margin-left:8px;white-space:nowrap;"
+               onclick="event.stopPropagation();">
+          <input type="checkbox" id="skipInstrumentsElectronics" ${ieSkipped ? 'checked' : ''}
+                 onclick="event.stopPropagation();"
+                 onchange="toggleInstrumentsElectronicsSkip(this.checked)"> Skip
+        </label>
       </button>
       <div class="accordion-content" style="display: none;">
+  `;
+
+  if (ieSkipped) {
+    // v2433: Skipped — show a compact notice with an Un-skip button.
+    // Stored photos and items are preserved; un-skipping restores them.
+    html += `
+        <div style="padding:14px;background:#f5f3ff;border:1px dashed #c4b5fd;border-radius:8px;color:#5b21b6;font-size:13px;">
+          <strong>Instruments &amp; Electronics section is skipped.</strong><br/>
+          This section will be omitted from the report. Uncheck <em>Skip</em> in the header to bring it back.
+          ${ieTotal > 0 ? `<div style="margin-top:6px;font-size:12px;color:#6b7280;">${ieTotal} item${ieTotal === 1 ? '' : 's'} preserved — nothing has been deleted.</div>` : ''}
+        </div>
+      </div>
+    </div>
+    `;
+  } else {
+    // v2433: Normal rendering — the pre-existing item list + capture UI.
+    html += `
         <div style="padding: 10px 0; font-size: 13px; color: #555; border-bottom: 1px solid #e5e7eb; margin-bottom: 12px;">
           <em>Photograph each instrument or electronic device. Mark whether it is operational, then optionally use AI to identify make, model and year.</em>
           ${!localStorage.getItem('geminiApiKey') ? `<br/><button onclick="updateGeminiApiKey()" style="margin-top:6px;background:none;border:1px solid #7c3aed;color:#7c3aed;padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;">⚙️ Set Gemini API Key</button>` : ''}
@@ -15097,6 +15133,7 @@ function renderInspection(survey) {
       </div>
     </div>
   `;
+  }  // v2433: end of `else (!ieSkipped)` branch around the I&E section body
 
   // v2227: Skipped sections bucket — fully-skipped categories and a
   // skipped-Safety section live here at the bottom so they don't clutter
@@ -16257,7 +16294,10 @@ async function checkSurvey() {
   }
 
   // ── 7. INSTRUMENTS & ELECTRONICS ────────────────────────────────────────
-  if (!survey.instrumentsElectronics || survey.instrumentsElectronics.length === 0) {
+  // v2433: Don't flag "no instruments" when Dave has explicitly skipped the
+  // whole section via the Skip toggle on the I&E accordion. Skipped surveys
+  // intentionally have no instruments, so a preflight warning would be noise.
+  if (!survey.skipInstrumentsElectronics && (!survey.instrumentsElectronics || survey.instrumentsElectronics.length === 0)) {
     add('warning', 'Instruments & Electronics', 'No instruments or electronics listed', null);
   }
 
@@ -18356,6 +18396,19 @@ async function addInstrumentManual() {
   await saveSurvey(survey);
   renderInspection(survey);
   showToast('Enter instrument details manually');
+}
+
+// v2433: Toggle the "Skip Instruments & Electronics" flag on the current
+// survey. Called from the header checkbox onchange. Saves the flag and
+// re-renders so the accordion body flips between the skipped notice and
+// the full item list. Photos/items on the survey are untouched — if the
+// surveyor un-skips, everything is still there.
+async function toggleInstrumentsElectronicsSkip(checked) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  survey.skipInstrumentsElectronics = !!checked;
+  await saveSurvey(survey);
+  renderInspection(survey);
 }
 
 // Remove an instrument
@@ -24053,7 +24106,10 @@ ${(() => {
   }
 
   // ── INSTRUMENTS & ELECTRONICS INVENTORY ────────────────────────────
-  if (survey.instrumentsElectronics && survey.instrumentsElectronics.length > 0) {
+  // v2433: Suppress the entire I&E inventory section when Dave has toggled
+  // Skip on the inspection view. Stored items/photos are preserved — the
+  // section simply isn't rendered in the report.
+  if (!survey.skipInstrumentsElectronics && survey.instrumentsElectronics && survey.instrumentsElectronics.length > 0) {
     const ieWorking = survey.instrumentsElectronics.filter(e => e.working === true).length;
     const ieNotWorking = survey.instrumentsElectronics.filter(e => e.working === false).length;
     const ieNotTested = survey.instrumentsElectronics.filter(e => e.working === null || e.working === undefined).length;
