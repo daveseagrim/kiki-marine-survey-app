@@ -12,6 +12,39 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2448 — 2026-04-21
+### Changed — Deck hatches: remove "proper/properly"; surface a "Good" chip at top of C list
+
+Dave's ask: *"Remove the word proper from deck hatches. There should also be 'Good' rating And it should be moved to the top of the list."*
+
+**Four chips edited across three sections.**
+
+| Section | Rating / Phase | Before | After |
+|---|---|---|---|
+| Cabin and conveniences → `Deck hatches, windows and portholes – interior observations` | C - min crazing / observed | All deck hatches and portholes opened and closed **properly**. | All deck hatches and portholes opened and closed **smoothly**. |
+| Cabin and conveniences → same section | C - min crazing / observed | Hatches, portholes, and windows were in **proper** working condition with minimal crazing. | Hatches, portholes, and windows were in **good** working condition with minimal crazing. |
+| Cabin and conveniences → `Cabin windows and hatches (interior observations)` | C / observed | All cabin windows and hatches opened and closed **properly**. | All cabin windows and hatches opened and closed **smoothly**. |
+| Deck → `Deck hatches, windows, and portholes – exterior observations` | C / observed | All deck hatches, windows, and portholes appeared in **proper** condition from the exterior. | All deck hatches, windows, and portholes appeared in **good** condition from the exterior. |
+
+**Plus a reorder.** The rewritten exterior "good condition" chip was moved to the top of the C/observed list for `Deck hatches, windows, and portholes – exterior observations`. New C/observed order:
+
+1. *All deck hatches, windows, and portholes appeared in good condition from the exterior.*  ← first ("Good" chip per Dave's ask)
+2. The single deck hatch appeared without deficiency from the exterior.
+3. Despite age-typical crazing, all deck hatches, windows, and portholes appeared in good order from the exterior.
+
+**Why "smoothly" replaces "properly" on the open-and-close chips.** Stripping "properly" without replacement leaves "opened and closed." which reads awkwardly (trailing adverb implied). "Smoothly" describes the same successful-operation observation without the value-laden "proper" framing. Matches the way `v2442` substituted "serviceable" for "proper" on swim-platform conductivity and `v2446` dropped the "free of corrosion" chip on grab rails — Dave's library is moving away from judgement/absence-of-deficiency phrasing toward concrete, observable descriptions.
+
+**Why "good" replaces "proper" on condition chips.** Dave's ask specifically called for a "Good" chip. Using "good" aligns with his choice. Already-present "good order" chip (`Despite age-typical crazing... appeared in good order from the exterior.`) stays untouched — that one was already compliant.
+
+**Scope boundaries — kept untouched.**
+- `Deck[341]` A/action: *"The corroded frame(s) should be removed, repaired or replaced, and **properly** rebedded."* — "properly rebedded" is industry terminology meaning "rebedded to spec with appropriate compound and technique." Different semantic load than "proper condition." Leaving this alone.
+- Cabin and conveniences → `Cabin windows and hatches (interior observations)` A/observed: *"The cabin windows and hatches were cracked, damaged, or not sealing **properly**."* — same reasoning: "sealing properly" is an adverbial quality-of-operation phrase describing a failure mode, not the value-laden "proper condition" C-rating pattern Dave's ask targets.
+- Any "properly" in non-hatch sections (nav table lid, storage/galley/drawer chips) — out of scope. Dave's ask was scoped to deck hatches.
+
+**Files changed.** `text_library.json` (three text edits + one chip reorder in Deck), `app.js` (APP_VERSION → v2448), `sw.js` (CACHE_NAME → `kiki-marine-v2448`), `index.html` (meta + 7 cache-busters → v2448), this file.
+
+---
+
 ## v2447 — 2026-04-21
 ### Removed — Bow thruster C chip: "Corrosion was not concerning"
 

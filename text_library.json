@@ -15417,14 +15417,14 @@
     {
       "section": "Deck hatches, windows and portholes – interior observations",
       "rating": "C - min crazing",
-      "text": "All deck hatches and portholes opened and closed properly.",
+      "text": "All deck hatches and portholes opened and closed smoothly.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Deck hatches, windows and portholes – interior observations",
       "rating": "C - min crazing",
-      "text": "Hatches, portholes, and windows were in proper working condition with minimal crazing.",
+      "text": "Hatches, portholes, and windows were in good working condition with minimal crazing.",
       "phase": "observed",
       "severity": 3
     },
@@ -16572,7 +16572,7 @@
     {
       "section": "Cabin windows and hatches (interior observations)",
       "rating": "C",
-      "text": "All cabin windows and hatches opened and closed properly.",
+      "text": "All cabin windows and hatches opened and closed smoothly.",
       "phase": "observed",
       "severity": 3
     },
@@ -25562,14 +25562,14 @@
     {
       "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "C",
-      "text": "The single deck hatch appeared without deficiency from the exterior.",
+      "text": "All deck hatches, windows, and portholes appeared in good condition from the exterior.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Deck hatches, windows, and portholes – exterior observations",
       "rating": "C",
-      "text": "All deck hatches, windows, and portholes appeared in proper condition from the exterior.",
+      "text": "The single deck hatch appeared without deficiency from the exterior.",
       "phase": "observed",
       "severity": 3
     },
