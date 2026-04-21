@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2430';
+const APP_VERSION = 'v2432';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -10132,15 +10132,10 @@ function renderNewSurveyForm() {
       </div>
       <div id="comparablesSection">
         <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Add comparable sales from BUCValu, Soldboats.com, YachtWorld, Boat Trader, or any other source to support your valuation.</div>
-        <!-- v2430: shared datalist referenced by every row's Source input so
-             the preset list (BUCValu / Soldboats / YachtWorld / Boat Trader)
-             shows up as suggestions while still allowing free-form typing. -->
-        <datalist id="compSourceOptions">
-          <option value="BUCValu"></option>
-          <option value="Soldboats.com"></option>
-          <option value="YachtWorld"></option>
-          <option value="Boat Trader"></option>
-        </datalist>
+        <!-- v2432: per-row Source is a real <select> (see addComparableEntry);
+             the v2430 shared <datalist id="compSourceOptions"> was removed
+             because iOS Safari did not render it as a visibly-tappable
+             dropdown and Dave couldn't tell there were presets to pick from. -->
         <div id="comparablesEntries"></div>
         <button class="btn-secondary" style="font-size:12px;padding:6px 12px;margin-top:8px;" onclick="addComparableEntry()">+ Add Comparable</button>
       </div>
@@ -10839,7 +10834,10 @@ function editSurveyDetails(surveyId) {
           const allEntries = document.querySelectorAll('#comparablesEntries > div');
           if (allEntries.length > 0) {
             const entry = allEntries[allEntries.length - 1];
-            if (entry.querySelector('.compSource')) entry.querySelector('.compSource').value = comp.source || '';
+            // v2432: Source → select+custom combo via helper (handles preset
+            // match vs custom-text classification and visibility of the
+            // hidden text input).
+            setComparableSource(entry, comp.source);
             if (entry.querySelector('.compVessel')) entry.querySelector('.compVessel').value = comp.vessel || '';
             const _priceEl = entry.querySelector('.compPrice');
             if (_priceEl) {
@@ -11710,11 +11708,54 @@ function findBoatSpecs(input) {
 }
 
 // Find value range in the values database (order-agnostic matching)
+//
+// v2431 — cross-brand collision fix.
+//
+// The original two-way substring matcher happily returned "C&C 34
+// (1984-1990)" for input "1988 Silverton 34C". Root cause: the & gets
+// stripped by the alphanumeric filter, so "C&C 34" becomes tokens
+// ["cc", "34"]. The input tokens are ["silverton", "34c"]. The matcher
+// counted "34c".includes("34") as a hit on both sides (matchedSearch=1
+// and matchedCand=1), producing score 0.5 which cleared the 0.4 threshold.
+//
+// Two gates now run BEFORE the score is computed. Either one can skip a
+// candidate outright:
+//
+//   1. Brand gate. An input token of length >= 3 that doesn't start with
+//      a digit is treated as a brand word ("silverton", "beneteau").
+//      If the input has any brand words, the candidate must (a) have at
+//      least one brand word of its own, AND (b) at least one input brand
+//      word must substring-match at least one candidate brand word.
+//      This rejects Silverton-vs-C&C immediately: "cc" is too short to
+//      be a brand word, so candBrands is empty and the candidate is
+//      skipped before scoring.
+//
+//   2. Digit-token gate. A token that STARTS with a digit is treated as
+//      a model number ("34", "34c", "40.7" → "407"). If BOTH the input
+//      and the candidate have digit-starting tokens, at least one pair
+//      must substring-match either way. This prevents the other class
+//      of false positive the old matcher produced — matching the right
+//      brand but the wrong model (e.g. "Silverton 34C" quietly
+//      returning "Silverton 31 Sedan" just because the brand aligned).
+//
+// Intentionally unchanged: the score formula, the 0.4 threshold, the
+// year-range selection, the null-when-no-match contract (caller shows
+// the Yachtworld / BUCValu fallback card). Inputs with no brand (e.g.
+// "1988 34C" alone) still fall back to the old substring behavior —
+// that's arguably an edge case but it's no worse than before.
 function findBoatValues(input) {
   if (!boatValuesDB || !boatValuesDB.values) return null;
   const stripped = input.trim().replace(/^\d{4}\s*/, '').toLowerCase().replace(/[^a-z0-9\s]/g, '');
   const searchWords = stripped.split(/\s+/).filter(w => w.length > 1);
   if (searchWords.length === 0) return null;
+
+  // v2431: classify input tokens for the two gates below.
+  const isBrandWord = (w) => w.length >= 3 && !/^\d/.test(w);
+  const isDigitToken = (w) => /^\d/.test(w);
+  const inputBrands = searchWords.filter(isBrandWord);
+  const inputDigits = searchWords.filter(isDigitToken);
+  const hasBrand = inputBrands.length > 0;
+  const hasInputDigits = inputDigits.length > 0;
 
   let bestEntry = null;
   let bestScore = 0;
@@ -11722,6 +11763,31 @@ function findBoatValues(input) {
   for (const entry of boatValuesDB.values) {
     const candidate = `${entry.make} ${entry.model}`.toLowerCase().replace(/[^a-z0-9\s]/g, '');
     const candWords = candidate.split(/\s+/).filter(w => w.length > 1);
+
+    // v2431: Brand gate. If input has brand words, candidate must too,
+    // and at least one must substring-match.
+    if (hasBrand) {
+      const candBrands = candWords.filter(isBrandWord);
+      if (candBrands.length === 0) continue;
+      const brandMatched = inputBrands.some(sw =>
+        candBrands.some(cw => cw.includes(sw) || sw.includes(cw))
+      );
+      if (!brandMatched) continue;
+    }
+
+    // v2431: Digit-token gate. If both sides have digit-starting tokens,
+    // at least one pair must align. Skip if input has no digit tokens
+    // (user didn't specify model) or candidate has none (rare but
+    // possible for brand-only entries).
+    if (hasInputDigits) {
+      const candDigits = candWords.filter(isDigitToken);
+      if (candDigits.length > 0) {
+        const digitMatched = inputDigits.some(sw =>
+          candDigits.some(cw => cw.includes(sw) || sw.includes(cw))
+        );
+        if (!digitMatched) continue;
+      }
+    }
 
     let matchedSearch = 0;
     let matchedCand = 0;
@@ -13354,6 +13420,59 @@ function formatComparablePriceInput(input) {
   if (input.value) reformat.call(input);
 }
 
+// v2432: Comparable Source helpers ──────────────────────────────────
+// The preset list that populates the <select> in addComparableEntry and
+// that setComparableSource below uses to classify saved values as "preset"
+// vs "custom". Keep in sync with the <option> values in addComparableEntry.
+const COMP_SOURCE_PRESETS = ['BUCValu', 'Soldboats.com', 'YachtWorld', 'Boat Trader'];
+
+// Called inline from the <select>'s onchange — shows/hides the free-form
+// custom input based on whether "Other..." was picked, and focuses it when
+// revealed so the surveyor can start typing immediately.
+function handleComparableSourceChange(sel) {
+  if (!sel) return;
+  const entry = sel.closest('div[style*="border"]') || sel.parentElement && sel.parentElement.parentElement;
+  // More robust: find the sibling .compSourceCustom in the same column cell
+  const cell = sel.parentElement;
+  if (!cell) return;
+  const custom = cell.querySelector('.compSourceCustom');
+  if (!custom) return;
+  if (sel.value === '__OTHER__') {
+    custom.style.display = '';
+    // Focus after the current event settles so iOS actually pops the keyboard
+    setTimeout(() => { try { custom.focus(); } catch (_) {} }, 0);
+  } else {
+    custom.style.display = 'none';
+    custom.value = '';
+  }
+}
+
+// Populate one comparable row's source state from a saved string value.
+// If the saved value matches a preset (case-insensitive), pick that preset
+// in the <select> and leave the custom input hidden/empty. Otherwise mark
+// the select as "Other..." and reveal the custom input with the saved text.
+// An empty/missing value means the select stays on its placeholder.
+function setComparableSource(entry, savedValue) {
+  if (!entry) return;
+  const sel = entry.querySelector('.compSourceSelect');
+  const custom = entry.querySelector('.compSourceCustom');
+  if (!sel) return;
+  const val = (savedValue == null) ? '' : String(savedValue).trim();
+  if (!val) {
+    sel.value = '';
+    if (custom) { custom.style.display = 'none'; custom.value = ''; }
+    return;
+  }
+  const match = COMP_SOURCE_PRESETS.find(p => p.toLowerCase() === val.toLowerCase());
+  if (match) {
+    sel.value = match;
+    if (custom) { custom.style.display = 'none'; custom.value = ''; }
+  } else {
+    sel.value = '__OTHER__';
+    if (custom) { custom.style.display = ''; custom.value = val; }
+  }
+}
+
 // Called by the Regenerate button — always overwrites the rationale
 function regenerateValuationRationale() {
   const rationaleEl = document.getElementById('valuationRationale');
@@ -13692,7 +13811,8 @@ async function restoreComparablesFromBackup(surveyId) {
       const allEntries = document.querySelectorAll('#comparablesEntries > div');
       if (allEntries.length > 0) {
         const entry = allEntries[allEntries.length - 1];
-        if (entry.querySelector('.compSource')) entry.querySelector('.compSource').value = comp.source || '';
+        // v2432: Source → select+custom combo via helper
+        setComparableSource(entry, comp.source);
         if (entry.querySelector('.compVessel')) entry.querySelector('.compVessel').value = comp.vessel || '';
         const _priceEl = entry.querySelector('.compPrice');
         if (_priceEl) {
@@ -13723,23 +13843,37 @@ function addComparableEntry() {
   const idx = container.children.length;
   const div = document.createElement('div');
   div.style.cssText = 'border:1px solid #e5e7eb;border-radius:8px;padding:10px;margin-bottom:8px;background:#fafafa;';
-  // v2430: Source is now a free-form text input backed by a shared datalist
-  // (id="compSourceOptions" rendered once at section level) — presets still
-  // suggest as the surveyor types, but any custom source name is accepted.
-  // Price and Currency now live in the same grid cell so the 2-column layout
-  // is preserved. Price auto-formats to 9,999,999.00 on blur (see formatter
-  // hook below).
+  // v2432: Source is now a real <select> with an "Other (type below)..."
+  // option that reveals a hidden text input. v2430 shipped an <input list=...>
+  // datalist pattern, but Dave reported on-device that iOS Safari did not
+  // render it as an obviously-tappable dropdown — it just looked like a text
+  // field, so presets were invisible. A true <select> is unambiguous on iOS.
+  //
+  // Price/Currency layout (also v2432): currency moves to the LEFT in a
+  // narrow ~65px slot, price moves to the RIGHT with flex:1. v2430 had them
+  // reversed with the currency dominating visually — Dave's screenshot
+  // showed the price input squeezed down to almost nothing while "USD" took
+  // half the row. This restores sane proportions.
   div.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
       <strong style="font-size:12px;">Comparable ${idx + 1}</strong>
       <button class="btn-secondary" style="font-size:11px;padding:2px 8px;color:#dc2626;" onclick="this.parentElement.parentElement.remove()">Remove</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-      <input type="text" class="compSource" list="compSourceOptions" placeholder="Source" autocapitalize="words" style="font-size:12px;padding:6px;">
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <select class="compSourceSelect" onchange="handleComparableSourceChange(this)" style="font-size:12px;padding:6px;">
+          <option value="">Source</option>
+          <option value="BUCValu">BUCValu</option>
+          <option value="Soldboats.com">Soldboats.com</option>
+          <option value="YachtWorld">YachtWorld</option>
+          <option value="Boat Trader">Boat Trader</option>
+          <option value="__OTHER__">Other (type below)...</option>
+        </select>
+        <input type="text" class="compSourceCustom" placeholder="Type source name" autocapitalize="words" style="font-size:12px;padding:6px;display:none;">
+      </div>
       <input type="text" class="compVessel" placeholder="Year/Make/Model" style="font-size:12px;padding:6px;">
-      <div style="display:flex;gap:4px;">
-        <input type="text" inputmode="decimal" class="compPrice" placeholder="Price (e.g. 125,000.00)" style="flex:1;min-width:0;font-size:12px;padding:6px;">
-        <select class="compCurrency" style="font-size:12px;padding:6px;flex:0 0 auto;">
+      <div style="display:flex;gap:4px;align-items:flex-start;">
+        <select class="compCurrency" style="font-size:12px;padding:6px;flex:0 0 65px;width:65px;">
           <option value="">Cur</option>
           <option value="CAD">CAD</option>
           <option value="USD">USD</option>
@@ -13747,6 +13881,7 @@ function addComparableEntry() {
           <option value="GBP">GBP</option>
           <option value="AUD">AUD</option>
         </select>
+        <input type="text" inputmode="decimal" class="compPrice" placeholder="Price (e.g. 125,000.00)" style="flex:1;min-width:0;font-size:12px;padding:6px;">
       </div>
       <input type="text" class="compLocation" placeholder="Location" style="font-size:12px;padding:6px;">
       <input type="text" class="compDate" placeholder="Sale/listing date" style="font-size:12px;padding:6px;">
@@ -13800,8 +13935,23 @@ function collectComparables() {
   const entries = container.querySelectorAll(':scope > div');
   const comps = [];
   entries.forEach(entry => {
+    // v2432: Source reads from .compSourceSelect, falling back to
+    // .compSourceCustom when the surveyor picked "Other...". Empty select
+    // value or placeholder ("") yields empty source; any other preset value
+    // is used directly; "__OTHER__" means read the custom text input.
+    const _sel = entry.querySelector('.compSourceSelect');
+    const _custom = entry.querySelector('.compSourceCustom');
+    let _sourceVal = '';
+    if (_sel) {
+      const v = _sel.value || '';
+      if (v === '__OTHER__') {
+        _sourceVal = (_custom && _custom.value) ? _custom.value.trim() : '';
+      } else {
+        _sourceVal = v;
+      }
+    }
     comps.push({
-      source: entry.querySelector('.compSource')?.value || '',
+      source: _sourceVal,                                               // v2432
       vessel: entry.querySelector('.compVessel')?.value || '',
       price: entry.querySelector('.compPrice')?.value || '',
       currency: entry.querySelector('.compCurrency')?.value || '',  // v2430
@@ -14980,9 +15130,9 @@ function renderInspection(survey) {
         const allEntries = document.querySelectorAll('#comparablesEntries > div');
         if (allEntries.length > 0) {
           const entry = allEntries[allEntries.length - 1];
-          // v2430: .compSource is now a free-form text input (not a select)
-          const sourceInput = entry.querySelector('.compSource');
-          if (sourceInput) sourceInput.value = comp.source || '';
+          // v2432: Source is now a select+conditional custom input; the
+          // helper classifies preset vs custom and sets visibility.
+          setComparableSource(entry, comp.source);
           if (entry.querySelector('.compVessel')) entry.querySelector('.compVessel').value = comp.vessel || '';
           const _priceEl = entry.querySelector('.compPrice');
           if (_priceEl) {

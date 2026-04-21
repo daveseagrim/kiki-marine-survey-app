@@ -12,6 +12,69 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2432 — 2026-04-20
+### Changed — Comparables UI revision: Source is a real dropdown; price/currency swapped to currency-left/price-right
+
+Dave tested v2430's Comparable Vessels changes on-device and reported two issues. Both fixed here.
+
+**Issue 1 — Source datalist wasn't obvious as a dropdown on iOS Safari.** v2430 shipped Source as an `<input type="text" list="compSourceOptions">` paired with a shared `<datalist>` — the idea being that typing would surface preset suggestions while still allowing free-form source names. On macOS Chrome this renders with a visible chevron and is clearly a combo. On iPhone Safari it renders as a plain text field; the dropdown only opens after the user starts typing, so Dave saw "just a text box" and the presets might as well not have existed. Not acceptable for a field-first app.
+
+**Fix.** Source is now a real `<select class="compSourceSelect">` with five options — the four preset marketplaces (BUCValu, Soldboats.com, YachtWorld, Boat Trader) plus `Other (type below)...` as the last option. Picking "Other..." reveals a conditional `<input class="compSourceCustom">` underneath, which gets focused so iOS pops the keyboard automatically. Picking any preset hides and clears the custom input. This trades off a tiny amount of typing speed for massive clarity on mobile — the presets are now visible in the picker wheel without the surveyor having to know they exist.
+
+**Issue 2 — Price/Currency were in the wrong order and wrong proportions.** v2430 put the price input on the LEFT with `flex:1` and the currency `<select>` on the RIGHT with `flex:0 0 auto`. On Dave's screenshot the price field ended up tiny (~40px wide after the Cur select swallowed the available width) and the currency selector looked like the dominant control. Dave's request: "currency should be to the left in a smaller space and then I should be able to type the amount in the larger space to the right."
+
+**Fix.** The currency `<select>` now sits on the LEFT with `flex:0 0 65px; width:65px` — narrow, consistent, unambiguously a picker. The price `<input>` sits on the RIGHT with `flex:1; min-width:0` — the dominant field, where the surveyor expects to type a number. Order and proportions now match Dave's mental model of the row.
+
+**Plumbing.**
+
+- `addComparableEntry` (app.js:13813) rewrote the Source and Price/Currency blocks. Source cell is a `flex-direction:column` wrapping the select plus the hidden custom input. Price cell is `flex-direction:row` with currency first, then price. The blur formatter is unchanged — `formatComparablePriceInput` is still attached to `.compPrice` after appending.
+
+- New helpers `handleComparableSourceChange(sel)` and `setComparableSource(entry, savedValue)` (app.js:13425) handle show/hide of the custom input on change, and the preset-vs-custom classification on load. `COMP_SOURCE_PRESETS = ['BUCValu', 'Soldboats.com', 'YachtWorld', 'Boat Trader']` is the single source of truth for what counts as a preset; anything else loads as "Other..." with the saved text prefilled in the custom input.
+
+- `collectComparables` (app.js:13901) now reads `.compSourceSelect.value`. If it's `"__OTHER__"` it falls back to `.compSourceCustom.value.trim()`; otherwise it uses the select value directly. Empty/placeholder select yields empty source.
+
+- All three survey-repopulate paths (loadSurveyForEdit app.js:10841, restoreComparablesFromBackup app.js:13783, renderInspection app.js:15052) now call `setComparableSource(entry, comp.source)` in place of the old raw `.value = comp.source` assignment.
+
+- The old shared `<datalist id="compSourceOptions">` block at app.js:10138 is removed — no longer referenced.
+
+**Data shape unchanged.** `collectComparables` still returns `{source: "BUCValu"}` or `{source: "Some Custom Marketplace"}` identically to v2430 — the select+custom UI is just a different front-end for reading/writing the same string. Surveys saved under v2430 (free-form text) load correctly: any value not in `COMP_SOURCE_PRESETS` is classified as "Other..." and shown in the custom input. Surveys saved under ≤v2429 with a legacy preset select value also load correctly because the v2432 preset list matches the old option values exactly.
+
+**Files changed.** `app.js` (APP_VERSION → v2432; comparables section datalist removed; `addComparableEntry` rewrite; new `handleComparableSourceChange` + `setComparableSource` helpers + `COMP_SOURCE_PRESETS` constant; `collectComparables` select+custom read; 3 populate paths updated), `sw.js` (CACHE_NAME → `kiki-marine-v2432`), `index.html` (meta + 7 cache-busters → v2432), this file.
+
+---
+
+## v2431 — 2026-04-20
+### Fixed — BUC matcher cross-brand collision: "Silverton 34C" no longer returns "C&C 34"
+
+Dave reported that entering **1988 Silverton 34C** in Edit Intro and tapping the 📊 valuation suggestion populated **C&C 34 (1984–1990)** as the match — clearly the wrong boat. Root-caused in `findBoatValues` at app.js:11713.
+
+**Root cause.** The existing matcher stripped non-alphanumerics from both the input and every DB candidate, then did two-way substring overlap on every token. For this input:
+
+- Input tokens (after year strip, lowercase, non-alphanumerics removed): `["silverton", "34c"]`
+- C&C 34 tokens (`&` stripped): `["cc", "34"]`
+- `"34c".includes("34")` returns true, and `"34".includes("34c")` is checked the other direction too, so the matcher counted a hit on both the input side (matchedSearch=1) and the candidate side (matchedCand=1).
+- Score = (1/2 + 1/2) / 2 = **0.5**, which cleared the 0.4 threshold. The C&C 34 range `lowUSD: 28000, highUSD: 45000` was returned for a 1988 Silverton.
+
+The Silverton 34C isn't actually in `boat_values_db.json` — the correct behaviour for this input is a null return, which triggers the "No built-in value data found" fallback card with Yachtworld and BUCValu links. The matcher was just too permissive.
+
+**Fix — two gates run before scoring.** Either gate can skip a candidate outright, preventing it from competing for the best-score slot.
+
+- **Brand gate.** An input token of length ≥ 3 that doesn't start with a digit counts as a "brand word" (`silverton`, `beneteau`, `alberg`). If the input has any brand words, the candidate must (a) have at least one brand word of its own, AND (b) at least one input brand word must substring-match at least one candidate brand word. For `Silverton 34C` vs `C&C 34`: candidate brand words = `[]` (`cc` is too short), so the candidate is rejected. The whole wrong-brand class of bugs collapses to this one gate.
+
+- **Digit-token gate.** A token that starts with a digit is treated as a model number (`34`, `34c`, `407` from `40.7`, etc.). If **both** the input and the candidate have digit-starting tokens, at least one pair must substring-match either way. This catches the adjacent bug the brand gate wouldn't — `Silverton 34C` silently matching `Silverton 31 Sedan` on brand alone. With the digit gate, `34c` vs `31` has no substring overlap, so the candidate is skipped. If the input has no digit tokens (user omitted the model), the gate is inert — anything with the right brand can match.
+
+- **Threshold unchanged at 0.4.** The gates prevent the bad cases from being scored in the first place; the threshold only matters for borderline cases that clear both gates. Raising it would also reject legitimate loose matches like `Silverton 34C` → `Silverton 34 Convertible` (if that entry existed), which is the kind of fuzziness this matcher is supposed to provide.
+
+**Trace of Dave's example after the fix.** Input `1988 Silverton 34C` → tokens `["silverton", "34c"]`. Walking the DB: every `Alberg` / `Bavaria` / `Beneteau` / `C&C` / `Catalina` / `Hunter` / etc. entry fails the brand gate (their brand tokens don't contain or get contained by `silverton`). The two Silverton entries in the DB (`Silverton 31 Sedan`, `Silverton 38 Convertible`) pass the brand gate but fail the digit gate (`34c` vs `31`, `34c` vs `38` — no overlap). Result: `null`, which triggers the Yachtworld / BUCValu fallback card. Exactly what should have happened the first time.
+
+**What didn't change.** The score formula, the 0.4 threshold, the year-range selection inside a matched entry, the single call site (`suggestValuation` at app.js:12011), the fallback card UI, and the `boat_values_db.json` contents. The change is scoped to four inserted blocks inside `findBoatValues`: the helper classifiers, the brand gate, the digit gate, and a header comment explaining the rationale.
+
+**Known limitation retained.** If the user types only a model without a brand (`1988 34C` on its own), `hasBrand` is false, the brand gate is skipped, and the matcher falls back to the original substring behaviour — which could still match `C&C 34`. No real user types model-only, so this is left alone rather than adding guess-the-brand heuristics.
+
+**Files changed.** `app.js` (APP_VERSION → v2431; `findBoatValues` brand + digit gates + header docblock), `sw.js` (CACHE_NAME → `kiki-marine-v2431`), `index.html` (meta + 7 cache-busters → v2431), this file.
+
+---
+
 ## v2430 — 2026-04-20
 ### Changed — Comparable Vessels: free-form Source input, per-row currency selector, auto-formatted "9,999,999.00" price
 
