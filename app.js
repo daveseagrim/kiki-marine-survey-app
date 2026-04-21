@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2438';
+const APP_VERSION = 'v2439';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -24391,12 +24391,14 @@ ${(() => {
       ? survey.valuationSources : (survey.valuationSource ? [survey.valuationSource] : []);
     const _srcCount = _srcArr.length;
     const _srcLabel = _srcCount === 1 ? 'Valuation Source' : 'Valuation Sources';
-    const _srcLabelConsulted = _srcCount === 1 ? 'Valuation Source Consulted' : 'Valuation Sources Consulted';
+    // v2439: _srcLabelConsulted removed — was only used by the deleted
+    // VALUATION WORKSHEET second table.
 
     // v2374: per Dave — no information entered = no blank space. Each row
     // below is guarded against its own empty state, and the whole
-    // Statement of Valuation + Worksheet block is suppressed when the
-    // user hasn't entered any valuation data at all.
+    // Statement of Valuation block is suppressed when the user hasn't
+    // entered any valuation data at all. (v2439: "+ Worksheet" dropped
+    // from this comment since the worksheet subsection was removed.)
     const _hasFMV = _lowU > 0 || _highU > 0;
     const _hasRepl = !!survey.replacementCost && _replU > 0;
     const _hasConc = _concU > 0;
@@ -24427,25 +24429,12 @@ ${(() => {
       ? '<tr><td><strong>Exchange Rate (USD\u2192CAD)</strong></td><td>' + _xr.toFixed(4) + '</td></tr>'
       : '';
 
-    const _bucRangeRow = _hasFMV
-      ? '<tr><td><strong>BUC Value Range</strong></td><td>'
-        + 'USD $' + _lowU.toLocaleString() + ' \u2013 $' + _highU.toLocaleString()
-        + (_xr ? ' &nbsp;/&nbsp; <strong style="color:#066aab;">CAD $' + _lowC.toLocaleString() + ' \u2013 $' + _highC.toLocaleString() + '</strong>' : '')
-        + '</td></tr>'
-      : '';
-
-    const _wsReplRow = _hasRepl
-      ? '<tr><td><strong>Estimated Replacement Cost</strong></td><td>USD $' + _replU.toLocaleString()
-        + (_xr ? ' &nbsp;/&nbsp; <strong style="color:#066aab;">CAD $' + _replC.toLocaleString() + '</strong>' : '')
-        + '</td></tr>'
-      : '';
-
-    const _wsSrcCell = _srcCount > 1
-      ? _srcArr.map(s => '\u2022 ' + esc(s)).join('<br>')
-      : (_srcCount === 1 ? esc(_srcArr[0]) : '');
-    const _wsSrcRow = _hasSources
-      ? '<tr><td style="width:40%;"><strong>' + (_srcCount === 1 ? 'Source' : 'Sources') + '</strong></td><td>' + _wsSrcCell + '</td></tr>'
-      : '';
+    // v2439: _bucRangeRow, _wsReplRow, _wsSrcCell, _wsSrcRow removed —
+    // they were the rows of the deleted VALUATION WORKSHEET second table.
+    // Every piece of data they surfaced is now shown exactly once via
+    // _fmvRow (covers BUC range), _replRow (covers Replacement Cost),
+    // _srcRow (covers Source list), and the trailing Final Concluded
+    // block at the end of the valuation section.
 
     const _methodology = esc(survey.valuationRationale) || 'The following method of valuation was used to obtain the Fair Market Value: similarly equipped, same or similar model vessels as shown as sold on soldboats.com, buc.com, and listings on yachtworld.com (and/or other websites) in the last two years were identified, adjusted for model year, condition, equipment, and date of sale, and averaged together. The vessel\'s overall condition rating using the BUC Marine Grading System has been factored into the final valuation range.';
 
@@ -24490,41 +24479,32 @@ ${(() => {
         + '</ul>'
         + '</div>'
 
+        // v2439: Final Concluded Fair Market Value block + Exchange Rate row
+        // are no longer in this top table. They moved to the bottom of the
+        // valuation section (after the comparables table) so the report
+        // closes on its punch line right before the Surveyor's Certification.
         + '<table>'
         + _srcRow
         + _fmvRow
         + _replRow
-        + (_hasConc ? '<tr style="border-top:2px solid #066aab;"><td><strong style="font-size:11pt;">Final Concluded Fair Market Value</strong></td><td>'
-          + (_xr ? '<div style="font-size:16pt;font-weight:800;color:#066aab;line-height:1.3;">CAD $' + _f(_concC) + '</div>' : '')
-          + '<div style="font-size:11pt;' + (_xr ? 'color:#4b5563;margin-top:2px;' : 'font-weight:800;color:#066aab;') + '">USD $' + _f(_concU) + ' ' + _xrNote + '</div>'
-          + '<div style="font-size:9pt;color:#6b7280;font-style:italic;">Tax not included.</div>'
-          + '</td></tr>' : '')
-        + _xrRow
         + '</table>'
 
         + '<p><strong>Appraisal Methodology:</strong></p>'
         + '<p class="scope-text">' + _methodology + '</p>'
         + (esc(survey.vesselName) ? '<p class="scope-text"><strong>Summary:</strong> In accordance with the request for a Marine Survey of the \u201c' + esc(survey.vesselName) + '\u201d, for the purpose of evaluating its present condition and estimating its Fair Market Value' + (_hasRepl ? ' and Replacement Cost' : '') + ', I herewith submit my conclusion based on the preceding report.' + (survey.surveyDate ? ' The subject vessel was personally inspected by the undersigned on <strong>' + survey.surveyDate + '</strong>.' : '') + ' Subject to correction of deficiencies listed in sections A and B, the vessel is considered to be reasonably suitable for its intended use. Other deficiencies listed should be attended to in keeping with good maintenance practices or as upgrades.</p>' : '')
-        + (_overallCondRaw ? '<p><strong>Condition Adjustment:</strong> The vessel\u2019s overall condition rating of \u201c' + _overallCondRaw + '\u201d has been factored into the final valuation range using the BUC Marine Grading System.</p>' : '')
+        + (_overallCondRaw ? '<p><strong>Condition Adjustment:</strong> The vessel\u2019s overall condition rating of \u201c' + _overallCondRaw + '\u201d has been factored into the final valuation range using the BUC Marine Grading System.</p>' : '');
 
-        + '<h3 style="margin:18px 0 8px 0;color:#066aab;font-size:11pt;">VALUATION WORKSHEET</h3>'
-        // v2242: only say "and comparables" if comparables were actually recorded
-        + (function() {
-          const _hasComps = !survey.skipComparables && survey.comparables && survey.comparables.length > 0 && survey.comparables.some(c => c.vessel);
-          const _ws2 = _hasComps
-            ? (_srcCount === 1 ? 'source and comparable were' : 'sources and comparables were')
-            : 'source' + (_srcCount === 1 ? ' was' : 's were');
-          return '<div class="scope-text"><p>The following data ' + _ws2 + ' used in determining the Fair Market Value' + (_hasRepl ? ' and Estimated Replacement Cost' : '') + ' of the subject vessel.</p></div>';
-        })()
-
-        + '<table>'
-        + (_hasSources ? '<tr><td colspan="2" style="background:#e8edf2;font-weight:bold;">' + _srcLabelConsulted + '</td></tr>' : '')
-        + _wsSrcRow
-        + _bucRangeRow
-        + _xrRow
-        + _wsReplRow
-        + (_hasConc ? '<tr style="border-top:2px solid #066aab;"><td><strong>Final Concluded FMV</strong></td><td><strong style="color:#066aab;">USD $' + _concU.toLocaleString() + (_xr ? ' &nbsp;/&nbsp; CAD $' + _concC.toLocaleString() : '') + '</strong></td></tr>' : '')
-        + '</table>';
+        // v2439: removed VALUATION WORKSHEET subsection entirely — header,
+        // "The following data sources and comparables were used..." intro
+        // sentence, and the second table (Sources Consulted / BUC Range /
+        // Exchange Rate / Replacement Cost / inline Final Concluded FMV).
+        // Every row in that table was already shown in the Statement of
+        // Valuation table above (FMV range label covers BUC range, xrNote
+        // on FMV rows covers Exchange Rate, Replacement Cost was repeated
+        // verbatim, Final Concluded FMV was repeated in smaller form).
+        // Dave flagged the section as choppy + redundant. The Final
+        // Concluded block + Exchange Rate row now render once at the end
+        // of the valuation section, just before the Surveyor's Certificate.
 
       // Comparables table: only if at least one comparable has a vessel name.
       // v2430: Price column header no longer hardcodes "(USD)" — currency is
@@ -24549,6 +24529,26 @@ ${(() => {
           + '<tr><td colspan="6" style="background:#e8edf2;font-weight:bold;">Comparable Vessels / Market Research</td></tr>'
           + '<tr><th>Source</th><th>Vessel</th><th>Price</th><th>Location</th><th>Date</th><th>Notes</th></tr>'
           + _compRows
+          + '</table>';
+      }
+
+      // v2439: Final Concluded Fair Market Value — punch line of the
+      // whole valuation section, rendered last so the report closes on
+      // this number right before the Surveyor's Certificate. Previously
+      // this block lived inside the Statement of Valuation table at the
+      // top of the section AND was repeated inside the now-removed
+      // VALUATION WORKSHEET subsection. Single source of truth, single
+      // display, strong close. Exchange Rate row rides along because
+      // Dave groups the two visually and it's the only place the raw
+      // rate is surfaced now that the worksheet table is gone.
+      if (_hasConc) {
+        _out += '<table style="margin-top:18px;">'
+          + '<tr style="border-top:2px solid #066aab;"><td style="width:40%;"><strong style="font-size:11pt;">Final Concluded Fair Market Value</strong></td><td>'
+          + (_xr ? '<div style="font-size:16pt;font-weight:800;color:#066aab;line-height:1.3;">CAD $' + _f(_concC) + '</div>' : '')
+          + '<div style="font-size:11pt;' + (_xr ? 'color:#4b5563;margin-top:2px;' : 'font-weight:800;color:#066aab;') + '">USD $' + _f(_concU) + ' ' + _xrNote + '</div>'
+          + '<div style="font-size:9pt;color:#6b7280;font-style:italic;">Tax not included.</div>'
+          + '</td></tr>'
+          + _xrRow
           + '</table>';
       }
     }

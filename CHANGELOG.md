@@ -12,6 +12,58 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2439 — 2026-04-21
+### Changed — Valuation section cleanup: removed VALUATION WORKSHEET subsection, moved Final Concluded FMV to just before the Surveyor's Certificate
+
+Dave flagged the final valuation section of the report as choppy and redundant. The offending structure was two back-to-back tables showing essentially the same data twice, with a `VALUATION WORKSHEET` header and a boilerplate intro sentence separating them. This pass collapses the redundancy into a single clean flow and gives the Final Concluded Fair Market Value its own standalone display right before the Surveyor's Certificate, so the report closes on its punch line.
+
+**Before (old flow).**
+
+1. `STATEMENT OF VALUATION` h3 + FMV definition paragraph
+2. Table with: Valuation Source, Fair Market Value range (big CAD + USD), Estimated Replacement Cost, **Final Concluded Fair Market Value** (big CAD + USD + "Tax not included."), Exchange Rate
+3. Appraisal Methodology / Summary / Condition Adjustment paragraphs
+4. `VALUATION WORKSHEET` h3
+5. "The following data sources and comparables were used..." intro sentence
+6. Second table with: Sources Consulted, Source list, BUC Range (USD/CAD), Exchange Rate, Replacement Cost, **Final Concluded FMV** (smaller inline row)
+7. Comparables / Market Research table
+
+**After (new flow).**
+
+1. `STATEMENT OF VALUATION` h3 + FMV definition paragraph
+2. Table with: Valuation Source, Fair Market Value range, Estimated Replacement Cost (Final Concluded row + Exchange Rate row removed — they now render at the end)
+3. Appraisal Methodology / Summary / Condition Adjustment paragraphs
+4. Comparables / Market Research table
+5. **Final Concluded Fair Market Value** standalone table — big CAD + USD with rate note + "Tax not included." — followed by Exchange Rate row
+
+**Why the second table was safe to delete wholesale.**
+
+Every row in the old worksheet table was already surfaced in the Statement of Valuation table above it, just with different labels:
+
+| Worksheet row | Already shown in top table as |
+|---|---|
+| Sources Consulted | Valuation Source(s) |
+| BUC Value Range (USD/CAD) | Fair Market Value (big CAD range + USD range with `@ rate` note) |
+| Exchange Rate (USD→CAD) | `(USD→CAD @ rate)` note on each money row |
+| Estimated Replacement Cost | Estimated Replacement Cost (identical) |
+| Final Concluded FMV (inline small) | Final Concluded Fair Market Value (big block) |
+
+The worksheet was essentially a second rendering of the same five data points. Removing it drops zero information from the report.
+
+**Why the Final Concluded block moved to the end.**
+
+Dave's ask was specifically to place it "just before the Surveyor's Certification". The valuation number is the deliverable — the thing the client cares about most — and having it appear twice (once mid-section, once at the end of the worksheet) diluted it. Putting the block at the bottom of the valuation flow means the reader's eye lands on the concluded value just as they roll into the signed certificate. It's a cleaner document narrative.
+
+**Edge cases preserved from v2374.**
+
+- If no valuation data is entered at all, the whole `_hasValuationData` block stays suppressed — no empty "STATEMENT OF VALUATION" heading, no blank tables.
+- If Final Concluded FMV is missing but FMV range is set, the top table still shows the range and the new trailing block simply doesn't render (guarded by `if (_hasConc)`).
+- If Exchange Rate is zero / not set, `_xrRow` already evaluates to empty string (unchanged from before), so the new trailing block shows just the Final Concluded FMV without an exchange rate row.
+- If there are no comparables, the comparables table is suppressed as before; the Final Concluded block still renders on its own right after the Condition Adjustment paragraph.
+
+**Files changed.** `app.js` (three targeted edits to `generateReport`'s valuation section at ~L24493–24564; APP_VERSION → v2439), `sw.js` (CACHE_NAME → `kiki-marine-v2439`), `index.html` (meta + 7 cache-busters → v2439), this file.
+
+---
+
 ## v2438 — 2026-04-21
 ### Fixed — "Hot water tank(s)" label made singular throughout
 
