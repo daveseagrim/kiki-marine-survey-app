@@ -12,6 +12,29 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2430 — 2026-04-20
+### Changed — Comparable Vessels: free-form Source input, per-row currency selector, auto-formatted "9,999,999.00" price
+
+Small but overdue usability fix to the Comparable Vessels section on Edit Intro. Dave asked for three things together and they all touch the same DOM/collector/report triad, so they ship as a single feature version.
+
+**What this ships.**
+
+- **Source is now free-form text with autosuggest (app.js:13720).** Previously Source was a fixed `<select>` whose only escape hatch was an "Other" option. Typing a marketplace that wasn't in the preset list was not possible. It is now an `<input type="text">` backed by a shared `<datalist id="compSourceOptions">` (app.js:10138) that offers BUCValu / Soldboats.com / YachtWorld / Boat Trader as suggestions while accepting any text Dave types. No schema change: the saved shape is still `{source: "..."}` — it's just no longer constrained to a preset list.
+
+- **New per-row currency selector (app.js:13724).** A compact `.compCurrency` `<select>` sits to the right of the price input in the same grid cell, with options: (blank) / CAD / USD / EUR / GBP / AUD. The report header used to hardcode "Price (USD)" — this was wrong for Canadian market comparables and was probably misleading Dave on desktop review. It's now "Price", and the per-row currency (when set) is rendered as a prefix on the price cell: `CAD 125,000.00`.
+
+- **Price auto-formats to "9,999,999.00" on blur (app.js:13326).** New helper `formatComparablePriceInput(input)` is wired up by `addComparableEntry()` and by all three survey-repopulate paths. It strips non-numeric chars (keeping at most one decimal), parses to a float, and reformats via `toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})`. Distinct from `formatCurrencyInput` because comparables need cents (the concluded-value field does not), and comparables should not trigger the aggressive "low-value warning" that catches concluded-value data-entry errors (a listed sailboat at $499 isn't a data-entry error).
+
+**Data shape.** `collectComparables` (app.js:13789) now returns `{source, vessel, price, currency, location, date, water, notes}` per row. Existing surveys saved before v2430 have no `currency` field; the report rendering tolerates this (just omits the prefix) and the populate paths read `comp.currency || ''`, so nothing breaks on load.
+
+**Populate paths updated (3 call sites).** All three spots where saved comparables are written back into DOM inputs now also set `.compCurrency.value` and fire a synthetic `blur` on `.compPrice` to reuse the formatter that `addComparableEntry` already attached. The third path (app.js:14983) also renames the local `sourceSelect` variable to `sourceInput` since Source is no longer a `<select>`.
+
+**What did NOT change.** `guardedAssignComparables` (v2383), the undefined-sentinel in `collectComparables` (v2377), and the sessionStorage backup / one-tap restore (v2383) are all untouched. The report comparables table still appears only when `survey.comparables.some(c => c.vessel)` and still respects `survey.skipComparables`. Valuation inputs (`valuationLow`, `valuationHigh`, `concludedValue`, `replacementCost`) still use the original `formatCurrencyInput` — whole-dollar, comma-only — since those are surveyor's-opinion fields, not quoted market prices.
+
+**Files changed.** `app.js` (APP_VERSION → v2430; `formatComparablePriceInput` added; `addComparableEntry` template rewrite; `collectComparables` currency field; 3 populate paths; report header + price-cell rendering), `sw.js` (CACHE_NAME → `kiki-marine-v2430`), `index.html` (meta + 7 cache-busters → v2430), this file.
+
+---
+
 ## v2429 — 2026-04-20
 ### Changed — Unified conductivity chip set across Hull / Deck / Aft Deck / Flybridge; rudder scrub extended to cover conductivity on power boats
 

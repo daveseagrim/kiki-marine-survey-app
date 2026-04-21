@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2429';
+const APP_VERSION = 'v2430';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -10131,7 +10131,16 @@ function renderNewSurveyForm() {
         </label>
       </div>
       <div id="comparablesSection">
-        <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Add comparable sales from BUCValu, Soldboats.com, YachtWorld, and current listings to support your valuation.</div>
+        <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Add comparable sales from BUCValu, Soldboats.com, YachtWorld, Boat Trader, or any other source to support your valuation.</div>
+        <!-- v2430: shared datalist referenced by every row's Source input so
+             the preset list (BUCValu / Soldboats / YachtWorld / Boat Trader)
+             shows up as suggestions while still allowing free-form typing. -->
+        <datalist id="compSourceOptions">
+          <option value="BUCValu"></option>
+          <option value="Soldboats.com"></option>
+          <option value="YachtWorld"></option>
+          <option value="Boat Trader"></option>
+        </datalist>
         <div id="comparablesEntries"></div>
         <button class="btn-secondary" style="font-size:12px;padding:6px 12px;margin-top:8px;" onclick="addComparableEntry()">+ Add Comparable</button>
       </div>
@@ -10832,7 +10841,17 @@ function editSurveyDetails(surveyId) {
             const entry = allEntries[allEntries.length - 1];
             if (entry.querySelector('.compSource')) entry.querySelector('.compSource').value = comp.source || '';
             if (entry.querySelector('.compVessel')) entry.querySelector('.compVessel').value = comp.vessel || '';
-            if (entry.querySelector('.compPrice')) entry.querySelector('.compPrice').value = comp.price || '';
+            const _priceEl = entry.querySelector('.compPrice');
+            if (_priceEl) {
+              _priceEl.value = comp.price || '';
+              // v2430: reformat loaded value to "9,999,999.00".
+              // addComparableEntry() already attached the blur listener,
+              // so firing a synthetic blur reuses that handler.
+              if (_priceEl.value) {
+                try { _priceEl.dispatchEvent(new Event('blur')); } catch (e) { /* non-fatal */ }
+              }
+            }
+            if (entry.querySelector('.compCurrency')) entry.querySelector('.compCurrency').value = comp.currency || '';  // v2430
             if (entry.querySelector('.compLocation')) entry.querySelector('.compLocation').value = comp.location || '';
             if (entry.querySelector('.compDate')) entry.querySelector('.compDate').value = comp.date || '';
             if (entry.querySelector('.compWater')) entry.querySelector('.compWater').value = comp.water || '';
@@ -13308,6 +13327,33 @@ function initCurrencyInputs() {
   });
 }
 
+// v2430: Comparable price input — formats on blur to "9,999,999.00"
+// (two-decimal display, comma thousand separators). Distinct from
+// formatCurrencyInput because comparables need cents and don't want the
+// aggressive "low-value" warning (a listed sailboat under $500 isn't a
+// data-entry error the way a concluded value under $500 would be).
+function formatComparablePriceInput(input) {
+  if (!input) return;
+  const reformat = function() {
+    // Strip to digits + at most one decimal point
+    const raw = String(this.value || '').replace(/[^0-9.]/g, '');
+    if (!raw) { this.value = ''; return; }
+    const parts = raw.split('.');
+    const intPart = parts[0].replace(/^0+(?=\d)/, '') || '0';
+    const decPart = parts.length > 1 ? parts.slice(1).join('').slice(0, 2) : '';
+    const normalized = decPart ? intPart + '.' + decPart : intPart;
+    const num = parseFloat(normalized);
+    if (!isFinite(num)) return;
+    this.value = num.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+  input.addEventListener('blur', reformat);
+  // Format existing value on attach (e.g., when loading an existing survey)
+  if (input.value) reformat.call(input);
+}
+
 // Called by the Regenerate button — always overwrites the rationale
 function regenerateValuationRationale() {
   const rationaleEl = document.getElementById('valuationRationale');
@@ -13648,7 +13694,15 @@ async function restoreComparablesFromBackup(surveyId) {
         const entry = allEntries[allEntries.length - 1];
         if (entry.querySelector('.compSource')) entry.querySelector('.compSource').value = comp.source || '';
         if (entry.querySelector('.compVessel')) entry.querySelector('.compVessel').value = comp.vessel || '';
-        if (entry.querySelector('.compPrice')) entry.querySelector('.compPrice').value = comp.price || '';
+        const _priceEl = entry.querySelector('.compPrice');
+        if (_priceEl) {
+          _priceEl.value = comp.price || '';
+          // v2430: reuse the blur listener attached by addComparableEntry
+          if (_priceEl.value) {
+            try { _priceEl.dispatchEvent(new Event('blur')); } catch (e) { /* non-fatal */ }
+          }
+        }
+        if (entry.querySelector('.compCurrency')) entry.querySelector('.compCurrency').value = comp.currency || '';  // v2430
         if (entry.querySelector('.compLocation')) entry.querySelector('.compLocation').value = comp.location || '';
         if (entry.querySelector('.compDate')) entry.querySelector('.compDate').value = comp.date || '';
         if (entry.querySelector('.compWater')) entry.querySelector('.compWater').value = comp.water || '';
@@ -13669,22 +13723,31 @@ function addComparableEntry() {
   const idx = container.children.length;
   const div = document.createElement('div');
   div.style.cssText = 'border:1px solid #e5e7eb;border-radius:8px;padding:10px;margin-bottom:8px;background:#fafafa;';
+  // v2430: Source is now a free-form text input backed by a shared datalist
+  // (id="compSourceOptions" rendered once at section level) — presets still
+  // suggest as the surveyor types, but any custom source name is accepted.
+  // Price and Currency now live in the same grid cell so the 2-column layout
+  // is preserved. Price auto-formats to 9,999,999.00 on blur (see formatter
+  // hook below).
   div.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
       <strong style="font-size:12px;">Comparable ${idx + 1}</strong>
       <button class="btn-secondary" style="font-size:11px;padding:2px 8px;color:#dc2626;" onclick="this.parentElement.parentElement.remove()">Remove</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-      <select class="compSource" style="font-size:12px;padding:6px;">
-        <option value="">Source</option>
-        <option value="BUCValu">BUCValu</option>
-        <option value="Soldboats.com">Soldboats.com</option>
-        <option value="YachtWorld">YachtWorld</option>
-        <option value="Boat Trader">Boat Trader</option>
-        <option value="Other">Other</option>
-      </select>
+      <input type="text" class="compSource" list="compSourceOptions" placeholder="Source" autocapitalize="words" style="font-size:12px;padding:6px;">
       <input type="text" class="compVessel" placeholder="Year/Make/Model" style="font-size:12px;padding:6px;">
-      <input type="text" class="compPrice" placeholder="Asking or sold price (USD)" style="font-size:12px;padding:6px;">
+      <div style="display:flex;gap:4px;">
+        <input type="text" inputmode="decimal" class="compPrice" placeholder="Price (e.g. 125,000.00)" style="flex:1;min-width:0;font-size:12px;padding:6px;">
+        <select class="compCurrency" style="font-size:12px;padding:6px;flex:0 0 auto;">
+          <option value="">Cur</option>
+          <option value="CAD">CAD</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+          <option value="AUD">AUD</option>
+        </select>
+      </div>
       <input type="text" class="compLocation" placeholder="Location" style="font-size:12px;padding:6px;">
       <input type="text" class="compDate" placeholder="Sale/listing date" style="font-size:12px;padding:6px;">
       <select class="compWater" style="font-size:12px;padding:6px;">
@@ -13698,6 +13761,8 @@ function addComparableEntry() {
     <input type="text" class="compNotes" placeholder="Notes (condition, hours, differences)" style="font-size:12px;padding:6px;width:100%;margin-top:6px;box-sizing:border-box;">
   `;
   container.appendChild(div);
+  // v2430: attach the 9,999,999.00 blur formatter to the new price input.
+  try { formatComparablePriceInput(div.querySelector('.compPrice')); } catch (e) { /* non-fatal */ }
 }
 
 // Collect bilge pump data from form
@@ -13739,6 +13804,7 @@ function collectComparables() {
       source: entry.querySelector('.compSource')?.value || '',
       vessel: entry.querySelector('.compVessel')?.value || '',
       price: entry.querySelector('.compPrice')?.value || '',
+      currency: entry.querySelector('.compCurrency')?.value || '',  // v2430
       location: entry.querySelector('.compLocation')?.value || '',
       date: entry.querySelector('.compDate')?.value || '',
       water: entry.querySelector('.compWater')?.value || '',
@@ -14914,10 +14980,18 @@ function renderInspection(survey) {
         const allEntries = document.querySelectorAll('#comparablesEntries > div');
         if (allEntries.length > 0) {
           const entry = allEntries[allEntries.length - 1];
-          const sourceSelect = entry.querySelector('.compSource');
-          if (sourceSelect) sourceSelect.value = comp.source || '';
+          // v2430: .compSource is now a free-form text input (not a select)
+          const sourceInput = entry.querySelector('.compSource');
+          if (sourceInput) sourceInput.value = comp.source || '';
           if (entry.querySelector('.compVessel')) entry.querySelector('.compVessel').value = comp.vessel || '';
-          if (entry.querySelector('.compPrice')) entry.querySelector('.compPrice').value = comp.price || '';
+          const _priceEl = entry.querySelector('.compPrice');
+          if (_priceEl) {
+            _priceEl.value = comp.price || '';
+            if (_priceEl.value) {
+              try { _priceEl.dispatchEvent(new Event('blur')); } catch (e) { /* non-fatal */ }
+            }
+          }
+          if (entry.querySelector('.compCurrency')) entry.querySelector('.compCurrency').value = comp.currency || '';  // v2430
           if (entry.querySelector('.compLocation')) entry.querySelector('.compLocation').value = comp.location || '';
           if (entry.querySelector('.compDate')) entry.querySelector('.compDate').value = comp.date || '';
           const waterSelect = entry.querySelector('.compWater');
@@ -24240,12 +24314,19 @@ ${(() => {
         + '</table>';
 
       // Comparables table: only if at least one comparable has a vessel name.
+      // v2430: Price column header no longer hardcodes "(USD)" — currency is
+      // now per-row and is rendered as a "CAD 125,000.00" style prefix on
+      // the cell. Surveyor picks currency per comparable via the new
+      // Cur selector in Edit Intro.
       if (!survey.skipComparables && survey.comparables && survey.comparables.length > 0 && survey.comparables.some(c => c.vessel)) {
         const _compRows = survey.comparables.map(function(c) {
+          const _priceCell = (c.price || '')
+            ? (c.currency ? esc(c.currency) + ' ' : '') + esc(c.price)
+            : '';
           return '<tr>'
             + '<td>' + esc(c.source) + '</td>'
             + '<td>' + esc(c.vessel) + '</td>'
-            + '<td>' + esc(c.price) + '</td>'
+            + '<td>' + _priceCell + '</td>'
             + '<td>' + esc(c.location || '') + '</td>'
             + '<td>' + esc(c.date || '') + '</td>'
             + '<td>' + esc(c.notes) + (c.water ? ' (' + esc(c.water) + ')' : '') + '</td>'
@@ -24253,7 +24334,7 @@ ${(() => {
         }).join('');
         _out += '<table style="margin-top:12px;">'
           + '<tr><td colspan="6" style="background:#e8edf2;font-weight:bold;">Comparable Vessels / Market Research</td></tr>'
-          + '<tr><th>Source</th><th>Vessel</th><th>Price (USD)</th><th>Location</th><th>Date</th><th>Notes</th></tr>'
+          + '<tr><th>Source</th><th>Vessel</th><th>Price</th><th>Location</th><th>Date</th><th>Notes</th></tr>'
           + _compRows
           + '</table>';
       }
@@ -26911,7 +26992,7 @@ const FirebaseSync = (() => {
   //     freely. Edits push back to Firebase + Drive.
   //   - Handoff is intentional: user chooses when to pull, never a race.
   //
-  // This will be formalised as v2430 "Device Roles" with a proper UI
+  // This will be formalised as a future "Device Roles" version with a proper UI
   // (field-mode vs report-mode home-screen selector, explicit pull/push
   // buttons, mode-specific icons). v2426 is the minimum-surface-area
   // interim that removes the hazard without touching the UI layer.
