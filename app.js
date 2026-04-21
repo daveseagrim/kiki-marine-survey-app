@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2440';
+const APP_VERSION = 'v2441';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -24492,7 +24492,14 @@ ${(() => {
         + '<p><strong>Appraisal Methodology:</strong></p>'
         + '<p class="scope-text">' + _methodology + '</p>'
         + (esc(survey.vesselName) ? '<p class="scope-text"><strong>Summary:</strong> In accordance with the request for a Marine Survey of the \u201c' + esc(survey.vesselName) + '\u201d, for the purpose of evaluating its present condition and estimating its Fair Market Value' + (_hasRepl ? ' and Replacement Cost' : '') + ', I herewith submit my conclusion based on the preceding report.' + (survey.surveyDate ? ' The subject vessel was personally inspected by the undersigned on <strong>' + survey.surveyDate + '</strong>.' : '') + ' Subject to correction of deficiencies listed in sections A and B, the vessel is considered to be reasonably suitable for its intended use. Other deficiencies listed should be attended to in keeping with good maintenance practices or as upgrades.</p>' : '')
-        + (_overallCondRaw ? '<p><strong>Condition Adjustment:</strong> The vessel\u2019s overall condition rating of \u201c' + _overallCondRaw + '\u201d has been factored into the final valuation range using the BUC Marine Grading System.</p>' : '');
+        // v2441: Condition Adjustment paragraph additionally gated on
+        // _hasFMV.  The sentence says the condition rating was "factored
+        // into the final valuation range" — meaningless when there is no
+        // valuation range entered (surveyor didn't include a BUC-determined
+        // price).  Overall rating callout earlier in the section still
+        // renders on _overallCondRaw alone because it only states the
+        // rating, not its interaction with a valuation range.
+        + (_overallCondRaw && _hasFMV ? '<p><strong>Condition Adjustment:</strong> The vessel\u2019s overall condition rating of \u201c' + _overallCondRaw + '\u201d has been factored into the final valuation range using the BUC Marine Grading System.</p>' : '');
 
         // v2439: removed VALUATION WORKSHEET subsection entirely — header,
         // "The following data sources and comparables were used..." intro

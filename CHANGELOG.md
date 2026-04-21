@@ -12,6 +12,25 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2441 — 2026-04-21
+### Fixed — Condition Adjustment paragraph now hides when no BUC-determined price is entered
+
+The valuation section's `Condition Adjustment` paragraph read:
+
+> Condition Adjustment: The vessel's overall condition rating of "Average" has been factored into the final valuation range using the BUC Marine Grading System.
+
+This is a claim about an interaction between the overall condition rating and a valuation range. When no BUC-determined price is entered — i.e., the Fair Market Value low/high fields are blank — there is no valuation range to factor into. The sentence in that case implies a methodology that wasn't performed and is misleading.
+
+**Fix.** The paragraph was previously guarded only on `_overallCondRaw` (the surveyor picked an overall BUC grade). Now additionally guarded on `_hasFMV` (the surveyor also entered a valuation range). When either is missing, the paragraph is suppressed.
+
+**Preserved behaviour.** The earlier `Overall Vessel Rating is: "…"` callout box continues to render on `_overallCondRaw` alone — it only states the rating and makes no claim about applying it to a valuation range, so it's correct with or without FMV data entered. Only the `Condition Adjustment` prose is gated on both.
+
+**Single-line change.** One boolean added to the guard in `generateReport`'s valuation block. No other behaviour touched.
+
+**Files changed.** `app.js` (L24495 guard; APP_VERSION → v2441), `sw.js` (CACHE_NAME → `kiki-marine-v2441`), `index.html` (meta + 7 cache-busters → v2441), this file.
+
+---
+
 ## v2440 — 2026-04-21
 ### Fixed — Black water tank C-rated chip cleanup: dropped redundant ASTM chip, moved "not visible" chip adjacent to "was mounted"
 
