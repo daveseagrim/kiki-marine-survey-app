@@ -876,6 +876,13 @@
       "severity": 1
     },
     {
+      "section": "Bow thruster",
+      "rating": "Not tested",
+      "text": "The bow thruster was not tested because the vessel was out of the water.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
       "section": "Transom",
       "rating": "C - with door",
       "text": "The transom appeared sound and well-maintained.",

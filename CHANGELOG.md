@@ -12,6 +12,29 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2445 — 2026-04-21
+### Added — Hull → Bow thruster: "Not tested — vessel out of water" chip
+
+Dave asked for the "boat was out of the water" reason to be available as an NT option on the bow thruster.
+
+**Audit.** The Hull section's `Bow thruster` entries (Hull[120–124]) only covered A/B/C ratings — there was no NT chip, so a surveyor inspecting a vessel on the hard had nothing to tap. Meanwhile, `Gauges and Instrumentation[31]` and `Flybridge gauges and instrument[31]` already carried the exact NT chip Dave wanted, so the phrasing is already established in the library.
+
+**After — new chip appended after Hull[124] in the Bow thruster section.**
+
+| Section | Rating | Phase | Text |
+|---|---|---|---|
+| Bow thruster | Not tested | observed | The bow thruster was not tested because the vessel was out of the water. |
+
+**Why this phrasing.** It mirrors the existing NT wording in the Gauges sections verbatim so a boat surveyed on land produces consistent copy no matter which panel the surveyor inserts from. "Was out of the water" matches the report's other rating-explanation format (`v2419` generator on-the-hard wording, `v2387` drive coupling NT option at C rating, etc.).
+
+**Placement.** The new chip sits between the last C-rated Bow thruster chip (Hull[124] `Corrosion was not concerning.`) and the first Transom chip, so section grouping in the text library panel stays intact.
+
+**Out of scope.** The Gauges/Flybridge versions of this chip already exist and remain untouched. A similar NT chip probably belongs on the generator section too — Dave raised that separately as a later queued item (v2467), not rolled in here per the one-feature-per-version rule.
+
+**Files changed.** `text_library.json` (new NT chip inserted in Hull Bow thruster section), `app.js` (APP_VERSION → v2445), `sw.js` (CACHE_NAME → `kiki-marine-v2445`), `index.html` (meta + 7 cache-busters → v2445), this file.
+
+---
+
 ## v2444 — 2026-04-21
 ### Changed — Trim tabs C-rated chip: removed "during limited trial run" clause
 
