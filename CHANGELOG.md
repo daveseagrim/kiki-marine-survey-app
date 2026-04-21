@@ -12,6 +12,33 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2451 — 2026-04-21
+### Changed — Engine locker lid C chip: rewrite around hinges + open/close
+
+Dave's ask: *"The engine locker lid was undamaged. This should be one sentence. Add to this that it was firmly affixed to his hinges. And another sentence that it opened and closed easily."*
+
+**Before — Engine locker lid C/observed chip (severity 1).**
+
+> The engine locker lid appeared undamaged and easily removed.
+
+**After.**
+
+> The engine locker lid was undamaged and firmly affixed to its hinges. It opened and closed easily.
+
+**Structure.** Per Dave's instructions the chip now contains two sentences in one snippet: sentence one covers damage state + hinge attachment (one sentence as Dave specified), sentence two covers functional operation. Surveyors pick the whole block in a single tap; nothing splits across chips. If a specific boat needs only one half — e.g. lid hinged but damaged — the B/observed "Localized wear or cosmetic damage" chip still covers that case without this C chip being invoked.
+
+**Why "its" instead of "his".** Dave's dictation came through as "his hinges" — voice-to-text slip. Canadian English grammar uses the neuter possessive "its" for inanimate objects. Documented here so future-me doesn't "correct" it back.
+
+**What stayed.** The other two C/observed chips in the same section are untouched: the hydraulic/electric lid control (`{specify:hydraulic|electric}` token) covers powered lids, and the seal/gasket chip covers the weather-tight fit. Those describe different inspection points from the lid-itself chip, so consolidating them would lose information.
+
+**Pattern.** Same direction as `v2446` grab rails, `v2448` deck hatches, `v2449` windshield, `v2450` cockpit drains: swap "appeared + adverbial value judgment" for concrete observable state ("was undamaged", "firmly affixed", "opened and closed easily"). "Easily" survives because it's describing motion quality, not making a pass/fail judgment.
+
+**Scope.** One chip text replaced. C/observed chip count in Engine locker lid section unchanged (still 3). B/observed chip at line 9807 ("appeared sound and undamaged") not touched — Dave's ask was specifically about the lid-is-fine scenario, which maps to C not B.
+
+**Files changed.** `text_library.json` (one chip text rewritten), `app.js` (APP_VERSION → v2451), `sw.js` (CACHE_NAME → `kiki-marine-v2451`), `index.html` (meta + 7 cache-busters → v2451), this file.
+
+---
+
 ## v2450 — 2026-04-21
 ### Changed — Cockpit drains C chip: strip "and drained the cockpit properly"
 
