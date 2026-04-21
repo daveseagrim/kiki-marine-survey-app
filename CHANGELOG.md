@@ -12,6 +12,47 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2427 — 2026-04-20
+### Added — Safe sync, half 1: push-side conflict-copy + open-survey richness banner (P0 follow-up to v2426)
+
+v2426 removed automatic pulls. v2427 closes the remaining hole: the unchecked `pushSurvey` path that let a thin local save silently overwrite a richer cloud copy. This was the failure mode that cost 6% of Legacy II (81% → 75%) earlier today.
+
+**Standard pattern chosen.** After a back-and-forth discussion about how other apps handle this, Dave chose the Dropbox / iCloud Drive model: on conflict, **preserve both copies, never overwrite**. A second screen (v2428) provides the reconciliation UI. This is a well-known pattern — it's what Dropbox calls "conflicted copy" and what iCloud calls "version conflict." We're not inventing.
+
+**What ships in v2427 (half 1 — the safety layer).**
+
+- **Push-side conflict-copy fallback (`pushSurvey`, app.js:25939+).** Every `pushSurvey` call now begins with a `checkCloudRichness()` probe. If the cloud copy of the same survey is richer than local (same threshold formula the old pull-side guard used: text chars +20%+50ch, strict photo count, strict rated-items count), the push does NOT touch `surveys/{id}`. Instead it writes to `survey_conflicts/{id}__{device}__{timestamp}`. Both the cloud main doc and the local attempt are preserved. Sync status shows "Conflict saved — reconcile in Settings"; a toast tells Dave what happened.
+
+- **Separate Firestore collection for conflicts (`survey_conflicts`).** Conflict copies live outside the `surveys` collection so `initialSync()` doesn't pull them down as phantom entries on the home screen. The v2428 reconciliation UI will read from this new collection.
+
+- **Rate-limit on conflict-copy writes (60 s per survey).** A session where the user keeps editing while cloud stays richer would otherwise create a conflict copy on every save. First save in a 60 s window writes the copy; subsequent saves within that window skip. Local IDB is always updated regardless.
+
+- **Open-survey richness banner (`openSurvey`, app.js:22087+).** When a survey opens, an async cloud probe fires 50 ms after `renderInspection`. If cloud is richer, a yellow banner slides in at the top of the inspection view with the numeric breakdown (Cloud: X chars · Y photos · Z rated  vs  This device: ...) and two buttons:
+  - **Pull cloud down** — confirms, then calls `FirebaseSync.pullSurvey(id)` to overwrite local with cloud (survey + photos). On success, re-opens the survey with fresh data.
+  - **Keep local** — dismisses the banner for this survey for the session (a reload clears the dismiss). No push is triggered; Dave keeps editing local.
+
+- **New helpers on `FirebaseSync`.**
+  - `checkCloudRichness(survey)` — probes cloud, returns `{cloudRicher, localScore, remoteScore, cloudSurvey}` or `{cloudRicher:false, error}` on failure.
+  - `pullSurvey(id)` — pulls one survey + photos from Firestore. Scoped to a single survey, unlike `pullNow()` which iterates all.
+  - `_getDeviceLabel()` — cheap userAgent-based device label for conflict-copy paths (iPhone / iPad / Mac / Windows / Android).
+
+- **No change to the rest of v2426.** Bidirectional auto-sync stays disabled. `pullNow()` still exists as the console-level manual pull. The richness guard inside the dead `startListening` path is untouched.
+
+**What did NOT change.**
+
+- Normal `pushSurvey` path (when cloud is not richer) is identical to v2426. Writes to `surveys/{id}` exactly as before.
+- Photo sync is unchanged. Conflict-copy docs in `survey_conflicts` do NOT trigger photo pushes — photos stay local until Dave promotes the conflict (v2428). The `surveys/{id}` main doc's photo references are unchanged, so photos tied to the cloud main are still reachable via `pullPhotosForSurvey`.
+- iPhone is still on v2426 until Dave force-refreshes it. Once iPhone picks up v2427, it gets the same guarantees.
+
+**What's next (v2428 — half 2).**
+
+- Settings > Sync Conflicts screen listing everything in `survey_conflicts`. Per-conflict buttons: Promote to main (overwrites `surveys/{id}` + pushes conflict photos, then deletes the conflict doc), Pull to this device (overwrites local IDB with conflict data), Discard (deletes the conflict doc).
+- Home-tile badges showing per-survey divergence at a glance.
+
+**Files changed.** `app.js` (APP_VERSION, `FirebaseSync` push/helpers, `openSurvey` hook, new `checkCloudRichnessBanner`), `sw.js` (CACHE_NAME), `index.html` (meta + 7 cache-busters), this file.
+
+---
+
 ## v2426 — 2026-04-20
 ### Changed — Bidirectional sync disabled; device handoff is now manual-only (P0 architecture change, follow-up to Legacy II recovery)
 

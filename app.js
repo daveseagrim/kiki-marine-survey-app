@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2426';
+const APP_VERSION = 'v2427';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -22100,6 +22100,95 @@ function openSurvey(surveyId) {
       }
     }
     renderInspection(survey);
+    // v2427: async cloud-richness check. Fires AFTER render so the survey
+    // opens instantly regardless of network state. If cloud copy is richer
+    // than local, a yellow banner is injected at the top with numeric
+    // breakdown + [Pull cloud] / [Keep local] buttons. No auto-action.
+    setTimeout(() => { try { checkCloudRichnessBanner(survey); } catch (_) {} }, 50);
+  });
+}
+
+// v2427: session-scoped dismiss memory. If Dave clicks "Keep local" on the
+// cloud-is-richer banner for a survey, we don't nag him again for that
+// survey this session. A reload clears it. A manual pullNow / pullSurvey
+// ALSO clears it (different function).
+const _cloudBannerDismissed = {};
+
+async function checkCloudRichnessBanner(survey) {
+  if (!survey || !survey.id) return;
+  // FirebaseSync is a top-level const (classic script) — does NOT attach to window.
+  // Guard with typeof and reference it bare, same pattern used elsewhere in app.js.
+  if (typeof FirebaseSync === 'undefined' || typeof FirebaseSync.checkCloudRichness !== 'function') return;
+  if (_cloudBannerDismissed[survey.id]) return;
+
+  let check;
+  try {
+    check = await FirebaseSync.checkCloudRichness(survey);
+  } catch (err) {
+    console.warn('[v2427] cloud richness check threw:', err);
+    return;
+  }
+  if (!check || !check.cloudRicher) return;
+  if (currentSurveyId !== survey.id) return; // Dave navigated away already
+
+  // Remove any stale banner so successive opens don't stack
+  const stale = document.getElementById('cloudRichnessBanner');
+  if (stale) stale.remove();
+
+  const ls = check.localScore, rs = check.remoteScore;
+  const banner = document.createElement('div');
+  banner.id = 'cloudRichnessBanner';
+  banner.style.cssText = [
+    'background:#fef3c7','border-bottom:2px solid #f59e0b','color:#78350f',
+    'padding:12px 16px','font-size:14px','line-height:1.45','position:sticky',
+    'top:0','z-index:90','box-shadow:0 2px 4px rgba(0,0,0,0.08)'
+  ].join(';');
+  banner.innerHTML = `
+    <div style="font-weight:700;margin-bottom:6px;">⚠ Cloud copy of this survey is more complete</div>
+    <div style="font-size:13px;margin-bottom:10px;">
+      <strong>Cloud:</strong> ${rs.textChars.toLocaleString()} chars &middot; ${rs.photoCount} photos &middot; ${rs.ratedItems} rated items<br>
+      <strong>This device:</strong> ${ls.textChars.toLocaleString()} chars &middot; ${ls.photoCount} photos &middot; ${ls.ratedItems} rated items
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button id="cloudRichPullBtn" style="background:#1565c0;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:14px;font-weight:600;cursor:pointer;">Pull cloud down (overwrites local)</button>
+      <button id="cloudRichKeepBtn" style="background:#fff;color:#374151;border:1px solid #d1d5db;border-radius:6px;padding:8px 14px;font-size:14px;font-weight:600;cursor:pointer;">Keep local</button>
+    </div>
+  `;
+
+  // Inject at top of #app — above the inspection content
+  const appEl = document.getElementById('app');
+  if (appEl && appEl.firstChild) {
+    appEl.insertBefore(banner, appEl.firstChild);
+  } else if (appEl) {
+    appEl.appendChild(banner);
+  } else {
+    document.body.insertBefore(banner, document.body.firstChild);
+  }
+
+  document.getElementById('cloudRichKeepBtn').addEventListener('click', () => {
+    _cloudBannerDismissed[survey.id] = true;
+    banner.remove();
+  });
+
+  document.getElementById('cloudRichPullBtn').addEventListener('click', async () => {
+    if (!window.confirm(
+      'Pull the cloud copy down and overwrite this device?\n\n' +
+      `Cloud: ${rs.textChars.toLocaleString()} chars, ${rs.photoCount} photos, ${rs.ratedItems} rated items\n` +
+      `Local: ${ls.textChars.toLocaleString()} chars, ${ls.photoCount} photos, ${ls.ratedItems} rated items\n\n` +
+      'Local changes for this survey will be replaced. Photos will re-download from cloud.'
+    )) return;
+    banner.querySelector('div').textContent = 'Pulling from cloud…';
+    banner.querySelectorAll('button').forEach(b => b.disabled = true);
+    const result = await FirebaseSync.pullSurvey(survey.id);
+    if (result && result.ok) {
+      _cloudBannerDismissed[survey.id] = true;
+      banner.remove();
+      // Re-open the survey so the freshly-pulled data renders
+      openSurvey(survey.id);
+      if (typeof showToast === 'function') showToast('Survey pulled from cloud', 3000);
+    } else {
+      banner.innerHTML = `<div style="color:#991b1b;font-weight:700;">Pull failed: ${(result && result.error) || 'unknown error'}</div>`;
+    }
   });
 }
 
@@ -25914,6 +26003,7 @@ const FirebaseSync = (() => {
   let _unsubscribeSurveys = null;
   let _suppressLocalWrite = false;  // Prevent echo loops
   let _lastLocalPushTime = {};      // Track when we last pushed each survey to avoid echo
+  let _lastConflictCopyTime = {};   // v2427: sid -> epoch ms — rate-limit conflict-copy writes to 60s per survey
   let _syncStatus = 'disconnected'; // disconnected | syncing | synced | error
   let _lastSyncTime = null;
   let _periodicTimer = null;          // v2259: 5-minute polling interval
@@ -25935,17 +26025,153 @@ const FirebaseSync = (() => {
 
   // ── Survey Sync (Firestore) ────────────────────────────────────────
 
+  // v2427: cheap device label for conflict-copy paths. Not a UUID — Dave
+  // only ever has two devices, so the userAgent category is enough to
+  // disambiguate. If he ever adds a third of the same class we can upgrade
+  // this to a persistent random suffix.
+  function _getDeviceLabel() {
+    const ua = (typeof navigator !== 'undefined' && navigator.userAgent) || '';
+    if (/iPhone/.test(ua))    return 'iPhone';
+    if (/iPad/.test(ua))      return 'iPad';
+    if (/Macintosh/.test(ua)) return 'Mac';
+    if (/Windows/.test(ua))   return 'Windows';
+    if (/Android/.test(ua))   return 'Android';
+    return 'unknown';
+  }
+
+  // v2427: compare local survey against current cloud copy. Returns the
+  // numbers callers need to decide what to do, plus a `cloudRicher` flag
+  // using the same threshold formula the legacy pull-side guard used:
+  //   • text chars: cloud must exceed local by 20% + 50 chars (noise floor)
+  //   • photo count: strict greater
+  //   • rated items: strict greater
+  // Any one of those is enough. A network/permission failure returns
+  // { cloudRicher: false, error } — caller can treat that as "can't decide,
+  // proceed cautiously" and we fall through to the normal push path.
+  async function checkCloudRichness(survey) {
+    if (!_syncEnabled || !window.fsDb || !survey || !survey.id) {
+      return { cloudRicher: false, error: 'unavailable' };
+    }
+    try {
+      const remoteDoc = await window.fsDb.collection('surveys').doc(String(survey.id)).get();
+      if (!remoteDoc.exists) return { cloudRicher: false, cloudExists: false };
+      const remoteSurvey = remoteDoc.data();
+      remoteSurvey.id = remoteDoc.id;
+      const localScore  = _scoreSurveyContent(survey);
+      const remoteScore = _scoreSurveyContent(remoteSurvey);
+      const cloudRicher =
+        remoteScore.textChars  > localScore.textChars * 1.2 + 50 ||
+        remoteScore.photoCount > localScore.photoCount ||
+        remoteScore.ratedItems > localScore.ratedItems;
+      return { cloudRicher, cloudExists: true, localScore, remoteScore, cloudSurvey: remoteSurvey };
+    } catch (err) {
+      console.warn('[Sync] v2427 checkCloudRichness failed:', err);
+      return { cloudRicher: false, error: err && err.message ? err.message : String(err) };
+    }
+  }
+
+  // v2427: pull a single survey from Firestore and save locally, including
+  // its photos. Used by the survey-open "Pull cloud down" banner action.
+  // This bypasses initialSync() so we don't touch any other surveys — per
+  // Rule 2 (no side effects on surveys Dave isn't currently looking at).
+  async function pullSurvey(surveyId) {
+    if (!window.fsDb) return { error: 'firebase-unavailable' };
+    try {
+      updateSyncStatusUI('syncing', 'Pulling single survey...');
+      const remoteDoc = await window.fsDb.collection('surveys').doc(String(surveyId)).get();
+      if (!remoteDoc.exists) {
+        updateSyncStatusUI('error', 'Cloud copy not found');
+        return { error: 'not-found' };
+      }
+      const remoteSurvey = remoteDoc.data();
+      remoteSurvey.id = remoteDoc.id;
+      _suppressLocalWrite = true;
+      try {
+        await saveSurvey(remoteSurvey);
+      } finally {
+        _suppressLocalWrite = false;
+      }
+      if (!window._cameraActive && !window._backupActive) {
+        await pullPhotosForSurvey(remoteSurvey);
+      }
+      updateSyncStatusUI('synced', 'Pulled ' + new Date().toLocaleTimeString());
+      return { ok: true, survey: remoteSurvey };
+    } catch (err) {
+      console.error('[Sync] v2427 pullSurvey failed:', err);
+      updateSyncStatusUI('error', (err && err.message) || 'Pull failed');
+      return { error: (err && err.message) || String(err) };
+    }
+  }
+
   // Upload a single survey to Firestore (without photos — photos go to Storage)
+  //
+  // v2427 — Push-side conflict-copy fallback. Before overwriting the main
+  // cloud doc, we compare richness. If cloud is richer than local, we do
+  // NOT touch the main doc. Instead the push is diverted to
+  //   survey_conflicts/{id}__{device}__{timestamp}
+  // so BOTH the cloud main copy AND the local attempt are preserved. Dave
+  // reconciles later via Settings > Sync Conflicts (shipping in v2428).
+  //
+  // This closes the failure mode that caused the 2026-04-20 Legacy II
+  // regression: a device with thin local state silently overwrote a richer
+  // cloud copy through the unchecked pushSurvey path.
   async function pushSurvey(survey) {
     if (!_syncEnabled || !window.fsDb) return;
+    const sid = String(survey.id);
     try {
-      // Clone and strip photo dataUrls from the survey object (too large for Firestore 1MB limit)
+      const check = await checkCloudRichness(survey);
       const doc = JSON.parse(JSON.stringify(survey));
       doc.lastModified = new Date().toISOString();
-      // Remove any inline base64 that might have leaked into survey data
       delete doc._rev;
-      await window.fsDb.collection('surveys').doc(survey.id).set(doc);
-      _lastLocalPushTime[survey.id] = Date.now();
+
+      if (check.cloudRicher) {
+        // Conflict copies live in a SEPARATE Firestore collection
+        // (survey_conflicts) so they don't pollute `initialSync()`. Each
+        // doc has a pointer back to the original surveyId and scoring
+        // snapshots on both sides so the v2428 reconciliation UI can
+        // render the numbers without re-computing.
+        //
+        // Rate-limit: if we already wrote a conflict copy for this survey
+        // in the last 60 seconds, skip this one. Local is already preserved
+        // in IDB; every subsequent save during a session where cloud is
+        // still richer would otherwise spam Firestore with near-identical
+        // copies and spam Dave with toast notifications.
+        const now = Date.now();
+        const lastConflict = _lastConflictCopyTime[sid] || 0;
+        if (now - lastConflict < 60000) {
+          console.log(`[Sync] v2427 Conflict already saved recently for ${sid}; skipping duplicate write.`);
+          updateSyncStatusUI('error', 'Conflict saved — reconcile in Settings');
+          return;
+        }
+        const device = _getDeviceLabel();
+        const ts = now;
+        const conflictId = `${sid}__${device}__${ts}`;
+        doc._conflictSourceId    = sid;
+        doc._conflictDevice      = device;
+        doc._conflictTimestamp   = ts;
+        doc._conflictLocalScore  = check.localScore;
+        doc._conflictRemoteScore = check.remoteScore;
+        doc._conflictVesselName  = survey.vesselName || '';
+        await window.fsDb.collection('survey_conflicts').doc(conflictId).set(doc);
+        _lastConflictCopyTime[sid] = ts;
+        console.warn(
+          `[Sync] v2427 CONFLICT: cloud copy of "${survey.vesselName || sid}" is richer. ` +
+          `Saved local as survey_conflicts/${conflictId}. ` +
+          `(local: ${check.localScore.textChars}ch / ${check.localScore.photoCount}p / ${check.localScore.ratedItems}r  vs  ` +
+          `cloud: ${check.remoteScore.textChars}ch / ${check.remoteScore.photoCount}p / ${check.remoteScore.ratedItems}r). ` +
+          `Reconcile in Settings > Sync Conflicts (v2428).`
+        );
+        updateSyncStatusUI('error', 'Conflict saved — reconcile in Settings');
+        if (typeof showToast === 'function') {
+          showToast(`⚠ Cloud copy of ${survey.vesselName || 'this survey'} is richer. Your local changes saved as a conflict copy.`, 6000);
+        }
+        _lastLocalPushTime[sid] = Date.now();
+        _lastSyncTime = Date.now();
+        return;
+      }
+
+      await window.fsDb.collection('surveys').doc(sid).set(doc);
+      _lastLocalPushTime[sid] = Date.now();
       updateSyncStatusUI('synced', new Date().toLocaleTimeString());
       _lastSyncTime = Date.now();
     } catch (err) {
@@ -26566,6 +26792,11 @@ const FirebaseSync = (() => {
     // but it has no callers left inside or outside the module.
     // Explicit manual pull is exposed as pullNow() below.
     pullNow,
+    // v2427: single-survey helpers so openSurvey can ask "is cloud richer?"
+    // and the richness banner can pull just one survey without triggering
+    // the ALL-surveys initialSync path.
+    checkCloudRichness,
+    pullSurvey,
     updateSyncStatusUI,
     refreshUI
   };
