@@ -85,10 +85,6 @@
           {
             "type": "question",
             "label": "Transport Canada licensing type and number"
-          },
-          {
-            "type": "question",
-            "label": "Tax status for navigation in Canada (duties and taxes paid)"
           }
         ]
       },

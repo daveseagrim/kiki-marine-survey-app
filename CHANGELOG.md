@@ -12,6 +12,41 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2453 — 2026-04-21
+### Removed — Tax Status + NMMA/CE/TC Compliance Plate fields
+
+Dave's ask: *"Remove tax status and compliance plate details from all surveys."*
+
+**What came out.**
+
+| Surface | Before | After |
+| --- | --- | --- |
+| Intro form (`app.js` ~10026–10044) | Two `form-group` blocks: "Tax Status (Duties and Taxes Paid)" text input + "NMMA/CE/TC Compliance Plate" text input with 📷 camera button | Both blocks removed; placeholder comment left in place |
+| Vessel Documentation Data report section (`app.js` ~23695) | Tax Status row + Compliance Plate row (with optional photo) | Both rows removed |
+| Preflight check (`app.js` ~15884) | Warning: "Missing: Compliance plate photo" | Removed |
+| `survey_template.json` / `insurance_survey_template.json` | "Tax status for navigation in Canada (duties and taxes paid)" question item under "Vessel documentation and regulatory compliance" | Removed (section kept with TC licensing item) |
+
+**Save / load plumbing.** Also stripped from five write-sites in `app.js` so the fields are no longer populated on new save paths:
+
+1. `createNewSurvey` seed (`~8899`) — `taxStatus` + `compliancePlate` no longer copied from `formData`
+2. `saveSurveyDetails` updates object (`~11235`) — no longer written to the guarded update batch
+3. `saveEditFormSilently` migration field list (`~11313`) — removed from the array consumed by the `if (el) survey[f] = el.value` loop
+4. New-survey formData builder (`~13715`) — no longer read from the DOM on create
+5. Form → survey field loader (`~10710`) — no longer populated into the form when an existing survey is opened
+
+**What we deliberately left alone.**
+
+- `survey.taxStatus` and `survey.compliancePlate` values already stored in IndexedDB on existing surveys are NOT deleted. The code paths that would overwrite them no longer run, so they persist untouched as orphaned fields. Safer than a destructive cleanup: if Dave ever wants this data back, it's still in the vessel's save record.
+- `survey.compliancePhoto` blob storage — not deleted. If Dave ever re-enables compliance plate capture, the existing `captureDocPhoto` infrastructure and photo mapping (`'compliancePhoto': 'Compliance Plate'` at `~20634`, `~15918`) are still wired up. Only the UI button is gone.
+- `compliancePhotoDataUrl` load in the report path (`~23107`) — deleted since nothing consumes it now. One less async photo decompress per report render on existing surveys.
+- The "Vessel documentation and regulatory compliance" template section itself — kept, with its one remaining question item (TC licensing). Dave only asked for tax status to be removed.
+
+**Why this path over "hard delete all the data".** Dave's triple-check rule and the stability-first roadmap both point away from destructive migrations. If he re-adds the field in v24xx or wants to audit old surveys that DID have tax status filled in, the data is still accessible programmatically. Silent UI removal costs nothing vs. a one-way migration.
+
+**Files changed.** `app.js` (7 edits across UI, save, load, report, preflight), `survey_template.json` (tax-status question removed), `insurance_survey_template.json` (tax-status question removed), `sw.js` (CACHE_NAME → v2453), `index.html` (meta + 7 cache-busters → v2453), this file.
+
+---
+
 ## v2452 — 2026-04-21
 ### Changed — Propane N/A chips: present → past tense
 

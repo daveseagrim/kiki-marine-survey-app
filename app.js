@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2452';
+const APP_VERSION = 'v2453';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -8896,8 +8896,7 @@ function createNewSurvey(formData) {
     tcLicense: formData.tcLicense,
     tcLicenseExpiry: formData.tcLicenseExpiry,
     hinNumber: formData.hinNumber,
-    taxStatus: formData.taxStatus,
-    compliancePlate: formData.compliancePlate,
+    // v2453: taxStatus + compliancePlate removed from UI; no longer seeded here.
 
     // Valuation section
     valuationLow: formData.valuationLow,
@@ -10023,25 +10022,9 @@ function renderNewSurveyForm() {
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Tax Status (Duties and Taxes Paid)</label>
-        <input type="text" id="taxStatus" placeholder="Yes/No">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">NMMA/CE/TC Compliance Plate</label>
-        <input type="text" id="compliancePlate" placeholder="Details or photo">
-        <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
-          <div data-photo-field="compliancePhoto">
-            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:6px 12px;">
-              📷 Compliance Plate
-              <input type="file" accept="image/*" capture="environment" style="display:none;"
-                     onchange="captureDocPhoto('compliancePhoto', 'Compliance Plate', event)" />
-            </label>
-          </div>
-          <span id="compliancePhotoStatus" style="font-size:12px;color:#6b7280;"></span>
-        </div>
-      </div>
+      <!-- v2453: Tax Status + NMMA/CE/TC Compliance Plate form-groups removed per Dave. -->
+      <!-- Surveyors no longer fill these fields; report section suppressed accordingly. -->
+      <!-- Legacy survey.taxStatus / survey.compliancePlate values in IndexedDB are preserved. -->
 
       <h2 class="form-heading" data-section="valuation">Valuation</h2>
 
@@ -10707,8 +10690,7 @@ function editSurveyDetails(surveyId) {
         tcLicenseType: survey.tcLicenseType,
         tcLicense: survey.tcLicense,
         tcLicenseExpiry: survey.tcLicenseExpiry,
-        taxStatus: survey.taxStatus,
-        compliancePlate: survey.compliancePlate,
+        // v2453: taxStatus + compliancePlate no longer populated — UI removed.
         valuationLow: survey.valuationLow,
         valuationHigh: survey.valuationHigh,
         exchangeRate: survey.exchangeRate,
@@ -11232,8 +11214,7 @@ function saveSurveyDetails(surveyId) {
       tcLicenseType: document.getElementById('tcLicenseType')?.value || '',
       tcLicense: document.getElementById('tcLicense')?.value || '',
       tcLicenseExpiry: document.getElementById('tcLicenseExpiry')?.value || '',
-      taxStatus: document.getElementById('taxStatus')?.value || '',
-      compliancePlate: document.getElementById('compliancePlate')?.value || '',
+      // v2453: taxStatus + compliancePlate inputs removed — no longer written to the updates object.
       valuationLow: document.getElementById('valuationLow')?.value || '',
       valuationHigh: document.getElementById('valuationHigh')?.value || '',
       exchangeRate: parseFloat(document.getElementById('exchangeRate')?.value) || 1.35,
@@ -11310,7 +11291,8 @@ async function saveEditFormSilently() {
     'engineHours','engineHP','fuelType','transmissionMake','transmissionModel','transmissionSerial',
     'engine2Make','engine2Model','engine2Serial','engine2Hours','engine2HP','fuelType2',
     'transmission2Make','transmission2Model','transmission2Serial',
-    'vesselDescription','hinNumber','tcLicenseType','tcLicense','tcLicenseExpiry','taxStatus','compliancePlate',
+    'vesselDescription','hinNumber','tcLicenseType','tcLicense','tcLicenseExpiry',
+    // v2453: 'taxStatus','compliancePlate' removed from migration list with the UI.
     'valuationLow','valuationHigh','valuationRationale','concludedValue','replacementCost','overallCondition'
   ];
   for (const f of fields) {
@@ -13712,8 +13694,7 @@ function startNewSurvey() {
     tcLicense: document.getElementById('tcLicense')?.value || '',
     tcLicenseExpiry: document.getElementById('tcLicenseExpiry')?.value || '',
     hinNumber: document.getElementById('hinNumber')?.value || '',
-    taxStatus: document.getElementById('taxStatus')?.value || '',
-    compliancePlate: document.getElementById('compliancePlate')?.value || '',
+    // v2453: taxStatus + compliancePlate inputs removed — no longer collected for new surveys.
 
     valuationLow: document.getElementById('valuationLow')?.value || '',
     valuationHigh: document.getElementById('valuationHigh')?.value || '',
@@ -15881,7 +15862,7 @@ async function checkSurvey() {
 
   // ── 3. DOCUMENTATION PHOTOS ─────────────────────────────────────────────
   if (!survey.hinPhoto) add('critical', 'Documentation Photos', 'Missing: HIN plate photo', null, 'hinPhotoStatus');
-  if (!survey.compliancePhoto) add('warning', 'Documentation Photos', 'Missing: Compliance plate photo', null, 'compliancePhotoStatus');
+  // v2453: compliance-plate photo warning removed with the UI field.
   if (!survey.coverPhoto) add('warning', 'Documentation Photos', 'Missing: Cover photo', null, 'coverPhotoStatus');
   if (!survey.licencePhoto) add('info', 'Documentation Photos', 'Missing: TC licence photo', null, 'tcLicense');
 
@@ -23104,7 +23085,7 @@ async function generateReport() {
     return '';
   }
   let hinPhotoDataUrl = await loadAndCompress(survey.hinPhoto);
-  let compliancePhotoDataUrl = await loadAndCompress(survey.compliancePhoto);
+  // v2453: compliancePhotoDataUrl load removed — report row no longer rendered.
   let licencePhotoDataUrl = await loadAndCompress(survey.licencePhoto);
   let tcPaperLicencePhotoDataUrl = await loadAndCompress(survey.tcPaperLicencePhoto);
   let coverPhotoDataUrl = await loadAndCompress(survey.coverPhoto);
@@ -23692,8 +23673,7 @@ async function generateReport() {
   <table>
     ${!_excl('hinNumber') && (esc(survey.hinNumber) || hinPhotoDataUrl) ? `<tr><td style="width:40%;"><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || ''}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>` : ''}
     ${!_excl('tcLicense') && (survey.tcLicense || survey.tcLicenseType || licencePhotoDataUrl || tcPaperLicencePhotoDataUrl) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${survey.tcLicenseExpiry ? ' (expires ' + esc(survey.tcLicenseExpiry) + ')' : ''}${licencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Licence number on hull:</em><br><img src="' + licencePhotoDataUrl + '" alt="Licence Number on Hull" class="report-photo" style="margin-top:4px;" />' : ''}${tcPaperLicencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Transport Canada paper licence:</em><br><img src="' + tcPaperLicencePhotoDataUrl + '" alt="TC Paper Licence" class="report-photo" style="margin-top:4px;" />' : ''}</td></tr>` : ''}
-    ${!_excl('taxStatus') && survey.taxStatus ? `<tr><td><strong>Tax Status (Duties Paid)</strong></td><td>${esc(survey.taxStatus)}</td></tr>` : ''}
-    ${!_excl('compliancePlate') && (survey.compliancePlate || compliancePhotoDataUrl) ? `<tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || ''}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>` : ''}
+    <!-- v2453: Tax Status + NMMA/CE/TC Compliance Plate rows removed per Dave. -->
   </table>
 
 ${(() => {
