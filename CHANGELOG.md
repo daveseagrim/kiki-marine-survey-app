@@ -12,6 +12,25 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2442 — 2026-04-21
+### Fixed — Swim platform conductivity chip: removed the word "proper"
+
+Dave flagged the word "proper" as unwanted language in conductivity-related chips. An audit across every chip whose `section` field contains "conductivity" (case-insensitive) surfaced exactly one hit:
+
+| Location | Rating | Before | After |
+|---|---|---|---|
+| Hull[358] — "Swim platform and ladder - condition and conductivity readings" | C / observed | Conductivity readings on the swim platform ranged between [insert reading range] and were consistent with **proper** condition. | Conductivity readings on the swim platform ranged between [insert reading range] and were consistent with **serviceable** condition. |
+
+The four location-unified conductivity sections (`Hull and rudder(s) conductivity testing`, `Aft deck conductivity testing`, `Flybridge conductivity testing`, `Deck and coachroof/pilothouse conductivity testing`) were already clean — no "proper" usage in any of the 176 chips that v2429 unified. The single remaining instance was in the swim platform's condition-and-conductivity chip, which lives under the Hull category but in its own section string.
+
+**Word choice.** Replaced with "serviceable" rather than deleting the descriptor entirely, matching the language pattern Dave has preferred elsewhere (e.g. `v2415` hull-deck joint satisfactory → serviceable, and the in-flight preference that "serviceable condition" reads best on its own).
+
+**Out of scope for this version.** Other "proper" occurrences elsewhere in `text_library.json` (e.g. on deck hatches, the drain-section "drained the cockpit properly" phrasing, and generic action chips like "restore proper function") were flagged separately and are queued for their own versions — one feature per push.
+
+**Files changed.** `text_library.json` (1 chip text edited at L2513), `app.js` (APP_VERSION → v2442), `sw.js` (CACHE_NAME → `kiki-marine-v2442`), `index.html` (meta + 7 cache-busters → v2442), this file.
+
+---
+
 ## v2441 — 2026-04-21
 ### Fixed — Condition Adjustment paragraph now hides when no BUC-determined price is entered
 
