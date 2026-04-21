@@ -18886,6 +18886,13 @@
     {
       "section": "Hot water tank, plumbing and electrical",
       "rating": "Not tested/not verified",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The electrical and plumbing connections appeared serviceable."
+    },
+    {
+      "section": "Hot water tank, plumbing and electrical",
+      "rating": "Not tested/not verified",
       "phase": "action",
       "severity": 2,
       "text": "Recommend testing the hot water tank, plumbing and electrical when the vessel is commissioned for the season."

@@ -12,6 +12,111 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2457 — 2026-04-21
+### Added — `🗑️ Delete cloud copy` overflow button + hardened `removeSurvey` / `removeAllPhotosForSurvey` cascade (P0 correctness — closes the gap v2456 opened)
+
+**Why this release exists.** v2456 stripped the `deletePhoto` / `deleteSurvey` auto-delete hooks so ordinary local deletes would stop silently wiping Firebase. That fix was correct but incomplete on its own — with no manual replacement, any survey deleted locally would linger in Firebase indefinitely and could resurrect on a future pull. Dave flagged this in his audit: *"This commit is only correct if your manual push flow has a real way to remove deleted photos/surveys from Firebase later. Otherwise they will stay in the cloud and may come back on a later pull."* v2457 closes that gap with two pieces: a deliberate destructive UI affordance, and a hardened cascade underneath it so the affordance can't leave orphan Storage blobs.
+
+Dave's directive (verbatim for this release): *"A: strip the auto-delete hooks + add the 🗑️ Delete cloud copy button in the same release + make the confirm dialog very explicit: vessel name, rated items, photo count, last modified, 'local copy will remain untouched'. On success show a clear toast. On failure show a visible error, not just a console log. One caution: make sure `removeSurvey` really deletes the survey doc and its cloud photos, or the button will look complete but leave orphaned storage behind."* The strip landed in v2456; the button + cascade hardening land in v2457.
+
+---
+
+### Part 1 — New `🗑️ Delete cloud copy` overflow-menu button
+
+**Where it lives.** Survey overflow menu (`⋯`), in the cloud-sync cluster with `☁️ Force push to cloud` and `⬇️ Force pull from cloud`. Directly below the Force pull button, above the recovery divider. Destructive-red styling (`color: #b91c1c`) distinguishes it at a glance from the two non-destructive sync actions. Element id: `manualDeleteCloudBtn`.
+
+**UX flow (matches the spec point-for-point).**
+
+1. **Guard.** If Firebase sync isn't active on the device (`!FirebaseSync.isEnabled() || !window.fsDb`), alert and bail — no half-state where the button looks live but can't do anything.
+
+2. **Peek first.** Call `FirebaseSync.peekCloudSurvey(currentSurveyId)`. Three outcomes:
+   - **Cloud copy exists** → proceed to confirm dialog with full snapshot.
+   - **`null` (clean miss, no cloud copy)** → alert `No cloud copy of "<vessel>" exists. Nothing to delete.` — button does not pretend to work when there's nothing there.
+   - **Peek throws (network/auth)** → alert `Could not reach the cloud — check connection and try again.` Never proceed to destructive action on unknown cloud state.
+
+3. **Confirm dialog (exactly Dave's spec).**
+   - `Delete cloud copy of "<vessel>"?` header in destructive red.
+   - `<strong>Cloud copy (will be removed):</strong>` — the `_snapshotSummary(cloudCopy)` block: rated items count, photo count, last modified.
+   - Green footnote: `This device's local copy will remain untouched.`
+   - Red warning footnote: `Firestore survey doc, all photo docs, and all Storage blobs for this survey will be deleted from Firebase. This cannot be undone from the app — you'd need to push from another device that still has the data.`
+   - Primary button `Delete cloud copy` / secondary `Cancel`.
+
+4. **Execute.** Calls the hardened `FirebaseSync.removeSurvey(currentSurveyId)` (see Part 2). Button shows `🗑️ Deleting…` and is disabled during the operation.
+
+5. **Inspect the structured result** `{ surveyDocDeleted, photos: { deleted, failed: [...] }, error }`:
+   - **Full success** (`surveyDocDeleted === true && !error && photos.failed.length === 0`): toast `🗑️ Cloud copy of "<vessel>" deleted (N photos).` (uses `showToast` when available, falls back to `showAlert`).
+   - **Any failure**: visible `showAlert` (not a silent console.error) titled `Delete cloud copy — incomplete`, listing:
+     - top-level error code,
+     - photo-query error (if the initial query failed),
+     - up to 5 failed photo IDs with their stage (`storage`, `storage-no-ref`, `doc`) and error message, plus `… and N more` if the list was truncated,
+     - explicit final line noting whether the survey doc was deleted (partial state — manual cleanup needed) or kept as anchor (retry is safe).
+
+**Surfaces it's missing on purpose.** The button is per-survey, not batch. There is no "delete all cloud copies" affordance — that's exactly the kind of destructive batch command Dave's manual-sync model is meant to avoid. Cleaning up many cloud copies is still Firebase-Console work.
+
+---
+
+### Part 2 — Harden the cascade (`removeSurvey` + `removeAllPhotosForSurvey`)
+
+**Why the primitives needed hardening, not just the button.** The button's failure-reporting is only as honest as what `removeSurvey` returns. The prior implementation silently swallowed failures at several points — a legitimate `storage/object-not-found` was lumped in with real network failures, and the outer try/catch aborted the whole cascade on the first exception. Bandaging the button to handle broken primitives would have papered over the same orphan-risk class Dave explicitly warned about in the v2456 audit (problem #5: partial-cascade orphan risk).
+
+**`removeAllPhotosForSurvey` — before v2457.**
+
+Silent `try { ... } catch (e) { /* may not exist */ }` around Storage delete ate every error equally; single outer try/catch around the loop aborted on the first Firestore doc delete failure, leaving remaining photos unattempted.
+
+**`removeAllPhotosForSurvey` — v2457.**
+
+- Per-photo try/catch around BOTH the Storage delete and the Firestore doc delete — one photo's failure no longer aborts the loop.
+- `storage/object-not-found` is treated as **idempotent success** (blob is already gone; that's what we wanted). Any other Storage error is logged to `failed` with `stage: 'storage'`.
+- Photos whose doc has no `storageRef` (legacy records from before the storageRef migration) are logged to `failed` with `stage: 'storage-no-ref'`. The Firestore doc is still deleted. Caller sees these in the result and can flag them for manual cleanup.
+- Returns `{ deleted: int, failed: [{id, stage, error}], error?: string }`. The top-level `error` is only set on a pre-loop failure (`firebase-unavailable`, or the initial Firestore `.where('surveyId','==',surveyId).get()` throwing). Individual per-photo failures go into `failed[]` so the caller can show them in the UI.
+- A photo only increments `deleted` if **both** `storageOk` and `docOk` are true — a photo where Storage succeeded but the doc delete failed (or vice versa) is counted as failed, not deleted. No false-positive success counts.
+
+**`removeSurvey` — order flipped.**
+
+Old order: `delete survey doc` → `cascade photos`. On cascade failure, the survey doc was gone but the photo docs were orphaned with no parent — and no way to retry the cascade because the query pivot (`surveyId == X`) was fine but the caller had nothing to do with the result.
+
+New order: `cascade photos first` → `delete survey doc only if cascade fully succeeded`. On partial photo failure, the survey doc stays in Firestore as an **anchor** — Dave can retry the Delete cloud copy button, and `removeAllPhotosForSurvey` will pick up the photos that previously failed. The half-torn-down state is now recoverable instead of orphaned.
+
+Returns `{ surveyDocDeleted: bool, photos: {...}, error?: string }`:
+
+- `photos` is the verbatim return from `removeAllPhotosForSurvey` (or `{deleted: 0, failed: [], error: 'photo-cascade-threw'}` if the cascade itself threw — which it shouldn't anymore given the per-photo try/catch, but defensive).
+- `error` surface values: `firebase-unavailable`, `photo-cascade-threw`, `photo-cascade-error: <msg>` (pre-loop failure from the cascade), `partial-photo-delete` (one or more photos in `failed[]`), `survey-doc-delete-failed: <msg>` (photos succeeded but doc delete rejected).
+- `surveyDocDeleted` is only `true` if the final `.delete()` call succeeded. The button UI keys off exactly this flag for toast-vs-alert.
+
+---
+
+**Locked-in requirement for v2430 Device Roles.** The button is now available for manual cloud cleanup, but v2430 still needs to integrate it properly. The moment Device Roles re-introduces any pull-on-startup flow (field-mode → report-mode handoff, etc.), deleted-locally-but-still-in-cloud surveys will come back on pull unless the user has tapped 🗑️ Delete cloud copy. v2430 MUST prompt for cloud cleanup on delete (or auto-invoke the hardened cascade with explicit confirmation) before re-enabling any pull path, otherwise deletes will feel like they didn't stick.
+
+**What else is left on the stability checklist.**
+
+Dave's original three-item priority: ✅ saveEverywhere (v2455), ✅ delete-hook strip (v2456), ✅ 🗑️ Delete cloud copy button + cascade hardening (this commit), ⏳ `pullNow()` (v2458 — next up; was tentatively v2457 until the button + cascade earned its own release).
+
+Two auto-push seams remain outside this commit's scope:
+
+- **Photo idle-backup queue** (`savePhoto` → `_pendingBackupIds` → `_processBackupQueue`, 5s-idle after capture). Still auto-pushes photos + parent survey to Firebase during ordinary field use. Separate task, future version.
+- **Bottom-bar "💾 Save" button** (`saveSurveyWithProgress`) still pushes to Firebase. User-initiated but asymmetric with the save-pill; UX polish task, future version.
+
+**Files changed.** `app.js` (5 edit zones: `APP_VERSION` bump, init() comment amended with v2457 note, new `🗑️ Delete cloud copy` button block in showReportControls, hardened `removeSurvey`, hardened `removeAllPhotosForSurvey`; the delete-hook comment blocks at the file's bottom were retouched to reference v2457 as the release where the manual button shipped), `sw.js` (`CACHE_NAME` → v2457), `index.html` (meta + 7 cache-busters → v2457), this file.
+
+**How to verify.**
+
+*🗑️ Delete cloud copy — happy path:*
+
+1. Open a survey that has a cloud copy. Open the `⋯` overflow menu — confirm the red **🗑️ Delete cloud copy** entry sits directly under ⬇️ Force pull from cloud.
+2. Tap it. Button changes to `🗑️ Checking cloud…` briefly, then a confirm dialog appears with the vessel name in red, a `Cloud copy (will be removed):` block showing rated-items / photo count / last-modified, and both the green "local copy untouched" note and the red Firestore+Storage warning.
+3. Tap **Delete cloud copy**. Button changes to `🗑️ Deleting…`. On success: a toast `🗑️ Cloud copy of "<vessel>" deleted (N photos).` Refresh Firebase Console — survey doc + all photo docs gone from Firestore, all blobs gone from Storage.
+4. Local copy of the survey is still present on the device (navigate back and open it — all data intact).
+
+*🗑️ Delete cloud copy — edge cases:*
+
+5. Tap the button on a survey that has NO cloud copy (never pushed, or already deleted): alert `No cloud copy of "<vessel>" exists. Nothing to delete.` Button doesn't proceed.
+6. Kill Wi-Fi and cellular. Tap the button: alert `Could not reach the cloud — check connection and try again.` No destructive action.
+7. Simulate partial failure (e.g., revoke Storage permission on a single photo via Firebase Rules console, then tap the button): confirm dialog still appears; after confirm, the failure alert `Delete cloud copy — incomplete` lists the failed photo ID with stage `storage`, and explicitly states `Survey doc was NOT deleted (kept as anchor so you can retry).` Firebase Console shows the survey doc still present with remaining photos — retry is safe.
+
+*v2458 preview.* Next up: remove `FirebaseSync.pullNow()`. With v2455 / v2456 / v2457 landed, the app's Firebase surfaces are: push via overflow `☁️ Force push to cloud`; pull via per-survey `⬇️ Force pull from cloud`; delete via per-survey `🗑️ Delete cloud copy`; plus the batch tools (`backupAllEverywhere`, `saveSurveyWithProgress`) and the idle-backup queue. `pullNow()` as a console-only batch escape hatch is redundant with per-survey pull and dangerous in combination with the now-stripped delete path (it's the one thing that could resurrect a local delete). Gone in v2458.
+
+---
+
 ## v2456 — 2026-04-21
 ### Fixed — `deletePhoto` / `deleteSurvey` no longer auto-delete from Firebase (P0 correctness — manual-sync symmetry restored)
 
@@ -27,7 +132,7 @@ lets you roll back to a specific version with confidence.
 
 4. **No explicit confirmation for a destructive cloud action.** The local delete confirmation dialog doesn't mention cloud. If Firebase pushes need a deliberate tap, Firebase deletes need the same bar. The symmetry argument from v2455 applies verbatim.
 
-5. **Partial-cascade orphan risk.** `FirebaseSync.removeSurvey(surveyId)` (`app.js:26657`) does cascade: it deletes the Firestore survey doc, then calls `removeAllPhotosForSurvey(surveyId)` to clean up Storage. Happy-path, no orphans. BUT: both are wrapped in a single try/catch with only `console.error`. If the Firestore doc delete succeeds and the Storage cascade fails partway (network hiccup, rate limit, one photo's delete rejects), you get: parent doc gone + some photos gone from Storage + **remaining photos orphaned with no Firestore parent and no retry/surface path**. Not *designed* to orphan, but not bulletproof either.
+5. **Partial-cascade orphan risk.** `FirebaseSync.removeSurvey(surveyId)` (`app.js:26657`) does cascade: it deletes the Firestore survey doc, then calls `removeAllPhotosForSurvey(surveyId)` to clean up Storage. Happy-path, no orphans. BUT: both are wrapped in a single try/catch with only `console.error`. If the Firestore doc delete succeeds and the Storage cascade fails partway (network hiccup, rate limit, one photo's delete rejects), you get: parent doc gone + some photos gone from Storage + **remaining photos orphaned with no Firestore parent and no retry/surface path**. Not *designed* to orphan, but not bulletproof either. (Fixed in v2457.)
 
 **The fix.** Both hooks now run the local delete only and emit a `console.info` so Dave can see in DevTools that the cloud copy was deliberately left alone. The wrapper shape is preserved (not deleted entirely) so v2430's "☁️ Delete cloud copy" action has a hook point to graft onto. Both hooks include `!FirebaseSync.isSuppressed()` so no log spam during restore/rebuild flows — this corrects the pre-v2456 asymmetry where `deletePhoto` lacked that check.
 

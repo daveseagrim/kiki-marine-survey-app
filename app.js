@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2456';
+const APP_VERSION = 'v2457';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -15487,6 +15487,128 @@ function ensureReportButton() {
   };
   overflowMenu.appendChild(pullOpt);
 
+  // ── v2457 — 🗑️ Delete cloud copy ───────────────────────────────────────
+  // The symmetric complement of "☁️ Force push to cloud": explicitly remove
+  // this survey's cloud copy (Firestore doc + all photo docs + all Storage
+  // blobs) without touching the local copy. This is the "manual delete"
+  // surface Dave's v2456 audit required — v2456 stripped the auto-delete
+  // hooks, and without a manual replacement the strip would have left
+  // phantom cloud copies that could resurrect on any future pull. v2457
+  // closes that gap by providing the deliberate destructive action.
+  //
+  // UX rules (per Dave's v2457 spec):
+  //   • peek cloud first — dialog shows before-state (vessel, rated items,
+  //     photo count, last modified)
+  //   • explicit statement "local copy will remain untouched"
+  //   • call hardened FirebaseSync.removeSurvey — returns structured result
+  //   • on FULL success (surveyDocDeleted && no photo failures): clear toast
+  //   • on ANY failure (partial, query failed, doc delete failed): VISIBLE
+  //     alert listing exactly what didn't complete — no silent console logs,
+  //     no misleading success toast
+  const delCloudOpt = document.createElement('button');
+  delCloudOpt.id = 'manualDeleteCloudBtn';
+  delCloudOpt.style.cssText = menuItemStyle + 'color:#b91c1c;';
+  delCloudOpt.innerHTML = '🗑️ Delete cloud copy';
+  delCloudOpt.title = 'Remove this survey\'s Firebase cloud copy. Local copy stays.';
+  delCloudOpt.onclick = async () => {
+    overflowMenu.style.display = 'none';
+    if (!FirebaseSync.isEnabled() || !window.fsDb) {
+      showAlert('Firebase sync is not active on this device.');
+      return;
+    }
+    const survey = await getSurvey(currentSurveyId);
+    if (!survey) { showAlert('Survey not found'); return; }
+    const vname = survey.vesselName || 'this survey';
+
+    // Peek cloud first. Three outcomes:
+    //   cloudCopy truthy  → show full snapshot in confirm
+    //   cloudCopy null    → nothing to delete, bail
+    //   peek throws       → couldn't reach cloud, bail
+    delCloudOpt.innerHTML = '🗑️ Checking cloud…';
+    delCloudOpt.disabled = true;
+    let cloudCopy = null;
+    let peekFailed = false;
+    try {
+      cloudCopy = await FirebaseSync.peekCloudSurvey(currentSurveyId);
+    } catch (e) {
+      console.warn('[Sync] peek before delete-cloud failed:', e);
+      peekFailed = true;
+    }
+    delCloudOpt.innerHTML = '🗑️ Delete cloud copy';
+    delCloudOpt.disabled = false;
+
+    if (!cloudCopy) {
+      showAlert(peekFailed
+        ? 'Could not reach the cloud — check connection and try again.'
+        : `No cloud copy of "${vname}" exists. Nothing to delete.`);
+      return;
+    }
+
+    const message =
+      `<strong style="color:#b91c1c;">Delete cloud copy of "${vname}"?</strong>` +
+      `<br><br>` +
+      `<div style="text-align:left;font-size:13px;line-height:1.5;">` +
+      `<strong>Cloud copy (will be removed):</strong><br>` +
+      `${_snapshotSummary(cloudCopy)}` +
+      `</div>` +
+      `<br>` +
+      `<span style="font-size:12px;color:#065f46;">This device's local copy will remain untouched.</span>` +
+      `<br>` +
+      `<span style="font-size:12px;color:#7c2d12;">Firestore survey doc, all photo docs, and all Storage blobs for this survey will be deleted from Firebase. This cannot be undone from the app — you'd need to push from another device that still has the data.</span>`;
+
+    const ok = await showConfirm(message, 'Delete cloud copy', 'Cancel');
+    if (!ok) return;
+
+    delCloudOpt.innerHTML = '🗑️ Deleting…';
+    delCloudOpt.disabled = true;
+    try {
+      const result = await FirebaseSync.removeSurvey(currentSurveyId);
+      // result: { surveyDocDeleted, photos: { deleted, failed: [...] }, error }
+      const photoFailCount = (result.photos && result.photos.failed) ? result.photos.failed.length : 0;
+      const fullSuccess = result.surveyDocDeleted && !result.error && photoFailCount === 0;
+
+      if (fullSuccess) {
+        const photosDeleted = (result.photos && result.photos.deleted) || 0;
+        if (typeof showToast === 'function') {
+          showToast(`🗑️ Cloud copy of "${vname}" deleted (${photosDeleted} photo${photosDeleted === 1 ? '' : 's'}).`);
+        } else {
+          showAlert(`Cloud copy deleted. ${photosDeleted} photo${photosDeleted === 1 ? '' : 's'} removed.`);
+        }
+      } else {
+        // Build a visible failure report. No silent console-only errors.
+        const lines = [];
+        if (result.error) lines.push(`<strong>Error:</strong> ${result.error}`);
+        if (result.photos && result.photos.error) {
+          lines.push(`<strong>Photo query:</strong> ${result.photos.error}`);
+        }
+        if (photoFailCount > 0) {
+          lines.push(`<strong>${photoFailCount} photo${photoFailCount === 1 ? '' : 's'} failed:</strong>`);
+          result.photos.failed.slice(0, 5).forEach(f => {
+            lines.push(`&nbsp;&nbsp;• ${f.id} (${f.stage}): ${f.error}`);
+          });
+          if (photoFailCount > 5) lines.push(`&nbsp;&nbsp;• … and ${photoFailCount - 5} more`);
+        }
+        if (result.surveyDocDeleted) {
+          lines.push('<em>Survey doc was deleted, but one or more photos did not. Cloud is in a partial state.</em>');
+        } else {
+          lines.push('<em>Survey doc was NOT deleted (kept as anchor so you can retry).</em>');
+        }
+        showAlert(
+          `<strong style="color:#b91c1c;">Delete cloud copy — incomplete</strong>` +
+          `<br><br>` +
+          `<div style="text-align:left;font-size:12px;line-height:1.5;">${lines.join('<br>')}</div>`
+        );
+      }
+    } catch (err) {
+      console.error('[Sync] Manual delete-cloud failed:', err);
+      showAlert('Delete cloud copy failed: ' + (err && err.message ? err.message : String(err)));
+    } finally {
+      delCloudOpt.innerHTML = '🗑️ Delete cloud copy';
+      delCloudOpt.disabled = false;
+    }
+  };
+  overflowMenu.appendChild(delCloudOpt);
+
   // Divider
   const divider = document.createElement('div');
   divider.style.cssText = 'height:1px;background:#e5e7eb;margin:4px 0;';
@@ -26653,16 +26775,57 @@ const FirebaseSync = (() => {
     }
   }
 
-  // Delete a survey from Firestore
+  // Delete a survey and all its photos from Firestore + Storage.
+  //
+  // v2457 hardening — two changes from the prior implementation:
+  //   1. ORDER FLIPPED. Previously the survey doc was deleted FIRST, then the
+  //      photo cascade ran. If the cascade failed partway, the survey doc was
+  //      gone but orphan photo docs still referenced a non-existent parent —
+  //      the "delete" looked complete from above but the pile of trash was
+  //      hidden. New order: photos cascade first. If ANY photo fails, we bail
+  //      early and leave the survey doc as an anchor. Dave sees the failure,
+  //      retries, and the state is never half-torn-down.
+  //   2. RETURNS A STRUCTURED RESULT so callers can surface partial failures
+  //      in the UI. The old version just logged to console and returned
+  //      undefined — silent failure in an otherwise "manual sync" model.
+  //
+  // Result shape: { surveyDocDeleted: bool, photos: {...result from removeAllPhotosForSurvey...}, error: string? }
+  // Callers (currently the new "🗑️ Delete cloud copy" overflow button)
+  // MUST check error and photos.failed explicitly before showing success UI.
   async function removeSurvey(surveyId) {
-    if (!_syncEnabled || !window.fsDb) return;
+    const result = { surveyDocDeleted: false, photos: null, error: null };
+    if (!_syncEnabled || !window.fsDb) {
+      result.error = 'firebase-unavailable';
+      return result;
+    }
+    // Step 1: cascade-delete all photos first.
+    try {
+      result.photos = await removeAllPhotosForSurvey(surveyId);
+    } catch (err) {
+      console.error('Firebase removeSurvey: photo cascade threw:', err);
+      result.photos = { deleted: 0, failed: [], error: err.message || String(err) };
+      result.error = 'photo-cascade-threw';
+      return result;
+    }
+    // Step 2: if any photo failed, bail early. The survey doc stays as an
+    // anchor so Dave can retry from a non-half-deleted state.
+    if (result.photos.error) {
+      result.error = 'photo-cascade-error: ' + result.photos.error;
+      return result;
+    }
+    if (result.photos.failed && result.photos.failed.length > 0) {
+      result.error = 'partial-photo-delete';
+      return result;
+    }
+    // Step 3: photos all gone (or there were none) — now delete the survey doc.
     try {
       await window.fsDb.collection('surveys').doc(surveyId).delete();
-      // Also delete all photos for this survey from Storage
-      await removeAllPhotosForSurvey(surveyId);
+      result.surveyDocDeleted = true;
     } catch (err) {
-      console.error('Firebase removeSurvey error:', err);
+      console.error('Firebase removeSurvey: doc delete failed:', err);
+      result.error = 'survey-doc-delete-failed: ' + (err.message || String(err));
     }
+    return result;
   }
 
   // Listen for real-time changes from other devices
@@ -26930,23 +27093,76 @@ const FirebaseSync = (() => {
     }
   }
 
-  // Remove all photos for a survey from Firebase Storage
+  // Remove all photos for a survey from Firebase Storage and Firestore.
+  //
+  // v2457 hardening — previously a single photo's doc.delete() failure would
+  // abort the whole loop via the outer catch, leaving remaining photos and
+  // their Storage blobs as orphans. Worse, a silent `catch { /* may not exist */ }`
+  // around the Storage delete ate legit failures — a transient permission/network
+  // error looked identical to "blob already gone", so the Firestore doc got
+  // deleted anyway and the Storage blob was orphaned with no pointer.
+  //
+  // New contract:
+  //   • Each photo has its own try/catch so one failure doesn't kill the loop.
+  //   • Storage `storage/object-not-found` is treated as success (idempotent);
+  //     any other error is surfaced.
+  //   • Firestore doc delete is attempted regardless of Storage outcome so the
+  //     failure surface is complete.
+  //   • Returns a structured result `{ deleted, failed: [{id, stage, error}], error? }`
+  //     so the caller can show the user exactly what didn't complete. Callers
+  //     must handle `failed.length > 0` explicitly — this function no longer
+  //     silently swallows.
   async function removeAllPhotosForSurvey(surveyId) {
-    if (!window.fsDb || !window.fsStorage) return;
+    const result = { deleted: 0, failed: [] };
+    if (!window.fsDb || !window.fsStorage) {
+      result.error = 'firebase-unavailable';
+      return result;
+    }
+    let snap;
     try {
-      const snap = await window.fsDb.collection('photos')
+      snap = await window.fsDb.collection('photos')
         .where('surveyId', '==', surveyId)
         .get();
-      for (const doc of snap.docs) {
-        const meta = doc.data();
-        if (meta.storageRef) {
-          try { await window.fsStorage.ref(meta.storageRef).delete(); } catch (e) { /* may not exist */ }
-        }
-        await doc.ref.delete();
-      }
     } catch (err) {
-      console.error('Firebase removeAllPhotos error:', err);
+      console.error('Firebase removeAllPhotos query error:', err);
+      result.error = err.message || String(err);
+      return result;
     }
+    for (const doc of snap.docs) {
+      const meta = doc.data();
+      const photoId = doc.id;
+      let storageOk = true;
+      let docOk = true;
+      // Step 1: delete the Storage blob if we know where it lives.
+      // Legacy photos without storageRef are skipped — there's no pointer
+      // to the blob, so we'd have to fall back to a path convention. Log
+      // those so Dave can see the gap in the result object.
+      if (meta.storageRef) {
+        try {
+          await window.fsStorage.ref(meta.storageRef).delete();
+        } catch (e) {
+          // storage/object-not-found is idempotent success — blob is already gone
+          if (e && e.code !== 'storage/object-not-found') {
+            storageOk = false;
+            result.failed.push({ id: photoId, stage: 'storage', error: e.message || String(e) });
+          }
+        }
+      } else {
+        // No storageRef — record it so the caller can see we couldn't
+        // target the blob. The Firestore doc is still deleted below.
+        result.failed.push({ id: photoId, stage: 'storage-no-ref', error: 'photo doc has no storageRef — legacy record, Storage blob (if any) not targeted' });
+        storageOk = false;
+      }
+      // Step 2: delete the Firestore photo doc.
+      try {
+        await doc.ref.delete();
+      } catch (e) {
+        docOk = false;
+        result.failed.push({ id: photoId, stage: 'doc', error: e.message || String(e) });
+      }
+      if (storageOk && docOk) result.deleted++;
+    }
+    return result;
   }
 
   // Remove a single photo from Firebase Storage
@@ -27209,27 +27425,42 @@ const FirebaseSync = (() => {
     // v2428: _syncEnabled stays true so the public pushSurvey / pullSurvey
     // / pushAllPhotosForSurvey helpers remain callable — but the saveSurvey
     // and savePhoto wrappers no longer fire them automatically. Sync is
-    // now ENTIRELY manual: Dave taps "☁️ Force push to cloud" or "⬇️ Force
-    // pull from cloud" in the overflow menu.
+    // now ENTIRELY manual: Dave taps "☁️ Force push to cloud", "⬇️ Force
+    // pull from cloud", or "🗑️ Delete cloud copy" in the overflow menu.
     //
     // v2455 amendment: the save-pill tap (saveEverywhere) previously
     // force-pushed to Firebase despite the v2428 design, which meant
     // "manual sync" was a lie at the main save surface. v2455 strips the
     // Firebase push from saveEverywhere so it is now local + Drive only.
     //
-    // Paths that still invoke Firebase after v2455 (audited with Dave):
+    // v2456 amendment: the deletePhoto/deleteSurvey wrappers used to
+    // auto-remove from Firebase on every local delete — same "manual sync
+    // is a lie" pattern on the destructive side. v2456 strips those
+    // auto-delete calls (the wrappers now only emit a console.info). The
+    // strip was intentionally shipped ahead of its manual replacement to
+    // stop unwanted cloud deletes immediately — with the short-term
+    // caveat that cloud copies would linger until the replacement landed.
+    //
+    // v2457 amendment: closes the gap the v2456 strip opened. Adds the
+    // "🗑️ Delete cloud copy" overflow button so cloud removal is a
+    // deliberate action, symmetric with "☁️ Force push to cloud". The
+    // FirebaseSync.removeSurvey cascade was hardened in the same release
+    // (photos first, survey doc second, per-photo try/catch, structured
+    // result) so partial failure cannot orphan Storage blobs.
+    //
+    // Paths that still invoke Firebase after v2457 (audited with Dave):
     //   USER-INITIATED:
     //     • backupAllEverywhere()            — home-screen "💾 Save All Surveys"
     //     • saveSurveyWithProgress()         — bottom-bar "💾 Save" button
     //     • "☁️ Force push to cloud"         — overflow-menu explicit push
-    //   AUTO-PUSH (v2456 scope — still fires during ordinary use):
+    //     • "⬇️ Force pull from cloud"       — overflow-menu explicit pull
+    //     • "🗑️ Delete cloud copy"           — overflow-menu explicit remove (v2457)
+    //   AUTO-PUSH (v2458+ scope — still fires during ordinary use):
     //     • _processBackupQueue()            — 5s-idle after savePhoto(); pushes queued
     //                                          photos + their parent survey to Firebase
-    //     • _originalDeletePhoto / _originalDeleteSurvey — force-remove from Firebase
-    //                                                      on local delete
     _syncEnabled = true;
     updateSyncStatusUI('idle', 'Manual sync (use overflow menu)');
-    console.log('[Sync] v2455: Manual Firebase sync only. saveEverywhere no longer auto-pushes. Use overflow-menu ☁️ Force push to cloud.');
+    console.log('[Sync] v2457: Manual Firebase sync only. Saves/deletes do not auto-sync. Use overflow-menu ☁️ / ⬇️ / 🗑️ buttons.');
   }
 
   // v2426 — explicit, user-initiated pull from Firestore. Runs the
@@ -27399,8 +27630,8 @@ savePhoto = async function(photo) {
 // (await returns normally; on failure the wrapper throws and we never reach
 // the log), emit a console.info so Dave can see in DevTools that the cloud
 // copy is deliberately untouched. The log deliberately doesn't name a
-// specific UI control — the explicit "Delete cloud copy" action is v2430
-// Device Roles scope and the string stays valid before and after it lands.
+// specific UI control — the explicit "🗑️ Delete cloud copy" overflow button
+// shipped in v2457 and the string stays valid if the control ever moves.
 // The !FirebaseSync.isSuppressed() guard is added here symmetrically with
 // deleteSurvey — during restore/rebuild flows we don't want log spam.
 const _originalDeletePhoto = deletePhoto;
@@ -27415,7 +27646,10 @@ deletePhoto = async function(photoId) {
 // ── Hook deleteSurvey (v2456: Firebase auto-delete REMOVED) ──────────────────
 // See deletePhoto hook above for full reasoning. Same treatment: strip the
 // Firebase removeSurvey call, log the local-only disposition, preserve the
-// wrapper as a hook point for the future v2430 "Delete cloud copy" action.
+// wrapper as a hook point. The explicit cloud-delete surface is the v2457
+// "🗑️ Delete cloud copy" overflow button (see the manualDeleteCloudBtn
+// block in showReportControls) — it calls FirebaseSync.removeSurvey
+// directly (the v2457-hardened cascade), independent of this hook.
 const _originalDeleteSurvey = deleteSurvey;
 deleteSurvey = async function(id) {
   const result = await _originalDeleteSurvey(id);
