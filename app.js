@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2433';
+const APP_VERSION = 'v2435';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -23333,23 +23333,18 @@ async function generateReport() {
       .page-break { page-break-after: always; }
       body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       #exportToolbar { display: none !important; }
-      /* v2397: anchor the Surveyor's Certification to the bottom of its own
-         dedicated last page so the report ends within the last ~20% of the
-         final printed 8.5x11 sheet. Previously the cert block could render
-         at the top of a final page, leaving 4–6 inches of white space below
-         the signature. Forcing a page break before the .report-end-page
-         wrapper + flex-column + justify-flex-end pushes the whole cert to
-         the bottom edge. min-height claims the full page height so the
-         flex-end has space to work with. */
-      .report-end-page {
-        page-break-before: always;
-        break-before: page;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        min-height: calc(100vh - 1mm);
-      }
-      .report-end-page > .footer { margin-top: auto; }
+      /* v2435: The v2397 "anchor cert to bottom of final page" trick used
+         min-height:100vh + justify-content:flex-end on .report-end-page to
+         push the SURVEYOR'S CERTIFICATION to the bottom edge of its own
+         dedicated page. That traded the old problem (cert high on page with
+         big gap below) for a new one (giant gap BEFORE the cert — the page
+         break plus bottom-anchor left the valuation/comparables content
+         separated from the cert by most of a page's worth of whitespace).
+         Dave's call: match the spacing of the rest of the report — so the
+         cert now flows naturally after the previous section with the same
+         h2 { margin-top: 24px } rhythm every other section uses. The
+         .report-end-page wrapper div still exists as a no-op so any future
+         rollback or alternate print treatment has a hook to target. */
     }
     /* v2225: report brand aligned to kikimarine.ca (primary #066aab) */
     body { font-family: Arial, Helvetica, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; color: #1f2937; line-height: 1.6; font-size: 11pt; }
@@ -23369,10 +23364,15 @@ async function generateReport() {
     .item { margin: 6px 0; padding: 4px 0 4px 10px; border-left: 3px solid #066aab; }
     .standards { font-size: 9pt; color: #4b5563; margin-top: 2px; }
     .item p { margin: 2px 0; }
-    /* v2227: keep Surveyor's Certification aligned flush with the body text
-       (previous padding was double-insetting the block). Only the top
-       separator + spacing remain. */
-    .footer { margin-top: 40px; padding: 16px 0 0 0; border-top: 2px solid #066aab; color: #4b5563; font-size: 10pt; }
+    /* v2435: cert wrapper previously had margin-top:40px + padding-top:16px,
+       stacking ~56px of extra space on top of the h2's own 24px margin —
+       visibly inconsistent with every other h2 boundary in the report. The
+       wrapper now contributes zero outer spacing; the h2 inside provides
+       the canonical 24px inter-section gap, same as DETAILED SURVEY
+       FINDINGS, INSTRUMENTS & ELECTRONICS, SAFETY EQUIPMENT, etc. A 2px
+       top border remains as a subtle visual cue for the legal signature
+       block without imposing extra vertical space. */
+    .footer { margin-top: 0; padding: 0; border-top: 2px solid #066aab; color: #4b5563; font-size: 10pt; }
     .footer a { color: #066aab; text-decoration: none; }
     .header-bar { border-bottom: 1px solid #d1d5db; font-size: 9pt; color: #6b7280; padding-bottom: 4px; margin-bottom: 16px; }
     .scope-text { font-size: 10pt; line-height: 1.5; }
@@ -23685,7 +23685,7 @@ async function generateReport() {
   <h2>VESSEL DOCUMENTATION DATA</h2>
   <table>
     ${!_excl('hinNumber') && (esc(survey.hinNumber) || hinPhotoDataUrl) ? `<tr><td style="width:40%;"><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || ''}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>` : ''}
-    ${!_excl('tcLicense') && (survey.tcLicense || survey.tcLicenseType || licencePhotoDataUrl || tcPaperLicencePhotoDataUrl) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${survey.tcLicenseExpiry ? ' (expires ' + esc(survey.tcLicenseExpiry) + ')' : ''}${licencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Licence number on hull:</em><br><img src="' + licencePhotoDataUrl + '" alt="Licence Number on Hull" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}${tcPaperLicencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Transport Canada paper licence:</em><br><img src="' + tcPaperLicencePhotoDataUrl + '" alt="TC Paper Licence" style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />' : ''}</td></tr>` : ''}
+    ${!_excl('tcLicense') && (survey.tcLicense || survey.tcLicenseType || licencePhotoDataUrl || tcPaperLicencePhotoDataUrl) ? `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${survey.tcLicenseExpiry ? ' (expires ' + esc(survey.tcLicenseExpiry) + ')' : ''}${licencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Licence number on hull:</em><br><img src="' + licencePhotoDataUrl + '" alt="Licence Number on Hull" class="report-photo" style="margin-top:4px;" />' : ''}${tcPaperLicencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Transport Canada paper licence:</em><br><img src="' + tcPaperLicencePhotoDataUrl + '" alt="TC Paper Licence" class="report-photo" style="margin-top:4px;" />' : ''}</td></tr>` : ''}
     ${!_excl('taxStatus') && survey.taxStatus ? `<tr><td><strong>Tax Status (Duties Paid)</strong></td><td>${esc(survey.taxStatus)}</td></tr>` : ''}
     ${!_excl('compliancePlate') && (survey.compliancePlate || compliancePhotoDataUrl) ? `<tr><td><strong>NMMA/CE/TC Compliance Plate</strong></td><td>${esc(survey.compliancePlate) || ''}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="Compliance Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>` : ''}
   </table>
@@ -24472,7 +24472,7 @@ ${(() => {
     // v2374: Statement of Valuation + Worksheet + Comparables only render
     // when there's at least one piece of valuation data to display.
     if (_hasValuationData) {
-      _out += '<h3 style="margin:20px 0 8px 0;color:#066aab;font-size:11pt;">STATEMENT OF VALUATION</h3>'
+      _out += '<h3 style="margin:18px 0 8px 0;color:#066aab;font-size:11pt;">STATEMENT OF VALUATION</h3>'
         + '<div class="scope-text">'
         + '<p>The \u201cFAIR MARKET VALUE\u201d is the most probable price in terms of money which a vessel should bring in a competitive and open market under all conditions requisite to a fair sale, the buyer and seller each acting prudently, knowledgeably and assuming the price is not affected by undue stimulus. Implicit in this definition is the consummation of a sale as of a specified date and the passing of title from seller to buyer under conditions whereby:</p>'
         + '<ul>'
@@ -24501,7 +24501,7 @@ ${(() => {
         + (esc(survey.vesselName) ? '<p class="scope-text"><strong>Summary:</strong> In accordance with the request for a Marine Survey of the \u201c' + esc(survey.vesselName) + '\u201d, for the purpose of evaluating its present condition and estimating its Fair Market Value' + (_hasRepl ? ' and Replacement Cost' : '') + ', I herewith submit my conclusion based on the preceding report.' + (survey.surveyDate ? ' The subject vessel was personally inspected by the undersigned on <strong>' + survey.surveyDate + '</strong>.' : '') + ' Subject to correction of deficiencies listed in sections A and B, the vessel is considered to be reasonably suitable for its intended use. Other deficiencies listed should be attended to in keeping with good maintenance practices or as upgrades.</p>' : '')
         + (_overallCondRaw ? '<p><strong>Condition Adjustment:</strong> The vessel\u2019s overall condition rating of \u201c' + _overallCondRaw + '\u201d has been factored into the final valuation range using the BUC Marine Grading System.</p>' : '')
 
-        + '<h3 style="margin:20px 0 8px 0;color:#066aab;font-size:11pt;">VALUATION WORKSHEET</h3>'
+        + '<h3 style="margin:18px 0 8px 0;color:#066aab;font-size:11pt;">VALUATION WORKSHEET</h3>'
         // v2242: only say "and comparables" if comparables were actually recorded
         + (function() {
           const _hasComps = !survey.skipComparables && survey.comparables && survey.comparables.length > 0 && survey.comparables.some(c => c.vessel);
@@ -24551,10 +24551,12 @@ ${(() => {
   })();
 
   // ── SURVEYOR'S CERTIFICATION ───────────────────────────────────────
-  // v2397: wrap in .report-end-page so print CSS (see @media print block
-  // above) forces this onto a dedicated final page with the cert anchored
-  // to the bottom — the report now ends within the last ~20% of the sheet
-  // instead of stranding the cert near the top of a mostly-empty page.
+  // v2435: v2397's bottom-anchor trick (min-height:100vh + flex-end) was
+  // neutralized in the @media print CSS above. The .report-end-page div
+  // stays as a no-op hook for any future alternate treatment, but it no
+  // longer imposes layout. The cert flows after the previous section with
+  // the standard h2 { margin-top: 24px } rhythm — matching every other
+  // section boundary in the report.
   html += `
   <div class="report-end-page">
   <div class="footer">
@@ -24669,7 +24671,7 @@ async function exportToWord() {
       '  .rating-po { color: #6b7280; font-weight: bold; }' +
       '  .rating-safety { color: #2563eb; font-weight: bold; }' +
       '  .item { margin: 12px 0; padding: 8px 10px; border-left: 4px solid #066aab; }' +
-      '  .footer { margin-top: 40px; padding: 20px; border-top: 2px solid #066aab; }' +
+      '  .footer { margin-top: 0; padding: 0; border-top: 2px solid #066aab; }' +
       '  .checklist-table th { background: #066aab; color: white; padding: 5px 6px; font-size: 8.5pt; }' +
       '  .checklist-table td { padding: 4px 6px; font-size: 9pt; }' +
       '  .checklist-table .rating-pill { display: inline-block; padding: 1px 7px; border-radius: 3px; color: white; font-weight: bold; font-size: 8pt; }' +

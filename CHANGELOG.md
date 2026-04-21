@@ -12,6 +12,64 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2435 — 2026-04-20
+### Fixed — Report: uniform vertical spacing between every section
+
+Dave spotted a large whitespace gap between Comparable Vessels (end of Statement of Valuation) and the SURVEYOR'S CERTIFICATION heading, then expanded the scope: "Vertical spacing should be uniform throughout the report. Please look throughout the report and make everything even." This pass audits and normalizes every section-level top margin in the report CSS + template so every `<h2>` boundary gets the same canonical 24px gap and every `<h3>` subsection gets the same 18px.
+
+**What was wrong.**
+
+1. **`.report-end-page` bottom-anchor trick (v2397).** The SURVEYOR'S CERTIFICATION was wrapped in `<div class="report-end-page">`, which an `@media print` rule styled with `page-break-before: always` + `min-height: calc(100vh - 1mm)` + `display: flex; flex-direction: column; justify-content: flex-end`. The intent was to push the cert to the bottom of its own dedicated final page — v2397 was solving the opposite complaint at the time ("cert lands high on page with 4–6 inches empty below signature"). Trade-off wasn't free: the page break plus bottom-anchor moved the whitespace from below the signature to above the heading, producing the giant gap Dave is now seeing.
+
+2. **`.footer { margin-top: 40px; padding: 16px 0 0 0; border-top: 2px solid #066aab }`.** The cert sits inside a `.footer` div. Its 40px outer margin stacked on top of the h2's own canonical 24px `margin-top` to create an effective ~56–66px gap above the cert — vs. the 24px that separates every other h2. The 16px padding-top layered on top of that for a total visual offset that matched nothing else in the report.
+
+3. **Valuation h3 overrides.** Two inline h3 tags inside the Rating & Valuation IIFE used `style="margin:20px 0 8px 0"` — close to the canonical h3 `margin-top: 18px` from the stylesheet but not equal, producing a subtle 2px inconsistency between STATEMENT OF VALUATION / VALUATION WORKSHEET and every other h3 (Purpose & Scope, Methodology, BUC grades, etc.).
+
+**Fixes.**
+
+- **Removed the `@media print` `.report-end-page` rules entirely.** No `page-break-before`, no `min-height: 100vh`, no flex column, no flex-end. The cert flows inline after the Statement of Valuation like every other section. The `<div class="report-end-page">` wrapper stays in the emitted HTML as a no-op hook for any future alternate print treatment, but it no longer imposes any layout.
+
+- **`.footer { margin-top: 0; padding: 0; border-top: 2px solid #066aab; ... }`.** The outer margin and top padding are zeroed so the h2 inside provides the canonical 24px inter-section spacing used everywhere else. The 2px top border remains as a subtle visual cue for the legal signature block — a single hairline, not a spacing contribution. Total gap above the cert h2 is now 24px + 2px border = visually indistinguishable from any other section boundary.
+
+- **Valuation h3 inline overrides normalized.** Both `margin:20px 0 8px 0` overrides (STATEMENT OF VALUATION at app.js:24470, VALUATION WORKSHEET at app.js:24499) are now `margin:18px 0 8px 0`, matching the default `h3 { margin-top: 18px }` from the stylesheet. The bottom margin (8px) is preserved because it tightens the heading to the content table that immediately follows — same pattern used throughout the h3 style.
+
+**Spacing reference (canonical values in the stylesheet, unchanged by this pass).**
+
+- `h1` (cover page title): `margin-top: 16px; margin-bottom: 8px` — unchanged, only appears once.
+- `h2` (top-level section heading): `margin-top: 24px` — canonical inter-section gap.
+- `h3` (subsection heading): `margin-top: 18px` — canonical subsection gap.
+- `table`: `margin: 8px 0` — tight around content.
+- `.item`: `margin: 6px 0` — tight around checklist items.
+- `.finding-section`: `margin-top: 8px` — internal spacing inside findings blocks.
+- `.bold-disclaimer`: `margin: 16px 0` — disclaimer callouts.
+
+**Internal cert spacing not touched.** The cert block still has a `margin-top:20px` on the signature row (separates text from signature image) and `margin-top:16px` on the bottom contact strip (separates signature from contact line). Those are internal-to-the-cert rhythms, not inter-section spacing, and they were never part of Dave's complaint.
+
+**Files changed.** `app.js` (APP_VERSION → v2435; `@media print` `.report-end-page` rules removed at app.js:23336; `.footer` rule at app.js:23370 normalized to `margin-top:0; padding:0`; STATEMENT OF VALUATION + VALUATION WORKSHEET h3 inline margins normalized from 20px to 18px; comment block above the cert updated to document the revert), `sw.js` (CACHE_NAME → `kiki-marine-v2435`), `index.html` (meta + 7 cache-busters → v2435), this file.
+
+---
+
+## v2434 — 2026-04-20
+### Fixed — Report: pleasure-craft licence photos now match HIN/compliance plate sizing
+
+Dave reviewed the Ex-Ta-Sea report and spotted that the Pleasure Craft Licence number on the hull ("ON406313") was rendering at roughly 2× the size of the HIN photo in the VESSEL DOCUMENTATION DATA table. The two rows sit one above the other, so the size mismatch was obvious and unprofessional.
+
+**Root cause.** In the report generator at app.js:23688, the two licence photos (`licencePhoto` "Licence Number on Hull" and `tcPaperLicencePhoto` "Transport Canada paper licence") were emitted with inline styles:
+
+```html
+<img ... style="max-width:500px;max-height:350px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" />
+```
+
+The HIN photo one row above and the Compliance plate photo one row below use `class="report-photo"`, which is defined at app.js:23398 as a fixed `234 × 176` — the standardized in-report thumb size applied to every other body photo in the document (item photos, finding photos, nameplates, four-corner overviews, safety equipment, instruments). The licence photos were the only outliers — they pre-dated the v2370 standardization pass and were never migrated to the class.
+
+**Fix.** Replace the inline `max-width/max-height/border/border-radius` styles on both licence `<img>` tags with `class="report-photo"`, keeping only `style="margin-top:4px;"` to preserve the small top margin that separates the photo from its `<em>` caption line. The `.report-photo` CSS already provides the border + border-radius + object-fit:cover treatment that the inline styles were reimplementing, so the visual identity stays the same — just at the correct 234×176 size that matches every other report photo.
+
+**Downstream effect.** All four VESSEL DOCUMENTATION DATA photos (HIN, Licence on Hull, TC Paper Licence, Compliance Plate) now render at identical 234×176 with identical borders. The caption lines ("Licence number on hull:" and "Transport Canada paper licence:") are unchanged, so the differentiation between Licence-on-Hull and Paper-Licence is still legible. Older reports regenerated from the same survey data will automatically pick up the corrected sizing on next Report-open — the data is untouched; only the emitted HTML changes.
+
+**Files changed.** `app.js` (APP_VERSION → v2434; two licence `<img>` tags migrated from inline styles to `class="report-photo"` at app.js:23688), `sw.js` (CACHE_NAME → `kiki-marine-v2434`), `index.html` (meta + 7 cache-busters → v2434), this file.
+
+---
+
 ## v2433 — 2026-04-20
 ### Added — Skip toggle on Instruments & Electronics section (mirrors skipComparables)
 
