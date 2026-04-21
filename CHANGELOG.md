@@ -12,6 +12,45 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2428 — 2026-04-20
+### Changed — Manual sync rollback: auto-push REMOVED, explicit Push / Pull buttons per survey (P0 correction to v2427)
+
+v2427 added safety rails around the automatic push path. Dave pushed back: "This is not what we discussed. This is supposed to be manual. No automatic decisions about what is richer. I decide — do I want to push or pull from either side." v2428 implements that.
+
+**What this ships.**
+
+- **`saveSurvey` wrapper no longer auto-pushes to Firebase (app.js ~26849).** Every save used to fire `FirebaseSync.pushSurvey(survey)` in the background. That call is gone. Local IndexedDB save still happens exactly as before. The lastModified timestamp bump still happens. Drive auto-sync (every 30 s per survey) still happens — Drive was never the problem and is useful as a low-risk secondary backup. Only the Firestore leg is now manual.
+
+- **`savePhoto` wrapper no longer auto-pushes to Firebase Storage (app.js ~26864).** Same rationale: capture a photo → IDB write only. Cloud upload waits for an explicit Push. The wrapper is kept as a pass-through so future work can re-hook it (queued batch upload, Drive-side push, etc.) without restructuring.
+
+- **`FirebaseSync.pushSurvey()` is now an unconditional overwrite (app.js ~26118).** The v2427 conflict-copy logic is gone: no `checkCloudRichness` call, no `survey_conflicts/{id}__{device}__{ts}` write path, no rate-limit, no richness-based UI warning. The function does exactly what its name says — write the local copy to `surveys/{id}`. Callers are responsible for asking Dave first.
+
+- **New overflow-menu buttons (app.js ~15030), with side-by-side overwrite-confirm dialogs:**
+  - **☁️ Force push to cloud** — Before running, peeks at the cloud doc and shows a red-headlined confirm with the content scores for BOTH sides: `rated · photos · chars` + `modified {time}` for this device and for cloud. If the cloud has no copy yet, the summary says "no cloud copy yet — this push will create one" instead. Only after Dave taps `Force push` does it call `pushSurvey(survey)` + `pushAllPhotosForSurvey(survey)`. Photos are idempotent — re-pushes skip anything already in Firebase Storage.
+  - **⬇️ Force pull from cloud** — Same side-by-side confirm pattern (cloud on top, local on bottom). If the peek returns null (no cloud copy, or cloud unreachable), the pull is blocked with a clear message rather than silently overwriting local with nothing. On confirm, calls `pullSurvey(id)`. Survey + photos are overwritten from cloud. The survey is re-rendered so Dave sees the pulled copy.
+  - Button labels use the word "Force" and the confirm dialog shows the word "OVERWRITE" in red. The old "Push to cloud" / "Pull from cloud" wording was too soft — two outside reviewers flagged that unconditional overwrite without explicit "force" framing is the biggest remaining data-loss risk in this architecture.
+
+- **`pushAllPhotosForSurvey` exposed on `FirebaseSync`'s public API.** Already existed as a private helper inside the module; now callable from the menu button.
+
+- **`peekCloudSurvey(surveyId)` added to `FirebaseSync` (new helper, app.js ~26230).** Reads the cloud doc without writing anywhere. Returns the remote survey object on hit, null on a clean miss (no cloud copy yet), and **throws** on any transient failure (network down, permission error, firebase not loaded). The throw-vs-null distinction is load-bearing: the Push dialog uses it to show "no cloud copy yet — this push will create one" vs "could not reach cloud — any existing cloud copy WILL be overwritten if it exists", and the Pull dialog uses it to block with "Could not reach the cloud — check connection and try again" instead of silently telling Dave there's no cloud copy when in fact we just couldn't see one.
+
+- **`scoreSurveyContent` exposed on `FirebaseSync`'s public API.** The same `_scoreSurveyContent({textChars, photoCount, ratedItems})` the open-survey richness banner uses internally. Exposing it keeps the numbers in the Force-push/pull confirm identical to the numbers in the open-survey banner — one source of truth for "how rich is this survey?"
+
+**What did NOT change.**
+
+- Drive auto-sync is unchanged. Saves still trigger a throttled (30 s per survey) JSON push to Drive if signed in. Drive has no automatic pull and no "is richer" logic — it's append-only backup per vessel/date.
+- The `checkCloudRichnessBanner` on survey open (v2427) still fires: it informs Dave when the cloud copy has more content and offers Pull / Keep-local buttons. It does not write anything automatically. Kept because it surfaces information Dave wants without taking action behind his back.
+- `pullNow()` console helper is still there. `pullSurvey(id)` is still there. Everything that was already manual stays manual.
+- `removeSurvey` / `removePhoto` wrappers still auto-propagate deletes to Firebase. Delete is an explicit one-shot user action (not triggered by every keystroke), and Dave has not asked for manual delete sync.
+
+**Rationale.**
+
+The v2427 conflict-copy branch was an attempt to make automatic sync safe. Dave's position is that automatic sync should not exist at all — richness scoring is the app making a decision, and he wants to make the decision. v2428 is a full rollback to manual: saves never touch cloud, button taps do. This matches the Device Roles design planned for v2430 (field mode vs report mode) and is a cleaner architectural foundation for that work.
+
+**Files changed.** `app.js` (APP_VERSION bumped to v2428; saveSurvey wrapper; savePhoto wrapper; `pushSurvey` body; public API surface; inspection overflow menu), `sw.js` (CACHE_NAME → `kiki-marine-v2428`), `index.html` (meta + 7 cache-busters → v2428), this file.
+
+---
+
 ## v2427 — 2026-04-20
 ### Added — Safe sync, half 1: push-side conflict-copy + open-survey richness banner (P0 follow-up to v2426)
 

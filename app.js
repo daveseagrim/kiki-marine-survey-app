@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2427';
+const APP_VERSION = 'v2428';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -15028,6 +15028,210 @@ function ensureReportButton() {
   introOpt.onclick = () => { overflowMenu.style.display = 'none'; editSurveyDetails(currentSurveyId); };
   overflowMenu.appendChild(introOpt);
 
+  // ── v2428: Manual sync divider + Force Push / Force Pull buttons ───────
+  // Replaces the v2426/v2427 auto-push behaviour. Save no longer touches
+  // Firebase by itself; Dave taps these buttons explicitly when he wants
+  // the device to talk to the cloud. Push = unconditional overwrite of
+  // cloud with local. Pull = unconditional overwrite of local with cloud.
+  // No richness check, no conflict copies, no auto decisions.
+  //
+  // v2428 hardening (this revision): every Push and every Pull is gated
+  // by a side-by-side "before / after" confirm dialog showing rated-item
+  // count, photo count, text-char count, and last-modified time on BOTH
+  // sides. Button labels say "Force push" / "Force pull" so it's obvious
+  // these are destructive overwrites, not safe merges. A bare-text helper
+  // (snapshotLine) builds each side's summary from FirebaseSync's exposed
+  // scoreSurveyContent + peekCloudSurvey.
+  const syncDivider = document.createElement('div');
+  syncDivider.style.cssText = 'height:1px;background:#e5e7eb;margin:4px 0;';
+  overflowMenu.appendChild(syncDivider);
+
+  // Format a survey's last-modified time as "Apr 20, 6:12 PM" (short, fits
+  // the 320 px confirm modal). Returns "—" if the survey has no timestamp.
+  function _formatSnapshotTime(survey) {
+    if (!survey || !survey.lastModified) return '—';
+    const d = new Date(survey.lastModified);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleString([], {
+      month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit'
+    });
+  }
+
+  // Build the inline HTML summary for one side (local or cloud). Uses
+  // FirebaseSync.scoreSurveyContent so the numbers exactly match what the
+  // open-survey richness banner shows. Returns innerHTML-safe markup.
+  function _snapshotSummary(survey) {
+    if (!survey) return '<em>no copy</em>';
+    const score = (FirebaseSync && FirebaseSync.scoreSurveyContent)
+      ? FirebaseSync.scoreSurveyContent(survey)
+      : { textChars: 0, photoCount: 0, ratedItems: 0 };
+    const charsLabel = score.textChars >= 1000
+      ? (score.textChars / 1000).toFixed(1) + 'k chars'
+      : score.textChars + ' chars';
+    return `${score.ratedItems} rated &middot; ${score.photoCount} photos &middot; ${charsLabel}<br>` +
+           `<span style="color:#6b7280;">modified ${_formatSnapshotTime(survey)}</span>`;
+  }
+
+  const pushOpt = document.createElement('button');
+  pushOpt.id = 'manualPushBtn';
+  pushOpt.style.cssText = menuItemStyle + 'color:#0d9488;';
+  pushOpt.innerHTML = '☁️ Force push to cloud';
+  pushOpt.title = 'OVERWRITE the cloud copy of this survey with the version on this device';
+  pushOpt.onclick = async () => {
+    overflowMenu.style.display = 'none';
+    if (!FirebaseSync.isEnabled() || !window.fsDb) {
+      showAlert('Firebase sync is not active on this device.');
+      return;
+    }
+    const survey = await getSurvey(currentSurveyId);
+    if (!survey) { showAlert('Survey not found'); return; }
+
+    // Peek at the cloud doc so the confirm dialog can show the exact
+    // before/after state. peekCloudSurvey now returns null ONLY on a
+    // clean miss (no doc) and THROWS on any transient error (network,
+    // permission, firebase not loaded) — we track peekFailed separately
+    // so the confirm dialog can tell Dave the difference between "cloud
+    // has no copy" and "couldn't check cloud".
+    pushOpt.innerHTML = '☁️ Checking cloud…';
+    pushOpt.disabled = true;
+    let cloudCopy = null;
+    let peekFailed = false;
+    try {
+      cloudCopy = await FirebaseSync.peekCloudSurvey(currentSurveyId);
+    } catch (e) {
+      console.warn('[Sync] peek before push failed:', e);
+      peekFailed = true;
+    }
+    pushOpt.innerHTML = '☁️ Force push to cloud';
+    pushOpt.disabled = false;
+
+    const vname = survey.vesselName || 'this survey';
+    const cloudLine = cloudCopy
+      ? _snapshotSummary(cloudCopy)
+      : (peekFailed
+          ? '<em style="color:#b45309;">could not reach cloud &mdash; any existing cloud copy WILL be overwritten if it exists</em>'
+          : '<em>no cloud copy yet &mdash; this push will create one</em>');
+    const message =
+      `<strong style="color:#dc2626;">Force push &mdash; OVERWRITE cloud copy of "${vname}"?</strong>` +
+      `<br><br>` +
+      `<div style="text-align:left;font-size:13px;line-height:1.5;">` +
+      `<strong>This device (will be sent up):</strong><br>` +
+      `${_snapshotSummary(survey)}` +
+      `<br><br>` +
+      `<strong>Cloud now (will be replaced):</strong><br>` +
+      `${cloudLine}` +
+      `</div>` +
+      `<br>` +
+      `<span style="font-size:12px;color:#7c2d12;">Any cloud edits not on this device will be lost.</span>`;
+
+    const ok = await showConfirm(message, 'Force push', 'Cancel');
+    if (!ok) return;
+
+    pushOpt.innerHTML = '☁️ Pushing…';
+    pushOpt.disabled = true;
+    try {
+      await FirebaseSync.pushSurvey(survey);
+      // pushAllPhotosForSurvey is idempotent per-photo (it skips photos
+      // already in Storage) so re-pushes are cheap.
+      await FirebaseSync.pushAllPhotosForSurvey(survey);
+      if (typeof showToast === 'function') {
+        showToast(`☁️ Pushed "${survey.vesselName || 'survey'}" to cloud.`, 4000);
+      } else {
+        showAlert('Push complete.');
+      }
+    } catch (err) {
+      console.error('[Sync] Manual push failed:', err);
+      showAlert('Push failed: ' + (err && err.message ? err.message : String(err)));
+    } finally {
+      pushOpt.innerHTML = '☁️ Force push to cloud';
+      pushOpt.disabled = false;
+    }
+  };
+  overflowMenu.appendChild(pushOpt);
+
+  const pullOpt = document.createElement('button');
+  pullOpt.id = 'manualPullBtn';
+  pullOpt.style.cssText = menuItemStyle + 'color:#7c3aed;';
+  pullOpt.innerHTML = '⬇️ Force pull from cloud';
+  pullOpt.title = 'OVERWRITE this device\'s copy of this survey with the cloud copy';
+  pullOpt.onclick = async () => {
+    overflowMenu.style.display = 'none';
+    if (!FirebaseSync.isEnabled() || !window.fsDb) {
+      showAlert('Firebase sync is not active on this device.');
+      return;
+    }
+    const survey = await getSurvey(currentSurveyId);
+    if (!survey) { showAlert('Survey not found'); return; }
+
+    // Peek at the cloud doc BEFORE the confirm. If there's no cloud copy
+    // we bail with a clear message — Pull is a no-op when nothing exists
+    // upstream, and the confirm dialog should never let Dave overwrite
+    // local with nothing.
+    pullOpt.innerHTML = '⬇️ Checking cloud…';
+    pullOpt.disabled = true;
+    let cloudCopy = null;
+    let peekFailed = false;
+    try {
+      cloudCopy = await FirebaseSync.peekCloudSurvey(currentSurveyId);
+    } catch (e) {
+      console.warn('[Sync] peek before pull failed:', e);
+      peekFailed = true;
+    }
+    pullOpt.innerHTML = '⬇️ Force pull from cloud';
+    pullOpt.disabled = false;
+
+    if (!cloudCopy) {
+      showAlert(peekFailed
+        ? 'Could not reach the cloud — check connection and try again.'
+        : 'No cloud copy of this survey exists yet. Push it first from the device that has the data.');
+      return;
+    }
+
+    const vname = survey.vesselName || 'this survey';
+    const message =
+      `<strong style="color:#dc2626;">Force pull &mdash; OVERWRITE local copy of "${vname}"?</strong>` +
+      `<br><br>` +
+      `<div style="text-align:left;font-size:13px;line-height:1.5;">` +
+      `<strong>Cloud (will be pulled down):</strong><br>` +
+      `${_snapshotSummary(cloudCopy)}` +
+      `<br><br>` +
+      `<strong>This device (will be replaced):</strong><br>` +
+      `${_snapshotSummary(survey)}` +
+      `</div>` +
+      `<br>` +
+      `<span style="font-size:12px;color:#7c2d12;">Any local edits not in the cloud will be lost.</span>`;
+
+    const ok = await showConfirm(message, 'Force pull', 'Cancel');
+    if (!ok) return;
+
+    pullOpt.innerHTML = '⬇️ Pulling…';
+    pullOpt.disabled = true;
+    try {
+      const result = await FirebaseSync.pullSurvey(currentSurveyId);
+      if (result && result.error) {
+        showAlert('Pull failed: ' + result.error);
+        return;
+      }
+      // Re-render the survey we just pulled so Dave sees the cloud copy.
+      // v2428: use openSurvey (same pattern as checkCloudRichnessBanner's
+      // Pull action at line 22291). showInspection is not defined anywhere
+      // in the app — a stale reference in recoverOpt is a latent bug.
+      const fresh = await getSurvey(currentSurveyId);
+      openSurvey(currentSurveyId);
+      if (typeof showToast === 'function') {
+        showToast(`⬇️ Pulled "${(fresh && fresh.vesselName) || 'survey'}" from cloud.`, 4000);
+      }
+    } catch (err) {
+      console.error('[Sync] Manual pull failed:', err);
+      showAlert('Pull failed: ' + (err && err.message ? err.message : String(err)));
+    } finally {
+      pullOpt.innerHTML = '⬇️ Force pull from cloud';
+      pullOpt.disabled = false;
+    }
+  };
+  overflowMenu.appendChild(pullOpt);
+
   // Divider
   const divider = document.createElement('div');
   divider.style.cssText = 'height:1px;background:#e5e7eb;margin:4px 0;';
@@ -26103,73 +26307,47 @@ const FirebaseSync = (() => {
     }
   }
 
+  // v2428 hardening: Peek at the cloud doc without modifying anything
+  // locally or remotely. Returns the remote survey (plain object) on hit,
+  // null on clean miss ("no cloud copy yet"), and THROWS on transient
+  // failure (network down, permission error, firebase not loaded). The
+  // distinction matters: the manual Push/Pull confirm dialog needs to
+  // tell Dave whether cloud genuinely has no copy vs whether we couldn't
+  // reach it — a swallowed error would make the dialog silently claim
+  // "no copy yet" when in fact the cloud copy might be richer than local.
+  async function peekCloudSurvey(surveyId) {
+    if (!window.fsDb) throw new Error('firebase-unavailable');
+    const doc = await window.fsDb.collection('surveys').doc(String(surveyId)).get();
+    if (!doc.exists) return null;
+    const s = doc.data() || {};
+    s.id = doc.id;
+    return s;
+  }
+
   // Upload a single survey to Firestore (without photos — photos go to Storage)
   //
-  // v2427 — Push-side conflict-copy fallback. Before overwriting the main
-  // cloud doc, we compare richness. If cloud is richer than local, we do
-  // NOT touch the main doc. Instead the push is diverted to
-  //   survey_conflicts/{id}__{device}__{timestamp}
-  // so BOTH the cloud main copy AND the local attempt are preserved. Dave
-  // reconciles later via Settings > Sync Conflicts (shipping in v2428).
+  // v2428 — MANUAL PUSH. Dave's rule: "No automatic decisions about what
+  // is richer. I decide — do I want to push or pull from either side."
+  // This function is now only called from the explicit "☁️ Push to cloud"
+  // overflow-menu button, so it does exactly what the button label says:
+  // unconditionally overwrite the cloud doc with the local copy.
   //
-  // This closes the failure mode that caused the 2026-04-20 Legacy II
-  // regression: a device with thin local state silently overwrote a richer
-  // cloud copy through the unchecked pushSurvey path.
+  // The v2427 richness check + survey_conflicts fallback has been REMOVED.
+  // If Dave taps Push and cloud was richer, cloud gets replaced — that is
+  // his explicit choice. The inverse button, "☁️ Pull from cloud", calls
+  // pullSurvey() and replaces local with cloud. No scoring, no surprises.
+  //
+  // Callers MUST ensure Dave asked for this (overflow menu, pullNow
+  // helpers that already suppress local writes, etc.). Do NOT restore
+  // any saveSurvey-wrapper auto-push — that is exactly the design flaw
+  // this version exists to eliminate.
   async function pushSurvey(survey) {
     if (!_syncEnabled || !window.fsDb) return;
     const sid = String(survey.id);
     try {
-      const check = await checkCloudRichness(survey);
       const doc = JSON.parse(JSON.stringify(survey));
       doc.lastModified = new Date().toISOString();
       delete doc._rev;
-
-      if (check.cloudRicher) {
-        // Conflict copies live in a SEPARATE Firestore collection
-        // (survey_conflicts) so they don't pollute `initialSync()`. Each
-        // doc has a pointer back to the original surveyId and scoring
-        // snapshots on both sides so the v2428 reconciliation UI can
-        // render the numbers without re-computing.
-        //
-        // Rate-limit: if we already wrote a conflict copy for this survey
-        // in the last 60 seconds, skip this one. Local is already preserved
-        // in IDB; every subsequent save during a session where cloud is
-        // still richer would otherwise spam Firestore with near-identical
-        // copies and spam Dave with toast notifications.
-        const now = Date.now();
-        const lastConflict = _lastConflictCopyTime[sid] || 0;
-        if (now - lastConflict < 60000) {
-          console.log(`[Sync] v2427 Conflict already saved recently for ${sid}; skipping duplicate write.`);
-          updateSyncStatusUI('error', 'Conflict saved — reconcile in Settings');
-          return;
-        }
-        const device = _getDeviceLabel();
-        const ts = now;
-        const conflictId = `${sid}__${device}__${ts}`;
-        doc._conflictSourceId    = sid;
-        doc._conflictDevice      = device;
-        doc._conflictTimestamp   = ts;
-        doc._conflictLocalScore  = check.localScore;
-        doc._conflictRemoteScore = check.remoteScore;
-        doc._conflictVesselName  = survey.vesselName || '';
-        await window.fsDb.collection('survey_conflicts').doc(conflictId).set(doc);
-        _lastConflictCopyTime[sid] = ts;
-        console.warn(
-          `[Sync] v2427 CONFLICT: cloud copy of "${survey.vesselName || sid}" is richer. ` +
-          `Saved local as survey_conflicts/${conflictId}. ` +
-          `(local: ${check.localScore.textChars}ch / ${check.localScore.photoCount}p / ${check.localScore.ratedItems}r  vs  ` +
-          `cloud: ${check.remoteScore.textChars}ch / ${check.remoteScore.photoCount}p / ${check.remoteScore.ratedItems}r). ` +
-          `Reconcile in Settings > Sync Conflicts (v2428).`
-        );
-        updateSyncStatusUI('error', 'Conflict saved — reconcile in Settings');
-        if (typeof showToast === 'function') {
-          showToast(`⚠ Cloud copy of ${survey.vesselName || 'this survey'} is richer. Your local changes saved as a conflict copy.`, 6000);
-        }
-        _lastLocalPushTime[sid] = Date.now();
-        _lastSyncTime = Date.now();
-        return;
-      }
-
       await window.fsDb.collection('surveys').doc(sid).set(doc);
       _lastLocalPushTime[sid] = Date.now();
       updateSyncStatusUI('synced', new Date().toLocaleTimeString());
@@ -26733,12 +26911,17 @@ const FirebaseSync = (() => {
       console.warn('[Sync] Firebase not available — sync disabled');
       return;
     }
-    // v2426: keep _syncEnabled = true so the sync wrapper continues to
-    // push saves to Firebase (insurance backup). Only the PULL path is
-    // disabled — no onSnapshot, no periodic timer, no visibility pull.
+    // v2428: _syncEnabled stays true so the public pushSurvey / pullSurvey
+    // / pushAllPhotosForSurvey helpers remain callable — but the saveSurvey
+    // and savePhoto wrappers no longer fire them automatically. Sync is
+    // now ENTIRELY manual: Dave taps "☁️ Push to cloud" or "⬇️ Pull from
+    // cloud" in the overflow menu. The user-initiated batch paths
+    // (backupAllEverywhere, saveSurveyWithProgress, saveEverywhere) also
+    // still work — they invoke pushSurvey explicitly. Nothing about the
+    // save path auto-decides what to sync.
     _syncEnabled = true;
-    updateSyncStatusUI('idle', 'Push-only (pull is manual)');
-    console.log('[Sync] v2426: Bidirectional sync disabled. Pushes active. Call FirebaseSync.pullNow() for explicit pull.');
+    updateSyncStatusUI('idle', 'Manual sync (use overflow menu)');
+    console.log('[Sync] v2428: Manual sync only. Auto-push removed. Use overflow-menu buttons or FirebaseSync.pushSurvey / FirebaseSync.pullSurvey.');
   }
 
   // v2426 — explicit, user-initiated pull from Firestore. Runs the
@@ -26781,6 +26964,12 @@ const FirebaseSync = (() => {
     pushSurvey,
     removeSurvey,
     pushPhoto,
+    // v2428: exposed so the manual "☁️ Push to cloud" overflow-menu button
+    // can upload every photo referenced by the current survey in one shot,
+    // now that savePhoto no longer auto-pushes. The function is defined
+    // inside the IIFE at pushAllPhotosForSurvey(); callers pass a full
+    // survey object. Skips photos already in Firebase Storage.
+    pushAllPhotosForSurvey,
     removePhoto,
     pullPhotosForSurvey,
     photoExistsInFirebase,
@@ -26797,6 +26986,12 @@ const FirebaseSync = (() => {
     // the ALL-surveys initialSync path.
     checkCloudRichness,
     pullSurvey,
+    // v2428 hardening: lets the manual Push / Pull overflow-menu buttons
+    // fetch the cloud doc (peek) and score local + cloud content (chars /
+    // photos / rated items) so the force-overwrite confirm dialog can show
+    // Dave exactly what he'd be replacing before he commits.
+    peekCloudSurvey,
+    scoreSurveyContent: _scoreSurveyContent,
     updateSyncStatusUI,
     refreshUI
   };
@@ -26846,10 +27041,15 @@ saveSurvey = async function(survey) {
   // unchanged IDB record stripped of its new items, which is exactly the
   // regression class the guard exists to prevent.
   if (result === null) return null;
-  // Push to Firebase (non-blocking)
-  if (FirebaseSync.isEnabled() && !FirebaseSync.isSuppressed()) {
-    FirebaseSync.pushSurvey(survey).catch(err => console.error('[Sync] Push failed:', err));
-  }
+  // v2428: AUTO-PUSH REMOVED. Dave's explicit rule (2026-04-20):
+  //   "This is supposed to be manual. No automatic decisions about what
+  //    is richer. I decide — do I want to push or pull from either side."
+  // Every save used to fire FirebaseSync.pushSurvey here; that call now
+  // only runs when Dave taps the explicit "☁️ Push to cloud" button in
+  // the inspection overflow menu. Local IDB saves continue as before —
+  // nothing about the on-device write path has changed. If the tab is
+  // closed before a manual push, the local copy is still the source of
+  // truth; nothing is lost.
   // v2253: Queue Drive auto-sync (throttled, non-blocking)
   // v2259: Skip Drive auto-sync when suppressed (e.g. periodicSync pulling from cloud)
   if (!FirebaseSync.isSuppressed()) {
@@ -26858,14 +27058,16 @@ saveSurvey = async function(survey) {
   return result;
 };
 
-// ── Hook savePhoto to also push to Firebase Storage ──────────────────────────
+// ── Hook savePhoto (v2428: Firebase auto-push REMOVED) ───────────────────────
+// v2428: Photo saves no longer auto-push to Firebase Storage. Photos land in
+// IndexedDB immediately (same as before); cloud upload happens only when Dave
+// taps the manual "☁️ Push to cloud" button, which walks the survey and
+// uploads every photo it references via FirebaseSync.pushAllPhotosForSurvey.
+// Kept as a wrapper (not deleted) so the hook point is preserved for future
+// use — e.g. queued/batched upload, or a Drive-side photo push.
 const _originalSavePhoto = savePhoto;
 savePhoto = async function(photo) {
-  const result = await _originalSavePhoto(photo);
-  if (FirebaseSync.isEnabled() && !FirebaseSync.isSuppressed()) {
-    FirebaseSync.pushPhoto(photo).catch(err => console.error('[Sync] Photo push failed:', err));
-  }
-  return result;
+  return await _originalSavePhoto(photo);
 };
 
 // ── Hook deletePhoto to also remove from Firebase ────────────────────────────
