@@ -13431,8 +13431,9 @@ const COMP_SOURCE_PRESETS = ['BUCValu', 'Soldboats.com', 'YachtWorld', 'Boat Tra
 // revealed so the surveyor can start typing immediately.
 function handleComparableSourceChange(sel) {
   if (!sel) return;
-  const entry = sel.closest('div[style*="border"]') || sel.parentElement && sel.parentElement.parentElement;
-  // More robust: find the sibling .compSourceCustom in the same column cell
+  // The <select> and its paired .compSourceCustom live in the same
+  // flex-column wrapper (see addComparableEntry), so the custom input is
+  // always a sibling inside sel.parentElement.
   const cell = sel.parentElement;
   if (!cell) return;
   const custom = cell.querySelector('.compSourceCustom');
