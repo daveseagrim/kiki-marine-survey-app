@@ -563,7 +563,14 @@
     {
       "section": "Transducers (speed, depth, etc.)",
       "rating": "C",
-      "text": "The speed wheel turned freely, and the installation appeared in acceptable condition.",
+      "text": "The speed wheel turned freely.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Transducers (speed, depth, etc.)",
+      "rating": "C",
+      "text": "The installation was in serviceable condition.",
       "phase": "observed",
       "severity": 3
     },

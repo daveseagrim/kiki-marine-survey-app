@@ -12,6 +12,34 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2443 — 2026-04-21
+### Changed — Transducer speed wheel chip: dropped "acceptable condition" clause, added standalone "serviceable condition" chip
+
+Dave asked for the phrase "acceptable condition" to be removed from the speed-wheel chip in the `Transducers (speed, depth, etc.)` section, and for the descriptor to appear **on its own** as a separate tappable snippet rather than tacked onto the speed-wheel sentence.
+
+**Before — Hull[80] C/observed.**
+
+> The speed wheel turned freely, and the installation appeared in acceptable condition.
+
+**After — two separate chips so the surveyor can tap either or both.**
+
+| Idx | Rating | Text |
+|---|---|---|
+| 80 | C / observed | The speed wheel turned freely. |
+| 81 (new) | C / observed | The installation was in serviceable condition. |
+
+**Why split.** Dave's preference: "Adding serviceable condition on its own without being attached to a separate sentence seems like the way to go." When the two ideas were welded together, the surveyor couldn't report on the speed-wheel spin without also implicitly commenting on the whole installation. Two chips give independent coverage — a speed-only tap is now possible, and "serviceable condition" becomes a reusable descriptor that can stand alone in contexts where the speed wheel isn't relevant (e.g. a depth-only transducer).
+
+**Word choice.** "acceptable condition" → "serviceable condition" matches Dave's established vocabulary preference (see `v2415` hull-deck joint satisfactory → serviceable, `v2442` conductivity `proper` → `serviceable`).
+
+**Chip ordering.** The new standalone chip was inserted immediately after the speed-wheel chip so the two render adjacent in the panel. Existing neighbours ("The transducer face appeared clean…", "The installation appeared in good working order.") stay in their current order afterward.
+
+**Existing stored surveys.** Past surveys that captured the old combined chip retain that exact text in their `items[...].text` field — the edit only changes the insertable library, not saved notes. Dave can re-tap if he wants to split an old survey's note.
+
+**Files changed.** `text_library.json` (Hull[80] text edited + 1 new chip inserted at position 81), `app.js` (APP_VERSION → v2443), `sw.js` (CACHE_NAME → `kiki-marine-v2443`), `index.html` (meta + 7 cache-busters → v2443), this file.
+
+---
+
 ## v2442 — 2026-04-21
 ### Fixed — Swim platform conductivity chip: removed the word "proper"
 
