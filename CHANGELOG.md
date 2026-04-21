@@ -12,6 +12,61 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2447 — 2026-04-21
+### Removed — Bow thruster C chip: "Corrosion was not concerning"
+
+Dave's ask: *"Remove this from bow thruster: Corrosion was not concerning."*
+
+**Before — Hull Bow thruster C/observed (was Hull[124] after the v2445 NT insert).**
+
+> Corrosion was not concerning.
+
+**After.** Chip deleted entirely — same reasoning as v2446's grab rails change: a C-rating observation declaring the *absence* of corrosion on a bow thruster gear leg isn't a meaningful finding. If the gear leg is sound, the preceding chip ("The bow thruster gear leg appeared solid and the propeller rotated freely.") already covers it. If corrosion *is* present and concerning, that's the A/B-rating territory ("Significant corrosion was present on the gear leg.", Hull A/observed).
+
+**Hull Bow thruster chip ladder after removal (6 chips).**
+
+| Rating | Phase | Text |
+|---|---|---|
+| A | observed | The bow thruster gear leg appeared solid and the propeller rotated freely. |
+| A | observed | Significant corrosion was present on the gear leg. |
+| B | observed | The bow thruster gear leg appeared solid and the propeller rotated freely. |
+| C | observed | The bow thruster gear leg appeared solid and the propeller rotated freely. |
+| Not tested | observed | The bow thruster was not tested because the vessel was out of the water. *(added v2445)* |
+| N/A | observed | No bow thruster was installed on this vessel. |
+
+**Parallel with v2446.** Same pattern as the grab rails `free of significant corrosion` removal: Dave's library is moving away from "absence-of-deficiency" C-rating copy in favour of positive condition statements only. A bow thruster in serviceable condition is described by the solidity/rotation chip; an unserviceable one gets the A-rating significant-corrosion chip. Nothing in between that says "we looked and it was fine."
+
+**Files changed.** `text_library.json` (Hull Bow thruster C/observed corrosion chip removed), `app.js` (APP_VERSION → v2447), `sw.js` (CACHE_NAME → `kiki-marine-v2447`), `index.html` (meta + 7 cache-busters → v2447), this file.
+
+---
+
+## v2446 — 2026-04-21
+### Removed — Grab rails C chip: "stainless steel finish appeared clean and free of significant corrosion"
+
+Dave's ask: *"Grab rails. Remove the part about stainless being free of corrosion. These don't corrode."*
+
+**Before — Deck[303] C/observed (section: Grab rails).**
+
+> The stainless steel finish appeared clean and free of significant corrosion.
+
+**After.** Chip deleted entirely. Not rewritten — a C-rated observation that the finish was "free of corrosion" reads like saying a brick is "free of leaks": the category of deficiency doesn't apply to marine-grade stainless on grab rails in the first place, so stating its absence is meaningless. Removing the chip is cleaner than softening the language.
+
+**Coverage after removal.** The remaining C-rated observed chips for Grab rails still cover:
+- Deck[298] "The vessel was fitted with teak grab rails."
+- Deck[299] "The vessel was fitted with stainless steel grab rails." *(material identification — kept)*
+- Deck[300] "All grab rails were solidly mounted and showed no visible deficiencies."
+- Deck[301] "The mounting hardware and bedding were intact."
+- Deck[302] "The teak showed normal weathering consistent with a vessel of this age and appeared structurally sound."
+
+Net: teak gets a dedicated condition-and-aging sentence (302); stainless gets identification (299) plus the generic "solidly mounted / no visible deficiencies" (300). The parallel isn't perfect but matches reality — stainless grab rails don't need a weathering chip.
+
+**Out of scope — kept intentionally.**
+- Deck[291] B/observed: *"Surface rust staining was observed on one or more stainless steel grab rails."* — this is a legitimate B-rating deficiency observation when rust staining is actually present. Dave's ask targets the "free of corrosion" C-rating framing, not all mentions of stainless and rust. Surface rust on stainless is a real field observation (from dissimilar-metal contact, iron contamination, pickling failure) that Dave should be able to report when he sees it.
+
+**Files changed.** `text_library.json` (Deck Grab rails C/observed stainless chip removed), `app.js` (APP_VERSION → v2446), `sw.js` (CACHE_NAME → `kiki-marine-v2446`), `index.html` (meta + 7 cache-busters → v2446), this file.
+
+---
+
 ## v2445 — 2026-04-21
 ### Added — Hull → Bow thruster: "Not tested — vessel out of water" chip
 

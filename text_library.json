@@ -870,13 +870,6 @@
     },
     {
       "section": "Bow thruster",
-      "rating": "C",
-      "text": "Corrosion was not concerning.",
-      "phase": "observed",
-      "severity": 1
-    },
-    {
-      "section": "Bow thruster",
       "rating": "Not tested",
       "text": "The bow thruster was not tested because the vessel was out of the water.",
       "phase": "observed",
@@ -27202,13 +27195,6 @@
       "phase": "observed",
       "severity": 1,
       "text": "The teak showed normal weathering consistent with a vessel of this age and appeared structurally sound.",
-      "section": "Grab rails"
-    },
-    {
-      "rating": "C",
-      "phase": "observed",
-      "severity": 1,
-      "text": "The stainless steel finish appeared clean and free of significant corrosion.",
       "section": "Grab rails"
     },
     {
