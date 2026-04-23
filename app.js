@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2462';
+const APP_VERSION = 'v2463';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -628,6 +628,76 @@ function shortLocation(fullLocation) {
     return `${street}, ${parts[1]}`;
   }
   return fullLocation;
+}
+
+// v2463: Report-grade address formatter. shortLocation() above is for UI labels
+// (tab title, survey card, etc) where we want "Venue, City" only. This one is
+// for the formal "Location of Survey Inspection" line in the report body — we
+// want the full mailing address, but stripped of Nominatim's geocoder artefacts
+// (suburb, "Peel Region", "Golden Horseshoe", "Canada"), with the province
+// abbreviated, and house number joined to the street name with a space instead
+// of a comma.
+//
+// Target format: "Port Credit Yacht Club, 115 Lakefront Promenade, Mississauga, ON L5E 3G9"
+//
+// Rules applied to the Nominatim display_name:
+//   - Drop parts matching /Region$| Horseshoe$|^Canada$/i (geocoder noise).
+//   - Abbreviate Canadian province names to their two-letter codes.
+//   - Join a pure-digit part (house number) with the next part using a space.
+//   - Drop the "suburb" / neighbourhood part — heuristic: the sub-city part
+//     immediately before the city, only when we can identify both. Conservative:
+//     if we can't tell which one is the suburb, we leave both in and let the
+//     surveyor tidy it up in Edit Vessel Info.
+function formatReportLocation(fullLocation) {
+  if (!fullLocation) return '';
+  const rawParts = fullLocation.split(',').map(p => p.trim()).filter(Boolean);
+  if (rawParts.length <= 2) return fullLocation;
+
+  const provinceMap = {
+    'ontario': 'ON', 'british columbia': 'BC', 'alberta': 'AB',
+    'saskatchewan': 'SK', 'manitoba': 'MB', 'quebec': 'QC', 'québec': 'QC',
+    'new brunswick': 'NB', 'nova scotia': 'NS', 'prince edward island': 'PE',
+    'newfoundland and labrador': 'NL', 'northwest territories': 'NT',
+    'nunavut': 'NU', 'yukon': 'YT',
+  };
+  const postalRE = /^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/i;
+  const noiseRE  = /(^|\s)Region$| Horseshoe$|^Regional Municipality\b|^County$|^Canada$/i;
+
+  // Pass 1: drop noise, normalise province.
+  let parts = [];
+  for (const p of rawParts) {
+    if (noiseRE.test(p)) continue;
+    const key = p.toLowerCase();
+    if (provinceMap[key]) parts.push(provinceMap[key]);
+    else parts.push(p);
+  }
+
+  // Pass 2: join pure-digit part (house number) with the next part.
+  const joined = [];
+  for (let i = 0; i < parts.length; i++) {
+    if (/^\d+[A-Z]?$/i.test(parts[i]) && i + 1 < parts.length) {
+      joined.push(`${parts[i]} ${parts[i + 1]}`);
+      i++;
+    } else {
+      joined.push(parts[i]);
+    }
+  }
+
+  // Pass 3: merge the province + postal code into one comma-less segment
+  // ("ON L5E 3G9" not "ON, L5E 3G9") per Canada Post guidelines.
+  const result = [];
+  for (let i = 0; i < joined.length; i++) {
+    const cur = joined[i];
+    const next = joined[i + 1];
+    if (/^[A-Z]{2}$/.test(cur) && next && postalRE.test(next)) {
+      result.push(`${cur} ${next}`);
+      i++;
+    } else {
+      result.push(cur);
+    }
+  }
+
+  return result.join(', ');
 }
 
 // Color mapping for ratings
@@ -1472,12 +1542,15 @@ const ITEM_SNIPPET_MAP = {
   'Evident damage or repairs to hull and rudder(s) (if applicable) below the waterline': 'Hull(s) condition (below the waterline)',
   'Hydraulic steering (hoses, fittings, steering cylinder, tiller arm / tiller bolt or tie-bar, rudder post and stuffing box, etc.)': 'Hydraulic steering (hoses, fittings, steering cylinder, tiller arm or tie bar, rudder post and stuffing box, etc.)',
   'Hull exterior above the waterline': 'Hull exterior above the waterline',
-  'Hull and rudder(s) (if applicable) percussion testing': 'Hull and rudder(s) impact and resonance testing',
+  // v2463: values retargeted to the current text_library section name ("percussion testing").
+  // Pre-v2463 the library still used "impact and resonance testing" here; both sides are now
+  // aligned on "percussion", so the bridge points at the live section.
+  'Hull and rudder(s) (if applicable) percussion testing': 'Hull and rudder(s) percussion testing',
   'Rudder(s) condition': 'Rudder(s) condition',
   'Rudder condition': 'Rudder(s) condition',
   'Propeller(s)': 'Propeller(s)',
   'Propeller': 'Propeller(s)',
-  'Hull and rudder(s) (if applicable) impact and resonance testing': 'Hull and rudder(s) impact and resonance testing',
+  'Hull and rudder(s) (if applicable) impact and resonance testing': 'Hull and rudder(s) percussion testing',
   'Hull and rudder(s) (if applicable) conductivity testing': 'Hull and rudder(s) conductivity testing',
   'Hydraulic steering': 'Hydraulic steering (hoses, fittings, steering cylinder, tiller arm or tie bar, rudder post and stuffing box, etc.)',
   'LPG cut-off solenoid valve switch': 'LPG cut off solenoid valve switch',
@@ -1530,7 +1603,7 @@ const ITEM_SNIPPET_MAP = {
   'Aft deck condition': 'Aft deck condition (spider cracks, etc.)',
   'Condition (spider cracks, etc.)': 'Aft deck condition (spider cracks, etc.)',
   'Conductivity testing': 'Aft deck conductivity testing',
-  'Percussion testing': 'Aft deck impact and resonance testing',
+  'Percussion testing': 'Aft deck percussion testing',
   'Mechanical steering': 'Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)',
   'Trim tab mechanism (interior)': 'Trim tab hydraulic pump and system',
   // ── Insurance template mappings ──────────────────────────────────────
@@ -1540,7 +1613,7 @@ const ITEM_SNIPPET_MAP = {
   'Cabin and conveniences - other features': 'Cabin lining and ceiling',
   'Cockpit - other features': 'Cockpit, floor, seats and coaming',
   'Cockpit - other gauges and instrumentation': 'Engine gauges',
-  'Cockpit percussion testing': 'Cockpit impact and resonance testing',
+  'Cockpit percussion testing': 'Cockpit percussion testing',
   'Condition': 'Aft deck condition (spider cracks, etc.)',
   'Deck and coachroof/pilot house - other features': 'Deck and coachroof/pilot house condition (spider cracks, etc.)',
   'Deck and coachroof/pilot house condition': 'Deck and coachroof/pilot house condition (spider cracks, etc.)',
@@ -2279,7 +2352,11 @@ window.addEventListener('pagehide', _flushOnHide);
 const ITEM_LABEL_MIGRATIONS = {
   'Hull and rudder(s)/drive(s) condition (below the waterline)': 'Hull(s) condition (below the waterline)',
   'Evident damage or repairs to hull and rudder below the waterline': 'Hull(s) condition (below the waterline)',
-  'Hull and rudder(s) (if applicable) percussion testing': 'Hull and rudder(s) (if applicable) impact and resonance testing',
+  // v2463: direction reversed. Pre-v2463 the current label was "impact and resonance testing"
+  // and this entry migrated NEW ("percussion") → OLD — which, now that "percussion" is the
+  // live label, would actively corrupt good current data. Reversed so any lingering survey
+  // with the old "impact and resonance" label upgrades to the current "percussion" label.
+  'Hull and rudder(s) (if applicable) impact and resonance testing': 'Hull and rudder(s) (if applicable) percussion testing',
   'Hull and rudder(s) (if applicable) moisture testing': 'Hull and rudder(s) (if applicable) conductivity testing',
   'Swim platform and ladder - condition and moisture readings': 'Swim platform and ladder - condition and conductivity readings',
   'IPS pod drive(s)': 'IPS pod drive(s)',
@@ -12523,7 +12600,9 @@ async function generateVesselDescription() {
   const yearStr = year || '[YEAR]';
   const makeStr = make || '[MAKE]';
   const modelStr = model || '[MODEL]';
-  const typeStr = boatStyle || (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : '[VESSEL TYPE]');
+  // v2463: lowercase boatStyle ("Sloop" → "sloop") mid-sentence. The sail/power
+  // fallbacks are already lowercase; the placeholder stays uppercase intentionally.
+  const typeStr = boatStyle ? boatStyle.toLowerCase() : (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : '[VESSEL TYPE]');
 
   // Gather engine and transmission data from form
   const engineMake = document.getElementById('engineMake')?.value || '';
@@ -12554,7 +12633,12 @@ async function generateVesselDescription() {
   const engMakeModel = (engineMake && engineModel) ? `${engineMake} ${engineModel}` :
                        engineMake ? `${engineMake} [MODEL]` : '[MAKE/MODEL]';
   const engFuel = fuelType || '[DIESEL/GASOLINE]';
-  const engHPStr = engineHP ? `${engineHP} horsepower` : '[XX] horsepower';
+  // v2463: don't double-emit the unit. If the user typed a power string that already
+  // contains HP/kW/horsepower (e.g., "29HP / 21.3kW" from the auto-fill), use it verbatim.
+  // Only append "horsepower" when the value is a bare number.
+  const engHPStr = engineHP
+    ? (/(hp|h\.p\.|horsepower|kw|bhp)/i.test(engineHP) ? engineHP : `${engineHP} horsepower`)
+    : '[XX] horsepower';
   const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
                          transmissionMake ? `${transmissionMake} [MODEL]` : '[MAKE/MODEL]';
 
@@ -12652,8 +12736,11 @@ async function generateVesselDescription() {
   // TC TP 511 details belong in the Safety Equipment section of the report,
   // not in the narrative description.
 
-  const constructionStr = construction || '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
-  const hullTypeStr = hullType || '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
+  // v2463: lowercase the real value so it reads as prose ("a fibreglass displacement
+  // sloop" not "a Fibreglass Displacement Sloop"). Placeholders stay uppercase — they
+  // signal a missing value to the surveyor reviewing the draft.
+  const constructionStr = construction ? construction.toLowerCase() : '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
+  const hullTypeStr = hullType ? hullType.toLowerCase() : '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
   const keelStr = vesselType === 'sail'
     ? (keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : ' with a [FIN/FULL/SHOAL/WING] keel')
     : '';
@@ -12671,12 +12758,14 @@ async function generateVesselDescription() {
   desc += `.`;
   desc += rigDesc;
   // Hull/deck colours woven into this paragraph when known
+  // v2463: colour names come from the dropdown capitalised (e.g. "White", "Navy blue").
+  // Lowercase them mid-sentence so the narrative reads as prose, not a list of proper nouns.
   if (hullColour && bootStripeColour && deckColour) {
-    desc += ` The hull is finished in ${hullColour} with a ${bootStripeColour} boot stripe, and the deck is ${deckColour}.`;
+    desc += ` The hull is finished in ${hullColour.toLowerCase()} with a ${bootStripeColour.toLowerCase()} boot stripe, and the deck is ${deckColour.toLowerCase()}.`;
   } else if (hullColour && deckColour) {
-    desc += ` The hull is finished in ${hullColour} and the deck is ${deckColour}.`;
+    desc += ` The hull is finished in ${hullColour.toLowerCase()} and the deck is ${deckColour.toLowerCase()}.`;
   } else if (hullColour) {
-    desc += ` The hull is finished in ${hullColour}.`;
+    desc += ` The hull is finished in ${hullColour.toLowerCase()}.`;
   }
 
   // ── Para 2: Propulsion ──
@@ -12761,7 +12850,9 @@ async function regenerateDescriptionFromInspection() {
   const yearStr = year || '[YEAR]';
   const makeStr = make || '[MAKE]';
   const modelStr = model || '[MODEL]';
-  const typeStr = boatStyle || (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : '[VESSEL TYPE]');
+  // v2463: lowercase boatStyle ("Sloop" → "sloop") mid-sentence. The sail/power
+  // fallbacks are already lowercase; the placeholder stays uppercase intentionally.
+  const typeStr = boatStyle ? boatStyle.toLowerCase() : (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : '[VESSEL TYPE]');
 
   const engineMake = survey.engineMake || '';
   const engineModel = survey.engineModel || '';
@@ -12785,7 +12876,12 @@ async function regenerateDescriptionFromInspection() {
   const engMakeModel = (engineMake && engineModel) ? `${engineMake} ${engineModel}` :
                        engineMake ? `${engineMake} [MODEL]` : '[MAKE/MODEL]';
   const engFuel = fuelType || '[DIESEL/GASOLINE]';
-  const engHPStr = engineHP ? `${engineHP} horsepower` : '[XX] horsepower';
+  // v2463: don't double-emit the unit. If the user typed a power string that already
+  // contains HP/kW/horsepower (e.g., "29HP / 21.3kW" from the auto-fill), use it verbatim.
+  // Only append "horsepower" when the value is a bare number.
+  const engHPStr = engineHP
+    ? (/(hp|h\.p\.|horsepower|kw|bhp)/i.test(engineHP) ? engineHP : `${engineHP} horsepower`)
+    : '[XX] horsepower';
   const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
                          transmissionMake ? `${transmissionMake} [MODEL]` : '[MAKE/MODEL]';
 
@@ -12872,8 +12968,11 @@ async function regenerateDescriptionFromInspection() {
   // v2375: TC TP 511 safety equipment summary removed from Overall Description
   // of Vessel. Safety equipment details belong in the dedicated report section.
 
-  const constructionStr = construction || '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
-  const hullTypeStr = hullType || '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
+  // v2463: lowercase the real value so it reads as prose ("a fibreglass displacement
+  // sloop" not "a Fibreglass Displacement Sloop"). Placeholders stay uppercase — they
+  // signal a missing value to the surveyor reviewing the draft.
+  const constructionStr = construction ? construction.toLowerCase() : '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
+  const hullTypeStr = hullType ? hullType.toLowerCase() : '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
   const keelStr = vesselType === 'sail'
     ? (keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : ' with a [FIN/FULL/SHOAL/WING] keel')
     : '';
@@ -12887,12 +12986,14 @@ async function regenerateDescriptionFromInspection() {
   if (ballastStr && vesselType === 'sail') desc += ` (ballast: ${ballastStr})`;
   desc += `.`;
   desc += rigDesc;
+  // v2463: colour names come from the dropdown capitalised (e.g. "White", "Navy blue").
+  // Lowercase them mid-sentence so the narrative reads as prose, not a list of proper nouns.
   if (hullColour && bootStripeColour && deckColour) {
-    desc += ` The hull is finished in ${hullColour} with a ${bootStripeColour} boot stripe, and the deck is ${deckColour}.`;
+    desc += ` The hull is finished in ${hullColour.toLowerCase()} with a ${bootStripeColour.toLowerCase()} boot stripe, and the deck is ${deckColour.toLowerCase()}.`;
   } else if (hullColour && deckColour) {
-    desc += ` The hull is finished in ${hullColour} and the deck is ${deckColour}.`;
+    desc += ` The hull is finished in ${hullColour.toLowerCase()} and the deck is ${deckColour.toLowerCase()}.`;
   } else if (hullColour) {
-    desc += ` The hull is finished in ${hullColour}.`;
+    desc += ` The hull is finished in ${hullColour.toLowerCase()}.`;
   }
   desc += `\n\n`;
   desc += engineDesc;
@@ -12957,7 +13058,9 @@ function buildDescriptionFromSurvey(survey) {
   const yearStr = year || '[YEAR]';
   const makeStr = make || '[MAKE]';
   const modelStr = model || '[MODEL]';
-  const typeStr = boatStyle || (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : '[VESSEL TYPE]');
+  // v2463: lowercase boatStyle ("Sloop" → "sloop") mid-sentence. The sail/power
+  // fallbacks are already lowercase; the placeholder stays uppercase intentionally.
+  const typeStr = boatStyle ? boatStyle.toLowerCase() : (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : '[VESSEL TYPE]');
 
   const engineMake = survey.engineMake || '';
   const engineModel = survey.engineModel || '';
@@ -12981,7 +13084,12 @@ function buildDescriptionFromSurvey(survey) {
   const engMakeModel = (engineMake && engineModel) ? `${engineMake} ${engineModel}` :
                        engineMake ? `${engineMake} [MODEL]` : '[MAKE/MODEL]';
   const engFuel = fuelType || '[DIESEL/GASOLINE]';
-  const engHPStr = engineHP ? `${engineHP} horsepower` : '[XX] horsepower';
+  // v2463: don't double-emit the unit. If the user typed a power string that already
+  // contains HP/kW/horsepower (e.g., "29HP / 21.3kW" from the auto-fill), use it verbatim.
+  // Only append "horsepower" when the value is a bare number.
+  const engHPStr = engineHP
+    ? (/(hp|h\.p\.|horsepower|kw|bhp)/i.test(engineHP) ? engineHP : `${engineHP} horsepower`)
+    : '[XX] horsepower';
   const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
                          transmissionMake ? `${transmissionMake} [MODEL]` : '[MAKE/MODEL]';
 
@@ -13072,8 +13180,11 @@ function buildDescriptionFromSurvey(survey) {
   // v2375: TC TP 511 safety equipment summary removed from Overall Description
   // of Vessel. Safety equipment details belong in the dedicated report section.
 
-  const constructionStr = construction || '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
-  const hullTypeStr = hullType || '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
+  // v2463: lowercase the real value so it reads as prose ("a fibreglass displacement
+  // sloop" not "a Fibreglass Displacement Sloop"). Placeholders stay uppercase — they
+  // signal a missing value to the surveyor reviewing the draft.
+  const constructionStr = construction ? construction.toLowerCase() : '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
+  const hullTypeStr = hullType ? hullType.toLowerCase() : '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
   const keelStr = vesselType === 'sail'
     ? (keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : ' with a [FIN/FULL/SHOAL/WING] keel')
     : '';
@@ -13087,12 +13198,14 @@ function buildDescriptionFromSurvey(survey) {
   if (ballastStr && vesselType === 'sail') desc += ` (ballast: ${ballastStr})`;
   desc += `.`;
   desc += rigDesc;
+  // v2463: colour names come from the dropdown capitalised (e.g. "White", "Navy blue").
+  // Lowercase them mid-sentence so the narrative reads as prose, not a list of proper nouns.
   if (hullColour && bootStripeColour && deckColour) {
-    desc += ` The hull is finished in ${hullColour} with a ${bootStripeColour} boot stripe, and the deck is ${deckColour}.`;
+    desc += ` The hull is finished in ${hullColour.toLowerCase()} with a ${bootStripeColour.toLowerCase()} boot stripe, and the deck is ${deckColour.toLowerCase()}.`;
   } else if (hullColour && deckColour) {
-    desc += ` The hull is finished in ${hullColour} and the deck is ${deckColour}.`;
+    desc += ` The hull is finished in ${hullColour.toLowerCase()} and the deck is ${deckColour.toLowerCase()}.`;
   } else if (hullColour) {
-    desc += ` The hull is finished in ${hullColour}.`;
+    desc += ` The hull is finished in ${hullColour.toLowerCase()}.`;
   }
   desc += `\n\n`;
   desc += engineDesc;
@@ -23078,6 +23191,29 @@ async function generateReport() {
   // Migrate old item labels before generating report
   if (migrateSurveyLabels(survey)) await saveSurvey(survey);
 
+  // ── v2463: refresh the condition sentence in the stored vessel description
+  // so it always matches the current BUC rating ─────────────────────────
+  // The condition sentence is appended to vesselDescription at the end of
+  // generateVesselDescription(). If Dave sets/changes overallCondition AFTER
+  // generating the description (which is the common workflow — write the
+  // description early, finalise the rating late), the stored description is
+  // stale and contradicts pp. 58-60 of the final report. We detect the tail
+  // sentence (always starts with " At the time of the survey…") and replace
+  // it with a freshly-built one in a local copy of the description — survey
+  // is not re-saved, so Dave's stored text stays as he last regenerated it,
+  // but the rendered report is always in sync with the formal rating.
+  let _refreshedDesc = survey.vesselDescription || '';
+  if (_refreshedDesc && (survey.overallCondition || (survey.items && Object.keys(survey.items).length))) {
+    const _fresh = _buildConditionSentence(survey);
+    // Strip any existing " At the time of the survey…" tail (spans 1–2 sentences).
+    const _tailRE = /\s*At the time of the survey[\s\S]*$/;
+    if (_tailRE.test(_refreshedDesc)) {
+      _refreshedDesc = _refreshedDesc.replace(_tailRE, '').trimEnd();
+    }
+    _refreshedDesc = _refreshedDesc + _fresh;
+  }
+  survey.vesselDescription = _refreshedDesc;
+
   // ── v2244: Date-integrity check ───────────────────────────────────────
   // Extract capture timestamps from photo IDs (all formats embed Date.now())
   // and warn if any photo post-dates the survey or report date.
@@ -23830,7 +23966,7 @@ async function generateReport() {
     <tr><td><strong>Date of Report</strong></td><td>${reportDateLong}</td></tr>
     ${esc(survey.vesselName) ? `<tr><td><strong>Vessel Name</strong></td><td>${esc(survey.vesselName)}</td></tr>` : ''}
     ${esc(survey.yearMakeModel) ? `<tr><td><strong>Year / Make / Model</strong></td><td>${esc(survey.yearMakeModel)}</td></tr>` : ''}
-    ${_row('location', 'Location of Survey Inspection', esc(survey.location) || 'N/A')}
+    ${_row('location', 'Location of Survey Inspection', esc(formatReportLocation(survey.location)) || 'N/A')}
     ${_row('clientName', 'Client / Purchaser', esc(survey.clientName) || 'N/A')}
     ${_row('personsInAttendance', 'Persons in Attendance', esc(survey.personsInAttendance) || 'N/A')}
     ${_row('independentSurveys', 'Independent Surveys', esc(survey.independentSurveys) || 'No independent surveys (engine, electrical, ultrasonic gauging, etc.) were conducted in conjunction with this inspection.')}
@@ -24085,7 +24221,10 @@ ${(() => {
                 mkMod,
                 survey.engineSerial ? `Serial ${survey.engineSerial}` : '',
                 survey.engineHP,
-                survey.engineHours ? `${survey.engineHours} hrs` : '',
+                // v2463: don't double-emit the unit. The "Hours not available" checkbox
+                // stores the literal string "Hours not available"; only append " hrs" when
+                // the value is numeric.
+                survey.engineHours ? (/^[\d,.\s]+$/.test(survey.engineHours) ? `${survey.engineHours} hrs` : survey.engineHours) : '',
                 survey.fuelType,
               ];
               blocks.push(propulsionItem(title, specs, e1Photos + e1Plates));
@@ -24101,7 +24240,8 @@ ${(() => {
                 mkMod,
                 survey.engine2Serial ? `Serial ${survey.engine2Serial}` : '',
                 survey.engine2HP,
-                survey.engine2Hours ? `${survey.engine2Hours} hrs` : '',
+                // v2463: see engineHours comment above — same pattern for engine 2.
+                survey.engine2Hours ? (/^[\d,.\s]+$/.test(survey.engine2Hours) ? `${survey.engine2Hours} hrs` : survey.engine2Hours) : '',
                 survey.fuelType2,
               ];
               blocks.push(propulsionItem(title, specs, e2Photos + e2Plates));

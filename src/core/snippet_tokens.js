@@ -198,7 +198,7 @@
   /**
    * Transform a checklist item label for display based on rudder context.
    * Targets the legacy "and rudder(s) (if applicable)" pattern that appears
-   * in items like "Hull and rudder(s) (if applicable) impact and resonance
+   * in items like "Hull and rudder(s) (if applicable) percussion
    * testing". Returns a cleaned-up version appropriate for the current survey.
    *
    * Internal keys (survey.items[label]) continue to use the raw label — this

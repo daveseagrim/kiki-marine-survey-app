@@ -402,7 +402,7 @@
           },
           {
             "type": "list",
-            "label": "Deck and coachroof/pilot percussion testing",
+            "label": "Deck and coachroof/pilot house percussion testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2846,7 +2846,7 @@
           },
           {
             "type": "list",
-            "label": "Distribution panel 110V",
+            "label": "Distribution panel 120V",
             "options": [
               "A - Critical",
               "B - Needs Attention",

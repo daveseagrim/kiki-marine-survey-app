@@ -92,13 +92,13 @@ describe('expandTokens - whitespace cleanup', () => {
 });
 
 describe('transformLabelForDisplay', () => {
-  const PERCUSSION = 'Hull and rudder(s) (if applicable) impact and resonance testing';
+  const PERCUSSION = 'Hull and rudder(s) (if applicable) percussion testing';
   const CONDUCTIVITY = 'Hull and rudder(s) (if applicable) conductivity testing';
 
   it('drops "and rudder(s) (if applicable)" when hasRudder is false', () => {
     assert.equal(
       transformLabelForDisplay(PERCUSSION, { hasRudder: false, rudderCount: 0 }),
-      'Hull impact and resonance testing'
+      'Hull percussion testing'
     );
     assert.equal(
       transformLabelForDisplay(CONDUCTIVITY, { hasRudder: false }),
@@ -108,17 +108,17 @@ describe('transformLabelForDisplay', () => {
   it('becomes "and rudder" (singular) when rudderCount is 1', () => {
     assert.equal(
       transformLabelForDisplay(PERCUSSION, { hasRudder: true, rudderCount: 1 }),
-      'Hull and rudder impact and resonance testing'
+      'Hull and rudder percussion testing'
     );
   });
   it('becomes "and rudders" (plural) when rudderCount is 2 or more', () => {
     assert.equal(
       transformLabelForDisplay(PERCUSSION, { hasRudder: true, rudderCount: 2 }),
-      'Hull and rudders impact and resonance testing'
+      'Hull and rudders percussion testing'
     );
     assert.equal(
       transformLabelForDisplay(PERCUSSION, { hasRudder: true, rudderCount: 4 }),
-      'Hull and rudders impact and resonance testing'
+      'Hull and rudders percussion testing'
     );
   });
   it('returns label unchanged when no "(if applicable)" clause is present', () => {

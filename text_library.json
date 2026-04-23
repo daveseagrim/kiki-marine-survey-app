@@ -246,168 +246,168 @@
       "text": "Recoat the affected areas with epoxy barrier coat and gelcoat before relaunching the vessel."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "A",
       "phase": "observed",
       "severity": 1,
-      "text": "Impact and resonance testing was carried out across the hull and rudder(s)."
+      "text": "Percussion testing was carried out across the hull and rudder(s)."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "A",
       "phase": "observed",
       "severity": 5,
       "text": "Percussion testing produced a dull thud across significant areas of the hull and rudder(s)."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "A",
       "phase": "means",
       "severity": 5,
       "text": "A ringing tone was returned in multiple areas, consistent with voids or delamination."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "A",
       "phase": "observed",
       "severity": 4,
       "text": "Hollow-sounding areas were observed in [describe area(s)]."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "A",
       "phase": "means",
       "severity": 5,
       "text": "These findings were consistent with significant core moisture or delamination."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "A",
       "phase": "means",
       "severity": 5,
       "text": "The extent of the affected areas represented a structural concern."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "A",
       "phase": "action",
       "severity": 4,
       "text": "A qualified fibreglass technician should carry out exploratory work to confirm the extent of the damage."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "A",
       "phase": "action",
       "severity": 5,
       "text": "The vessel should not be returned to service until the affected areas are professionally assessed and remediated."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "A",
       "phase": "action",
       "severity": 5,
       "text": "Haul the vessel for exploratory inspection of the laminate in the affected areas."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "B",
       "phase": "observed",
       "severity": 1,
-      "text": "Impact and resonance testing was carried out across the hull and rudder(s)."
+      "text": "Percussion testing was carried out across the hull and rudder(s)."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "B",
       "phase": "observed",
       "severity": 2,
       "text": "Localized ringing indicating possible voids, poor resin impregnation, or delamination was detected in [describe area(s)]. The tip of the hammer indicates the affected area."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "B",
       "phase": "observed",
       "severity": 3,
       "text": "Localized thuds or dullness possibly indicating saturation were detected in [describe area(s)]. The tip of the hammer indicates the affected area."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "B",
       "phase": "means",
       "severity": 2,
       "text": "The findings were localized and did not indicate widespread structural concern."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "B",
       "phase": "means",
       "severity": 3,
       "text": "These findings warranted further monitoring to rule out core moisture or early delamination."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "B",
       "phase": "action",
       "severity": 2,
       "text": "Recommend monitoring the affected areas."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Recommend moisture testing of the affected areas to confirm the findings."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Recommend rechecking with visual inspection, impact and conductivity testing periodically."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "Impact and resonance testing was carried out across the hull and rudder(s)."
+      "text": "Percussion testing was carried out across the hull and rudder(s)."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
       "text": "Percussion testing of the hull and rudder(s) produced a clear and even tone throughout."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
       "text": "No hollow-sounding or dull areas were detected during impact testing of the hull and rudder(s)."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "C",
       "phase": "means",
       "severity": 1,
       "text": "The findings were consistent with a sound laminate."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "C",
       "phase": "means",
       "severity": 1,
       "text": "No indications of delamination or voids were found at the time of survey."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "C",
       "phase": "action",
       "severity": 1,
       "text": "No corrective action is recommended at this time."
     },
     {
-      "section": "Hull and rudder(s) impact and resonance testing",
+      "section": "Hull and rudder(s) percussion testing",
       "rating": "C",
       "phase": "action",
       "severity": 2,
@@ -6440,35 +6440,35 @@
       "severity": 3
     },
     {
-      "section": "Aft deck impact and resonance testing",
+      "section": "Aft deck percussion testing",
       "rating": "C",
       "text": "Percussion testing of the aft deck produced a clear and even tone with no indications of delamination or voids.",
       "phase": "observed",
       "severity": 5
     },
     {
-      "section": "Aft deck impact and resonance testing",
+      "section": "Aft deck percussion testing",
       "rating": "C",
       "text": "Both areas presented no deficiencies.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Aft deck impact and resonance testing",
+      "section": "Aft deck percussion testing",
       "rating": "B",
       "text": "Percussion testing of the aft deck was generally clear.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Aft deck impact and resonance testing",
+      "section": "Aft deck percussion testing",
       "rating": "B",
       "text": "A small localized area produced a slightly irregular response.",
       "phase": "observed",
       "severity": 2
     },
     {
-      "section": "Aft deck impact and resonance testing",
+      "section": "Aft deck percussion testing",
       "rating": "B",
       "text": "Monitor and reassess if changes are observed.",
       "phase": "action",
@@ -6776,14 +6776,14 @@
       "text": "No corrective action is recommended at this time."
     },
     {
-      "section": "Aft deck impact and resonance testing",
+      "section": "Aft deck percussion testing",
       "rating": "C",
       "phase": "means",
       "severity": 1,
       "text": "No immediate concern was identified."
     },
     {
-      "section": "Aft deck impact and resonance testing",
+      "section": "Aft deck percussion testing",
       "rating": "C",
       "phase": "action",
       "severity": 1,
@@ -7970,58 +7970,58 @@
       "severity": 2
     },
     {
-      "section": "Cockpit impact and resonance testing",
+      "section": "Cockpit percussion testing",
       "rating": "B - Multiple spots",
       "text": "Percussion testing of most of the cockpit floor produced a clear and even tone across most areas with no indications of delamination or voids.",
       "phase": "observed",
       "severity": 5
     },
     {
-      "section": "Cockpit impact and resonance testing",
+      "section": "Cockpit percussion testing",
       "rating": "B - Multiple spots",
       "text": "[insert number of] localized areas produced dull thuds suggestive of present or past saturation with core deterioration.",
       "phase": "observed",
       "severity": 2
     },
     {
-      "section": "Cockpit impact and resonance testing",
+      "section": "Cockpit percussion testing",
       "rating": "B - Multiple spots",
       "text": "The photographs show the hammer tip indicating the areas.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Cockpit impact and resonance testing",
+      "section": "Cockpit percussion testing",
       "rating": "B - Multiple spots",
       "text": "Monitor and plan localized repair if softness develops.",
       "phase": "action",
       "severity": 2
     },
     {
-      "section": "Cockpit impact and resonance testing",
+      "section": "Cockpit percussion testing",
       "rating": "B - Singular spot",
       "text": "One localized area at [insert location] produced a dull thud suggestive of present saturation or past saturation with core deterioration.",
       "phase": "observed",
       "severity": 2
     },
     {
-      "section": "Cockpit impact and resonance testing",
+      "section": "Cockpit percussion testing",
       "rating": "B - Singular spot",
       "text": "The photographs show the hammer tip indicating the area.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Cockpit impact and resonance testing",
+      "section": "Cockpit percussion testing",
       "rating": "C",
       "text": "Percussion testing of the cockpit floor produced a clear and even tone with no indications of delamination or voids in the laminate.",
       "phase": "observed",
       "severity": 5
     },
     {
-      "section": "Cockpit impact and resonance testing",
+      "section": "Cockpit percussion testing",
       "rating": "Not tested",
-      "text": "Impact and resonance testing of the cockpit floor was not possible because the surface was covered with PE or EVA foam material.",
+      "text": "Percussion testing of the cockpit floor was not possible because the surface was covered with PE or EVA foam material.",
       "phase": "observed",
       "severity": 3
     },
@@ -9030,21 +9030,21 @@
       "severity": 3
     },
     {
-      "section": "Cockpit impact and resonance testing",
+      "section": "Cockpit percussion testing",
       "rating": "A",
       "text": "Percussion testing revealed extensive delamination and voids across the cockpit floor.",
       "phase": "observed",
       "severity": 5
     },
     {
-      "section": "Cockpit impact and resonance testing",
+      "section": "Cockpit percussion testing",
       "rating": "A",
       "text": "Multiple areas produced hollow or dull tones indicating widespread structural deterioration.",
       "phase": "observed",
       "severity": 5
     },
     {
-      "section": "Cockpit impact and resonance testing",
+      "section": "Cockpit percussion testing",
       "rating": "A",
       "text": "Immediate professional assessment and repair is critical.",
       "phase": "action",
@@ -9254,21 +9254,21 @@
       "text": "No corrective action is recommended at this time."
     },
     {
-      "section": "Cockpit impact and resonance testing",
+      "section": "Cockpit percussion testing",
       "rating": "A",
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
     },
     {
-      "section": "Cockpit impact and resonance testing",
+      "section": "Cockpit percussion testing",
       "rating": "C",
       "phase": "means",
       "severity": 1,
       "text": "No immediate concern was identified."
     },
     {
-      "section": "Cockpit impact and resonance testing",
+      "section": "Cockpit percussion testing",
       "rating": "C",
       "phase": "action",
       "severity": 1,
@@ -21463,7 +21463,7 @@
     {
       "section": "Shore power overcurrent protection",
       "rating": "C - not tested",
-      "text": "A dedicated shore power overcurrent protection circuit breaker was located on the main 110V AC panel rated at [insert amperage] amps.",
+      "text": "A dedicated shore power overcurrent protection circuit breaker was located on the main 120V AC panel rated at [insert amperage] amps.",
       "phase": "observed",
       "severity": 3
     },
@@ -22077,60 +22077,60 @@
       "severity": 3
     },
     {
-      "section": "Distribution panel 110V",
+      "section": "Distribution panel 120V",
       "rating": "A",
       "text": "A protective guard was not present on the reverse side of the panel.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Distribution panel 110V",
+      "section": "Distribution panel 120V",
       "rating": "A",
       "text": "Install a guard to prevent accidental contact with live parts.",
       "phase": "action",
       "severity": 3
     },
     {
-      "section": "Distribution panel 110V",
+      "section": "Distribution panel 120V",
       "rating": "A",
       "phase": "observed",
       "text": "A reverse-polarity indicator was not present on the AC shore-power panel."
     },
     {
-      "section": "Distribution panel 110V",
+      "section": "Distribution panel 120V",
       "rating": "A",
       "phase": "means",
       "text": "The indicator warns the crew of a reversed polarity in the shore-power connection. Without one, the reversed-polarity condition — which presents shock and fire hazards — can go undetected during normal use."
     },
     {
-      "section": "Distribution panel 110V",
+      "section": "Distribution panel 120V",
       "rating": "A",
       "phase": "action",
       "text": "Install a reverse-polarity indicator in accordance with ABYC E-11."
     },
     {
-      "section": "Distribution panel 110V",
+      "section": "Distribution panel 120V",
       "rating": "C",
-      "text": "The 110V distribution panel appeared clearly labeled, and all appeared to function properly.",
+      "text": "The 120V distribution panel appeared clearly labeled, and all appeared to function properly.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Distribution panel 110V",
+      "section": "Distribution panel 120V",
       "rating": "C",
       "text": "The panel was screwed down, so reverse side protection could not be confirmed.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Distribution panel 110V",
+      "section": "Distribution panel 120V",
       "rating": "Not tested",
-      "text": "The 110V distribution panel appeared clearly labeled, and all switches appeared to function properly.",
+      "text": "The 120V distribution panel appeared clearly labeled, and all switches appeared to function properly.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Distribution panel 110V",
+      "section": "Distribution panel 120V",
       "rating": "Not tested",
       "text": "The system was not tested because the vessel was not connected to AC power.",
       "phase": "observed",
@@ -22139,7 +22139,7 @@
     {
       "section": "Reverse polarity light",
       "rating": "Not tested",
-      "text": "The reverse polarity light on the 110V panel could not be tested.",
+      "text": "The reverse polarity light on the 120V panel could not be tested.",
       "phase": "observed",
       "severity": 3
     },
@@ -22160,7 +22160,7 @@
     {
       "section": "Voltmeter/ammeter",
       "rating": "C",
-      "text": "The voltmeters on both the 12V and 110V panels functioned properly.",
+      "text": "The voltmeters on both the 12V and 120V panels functioned properly.",
       "phase": "observed",
       "severity": 3
     },
@@ -22174,7 +22174,7 @@
     {
       "section": "Voltmeter/ammeter",
       "rating": "Not tested - only 110",
-      "text": "There was only a voltmeter on the 110V distribution, which was not tested because the vessel was not connected to AC power.",
+      "text": "There was only a voltmeter on the 120V distribution, which was not tested because the vessel was not connected to AC power.",
       "phase": "observed",
       "severity": 3
     },
@@ -23029,14 +23029,14 @@
       "severity": 3
     },
     {
-      "section": "Distribution panel 110V",
+      "section": "Distribution panel 120V",
       "rating": "B",
-      "text": "The 110V distribution panel was functional but showed signs of age or minor corrosion.",
+      "text": "The 120V distribution panel was functional but showed signs of age or minor corrosion.",
       "phase": "observed",
       "severity": 2
     },
     {
-      "section": "Distribution panel 110V",
+      "section": "Distribution panel 120V",
       "rating": "B",
       "text": "Inspection and service are recommended to ensure all circuits are operating properly.",
       "phase": "observed",
@@ -23379,28 +23379,28 @@
       "text": "No corrective action is recommended at this time."
     },
     {
-      "section": "Distribution panel 110V",
+      "section": "Distribution panel 120V",
       "rating": "A",
       "phase": "means",
       "severity": 5,
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
     },
     {
-      "section": "Distribution panel 110V",
+      "section": "Distribution panel 120V",
       "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
     },
     {
-      "section": "Distribution panel 110V",
+      "section": "Distribution panel 120V",
       "rating": "C",
       "phase": "means",
       "severity": 1,
       "text": "No immediate concern was identified."
     },
     {
-      "section": "Distribution panel 110V",
+      "section": "Distribution panel 120V",
       "rating": "C",
       "phase": "action",
       "severity": 1,
@@ -26284,7 +26284,7 @@
       "rating": "B",
       "phase": "observed",
       "severity": 1,
-      "text": "Impact and resonance testing was carried out across the deck and coachroof.",
+      "text": "Percussion testing was carried out across the deck and coachroof.",
       "section": "Deck and coachroof/pilot percussion testing"
     },
     {
@@ -26333,7 +26333,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "Impact and resonance testing was carried out across the deck and coachroof.",
+      "text": "Percussion testing was carried out across the deck and coachroof.",
       "section": "Deck and coachroof/pilot percussion testing"
     },
     {

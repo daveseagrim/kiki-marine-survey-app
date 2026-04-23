@@ -12,6 +12,79 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2463 — 2026-04-23
+### Fixed — Report text polish bundle (nine independent fixes surfaced during review of the Footloose insurance survey)
+
+**Why this release exists — and why it's bundled.** Dave reviewed the Footloose report end-to-end on the morning of 2026-04-23 and flagged nine separate text/template issues that made the PDF look drafty instead of professional. Each is a pure text or template fix — no shared state, no cross-dependency, no new logic path — which is why they ship as a single version instead of nine sequential ones. The regular "one feature per version" rule exists to prevent logic regressions masking each other; for isolated text/template edits with zero shared surface, bundling is safe and lets Dave deploy once and regenerate every pending report against the same fixed baseline. Each fix is listed below as its own bullet, with the exact location and the before/after shape, so history stays searchable.
+
+---
+
+### What changed
+
+**1. "Impact and resonance" → "percussion" (60 replacements across 4 files).**
+SAMS convention and the report's own Definitions of Terms both use "Percussion Testing" as the canonical name for hammer/sounding inspection. The snippet library and two survey templates had previously used "impact and resonance testing" in 60 places, causing the adjacent-heading mismatch Dave spotted on p. 9 of Footloose (heading said *"Hull and rudder percussion testing"* but narrative said *"Impact and resonance testing was carried out…"*). All 60 occurrences rewritten, preserving case. Files touched: `text_library.json` (51), `survey_template.json` (3), `src/core/snippet_tokens.js` (1 comment), `tests/snippet_tokens.test.js` (5 test fixtures — tests still exercise the same matching paths with the new literal).
+
+**2. Verbose geocoded address — new `formatReportLocation()` helper.**
+The report's *Location of Survey Inspection* row rendered `survey.location` verbatim — which is Nominatim's full `display_name` including suburb, regional muncipality, and informal region ("Peel Region, Golden Horseshoe"). Footloose rendered as *"Port Credit Yacht Club, 115, Lakefront Promenade, Lakeview, Mississauga, Peel Region, Golden Horseshoe, Ontario, L5E 3G9, Canada"*. New helper `formatReportLocation(fullLocation)` at `app.js` (defined just below `shortLocation()`): drops parts matching `/Region$| Horseshoe$|^Regional Municipality| County$|^Canada$/i`, abbreviates Canadian province names to two-letter codes, joins a pure-digit house number to the next part with a space, merges province + postal into one comma-less segment per Canada Post. Wired in at the single report call site (`app.js` row generator for `'Location of Survey Inspection'`). `shortLocation()` — still used for UI labels — is left unchanged. Footloose now renders as *"Port Credit Yacht Club, 115 Lakefront Promenade, Lakeview, Mississauga, ON L5E 3G9"* (the "Lakeview" suburb still shows when Nominatim returns it separately — stripping that reliably would need the structured `address` object, which we don't currently capture at geocode time; flagged as v2464 scope).
+
+**3. Missing "house" in percussion-testing label (`insurance_survey_template.json`).**
+Item label at line 405 read *"Deck and coachroof/pilot percussion testing"*; sibling items at lines 393, 417, 585 all correctly said *"…pilot house…"*. One-word fix: added **house** to bring this one in line. Affects the heading on the detailed-findings page for any insurance survey generated going forward.
+
+**4. Colour names capitalised mid-sentence (9 interpolations).**
+Dropdown at `app.js:9509` stores colour values capitalised ("White", "Navy blue") — correct for a <select> option, wrong when interpolated into prose. Footloose narrative: *"finished in white with a **B**lue boot stripe, and the deck is **W**hite."* All 9 interpolations across the 3 vessel-description generators now wrap the value in `.toLowerCase()`. Inside the `if` guard, the value is guaranteed non-empty, so lowercasing is safe. Placeholders (when value is empty) stay uppercase intentionally.
+
+**5. Construction / hull type / boat style capitalised mid-sentence (9 interpolations).**
+Same class of bug as #4 but for `construction`, `hullType`, `boatStyle`. Footloose: *"a Fibreglass Displacement Sloop"*. Each `const X = value || '[PLACEHOLDER]'` rewritten as `const X = value ? value.toLowerCase() : '[PLACEHOLDER]'` — real values become lowercase, placeholders remain uppercase to signal "needs filling in" to the surveyor reviewing the draft. Three generators × three fields = 9 spots.
+
+**6. "Hours not available hrs" double unit (2 spots in `propulsionItem` block).**
+The "Hours not available" checkbox at line 9656 stores the literal string "Hours not available" as the value of `engineHours`. The report render at `app.js:24103` and `:24119` unconditionally appended ` hrs` to that value, producing *"Hours not available hrs"*. Wrapped each in `(/^[\d,.\s]+$/.test(survey.engineHours) ? ... : survey.engineHours)` — only append the ` hrs` unit when the value is purely numeric. A blank field still renders blank; a numeric field still gets the unit. Applied identically for engine 2.
+
+**7. "29HP / 21.3kW horsepower" redundancy (3 spots in vessel-description generators).**
+`const engHPStr = engineHP ? \`${engineHP} horsepower\` : '[XX] horsepower'` unconditionally appended the word *horsepower* — but `engineHP` is almost always already a formatted string like "29HP / 21.3kW" (populated by the boat-specs auto-fill at line 10295). Now uses the same regex the smart-append helper `_fmtHP` uses: `/(hp|h\.p\.|horsepower|kw|bhp)/i` — if the value already carries a unit it's rendered verbatim; only bare-number entries get the word "horsepower" appended. Three generators, so three identical edits.
+
+**8. 110V → 120V (24 replacements across 3 files).**
+North American AC-shore-power convention is 120V (the modern nominal voltage; 110V is the legacy low-end of the ±10% tolerance band). The snippet library and both survey templates had 24 places using the old "110V" label. Rewritten en masse with a digit-boundary-aware regex (`(?<![0-9])110(\s?)V(?![0-9])` → `120\1V`) so only standalone "110V" tokens match and not any `1110V` / `110V2` substring that might appear in serial numbers or model names. Files: `text_library.json` (22), `survey_template.json` (1 — the "Distribution panel 110V" item label), `insurance_survey_template.json` (1).
+
+**9. Condition narrative out of sync with formal BUC rating (at report render, not at description generation).**
+`_buildConditionSentence(survey)` in `app.js:12455` produces the " At the time of the survey the vessel was in … overall condition" sentence, and the three `generateVesselDescription*` functions append it at the end of the description. Problem: the sentence is FROZEN into `survey.vesselDescription` at the moment Dave clicks "Generate Vessel Description". If he sets or changes `overallCondition` afterwards (the common workflow — write the description early, finalise the rating late), the stored description stays stale and contradicts pp. 58-60. Footloose p. 8 said "fair overall condition" while the formal rating was "Above Average".
+
+Fix sits inside `generateReport()`, just after `migrateSurveyLabels`: detect and strip the existing " At the time of the survey…" tail from a local copy of `survey.vesselDescription` (regex `/\s*At the time of the survey[\s\S]*$/`), then append a freshly-built sentence via `_buildConditionSentence(survey)`. The mutation is in-place on the scoped `survey` object only — not persisted back to IndexedDB — so Dave's stored description stays exactly as he last regenerated it, but every rendered report is always in sync with the current BUC grade. If Dave has manually added prose *after* the condition sentence, this refresh will strip it; that's a conscious trade-off to guarantee sync and is called out here for future reference.
+
+---
+
+### Also fixed (surfaced during v2463 QC)
+
+**Migration-map alignment with the new "percussion" terminology.** The mass replace in fix #1 hit four files directly; the two long lookup tables in `app.js` (`ITEM_SNIPPET_MAP` at line 1499 and `ITEM_LABEL_MIGRATIONS` at line 2352) were not touched by the replace and contained entries that pointed at the OLD "impact and resonance" strings, plus one backwards migration. QC pass 3 caught four `ITEM_SNIPPET_MAP` values that aimed at text_library sections that no longer exist under those names (Hull, Aft deck, Cockpit, the `(if applicable)` hull variant) — all retargeted to the current `…percussion testing` sections. QC also caught one `ITEM_LABEL_MIGRATIONS` entry (`'… percussion testing' → '… impact and resonance testing'`) whose direction was actively harmful post-v2463: with "percussion" now the live template label, that entry would have rewritten good current-survey labels back to the retired "impact and resonance" string every time `migrateSurveyLabels` ran. Direction reversed so any lingering old-labelled survey upgrades to the current term. No stored survey should need any user action to benefit.
+
+---
+
+### Version markers
+- `app.js` — `APP_VERSION = 'v2463'` (line 8).
+- `sw.js` — `CACHE_NAME = 'kiki-marine-v2463'` (line 1).
+- `index.html` — `<meta name="app-version" content="v2463">` and all 7 core-module cache-busters → `?v=2463`.
+
+---
+
+### Test plan (for Dave post-deploy)
+
+After the push and a hard-refresh on the Mac (and a reload on the iPhone PWA):
+
+1. **Version confirm.** Chrome DevTools → Console: should see `[Sync] v2463: Manual Firebase sync only. …`. Application → Cache Storage: a bucket named `kiki-marine-v2463` exists.
+2. **Percussion terminology.** Open any inspection section that includes percussion testing (Hull, Deck/coachroof, Cockpit). Heading + snippet chips should say *"percussion testing"* — no remaining *"impact and resonance"*.
+3. **Location line.** Open any survey, generate report. The *Location of Survey Inspection* row should show *"Venue, Street, City, ON Postal"* with no *Region*, *Horseshoe*, or *Canada* components.
+4. **"House" restored.** Open the deck/coachroof section of any new insurance survey. Item 3 should read *"Deck and coachroof/pilot house percussion testing"*.
+5. **Lowercase colours and construction.** Re-generate a vessel description for any survey with hull/boot/deck colours and a construction value. Sentence should read as prose: *"a fibreglass displacement sloop"*, *"finished in white with a blue boot stripe"*.
+6. **Hours not available.** Tick the "Hours not available" checkbox on a survey's engine, save, generate report. Engine block should read *"Hours not available"* (no trailing " hrs").
+7. **Horsepower formatting.** Verify engines with auto-filled HP (e.g., "29HP / 21.3kW") render as *"rated at 29HP / 21.3kW"* in the description — not *"…horsepower"*. Verify a bare-number entry (e.g., type just "54" into the HP field) renders as *"rated at 54 horsepower"*.
+8. **120V everywhere.** Search generated report for "110V" → should be zero hits. Check the Electrical section snippet chips — "Distribution panel 120V" heading, all 120V in snippet text.
+9. **Condition sync.** Create or reopen a survey. Set *overallCondition* dropdown to something other than what the description currently says. Regenerate the report — the description's condition sentence should now match the dropdown, even though the stored description text was left alone.
+
+If any of 1–9 regresses, roll back to v2462.
+
+*Behaviour unchanged from v2462:* Manual-only Firebase sync, Force push SaveProgress modal, Drive auto-backup, neutered bidirectional-sync stubs.
+
+---
+
 ## v2462 — 2026-04-22
 ### Fixed — `☁️ Force push to cloud` now shows the SaveProgress modal (the Save button's progress UI) instead of flickering hidden button text
 
