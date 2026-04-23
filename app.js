@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2460';
+const APP_VERSION = 'v2462';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -15401,24 +15401,89 @@ function ensureReportButton() {
     const ok = await showConfirm(message, 'Force push', 'Cancel');
     if (!ok) return;
 
-    pushOpt.innerHTML = '☁️ Pushing…';
-    pushOpt.disabled = true;
+    // ── v2462: visible progress modal for the actual push ─────────────
+    // Previously this block only flipped pushOpt.innerHTML to "☁️
+    // Pushing…" and relied on the end-of-push toast. But overflowMenu
+    // was hidden back at the very top of this handler (line ~15355), so
+    // every pushOpt.innerHTML change landed on an off-screen element.
+    // For a photo-heavy survey the push can run many seconds with zero
+    // on-screen feedback, and the 4-second toast at the end is easy to
+    // miss. We now route the post-confirm work through SaveProgress —
+    // the same modal the 💾 Save button uses via saveSurveyWithProgress
+    // — with a single Firebase row that reports per-photo progress.
+    //
+    // The photo loop is duplicated from saveSurveyWithProgress rather
+    // than using FirebaseSync.pushAllPhotosForSurvey because the latter
+    // takes no progress callback. Same trade-off v2257 already made for
+    // Save. Keeps the v2260 batch photoExistsInFirebase optimisation so
+    // a 100-photo re-push is one query instead of 100 round trips.
+    //
+    // Force pull (pullOpt, below) still has the same hidden-button UX
+    // quirk — it's tracked as the next single-feature follow-up per the
+    // one-feature-per-version rule.
+    const vesselName = survey.vesselName || 'Unnamed';
+    SaveProgress.show('Force pushing to cloud…', vesselName,
+      [{ id: 'firebase', label: 'Firebase', icon: '🔥' }]);
     try {
+      SaveProgress.markActive('firebase', 'Pushing survey data…');
       await FirebaseSync.pushSurvey(survey);
-      // pushAllPhotosForSurvey is idempotent per-photo (it skips photos
-      // already in Storage) so re-pushes are cheap.
-      await FirebaseSync.pushAllPhotosForSurvey(survey);
-      if (typeof showToast === 'function') {
-        showToast(`☁️ Pushed "${survey.vesselName || 'survey'}" to cloud.`, 4000);
-      } else {
-        showAlert('Push complete.');
+      SaveProgress.setProgress('firebase', 20);
+
+      // Collect photo IDs for this survey (mirrors saveSurveyWithProgress)
+      const photoIds = await new Promise((resolve) => {
+        const tx = db.transaction(['photos'], 'readonly');
+        const index = tx.objectStore('photos').index('surveyId');
+        const keys = [];
+        index.openKeyCursor(IDBKeyRange.only(currentSurveyId)).onsuccess = (e) => {
+          const cursor = e.target.result;
+          if (cursor) { keys.push(cursor.primaryKey); cursor.continue(); }
+          else resolve(keys);
+        };
+      });
+      const fbTotal = photoIds.length;
+      SaveProgress.setProgress('firebase', fbTotal > 0 ? 30 : 90);
+
+      // Batch-check existing Firebase photos in one query (v2260 pattern)
+      let existingPhotoIds = new Set();
+      if (fbTotal > 0) {
+        try {
+          const snap = await window.fsDb.collection('photos')
+            .where('surveyId', '==', currentSurveyId).get();
+          snap.docs.forEach(doc => existingPhotoIds.add(doc.id));
+        } catch (e) { /* fall through — pushPhoto still uploads */ }
       }
+
+      let uploaded = 0, skipped = 0;
+      for (const pid of photoIds) {
+        if (SaveProgress.isCancelled()) break;
+        if (existingPhotoIds.has(pid)) {
+          skipped++;
+        } else {
+          let photo = await getPhotoById(pid);
+          if (photo && photo.dataUrl) {
+            await FirebaseSync.pushPhoto(photo);
+            uploaded++;
+          }
+          photo = null; // release memory immediately
+        }
+        const processed = uploaded + skipped;
+        SaveProgress.updateDetail('firebase',
+          `Photo ${processed} of ${fbTotal}${skipped > 0 ? ` (${skipped} already synced)` : ''}`);
+        SaveProgress.setProgress('firebase', 30 + Math.round((processed / fbTotal) * 70));
+      }
+
+      const detail = fbTotal === 0
+        ? 'Survey data ✓'
+        : (skipped > 0
+            ? `Survey + ${uploaded} photos (${skipped} already synced) ✓`
+            : `Survey + ${uploaded} photos ✓`);
+      SaveProgress.markDone('firebase', detail);
+      SaveProgress.finish(true, '✓ Pushed to cloud');
     } catch (err) {
       console.error('[Sync] Manual push failed:', err);
-      showAlert('Push failed: ' + (err && err.message ? err.message : String(err)));
-    } finally {
-      pushOpt.innerHTML = '☁️ Force push to cloud';
-      pushOpt.disabled = false;
+      SaveProgress.markFailed('firebase',
+        'Error: ' + (err && err.message ? err.message : String(err)));
+      SaveProgress.finish(false, '⚠ Push failed');
     }
   };
   overflowMenu.appendChild(pushOpt);
@@ -27131,94 +27196,41 @@ const FirebaseSync = (() => {
   // ── v2259: Periodic Sync — lightweight two-way pull/push every 5 min ───
   // Also fires on visibilitychange (app foreground) with a 30 s throttle.
   //
-  // SAFETY CONSTRAINTS (crash prevention):
+  // SAFETY CONSTRAINTS (crash prevention — historical, from v2259):
   // - NO photo downloads during periodic sync — photos are memory-heavy and
-  //   would crash iPhone during active survey work. Photos only pull on
-  //   explicit Save or initial sync (when app is freshly opened).
-  // - NO photo pushes — survey metadata only. Saves bandwidth and battery.
+  //   would crash iPhone during active survey work.
+  // - NO photo pushes — survey metadata only.
   // - Skips entirely if a save/backup is in progress (_backupActive).
-  // - Skips the survey currently being edited (currentSurveyId) to avoid
-  //   overwriting unsaved form data.
-  // - Pauses the real-time listener during sync to prevent race conditions.
+  // - Skips the survey currently being edited (currentSurveyId).
+  // - Pauses the real-time listener during sync.
+  //
+  // ── v2426: REMOVED FROM PUBLIC API ─────────────────────────────────────
+  // No longer invoked by any timer, visibilitychange listener, or FirebaseSync
+  // export. All automatic sync was replaced with per-survey manual ☁️ / ⬇️
+  // buttons per the v2428 manual-only sync contract. The function body below
+  // was kept intact for diff legibility / rollback safety.
+  //
+  // ── v2461: LOUD-FAILURE STUB ──────────────────────────────────────────
+  // Body replaced with the same console.error + console.trace + throw
+  // pattern used on startListening() (v2460) and initialSync() (v2460). The
+  // orphaned body iterated ALL local+remote surveys, pushing/pulling based on
+  // lastModified — precisely the unbounded batch path the v2428 manual-only
+  // contract exists to prevent. Leaving 80 lines of bidirectional-sync code
+  // alive inside an orphaned function is a loaded footgun: a grep-to-rename,
+  // a future "re-enable periodic sync" refactor, or dead-code-elimination
+  // miss could flip it back on without re-reviewing the richness guards,
+  // throttle, or the v2428 contract. Loud-failure stub makes any accidental
+  // re-wire surface synchronously in the stack trace instead of silently
+  // batch-reconciling surveys in the background.
+  //
+  // `_periodicSyncRunning` (declared line ~26654) is now dead — left in
+  // place for minimal-diff discipline, flagged for future module-level
+  // cleanup alongside `_unsubscribeSurveys` (dead since v2460's
+  // startListening stub).
   async function periodicSync() {
-    if (!_syncEnabled || !window.fsDb) return;
-    if (_periodicSyncRunning) return; // prevent overlap
-    if (window._backupActive) return; // don't compete with an active save
-    // Throttle: don't sync if last sync was < 30 s ago
-    if (Date.now() - _lastSyncTimestamp < 30000) return;
-
-    _periodicSyncRunning = true;
-    // Pause real-time listener to avoid race conditions during sync
-    _suppressLocalWrite = true;
-    updateSyncStatusUI('syncing', 'Syncing…');
-    let pulled = 0, pushed = 0;
-    try {
-      const localSurveys = await getAllSurveys();
-      const remoteSnap = await window.fsDb.collection('surveys').get();
-      const remoteSurveyMap = {};
-      remoteSnap.docs.forEach(doc => { remoteSurveyMap[doc.id] = doc.data(); });
-
-      // Compare each local survey with remote
-      for (const local of localSurveys) {
-        // Skip the survey the user is actively editing — don't touch it
-        if (typeof currentSurveyId !== 'undefined' && local.id === currentSurveyId) {
-          delete remoteSurveyMap[local.id];
-          continue;
-        }
-
-        const remote = remoteSurveyMap[local.id];
-        const localTime = new Date(local.lastModified || local.createdAt || 0).getTime();
-        const remoteTime = remote ? new Date(remote.lastModified || remote.createdAt || 0).getTime() : 0;
-
-        if (!remote || localTime > remoteTime) {
-          // Local is newer — push (survey data only, no photos)
-          await pushSurvey(local);
-          pushed++;
-        } else if (remoteTime > localTime) {
-          // Remote is newer — pull it down (metadata only, NO photos)
-          const lScore = _scoreSurveyContent(local);
-          const rScore = _scoreSurveyContent(remote);
-          const localRicher =
-            lScore.textChars > rScore.textChars * 1.2 + 50 ||
-            lScore.photoCount > rScore.photoCount ||
-            lScore.ratedItems > rScore.ratedItems;
-          if (localRicher) {
-            await pushSurvey(local);
-            pushed++;
-          } else {
-            remote.id = local.id;
-            await saveSurvey(remote); // _suppressLocalWrite is true → no Firebase re-push
-            pulled++;
-          }
-        }
-        delete remoteSurveyMap[local.id];
-      }
-
-      // Pull any remote-only surveys (created on another device) — metadata only
-      for (const [id, remote] of Object.entries(remoteSurveyMap)) {
-        remote.id = id;
-        await saveSurvey(remote); // _suppressLocalWrite is true → no Firebase re-push
-        pulled++;
-      }
-
-      _lastSyncTimestamp = Date.now();
-      updateSyncStatusUI('synced', new Date().toLocaleTimeString());
-
-      // Refresh UI and notify user if anything changed
-      if (pulled > 0) {
-        if (currentView === 'surveys') renderHome();
-        showToast(`☁️ ${pulled} survey${pulled > 1 ? 's' : ''} updated from cloud`);
-      }
-      if (pushed > 0 || pulled > 0) {
-        console.log(`[Sync] Periodic sync: pushed ${pushed}, pulled ${pulled}`);
-      }
-    } catch (err) {
-      console.error('[Sync] Periodic sync error:', err);
-      updateSyncStatusUI('error', err.message);
-    } finally {
-      _suppressLocalWrite = false; // Re-enable real-time listener
-      _periodicSyncRunning = false;
-    }
+    console.error('[Sync] periodicSync() was removed in v2426 and stubbed in v2461. See CHANGELOG. This is a bug — the call path that reached here should be rewritten around per-survey pullSurvey/pushSurvey (manual ☁️ / ⬇️ buttons).');
+    console.trace('[Sync] periodicSync call trace');
+    throw new Error('periodicSync removed — use per-survey pullSurvey/pushSurvey');
   }
 
   // Push all photos for a given survey to Firebase Storage
@@ -27379,9 +27391,13 @@ const FirebaseSync = (() => {
     //     • "🗑️ Delete cloud copy"           — overflow-menu explicit remove (v2457)
     //   AUTO-PUSH: (none — emptied in v2459)
     //   NEUTERED STUBS (throw on call): startListening(), initialSync() — v2460
+    //                                    periodicSync() — v2461
+    //   All three bidirectional-sync bodies have been replaced with the same
+    //   console.error + console.trace + throw pattern so any accidental
+    //   re-wire surfaces synchronously in the stack trace.
     _syncEnabled = true;
     updateSyncStatusUI('idle', 'Manual sync (use overflow menu)');
-    console.log('[Sync] v2460: Manual Firebase sync only. Photos auto-backup to Drive only; Firebase reached via 💾 Save / ☁️ Force push / ⬇️ Force pull / 🗑️ Delete cloud copy. Orphaned sync engines (startListening, initialSync) throw on call.');
+    console.log('[Sync] v2462: Manual Firebase sync only. Photos auto-backup to Drive only; Firebase reached via 💾 Save / ☁️ Force push / ⬇️ Force pull / 🗑️ Delete cloud copy. Orphaned sync engines (startListening, initialSync, periodicSync) throw on call.');
   }
 
   // v2458 — pullNow() REMOVED. It was the batch-pull escape hatch (console-only,
@@ -27395,8 +27411,12 @@ const FirebaseSync = (() => {
   //      cloud, reversing Dave's delete with no warning. pullNow was the ONE
   //      remaining path that could resurrect a deliberate local delete.
   // The body is gone entirely (not just unwired) so a future rename / accidental
-  // re-export can't reintroduce the risk. initialSync() below is now orphaned
-  // — kept for diff legibility / rollback, same treatment as periodicSync.
+  // re-export can't reintroduce the risk.
+  //
+  // v2460: initialSync() and startListening() were orphaned but kept for diff
+  // legibility. Both bodies are now replaced with loud-failure stubs.
+  // v2461: periodicSync() follows the same treatment — the third orphaned
+  // bidirectional-sync body, now also stubbed.
 
   // Re-apply current sync status to a freshly rendered DOM element
   function refreshUI() {
@@ -27429,6 +27449,11 @@ const FirebaseSync = (() => {
     // Rule 1 (no cross-device pulls without user request). The function
     // body is still defined in the module so history/diff stays readable,
     // but it has no callers left inside or outside the module.
+    //
+    // v2461: the body is now a loud-failure stub (console.error + trace +
+    // throw), matching the v2460 treatment for startListening/initialSync.
+    // Any accidental re-wire — rename, refactor, dead-code-elimination miss
+    // — surfaces synchronously instead of silently batch-reconciling.
     //
     // v2458: pullNow() ALSO REMOVED from public API (and its function body
     // deleted — see the comment where it used to live). Same reasoning: it

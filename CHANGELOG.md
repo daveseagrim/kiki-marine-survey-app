@@ -12,6 +12,201 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2462 — 2026-04-22
+### Fixed — `☁️ Force push to cloud` now shows the SaveProgress modal (the Save button's progress UI) instead of flickering hidden button text
+
+**Why this release exists.** Dave tapped `☁️ Force push to cloud` on the "Liquid Wisdom" survey and reported: *"I don't see any indication that it has pushed and no progress bar."* Bug confirmed — the handler's only post-confirm UI was `pushOpt.innerHTML = '☁️ Pushing…'` and a 4-second toast at the end, but the overflow menu containing that button is hidden as the very first line of the handler (`overflowMenu.style.display = 'none';` at line ~15355). Every subsequent `pushOpt.innerHTML` and `pushOpt.disabled` change lands on an off-screen element. For a photo-heavy survey the push runs many seconds with zero on-screen feedback, and the end-of-push toast is easy to miss if Dave has switched apps, locked the phone, or simply looked away.
+
+The `💾 Save` button has never had this problem — `saveSurveyWithProgress` (v2257) uses the `SaveProgress` overlay, which is a full-screen modal with per-backend rows, a progress bar, photo-by-photo detail text, elapsed-time counter, and a Close button. v2462 reuses that same modal for Force push. One row, Firebase only (Force push is firebase-only by design), so Dave sees the same familiar `🔥 Firebase` row he's used to from Save, with `Photo 47 of 138 (32 already synced)`-style updates.
+
+---
+
+### What changed in code
+
+**`app.js` (around line 15404, inside `ensureReportButton`'s `pushOpt.onclick`):**
+
+Removed: the useless pre-try `pushOpt.innerHTML = '☁️ Pushing…'; pushOpt.disabled = true;` dance, the toast/alert branches at end of try, and the `finally` block that re-enabled the hidden button.
+
+Added: a `SaveProgress.show` call with a single Firebase row, followed by the same photo-collection + batch-existence-check + per-photo-push loop pattern `saveSurveyWithProgress` uses. Photo loop is duplicated (not delegated to `FirebaseSync.pushAllPhotosForSurvey`) because that helper takes no progress callback — same trade-off v2257 made for Save. The v2260 batch `photoExistsInFirebase` optimisation is preserved: one `where('surveyId', '==', …)` query replaces N round trips.
+
+Flow now:
+
+1. Confirm dialog (unchanged — the before/after snapshot summary is the useful part and already appears).
+2. `SaveProgress.show('Force pushing to cloud…', vesselName, [{ id:'firebase', label:'Firebase', icon:'🔥' }])` — opens the modal.
+3. `markActive('firebase', 'Pushing survey data…')` + `pushSurvey` + `setProgress(20)`.
+4. Collect photo IDs, `setProgress(fbTotal > 0 ? 30 : 90)`.
+5. Batch-check existing Firebase photos in one query.
+6. Photo loop: for each photo, skip if already uploaded, else `pushPhoto`; after each, `updateDetail('Photo N of M (K already synced)')` + `setProgress(30 + (processed/total)*70)`.
+7. `markDone('firebase', 'Survey + N photos (K already synced) ✓')` + `finish(true, '✓ Pushed to cloud')`.
+8. On throw: `markFailed('firebase', 'Error: …')` + `finish(false, '⚠ Push failed')`.
+
+The `SaveProgress` modal's Cancel-turned-Close button handles dismissal, so the old `finally` block's job (re-enabling a hidden button) is no longer needed.
+
+**`sw.js`:** `CACHE_NAME` → `kiki-marine-v2462`.
+
+**`index.html`:** `<meta name="app-version">` → `v2462`; all 7 core-module cache-busters → `?v=2462`.
+
+**Startup console banner:** bumped to `v2462` (same sentence, just the version number).
+
+---
+
+### What did NOT change (deliberately)
+
+- **The confirm dialog and its before/after snapshot summary.** That's the pre-push UX layer and works fine — Dave sees "Cloud now (will be replaced): 47 rated · 138 photos · 12.3k chars" before he commits to the overwrite. Untouched.
+- **`FirebaseSync.pushSurvey` / `pushPhoto` / `pushAllPhotosForSurvey`.** The sync module's public API is stable; the fix is purely in the UI glue layer inside `pushOpt.onclick`.
+- **`⬇️ Force pull from cloud`.** Same hidden-button UX quirk exists there (pullOpt's `innerHTML` dances on an off-screen element too). Not fixed in this release to honour the one-feature-per-version rule. Flagged in the inline comment and noted here — next single-feature candidate. A pull is usually faster than a push (no photo upload, just download + IDB writes) so the cost of leaving it one version longer is smaller than combining would be.
+- **The peek-before-confirm button-text flash** (`pushOpt.innerHTML = '☁️ Checking cloud…'`). Same hidden-button problem in principle, but `peekCloudSurvey` is a single Firestore `get()` — typically <1 second. Not worth widening scope for this release. If it ever becomes user-noticeable on slow networks, a lightweight overlay spinner during peek is a future candidate.
+
+---
+
+### Regression check
+
+**What could break:**
+
+- `SaveProgress` is a shared UI singleton. If the user already has the Save modal open (they tapped 💾 Save) and then somehow triggers Force push before Save finishes, calling `.show()` again would call `existing.remove()` on the existing overlay (line 25700) and start a fresh one. In practice this isn't reachable: the overflow menu that contains Force push is positioned inside the bottom bar, the Save modal overlays the whole viewport with `position:fixed;inset:0;` at `z-index:10002`, which blocks pointer events on the overflow menu. No known path for concurrent show calls.
+- `SaveProgress.isCancelled()` is honoured inside the photo loop — if Dave taps Cancel mid-push, the loop breaks and the modal stays in "Cancelling…" state until the awaited `pushPhoto` resolves. `pushSurvey` and the initial batch-existence-check don't check cancellation — same behaviour as `saveSurveyWithProgress`, accepted.
+- If `FirebaseSync.pushSurvey` throws, control jumps to the catch block and `markFailed` + `finish(false, …)` show an error. The photo loop never runs — same failure surface as `pushAllPhotosForSurvey` throwing from inside.
+
+**Manual test checklist (iPhone, on Liquid Wisdom):**
+
+1. Open Liquid Wisdom survey.
+2. Tap ⋯ → `☁️ Force push to cloud`.
+3. Confirm the "before/after" dialog appears (unchanged).
+4. Tap `Force push`.
+5. Expect: SaveProgress modal appears with title `Force pushing to cloud…`, the vessel name below it, and a `🔥 Firebase` row with `Pushing survey data…` detail.
+6. Progress bar should advance smoothly as photos upload; detail text should read `Photo N of M (K already synced)`.
+7. On completion: title changes to `✓ Pushed to cloud`, Firebase row row shows `Survey + N photos (…) ✓` in green, Cancel button becomes Close.
+8. Tap Close → modal dismisses, no stale state left behind.
+9. Re-tap `☁️ Force push to cloud` → confirm dialog should show the updated cloud snapshot (photo count matching what was just pushed) proving the push actually landed.
+
+**Cache verification:** `document.querySelector('meta[name=app-version]').content` → `v2462`; `caches.keys()` → `['kiki-marine-v2462']`; all seven `?v=2462` cache-busters in page source; console `APP_VERSION` → `v2462`.
+
+---
+
+## v2461 — 2026-04-21
+### Neutered — `periodicSync()` replaced with loud-failure stub (P1 hardening — closes the last dormant bidirectional-sync body)
+
+**Why this release exists.** v2460 stubbed `startListening()` and `initialSync()` but deliberately left `periodicSync()` alone, per one-feature-per-version. That comment block in the v2460 CHANGELOG ("What about `periodicSync()`?") explicitly flagged it as "Scope for a future release." This is that release. The third orphaned bidirectional-sync body — ~80 lines of `getAllSurveys() + fsDb.collection('surveys').get()` reconciling every local and remote survey by `lastModified`, pushing deltas and pulling orphans — is now a three-line loud-failure stub.
+
+`periodicSync()` has been orphaned since v2426 (removed from the public `FirebaseSync` export and no longer invoked by any timer, `visibilitychange` listener, or `pushNow`/`pullNow` caller). The v2460 surface map listed it under "ORPHANED-BUT-LIVE" as a future stubbing candidate for exactly this reason: the body was still fully wired, the v2428 manual-only sync contract still technically depended on nothing grep-renaming or accidentally re-exporting it. After v2461 that dependency is gone — even a rename/re-export would yield an immediately-throwing stub.
+
+---
+
+### Why now, not later
+
+Three reasons this couldn't wait:
+
+1. **Consistency with v2460.** Leaving one of the three orphaned sync bodies alive while two are stubbed is the kind of asymmetry that catches future-Dave at 11pm trying to remember "wait, is periodicSync dead or just unwired?" Stubbing the third closes the pattern.
+2. **Smallest-blast-radius argument from v2460 is weaker than it looked.** The v2460 CHANGELOG argued periodicSync was OK to leave because it had `_periodicSyncRunning`, `_backupActive`, and a 30-second timestamp throttle — three layers of self-gating. Those gates don't actually *prevent* the bidirectional sync from running; they just throttle it. A single call during a quiet moment would still iterate every local+remote survey and push/pull the delta, violating the v2428 manual-only contract just as hard as `initialSync` would.
+3. **The Ex-Ta-Sea disappearance forensics (2026-04-10 / 2026-04-19) are still open** (task #74). Until that's root-caused, every dormant bidirectional-sync body is a suspect. Stubbing narrows the suspect list.
+
+---
+
+### What changed in code
+
+**`app.js`:**
+
+- **`periodicSync()` (around line 27143)** — full ~80-line reconcile loop replaced with the three-line stub:
+
+  ```js
+  async function periodicSync() {
+    console.error('[Sync] periodicSync() was removed in v2426 and stubbed in v2461. See CHANGELOG. This is a bug — the call path that reached here should be rewritten around per-survey pullSurvey/pushSurvey (manual ☁️ / ⬇️ buttons).');
+    console.trace('[Sync] periodicSync call trace');
+    throw new Error('periodicSync removed — use per-survey pullSurvey/pushSurvey');
+  }
+  ```
+
+  Removed: the `_syncEnabled`/`window.fsDb` guards, the `_periodicSyncRunning` overlap check, the `_backupActive` check, the 30-second throttle, the `_suppressLocalWrite` flag dance, the dual-fetch `getAllSurveys()` + `fsDb.collection('surveys').get()`, the local-newer push branch, the remote-newer pull branch with the `_scoreSurveyContent` richness guard, the orphan-remote-survey pull loop, the `updateSyncStatusUI` calls, the toast, the push/pull log line.
+
+  Kept: the function signature (`async function periodicSync()`), and the entire v2259 doc comment block above it. The doc comment now carries a v2426 amendment ("removed from public API") and a v2461 amendment ("loud-failure stub"), giving future maintainers the full three-version archaeology without scrolling git blame.
+
+- **`_periodicSyncRunning` declaration (line ~26654)** — left in place. Dead let (the stub no longer assigns it). Same treatment as `_unsubscribeSurveys` from v2460: removing a dead module-private variable alongside a scope-limited stub-replacement would drift into unrelated cleanup. Flagged for the module-wide dead-state sweep whenever that happens.
+
+- **`init()` comment block (around line 27328)** — the "NEUTERED STUBS" map line gains `periodicSync() — v2461`:
+
+  ```
+  NEUTERED STUBS (throw on call): startListening(), initialSync() — v2460
+                                  periodicSync() — v2461
+  ```
+
+  A short explanatory sentence is added after the map: "All three bidirectional-sync bodies have been replaced with the same console.error + console.trace + throw pattern so any accidental re-wire surfaces synchronously in the stack trace."
+
+- **Export-site comment at `periodicSync` (around line 27373 in the module's `return {...}` block)** — gets a v2461 amendment noting the body is now a stub.
+
+- **Startup console.log** — bumped to v2461 and the orphaned-engines list extended: `[Sync] v2461: Manual Firebase sync only. Photos auto-backup to Drive only; Firebase reached via 💾 Save / ☁️ Force push / ⬇️ Force pull / 🗑️ Delete cloud copy. Orphaned sync engines (startListening, initialSync, periodicSync) throw on call.`
+
+- **pullNow-removal comment (around line 27346)** — updated to reflect that all three bodies are now stubs, not just orphaned.
+
+**`sw.js`:** `CACHE_NAME` → `kiki-marine-v2461`.
+
+**`index.html`:** `<meta name="app-version">` → `v2461`; all 7 core-module cache-busters → `?v=2461`.
+
+---
+
+### Updated Firebase surface map (post-v2461)
+
+**USER-INITIATED (manual only — unchanged since v2459):**
+
+- `backupAllEverywhere()` — home-screen "💾 Save All Surveys" button.
+- `saveSurveyWithProgress()` — bottom-bar "💾 Save" on an open survey.
+- `☁️ Force push to cloud` (overflow menu) — per-survey push.
+- `⬇️ Force pull from cloud` (overflow menu) — per-survey pull.
+- `🗑️ Delete cloud copy` (overflow menu, v2457) — per-survey destructive.
+
+**AUTO-PUSH:** (none — emptied in v2459)
+
+**NEUTERED STUBS — throw on call:**
+
+- `startListening()` — onSnapshot real-time sync engine. Throws since v2460.
+- `initialSync()` — batch local+remote reconciler. Throws since v2460.
+- `periodicSync()` — 5-minute two-way reconciler. Throws since v2461 (new this release).
+
+**ORPHANED-BUT-LIVE:** (none — v2461 closes this category)
+
+This is the first release since the manual-sync program started (v2426) where there is no dormant bidirectional-sync body anywhere in the module. Every Firebase write path is now either explicit manual-button or an immediately-throwing stub.
+
+---
+
+### Dead-state follow-up (future release, not in this one)
+
+Three module-private lets are now fully dead:
+
+- `_unsubscribeSurveys` (since v2460 — `startListening` no longer assigns it)
+- `_periodicSyncRunning` (since v2461 — `periodicSync` no longer assigns it)
+- `_lastSyncTimestamp` (since v2461 — was read and written only by `periodicSync`)
+
+All three are private to the IIFE with zero external footprint. Removing them is a mechanical cleanup that should be done as a single dead-state sweep alongside any other orphaned variables discovered in a full module audit — not piecemeal as part of a feature release. This note exists so future-Dave can grep the CHANGELOG for "dead-state follow-up" and find the inventory.
+
+---
+
+### How to verify
+
+*Stub throws when called:*
+
+1. Open Safari Web Inspector → Console on the running app.
+2. Type `FirebaseSync.periodicSync`. Expect: `undefined` (it's private to the IIFE and was never exported — confirming the v2426 unexport still holds).
+3. Confirm no call site remains in-module: `grep -n 'periodicSync' app.js` should show the function definition plus comment-only references (CHANGELOG-style archaeology). Zero live callers.
+
+*Startup banner confirms neutering:*
+
+4. Fresh load. The startup console line should begin `[Sync] v2461:` and end with `Orphaned sync engines (startListening, initialSync, periodicSync) throw on call.`
+
+*Version atoms coherent:*
+
+5. View page source: `<meta name="app-version" content="v2461">`, all seven `?v=2461` cache-busters present.
+6. DevTools → Application → Service Workers: active worker is `kiki-marine-v2461`.
+7. DevTools → Application → Cache Storage: a bucket named `kiki-marine-v2461` exists; old `kiki-marine-v2460` bucket should be gone after activate (per v2392 atomic install + v2391 handshake).
+
+*Behaviour unchanged from v2460:*
+
+8. Snap a photo, wait 5 seconds → `✓ N photos backed up to Drive` banner fires; no Firebase network activity in DevTools → Network.
+9. Save a survey via bottom-bar 💾 → Firebase Save still works (user-initiated path, untouched by this release).
+10. 🗑️ Delete cloud copy overflow button still works (user-initiated path, untouched).
+
+If any of 1–10 regresses, roll back to v2460.
+
+---
+
 ## v2460 — 2026-04-21
 ### Neutered — `startListening()` + `initialSync()` replaced with loud-failure stubs (P1 hardening — removes the last two dormant bidirectional-sync bodies so they cannot be accidentally re-wired)
 
