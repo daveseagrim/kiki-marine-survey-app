@@ -12,6 +12,50 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2464 — 2026-04-23
+### Fixed — Table of Contents no longer lists *Instruments & Electronics Inventory* when that section has been skipped
+
+**Why this release exists.** On the Footloose report Dave confirmed post-v2463 that the *Instruments & Electronics Inventory* entry was still showing up as item 14 in the Table of Contents even though he had explicitly ticked "Skip Instruments & Electronics" on the Edit Vessel Info screen, and the body of the report correctly omitted the section. The heading existed in the TOC as a static `<li>`, unconditional; the body section correctly checked `!survey.skipInstrumentsElectronics && survey.instrumentsElectronics?.length > 0` before rendering itself, but the TOC had no such gate. Readers who scan the TOC and then flip to the section it promises found a gap where they expected content.
+
+### What changed
+
+**`app.js` (inside the Table of Contents `<ol>`, around the `Safety Equipment — TC TP 511` / `Findings & Recommendations` boundary):**
+
+The static line
+```html
+<li>Instruments &amp; Electronics Inventory</li>
+```
+is now wrapped in the same predicate the body section uses:
+```js
+${(!survey.skipInstrumentsElectronics && survey.instrumentsElectronics && survey.instrumentsElectronics.length > 0) ? '<li>Instruments &amp; Electronics Inventory</li>' : ''}
+```
+
+The predicate is duplicated inline rather than factored into a shared flag because there are only two call sites (TOC + body) and the predicate itself is short. If a third consumer shows up, lift it to a named `const showInstrumentsElectronics` at the top of `generateReport()` and reuse.
+
+Browser-standard `<ol>` auto-numbering carries the rest: when the I&E `<li>` is suppressed, items 15/16/17 become 14/15/16 automatically — no manual renumbering in any downstream code is needed.
+
+### Scope audit
+
+I grep'd every `survey.skip*` flag in the codebase to confirm this was the only TOC/body mismatch of its kind. Two skip flags exist: `skipInstrumentsElectronics` (this one) and `skipComparables`. Comparables live inside *Rating & Valuation* (TOC item 16), which is a single top-level entry whose presence is unconditional — the comparables table within it is gated, but the TOC heading is not tied to the table. No fix needed there.
+
+### Version markers
+- `app.js` — `APP_VERSION = 'v2464'` (line 8).
+- `sw.js` — `CACHE_NAME = 'kiki-marine-v2464'` (line 1).
+- `index.html` — `<meta name="app-version" content="v2464">` and all 7 core-module cache-busters → `?v=2464`.
+
+### Test plan
+
+1. Hard-refresh the PWA on the Mac; console should print `[Sync] v2464: Manual Firebase sync only…`.
+2. Open a survey where **Skip Instruments & Electronics** is checked on Edit Vessel Info. Generate the report. TOC should show 16 items (I&E no longer listed); the *Safety Equipment — TC TP 511* item is still 13; *Findings & Recommendations* is now 14 (not 15).
+3. Open a survey where the checkbox is *unchecked* **and** at least one instrument has been logged. Generate the report. TOC should show 17 items with *Instruments & Electronics Inventory* at position 14, and the body should render the Inventory section as before.
+4. Open a survey where the checkbox is unchecked **but** no instruments have been logged yet. TOC should omit the entry (predicate requires `length > 0`) and body should omit it too — same behaviour as pre-v2464, just now reflected consistently in the TOC.
+
+If any of 2–4 regresses, roll back to v2463.
+
+*Behaviour unchanged from v2463:* all nine text/template fixes from that bundle, condition-sentence sync at render time, migration-map alignment, etc.
+
+---
+
 ## v2463 — 2026-04-23
 ### Fixed — Report text polish bundle (nine independent fixes surfaced during review of the Footloose insurance survey)
 

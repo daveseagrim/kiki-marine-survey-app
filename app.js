@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2463';
+const APP_VERSION = 'v2464';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -23943,7 +23943,7 @@ async function generateReport() {
       <li>Findings Overview</li>
       <li>Detailed Survey Findings</li>
       <li>Safety Equipment — TC TP 511</li>
-      <li>Instruments &amp; Electronics Inventory</li>
+      ${(!survey.skipInstrumentsElectronics && survey.instrumentsElectronics && survey.instrumentsElectronics.length > 0) ? '<li>Instruments &amp; Electronics Inventory</li>' : ''}
       <li>Findings &amp; Recommendations</li>
       <li>Rating &amp; Valuation</li>
       <li>Surveyor's Certification</li>
