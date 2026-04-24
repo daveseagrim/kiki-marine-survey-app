@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2468';
+const APP_VERSION = 'v2469';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -8095,7 +8095,7 @@ function refreshChipStrip(textarea) {
 
     html += `
       <input type="text" data-custom-idx="${ti}" placeholder="Add another item${isMulti ? ' (comma-separated, no punctuation)' : ''}"
-             spellcheck="true" autocorrect="on" autocapitalize="none"
+             spellcheck="true" autocorrect="on" autocapitalize="sentences"
              style="width:100%;margin-top:4px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;box-sizing:border-box;" />
       <div data-tone-warning-for="${ti}" style="display:none;margin-top:6px;padding:7px 10px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;line-height:1.4;"></div>
     `;
@@ -25262,13 +25262,22 @@ async function initApp() {
     }
 
     // Suppress iOS autofill bar (keys, credit card, location, checkmark)
-    // by setting autocomplete="off" on all inputs as they're created
+    // by setting autocomplete="off" on all inputs as they're created.
+    //
+    // v2469 fix: ONLY touch autocomplete. Previously this also set
+    // autocorrect="off" and autocapitalize="off", which clobbered the
+    // per-element attributes set in HTML (autocapitalize="sentences"
+    // on notes textareas, autocapitalize="words" on vessel/client-name
+    // inputs, autocorrect="on" everywhere). Result: iOS never capitalized
+    // the first letter of a sentence and surfaced no autocorrect
+    // suggestions in the keyboard bar. Surveyors had to hit the Shift
+    // key manually for every sentence. The autofill bar is suppressed
+    // by autocomplete alone; autocorrect and autocapitalize are
+    // orthogonal to autofill and should flow through from the HTML.
     const disableAutofill = (el) => {
       // Don't suppress autocomplete on inputs linked to a datalist — they need it for suggestions
       if (el.getAttribute('list')) return;
       el.setAttribute('autocomplete', 'off');
-      el.setAttribute('autocorrect', 'off');
-      el.setAttribute('autocapitalize', 'off');
     };
     new MutationObserver((mutations) => {
       for (const m of mutations) {

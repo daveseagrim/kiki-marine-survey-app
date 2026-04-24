@@ -12,6 +12,109 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2469 — 2026-04-24
+### Fixed — iOS autocapitalize + autocorrect restored across every input and textarea
+
+**Why this release exists.** Dave's report during the Dehler 39 SQ
+survey: *"The spell check in 1.0 does not automatically capitalize the
+first letter in a sentence. Also, there is supposed to be grammar
+check (like grammarly) but it does not seem to work."*
+
+Both symptoms had a single root cause: the MutationObserver at
+`app.js:25273` that was added to suppress the iOS autofill bar (the
+keyboard accessory strip that suggests saved passwords, credit cards,
+addresses, etc. when typing into a text input) was doing too much.
+It set three attributes on every input/textarea added to the DOM:
+
+```js
+el.setAttribute('autocomplete', 'off');
+el.setAttribute('autocorrect', 'off');       // ← broke autocorrect
+el.setAttribute('autocapitalize', 'off');    // ← broke sentence caps
+```
+
+`autocomplete="off"` does the job the observer was added for — suppresses
+the autofill bar. The other two attributes are orthogonal to autofill
+and should not have been touched:
+
+- `autocapitalize` controls whether iOS capitalizes the first letter
+  of a sentence (or every word, depending on the value). The per-
+  element HTML already sets this to the right value per field type —
+  `"sentences"` on notes textareas, `"words"` on vessel-name inputs,
+  `"off"` where it genuinely shouldn't happen. The observer was
+  overwriting all of those with `"off"`.
+- `autocorrect` controls whether iOS's built-in spelling autocorrect
+  runs. With it set to `"off"`, iOS doesn't surface correction
+  suggestions at the keyboard bar, doesn't red-underline misspellings,
+  and doesn't offer the tap-to-replace affordance. This is as close
+  as a browser gets to a "grammar check" without a third-party service
+  like Grammarly or LanguageTool.
+
+With both forced off, surveyors had to manually hit Shift for every
+new sentence and got zero typo feedback from iOS.
+
+### What changed
+
+**`app.js` (one-function rewrite).** `disableAutofill` now sets only
+`autocomplete="off"`. Removed the two other `setAttribute` calls.
+Comment updated to explain why, so a future reader doesn't think
+they were accidentally removed.
+
+**`app.js:8098` (one input-tag attribute).** The "Add another item"
+input in the snippet-add flow had a hardcoded `autocapitalize="none"`.
+Changed to `autocapitalize="sentences"` so the first letter of a
+typed-in phrase gets capitalized. This is a tiny standalone fix that
+would have landed even without the observer bug.
+
+### Version markers
+
+- `app.js` — `APP_VERSION = 'v2469'` (line 8).
+- `sw.js` — `CACHE_NAME = 'kiki-marine-v2469'` (line 1).
+- `index.html` — `<meta name="app-version" content="v2469">` and all
+  7 core cache-busters → `?v=2469`.
+
+### Test plan
+
+1. Hard-refresh the PWA; console should print `[Sync] v2469…`.
+2. Open any survey, scroll to an item's Notes / Description textarea.
+   Type `"the rudder appeared serviceable. "` (trailing period +
+   space) — the next letter typed should auto-capitalize.
+3. Misspell a word on purpose (`"shrowds"`). iOS should red-underline
+   it and offer correction at the keyboard bar (iPhone/iPad only;
+   macOS Chrome doesn't do this).
+4. Fields that should still NOT autocapitalize (e.g., emails, URLs,
+   anything explicitly set to `autocapitalize="off"` in the HTML)
+   remain uncapitalized — the observer no longer overrides them, but
+   their explicit HTML attribute still wins.
+5. The iOS autofill bar (credit cards, passwords, "scan credit card"
+   suggestion) should still be suppressed — `autocomplete="off"` is
+   doing that alone.
+
+### Grammar check — what to expect and what NOT to expect
+
+iOS / Safari / Chrome do not ship with a true grammar check (subject-
+verb agreement, clause boundaries, style suggestions) the way
+Grammarly does. What they DO offer, with `autocorrect="on"` + default
+browser spellcheck:
+
+- Red underline on misspelled words.
+- Tap-the-underline to see replacement suggestions.
+- iOS keyboard-bar inline auto-replacement for common typos
+  ("teh" → "the").
+- Double-space at end of sentence = period + space.
+- Capitalize-after-period.
+
+v2469 restores all of the above. For genuine grammar checking
+(Grammarly-style), the report should be reviewed on the desktop
+Chrome with the Grammarly extension installed, or pasted through
+a grammar-check service before sending to clients. That's outside
+the PWA's scope.
+
+*Behaviour unchanged from v2468:* Bulkheads placement in insurance
+template, Catalina 350 fin/wing draft variants, all prior v2466+ text
+cleanup.
+
+---
+
 ## v2468 — 2026-04-24
 ### Changed — Bulkheads moved above Bilge/stringers in insurance template so bilge-accessed items are adjacent
 
