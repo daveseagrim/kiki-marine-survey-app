@@ -12,6 +12,71 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2467 — 2026-04-24
+### Added — Catalina 350 (2002–2007) to boat_specs_db
+
+**Why this release exists.** A specific vessel Dave needs to survey. The
+Catalina 350 (2002-2007 production, Gerry Douglas design) fills a gap
+between the Catalina 34 (ends 2003) and the Catalina 36 Mk II already
+in the DB. Typing "2004 Catalina 350" into the Auto-fill field now
+resolves cleanly.
+
+### What changed
+
+**`boat_specs_db.json`** — new entry inserted between `catalina-34`
+and `catalina-36-mk2` (ID order preserved):
+
+```json
+{
+  "id": "catalina-350",
+  "make": "Catalina",
+  "model": "350",
+  "aliases": ["catalina350", "catalina 350"],
+  "yearStart": 2002,
+  "yearEnd": 2007,
+  "type": "sailboat",
+  "loa": "35'4\"",
+  "lwl": "30'3\"",
+  "beam": "12'4\"",
+  "displacement": "14,250 lbs",
+  "ballast": "5,500 lbs",
+  "maxDraft": "6'10\"",
+  "totalSailArea": "601 sq ft",
+  "hullType": "Displacement",
+  "keelType": "Fin (deep standard; wing/shoal 4'10\" optional)",
+  "construction": "Fibreglass",
+  "designer": "Gerry Douglas"
+}
+```
+
+Database count: 262 → 263. The wing/shoal-keel variant is noted in
+`keelType` rather than as a separate entry since the rest of the specs
+are identical — the surveyor can adjust `maxDraft` manually after
+auto-fill on a wing-keel hull.
+
+`lastUpdated` field bumped to reference v2467.
+
+### Version markers
+- `app.js` — `APP_VERSION = 'v2467'` (line 8).
+- `sw.js` — `CACHE_NAME = 'kiki-marine-v2467'` (line 1).
+- `index.html` — `<meta name="app-version" content="v2467">` and all 7
+  core cache-busters → `?v=2467`.
+
+### Test plan
+
+1. Hard-refresh the PWA on the Mac; console should print `[Sync] v2467…`.
+2. Create a new survey, type `2004 Catalina 350` into the Year/Make/Model
+   field, blur. The Auto-fill banner should offer "Catalina 350
+   (2002-2007)". Apply — LOA, beam, draft, displacement, ballast, sail
+   area, and designer should populate.
+3. Existing Catalina 34 and Catalina 36 Mk II lookups still resolve
+   correctly (no collision from the new entry).
+
+*Behaviour unchanged from v2466:* "acceptable" → "serviceable" library
+cleanup, Gearbox rename, saildrive entries, Dehler 39 SQ auto-fill.
+
+---
+
 ## v2466 — 2026-04-24
 ### Changed — Every "acceptable" in snippet library replaced with "serviceable"
 

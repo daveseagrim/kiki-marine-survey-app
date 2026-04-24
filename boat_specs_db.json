@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-24 (v2465 — Dehler 39 SQ)",
+  "lastUpdated": "2026-04-24 (v2467 — Catalina 350)",
   "note": "Specifications sourced from manufacturer data sheets, sailboatdata.com, recognized technical references, and powerboat manufacturers. Values are approximate and may vary by model year, options, and keel variant.",
   "boats": [
     {
@@ -1997,6 +1997,29 @@
       "hullType": "Displacement",
       "keelType": "Fin",
       "construction": "Fibreglass"
+    },
+    {
+      "id": "catalina-350",
+      "make": "Catalina",
+      "model": "350",
+      "aliases": [
+        "catalina350",
+        "catalina 350"
+      ],
+      "yearStart": 2002,
+      "yearEnd": 2007,
+      "type": "sailboat",
+      "loa": "35'4\"",
+      "lwl": "30'3\"",
+      "beam": "12'4\"",
+      "displacement": "14,250 lbs",
+      "ballast": "5,500 lbs",
+      "maxDraft": "6'10\"",
+      "totalSailArea": "601 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin (deep standard; wing/shoal 4'10\" optional)",
+      "construction": "Fibreglass",
+      "designer": "Gerry Douglas"
     },
     {
       "id": "catalina-36-mk2",
