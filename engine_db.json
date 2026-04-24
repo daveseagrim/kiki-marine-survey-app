@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04",
+  "lastUpdated": "2026-04-24 (v2465 — saildrive additions)",
   "engines": [
     {
       "make": "Yanmar",
@@ -896,7 +896,7 @@
           "cylinders": "",
           "displacement": "D8 series or custom",
           "engineType": "Inboard",
-          "description": "Diesel; 2023-Present; Latest IPS inboard pod, works with D8 series diesel engines, +/-40\u00b0 rotation, joystick steering"
+          "description": "Diesel; 2023-Present; Latest IPS inboard pod, works with D8 series diesel engines, +/-40° rotation, joystick steering"
         },
         {
           "model": "IPS 600",
@@ -916,7 +916,7 @@
           "cylinders": "13",
           "displacement": "Variable",
           "engineType": "Inboard",
-          "description": "Diesel/Hybrid electric; 2024-Present; Dual D13 diesel or D13+electric motor hybrid, +/-40\u00b0 rotation, joystick control, dual prop IPS"
+          "description": "Diesel/Hybrid electric; 2024-Present; Dual D13 diesel or D13+electric motor hybrid, +/-40° rotation, joystick control, dual prop IPS"
         }
       ]
     },
@@ -1730,7 +1730,7 @@
           "cylinders": "6",
           "displacement": "2.5L",
           "engineType": "Outboard",
-          "description": "DFI 2-Stroke; 2000-2010; DFI 2-stroke variant, loop-charged 60\u00b0 V6"
+          "description": "DFI 2-Stroke; 2000-2010; DFI 2-stroke variant, loop-charged 60° V6"
         },
         {
           "model": "Optimax 175",
@@ -3769,7 +3769,7 @@
     {
       "make": "Kanzaki",
       "country": "Japan",
-      "note": "Yanmar's transmission division \u2014 standard gearbox on most Yanmar marine diesels",
+      "note": "Yanmar's transmission division — standard gearbox on most Yanmar marine diesels",
       "models": [
         {
           "model": "KM2P",
@@ -4126,7 +4126,7 @@
     {
       "make": "Walter",
       "country": "USA",
-      "note": "V-drive specialist \u2014 common on ski boats, wake boats, and inboard runabouts",
+      "note": "V-drive specialist — common on ski boats, wake boats, and inboard runabouts",
       "models": [
         {
           "model": "V-Drive (Light Duty)",
@@ -4276,6 +4276,138 @@
           "type": "Hydraulic",
           "transmission_type": "Hydraulic Shift",
           "ratios": "2.5:1, 3.0:1, 3.5:1"
+        }
+      ]
+    },
+    {
+      "make": "Yanmar Saildrive",
+      "country": "Japan",
+      "models": [
+        {
+          "model": "SD20",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.64:1"
+        },
+        {
+          "model": "SD25",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.64:1"
+        },
+        {
+          "model": "SD40",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.27:1"
+        },
+        {
+          "model": "SD50",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.27:1"
+        },
+        {
+          "model": "SD60",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.27:1"
+        },
+        {
+          "model": "SD60-4T",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.27:1"
+        },
+        {
+          "model": "SD70",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.40:1"
+        }
+      ]
+    },
+    {
+      "make": "Volvo Penta Saildrive",
+      "country": "Sweden",
+      "models": [
+        {
+          "model": "110S",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.47:1"
+        },
+        {
+          "model": "120S",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.47:1"
+        },
+        {
+          "model": "130S",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.14:1"
+        },
+        {
+          "model": "130SR",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.14:1"
+        },
+        {
+          "model": "150S",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.19:1"
+        },
+        {
+          "model": "150SR",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.19:1"
+        },
+        {
+          "model": "MS25L",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.19:1"
+        },
+        {
+          "model": "MS25S",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.19:1"
+        }
+      ]
+    },
+    {
+      "make": "ZF Saildrive",
+      "country": "Germany",
+      "models": [
+        {
+          "model": "SD2",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.40:1"
+        },
+        {
+          "model": "SD4",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.40:1"
+        },
+        {
+          "model": "SD6",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.46:1"
+        },
+        {
+          "model": "SD8",
+          "type": "Saildrive",
+          "transmission_type": "Saildrive",
+          "ratios": "2.48:1"
         }
       ]
     }

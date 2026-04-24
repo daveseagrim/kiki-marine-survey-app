@@ -12,6 +12,64 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2465 — 2026-04-23
+### Added — Saildrive entries in gearbox make dropdown + Dehler 39 SQ in specs DB; Changed — "Transmission" → "Gearbox" across UI
+
+**Why this release exists — and why three changes ship bundled.** Dave is in the middle of a live Dehler 39 SQ survey and hit three gaps in one sitting: (1) the boat has a Yanmar saildrive, which was not an option in the transmission/gearbox make dropdown — only traditional gearbox makers (ZF, Twin Disc, Borg Warner, etc.) were listed; (2) "Dehler 39 SQ" is not in `boat_specs_db.json`, so Auto-fill could not seed dimensions on the Vessel Info form; (3) the form and report consistently used the word "Transmission", but Dave's surveyor convention — and the field-more-common term when a saildrive is involved — is "Gearbox". All three are independent, non-logic text/data edits with no shared state. Bundling is safe under the same reasoning as v2463: isolated UI/data changes, no new code paths, no regression surface between them. Shipping this way lets Dave unblock the active survey in a single refresh.
+
+---
+
+### What changed
+
+**1. Saildrive makes added to `engine_db.json` (gearbox dropdown).**
+Three new entries appended to the gearbox make list so saildrives surface alongside traditional inboards:
+
+- **Yanmar Saildrive** — 7 models: SD20, SD25, SD40, SD50, SD60, SD60-4T, SD70.
+- **Volvo Penta Saildrive** — 8 models: 110S, 120S, 130S, 130SR, 150S, 150SR, MS25L, MS25S.
+- **ZF Saildrive** — 4 models: SD2, SD4, SD6, SD8.
+
+When the surveyor selects "Yanmar Saildrive" as the gearbox make, the model dropdown now lists the SD-series rather than HC/KBW/KMH traditional gearbox models. `lastUpdated` bumped.
+
+**2. Dehler 39 SQ added to `boat_specs_db.json`.**
+Entry `dehler-39sq` — year range 2019-2026, LOA 39'3", LWL 35'5", beam 12'8", displacement 16,534 lbs, ballast 5,732 lbs, max draft 7'3", total sail area 916 sq ft, designer Judel/Vrolijk & Co, construction Fibreglass. Auto-fill lookup now resolves "2023 Dehler 39 SQ" (and year variants) to these specs. Database count: 261 → 262.
+
+**3. "Transmission" → "Gearbox" rename across UI, form labels, camera captions, and report narrative (`app.js`).**
+All user-visible occurrences now say "Gearbox". Specifically:
+
+- Section heading `Engine & Transmission` → `Engine & Gearbox` (form + check-survey category — all 3 call sites).
+- Subsection labels `Transmission 1 (Port)` / `Transmission 2 (Starboard)` → `Gearbox 1 (Port)` / `Gearbox 2 (Starboard)` (both form and report render).
+- Field labels `Transmission Make`, `Transmission Model`, `Transmission Serial No.`, `Transmission Photo` → `Gearbox ...`.
+- Camera button captions `📷 Transmission` → `📷 Gearbox`.
+- `docPhotoLabels` entries `'Transmission'` / `'Transmission plate'` → `'Gearbox'` / `'Gearbox plate'`.
+- `photoKindLabels` entries `'transmissionPhoto': 'Transmission'` / `'transmission2Photo': 'Transmission 2'` → `'Gearbox'` / `'Gearbox 2'`.
+- Report render: nameplate image alt-text and the propulsion-block titles in the generated HTML.
+
+**Deliberately *not* renamed** — the persistent data schema. `survey.transmissionMake`, `survey.transmissionModel`, `survey.transmissionMakeModel`, `survey.transmission2*`, DOM `id="transmissionMake"`, and `onTransmissionMakeChange()` are the on-disk keys inside every stored survey in IndexedDB. Renaming them would either (a) silently drop data on every existing survey when v2465 loaded, or (b) require a migration that rewrites every IndexedDB record on version handshake — high risk, zero benefit since these keys are never user-visible. The internal→external translation is one-way at render time: reads happen from the `transmission*` keys, labels render as "Gearbox".
+
+### Scope audit
+
+Grep after changes confirmed zero user-visible "Transmission" occurrences remain in `app.js`, `index.html`, or template JSON. The 18 surviving `transmission*` references are all internal field names (survey object keys, DOM IDs, handler function names). Saildrive entries were appended to the existing arrays in `engine_db.json` with no reordering of prior entries — existing surveys that reference "ZF Marine" or "Twin Disc" model indexes remain stable. The Dehler 39 SQ entry was inserted in alphabetical-by-make order within the Dehler block; no existing IDs were changed.
+
+### Version markers
+- `app.js` — `APP_VERSION = 'v2465'` (line 8).
+- `sw.js` — `CACHE_NAME = 'kiki-marine-v2465'` (line 1).
+- `index.html` — `<meta name="app-version" content="v2465">` and all 7 core-module cache-busters → `?v=2465`.
+
+### Test plan
+
+1. Hard-refresh the PWA on the Mac; console should print `[Sync] v2465: Manual Firebase sync only…`. No cache errors on the install handshake.
+2. Open the Dehler 39 SQ survey. On the Vessel Info screen, type `2023 Dehler 39 SQ` into the year/make/model field and blur — the Auto-fill banner should offer the new entry. Applying it should populate LOA 39'3", beam 12'8", max draft 7'3", sail area 916 sq ft, designer Judel/Vrolijk & Co.
+3. Still on that survey, scroll to **Engine & Gearbox** (heading should now read *Gearbox*, not *Transmission*). Open the gearbox make dropdown — **Yanmar Saildrive**, **Volvo Penta Saildrive**, **ZF Saildrive** should appear alphabetically amongst the traditional makers. Select *Yanmar Saildrive*; the model dropdown should list SD20–SD70.
+4. Check camera/photo-capture labels: the photo tile should say *Gearbox Photo*, the capture button should say *📷 Gearbox*.
+5. Generate the report. The narrative propulsion block titles should say *Gearbox 1 (Port)* / *Gearbox 2 (Starboard)* (or just *Gearbox* for single-engine), and nameplate image alts should read *Gearbox serial plate* etc.
+6. Open any *existing* survey saved before v2465 (e.g., Footloose). Verify the existing `transmissionMake` / `transmissionMakeModel` data still renders correctly under the new "Gearbox" labels — no empty fields, no data loss.
+
+If any of 2–6 regresses, roll back to v2464.
+
+*Behaviour unchanged from v2464:* TOC skip-logic for I&E section, all v2463 report text polish, condition sentence derivation at render time.
+
+---
+
 ## v2464 — 2026-04-23
 ### Fixed — Table of Contents no longer lists *Instruments & Electronics Inventory* when that section has been skipped
 

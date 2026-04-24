@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2464';
+const APP_VERSION = 'v2465';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -9704,7 +9704,7 @@ function renderNewSurveyForm() {
         <textarea id="changesToPlan" placeholder="Any modifications or changes" autocapitalize="sentences"></textarea>
       </div>
 
-      <h3 style="margin-top:16px;color:#066aab;">Engine & Transmission</h3>
+      <h3 style="margin-top:16px;color:#066aab;">Engine & Gearbox</h3>
 
       <!-- Engine 1 -->
       <div style="border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin-bottom:10px;background:#f8fafc;">
@@ -9768,32 +9768,32 @@ function renderNewSurveyForm() {
             </div>
           </div>
         </div>
-        <div style="font-weight:700;font-size:13px;color:#066aab;margin:12px 0 8px;">Transmission 1</div>
+        <div style="font-weight:700;font-size:13px;color:#066aab;margin:12px 0 8px;">Gearbox 1</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Transmission Make</label>
+            <label class="form-label" style="font-size:12px;">Gearbox Make</label>
             <select id="transmissionMake" onchange="onTransmissionMakeChange()">
               <option value="">Select make</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Transmission Model</label>
+            <label class="form-label" style="font-size:12px;">Gearbox Model</label>
             <select id="transmissionModel" onchange="onTransmissionModelChange()">
               <option value="">Select make first</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Transmission Serial No.</label>
+            <label class="form-label" style="font-size:12px;">Gearbox Serial No.</label>
             <input type="text" id="transmissionSerial" placeholder="">
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
           <div class="form-group" style="margin:0;">
-            <label class="form-label" style="font-size:11px;">Transmission Photo</label>
+            <label class="form-label" style="font-size:11px;">Gearbox Photo</label>
             <div data-photo-field="transmissionPhoto">
               <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-                📷 Transmission
-                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmissionPhoto', 'Transmission', event)" />
+                📷 Gearbox
+                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmissionPhoto', 'Gearbox', event)" />
               </label>
             </div>
           </div>
@@ -9874,32 +9874,32 @@ function renderNewSurveyForm() {
             </div>
           </div>
         </div>
-        <div style="font-weight:700;font-size:13px;color:#066aab;margin:12px 0 8px;">Transmission 2</div>
+        <div style="font-weight:700;font-size:13px;color:#066aab;margin:12px 0 8px;">Gearbox 2</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Transmission Make</label>
+            <label class="form-label" style="font-size:12px;">Gearbox Make</label>
             <select id="transmission2Make" onchange="onTransmission2MakeChange()">
               <option value="">Select make</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Transmission Model</label>
+            <label class="form-label" style="font-size:12px;">Gearbox Model</label>
             <select id="transmission2Model" onchange="onTransmission2ModelChange()">
               <option value="">Select make first</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Transmission Serial No.</label>
+            <label class="form-label" style="font-size:12px;">Gearbox Serial No.</label>
             <input type="text" id="transmission2Serial" placeholder="">
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
           <div class="form-group" style="margin:0;">
-            <label class="form-label" style="font-size:11px;">Transmission Photo</label>
+            <label class="form-label" style="font-size:11px;">Gearbox Photo</label>
             <div data-photo-field="transmission2Photo">
               <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-                📷 Transmission 2
-                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmission2Photo', 'Transmission 2', event)" />
+                📷 Gearbox 2
+                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmission2Photo', 'Gearbox 2', event)" />
               </label>
             </div>
           </div>
@@ -10255,7 +10255,7 @@ function renderNewSurveyForm() {
   initCurrencyInputs();
 }
 
-// ─── Engine & Transmission Dropdown Population ──────────────────────────────
+// ─── Engine & Gearbox Dropdown Population ───────────────────────────────────
 
 function populateEngineMakes() {
   if (!engineDb) return;
@@ -16154,18 +16154,18 @@ async function checkSurvey() {
     let missingEngineCount = 0;
     for (const [field, label] of engineFields) {
       if (!survey[field] || survey[field].trim() === '') {
-        add('critical', 'Engine & Transmission', `Missing: ${label}`, null, field);
+        add('critical', 'Engine & Gearbox', `Missing: ${label}`, null, field);
         missingEngineCount++;
       }
     }
     const transFields = [
-      ['transmissionMake',   'Transmission make'],
-      ['transmissionModel',  'Transmission model'],
-      ['transmissionSerial', 'Transmission serial number'],
+      ['transmissionMake',   'Gearbox make'],
+      ['transmissionModel',  'Gearbox model'],
+      ['transmissionSerial', 'Gearbox serial number'],
     ];
     for (const [field, label] of transFields) {
       if (!survey[field] || survey[field].trim() === '') {
-        add('warning', 'Engine & Transmission', `Missing: ${label}`, null, field);
+        add('warning', 'Engine & Gearbox', `Missing: ${label}`, null, field);
       }
     }
     // Check if engine data exists in checklist items that could be migrated
@@ -16198,8 +16198,8 @@ async function checkSurvey() {
   const enginePhotoFields = [
     ['enginePhoto',         'Engine photo'],
     ['enginePlatePhoto',    'Engine plate photo'],
-    ['transmissionPhoto',   'Transmission photo'],
-    ['transmissionPlatePhoto','Transmission plate photo'],
+    ['transmissionPhoto',   'Gearbox photo'],
+    ['transmissionPlatePhoto','Gearbox plate photo'],
   ];
   if (survey.vesselType !== 'human-powered') {
     for (const [field, label] of enginePhotoFields) {
@@ -16222,7 +16222,7 @@ async function checkSurvey() {
     fourCornerPortBow: 'Port bow', fourCornerStbdBow: 'Starboard bow',
     fourCornerPortStern: 'Port stern', fourCornerStbdStern: 'Starboard stern',
     enginePhoto: 'Engine', enginePlatePhoto: 'Engine plate',
-    transmissionPhoto: 'Transmission', transmissionPlatePhoto: 'Transmission plate',
+    transmissionPhoto: 'Gearbox', transmissionPlatePhoto: 'Gearbox plate',
   };
   for (const key of docPhotoKeys) {
     if (survey[key]) allPhotoRefs.push({ id: survey[key], label: docPhotoLabels[key] || key, isDoc: true, navId: key });
@@ -18025,7 +18025,7 @@ function _csCheckSingleIssue(issue, data, survey) {
   }
 
   // Header field issues (engineMake, etc.) — check survey-level fields by navId
-  if (cat === 'Header Fields' || cat === 'Engine & Transmission' || cat === 'Valuation' || cat === 'Documentation') {
+  if (cat === 'Header Fields' || cat === 'Engine & Gearbox' || cat === 'Valuation' || cat === 'Documentation') {
     const navId = issue.navId;
     if (navId && survey[navId] && String(survey[navId]).trim() !== '' && survey[navId] !== 'Select') {
       return { fixed: true };
@@ -20923,9 +20923,9 @@ const PHOTO_FIELD_LABELS = {
   'enginePlatePhoto': 'Data Plate',
   'engine2Photo': 'Engine 2',
   'engine2PlatePhoto': 'Data Plate 2',
-  'transmissionPhoto': 'Transmission',
+  'transmissionPhoto': 'Gearbox',
   'transmissionPlatePhoto': 'Serial Plate',
-  'transmission2Photo': 'Transmission 2',
+  'transmission2Photo': 'Gearbox 2',
   'transmission2PlatePhoto': 'Serial Plate 2',
   'coverPhoto': 'Cover Photo',
   'fourCornerPortBow': 'Port Bow',
@@ -24187,10 +24187,10 @@ ${(() => {
             const e1Plates = (enginePlatePhotos || []).map(u => nameplateImg(u, 'Engine data plate')).join('');
             const e2Photos = (engine2Photos || []).map(u => nameplateImg(u, 'Engine 2')).join('');
             const e2Plates = (engine2PlatePhotos || []).map(u => nameplateImg(u, 'Engine 2 data plate')).join('');
-            const t1Photos = (transmissionPhotos || []).map(u => nameplateImg(u, 'Transmission')).join('');
-            const t1Plates = (transmissionPlatePhotos || []).map(u => nameplateImg(u, 'Transmission serial plate')).join('');
-            const t2Photos = (transmission2Photos || []).map(u => nameplateImg(u, 'Transmission 2')).join('');
-            const t2Plates = (transmission2PlatePhotos || []).map(u => nameplateImg(u, 'Transmission 2 serial plate')).join('');
+            const t1Photos = (transmissionPhotos || []).map(u => nameplateImg(u, 'Gearbox')).join('');
+            const t1Plates = (transmissionPlatePhotos || []).map(u => nameplateImg(u, 'Gearbox serial plate')).join('');
+            const t2Photos = (transmission2Photos || []).map(u => nameplateImg(u, 'Gearbox 2')).join('');
+            const t2Plates = (transmission2PlatePhotos || []).map(u => nameplateImg(u, 'Gearbox 2 serial plate')).join('');
 
             // Per-unit .item renderer. Uses the same #066aab border-left
             // colour that the default (unrated) item block falls back to,
@@ -24250,7 +24250,7 @@ ${(() => {
             const hasT1 = survey.transmissionMakeModel || survey.transmissionSerial
               || t1Photos || t1Plates;
             if (hasT1) {
-              const title = survey.transmission2MakeModel ? 'Transmission 1 (Port)' : 'Transmission';
+              const title = survey.transmission2MakeModel ? 'Gearbox 1 (Port)' : 'Gearbox';
               const specs = [
                 survey.transmissionMakeModel,
                 survey.transmissionSerial ? `Serial ${survey.transmissionSerial}` : '',
@@ -24261,7 +24261,7 @@ ${(() => {
             const hasT2 = survey.transmission2MakeModel || survey.transmission2Serial
               || t2Photos || t2Plates;
             if (hasT2) {
-              const title = 'Transmission 2 (Starboard)';
+              const title = 'Gearbox 2 (Starboard)';
               const specs = [
                 survey.transmission2MakeModel,
                 survey.transmission2Serial ? `Serial ${survey.transmission2Serial}` : '',

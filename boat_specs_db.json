@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04",
+  "lastUpdated": "2026-04-24 (v2465 — Dehler 39 SQ)",
   "note": "Specifications sourced from manufacturer data sheets, sailboatdata.com, recognized technical references, and powerboat manufacturers. Values are approximate and may vary by model year, options, and keel variant.",
   "boats": [
     {
@@ -248,28 +248,40 @@
       "construction": "Fibreglass"
     },
     {
-      "id": "benford-friday-harbor-34",
-      "make": "Benford",
-      "model": "Friday Harbor 34",
+      "id": "beneteau-antares-11",
+      "make": "Beneteau",
+      "model": "Antares 11",
       "aliases": [
-        "friday harbor 34",
-        "friday harbour 34",
-        "benford 34",
-        "friday harbor ferry 34",
-        "friday harbour ferry 34"
+        "antares 11",
+        "antares11"
       ],
-      "yearStart": 1990,
+      "yearStart": 2015,
       "yearEnd": null,
       "type": "powerboat",
-      "loa": "34'0\"",
-      "lwl": "32'0\"",
-      "beam": "11'0\"",
-      "displacement": "14,000 lbs",
-      "maxDraft": "3'6\"",
-      "hullType": "Displacement",
-      "construction": "Fibreglass or cold-moulded wood (varies by builder)",
-      "designer": "Jay R. Benford",
-      "notes": "Traditional trawler-style design by Jay Benford. Single diesel (typically 40-75 hp). Built by various yards and home builders from Benford plans; specifications vary by builder. Verify on-site."
+      "loa": "36'4\"",
+      "beam": "11'2\"",
+      "maxDraft": "2'7\"",
+      "displacement": "13,228 lbs",
+      "hullType": "Planing",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "beneteau-antares-12",
+      "make": "Beneteau",
+      "model": "Antares 12",
+      "aliases": [
+        "antares 12",
+        "antares12"
+      ],
+      "yearStart": 2015,
+      "yearEnd": null,
+      "type": "powerboat",
+      "loa": "42'7\"",
+      "beam": "12'5\"",
+      "maxDraft": "3'7\"",
+      "displacement": "19,400 lbs",
+      "hullType": "Planing",
+      "construction": "Fibreglass"
     },
     {
       "id": "beneteau-antares-7",
@@ -326,42 +338,6 @@
       "construction": "Fibreglass"
     },
     {
-      "id": "beneteau-antares-11",
-      "make": "Beneteau",
-      "model": "Antares 11",
-      "aliases": [
-        "antares 11",
-        "antares11"
-      ],
-      "yearStart": 2015,
-      "yearEnd": null,
-      "type": "powerboat",
-      "loa": "36'4\"",
-      "beam": "11'2\"",
-      "maxDraft": "2'7\"",
-      "displacement": "13,228 lbs",
-      "hullType": "Planing",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "beneteau-antares-12",
-      "make": "Beneteau",
-      "model": "Antares 12",
-      "aliases": [
-        "antares 12",
-        "antares12"
-      ],
-      "yearStart": 2015,
-      "yearEnd": null,
-      "type": "powerboat",
-      "loa": "42'7\"",
-      "beam": "12'5\"",
-      "maxDraft": "3'7\"",
-      "displacement": "19,400 lbs",
-      "hullType": "Planing",
-      "construction": "Fibreglass"
-    },
-    {
       "id": "beneteau-first-25",
       "make": "Beneteau",
       "model": "First 25",
@@ -406,6 +382,50 @@
       "construction": "Fibreglass"
     },
     {
+      "id": "beneteau-first-305",
+      "make": "Beneteau",
+      "model": "First 305",
+      "aliases": [
+        "first 305",
+        "first305"
+      ],
+      "yearStart": 1984,
+      "yearEnd": 1989,
+      "type": "sailboat",
+      "loa": "30'6\"",
+      "lwl": "26'11\"",
+      "beam": "9'10\"",
+      "displacement": "7,939 lbs",
+      "ballast": "2,900 lbs",
+      "maxDraft": "5'5\"",
+      "totalSailArea": "537 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "beneteau-first-310",
+      "make": "Beneteau",
+      "model": "First 310",
+      "aliases": [
+        "first 310",
+        "first310"
+      ],
+      "yearStart": 1990,
+      "yearEnd": 1995,
+      "type": "sailboat",
+      "loa": "30'0\"",
+      "lwl": "28'10\"",
+      "beam": "10'6\"",
+      "displacement": "7,040 lbs",
+      "ballast": "1,785 lbs",
+      "maxDraft": "5'11\"",
+      "totalSailArea": "460 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
       "id": "beneteau-first-32",
       "make": "Beneteau",
       "model": "First 32",
@@ -423,6 +443,28 @@
       "ballast": "3,310 lbs",
       "maxDraft": "4'5\"",
       "totalSailArea": "499 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "beneteau-first-345",
+      "make": "Beneteau",
+      "model": "First 345",
+      "aliases": [
+        "first 345",
+        "first345"
+      ],
+      "yearStart": 1985,
+      "yearEnd": 1988,
+      "type": "sailboat",
+      "loa": "34'8\"",
+      "lwl": "29'2\"",
+      "beam": "11'6\"",
+      "displacement": "12,100 lbs",
+      "ballast": "4,200 lbs",
+      "maxDraft": "6'2\"",
+      "totalSailArea": "673 sq ft",
       "hullType": "Displacement",
       "keelType": "Fin",
       "construction": "Fibreglass"
@@ -468,6 +510,28 @@
       "ballast": "4,409 lbs",
       "maxDraft": "6'10\"",
       "totalSailArea": "753 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "beneteau-first-375",
+      "make": "Beneteau",
+      "model": "First 375",
+      "aliases": [
+        "first 375",
+        "first375"
+      ],
+      "yearStart": 1985,
+      "yearEnd": 1989,
+      "type": "sailboat",
+      "loa": "37'0\"",
+      "lwl": "33'2\"",
+      "beam": "12'6\"",
+      "displacement": "15,400 lbs",
+      "ballast": "4,650 lbs",
+      "maxDraft": "6'6\"",
+      "totalSailArea": "659 sq ft",
       "hullType": "Displacement",
       "keelType": "Fin",
       "construction": "Fibreglass"
@@ -557,94 +621,6 @@
       "ballast": "7,980 lbs",
       "maxDraft": "7'10\"",
       "totalSailArea": "1,195 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "beneteau-first-305",
-      "make": "Beneteau",
-      "model": "First 305",
-      "aliases": [
-        "first 305",
-        "first305"
-      ],
-      "yearStart": 1984,
-      "yearEnd": 1989,
-      "type": "sailboat",
-      "loa": "30'6\"",
-      "lwl": "26'11\"",
-      "beam": "9'10\"",
-      "displacement": "7,939 lbs",
-      "ballast": "2,900 lbs",
-      "maxDraft": "5'5\"",
-      "totalSailArea": "537 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "beneteau-first-310",
-      "make": "Beneteau",
-      "model": "First 310",
-      "aliases": [
-        "first 310",
-        "first310"
-      ],
-      "yearStart": 1990,
-      "yearEnd": 1995,
-      "type": "sailboat",
-      "loa": "30'0\"",
-      "lwl": "28'10\"",
-      "beam": "10'6\"",
-      "displacement": "7,040 lbs",
-      "ballast": "1,785 lbs",
-      "maxDraft": "5'11\"",
-      "totalSailArea": "460 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "beneteau-first-345",
-      "make": "Beneteau",
-      "model": "First 345",
-      "aliases": [
-        "first 345",
-        "first345"
-      ],
-      "yearStart": 1985,
-      "yearEnd": 1988,
-      "type": "sailboat",
-      "loa": "34'8\"",
-      "lwl": "29'2\"",
-      "beam": "11'6\"",
-      "displacement": "12,100 lbs",
-      "ballast": "4,200 lbs",
-      "maxDraft": "6'2\"",
-      "totalSailArea": "673 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "beneteau-first-375",
-      "make": "Beneteau",
-      "model": "First 375",
-      "aliases": [
-        "first 375",
-        "first375"
-      ],
-      "yearStart": 1985,
-      "yearEnd": 1989,
-      "type": "sailboat",
-      "loa": "37'0\"",
-      "lwl": "33'2\"",
-      "beam": "12'6\"",
-      "displacement": "15,400 lbs",
-      "ballast": "4,650 lbs",
-      "maxDraft": "6'6\"",
-      "totalSailArea": "659 sq ft",
       "hullType": "Displacement",
       "keelType": "Fin",
       "construction": "Fibreglass"
@@ -802,6 +778,50 @@
       "construction": "Fibreglass"
     },
     {
+      "id": "beneteau-oceanis-323",
+      "make": "Beneteau",
+      "model": "Oceanis 323",
+      "aliases": [
+        "oceanis 323",
+        "oceanis323"
+      ],
+      "yearStart": 2003,
+      "yearEnd": 2007,
+      "type": "sailboat",
+      "loa": "33'1\"",
+      "lwl": "29'6\"",
+      "beam": "10'10\"",
+      "displacement": "10,582 lbs",
+      "ballast": "3,086 lbs",
+      "maxDraft": "4'11\"",
+      "totalSailArea": "484 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "beneteau-oceanis-331",
+      "make": "Beneteau",
+      "model": "Oceanis 331",
+      "aliases": [
+        "oceanis 331",
+        "oceanis331"
+      ],
+      "yearStart": 1999,
+      "yearEnd": 2004,
+      "type": "sailboat",
+      "loa": "33'11\"",
+      "lwl": "30'10\"",
+      "beam": "11'2\"",
+      "displacement": "10,450 lbs",
+      "ballast": "3,307 lbs",
+      "maxDraft": "5'3\"",
+      "totalSailArea": "534 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
       "id": "beneteau-oceanis-34",
       "make": "Beneteau",
       "model": "Oceanis 34",
@@ -819,6 +839,40 @@
       "ballast": "3,556 lbs",
       "maxDraft": "6'1\"",
       "totalSailArea": "544 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "beneteau-oceanis-343",
+      "make": "Beneteau",
+      "model": "Oceanis 343",
+      "aliases": [
+        "oceanis 343",
+        "oceanis343",
+        "oceanis 343 clipper",
+        "beneteau 343"
+      ],
+      "yearStart": 2005,
+      "yearEnd": 2008,
+      "type": "sailboat",
+      "loa": "35'6\"",
+      "lwl": "31'2\"",
+      "beam": "11'5\"",
+      "displacement": "12,290 lbs",
+      "ballast": "3,402 lbs",
+      "maxDraft": "6'5\"",
+      "draftVariants": [
+        {
+          "label": "Deep keel",
+          "draft": "6'5\""
+        },
+        {
+          "label": "Shallow keel",
+          "draft": "4'9\""
+        }
+      ],
+      "totalSailArea": "597 sq ft",
       "hullType": "Displacement",
       "keelType": "Fin",
       "construction": "Fibreglass"
@@ -891,6 +945,28 @@
       "construction": "Fibreglass"
     },
     {
+      "id": "beneteau-oceanis-373",
+      "make": "Beneteau",
+      "model": "Oceanis 373",
+      "aliases": [
+        "oceanis 373",
+        "oceanis373"
+      ],
+      "yearStart": 2004,
+      "yearEnd": 2010,
+      "type": "sailboat",
+      "loa": "36'11\"",
+      "lwl": "32'10\"",
+      "beam": "12'4\"",
+      "displacement": "15,013 lbs",
+      "ballast": "3,867 lbs",
+      "maxDraft": "4'11\"",
+      "totalSailArea": "710 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
       "id": "beneteau-oceanis-38",
       "make": "Beneteau",
       "model": "Oceanis 38",
@@ -922,6 +998,28 @@
           "draft": "4'11\""
         }
       ]
+    },
+    {
+      "id": "beneteau-oceanis-393",
+      "make": "Beneteau",
+      "model": "Oceanis 393",
+      "aliases": [
+        "oceanis 393",
+        "oceanis393"
+      ],
+      "yearStart": 2002,
+      "yearEnd": 2007,
+      "type": "sailboat",
+      "loa": "38'8\"",
+      "lwl": "35'1\"",
+      "beam": "12'7\"",
+      "displacement": "15,400 lbs",
+      "ballast": "5,060 lbs",
+      "maxDraft": "6'6\"",
+      "totalSailArea": "990 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
     },
     {
       "id": "beneteau-oceanis-40",
@@ -964,6 +1062,50 @@
       "ballast": "5,842 lbs",
       "maxDraft": "6'3\"",
       "totalSailArea": "916 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "beneteau-oceanis-411",
+      "make": "Beneteau",
+      "model": "Oceanis 411",
+      "aliases": [
+        "oceanis 411",
+        "oceanis411"
+      ],
+      "yearStart": 1997,
+      "yearEnd": 2004,
+      "type": "sailboat",
+      "loa": "40'11\"",
+      "lwl": "35'8\"",
+      "beam": "13'0\"",
+      "displacement": "14,990 lbs",
+      "ballast": "4,409 lbs",
+      "maxDraft": "6'3\"",
+      "totalSailArea": "735 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "beneteau-oceanis-423",
+      "make": "Beneteau",
+      "model": "Oceanis 423",
+      "aliases": [
+        "oceanis 423",
+        "oceanis423"
+      ],
+      "yearStart": 2002,
+      "yearEnd": 2005,
+      "type": "sailboat",
+      "loa": "43'1\"",
+      "lwl": "38'6\"",
+      "beam": "12'11\"",
+      "displacement": "19,500 lbs",
+      "ballast": "5,836 lbs",
+      "maxDraft": "5'7\"",
+      "totalSailArea": "870 sq ft",
       "hullType": "Displacement",
       "keelType": "Fin",
       "construction": "Fibreglass"
@@ -1097,166 +1239,6 @@
       "ballast": "9,918 lbs",
       "maxDraft": "8'2\"",
       "totalSailArea": "1,227 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "beneteau-oceanis-323",
-      "make": "Beneteau",
-      "model": "Oceanis 323",
-      "aliases": [
-        "oceanis 323",
-        "oceanis323"
-      ],
-      "yearStart": 2003,
-      "yearEnd": 2007,
-      "type": "sailboat",
-      "loa": "33'1\"",
-      "lwl": "29'6\"",
-      "beam": "10'10\"",
-      "displacement": "10,582 lbs",
-      "ballast": "3,086 lbs",
-      "maxDraft": "4'11\"",
-      "totalSailArea": "484 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "beneteau-oceanis-331",
-      "make": "Beneteau",
-      "model": "Oceanis 331",
-      "aliases": [
-        "oceanis 331",
-        "oceanis331"
-      ],
-      "yearStart": 1999,
-      "yearEnd": 2004,
-      "type": "sailboat",
-      "loa": "33'11\"",
-      "lwl": "30'10\"",
-      "beam": "11'2\"",
-      "displacement": "10,450 lbs",
-      "ballast": "3,307 lbs",
-      "maxDraft": "5'3\"",
-      "totalSailArea": "534 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "beneteau-oceanis-343",
-      "make": "Beneteau",
-      "model": "Oceanis 343",
-      "aliases": [
-        "oceanis 343",
-        "oceanis343",
-        "oceanis 343 clipper",
-        "beneteau 343"
-      ],
-      "yearStart": 2005,
-      "yearEnd": 2008,
-      "type": "sailboat",
-      "loa": "35'6\"",
-      "lwl": "31'2\"",
-      "beam": "11'5\"",
-      "displacement": "12,290 lbs",
-      "ballast": "3,402 lbs",
-      "maxDraft": "6'5\"",
-      "draftVariants": [
-        { "label": "Deep keel", "draft": "6'5\"" },
-        { "label": "Shallow keel", "draft": "4'9\"" }
-      ],
-      "totalSailArea": "597 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "beneteau-oceanis-373",
-      "make": "Beneteau",
-      "model": "Oceanis 373",
-      "aliases": [
-        "oceanis 373",
-        "oceanis373"
-      ],
-      "yearStart": 2004,
-      "yearEnd": 2010,
-      "type": "sailboat",
-      "loa": "36'11\"",
-      "lwl": "32'10\"",
-      "beam": "12'4\"",
-      "displacement": "15,013 lbs",
-      "ballast": "3,867 lbs",
-      "maxDraft": "4'11\"",
-      "totalSailArea": "710 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "beneteau-oceanis-393",
-      "make": "Beneteau",
-      "model": "Oceanis 393",
-      "aliases": [
-        "oceanis 393",
-        "oceanis393"
-      ],
-      "yearStart": 2002,
-      "yearEnd": 2007,
-      "type": "sailboat",
-      "loa": "38'8\"",
-      "lwl": "35'1\"",
-      "beam": "12'7\"",
-      "displacement": "15,400 lbs",
-      "ballast": "5,060 lbs",
-      "maxDraft": "6'6\"",
-      "totalSailArea": "990 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "beneteau-oceanis-411",
-      "make": "Beneteau",
-      "model": "Oceanis 411",
-      "aliases": [
-        "oceanis 411",
-        "oceanis411"
-      ],
-      "yearStart": 1997,
-      "yearEnd": 2004,
-      "type": "sailboat",
-      "loa": "40'11\"",
-      "lwl": "35'8\"",
-      "beam": "13'0\"",
-      "displacement": "14,990 lbs",
-      "ballast": "4,409 lbs",
-      "maxDraft": "6'3\"",
-      "totalSailArea": "735 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "beneteau-oceanis-423",
-      "make": "Beneteau",
-      "model": "Oceanis 423",
-      "aliases": [
-        "oceanis 423",
-        "oceanis423"
-      ],
-      "yearStart": 2002,
-      "yearEnd": 2005,
-      "type": "sailboat",
-      "loa": "43'1\"",
-      "lwl": "38'6\"",
-      "beam": "12'11\"",
-      "displacement": "19,500 lbs",
-      "ballast": "5,836 lbs",
-      "maxDraft": "5'7\"",
-      "totalSailArea": "870 sq ft",
       "hullType": "Displacement",
       "keelType": "Fin",
       "construction": "Fibreglass"
@@ -1474,6 +1456,30 @@
       "displacement": "31,309 lbs",
       "hullType": "Semi-displacement",
       "construction": "Fibreglass"
+    },
+    {
+      "id": "benford-friday-harbor-34",
+      "make": "Benford",
+      "model": "Friday Harbor 34",
+      "aliases": [
+        "friday harbor 34",
+        "friday harbour 34",
+        "benford 34",
+        "friday harbor ferry 34",
+        "friday harbour ferry 34"
+      ],
+      "yearStart": 1990,
+      "yearEnd": null,
+      "type": "powerboat",
+      "loa": "34'0\"",
+      "lwl": "32'0\"",
+      "beam": "11'0\"",
+      "displacement": "14,000 lbs",
+      "maxDraft": "3'6\"",
+      "hullType": "Displacement",
+      "construction": "Fibreglass or cold-moulded wood (varies by builder)",
+      "designer": "Jay R. Benford",
+      "notes": "Traditional trawler-style design by Jay Benford. Single diesel (typically 40-75 hp). Built by various yards and home builders from Benford plans; specifications vary by builder. Verify on-site."
     },
     {
       "id": "boston-whaler-230-vantage",
@@ -1949,6 +1955,28 @@
       "construction": "Fibreglass"
     },
     {
+      "id": "catalina-320",
+      "make": "Catalina",
+      "model": "320",
+      "aliases": [
+        "catalina320",
+        "catalina 320"
+      ],
+      "yearStart": 1994,
+      "yearEnd": 2009,
+      "type": "sailboat",
+      "loa": "32'5\"",
+      "lwl": "28'0\"",
+      "beam": "11'1\"",
+      "displacement": "10,600 lbs",
+      "ballast": "3,300 lbs",
+      "maxDraft": "5'6\"",
+      "totalSailArea": "483 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
       "id": "catalina-34",
       "make": "Catalina",
       "model": "34",
@@ -1993,50 +2021,6 @@
       "construction": "Fibreglass"
     },
     {
-      "id": "catalina-42",
-      "make": "Catalina",
-      "model": "42",
-      "aliases": [
-        "catalina42",
-        "catalina 42"
-      ],
-      "yearStart": 1989,
-      "yearEnd": 2007,
-      "type": "sailboat",
-      "loa": "42'0\"",
-      "lwl": "35'4\"",
-      "beam": "13'0\"",
-      "displacement": "19,500 lbs",
-      "ballast": "7,000 lbs",
-      "maxDraft": "6'2\"",
-      "totalSailArea": "795 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "catalina-320",
-      "make": "Catalina",
-      "model": "320",
-      "aliases": [
-        "catalina320",
-        "catalina 320"
-      ],
-      "yearStart": 1994,
-      "yearEnd": 2009,
-      "type": "sailboat",
-      "loa": "32'5\"",
-      "lwl": "28'0\"",
-      "beam": "11'1\"",
-      "displacement": "10,600 lbs",
-      "ballast": "3,300 lbs",
-      "maxDraft": "5'6\"",
-      "totalSailArea": "483 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
       "id": "catalina-380",
       "make": "Catalina",
       "model": "380",
@@ -2054,6 +2038,28 @@
       "ballast": "5,800 lbs",
       "maxDraft": "6'6\"",
       "totalSailArea": "705 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "catalina-42",
+      "make": "Catalina",
+      "model": "42",
+      "aliases": [
+        "catalina42",
+        "catalina 42"
+      ],
+      "yearStart": 1989,
+      "yearEnd": 2007,
+      "type": "sailboat",
+      "loa": "42'0\"",
+      "lwl": "35'4\"",
+      "beam": "13'0\"",
+      "displacement": "19,500 lbs",
+      "ballast": "7,000 lbs",
+      "maxDraft": "6'2\"",
+      "totalSailArea": "795 sq ft",
       "hullType": "Displacement",
       "keelType": "Fin",
       "construction": "Fibreglass"
@@ -2380,6 +2386,32 @@
       "construction": "Fibreglass"
     },
     {
+      "id": "dehler-39sq",
+      "make": "Dehler",
+      "model": "39 SQ",
+      "aliases": [
+        "dehler39sq",
+        "dehler 39sq",
+        "39 SQ",
+        "39SQ"
+      ],
+      "yearStart": 2019,
+      "yearEnd": 2026,
+      "type": "sailboat",
+      "loa": "39'3\"",
+      "lwl": "35'5\"",
+      "beam": "12'8\"",
+      "displacement": "16,534 lbs",
+      "ballast": "5,732 lbs",
+      "maxDraft": "7'3\"",
+      "totalSailArea": "916 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin (deep standard; shoal 5'5\" optional)",
+      "construction": "Fibreglass",
+      "designer": "Judel/Vrolijk & Co",
+      "notes": "SQ = Sport Quality. Twin rudders. Available with standard (deep) or shoal draft, and performance cruiser or racing rig."
+    },
+    {
       "id": "doral-300-prestancia",
       "make": "Doral",
       "model": "300 Prestancia",
@@ -2475,164 +2507,6 @@
       "construction": "Fibreglass"
     },
     {
-      "id": "formula-31-pc",
-      "make": "Formula",
-      "model": "31 PC",
-      "aliases": [
-        "formula31pc",
-        "formula 31 performance cruiser"
-      ],
-      "yearStart": 1993,
-      "yearEnd": 2021,
-      "type": "powerboat",
-      "loa": "31'8\"",
-      "beam": "11'0\"",
-      "displacement": "14,100 lbs",
-      "maxDraft": "2'10\"",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "formula-34-pc",
-      "make": "Formula",
-      "model": "34 PC",
-      "aliases": [
-        "formula34pc",
-        "formula 34 performance cruiser"
-      ],
-      "yearStart": 2000,
-      "yearEnd": 2018,
-      "type": "powerboat",
-      "loa": "34'3\"",
-      "beam": "11'6\"",
-      "displacement": "15,710 lbs",
-      "maxDraft": "3'0\"",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "formula-37-pc",
-      "make": "Formula",
-      "model": "37 PC",
-      "aliases": [
-        "formula37pc",
-        "formula 37 performance cruiser"
-      ],
-      "yearStart": 1998,
-      "yearEnd": 2020,
-      "type": "powerboat",
-      "loa": "38'5\"",
-      "beam": "12'0\"",
-      "displacement": "17,500 lbs",
-      "maxDraft": "2'10\"",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "formula-40-pc",
-      "make": "Formula",
-      "model": "40 PC",
-      "aliases": [
-        "formula40pc",
-        "formula 40 performance cruiser"
-      ],
-      "yearStart": 2010,
-      "yearEnd": 2022,
-      "type": "powerboat",
-      "loa": "42'7\"",
-      "beam": "12'8\"",
-      "displacement": "22,150 lbs",
-      "maxDraft": "3'8\"",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "formula-310-ss",
-      "make": "Formula",
-      "model": "310 Sun Sport",
-      "aliases": [
-        "formula310ss",
-        "formula 310 sunsport",
-        "formula 310ss"
-      ],
-      "yearStart": 1999,
-      "yearEnd": 2015,
-      "type": "powerboat",
-      "loa": "31'0\"",
-      "beam": "9'6\"",
-      "displacement": "10,251 lbs",
-      "maxDraft": "3'2\"",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "formula-330-ss",
-      "make": "Formula",
-      "model": "330 Sun Sport",
-      "aliases": [
-        "formula330ss",
-        "formula 330 sunsport",
-        "formula 330ss"
-      ],
-      "yearStart": 2000,
-      "yearEnd": 2012,
-      "type": "powerboat",
-      "loa": "33'6\"",
-      "beam": "10'6\"",
-      "displacement": "12,500 lbs",
-      "maxDraft": "3'4\"",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "formula-350-ss",
-      "make": "Formula",
-      "model": "350 Sun Sport",
-      "aliases": [
-        "formula350ss",
-        "formula 350 sunsport",
-        "formula 350ss"
-      ],
-      "yearStart": 2002,
-      "yearEnd": 2010,
-      "type": "powerboat",
-      "loa": "35'6\"",
-      "beam": "11'0\"",
-      "displacement": "14,200 lbs",
-      "maxDraft": "3'4\"",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "formula-370-ss",
-      "make": "Formula",
-      "model": "370 Super Sport",
-      "aliases": [
-        "formula370ss",
-        "formula 370 supersport",
-        "formula 370ss"
-      ],
-      "yearStart": 2005,
-      "yearEnd": 2015,
-      "type": "powerboat",
-      "loa": "37'6\"",
-      "beam": "11'6\"",
-      "displacement": "16,000 lbs",
-      "maxDraft": "3'6\"",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "formula-400-ss",
-      "make": "Formula",
-      "model": "400 Super Sport",
-      "aliases": [
-        "formula400ss",
-        "formula 400 supersport",
-        "formula 400ss"
-      ],
-      "yearStart": 2006,
-      "yearEnd": 2016,
-      "type": "powerboat",
-      "loa": "40'0\"",
-      "beam": "12'0\"",
-      "displacement": "19,500 lbs",
-      "maxDraft": "3'8\"",
-      "construction": "Fibreglass"
-    },
-    {
       "id": "formula-270-br",
       "make": "Formula",
       "model": "270 Bowrider",
@@ -2667,6 +2541,41 @@
       "construction": "Fibreglass"
     },
     {
+      "id": "formula-31-pc",
+      "make": "Formula",
+      "model": "31 PC",
+      "aliases": [
+        "formula31pc",
+        "formula 31 performance cruiser"
+      ],
+      "yearStart": 1993,
+      "yearEnd": 2021,
+      "type": "powerboat",
+      "loa": "31'8\"",
+      "beam": "11'0\"",
+      "displacement": "14,100 lbs",
+      "maxDraft": "2'10\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-310-ss",
+      "make": "Formula",
+      "model": "310 Sun Sport",
+      "aliases": [
+        "formula310ss",
+        "formula 310 sunsport",
+        "formula 310ss"
+      ],
+      "yearStart": 1999,
+      "yearEnd": 2015,
+      "type": "powerboat",
+      "loa": "31'0\"",
+      "beam": "9'6\"",
+      "displacement": "10,251 lbs",
+      "maxDraft": "3'2\"",
+      "construction": "Fibreglass"
+    },
+    {
       "id": "formula-330-cbr",
       "make": "Formula",
       "model": "330 Crossover Bowrider",
@@ -2681,6 +2590,129 @@
       "beam": "10'3\"",
       "displacement": "12,250 lbs",
       "maxDraft": "3'2\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-330-ss",
+      "make": "Formula",
+      "model": "330 Sun Sport",
+      "aliases": [
+        "formula330ss",
+        "formula 330 sunsport",
+        "formula 330ss"
+      ],
+      "yearStart": 2000,
+      "yearEnd": 2012,
+      "type": "powerboat",
+      "loa": "33'6\"",
+      "beam": "10'6\"",
+      "displacement": "12,500 lbs",
+      "maxDraft": "3'4\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-34-pc",
+      "make": "Formula",
+      "model": "34 PC",
+      "aliases": [
+        "formula34pc",
+        "formula 34 performance cruiser"
+      ],
+      "yearStart": 2000,
+      "yearEnd": 2018,
+      "type": "powerboat",
+      "loa": "34'3\"",
+      "beam": "11'6\"",
+      "displacement": "15,710 lbs",
+      "maxDraft": "3'0\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-350-ss",
+      "make": "Formula",
+      "model": "350 Sun Sport",
+      "aliases": [
+        "formula350ss",
+        "formula 350 sunsport",
+        "formula 350ss"
+      ],
+      "yearStart": 2002,
+      "yearEnd": 2010,
+      "type": "powerboat",
+      "loa": "35'6\"",
+      "beam": "11'0\"",
+      "displacement": "14,200 lbs",
+      "maxDraft": "3'4\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-37-pc",
+      "make": "Formula",
+      "model": "37 PC",
+      "aliases": [
+        "formula37pc",
+        "formula 37 performance cruiser"
+      ],
+      "yearStart": 1998,
+      "yearEnd": 2020,
+      "type": "powerboat",
+      "loa": "38'5\"",
+      "beam": "12'0\"",
+      "displacement": "17,500 lbs",
+      "maxDraft": "2'10\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-370-ss",
+      "make": "Formula",
+      "model": "370 Super Sport",
+      "aliases": [
+        "formula370ss",
+        "formula 370 supersport",
+        "formula 370ss"
+      ],
+      "yearStart": 2005,
+      "yearEnd": 2015,
+      "type": "powerboat",
+      "loa": "37'6\"",
+      "beam": "11'6\"",
+      "displacement": "16,000 lbs",
+      "maxDraft": "3'6\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-40-pc",
+      "make": "Formula",
+      "model": "40 PC",
+      "aliases": [
+        "formula40pc",
+        "formula 40 performance cruiser"
+      ],
+      "yearStart": 2010,
+      "yearEnd": 2022,
+      "type": "powerboat",
+      "loa": "42'7\"",
+      "beam": "12'8\"",
+      "displacement": "22,150 lbs",
+      "maxDraft": "3'8\"",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "formula-400-ss",
+      "make": "Formula",
+      "model": "400 Super Sport",
+      "aliases": [
+        "formula400ss",
+        "formula 400 supersport",
+        "formula 400ss"
+      ],
+      "yearStart": 2006,
+      "yearEnd": 2016,
+      "type": "powerboat",
+      "loa": "40'0\"",
+      "beam": "12'0\"",
+      "displacement": "19,500 lbs",
+      "maxDraft": "3'8\"",
       "construction": "Fibreglass"
     },
     {
@@ -3228,6 +3260,96 @@
       "construction": "Fibreglass"
     },
     {
+      "id": "j-100",
+      "make": "J/Boats",
+      "model": "J/100",
+      "aliases": [
+        "j100",
+        "j/100",
+        "j 100"
+      ],
+      "yearStart": 1992,
+      "yearEnd": 2010,
+      "type": "sailboat",
+      "loa": "32'9\"",
+      "lwl": "29'0\"",
+      "beam": "9'4\"",
+      "displacement": "6,500 lbs",
+      "ballast": "2,500 lbs",
+      "maxDraft": "5'9\"",
+      "totalSailArea": "533 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Bulb",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "j-105",
+      "make": "J/Boats",
+      "model": "J/105",
+      "aliases": [
+        "j105",
+        "j/105",
+        "j 105"
+      ],
+      "yearStart": 1991,
+      "yearEnd": null,
+      "type": "sailboat",
+      "loa": "34'6\"",
+      "lwl": "28'5\"",
+      "beam": "11'0\"",
+      "displacement": "7,750 lbs",
+      "ballast": "3,400 lbs",
+      "maxDraft": "6'6\"",
+      "totalSailArea": "551 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "j-109",
+      "make": "J/Boats",
+      "model": "J/109",
+      "aliases": [
+        "j109",
+        "j/109",
+        "j 109"
+      ],
+      "yearStart": 1990,
+      "yearEnd": null,
+      "type": "sailboat",
+      "loa": "35'3\"",
+      "lwl": "30'6\"",
+      "beam": "11'6\"",
+      "displacement": "10,900 lbs",
+      "ballast": "3,900 lbs",
+      "maxDraft": "7'0\"",
+      "totalSailArea": "644 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "j-120",
+      "make": "J/Boats",
+      "model": "J/120",
+      "aliases": [
+        "j120",
+        "j/120",
+        "j 120"
+      ],
+      "yearStart": 1994,
+      "yearEnd": null,
+      "type": "sailboat",
+      "loa": "40'0\"",
+      "beam": "12'6\"",
+      "displacement": "14,000 lbs",
+      "maxDraft": "6'6\"",
+      "totalSailArea": "850 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
       "id": "j-22",
       "make": "J/Boats",
       "model": "J/22",
@@ -3343,91 +3465,24 @@
       "construction": "Fibreglass"
     },
     {
-      "id": "j-100",
-      "make": "J/Boats",
-      "model": "J/100",
+      "id": "jeanneau-so-349",
+      "make": "Jeanneau",
+      "model": "Sun Odyssey 349",
       "aliases": [
-        "j100",
-        "j/100",
-        "j 100"
+        "sun odyssey 349",
+        "so349",
+        "jeanneau 349"
       ],
-      "yearStart": 1992,
-      "yearEnd": 2010,
+      "yearStart": 2015,
+      "yearEnd": null,
       "type": "sailboat",
-      "loa": "32'9\"",
-      "lwl": "29'0\"",
-      "beam": "9'4\"",
-      "displacement": "6,500 lbs",
-      "ballast": "2,500 lbs",
+      "loa": "34'9\"",
+      "lwl": "30'11\"",
+      "beam": "12'0\"",
+      "displacement": "11,574 lbs",
+      "ballast": "3,748 lbs",
       "maxDraft": "5'9\"",
-      "totalSailArea": "533 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Bulb",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "j-105",
-      "make": "J/Boats",
-      "model": "J/105",
-      "aliases": [
-        "j105",
-        "j/105",
-        "j 105"
-      ],
-      "yearStart": 1991,
-      "yearEnd": null,
-      "type": "sailboat",
-      "loa": "34'6\"",
-      "lwl": "28'5\"",
-      "beam": "11'0\"",
-      "displacement": "7,750 lbs",
-      "ballast": "3,400 lbs",
-      "maxDraft": "6'6\"",
-      "totalSailArea": "551 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "j-109",
-      "make": "J/Boats",
-      "model": "J/109",
-      "aliases": [
-        "j109",
-        "j/109",
-        "j 109"
-      ],
-      "yearStart": 1990,
-      "yearEnd": null,
-      "type": "sailboat",
-      "loa": "35'3\"",
-      "lwl": "30'6\"",
-      "beam": "11'6\"",
-      "displacement": "10,900 lbs",
-      "ballast": "3,900 lbs",
-      "maxDraft": "7'0\"",
-      "totalSailArea": "644 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "j-120",
-      "make": "J/Boats",
-      "model": "J/120",
-      "aliases": [
-        "j120",
-        "j/120",
-        "j 120"
-      ],
-      "yearStart": 1994,
-      "yearEnd": null,
-      "type": "sailboat",
-      "loa": "40'0\"",
-      "beam": "12'6\"",
-      "displacement": "14,000 lbs",
-      "maxDraft": "6'6\"",
-      "totalSailArea": "850 sq ft",
+      "totalSailArea": "626 sq ft",
       "hullType": "Displacement",
       "keelType": "Fin",
       "construction": "Fibreglass"
@@ -3451,52 +3506,6 @@
       "ballast": "3,748 lbs",
       "maxDraft": "6'3\"",
       "totalSailArea": "666 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "jeanneau-so-44i",
-      "make": "Jeanneau",
-      "model": "Sun Odyssey 44i",
-      "aliases": [
-        "sun odyssey 44i",
-        "so44i",
-        "jeanneau 44i"
-      ],
-      "yearStart": 2008,
-      "yearEnd": 2014,
-      "type": "sailboat",
-      "loa": "44'8\"",
-      "lwl": "39'7\"",
-      "beam": "14'7\"",
-      "displacement": "24,030 lbs",
-      "ballast": "7,936 lbs",
-      "maxDraft": "7'3\"",
-      "totalSailArea": "1,130 sq ft",
-      "hullType": "Displacement",
-      "keelType": "Fin",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "jeanneau-so-349",
-      "make": "Jeanneau",
-      "model": "Sun Odyssey 349",
-      "aliases": [
-        "sun odyssey 349",
-        "so349",
-        "jeanneau 349"
-      ],
-      "yearStart": 2015,
-      "yearEnd": null,
-      "type": "sailboat",
-      "loa": "34'9\"",
-      "lwl": "30'11\"",
-      "beam": "12'0\"",
-      "displacement": "11,574 lbs",
-      "ballast": "3,748 lbs",
-      "maxDraft": "5'9\"",
-      "totalSailArea": "626 sq ft",
       "hullType": "Displacement",
       "keelType": "Fin",
       "construction": "Fibreglass"
@@ -3543,6 +3552,29 @@
       "ballast": "6,395 lbs",
       "maxDraft": "6'10\"",
       "totalSailArea": "935 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "jeanneau-so-44i",
+      "make": "Jeanneau",
+      "model": "Sun Odyssey 44i",
+      "aliases": [
+        "sun odyssey 44i",
+        "so44i",
+        "jeanneau 44i"
+      ],
+      "yearStart": 2008,
+      "yearEnd": 2014,
+      "type": "sailboat",
+      "loa": "44'8\"",
+      "lwl": "39'7\"",
+      "beam": "14'7\"",
+      "displacement": "24,030 lbs",
+      "ballast": "7,936 lbs",
+      "maxDraft": "7'3\"",
+      "totalSailArea": "1,130 sq ft",
       "hullType": "Displacement",
       "keelType": "Fin",
       "construction": "Fibreglass"
@@ -3636,28 +3668,6 @@
       "construction": "Fibreglass"
     },
     {
-      "id": "mainship-43-trawler",
-      "make": "Mainship",
-      "model": "43 Trawler",
-      "aliases": [
-        "mainship43",
-        "mainship 43"
-      ],
-      "yearStart": 2000,
-      "yearEnd": 2012,
-      "type": "powerboat",
-      "loa": "43'6\"",
-      "lwl": "",
-      "beam": "14'9\"",
-      "displacement": "28,000 lbs",
-      "ballast": "",
-      "maxDraft": "3'6\"",
-      "totalSailArea": "",
-      "hullType": "Semi-displacement",
-      "keelType": "",
-      "construction": "Fibreglass"
-    },
-    {
       "id": "mainship-350-390-trawler",
       "make": "Mainship",
       "model": "350/390 Trawler",
@@ -3693,6 +3703,28 @@
       "maxDraft": "3'8\"",
       "displacement": "32,000 lbs",
       "hullType": "Semi-displacement",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "mainship-43-trawler",
+      "make": "Mainship",
+      "model": "43 Trawler",
+      "aliases": [
+        "mainship43",
+        "mainship 43"
+      ],
+      "yearStart": 2000,
+      "yearEnd": 2012,
+      "type": "powerboat",
+      "loa": "43'6\"",
+      "lwl": "",
+      "beam": "14'9\"",
+      "displacement": "28,000 lbs",
+      "ballast": "",
+      "maxDraft": "3'6\"",
+      "totalSailArea": "",
+      "hullType": "Semi-displacement",
+      "keelType": "",
       "construction": "Fibreglass"
     },
     {
@@ -4716,6 +4748,42 @@
       "construction": "Fibreglass"
     },
     {
+      "id": "silverton-310-express",
+      "make": "Silverton",
+      "model": "310 Express",
+      "aliases": [
+        "silverton 310",
+        "sv310"
+      ],
+      "yearStart": 1995,
+      "yearEnd": 1998,
+      "type": "powerboat",
+      "loa": "31'0\"",
+      "beam": "10'6\"",
+      "maxDraft": "2'8\"",
+      "displacement": "12,000 lbs",
+      "hullType": "Modified V",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "silverton-34-convertible",
+      "make": "Silverton",
+      "model": "34 Convertible",
+      "aliases": [
+        "silverton 34",
+        "sv34c"
+      ],
+      "yearStart": 1998,
+      "yearEnd": 2010,
+      "type": "powerboat",
+      "loa": "37'7\"",
+      "beam": "13'10\"",
+      "maxDraft": "3'3\"",
+      "displacement": "20,000 lbs",
+      "hullType": "Modified V",
+      "construction": "Fibreglass"
+    },
+    {
       "id": "silverton-34c-1988",
       "make": "Silverton",
       "model": "34C",
@@ -4742,24 +4810,6 @@
       "construction": "Fibreglass"
     },
     {
-      "id": "silverton-34-convertible",
-      "make": "Silverton",
-      "model": "34 Convertible",
-      "aliases": [
-        "silverton 34",
-        "sv34c"
-      ],
-      "yearStart": 1998,
-      "yearEnd": 2010,
-      "type": "powerboat",
-      "loa": "37'7\"",
-      "beam": "13'10\"",
-      "maxDraft": "3'3\"",
-      "displacement": "20,000 lbs",
-      "hullType": "Modified V",
-      "construction": "Fibreglass"
-    },
-    {
       "id": "silverton-37-convertible",
       "make": "Silverton",
       "model": "37 Convertible",
@@ -4774,6 +4824,24 @@
       "beam": "14'0\"",
       "maxDraft": "3'6\"",
       "displacement": "24,000 lbs",
+      "hullType": "Modified V",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "silverton-372-motor-yacht",
+      "make": "Silverton",
+      "model": "372 Motor Yacht",
+      "aliases": [
+        "silverton 372",
+        "sv372"
+      ],
+      "yearStart": 1994,
+      "yearEnd": 2002,
+      "type": "powerboat",
+      "loa": "37'0\"",
+      "beam": "14'0\"",
+      "maxDraft": "3'0\"",
+      "displacement": "28,000 lbs",
       "hullType": "Modified V",
       "construction": "Fibreglass"
     },
@@ -4800,60 +4868,6 @@
       "construction": "Fibreglass"
     },
     {
-      "id": "silverton-42-convertible",
-      "make": "Silverton",
-      "model": "42 Convertible",
-      "aliases": [
-        "silverton 42",
-        "sv42c"
-      ],
-      "yearStart": 2004,
-      "yearEnd": 2015,
-      "type": "powerboat",
-      "loa": "43'6\"",
-      "beam": "13'8\"",
-      "maxDraft": "3'0\"",
-      "displacement": "28,000 lbs",
-      "hullType": "Modified V",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "silverton-310-express",
-      "make": "Silverton",
-      "model": "310 Express",
-      "aliases": [
-        "silverton 310",
-        "sv310"
-      ],
-      "yearStart": 1995,
-      "yearEnd": 1998,
-      "type": "powerboat",
-      "loa": "31'0\"",
-      "beam": "10'6\"",
-      "maxDraft": "2'8\"",
-      "displacement": "12,000 lbs",
-      "hullType": "Modified V",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "silverton-372-motor-yacht",
-      "make": "Silverton",
-      "model": "372 Motor Yacht",
-      "aliases": [
-        "silverton 372",
-        "sv372"
-      ],
-      "yearStart": 1994,
-      "yearEnd": 2002,
-      "type": "powerboat",
-      "loa": "37'0\"",
-      "beam": "14'0\"",
-      "maxDraft": "3'0\"",
-      "displacement": "28,000 lbs",
-      "hullType": "Modified V",
-      "construction": "Fibreglass"
-    },
-    {
       "id": "silverton-392-motor-yacht",
       "make": "Silverton",
       "model": "392 Motor Yacht",
@@ -4868,6 +4882,24 @@
       "beam": "14'0\"",
       "maxDraft": "3'2\"",
       "displacement": "35,000 lbs",
+      "hullType": "Modified V",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "silverton-42-convertible",
+      "make": "Silverton",
+      "model": "42 Convertible",
+      "aliases": [
+        "silverton 42",
+        "sv42c"
+      ],
+      "yearStart": 2004,
+      "yearEnd": 2015,
+      "type": "powerboat",
+      "loa": "43'6\"",
+      "beam": "13'8\"",
+      "maxDraft": "3'0\"",
+      "displacement": "28,000 lbs",
       "hullType": "Modified V",
       "construction": "Fibreglass"
     },
@@ -5202,6 +5234,24 @@
       "construction": "Fibreglass"
     },
     {
+      "id": "wellcraft-2600-martinique",
+      "make": "Wellcraft",
+      "model": "2600 Martinique",
+      "aliases": [
+        "wellcraft 2600",
+        "wellcraft martinique 2600"
+      ],
+      "yearStart": 1997,
+      "yearEnd": 2005,
+      "type": "powerboat",
+      "loa": "26'6\"",
+      "beam": "8'10\"",
+      "maxDraft": "3'4\"",
+      "displacement": "5,000 lbs",
+      "hullType": "Deep V",
+      "construction": "Fibreglass"
+    },
+    {
       "id": "wellcraft-270-coastal",
       "make": "Wellcraft",
       "model": "270 Coastal",
@@ -5253,24 +5303,6 @@
       "maxDraft": "4'0\"",
       "displacement": "16,000 lbs",
       "hullType": "Modified V",
-      "construction": "Fibreglass"
-    },
-    {
-      "id": "wellcraft-2600-martinique",
-      "make": "Wellcraft",
-      "model": "2600 Martinique",
-      "aliases": [
-        "wellcraft 2600",
-        "wellcraft martinique 2600"
-      ],
-      "yearStart": 1997,
-      "yearEnd": 2005,
-      "type": "powerboat",
-      "loa": "26'6\"",
-      "beam": "8'10\"",
-      "maxDraft": "3'4\"",
-      "displacement": "5,000 lbs",
-      "hullType": "Deep V",
       "construction": "Fibreglass"
     },
     {
