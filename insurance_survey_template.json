@@ -2132,7 +2132,7 @@
           },
           {
             "type": "list",
-            "label": "Bilge, stringers and ribs (those accessible from cabin)",
+            "label": "Bulkheads",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2144,7 +2144,7 @@
           },
           {
             "type": "list",
-            "label": "Bulkheads",
+            "label": "Bilge, stringers and ribs (those accessible from cabin)",
             "options": [
               "A - Critical",
               "B - Needs Attention",

@@ -12,6 +12,68 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2468 — 2026-04-24
+### Changed — Bulkheads moved above Bilge/stringers in insurance template so bilge-accessed items are adjacent
+
+**Why this release exists.** Dave's note during the Dehler 39 SQ survey:
+*"Keel bolts and ribs and stringers visible from the bilge should be
+next to each other."* Both items are inspected from inside the bilge —
+having them adjacent in the report lets the reader follow the
+surveyor's physical workflow. Previously Bulkheads sat between them:
+
+**Before (v2467):**
+- Signs of water ingress
+- Chainplates (interior)
+- Bilge, stringers and ribs (those accessible from cabin)
+- **Bulkheads** ← split the bilge-accessed items
+- Keel bolts
+
+**After (v2468):**
+- Signs of water ingress
+- Chainplates (interior)
+- **Bulkheads** ← moved up above the bilge-accessed items
+- Bilge, stringers and ribs (those accessible from cabin)
+- Keel bolts
+
+Bulkheads are visible throughout the cabin (not just from the bilge),
+so placing them with the other cabin-wide inspections (water ingress,
+chainplates) makes sense. The two bilge-accessed structural items now
+render as a pair at the end of the interior structural block.
+
+### What changed
+
+**`insurance_survey_template.json`** — swapped the order of the
+Bulkheads and Bilge/stringers blocks inside the interior section.
+Pure reorder — labels, options, and all other fields unchanged.
+`survey_template.json` is untouched because its interior section
+already has Bulkheads before Bilge/stringers (the v1 and insurance
+templates drifted apart at some point).
+
+### Version markers
+
+- `app.js` — `APP_VERSION = 'v2468'` (line 8).
+- `sw.js` — `CACHE_NAME = 'kiki-marine-v2468'` (line 1).
+- `index.html` — `<meta name="app-version" content="v2468">` and all 7
+  core cache-busters → `?v=2468`.
+
+### Test plan
+
+1. Hard-refresh the PWA; console should print `[Sync] v2468…`.
+2. Open or create an **insurance** survey. Scroll to the interior
+   section. Item order should be: Signs of water ingress →
+   Chainplates (interior) → Bulkheads → Bilge/stringers → Keel bolts.
+3. Existing surveys with already-entered data for these items keep
+   their entries — this is a template order change, not a data
+   migration.
+4. Pre-purchase surveys (`survey_template.json`) unaffected; their
+   interior order was already correct.
+
+*Behaviour unchanged from v2467:* Catalina 350 with wing/fin draft
+variants, all v2466 "acceptable" → "serviceable" library cleanup,
+Gearbox rename, saildrive dropdown, Dehler 39 SQ auto-fill.
+
+---
+
 ## v2467 — 2026-04-24
 ### Added — Catalina 350 (2002–2007) to boat_specs_db
 
