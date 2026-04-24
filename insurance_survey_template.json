@@ -2822,6 +2822,30 @@
           },
           {
             "type": "list",
+            "label": "Battery(ies), house",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Battery(ies), starter",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
             "label": "Battery(ies) overcurrent protection",
             "options": [
               "A - Critical",
@@ -2835,6 +2859,18 @@
           {
             "type": "list",
             "label": "Distribution panel 12V",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Voltmeter/ammeter (12V DC)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2870,7 +2906,7 @@
           },
           {
             "type": "list",
-            "label": "Voltmeter/ammeter",
+            "label": "Voltmeter/ammeter (120V AC)",
             "options": [
               "A - Critical",
               "B - Needs Attention",

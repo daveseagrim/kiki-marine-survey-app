@@ -12,6 +12,127 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2471 — 2026-04-24
+### Added — Battery(ies), house + Battery(ies), starter items to the insurance template
+
+**Why this release exists.** Dave's note during the Dehler 39 SQ
+survey: *"batteries have disappeared from the electrical section"*.
+Investigation showed this was a long-standing template gap rather
+than a regression from v2470 — `insurance_survey_template.json` has
+always had the derivative battery items (charger, selector, ventilation,
+overcurrent protection) but not the actual physical batteries. The
+pre-purchase template (`survey_template.json`) carries both
+`Battery(ies), house` and `Battery(ies), starter` in the same section.
+Dave noticed the gap now because of the heavy recent scrutiny on the
+electrical section (v2470 voltmeter split, v2469 autocapitalize fix).
+
+### What changed
+
+**`insurance_survey_template.json`** — added two new list items
+between `Battery ventilation` and `Battery(ies) overcurrent protection`:
+
+- **Battery(ies), house**
+- **Battery(ies), starter**
+
+Placement groups the battery-related inspections in logical sequence:
+charger → selector → ventilation → the batteries themselves → the
+breakers/fuses protecting them → the panels they feed. Both new items
+use the standard six-rating option set.
+
+Pre-purchase template unchanged — it already had these items.
+
+### Version markers
+
+- `app.js` — `APP_VERSION = 'v2471'` (line 8).
+- `sw.js` — `CACHE_NAME = 'kiki-marine-v2471'` (line 1).
+- `index.html` — `<meta name="app-version" content="v2471">` and all
+  7 core cache-busters → `?v=2471`.
+
+### Test plan
+
+1. Hard-refresh the PWA; console should print `[Sync] v2471…`.
+2. Open the **Refuge** or a new insurance survey. Scroll to the
+   Electrical section. Between `Battery ventilation` and
+   `Battery(ies) overcurrent protection`, two new rating items should
+   appear: `Battery(ies), house` and `Battery(ies), starter`.
+3. Existing insurance surveys that pre-date v2471 will show these as
+   unrated — rate them like any other item.
+4. Pre-purchase surveys unaffected.
+
+*Behaviour unchanged from v2470:* voltmeter 12V DC + 120V AC split,
+v2469 iOS autocapitalize restoration, v2468 Bulkheads ordering,
+v2467 Catalina 350.
+
+---
+
+## v2470 — 2026-04-24
+### Changed — Voltmeter/ammeter split into separate 12V DC and 120V AC items, with migration
+
+**Why this release exists.** Dave's note during the Dehler 39 SQ
+survey: *"voltmeter and ammeter check should be on both 12V and 110V"*.
+Previously both templates had a single ambiguous "Voltmeter/ammeter"
+item positioned after the 120V Distribution panel + Reverse polarity
+light (implied AC context) — but the Footloose report showed Dave
+using it to describe the 12V house/starter voltmeter. Two items make
+the check explicit on each voltage.
+
+### What changed
+
+**`insurance_survey_template.json` + `survey_template.json`**
+(identical change to both). The interior electrical block now reads:
+
+- Distribution panel 12V
+- **Voltmeter/ammeter (12V DC)** ← new, co-located with the 12V panel
+- Distribution panel 120V
+- Reverse polarity light
+- **Voltmeter/ammeter (120V AC)** ← renamed from "Voltmeter/ammeter"
+- Bundling support and wiring
+
+Each voltage now has its own inspection line immediately after or
+within the panel block that monitors it. No more ambiguity about
+which meter is being rated.
+
+**`app.js` — one-time migration in `openSurvey`.** When a survey is
+opened, if it has data under the legacy `"Voltmeter/ammeter"` key AND
+neither new key has data, the legacy data is copied to
+`"Voltmeter/ammeter (12V DC)"` and the old key is deleted. Rationale:
+Dave's Footloose report demonstrates the legacy item was used for 12V
+house/starter monitoring, so a silent migration to the 12V DC variant
+is the best default. Surveyors who were treating the legacy item as
+120V (rare — most boats don't have a separate AC voltmeter) can
+manually move the rating via the checklist UI after opening the
+affected survey. Migration is idempotent: re-opens after migration
+see neither old nor new-12V-empty conditions and do nothing.
+
+### Version markers
+
+- `app.js` — `APP_VERSION = 'v2470'` (line 8).
+- `sw.js` — `CACHE_NAME = 'kiki-marine-v2470'` (line 1).
+- `index.html` — `<meta name="app-version" content="v2470">` and all
+  7 core cache-busters → `?v=2470`.
+
+### Test plan
+
+1. Hard-refresh the PWA; console should print `[Sync] v2470…`.
+2. Open a newly-created survey. The Electrical section should show
+   two distinct items: `Voltmeter/ammeter (12V DC)` next to the 12V
+   distribution panel, and `Voltmeter/ammeter (120V AC)` near the
+   Reverse polarity light.
+3. Open the **Refuge** or **Footloose** survey (pre-v2470). The
+   previously-rated `Voltmeter/ammeter` entry should now appear under
+   `Voltmeter/ammeter (12V DC)` — same rating, same note. A
+   `Voltmeter/ammeter (120V AC)` slot should appear unrated.
+4. The legacy `"Voltmeter/ammeter"` item should no longer appear in
+   the checklist (migrated and removed).
+5. Re-open the same survey: migration must not re-run — already-
+   migrated surveys stay as-is.
+
+*Behaviour unchanged from v2469:* restored iOS autocapitalize +
+autocorrect, Bulkheads / Bilge / Keel bolts ordering, Catalina 350
+fin/wing variants, all prior text-library cleanup.
+
+---
+
 ## v2469 — 2026-04-24
 ### Fixed — iOS autocapitalize + autocorrect restored across every input and textarea
 

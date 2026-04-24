@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2469';
+const APP_VERSION = 'v2471';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -22890,6 +22890,23 @@ function openSurvey(surveyId) {
           survey.vesselType = correctType;
           saveSurvey(survey);
         }
+      }
+    }
+    // v2470: one-time per-survey migration. The ambiguous "Voltmeter/ammeter"
+    // item was split into "Voltmeter/ammeter (12V DC)" (adjacent to the 12V
+    // Distribution panel) and "Voltmeter/ammeter (120V AC)" (next to the
+    // Reverse polarity light). Per Dave's Footloose usage, the old generic
+    // item described the 12V house/starter voltmeter — so existing data
+    // migrates to the 12V DC key. Idempotent: only runs when the old key
+    // exists AND neither new key has data.
+    if (survey.items) {
+      const legacy = survey.items['Voltmeter/ammeter'];
+      const has12 = !!survey.items['Voltmeter/ammeter (12V DC)'];
+      const has120 = !!survey.items['Voltmeter/ammeter (120V AC)'];
+      if (legacy && !has12 && !has120) {
+        survey.items['Voltmeter/ammeter (12V DC)'] = legacy;
+        delete survey.items['Voltmeter/ammeter'];
+        saveSurvey(survey);
       }
     }
     renderInspection(survey);
