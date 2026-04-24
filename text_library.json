@@ -96,7 +96,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The hull appeared in acceptable condition for normal use."
+      "text": "The hull appeared in serviceable condition for normal use."
     },
     {
       "section": "Hull(s) condition (below the waterline)",
@@ -612,7 +612,7 @@
     {
       "section": "Skeg(s)",
       "rating": "C - single, bronze",
-      "text": "The inlaid bronze skeg appeared solidly mounted and in acceptable condition.",
+      "text": "The inlaid bronze skeg appeared solidly mounted and in serviceable condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -1256,7 +1256,7 @@
     {
       "section": "Rub rail",
       "rating": "C",
-      "text": "The rub rail appeared solidly affixed to the hull and deck joint and appeared in acceptable condition.",
+      "text": "The rub rail appeared solidly affixed to the hull and deck joint and appeared in serviceable condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -2140,7 +2140,7 @@
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "The anti-fouling, epoxy barrier coat, and gelcoat were intact and in acceptable condition."
+      "text": "The anti-fouling, epoxy barrier coat, and gelcoat were intact and in serviceable condition."
     },
     {
       "section": "Primer, barrier coat, anti-fouling",
@@ -2601,7 +2601,7 @@
       "rating": "B",
       "phase": "observed",
       "severity": 3,
-      "text": "Conductivity readings were generally acceptable but elevated in [describe area(s)] with readings of [insert reading range].",
+      "text": "Conductivity readings were generally serviceable but elevated in [describe area(s)] with readings of [insert reading range].",
       "section": "Swim platform and ladder - condition and conductivity readings"
     },
     {
@@ -4718,7 +4718,7 @@
     {
       "section": "Shrouds, swages and turnbuckles",
       "rating": "C - tool marks",
-      "text": "Swage fittings and turnbuckles were in acceptable condition, though tool marks on the turnbuckles suggested past adjustments made with toothed instruments.",
+      "text": "Swage fittings and turnbuckles were in serviceable condition, though tool marks on the turnbuckles suggested past adjustments made with toothed instruments.",
       "phase": "means",
       "severity": 3
     },
@@ -4963,7 +4963,7 @@
     {
       "section": "Mast partner, mast collar, mast step",
       "rating": "C",
-      "text": "All attached hardware appeared correctly installed with the correct pins and rings, and in acceptable condition.",
+      "text": "All attached hardware appeared correctly installed with the correct pins and rings, and in serviceable condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -5355,7 +5355,7 @@
     {
       "section": "Genoa 2 (mid-size)",
       "rating": "C",
-      "text": "The sail was in acceptable condition and safe for use.",
+      "text": "The sail was in serviceable condition and safe for use.",
       "phase": "observed",
       "severity": 3
     },
@@ -6428,7 +6428,7 @@
     {
       "section": "Aft deck condition (spider cracks, etc.)",
       "rating": "C",
-      "text": "The aft deck appeared in acceptable condition with no notable defects.",
+      "text": "The aft deck appeared in serviceable condition with no notable defects.",
       "phase": "observed",
       "severity": 3
     },
@@ -6505,7 +6505,7 @@
     {
       "section": "Cover",
       "rating": "C",
-      "text": "The cover is in acceptable condition and provides adequate weather protection.",
+      "text": "The cover is in serviceable condition and provides adequate weather protection.",
       "phase": "means",
       "severity": 1
     },
@@ -7375,7 +7375,7 @@
     {
       "section": "Outboard general condition and impression",
       "rating": "B",
-      "text": "Operation appeared acceptable.",
+      "text": "Operation appeared serviceable.",
       "phase": "observed",
       "severity": 3
     },
@@ -7389,7 +7389,7 @@
     {
       "section": "Outboard general condition and impression",
       "rating": "C",
-      "text": "The outboard presented in acceptable condition with no notable defects.",
+      "text": "The outboard presented in serviceable condition with no notable defects.",
       "phase": "observed",
       "severity": 3
     },
@@ -8248,7 +8248,7 @@
     {
       "section": "Tiller",
       "rating": "C",
-      "text": "The tiller appeared solidly attached to the rudder post and the extension appeared in acceptable condition.",
+      "text": "The tiller appeared solidly attached to the rudder post and the extension appeared in serviceable condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -10406,14 +10406,14 @@
     {
       "section": "Wiper blade operation",
       "rating": "C",
-      "text": "The [side] windshield wiper functioned properly and the blade was in acceptable condition.",
+      "text": "The [side] windshield wiper functioned properly and the blade was in serviceable condition.",
       "phase": "observed",
       "severity": 3
     },
     {
       "section": "Wiper blade operation",
       "rating": "C",
-      "text": "Both windshield wipers functioned properly and the blades were in acceptable condition.",
+      "text": "Both windshield wipers functioned properly and the blades were in serviceable condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -11794,7 +11794,7 @@
     {
       "section": "Safety rail",
       "rating": "C",
-      "text": "The safety rail appeared solidly mounted to the flybridge deck and in acceptable condition.",
+      "text": "The safety rail appeared solidly mounted to the flybridge deck and in serviceable condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -12305,7 +12305,7 @@
     {
       "section": "Flybridge Seating",
       "rating": "C",
-      "text": "Flybridge seating is in acceptable condition with no structural issues.",
+      "text": "Flybridge seating is in serviceable condition with no structural issues.",
       "phase": "observed",
       "severity": 5
     },
@@ -12550,7 +12550,7 @@
     {
       "section": "Flybridge Safety rails",
       "rating": "C",
-      "text": "The flybridge safety rails were securely mounted, properly aligned, and in acceptable condition with no loose connections.",
+      "text": "The flybridge safety rails were securely mounted, properly aligned, and in serviceable condition with no loose connections.",
       "phase": "observed",
       "severity": 3
     },
@@ -15361,7 +15361,7 @@
     {
       "section": "Chainplates (interior)",
       "rating": "C - 1/2 rings to nuts",
-      "text": "This internal chainplate system appeared in acceptable condition.",
+      "text": "This internal chainplate system appeared in serviceable condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -15452,7 +15452,7 @@
     {
       "section": "Woodwork, doors and framing",
       "rating": "C",
-      "text": "All woodwork, doors, and framing were in acceptable condition.",
+      "text": "All woodwork, doors, and framing were in serviceable condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -15844,7 +15844,7 @@
     {
       "section": "Bulkheads",
       "rating": "C",
-      "text": "All bulkheads appeared in acceptable condition with no cracking at seams, failed repairs, or rot.",
+      "text": "All bulkheads appeared in serviceable condition with no cracking at seams, failed repairs, or rot.",
       "phase": "observed",
       "severity": 5
     },
@@ -18032,7 +18032,7 @@
     {
       "section": "Fuel tank(s)",
       "rating": "C - multiple",
-      "text": "They appeared in acceptable condition with the correct SAE-rated hoses, hose clamps, and fuel shut-off valves.",
+      "text": "They appeared in serviceable condition with the correct SAE-rated hoses, hose clamps, and fuel shut-off valves.",
       "phase": "observed",
       "severity": 3
     },
@@ -19245,7 +19245,7 @@
     {
       "section": "Anti-vibration mounts",
       "rating": "C",
-      "text": "The anti-vibration mounts showed very little corrosion or cracking and appeared in acceptable condition.",
+      "text": "The anti-vibration mounts showed very little corrosion or cracking and appeared in serviceable condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -19735,7 +19735,7 @@
     {
       "section": "Stuffing box/packing gland/dripless seal",
       "rating": "C - traditional packing",
-      "text": "The drip rate appeared within acceptable limits at approximately one to two drops per minute under load.",
+      "text": "The drip rate appeared within normal operating range at approximately one to two drops per minute under load.",
       "phase": "observed",
       "severity": 3
     },
@@ -19763,7 +19763,7 @@
     {
       "section": "Stuffing box/packing gland/dripless seal",
       "rating": "B - traditional packing",
-      "text": "The traditional stuffing box was dripping at a rate exceeding acceptable limits.",
+      "text": "The traditional stuffing box was dripping at a rate exceeding normal operating range.",
       "phase": "observed",
       "severity": 3
     },
@@ -21505,7 +21505,7 @@
     {
       "section": "Inverter",
       "rating": "C",
-      "text": "A Xantrex DC to AC inverter was installed in acceptable condition.",
+      "text": "A Xantrex DC to AC inverter was installed in serviceable condition.",
       "phase": "observed",
       "severity": 3
     },
@@ -25478,7 +25478,7 @@
     {
       "section": "Toerail and gunwale",
       "rating": "C - part of the deck good condition",
-      "text": "The toerail appeared in acceptable condition.",
+      "text": "The toerail appeared in serviceable condition.",
       "phase": "observed",
       "severity": 3
     },

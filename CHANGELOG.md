@@ -12,6 +12,87 @@ lets you roll back to a specific version with confidence.
 
 ---
 
+## v2466 — 2026-04-24
+### Changed — Every "acceptable" in snippet library replaced with "serviceable"
+
+**Why this release exists.** Dave's directive during the 2.0 snippet-design
+review: *"'acceptable' should not be part of a survey."* Reason: "acceptable"
+reads as an opinion ("I find this acceptable") rather than a survey fact.
+"Serviceable" is the canonical word of art for a survey finding in the C lane
+— it has a specific meaning (the item functioned as intended with no
+material deficiency observed) and doesn't carry the subjective-endorsement
+weight that "acceptable" does. Every occurrence in the snippet library was
+either (a) redundant with "serviceable" already appearing in the same
+sentence, or (b) replaceable one-for-one without loss of meaning. Two
+occurrences used the phrase "acceptable limits" where straight substitution
+produced "serviceable limits" (not idiomatic English); those two were
+rewritten to "normal operating range" instead.
+
+### What changed
+
+**`text_library.json` (26 library entries touched).**
+
+Global find/replace `\bacceptable\b` → `serviceable` across the library.
+Grammar preserved in every case. A few representative before/afters:
+
+- *"The hull appeared in acceptable condition for normal use."* → *"The
+  hull appeared in serviceable condition for normal use."*
+- *"All bulkheads appeared in acceptable condition with no cracking at
+  seams, failed repairs, or rot."* → *"All bulkheads appeared in serviceable
+  condition with no cracking at seams, failed repairs, or rot."*
+- *"Swage fittings and turnbuckles were in acceptable condition, though tool
+  marks on the turnbuckles suggested past adjustments made with toothed
+  instruments."* → *"Swage fittings and turnbuckles were in serviceable
+  condition, though tool marks on the turnbuckles suggested past adjustments
+  made with toothed instruments."*
+
+Two "limits" entries rewritten (not find/replaced):
+
+- *"The drip rate appeared within **acceptable limits** at approximately
+  one to two drops per minute under load."* → *"The drip rate appeared
+  within **normal operating range** at approximately one to two drops per
+  minute under load."*
+- *"The traditional stuffing box was dripping at a rate exceeding
+  **acceptable limits**."* → *"The traditional stuffing box was dripping
+  at a rate exceeding **normal operating range**."*
+
+**`app.js` (2 UI strings touched).**
+
+- Line 13878 — rating-tooltip for the C lane: "Functional and in
+  acceptable condition — no action required" → "Functional and in
+  serviceable condition — no action required".
+- Line 18078 — Force-OK button label: "✓ Force OK — mark as acceptable"
+  → "✓ Force OK — mark as serviceable".
+
+One occurrence of the word in `app.js:17227` was left in place because it
+appears inside a code comment (`// acceptable because the old one still
+has all its handlers wired.`) describing code behaviour, not survey text.
+
+### Version markers
+- `app.js` — `APP_VERSION = 'v2466'` (line 8).
+- `sw.js` — `CACHE_NAME = 'kiki-marine-v2466'` (line 1).
+- `index.html` — `<meta name="app-version" content="v2466">` and all 7 core
+  cache-busters → `?v=2466`.
+
+### Test plan
+
+1. Hard-refresh the PWA on the Mac; console should print `[Sync] v2466…`.
+2. Open any survey with previously-generated snippet text that previously
+   contained "acceptable" — e.g., regenerate the report text for a
+   previously-saved item. The word should no longer appear.
+3. Grep-check the generated report HTML: `grep -i acceptable` should
+   return 0 hits on any report produced after v2466 installs.
+4. Existing stored survey data (per-item `text` fields already written
+   into IDB before v2466) is NOT auto-rewritten by this patch — the
+   library is the source of future inserts only. To purge "acceptable"
+   from older generated text, re-tap the snippets on the affected items,
+   or use find/replace directly in the item's note field.
+
+*Behaviour unchanged from v2465:* Gearbox rename, saildrive entries,
+Dehler 39 SQ auto-fill, I&E TOC skip logic, all v2463 report text polish.
+
+---
+
 ## v2465 — 2026-04-23
 ### Added — Saildrive entries in gearbox make dropdown + Dehler 39 SQ in specs DB; Changed — "Transmission" → "Gearbox" across UI
 

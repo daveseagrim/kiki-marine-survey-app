@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2465';
+const APP_VERSION = 'v2466';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -13875,7 +13875,7 @@ function getRatingTooltip(rating) {
   const tips = {
     'A - Critical': 'Safety hazard or code violation — must be corrected before vessel is next underway',
     'B - Needs Attention': 'Needs repair soon — not immediately dangerous but should be scheduled',
-    'C - Serviceable': 'Functional and in acceptable condition — no action required',
+    'C - Serviceable': 'Functional and in serviceable condition — no action required',
     'Not tested/not verified': 'Could not be tested or inspected due to conditions',
     'Not applicable': 'Item does not apply to this vessel',
     'Powered up only': 'Powered up and appears operational — not tested under load',
@@ -18075,7 +18075,7 @@ function _csShowEvalModal(working, reason, scrollPos) {
           ← Go back and fix
         </button>
         <button id="csEvalForceOK" style="width:100%;padding:12px;background:white;color:#64748b;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;">
-          ✓ Force OK — mark as acceptable
+          ✓ Force OK — mark as serviceable
         </button>
         <button id="csEvalCancel" style="width:100%;padding:10px;background:none;color:#94a3b8;border:none;font-size:13px;cursor:pointer;">
           Return to Check Survey without resolving
