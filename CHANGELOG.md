@@ -24,7 +24,8 @@ resolves cleanly.
 ### What changed
 
 **`boat_specs_db.json`** — new entry inserted between `catalina-34`
-and `catalina-36-mk2` (ID order preserved):
+and `catalina-36-mk2` (ID order preserved), modelled on the existing
+`catalina-470` pattern for dual-keel vessels:
 
 ```json
 {
@@ -38,21 +39,28 @@ and `catalina-36-mk2` (ID order preserved):
   "loa": "35'4\"",
   "lwl": "30'3\"",
   "beam": "12'4\"",
-  "displacement": "14,250 lbs",
-  "ballast": "5,500 lbs",
+  "displacement": "13,500 lbs",
+  "ballast": "5,000 lbs",
   "maxDraft": "6'10\"",
   "totalSailArea": "601 sq ft",
-  "hullType": "Displacement",
-  "keelType": "Fin (deep standard; wing/shoal 4'10\" optional)",
+  "hullType": "Fin keel",
+  "keelType": "Fin",
   "construction": "Fibreglass",
-  "designer": "Gerry Douglas"
+  "designer": "Gerry Douglas",
+  "draftVariants": [
+    { "label": "Fin keel", "draft": "6'10\"" },
+    { "label": "Wing keel", "draft": "4'10\"" }
+  ]
 }
 ```
 
-Database count: 262 → 263. The wing/shoal-keel variant is noted in
-`keelType` rather than as a separate entry since the rest of the specs
-are identical — the surveyor can adjust `maxDraft` manually after
-auto-fill on a wing-keel hull.
+Database count: 262 → 263. `draftVariants` follows the pattern already
+used by the Catalina 470 and Beneteau Oceanis 343/38 entries — on
+vessels shipped with more than one keel option, the Auto-fill lookup
+offers radio buttons to pick the correct variant, updating the
+surveyed vessel's `maxDraft` to match. `maxDraft` at the top level
+holds the deeper variant (fin) as the canonical value; the wing
+variant is selectable from `draftVariants`.
 
 `lastUpdated` field bumped to reference v2467.
 
