@@ -2294,6 +2294,18 @@
           },
           {
             "type": "list",
+            "label": "Voltmeter/ammeter (12V DC)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
             "label": "Distribution panel 120V",
             "options": [
               "A - Critical",
@@ -2318,7 +2330,7 @@
           },
           {
             "type": "list",
-            "label": "Voltmeter/ammeter",
+            "label": "Voltmeter/ammeter (120V AC)",
             "options": [
               "A - Critical",
               "B - Needs Attention",

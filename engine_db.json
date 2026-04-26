@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-24 (v2465 — saildrive additions)",
+  "lastUpdated": "2026-04-26T03:24:27.014315Z",
   "engines": [
     {
       "make": "Yanmar",
@@ -134,6 +134,15 @@
         },
         {
           "model": "3JH3E",
+          "hp": "39",
+          "kw": "28.7",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.64L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "3JH4E",
           "hp": "39",
           "kw": "28.7",
           "fuel": "Diesel",
@@ -896,7 +905,7 @@
           "cylinders": "",
           "displacement": "D8 series or custom",
           "engineType": "Inboard",
-          "description": "Diesel; 2023-Present; Latest IPS inboard pod, works with D8 series diesel engines, +/-40° rotation, joystick steering"
+          "description": "Diesel; 2023-Present; Latest IPS inboard pod, works with D8 series diesel engines, +/-40\u00b0 rotation, joystick steering"
         },
         {
           "model": "IPS 600",
@@ -916,7 +925,7 @@
           "cylinders": "13",
           "displacement": "Variable",
           "engineType": "Inboard",
-          "description": "Diesel/Hybrid electric; 2024-Present; Dual D13 diesel or D13+electric motor hybrid, +/-40° rotation, joystick control, dual prop IPS"
+          "description": "Diesel/Hybrid electric; 2024-Present; Dual D13 diesel or D13+electric motor hybrid, +/-40\u00b0 rotation, joystick control, dual prop IPS"
         }
       ]
     },
@@ -1730,7 +1739,7 @@
           "cylinders": "6",
           "displacement": "2.5L",
           "engineType": "Outboard",
-          "description": "DFI 2-Stroke; 2000-2010; DFI 2-stroke variant, loop-charged 60° V6"
+          "description": "DFI 2-Stroke; 2000-2010; DFI 2-stroke variant, loop-charged 60\u00b0 V6"
         },
         {
           "model": "Optimax 175",
@@ -3769,7 +3778,7 @@
     {
       "make": "Kanzaki",
       "country": "Japan",
-      "note": "Yanmar's transmission division — standard gearbox on most Yanmar marine diesels",
+      "note": "Yanmar's transmission division \u2014 standard gearbox on most Yanmar marine diesels",
       "models": [
         {
           "model": "KM2P",
@@ -4126,7 +4135,7 @@
     {
       "make": "Walter",
       "country": "USA",
-      "note": "V-drive specialist — common on ski boats, wake boats, and inboard runabouts",
+      "note": "V-drive specialist \u2014 common on ski boats, wake boats, and inboard runabouts",
       "models": [
         {
           "model": "V-Drive (Light Duty)",

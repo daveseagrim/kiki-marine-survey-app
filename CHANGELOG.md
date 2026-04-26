@@ -1,3 +1,6 @@
+## v2472
+- Add Yanmar 3JH4E to engine_db.json (39 hp / 28.7 kW / 3-cyl / 1.64L diesel inboard, JH-series family)
+
 # Changelog
 
 All notable changes to the Kiki Marine Survey PWA are documented here.
@@ -9,6 +12,122 @@ Each entry is grouped under a version number. The format loosely follows
 When making any user-visible change, add an entry here **before** pushing
 the commit. This gives future-you a searchable history of decisions, and
 lets you roll back to a specific version with confidence.
+
+---
+
+## v2472 — 2026-04-25
+### Rewritten — Hull(s) condition (below the waterline) A/B/C chip list
+
+First section in the Phase-1 migration: bring every observational
+section to match the propellers chip shape exactly. Propellers (v2189)
+is the canonical reference — same A/B/C distribution, same
+observed/means/action ratios, same severity ladder, same `{specify:}`
+configuration chip pattern, same minor-cosmetic-but-serviceable cluster.
+
+**Why this release exists.** Dave's call: *"All sections that have
+observational questions need the same format as propellers."* Hull
+condition was the first section in the pre-purchase survey using the
+old typing-required `[describe area(s)]` chip pattern that propellers
+had migrated away from. 10 of the 35 existing entries forced the
+surveyor to type an area into a free-text input embedded inside the
+chip; the rest were a mix of vague summary statements and synonym
+clusters (4 different ways to say "in good condition"). Mirrored the
+propellers shape exactly so the chip-tap UX behaves identically here.
+
+**Canonical reference (Propeller(s), unchanged):**
+- A: 4 observed (sevs 5,5,4,4) + 1 means (sev 5) + 1 action (sev 5) = 6
+- B: 3 observed (sevs 3,2,2) + 1 means (sev 3) + 2 actions (sevs 3,2) = 6
+- C: 10 observed (5×sev2 cosmetic + 5×sev1 specific positive) + 1 means
+  (sev 1) + 2 actions (sevs 2,1) = 13
+- 25 entries total. C/observed includes a `{specify:…7 types…}`
+  configuration chip that expands to 7 atomic chips at render.
+
+**Hull(s) condition (below the waterline) — same shape, same counts,
+same severity ladder:**
+- A: 4 observed (sevs 5,5,4,4) + 1 means (sev 5) + 1 action (sev 5) = 6
+- B: 3 observed (sevs 3,2,2) + 1 means (sev 3) + 2 actions (sevs 3,2) = 6
+- C: 10 observed (5×sev2 cosmetic + 5×sev1 specific positive) + 1 means
+  (sev 1) + 2 actions (sevs 2,1) = 13
+- 25 entries total. C/observed includes a `{specify:fibreglass|aluminium|wood}`
+  hull-material configuration chip that expands to 3 atomic chips at render.
+
+**Chip-by-chip mirror to propellers:**
+
+| Propellers | → | Hull(s) condition (below the waterline) |
+|---|---|---|
+| A/obs sev5 "blades chipped, cracked, or bent" | → | "The hull was gouged, cracked, or penetrated to the laminate." |
+| A/obs sev5 "blade was missing" | → | "An area of the hull laminate was exposed below the waterline." |
+| A/obs sev4 "Severe pitting/corrosion compromised blades" | → | "Severe osmotic blistering had compromised the hull below the waterline." |
+| A/obs sev4 "retaining nut/pin loose or missing" | → | "Delamination of the hull laminate was detected below the waterline." |
+| A/means sev5 "compromised propeller creates vibration… damage shaft, cutlass, transmission" | → | "A compromised hull creates risk of water ingress, reduces structural integrity, and can damage the keel, stringers, and interior structures." |
+| A/action sev5 "removed, professionally assessed, repaired/replaced" | → | "The hull should be professionally assessed and repaired before the vessel is returned to service." |
+| B/obs sev3 "Light edge nicks or minor blade damage" | → | "Light gouging or scrapes were observed on the hull below the waterline." |
+| B/obs sev2 "Light pitting or surface corrosion on blades" | → | "Surface cracking of the gelcoat was observed below the waterline." |
+| B/obs sev2 "Minor galling/tool marks at shaft-end interface" | → | "Small osmotic blisters were observed in localized areas below the waterline." |
+| B/means sev3 "warranted attention to prevent further deterioration, vibration, imbalance" | → | "These findings warranted attention to prevent further deterioration, water ingress, or osmotic spread." |
+| B/action sev3 "Dress the light nicks at next service and monitor" | → | "Touch up the affected areas with gelcoat at next service and monitor." |
+| B/action sev2 "Remove, inspect, recondition at haul-out" | → | "Sand to the barrier coat and recoat the affected areas at the next scheduled haul-out." |
+| C/obs sev2 "Despite minor cosmetic corrosion… satisfactory and properly attached" | → | "Despite minor cosmetic blemishes, the hull appeared in satisfactory condition below the waterline." |
+| C/obs sev2 "Minor surface corrosion on blades, typical of vessel of this age" | → | "Light surface scoring was observed on the hull below the waterline, typical of a vessel of this age." |
+| C/obs sev2 "Light galvanic corrosion on blade surfaces but had not compromised blade profile" | → | "Light gelcoat crazing was present on the hull below the waterline but had not compromised the laminate." |
+| C/obs sev2 "Electrolysis staining but blade integrity not affected" | → | "Faint blister scarring was observed on the hull but laminate integrity was not affected." |
+| C/obs sev2 "Minor marine growth on blades" | → | "Minor marine growth was present on the hull below the waterline." |
+| C/obs sev1 `{specify:…7 types…}` "propeller appeared in serviceable condition with no significant damage, pitting, or corrosion" | → | `{specify:fibreglass\|aluminium\|wood}` "The {specify:…} hull below the waterline appeared in serviceable condition with no significant damage, blistering, or delamination." |
+| C/obs sev1 "blades intact and securely attached to shaft" | → | "The hull below the waterline was true and fair with no visible impact damage." |
+| C/obs sev1 "folding/feathering propeller opened and closed smoothly" *(no hull analogue — substituted)* | → | "The gelcoat below the waterline was intact with no significant cracking, crazing, or blistering." |
+| C/obs sev1 "propeller properly secured with retaining nut and pin" *(propellers cross-references its mounting hardware; mirrored here)* | → | "The keel-hull joint appeared sound with no signs of separation or weeping." |
+| C/obs sev1 "propeller showed no significant corrosion or damage" | → | "The hull showed no significant blistering, delamination, or laminate damage." |
+| C/means sev1 "propeller appeared to provide effective propulsion" | → | "The hull appeared structurally sound and watertight at the time of survey." |
+| C/action sev2 "Continued routine seasonal inspection is recommended" | → | (verbatim) |
+| C/action sev1 "No corrective action is recommended at this time" | → | (verbatim) |
+
+**What's gone.**
+- 10 `[describe area(s)]` typing-required chips replaced with atomic
+  observations that name the area inline ("below the waterline",
+  "in localized areas").
+- "An inspection of the hull below the waterline was conducted." —
+  meta/process statement, not a finding. Dropped here and rule logged
+  for the rest of the migration: drop "an inspection was conducted"
+  / "I looked at X" filler library-wide.
+- "Below the waterline, no evident damage was observed on the hull." —
+  appeared verbatim in BOTH B and C ratings; dropped from both.
+  Negative-summary catch-all chip; positive specific findings cover
+  the C-rating space instead.
+- 4 C/observed synonym chips ("good order with no visible damage",
+  "good overall condition with only cosmetic wear", "serviceable
+  condition for normal use") collapsed into the propellers-style
+  5×specific-positive cluster (gelcoat intact, hull true and fair,
+  keel-hull joint sound, no significant blistering/delamination, etc.).
+- 4 of the 6 B/action chips (fill-and-recoat-with-epoxy, sand-to-gelcoat,
+  lightly-sand-and-fill, etc.) dropped — propellers has only 2 B/action
+  chips so the mirror trims to match.
+
+**Spelling deferred to library convention** since propellers itself
+doesn't use these words: `fibreglass` (UK; library has 8 vs 0
+fiberglass), `aluminium` (UK; library has 3 vs 0 aluminum). Library
+spelling supersedes Dave's earlier "aluminum" note per the
+match-propellers-exactly rule.
+
+**Spell-check spot-check.** All 20 marine words used in the new chips
+are recognized by the global `dictionary.json` (128,587 words +
+`MARINE_EXTRAS`). No additions to `MARINE_EXTRAS` needed for this
+section. The live tone-warning banner and `polishSnippetProse` /
+`applyWritingFixups` save-time fixups continue to apply unchanged —
+they were already global, propellers wasn't special on this dimension.
+
+### Audit
+
+- text_library.json parses ✓
+- app.js compiles ✓
+- sw.js compiles ✓
+- Hull(s) condition entry count: 25 (was 35) ✓
+- Hull(s) condition grid identical to Propeller(s): A 4/1/1, B 3/1/2, C 10/1/2 ✓
+- Severity ladder identical to Propeller(s): A obs [5,5,4,4]/[5]/[5], B [3,2,2]/[3]/[3,2], C [2,2,2,2,2,1,1,1,1,1]/[1]/[2,1] ✓
+- Zero `[describe area(s)]` tokens remaining in section ✓
+- One `{specify:fibreglass|aluminium|wood}` config chip present ✓
+- All 20 chip-text marine words recognized by dictionary.json ✓
+- APP_VERSION (app.js) = `v2472` ✓
+- CACHE_NAME (sw.js) = `kiki-marine-v2472` ✓
 
 ---
 
