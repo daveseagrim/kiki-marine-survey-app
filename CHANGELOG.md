@@ -1,3 +1,9 @@
+## v2475
+- Add Volvo Penta D6-370D-B IPS to engine_db.json
+- 370 hp / 272 kW, 6-cyl, 5.5L common-rail diesel, IPS pod-paired
+- IMO NOx Tier 2 (Annex VI) compliant
+- Production 2005-Present
+
 ## v2474
 - Add 2006 Cruisers Yachts 420 Express to boat_specs_db.json
 - Production years 2003-2008, planing fibreglass powerboat

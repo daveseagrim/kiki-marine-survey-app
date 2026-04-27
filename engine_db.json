@@ -838,6 +838,16 @@
           "description": "Common-rail diesel; 2008-Present; Diesel inboard, inline 6-cylinder, common-rail, DHOC, turbo"
         },
         {
+          "model": "D6-370D-B IPS",
+          "hp": "370",
+          "kw": "272",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "5.5L",
+          "engineType": "Inboard (IPS pod)",
+          "description": "Common-rail diesel; 2005-Present; Inline-6 diesel paired with Volvo Penta IPS forward-facing twin-prop pod drive, twin-entry turbo, aftercooler, IMO NOx Tier 2 compliant (Annex VI)"
+        },
+        {
           "model": "D13 Inboard",
           "hp": "425",
           "kw": "313",
