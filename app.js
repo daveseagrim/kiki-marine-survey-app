@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2476';
+const APP_VERSION = 'v2477';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -24828,9 +24828,16 @@ ${(() => {
     const _hasSources = _srcCount > 0;
     const _hasValuationData = _hasFMV || _hasRepl || _hasConc || _hasSources;
 
+    // v2477: every row in the Statement of Valuation table now ALWAYS
+    // renders. Empty fields show "\u2014" instead of being suppressed. The
+    // v2374 "no information entered = no blank space" rule turned out
+    // to feel like the section had DISAPPEARED when valuation data
+    // wasn't entered (Dave's complaint, 2026-04-27). Surveyors expect
+    // to see the structure of the section so they know what to fill
+    // in; placeholder dashes are clearer than absent rows.
     const _srcRow = _hasSources
       ? '<tr><td style="width:40%;"><strong>' + _srcLabel + '</strong></td><td>' + _srcArr.map(s => esc(s)).join('<br>') + '</td></tr>'
-      : '';
+      : '<tr><td style="width:40%;"><strong>Valuation Sources</strong></td><td style="color:#9ca3af;">\u2014</td></tr>';
 
     const _fmvRow = _hasFMV
       ? '<tr><td><strong>Fair Market Value</strong></td><td>'
@@ -24838,7 +24845,7 @@ ${(() => {
         + '<div' + (_xr ? ' style="font-size:10pt;color:#4b5563;margin-top:2px;"' : '') + '>USD $' + _f(_lowU) + ' &ndash; $' + _f(_highU) + ' ' + _xrNote + '</div>'
         + '<div style="font-size:9pt;color:#6b7280;font-style:italic;">Tax not included.</div>'
         + '</td></tr>'
-      : '';
+      : '<tr><td><strong>Fair Market Value</strong></td><td style="color:#9ca3af;">\u2014</td></tr>';
 
     const _replRow = _hasRepl
       ? '<tr><td><strong>Estimated Replacement Cost</strong></td><td>'
@@ -24846,9 +24853,9 @@ ${(() => {
         + '<div' + (_xr ? ' style="font-size:10pt;color:#4b5563;margin-top:2px;"' : '') + '>USD $' + _f(_replU) + '</div>'
         + '<div style="font-size:9pt;color:#6b7280;font-style:italic;">Tax not included.</div>'
         + '</td></tr>'
-      : '';
+      : '<tr><td><strong>Estimated Replacement Cost</strong></td><td style="color:#9ca3af;">\u2014</td></tr>';
 
-    const _xrRow = _xr && _hasValuationData
+    const _xrRow = _xr
       ? '<tr><td><strong>Exchange Rate (USD\u2192CAD)</strong></td><td>' + _xr.toFixed(4) + '</td></tr>'
       : '';
 
@@ -24887,9 +24894,20 @@ ${(() => {
       + _ratingCallout
       + '</div>';
 
-    // v2374: Statement of Valuation + Worksheet + Comparables only render
-    // when there's at least one piece of valuation data to display.
-    if (_hasValuationData) {
+    // v2477: Statement of Valuation gating revisited.
+    //   - Insurance surveys: no FMV/replacement table at all. Insurance
+    //     reports state condition only; the lender doesn't need an
+    //     appraised market value from the surveyor. Just the BUC
+    //     rating callout above. Matches Dave's example PDF
+    //     (Marine Vessel Surveys-8315233a.pdf, page 50, 2026-04-27).
+    //   - Pre-purchase + Appraisal surveys: ALWAYS render the table,
+    //     even with empty values. Placeholder "—" rows make it
+    //     obvious what still needs to be filled in. The v2374 gate
+    //     (which hid the whole block when empty) made the section
+    //     look like it had vanished — Dave's complaint that drove
+    //     this change.
+    const _isInsurance = survey.surveyType === 'Insurance survey';
+    if (!_isInsurance) {
       _out += '<h3 style="margin:18px 0 8px 0;color:#066aab;font-size:11pt;">STATEMENT OF VALUATION</h3>'
         + '<div class="scope-text">'
         + '<p>The \u201cFAIR MARKET VALUE\u201d is the most probable price in terms of money which a vessel should bring in a competitive and open market under all conditions requisite to a fair sale, the buyer and seller each acting prudently, knowledgeably and assuming the price is not affected by undue stimulus. Implicit in this definition is the consummation of a sale as of a specified date and the passing of title from seller to buyer under conditions whereby:</p>'

@@ -1,3 +1,11 @@
+## v2477
+- Restore Statement of Valuation section to the report
+- Bug: v2374 gate hid the whole table when no FMV/replacement/concluded/sources data was present, leaving only the BUC grading boilerplate. Dave reported the section "disappeared from the report" on 2026-04-27.
+- Fix: every row in the Statement of Valuation table now ALWAYS renders on Pre-purchase / Appraisal surveys. Empty fields show "—" placeholders so the surveyor sees the structure of what to fill in.
+- Insurance surveys: still no Statement of Valuation table — insurance reports show condition only, no appraised market value (matches Dave's example PDF page 50).
+- Comparables and Final Concluded blocks remain conditional below the table; they're additive and meaningless when empty.
+- Exchange Rate row no longer requires the table to be hidden — renders on its own when an FX rate is present.
+
 ## v2476
 - Add full generator section to prepurchase template (survey_template.json)
 - Pre-purchase was missing 9 generator items the insurance template already had
