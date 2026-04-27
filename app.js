@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2478';
+const APP_VERSION = 'v2479';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -24916,16 +24916,16 @@ ${(() => {
         + '</ul>'
         + '</div>'
 
-        // v2439: Final Concluded Fair Market Value block + Exchange Rate row
-        // are no longer in this top table. They moved to the bottom of the
-        // valuation section (after the comparables table) so the report
-        // closes on its punch line right before the Surveyor's Certification.
-        + '<table>'
-        + _srcRow
-        + _fmvRow
-        + _replRow
-        + '</table>'
-
+        // v2479: Valuation Sources / Fair Market Value range / Estimated
+        // Replacement Cost rows removed per Dave's request 2026-04-27.
+        // Surveyor's preference: surface only the Final Concluded FMV
+        // (rendered at the bottom of the valuation section, see _hasConc
+        // block below) plus the Comparables table when present. The
+        // sources/range/replacement working data lives in the surveyor's
+        // worksheet, not the client-facing report. _srcRow / _fmvRow /
+        // _replRow / _hasFMV / _hasRepl / _hasSources still computed
+        // above because Condition Adjustment paragraph + Comparables
+        // intro logic reads them.
         + '<p><strong>Appraisal Methodology:</strong></p>'
         + '<p class="scope-text">' + _methodology + '</p>'
         + (esc(survey.vesselName) ? '<p class="scope-text"><strong>Summary:</strong> In accordance with the request for a Marine Survey of the \u201c' + esc(survey.vesselName) + '\u201d, for the purpose of evaluating its present condition and estimating its Fair Market Value' + (_hasRepl ? ' and Replacement Cost' : '') + ', I herewith submit my conclusion based on the preceding report.' + (survey.surveyDate ? ' The subject vessel was personally inspected by the undersigned on <strong>' + survey.surveyDate + '</strong>.' : '') + ' Subject to correction of deficiencies listed in sections A and B, the vessel is considered to be reasonably suitable for its intended use. Other deficiencies listed should be attended to in keeping with good maintenance practices or as upgrades.</p>' : '')

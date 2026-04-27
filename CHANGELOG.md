@@ -1,3 +1,10 @@
+## v2479
+- Remove Valuation Sources, Fair Market Value range, and Estimated Replacement Cost rows from the Statement of Valuation table
+- Per Dave 2026-04-27: report should surface only the Final Concluded Fair Market Value (the punch-line block at the bottom of the valuation section, before the Surveyor's Certification). The sources/range/replacement working data lives in the surveyor's notes, not the client-facing report.
+- Final Concluded Fair Market Value block is unchanged — still renders with the boxed callout when survey.concludedValue is set, with the Exchange Rate row riding along.
+- Statement of Valuation header + Fair Market Value definition + Appraisal Methodology + Summary + Condition Adjustment paragraphs all still render.
+- Comparables table still renders when at least one comparable vessel has a name.
+
 ## v2478
 - Statement of Valuation also renders for Insurance surveys (correction to v2477)
 - v2477 had gated the table to Pre-purchase + Appraisal only based on a misread of the example PDF. Insurance surveys also need a valuation table.
