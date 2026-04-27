@@ -1,3 +1,10 @@
+## v2473
+- Add Delivered checkbox to each survey row
+- New Delivered section at the bottom of the home screen
+- Tap a row to expand the action panel; check "Delivered to client" to move the survey to the Delivered section
+- Inside Delivered: uncheck to send a survey back to the active list
+- Adds delivered + deliveredAt fields to the survey object (no schema migration needed)
+
 ## v2472
 - Add Yanmar 3JH4E to engine_db.json (39 hp / 28.7 kW / 3-cyl / 1.64L diesel inboard, JH-series family)
 

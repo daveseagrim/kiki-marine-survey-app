@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2472';
+const APP_VERSION = 'v2473';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -9190,6 +9190,23 @@ async function emergencyRecovery() {
   }
 }
 
+// v2473+ — mark a survey as "delivered" so it moves to the
+// Delivered section at the bottom of the home screen. Re-renders the
+// home view after saving so the survey moves immediately.
+async function toggleDelivered(surveyId, ev) {
+  if (ev && typeof ev.stopPropagation === 'function') ev.stopPropagation();
+  const survey = await getSurvey(surveyId);
+  if (!survey) return;
+  survey.delivered = !survey.delivered;
+  survey.deliveredAt = survey.delivered ? new Date().toISOString() : undefined;
+  await saveSurvey(survey);
+  // Re-render so the row moves between the active list and the
+  // Delivered section.
+  if (currentView === 'surveys') {
+    renderHome();
+  }
+}
+
 function renderHome() {
   currentView = 'surveys'; persistViewState();
   history.replaceState({ view: 'surveys' }, '');
@@ -9274,8 +9291,14 @@ function renderHome() {
         return da.localeCompare(db);
       });
 
+      // v2473+ — partition into active (not delivered) and delivered.
+      // Delivered surveys move out of the month-grouped main list and
+      // into a single "Delivered" section at the bottom.
+      const activeSurveys = sorted.filter(s => !s.delivered);
+      const deliveredSurveys = sorted.filter(s => s.delivered);
+
       const groups = {};
-      sorted.forEach(survey => {
+      activeSurveys.forEach(survey => {
         const rawDate = survey.surveyDate || new Date(survey.createdAt).toISOString().split('T')[0];
         const parts = rawDate ? rawDate.split('-') : [];
         const groupKey = parts.length >= 2 ? `${parts[0]}-${parts[1]}` : 'Unknown';
@@ -9359,6 +9382,11 @@ function renderHome() {
                   <button onclick="event.stopPropagation();exportSurvey('${survey.id}')" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:14px;cursor:pointer;">📤 Export</button>
                   <button onclick="event.stopPropagation();deleteSurveyConfirm('${survey.id}')" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#fef2f2;color:#dc2626;border:none;border-radius:14px;cursor:pointer;">🗑 Delete</button>
                 </div>
+                <!-- v2473+ — Mark as delivered (moves to bottom Delivered section). -->
+                <label style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 10px;background:#f1f5f9;border-radius:14px;cursor:pointer;font-size:13px;font-weight:600;color:#334155;" onclick="event.stopPropagation();">
+                  <input type="checkbox" ${survey.delivered ? 'checked' : ''} onchange="toggleDelivered('${survey.id}', event)" style="width:18px;height:18px;cursor:pointer;" />
+                  📬 Delivered to client
+                </label>
               </div>
             </div>
           `;
@@ -9366,6 +9394,55 @@ function renderHome() {
 
         html += '</div></div>';
       }
+
+      // v2473+ — Delivered section at the bottom. Compact one-line
+      // rows; tap a row to open it in inspection view; uncheck to send
+      // it back to the active list.
+      if (deliveredSurveys.length > 0) {
+        html += `
+          <div style="margin-top:24px;border-top:2px solid #e2e8f0;padding-top:12px;">
+            <div style="padding:8px 4px 4px;font-size:12px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.5px;">
+              📬 Delivered <span style="font-weight:400;color:#cbd5e1;">(${deliveredSurveys.length})</span>
+            </div>
+            <div style="background:white;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden;">
+        `;
+        // Reverse-chronological so most-recently delivered is on top.
+        const deliveredSorted = [...deliveredSurveys].sort((a, b) => {
+          const da = a.deliveredAt || a.surveyDate || a.createdAt || '';
+          const db = b.deliveredAt || b.surveyDate || b.createdAt || '';
+          return db.localeCompare(da);
+        });
+        deliveredSorted.forEach((survey, idx) => {
+          const rawDate = survey.surveyDate || (survey.createdAt ? new Date(survey.createdAt).toISOString().split('T')[0] : '');
+          const parts = rawDate ? rawDate.split('-') : [];
+          const dayNum = parts.length >= 3 ? parseInt(parts[2], 10) : '';
+          const monthShort = parts.length >= 2 ? months[parseInt(parts[1], 10) - 1] : '';
+          const vesselName = survey.vesselName ? esc(survey.vesselName) : 'Unnamed';
+          const clientName = survey.clientName ? esc(survey.clientName) : '';
+          const ymm = survey.yearMakeModel ? esc(survey.yearMakeModel) : '';
+          const separator = idx > 0 ? 'border-top:1px solid #f1f5f9;' : '';
+
+          html += `
+            <div style="${separator}display:flex;align-items:center;gap:8px;padding:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;"
+                 onclick="openSurvey('${survey.id}')">
+              <label style="display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:36px;cursor:pointer;" onclick="event.stopPropagation();">
+                <input type="checkbox" checked onchange="toggleDelivered('${survey.id}', event)" style="width:18px;height:18px;cursor:pointer;" />
+              </label>
+              <div style="flex:0 0 38px;text-align:center;">
+                <div style="font-size:14px;font-weight:600;color:#94a3b8;line-height:1.1;">${dayNum}</div>
+                <div style="font-size:9px;color:#cbd5e1;text-transform:uppercase;">${monthShort}</div>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:500;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${vesselName}</div>
+                <div style="font-size:11px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${[clientName, ymm].filter(Boolean).join(' · ')}</div>
+              </div>
+              <div style="flex:0 0 auto;font-size:11px;color:#16a34a;font-weight:600;">✓</div>
+            </div>
+          `;
+        });
+        html += '</div></div>';
+      }
+
       html += '</div>';
       content.innerHTML = html;
     }
