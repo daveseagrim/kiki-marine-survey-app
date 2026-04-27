@@ -1,3 +1,11 @@
+## v2476
+- Add full generator section to prepurchase template (survey_template.json)
+- Pre-purchase was missing 9 generator items the insurance template already had
+- Added: Manufacturer and model #, Nameplate (photo), Operation, Exhaust, Oil level and condition, Air filter, Hoses, Anti-siphon, Battery
+- Kept: Generator (if installed) as the first item, Generator valve and sea strainer (already present)
+- Same A/B/C/Powered up only/Not applicable/Not tested options as the engine equivalents
+- Items remain independent — surveyor still rates each one separately
+
 ## v2475
 - Add Volvo Penta D6-370D-B IPS to engine_db.json
 - 370 hp / 272 kW, 6-cyl, 5.5L common-rail diesel, IPS pod-paired

@@ -2134,8 +2134,100 @@
             ]
           },
           {
+            "type": "textsingle",
+            "label": "Generator Manufacturer and model #"
+          },
+          {
+            "type": "media",
+            "label": "Generator nameplate"
+          },
+          {
+            "type": "list",
+            "label": "Generator operation",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
             "type": "list",
             "label": "Generator valve and sea strainer",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Generator exhaust",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Generator oil level and condition",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Generator air filter",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Generator hoses",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Generator anti-siphon",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Generator battery",
             "options": [
               "A - Critical",
               "B - Needs Attention",
