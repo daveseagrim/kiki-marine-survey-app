@@ -1,3 +1,10 @@
+## v2474
+- Add 2006 Cruisers Yachts 420 Express to boat_specs_db.json
+- Production years 2003-2008, planing fibreglass powerboat
+- LOA 42'8", beam 13'10", maxDraft 3'6", displacement 22,500 lbs
+- Aliases: cruisers420, cruisers 420, 420 express, 420
+- Verify on-vessel — auto-fill is a starting point, not the final word
+
 ## v2473
 - Add Delivered checkbox to each survey row
 - New Delivered section at the bottom of the home screen

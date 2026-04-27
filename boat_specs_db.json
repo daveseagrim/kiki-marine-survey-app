@@ -2314,6 +2314,30 @@
       "construction": "Fibreglass"
     },
     {
+      "id": "cruisers-420",
+      "make": "Cruisers Yachts",
+      "model": "420 Express",
+      "aliases": [
+        "cruisers420",
+        "cruisers 420",
+        "420 express",
+        "420"
+      ],
+      "yearStart": 2003,
+      "yearEnd": 2008,
+      "type": "powerboat",
+      "loa": "42'8\"",
+      "lwl": "",
+      "beam": "13'10\"",
+      "displacement": "22,500 lbs",
+      "ballast": "",
+      "maxDraft": "3'6\"",
+      "totalSailArea": "",
+      "hullType": "Planing",
+      "keelType": "",
+      "construction": "Fibreglass"
+    },
+    {
       "id": "cs-27",
       "make": "CS",
       "model": "27",
