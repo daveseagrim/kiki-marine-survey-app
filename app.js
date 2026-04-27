@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2477';
+const APP_VERSION = 'v2478';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -24894,20 +24894,16 @@ ${(() => {
       + _ratingCallout
       + '</div>';
 
-    // v2477: Statement of Valuation gating revisited.
-    //   - Insurance surveys: no FMV/replacement table at all. Insurance
-    //     reports state condition only; the lender doesn't need an
-    //     appraised market value from the surveyor. Just the BUC
-    //     rating callout above. Matches Dave's example PDF
-    //     (Marine Vessel Surveys-8315233a.pdf, page 50, 2026-04-27).
-    //   - Pre-purchase + Appraisal surveys: ALWAYS render the table,
-    //     even with empty values. Placeholder "—" rows make it
-    //     obvious what still needs to be filled in. The v2374 gate
-    //     (which hid the whole block when empty) made the section
-    //     look like it had vanished — Dave's complaint that drove
-    //     this change.
-    const _isInsurance = survey.surveyType === 'Insurance survey';
-    if (!_isInsurance) {
+    // v2477: Statement of Valuation now ALWAYS renders for every
+    // survey type — insurance, pre-purchase, and appraisal all need
+    // a valuation table. The v2374 gate hid the whole block when no
+    // value rows had data, which made the section look vanished.
+    // Initial v2477 attempt also gated on `surveyType !== "Insurance
+    // survey"` based on Dave's example PDF, but Dave clarified
+    // (2026-04-27): insurance reports DO need valuation. Empty rows
+    // show "—" placeholders so the surveyor sees what still needs
+    // to be filled in regardless of survey type.
+    {
       _out += '<h3 style="margin:18px 0 8px 0;color:#066aab;font-size:11pt;">STATEMENT OF VALUATION</h3>'
         + '<div class="scope-text">'
         + '<p>The \u201cFAIR MARKET VALUE\u201d is the most probable price in terms of money which a vessel should bring in a competitive and open market under all conditions requisite to a fair sale, the buyer and seller each acting prudently, knowledgeably and assuming the price is not affected by undue stimulus. Implicit in this definition is the consummation of a sale as of a specified date and the passing of title from seller to buyer under conditions whereby:</p>'
