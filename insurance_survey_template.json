@@ -138,7 +138,7 @@
           },
           {
             "type": "list",
-            "label": "Keel and keel joint",
+            "label": "Keel and keel-hull joint",
             "options": [
               "A - Critical",
               "B - Needs Attention",

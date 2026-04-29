@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2480';
+const APP_VERSION = 'v2482';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -2362,6 +2362,8 @@ const ITEM_LABEL_MIGRATIONS = {
   'IPS pod drive(s)': 'IPS pod drive(s)',
   'Battery ventillation': 'Battery ventilation',
   'Lighting': 'Lighting (cabin)',
+  // v2482: section rename — old surveys keyed on "Keel and keel joint" carry forward to the new label.
+  'Keel and keel joint': 'Keel and keel-hull joint',
 };
 
 // Migrate old item labels to current template labels.
@@ -2375,7 +2377,7 @@ const BLANK_ITEM_TEXT_PATCHES = {
 
 function migrateSurveyLabels(survey) {
   if (!survey || !survey.items) return false;
-  const currentVersion = 2114;
+  const currentVersion = 2482;
   if (survey._labelVersion >= currentVersion) return false;
 
   let changed = false;
@@ -6969,7 +6971,7 @@ const ITEM_STANDARD_MAP = {
   // Hull exterior, keel and propulsion
   'Hull and rudder': 'TP1332 - Construction Standards for Small Vessels',
   'Primer, barrier coat': 'TP1332 - Construction Standards for Small Vessels',
-  'Keel and keel joint': 'TP1332 - Construction Standards for Small Vessels',
+  'Keel and keel-hull joint': 'TP1332 - Construction Standards for Small Vessels',
   'Hull anodes': 'ABYC E-2 - Cathodic Protection',
   'Propeller/drive anode': 'ABYC E-2 - Cathodic Protection',
   'Cutlass bearing': 'ABYC P-7 - Propeller Shafting Systems',
@@ -14491,7 +14493,7 @@ function renderInspection(survey) {
   // v2180: keel items (external ballast keel, keel bolts) don't exist on
   // power boats — hide them for any power survey.
   const SAIL_ONLY_ITEM_LABELS = [
-    'Keel and keel joint',
+    'Keel and keel-hull joint',
     'Keel bolts',
   ];
 
@@ -16410,7 +16412,7 @@ async function checkSurvey() {
         : !['outdrive','saildrive','ips'].includes((survey.driveType||'').toLowerCase());
       if (!_hasRudder) return false;
     }
-    if (isPowerboat && ['Keel and keel joint', 'Keel bolts'].includes(item.label)) return false;
+    if (isPowerboat && ['Keel and keel-hull joint', 'Keel bolts'].includes(item.label)) return false;
     if (driveType) {
       if (driveType === 'outdrive' && (SAILDRIVE_ONLY.includes(item.label) || IPS_ONLY.includes(item.label) || SHAFT_ONLY.includes(item.label))) return false;
       if (driveType === 'saildrive' && (OUTDRIVE_ONLY.includes(item.label) || IPS_ONLY.includes(item.label) || SHAFT_ONLY.includes(item.label))) return false;

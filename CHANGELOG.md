@@ -1,3 +1,21 @@
+## v2482
+- Two coupled changes — bundled because the second references terminology introduced by the first.
+
+### Rename "Keel and keel joint" → "Keel and keel-hull joint"
+- Applies to: pre-purchase template, insurance template, text library (14 entries), ITEM_STANDARD_MAP, SAIL_ONLY_ITEM_LABELS, checkSurvey powerboat-exclusion list.
+- Existing surveys: ITEM_LABEL_MIGRATIONS entry added — `survey.items["Keel and keel joint"]` carries forward to the new label on next open. currentVersion bumped 2114 → 2482 so the migration re-runs on already-migrated surveys.
+- Backcompat: non-destructive (`if (survey.items[oldLabel] && !survey.items[newLabel])`) — won't overwrite if both keys coexist.
+- Term sourced from the v2472 Hull(s) condition C/observed chip ("The keel-hull joint appeared sound…") — section name now matches the chip terminology.
+
+### Rewrite "Hull and rudder(s) percussion testing" chip list to propellers shape
+- Phase 1 section 2 of the chip-shape migration. 24 entries → 25 (A 4/1/1, B 3/1/2, C 10/1/2 — identical grid + severity ladder to Propeller(s)).
+- Drop 3 `[describe area(s)]` typing-required chips and the 3 "Percussion testing was carried out across the hull and rudder(s)" meta/process chips per the library-wide rule.
+- Add `{specify:solid laminate|cored composite}` configuration chip in C/observed (cored composites have a different baseline percussion tone).
+- A/observed atomic failure tones: dull thud across multiple areas, hollow ringing indicating delamination, multiple discrete voids, audible fluid behind laminate.
+- B/observed: localized dullness, light tone variations, isolated ringing suggesting small void.
+- C/observed: 5 cosmetic-but-serviceable variations (tonal variations, age-typical, fastener locations, repair sites, high-resin areas) + 5 specific positives (configuration-aware solid-vs-cored, hull below waterline clear tone, no hollow areas, topsides clear tone, rudder sound).
+- Domain note: percussion testing is performed on hull, rudder(s), deck, and coachroof/pilot house only — never on the keel or the keel-hull joint. Earlier draft incorrectly included a "Percussion testing of the keel-hull joint" chip; corrected before push to "The topsides returned a clear and even tone consistent with sound laminate."
+
 ## v2480
 - Add five new rated items to the pre-purchase template
 - Cockpit category: Cockpit table, Bimini/dodger/canvas enclosure, Companionway and washboards (sail-only), Outdoor speakers

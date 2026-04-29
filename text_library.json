@@ -179,162 +179,162 @@
       "section": "Hull and rudder(s) percussion testing",
       "rating": "A",
       "phase": "observed",
-      "severity": 1,
-      "text": "Percussion testing was carried out across the hull and rudder(s)."
+      "severity": 5,
+      "text": "A dull thud was returned across multiple areas of the hull and rudder(s) below the waterline during percussion testing."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
       "rating": "A",
       "phase": "observed",
       "severity": 5,
-      "text": "Percussion testing produced a dull thud across significant areas of the hull and rudder(s)."
-    },
-    {
-      "section": "Hull and rudder(s) percussion testing",
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "A ringing tone was returned in multiple areas, consistent with voids or delamination."
+      "text": "Hollow ringing indicating widespread delamination was detected across the hull and rudder(s)."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
       "rating": "A",
       "phase": "observed",
       "severity": 4,
-      "text": "Hollow-sounding areas were observed in [describe area(s)]."
+      "text": "Multiple discrete voids were located by percussion testing of the hull and rudder(s)."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
       "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "These findings were consistent with significant core moisture or delamination."
-    },
-    {
-      "section": "Hull and rudder(s) percussion testing",
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "The extent of the affected areas represented a structural concern."
-    },
-    {
-      "section": "Hull and rudder(s) percussion testing",
-      "rating": "A",
-      "phase": "action",
+      "phase": "observed",
       "severity": 4,
-      "text": "A qualified fibreglass technician should carry out exploratory work to confirm the extent of the damage."
+      "text": "Audible fluid was heard behind the laminate during percussion testing of the hull."
+    },
+    {
+      "section": "Hull and rudder(s) percussion testing",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "Widespread saturation or delamination compromises hull strength, threatens watertight integrity, and can progress to catastrophic structural failure."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
       "rating": "A",
       "phase": "action",
       "severity": 5,
-      "text": "The vessel should not be returned to service until the affected areas are professionally assessed and remediated."
-    },
-    {
-      "section": "Hull and rudder(s) percussion testing",
-      "rating": "A",
-      "phase": "action",
-      "severity": 5,
-      "text": "Haul the vessel for exploratory inspection of the laminate in the affected areas."
+      "text": "The affected areas should be professionally assessed by a qualified fibreglass technician and repaired before the vessel is returned to service."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
       "rating": "B",
       "phase": "observed",
-      "severity": 1,
-      "text": "Percussion testing was carried out across the hull and rudder(s)."
+      "severity": 3,
+      "text": "Localized dullness suggesting possible saturation was detected in isolated areas of the hull below the waterline."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
       "rating": "B",
       "phase": "observed",
       "severity": 2,
-      "text": "Localized ringing indicating possible voids, poor resin impregnation, or delamination was detected in [describe area(s)]. The tip of the hammer indicates the affected area."
+      "text": "Light variations in tone were noted in limited areas of the hull below the waterline."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
       "rating": "B",
       "phase": "observed",
-      "severity": 3,
-      "text": "Localized thuds or dullness possibly indicating saturation were detected in [describe area(s)]. The tip of the hammer indicates the affected area."
-    },
-    {
-      "section": "Hull and rudder(s) percussion testing",
-      "rating": "B",
-      "phase": "means",
       "severity": 2,
-      "text": "The findings were localized and did not indicate widespread structural concern."
+      "text": "An isolated ringing tone suggesting a possible small void was detected during percussion testing."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
       "rating": "B",
       "phase": "means",
       "severity": 3,
-      "text": "These findings warranted further monitoring to rule out core moisture or early delamination."
+      "text": "These findings warranted further investigation to rule out core moisture, voids, or early delamination."
+    },
+    {
+      "section": "Hull and rudder(s) percussion testing",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Confirm the findings with conductivity testing and periodic re-inspection."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
       "rating": "B",
       "phase": "action",
       "severity": 2,
-      "text": "Recommend monitoring the affected areas."
+      "text": "Monitor the affected areas at the next scheduled haul-out."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Recommend moisture testing of the affected areas to confirm the findings."
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Despite minor tonal variations, percussion testing of the hull and rudder(s) returned consistently sound results."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Recommend rechecking with visual inspection, impact and conductivity testing periodically."
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Light variations in tone were noted but were within the range typical of a vessel of this age."
+    },
+    {
+      "section": "Hull and rudder(s) percussion testing",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Minor changes in tone were detected at fastener locations but did not indicate structural concern."
+    },
+    {
+      "section": "Hull and rudder(s) percussion testing",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Light tonal variation was noted near previous repair sites but the surrounding laminate read sound."
+    },
+    {
+      "section": "Hull and rudder(s) percussion testing",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 2,
+      "text": "Subtle tonal changes were noted at high-resin areas but the laminate returned sound results overall."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "Percussion testing was carried out across the hull and rudder(s)."
+      "text": "The {specify:solid laminate|cored composite} hull below the waterline returned a clear and even tone throughout percussion testing."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "Percussion testing of the hull and rudder(s) produced a clear and even tone throughout."
+      "text": "Percussion testing of the hull below the waterline produced a clear and even tone throughout."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
       "rating": "C",
       "phase": "observed",
       "severity": 1,
-      "text": "No hollow-sounding or dull areas were detected during impact testing of the hull and rudder(s)."
+      "text": "No hollow-sounding or dull areas were detected during percussion testing of the hull and rudder(s)."
+    },
+    {
+      "section": "Hull and rudder(s) percussion testing",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The topsides returned a clear and even tone consistent with sound laminate."
+    },
+    {
+      "section": "Hull and rudder(s) percussion testing",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The rudder(s) returned a clear and consistent tone consistent with sound laminate."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
       "rating": "C",
       "phase": "means",
       "severity": 1,
-      "text": "The findings were consistent with a sound laminate."
-    },
-    {
-      "section": "Hull and rudder(s) percussion testing",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No indications of delamination or voids were found at the time of survey."
-    },
-    {
-      "section": "Hull and rudder(s) percussion testing",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No corrective action is recommended at this time."
+      "text": "Percussion testing indicated the hull and rudder(s) were structurally sound at the time of survey."
     },
     {
       "section": "Hull and rudder(s) percussion testing",
@@ -344,63 +344,70 @@
       "text": "Continued routine seasonal inspection is recommended."
     },
     {
-      "section": "Keel and keel joint",
+      "section": "Hull and rudder(s) percussion testing",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No corrective action is recommended at this time."
+    },
+    {
+      "section": "Keel and keel-hull joint",
       "rating": "B",
       "text": "A longitudinal crack was observed along the keel-to-hull joint.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Keel and keel joint",
+      "section": "Keel and keel-hull joint",
       "rating": "B",
       "text": "This is a common occurrence typically addressed during routine maintenance.",
       "phase": "observed",
       "severity": 2
     },
     {
-      "section": "Keel and keel joint",
+      "section": "Keel and keel-hull joint",
       "rating": "B",
       "text": "The joint had been previously repaired, but further work was required to prevent water ingress into the keel and keel bolts.",
       "phase": "means",
       "severity": 3
     },
     {
-      "section": "Keel and keel joint",
+      "section": "Keel and keel-hull joint",
       "rating": "B",
       "text": "Retorquing the keel bolts while the vessel is in the cradle is recommended.",
       "phase": "action",
       "severity": 3
     },
     {
-      "section": "Keel and keel joint",
+      "section": "Keel and keel-hull joint",
       "rating": "B",
       "text": "This is common and is typically repaired periodically as part of maintenance.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Keel and keel joint",
+      "section": "Keel and keel-hull joint",
       "rating": "B",
       "text": "Impact wear or damage was observed along the forward edge of the keel.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Keel and keel joint",
+      "section": "Keel and keel-hull joint",
       "rating": "B",
       "text": "Sand and fair the area and apply multiple coats of epoxy barrier followed by anti-fouling.",
       "phase": "action",
       "severity": 4
     },
     {
-      "section": "Keel and keel joint",
+      "section": "Keel and keel-hull joint",
       "rating": "C",
       "text": "The keel and keel joint appeared sound and well-maintained.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Keel and keel joint",
+      "section": "Keel and keel-hull joint",
       "rating": "C",
       "text": "The keel was encapsulated and appeared intact and in good order.",
       "phase": "observed",
@@ -1814,21 +1821,21 @@
       "severity": 1
     },
     {
-      "section": "Keel and keel joint",
+      "section": "Keel and keel-hull joint",
       "rating": "A",
       "text": "The keel or keel joint exhibited visible cracking, corrosion, or separation.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Keel and keel joint",
+      "section": "Keel and keel-hull joint",
       "rating": "A",
       "text": "Structural integrity is compromised.",
       "phase": "means",
       "severity": 5
     },
     {
-      "section": "Keel and keel joint",
+      "section": "Keel and keel-hull joint",
       "rating": "A",
       "text": "Immediate professional inspection and repair is critical.",
       "phase": "action",
@@ -2591,14 +2598,14 @@
       "section": "Swim platform and ladder - condition and conductivity readings"
     },
     {
-      "section": "Keel and keel joint",
+      "section": "Keel and keel-hull joint",
       "rating": "C",
       "phase": "means",
       "severity": 1,
       "text": "No immediate concern was identified."
     },
     {
-      "section": "Keel and keel joint",
+      "section": "Keel and keel-hull joint",
       "rating": "C",
       "phase": "action",
       "severity": 1,
