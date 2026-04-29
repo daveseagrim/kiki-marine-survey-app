@@ -1222,6 +1222,55 @@
               "Not applicable",
               "Not tested/not verified"
             ]
+          },
+          {
+            "type": "list",
+            "label": "Cockpit table",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Bimini, dodger and canvas enclosure",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Companionway and washboards",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "sailOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Outdoor speakers",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
           }
         ]
       },
@@ -1737,6 +1786,18 @@
           {
             "type": "list",
             "label": "Interior lighting",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Indoor speakers",
             "options": [
               "A - Critical",
               "B - Needs Attention",

@@ -1,3 +1,9 @@
+## v2480
+- Add five new rated items to the pre-purchase template
+- Cockpit category: Cockpit table, Bimini/dodger/canvas enclosure, Companionway and washboards (sail-only), Outdoor speakers
+- Cabin and conveniences category: Indoor speakers
+- All five items use the standard A/B/C/Powered up only/Not applicable/Not tested rating list
+
 ## v2479
 - Remove Valuation Sources, Fair Market Value range, and Estimated Replacement Cost rows from the Statement of Valuation table
 - Per Dave 2026-04-27: report should surface only the Final Concluded Fair Market Value (the punch-line block at the bottom of the valuation section, before the Surveyor's Certification). The sources/range/replacement working data lives in the surveyor's notes, not the client-facing report.
