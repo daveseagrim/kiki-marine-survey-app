@@ -4,6 +4,13 @@
       "section": "Hull(s) condition (below the waterline)",
       "rating": "A",
       "phase": "observed",
+      "severity": 1,
+      "text": "An inspection of the hull below the waterline was conducted."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "A",
+      "phase": "observed",
       "severity": 5,
       "text": "The hull was gouged, cracked, or penetrated to the laminate."
     },
@@ -174,6 +181,20 @@
       "phase": "action",
       "severity": 1,
       "text": "No corrective action is recommended at this time."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "Below the waterline, no evident damage was observed on the hull."
+    },
+    {
+      "section": "Hull(s) condition (below the waterline)",
+      "rating": "C",
+      "phase": "observed",
+      "severity": 1,
+      "text": "The hull appeared in good overall condition with only cosmetic wear."
     },
     {
       "section": "Hull and rudder(s) percussion testing",

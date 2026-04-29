@@ -1,3 +1,11 @@
+## v2483
+- Restore three Hull(s) condition (below the waterline) chips that v2472 dropped in error
+- Source-truth review against the 4 PDF surveys + Cut and paste.xlsx confirmed these are chips Dave actually uses verbatim — they are not "meta filler" or "vague summary catch-alls" as v2472 wrongly classified them
+- Restored to A/observed/sev1: "An inspection of the hull below the waterline was conducted." (lead-in, used as scene-setter)
+- Restored to C/observed/sev1: "Below the waterline, no evident damage was observed on the hull." (used verbatim as the entire C-rating finding in Footloose surveys)
+- Restored to C/observed/sev1: "The hull appeared in good overall condition with only cosmetic wear." (used verbatim as the entire C-rating finding in the powerboat survey)
+- Section count: 25 → 28. Grid now A 5/1/1, B 3/1/2, C 12/1/2 — deliberate deviation from the strict propellers grid (4/1/1, 3/1/2, 10/1/2) because the surveyor-voice content takes precedence over shape symmetry. The propellers shape remains the structural model, but source-truth content rules whenever they conflict.
+
 ## v2482
 - Two coupled changes — bundled because the second references terminology introduced by the first.
 
