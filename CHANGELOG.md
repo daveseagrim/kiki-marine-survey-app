@@ -1,3 +1,8 @@
+## v2486
+- Replace the Page 3 water-leak limitation with clearer professional wording: leaks are assessed visually only, and evidence of past/intermittent leaks may be cleaned, concealed, or absent.
+- Shorten safety-equipment photo captions in the PDF generator. Fire extinguisher photos now caption as "Fire extinguisher — photo X of Y" instead of repeating the full TC requirement under every image.
+- Verified: `node --check app.js`, `scripts/release.sh` test suite: 106 tests passed, version check clean after this entry.
+
 ## v2485
 - Fix twin-engine horsepower wording so the generated vessel description and propulsion narrative no longer use Engine 1 horsepower as "each" when Engine 2 has a different recorded rating.
 - Keep D12D-A MP report language aligned with the corrected 715 HP / 526 kW data and avoid silently masking port/starboard horsepower mismatches.

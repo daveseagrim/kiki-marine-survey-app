@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2485';
+const APP_VERSION = 'v2486';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -12685,6 +12685,14 @@ function _descriptionAlreadyStatesCondition(text) {
   return /\b(overall condition|above[- ]average|average overall|excellent overall|fair overall|poor overall|restorable condition)\b/i.test(text || '');
 }
 
+function _shortSafetyPhotoCaption(name, idx, total) {
+  const raw = String(name || 'Safety equipment').trim();
+  const base = /^fire extinguisher/i.test(raw)
+    ? 'Fire extinguisher'
+    : raw.replace(/\s*\([^)]*\)\s*/g, ' ').replace(/\s+—\s*.*/, '').replace(/\s+/g, ' ').trim();
+  return total > 1 ? `${base} — photo ${idx + 1} of ${total}` : base;
+}
+
 // Generate a vessel description template from filled-in form fields
 async function generateVesselDescription() {
   const ymm = document.getElementById('yearMakeModel')?.value || '';
@@ -23957,7 +23965,7 @@ async function generateReport() {
       <li><strong>Electrical/Electronic Systems:</strong> Powered where possible; detailed wiring analysis requires a marine electrician or ABYC-certified electrical engineer.</li>
       <li><strong>Mechanical/Structural:</strong> Engines, transmissions, drives, and generators were not run or opened; inspection by a manufacturer's certified technician is advised.</li>
       <li><strong>Tankage:</strong> Visually inspected empty tanks; filling and pressure testing recommended.</li>
-      <li><strong>Water Leaks:</strong> Visual inspection was done for that instance in time; cleaned evidence of past leaks may be hidden.</li>
+      <li><strong>Water Leaks:</strong> Water leaks were assessed visually only. Evidence of past or intermittent leaks may have been cleaned, concealed, or absent during the inspection.</li>
       <li><strong>General:</strong> No removal of fixed partitions, panels, furniture, or stored gear; locked or inaccessible areas not surveyed.</li>
     </ul>
 
@@ -24548,9 +24556,7 @@ ${(() => {
           const validPhotos = eq.photos.filter(pid => itemPhotoCache[pid]);
           const total = validPhotos.length;
           const imgs = validPhotos.map((pid, idx) => {
-            const cap = total === 1
-              ? eq.name
-              : (idx === 0 ? eq.name : `${eq.name} — photo ${idx + 1} of ${total}`);
+            const cap = _shortSafetyPhotoCaption(eq.name, idx, total);
             return `<div class="report-photo-card">
               <img src="${itemPhotoCache[pid]}" alt="${esc(cap)}" class="report-photo" />
               <div class="caption">${esc(cap)}</div>
