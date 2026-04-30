@@ -2,9 +2,12 @@
 - **Colour fields now persist on auto-save** (per Dave 2026-04-29: "Items on the homepage are not saving. In particular, hull colour, boot stripe colour and deck colour.")
 - `saveEditFormSilently()` — the silent path used for back-nav, on-blur, and on-app-background — was missing `hullColour`, `bootStripeColour`, and `deckColour`. The fields[] array loop didn't handle them because they're `<select>`s with an `__other__` sentinel value that needs custom-value resolution; only the explicit Save button (`saveSurveyDetails`) ran the resolver. Dave's colour edits silently failed unless he remembered to tap Save before navigating away.
 - Fix: call `getColourValue('hullColour' / 'bootStripeColour' / 'deckColour')` in `saveEditFormSilently` with the same v2377 undefined-skip guard already used in `saveSurveyDetails` — write only when the colour `<select>` is in the DOM, leave the saved value alone otherwise. Same pattern as the existing valuation-sources / comparables guards in the surrounding code.
-- **Volvo Penta D12D-A MP / D12 family added to engine_db.json**, between the existing D13 Inboard entry and the legacy gasoline inboards under the "Volvo Penta" make block.
-- Six new model rows: D12D-A MP (generic family designation, 450 hp), D12-450, D12-525, D12-650, D12-675, D12-715. All 12.13 L inline-6, turbocharged + aftercooled, 4-valve OHC, EMS 2 electronic control, freshwater-cooled, marine pleasure (MP) duty rating, ~2002-2010 production.
-- Engine picker on the home screen / new survey form will now offer the D12 family alongside the existing D4 / D6 / D13 entries.
+- **Volvo Penta D12D-A MP and D12D MH added to engine_db.json**, under the "Volvo Penta" make block between the existing D13 Inboard entry and the legacy gasoline inboards.
+- D12D-A MP — Marine Pleasure rating in the 615-715 HP range @ 2300 rpm. Stored at the 715 HP top-of-range value (manufacturer part no. 869186 = 715 HP); description notes the range and instructs the surveyor to record "Not verified from data plate" when the visible plate doesn't confirm horsepower, since the same designation ships at 615 / 650 / 675 / 715 HP.
+- D12D MH — Medium-Heavy duty rating @ 2200 rpm, 450 HP / 331 kW. Distinct designation from D12D-A MP; the 450 HP rating belongs here, not under the MP family.
+- Both 12.13 L inline-6, direct-injected, turbocharged + aftercooled, 4-valve OHC, EMS 2 electronic control, freshwater-cooled, ~2002-2010 production.
+- Engine picker on the home screen / new survey form will now offer the D12D-A MP and D12D MH designations alongside the existing D4 / D6 / D13 entries.
+- Per Dave 2026-04-29: an earlier draft of this file conflated the D12D-A MP (615-715 HP) with the D12D MH (450 HP) — the corrected entries above match the manufacturer's designation logic.
 
 ## v2483
 - Restore three Hull(s) condition (below the waterline) chips that v2472 dropped in error
