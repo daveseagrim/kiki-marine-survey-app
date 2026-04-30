@@ -1,3 +1,10 @@
+## v2485
+- Fix twin-engine horsepower wording so the generated vessel description and propulsion narrative no longer use Engine 1 horsepower as "each" when Engine 2 has a different recorded rating.
+- Keep D12D-A MP report language aligned with the corrected 715 HP / 526 kW data and avoid silently masking port/starboard horsepower mismatches.
+- Stop PDF generation from appending a second overall-condition sentence when the vessel description already states the condition.
+- Tighten the auto-generated above-average condition sentence by hyphenating "above-average" and removing the overly broad "minor and typical" sentence.
+- Verified: `node --check app.js`, `scripts/release.sh` test suite: 106 tests passed, version check clean after this entry.
+
 ## v2484
 - **Colour fields now persist on auto-save** (per Dave 2026-04-29: "Items on the homepage are not saving. In particular, hull colour, boot stripe colour and deck colour.")
 - `saveEditFormSilently()` — the silent path used for back-nav, on-blur, and on-app-background — was missing `hullColour`, `bootStripeColour`, and `deckColour`. The fields[] array loop didn't handle them because they're `<select>`s with an `__other__` sentinel value that needs custom-value resolution; only the explicit Save button (`saveSurveyDetails`) ran the resolver. Dave's colour edits silently failed unless he remembered to tap Save before navigating away.

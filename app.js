@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2484';
+const APP_VERSION = 'v2485';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -12630,7 +12630,7 @@ function _buildConditionSentence(survey) {
     if (_oc.includes('excellent') || _oc.includes('bristol')) {
       return ` At the time of the survey the vessel was in excellent overall condition, consistent with a vessel that has been meticulously maintained and well equipped.`;
     } else if (_oc.includes('above average')) {
-      return ` At the time of the survey the vessel was in above average overall condition, having received above average care. Any items noted in the findings section are minor and typical for a vessel of this age and type.`;
+      return ` At the time of the survey the vessel was in above-average overall condition, having received above-average care.`;
     } else if (_oc.includes('average')) {
       return ` At the time of the survey the vessel was in average overall condition, ready for use and normally equipped for its size. The reader is directed to the Findings and Recommendations section for items requiring attention.`;
     } else if (_oc.includes('fair')) {
@@ -12664,6 +12664,25 @@ function _buildConditionSentence(survey) {
     }
   }
   return `\n\nThe vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained.`;
+}
+
+function _formatEnginePowerText(engineHP) {
+  const value = (engineHP || '').trim();
+  if (!value) return '';
+  return /(hp|h\.p\.|horsepower|kw|bhp)/i.test(value) ? value : `${value} horsepower`;
+}
+
+function _formatTwinEngineRatedPhrase(engineHP, engine2HP) {
+  const primary = _formatEnginePowerText(engineHP);
+  const secondary = _formatEnginePowerText(engine2HP);
+  if (primary && secondary && primary !== secondary) {
+    return `rated at ${primary} (port) and ${secondary} (starboard)`;
+  }
+  return `rated at ${primary || secondary || '[XX] horsepower'} each`;
+}
+
+function _descriptionAlreadyStatesCondition(text) {
+  return /\b(overall condition|above[- ]average|average overall|excellent overall|fair overall|poor overall|restorable condition)\b/i.test(text || '');
 }
 
 // Generate a vessel description template from filled-in form fields
@@ -12704,6 +12723,7 @@ async function generateVesselDescription() {
   const engineMake = document.getElementById('engineMake')?.value || '';
   const engineModel = document.getElementById('engineModel')?.value || '';
   const engineHP = document.getElementById('engineHP')?.value || '';
+  const engine2HP = document.getElementById('engine2HP')?.value || '';
   const fuelType = document.getElementById('fuelType')?.value || '';
   const transmissionMake = document.getElementById('transmissionMake')?.value || '';
   const transmissionModel = document.getElementById('transmissionModel')?.value || '';
@@ -12732,9 +12752,8 @@ async function generateVesselDescription() {
   // v2463: don't double-emit the unit. If the user typed a power string that already
   // contains HP/kW/horsepower (e.g., "29HP / 21.3kW" from the auto-fill), use it verbatim.
   // Only append "horsepower" when the value is a bare number.
-  const engHPStr = engineHP
-    ? (/(hp|h\.p\.|horsepower|kw|bhp)/i.test(engineHP) ? engineHP : `${engineHP} horsepower`)
-    : '[XX] horsepower';
+  const engHPStr = _formatEnginePowerText(engineHP) || '[XX] horsepower';
+  const twinRatedPhrase = _formatTwinEngineRatedPhrase(engineHP, engine2HP);
   const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
                          transmissionMake ? `${transmissionMake} [MODEL]` : '[MAKE/MODEL]';
 
@@ -12763,7 +12782,7 @@ async function generateVesselDescription() {
   } else if (hasEngine2) {
     const engType = engineTypeStr || _engTypeFromDrive1 || '[inboard/outboard/sterndrive]';
     const drivePhrase = _drivePlural1 || '[SHAFT DRIVES/STERNDRIVES]';
-    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines rated at ${engHPStr} each, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through ${drivePhrase}.`;
+    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines ${twinRatedPhrase}, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through ${drivePhrase}.`;
   } else {
     const engType = engineTypeStr || _engTypeFromDrive1 || '[inboard/outboard/sterndrive]';
     const drivePhrase = _driveSingular1 || '[SHAFT DRIVE/STERNDRIVE]';
@@ -12953,6 +12972,7 @@ async function regenerateDescriptionFromInspection() {
   const engineMake = survey.engineMake || '';
   const engineModel = survey.engineModel || '';
   const engineHP = survey.engineHP || '';
+  const engine2HP = survey.engine2HP || '';
   const fuelType = survey.fuelType || '';
   const transmissionMake = survey.transmissionMake || '';
   const transmissionModel = survey.transmissionModel || '';
@@ -12975,9 +12995,8 @@ async function regenerateDescriptionFromInspection() {
   // v2463: don't double-emit the unit. If the user typed a power string that already
   // contains HP/kW/horsepower (e.g., "29HP / 21.3kW" from the auto-fill), use it verbatim.
   // Only append "horsepower" when the value is a bare number.
-  const engHPStr = engineHP
-    ? (/(hp|h\.p\.|horsepower|kw|bhp)/i.test(engineHP) ? engineHP : `${engineHP} horsepower`)
-    : '[XX] horsepower';
+  const engHPStr = _formatEnginePowerText(engineHP) || '[XX] horsepower';
+  const twinRatedPhrase = _formatTwinEngineRatedPhrase(engineHP, engine2HP);
   const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
                          transmissionMake ? `${transmissionMake} [MODEL]` : '[MAKE/MODEL]';
 
@@ -13002,7 +13021,7 @@ async function regenerateDescriptionFromInspection() {
   } else if (hasEngine2) {
     const engType = engineTypeStr || _engTypeFromDrive2 || '[inboard/outboard/sterndrive]';
     const drivePhrase = _drivePlural2 || '[SHAFT DRIVES/STERNDRIVES]';
-    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines rated at ${engHPStr} each, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through ${drivePhrase}.`;
+    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines ${twinRatedPhrase}, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through ${drivePhrase}.`;
   } else {
     const engType = engineTypeStr || _engTypeFromDrive2 || '[inboard/outboard/sterndrive]';
     const drivePhrase = _driveSingular2 || '[SHAFT DRIVE/STERNDRIVE]';
@@ -13161,6 +13180,7 @@ function buildDescriptionFromSurvey(survey) {
   const engineMake = survey.engineMake || '';
   const engineModel = survey.engineModel || '';
   const engineHP = survey.engineHP || '';
+  const engine2HP = survey.engine2HP || '';
   const fuelType = survey.fuelType || '';
   const transmissionMake = survey.transmissionMake || '';
   const transmissionModel = survey.transmissionModel || '';
@@ -13183,9 +13203,8 @@ function buildDescriptionFromSurvey(survey) {
   // v2463: don't double-emit the unit. If the user typed a power string that already
   // contains HP/kW/horsepower (e.g., "29HP / 21.3kW" from the auto-fill), use it verbatim.
   // Only append "horsepower" when the value is a bare number.
-  const engHPStr = engineHP
-    ? (/(hp|h\.p\.|horsepower|kw|bhp)/i.test(engineHP) ? engineHP : `${engineHP} horsepower`)
-    : '[XX] horsepower';
+  const engHPStr = _formatEnginePowerText(engineHP) || '[XX] horsepower';
+  const twinRatedPhrase = _formatTwinEngineRatedPhrase(engineHP, engine2HP);
   const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
                          transmissionMake ? `${transmissionMake} [MODEL]` : '[MAKE/MODEL]';
 
@@ -13213,7 +13232,7 @@ function buildDescriptionFromSurvey(survey) {
   } else if (hasEngine2) {
     const engType = engineTypeStr || engTypeFromDrive || '[inboard/outboard/sterndrive]';
     const drivePhrase = driveLabelPlural || '[SHAFT DRIVES/STERNDRIVES]';
-    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines rated at ${engHPStr} each, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through ${drivePhrase}.`;
+    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines ${twinRatedPhrase}, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through ${drivePhrase}.`;
   } else {
     const engType = engineTypeStr || engTypeFromDrive || '[inboard/outboard/sterndrive]';
     const drivePhrase = driveLabelSingular || '[SHAFT DRIVE/STERNDRIVE]';
@@ -13347,6 +13366,7 @@ function buildPropulsionNarrative(survey) {
   const eMake = (survey.engineMake || '').trim();
   const eModel = (survey.engineModel || '').trim();
   const eHP = (survey.engineHP || '').trim();
+  const e2HP = (survey.engine2HP || '').trim();
   const eFuel = (survey.fuelType || '').trim();
   const e2Make = (survey.engine2Make || '').trim();
   const hasTwin = !!e2Make;
@@ -13368,7 +13388,7 @@ function buildPropulsionNarrative(survey) {
   // each". Idempotent — existing "300 hp" / "220 kW" strings pass through.
   const eHPFmt = _fmtHP(eHP);
   const opener = hasTwin
-    ? `Twin ${enginePhrase}${eHPFmt ? ` rated at ${eHPFmt} each` : ''}`
+    ? `Twin ${enginePhrase} ${_formatTwinEngineRatedPhrase(eHP, e2HP)}`
     : (makeModel ? `${articleAn ? 'An' : 'A'} ${enginePhrase}${eHPFmt ? ` rated at ${eHPFmt}` : ''}` : `The vessel's engine`);
 
   // ── Location / access ─────────────────────────────────────────────
@@ -23317,11 +23337,13 @@ async function generateReport() {
   // but the rendered report is always in sync with the formal rating.
   let _refreshedDesc = survey.vesselDescription || '';
   if (_refreshedDesc && (survey.overallCondition || (survey.items && Object.keys(survey.items).length))) {
-    const _fresh = _buildConditionSentence(survey);
+    let _fresh = _buildConditionSentence(survey);
     // Strip any existing " At the time of the survey…" tail (spans 1–2 sentences).
     const _tailRE = /\s*At the time of the survey[\s\S]*$/;
     if (_tailRE.test(_refreshedDesc)) {
       _refreshedDesc = _refreshedDesc.replace(_tailRE, '').trimEnd();
+    } else if (_descriptionAlreadyStatesCondition(_refreshedDesc)) {
+      _fresh = '';
     }
     _refreshedDesc = _refreshedDesc + _fresh;
   }
