@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2483';
+const APP_VERSION = 'v2484';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -11479,6 +11479,23 @@ async function saveEditFormSilently() {
   // Special fields
   survey.locationLat = window._surveyLat || survey.locationLat;
   survey.locationLon = window._surveyLon || survey.locationLon;
+  // v2484: colour fields use getColourValue with undefined-skip semantics —
+  // the colour <select>s aren't in the fields[] array because their
+  // "__other__" sentinel value needs custom-value resolution. Without this,
+  // changes to hull / boot-stripe / deck colour from Edit Intro silently
+  // failed to autosave when navigating away; only the explicit Save button
+  // (saveSurveyDetails) persisted them. Per Dave 2026-04-29: "Items on the
+  // homepage are not saving. In particular, hull colour, boot stripe colour
+  // and deck colour."
+  // Same v2377 guard pattern as saveSurveyDetails: getColourValue returns
+  // undefined when the select isn't in the DOM, in which case we skip the
+  // write so the saved value isn't wiped.
+  const _hullColour = getColourValue('hullColour');
+  if (_hullColour !== undefined) survey.hullColour = _hullColour;
+  const _bootStripeColour = getColourValue('bootStripeColour');
+  if (_bootStripeColour !== undefined) survey.bootStripeColour = _bootStripeColour;
+  const _deckColour = getColourValue('deckColour');
+  if (_deckColour !== undefined) survey.deckColour = _deckColour;
   survey.exchangeRate = parseFloat(document.getElementById('exchangeRate')?.value) || survey.exchangeRate || 1.35;
   // v2377 data-loss guard: only write valuation sources when the DOM
   // checkboxes are rendered. The old path unconditionally assigned the

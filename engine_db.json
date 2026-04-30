@@ -858,6 +858,66 @@
           "description": "High-pressure unit injector diesel; 2010-Present; Large displacement diesel, OHC, twin-entry turbo, yacht applications"
         },
         {
+          "model": "D12D-A MP",
+          "hp": "450",
+          "kw": "331",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "12.13L",
+          "engineType": "Inboard",
+          "description": "Direct-injected, turbocharged and aftercooled inline-6 marine diesel; ~2002-2010; D12 family, marine pleasure (MP) duty rating, electronic engine management (EMS 2), 4-valve OHC head; common pleasure ratings: 450 / 525 / 650 / 675 / 715 hp"
+        },
+        {
+          "model": "D12-450",
+          "hp": "450",
+          "kw": "331",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "12.13L",
+          "engineType": "Inboard",
+          "description": "Turbocharged + aftercooled inline-6 diesel; ~2002-2010; Marine pleasure rating @ 2200 rpm, 4-valve OHC, EMS 2 electronic control, freshwater-cooled"
+        },
+        {
+          "model": "D12-525",
+          "hp": "525",
+          "kw": "386",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "12.13L",
+          "engineType": "Inboard",
+          "description": "Turbocharged + aftercooled inline-6 diesel; ~2002-2010; Marine pleasure rating @ 2300 rpm, 4-valve OHC, EMS 2 electronic control"
+        },
+        {
+          "model": "D12-650",
+          "hp": "650",
+          "kw": "478",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "12.13L",
+          "engineType": "Inboard",
+          "description": "Turbocharged + aftercooled inline-6 diesel; ~2003-2010; Marine pleasure rating @ 2300 rpm, 4-valve OHC, EMS 2 electronic control, common in twin-engine motoryacht installs"
+        },
+        {
+          "model": "D12-675",
+          "hp": "675",
+          "kw": "496",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "12.13L",
+          "engineType": "Inboard",
+          "description": "Turbocharged + aftercooled inline-6 diesel; ~2004-2010; Marine pleasure rating @ 2300 rpm, 4-valve OHC, EMS 2 electronic control"
+        },
+        {
+          "model": "D12-715",
+          "hp": "715",
+          "kw": "526",
+          "fuel": "Diesel",
+          "cylinders": "6",
+          "displacement": "12.13L",
+          "engineType": "Inboard",
+          "description": "Turbocharged + aftercooled inline-6 diesel; ~2005-2010; Top D12 marine pleasure rating @ 2300 rpm, 4-valve OHC, EMS 2 electronic control, twin-entry turbo"
+        },
+        {
           "model": "4.3L Inboard",
           "hp": "220",
           "kw": "162",
