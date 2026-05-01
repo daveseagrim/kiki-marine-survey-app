@@ -1155,6 +1155,253 @@
         ]
       },
       {
+        "name": "Pilot house gauges and instrumentation",
+        "items": [
+          {
+            "type": "list",
+            "label": "Pilot house Blower",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Engine start/stop",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Engine gauges (tachometer, speedometer, fuel, temperature, etc.)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Engine controls (throttle, gearshift, etc.)",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Outdrive tilt",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "powerOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Trim tab controls",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ],
+            "powerOnly": true
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Bow thruster/stern thruster controls",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Anchor windlass control",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Autopilot",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Lighting",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house MFD/Chartplotter",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Radar",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Depth sounder",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Log",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house VHF radio and antenna",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Windshield wiper(s) operation",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Searchlight",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Flood lights/deck lights",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house Magnetic compass",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
+            "label": "Pilot house - other gauges and instrumentation",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          }
+        ]
+      },
+      {
         "name": "Flybridge",
         "items": [
           {
@@ -1556,253 +1803,6 @@
           {
             "type": "list",
             "label": "Flybridge - other gauges and instrumentation",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Pilot house gauges and instrumentation",
-        "items": [
-          {
-            "type": "list",
-            "label": "Pilot house Blower",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Engine start/stop",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Engine gauges (tachometer, speedometer, fuel, temperature, etc.)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Engine controls (throttle, gearshift, etc.)",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Outdrive tilt",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "powerOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Trim tab controls",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "powerOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Bow thruster/stern thruster controls",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Anchor windlass control",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Autopilot",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Lighting",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house MFD/Chartplotter",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Radar",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Depth sounder",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Log",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house VHF radio and antenna",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Windshield wiper(s) operation",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Searchlight",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Flood lights/deck lights",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house Magnetic compass",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Pilot house - other gauges and instrumentation",
             "options": [
               "A - Critical",
               "B - Needs Attention",

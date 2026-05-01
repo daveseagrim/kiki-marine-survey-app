@@ -1,3 +1,7 @@
+## v2507
+- Move "Pilot house gauges and instrumentation" so it appears immediately after "Pilot house" in the insurance survey template.
+- Verified: `node tests/run_tests.js` — 108 tests passed.
+
 ## v2506
 - Manual edits to the Vessel Description now immediately stop auto-regeneration during that same save.
 - Manual edits to the Propulsion Narrative are saved from the inspection view and stop auto-regeneration until Regenerate is tapped.
