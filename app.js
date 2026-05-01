@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2508';
+const APP_VERSION = 'v2509';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -10327,9 +10327,22 @@ function renderNewSurveyForm() {
         </div>
       </div>
 
-      <!-- v2453: Tax Status + NMMA/CE/TC Compliance Plate form-groups removed per Dave. -->
-      <!-- Surveyors no longer fill these fields; report section suppressed accordingly. -->
-      <!-- Legacy survey.taxStatus / survey.compliancePlate values in IndexedDB are preserved. -->
+      <div class="form-group">
+        <label class="form-label">NMMA Yacht Certification Plate</label>
+        <input type="text" id="compliancePlate" placeholder="e.g., NMMA certified / plate sighted">
+        <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
+          <div data-photo-field="compliancePhoto">
+            <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:6px 12px;">
+              📷 NMMA Plate
+              <input type="file" accept="image/*" capture="environment" style="display:none;"
+                     onchange="captureDocPhoto('compliancePhoto', 'NMMA Yacht Certification Plate', event)" />
+            </label>
+          </div>
+          <span id="compliancePhotoStatus" style="font-size:12px;color:#6b7280;"></span>
+        </div>
+      </div>
+
+      <!-- v2453/v2509: Tax Status remains removed. NMMA Yacht Certification Plate restored after HIN. -->
 
       <h2 class="form-heading" data-section="valuation">Valuation</h2>
 
@@ -10992,10 +11005,11 @@ function editSurveyDetails(surveyId) {
         // never appears in the textarea on load.
         vesselDescription: _stripLegacySafetyFromDescription(survey.vesselDescription),
         hinNumber: survey.hinNumber,
+        compliancePlate: survey.compliancePlate,
         tcLicenseType: survey.tcLicenseType,
         tcLicense: survey.tcLicense,
         tcLicenseExpiry: survey.tcLicenseExpiry,
-        // v2453: taxStatus + compliancePlate no longer populated — UI removed.
+        // v2453/v2509: taxStatus no longer populated — UI removed.
         valuationLow: survey.valuationLow,
         valuationHigh: survey.valuationHigh,
         exchangeRate: survey.exchangeRate,
@@ -11518,10 +11532,11 @@ function saveSurveyDetails(surveyId) {
       transmission2Serial: document.getElementById('transmission2Serial')?.value || '',
       vesselDescription: formDescriptionValue,
       hinNumber: document.getElementById('hinNumber')?.value || '',
+      compliancePlate: document.getElementById('compliancePlate')?.value || '',
       tcLicenseType: document.getElementById('tcLicenseType')?.value || '',
       tcLicense: document.getElementById('tcLicense')?.value || '',
       tcLicenseExpiry: document.getElementById('tcLicenseExpiry')?.value || '',
-      // v2453: taxStatus + compliancePlate inputs removed — no longer written to the updates object.
+      // v2453/v2509: taxStatus input removed — no longer written to the updates object.
       valuationLow: document.getElementById('valuationLow')?.value || '',
       valuationHigh: document.getElementById('valuationHigh')?.value || '',
       exchangeRate: parseFloat(document.getElementById('exchangeRate')?.value) || 1.35,
@@ -14131,7 +14146,8 @@ function startNewSurvey() {
     tcLicense: document.getElementById('tcLicense')?.value || '',
     tcLicenseExpiry: document.getElementById('tcLicenseExpiry')?.value || '',
     hinNumber: document.getElementById('hinNumber')?.value || '',
-    // v2453: taxStatus + compliancePlate inputs removed — no longer collected for new surveys.
+    compliancePlate: document.getElementById('compliancePlate')?.value || '',
+    // v2453/v2509: taxStatus input removed — no longer collected for new surveys.
 
     valuationLow: document.getElementById('valuationLow')?.value || '',
     valuationHigh: document.getElementById('valuationHigh')?.value || '',
@@ -23780,7 +23796,7 @@ async function generateReport() {
     return '';
   }
   let hinPhotoDataUrl = await loadAndCompress(survey.hinPhoto);
-  // v2453: compliancePhotoDataUrl load removed — report row no longer rendered.
+  let compliancePhotoDataUrl = await loadAndCompress(survey.compliancePhoto);
   let licencePhotoDataUrl = await loadAndCompress(survey.licencePhoto);
   let tcPaperLicencePhotoDataUrl = await loadAndCompress(survey.tcPaperLicencePhoto);
   let coverPhotoDataUrl = await loadAndCompress(survey.coverPhoto);
@@ -24367,6 +24383,7 @@ async function generateReport() {
   <h2>VESSEL DOCUMENTATION DATA</h2>
   <table>
     ${!_excl('hinNumber') && (esc(survey.hinNumber) || hinPhotoDataUrl) ? `<tr><td style="width:40%;"><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || ''}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>` : ''}
+    ${!_excl('compliancePlate') && (esc(survey.compliancePlate) || compliancePhotoDataUrl) ? `<tr><td><strong>NMMA Yacht Certification Plate</strong></td><td>${esc(survey.compliancePlate) || ''}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="NMMA Yacht Certification Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>` : ''}
     ${(() => {
       if (_excl('tcLicense')) return '';
       const licenceType = String(survey.tcLicenseType || '');
@@ -24377,7 +24394,7 @@ async function generateReport() {
       if (!(survey.tcLicense || survey.tcLicenseType || hullLicenceBlock || tcPaperLicencePhotoDataUrl)) return '';
       return `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${survey.tcLicenseExpiry ? ' (expires ' + esc(survey.tcLicenseExpiry) + ')' : ''}${hullLicenceBlock}${tcPaperLicencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Transport Canada paper licence:</em><br><img src="' + tcPaperLicencePhotoDataUrl + '" alt="TC Paper Licence" class="report-photo" style="margin-top:4px;" />' : ''}</td></tr>`;
     })()}
-    <!-- v2453: Tax Status + NMMA/CE/TC Compliance Plate rows removed per Dave. -->
+    <!-- v2453/v2509: Tax Status row remains removed; NMMA Yacht Certification Plate restored after HIN. -->
   </table>
 
 ${(() => {

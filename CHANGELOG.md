@@ -1,3 +1,8 @@
+## v2509
+- Restore the NMMA Yacht Certification Plate field and photo slot directly after the HIN number.
+- Report documentation now prints the NMMA plate row immediately after HIN when text or a plate photo is present.
+- Verified: `node tests/run_tests.js` — 108 tests passed.
+
 ## v2508
 - Add the 1989 Tollycraft 34 Sport Sedan to the boat-specs database, including "Tolleycraft" spelling aliases for lookup.
 - Verified: `node tests/run_tests.js` — 108 tests passed.
