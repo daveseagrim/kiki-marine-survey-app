@@ -1,3 +1,8 @@
+## v2504
+- Change the stale-save guard from blocking saves to recovering protected dropped survey content before saving.
+- This keeps ratings, photos, chips, and substantial notes from being lost while avoiding the "Save refused — stale data detected" loop during normal edits.
+- Verified: `node tests/run_tests.js` — 108 tests passed.
+
 ## v2503
 - Tighten the stale-save guard again to reduce false "Save refused — stale data detected" warnings during normal editing.
 - The guard now focuses on dropped protected item content such as ratings, photos, selected chips, or substantial notes rather than treating ordinary shortened shared text as stale data.

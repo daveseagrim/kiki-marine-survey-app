@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2503';
+const APP_VERSION = 'v2504';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -2109,18 +2109,22 @@ async function saveSurvey(survey) {
       if (beforeRecord) {
         const regression = _v2424DetectStaleRegression(beforeRecord, survey);
         if (regression) {
-          _kkSaveInProgress = false;
-          _checkDeferredUpdate();
-          // Journal the refusal so the forensic trail shows it.
-          try {
-            _journalSurveyWrite(survey, (_v2401Caller || '?') + ':REFUSED_STALE', beforeRecord);
-          } catch (_) { /* never block on journal failure */ }
+          // v2504: Recover instead of refusing. The old hard block trapped
+          // legitimate edits when template/catalog changes made protected
+          // items appear "dropped". Put those protected records back into
+          // the outgoing survey, then continue the save.
+          if (!survey.items || typeof survey.items !== 'object') survey.items = {};
+          for (const key of regression.droppedKeys || []) {
+            if (!(key in survey.items) && beforeRecord.items && beforeRecord.items[key]) {
+              survey.items[key] = beforeRecord.items[key];
+            }
+          }
           if (typeof console !== 'undefined') {
-            console.warn('[v2424] save refused — stale regression detected:', {
+            console.warn('[v2504] stale-save guard recovered protected items before save:', {
               id: survey.id,
               caller: _v2401Caller,
-              droppedItems: regression.droppedItems,
-              droppedKeys: regression.droppedKeys,
+              recoveredItems: (regression.droppedKeys || []).length,
+              recoveredKeys: regression.droppedKeys,
               nameChanged: regression.nameChanged,
               existingName: regression.existingName,
               incomingName: regression.incomingName,
@@ -2129,12 +2133,10 @@ async function saveSurvey(survey) {
           }
           try {
             if (typeof showToast === 'function') {
-              showToast('⚠️ Save refused — stale data detected. Reload the page.');
+              showToast('Protected survey content was recovered, then saved.');
             }
           } catch (_) { /* toast is cosmetic */ }
-          // Resolve with null so the sync wrapper can short-circuit and
-          // skip the Firestore push + Drive autosync.
-          resolve(null);
+          _performPut(beforeRecord);
           return;
         }
       }
