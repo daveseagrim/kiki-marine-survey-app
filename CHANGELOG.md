@@ -1,3 +1,8 @@
+## v2502
+- Remove the remaining generic B-finding recommendation fallback: "Address this finding as described in the observation."
+- B findings now print a Recommendation line only when a specific action sentence is available.
+- Verified: `node tests/run_tests.js` — 108 tests passed.
+
 ## v2501
 - Clean up Persons in Attendance before saving and rendering the report.
 - Fixes broken output such as `Ian Koster (Owner)Ian Koster` and avoids duplicate attendee names in the printed table.

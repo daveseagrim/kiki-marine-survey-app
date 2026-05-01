@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2501';
+const APP_VERSION = 'v2502';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -24845,9 +24845,8 @@ ${(() => {
   // v2394 rules (per Dave):
   //   • If an action sentence was detected in the observation, the
   //     recommendation is just "<action> <standards>" — NO boilerplate.
-  //   • If no action was detected, the recommendation falls back to the
-  //     standard boilerplate ("Schedule repairs…" for B, "Immediate
-  //     correction required…" for A) + standards cite.
+  //   • If no action was detected, B findings do not get generic filler.
+  //     A findings still get a safety-critical fallback.
   // The action arrives here already stripped from the observation body so
   // the reader never sees it twice.
   function buildRecommendation(f, severity, action) {
@@ -24867,9 +24866,8 @@ ${(() => {
         : `Immediate correction required before the vessel is next underway${stdCite}. This finding represents a direct safety risk or code violation.`;
       return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> ${body}</em></p>`;
     } else if (severity === 'B') {
-      const body = action
-        ? actionWithCite(action)
-        : `Address this finding as described in the observation${stdCite}.`;
+      if (!action) return '';
+      const body = actionWithCite(action);
       return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> ${body}</em></p>`;
     } else {
       // v2240: C-rated items don't get a generic recommendation line —
