@@ -482,15 +482,15 @@
         ]
       },
       {
-        "name": "Deck and coachroof/pilot house",
+        "name": "Deck and coachroof",
         "items": [
           {
             "type": "media",
-            "label": "Deck and coachroof/pilot house photos"
+            "label": "Deck and coachroof photos"
           },
           {
             "type": "list",
-            "label": "Deck and coachroof/pilot house percussion testing",
+            "label": "Deck and coachroof percussion testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -502,7 +502,7 @@
           },
           {
             "type": "list",
-            "label": "Deck and coachroof/pilot house conductivity testing",
+            "label": "Deck and coachroof conductivity testing",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -514,7 +514,7 @@
           },
           {
             "type": "list",
-            "label": "Deck and coachroof/pilot house condition (spider cracks, etc.)",
+            "label": "Deck and coachroof condition (spider cracks, etc.)",
             "options": [
               "A - Critical",
               "B - Needs Attention",

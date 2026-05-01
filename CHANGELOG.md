@@ -1,3 +1,9 @@
+## v2495
+- Rename the deck section wording from "Deck and coachroof/pilot house" to "Deck and coachroof" in the v1 templates and chip-library references.
+- Existing saved surveys migrate their old deck/coachroof item keys to the new labels so ratings, notes, and photos are preserved.
+- The separate Pilot house station section remains unchanged for boats with a pilothouse helm.
+- Verified: template JSON parse clean; `node tests/run_tests.js` — 106 tests passed.
+
 ## v2494
 - Stop the vessel description from automatically guessing an overall condition such as "fair" from the finding counts.
 - The condition sentence now comes only from the Overall Vessel Condition Rating dropdown: Excellent (Bristol), Above Average, Average, Fair, Poor, or Restorable.

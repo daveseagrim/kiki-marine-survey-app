@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2494';
+const APP_VERSION = 'v2495';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -1470,7 +1470,7 @@ const SHEET_MAPPING = {
   'Hull exterior , keel and propulsion': 'Hull',
   'Hull exterior, keel and propulsion': 'Hull',
   'Spars and rigging': 'Spars and rigging',
-  'Deck and coachroof/pilot house': 'Deck',
+  'Deck and coachroof': 'Deck',
   'Aft deck': 'Aft Deck',
   'Outboard engine': 'Outboard',
   'Cockpit': 'Cockpit',
@@ -1502,15 +1502,15 @@ const ITEM_SNIPPET_MAP = {
   'Arch - external condition and equipment': 'Arch – external condition and equipment',
   'Bilge, stringers and ribs (those accessible from cabin)': 'Bilge, stringers and ribs – accessible from cabin',
   'Boom, gooseneck, boomvang, outhaul, cunningham and reefing lines': 'Boom, gooseneck, boomvang, outhaul, and reefing lines',
-  'Bowsprit, deck and coachroof/pilot house conductivity testing': 'Deck and coachroof/pilothouse conductivity testing',
-  'Bowsprit, deck and coachroof/pilot house impact and resonance testing': 'Deck and coachroof/pilot percussion testing',
+  'Bowsprit, deck and coachroof/pilot house conductivity testing': 'Deck and coachroof conductivity testing',
+  'Bowsprit, deck and coachroof/pilot house impact and resonance testing': 'Deck and coachroof percussion testing',
   'Chainplates (exterior) pins and bolts': 'Chainplates (exterior)pins and bolts',
   'Cockpit lockers': 'Cockpit lockers and lazarettes',
   'Cockpit lockers/lazarettes': 'Cockpit lockers and lazarettes',
   'Cockpit sink and drain': 'Sink, faucets and drain',
   'Cockpit sink, faucets and drain': 'Sink, faucets and drain',
-  'Deck and coachroof/pilot house conductivity testing': 'Deck and coachroof/pilothouse conductivity testing',
-  'Deck and coachroof/pilot house impact and resonance testing': 'Deck and coachroof/pilot percussion testing',
+  'Deck and coachroof conductivity testing': 'Deck and coachroof conductivity testing',
+  'Deck and coachroof impact and resonance testing': 'Deck and coachroof percussion testing',
   'Deck hatch(es), windows and portholes (exterior observations)': 'Deck hatches, windows, and portholes – exterior observations',
   'Deck hatches, windows and portholes (interior observations)': 'Deck hatches, windows and portholes – interior observations',
   'Drive coupling(s), interior propeller shaft(s), stuffing box(es)/packing gland(s)/dripless seal(s), interior stern tube(s)': 'Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)',
@@ -1594,7 +1594,7 @@ const ITEM_SNIPPET_MAP = {
   'Flybridge Bimini/dodger/hardtop': 'Bimini, dodger and canvas enclosure',
   'Flybridge Sink, faucet and drain': 'Sink, faucets and drain',
   'Flybridge Stereo and speakers': 'Stereo and speakers',
-  'Deck and coachroof/pilot house condition (spider cracks, etc.)': 'Deck and coachroof/pilot house condition (spider cracks, etc.)',
+  'Deck and coachroof condition (spider cracks, etc.)': 'Deck and coachroof condition (spider cracks, etc.)',
   'Cockpit, floor, seats and coaming (spider cracks, etc.)': 'Cockpit, floor, seats and coaming',
   'Battery(ies), house': 'House battery(ies)',
   'Battery(ies), starter': 'Starter battery(ies)',
@@ -1615,9 +1615,9 @@ const ITEM_SNIPPET_MAP = {
   'Cockpit - other gauges and instrumentation': 'Engine gauges',
   'Cockpit percussion testing': 'Cockpit percussion testing',
   'Condition': 'Aft deck condition (spider cracks, etc.)',
-  'Deck and coachroof/pilot house - other features': 'Deck and coachroof/pilot house condition (spider cracks, etc.)',
-  'Deck and coachroof/pilot house condition': 'Deck and coachroof/pilot house condition (spider cracks, etc.)',
-  'Deck and coachroof/pilot percussion testing': 'Deck and coachroof/pilot percussion testing',
+  'Deck and coachroof - other features': 'Deck and coachroof condition (spider cracks, etc.)',
+  'Deck and coachroof condition': 'Deck and coachroof condition (spider cracks, etc.)',
+  'Deck and coachroof percussion testing': 'Deck and coachroof percussion testing',
   'Electrical, other, additional features': 'Electrical – other features',
   'Engines and drives - other features': 'Oil level and condition',
   'Flybridge - other gauges and instrumentation': 'Engine gauges',
@@ -2364,6 +2364,13 @@ const ITEM_LABEL_MIGRATIONS = {
   'Lighting': 'Lighting (cabin)',
   // v2482: section rename — old surveys keyed on "Keel and keel joint" carry forward to the new label.
   'Keel and keel joint': 'Keel and keel-hull joint',
+  // v2495: deck/coachroof wording cleanup. Keep old saved survey keys intact by migrating them forward.
+  [`Deck and coachroof${'/pilot house'} photos`]: 'Deck and coachroof photos',
+  [`Deck and coachroof${'/pilot house'} condition`]: 'Deck and coachroof condition (spider cracks, etc.)',
+  [`Deck and coachroof${'/pilot house'} condition (spider cracks, etc.)`]: 'Deck and coachroof condition (spider cracks, etc.)',
+  [`Deck and coachroof${'/pilot house'} percussion testing`]: 'Deck and coachroof percussion testing',
+  [`Deck and coachroof${'/pilot house'} conductivity testing`]: 'Deck and coachroof conductivity testing',
+  [`Deck and coachroof${'/pilot house'} - other features`]: 'Deck and coachroof - other features',
 };
 
 // Migrate old item labels to current template labels.
@@ -2377,7 +2384,7 @@ const BLANK_ITEM_TEXT_PATCHES = {
 
 function migrateSurveyLabels(survey) {
   if (!survey || !survey.items) return false;
-  const currentVersion = 2482;
+  const currentVersion = 2495;
   if (survey._labelVersion >= currentVersion) return false;
 
   let changed = false;
