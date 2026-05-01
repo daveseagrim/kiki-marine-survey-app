@@ -1,3 +1,9 @@
+## v2493
+- Fix the Transport Canada safety-equipment length class. The app now parses common LOA formats such as `35'4"` and `35 ft 4 in` instead of falling back to "Not over 6 m".
+- If the saved LOA field is blank, the safety checklist can use the matched boat-spec database LOA from the vessel model.
+- Opening or generating a report now auto-corrects stale safety checklists to the proper length bracket while preserving matching safety-item notes, checked status, and photos.
+- Verified: `node tests/run_tests.js` — 106 tests passed.
+
 ## v2492
 - Fix sailboat mast wording in the vessel description. The generated report now uses past tense ("was ... rigged") and no longer prints `[deck-stepped/keel-stepped] [aluminium/carbon fibre]`.
 - Mast material now defaults to aluminium. Carbon fibre is no longer offered in the automatic vessel-description wording.

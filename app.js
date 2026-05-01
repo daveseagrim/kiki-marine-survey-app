@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2492';
+const APP_VERSION = 'v2493';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -7341,17 +7341,32 @@ const TC_SAFETY_EQUIPMENT = {
 // Parse LOA string to get length in metres
 function parseLOAtoMetres(loaStr) {
   if (!loaStr) return 0;
-  const s = loaStr.toLowerCase().replace(/,/g, '');
+  const s = String(loaStr)
+    .toLowerCase()
+    .replace(/,/g, '')
+    .replace(/[’‘]/g, "'")
+    .replace(/[“”]/g, '"');
   // Check for metres first
   const mMatch = s.match(/([\d.]+)\s*(m|metres?|meters?)/);
   if (mMatch) return parseFloat(mMatch[1]);
-  // Check for feet
-  const ftMatch = s.match(/([\d.]+)\s*(ft|feet|foot|')/);
-  if (ftMatch) return parseFloat(ftMatch[1]) * 0.3048;
+  // Check for feet and optional inches: 35'4", 35 ft 4 in, 35.5 ft
+  const ftInMatch = s.match(/([\d.]+)\s*(?:ft|feet|foot|')\s*(?:(\d+(?:\.\d+)?)\s*(?:in|inch|inches|"))?/);
+  if (ftInMatch) {
+    const feet = parseFloat(ftInMatch[1]) || 0;
+    const inches = parseFloat(ftInMatch[2] || '0') || 0;
+    return ((feet * 12) + inches) * 0.0254;
+  }
   // Bare number — assume feet (common in N. America)
   const numMatch = s.match(/([\d.]+)/);
   if (numMatch) return parseFloat(numMatch[1]) * 0.3048;
   return 0;
+}
+
+function getSurveyLOAForSafety(survey) {
+  if (!survey) return '';
+  if (survey.loa && String(survey.loa).trim()) return String(survey.loa).trim();
+  const specs = survey.yearMakeModel ? findBoatSpecs(survey.yearMakeModel) : null;
+  return specs && specs.loa ? String(specs.loa).trim() : '';
 }
 
 // Determine which bracket a vessel falls into
@@ -7361,6 +7376,10 @@ function getLengthBracket(loaStr) {
     if (metres <= b.maxM) return b.id;
   }
   return 'over24';
+}
+
+function getLengthBracketForSurvey(survey) {
+  return getLengthBracket(getSurveyLOAForSafety(survey));
 }
 
 // Infer hull type from boat style string
@@ -7401,7 +7420,7 @@ function getVesselType(boatStyle) {
 
 // Generate safety equipment checklist for a given vessel
 function generateSafetyChecklist(survey) {
-  const bracket = getLengthBracket(survey.loa);
+  const bracket = getLengthBracketForSurvey(survey);
   const vesselType = survey.vesselType || getVesselType(survey.boatStyle);
   const checklist = [];
 
@@ -15165,7 +15184,7 @@ function renderInspection(survey) {
     autoUpdateSafetyBracket(survey);
   }
 
-  const bracketObj = TC_SAFETY_EQUIPMENT.brackets.find(b => b.id === (survey.safetyBracket || getLengthBracket(survey.loa)));
+  const bracketObj = TC_SAFETY_EQUIPMENT.brackets.find(b => b.id === (survey.safetyBracket || getLengthBracketForSurvey(survey)));
   const bracketLabel = bracketObj ? bracketObj.label : 'Unknown';
   const typeLabel = (survey.safetyVesselType || survey.vesselType || 'power').replace('-', ' ');
   const sectionSkipped = !!survey.safetyEquipmentSkipped;
@@ -16774,12 +16793,13 @@ async function checkSurvey() {
     add('critical', 'Safety Equipment', 'TC TP 511 safety equipment checklist not configured', null);
   } else {
     // v2233: warn if stored bracket doesn't match current LOA
-    if (survey.loa && survey.loa.trim()) {
-      const correctBracket = getLengthBracket(survey.loa);
+    const safetyLoa = getSurveyLOAForSafety(survey);
+    if (safetyLoa) {
+      const correctBracket = getLengthBracketForSurvey(survey);
       if (survey.safetyBracket && survey.safetyBracket !== correctBracket) {
         const stored = TC_SAFETY_EQUIPMENT.brackets.find(b => b.id === survey.safetyBracket);
         const correct = TC_SAFETY_EQUIPMENT.brackets.find(b => b.id === correctBracket);
-        add('critical', 'Safety Equipment', `Length bracket mismatch: checklist is for "${stored ? stored.label : survey.safetyBracket}" but LOA "${survey.loa}" maps to "${correct ? correct.label : correctBracket}". Tap Regenerate Checklist in the safety section.`, null);
+        add('critical', 'Safety Equipment', `Length bracket mismatch: checklist is for "${stored ? stored.label : survey.safetyBracket}" but LOA "${safetyLoa}" maps to "${correct ? correct.label : correctBracket}". Tap Regenerate Checklist in the safety section.`, null);
       }
     }
     const _csSkipCats = survey.safetySubcategoriesSkipped || {};
@@ -19289,14 +19309,15 @@ async function loadAllInstrumentThumbnails() {
 // empty at survey creation and was never auto-corrected.
 function autoUpdateSafetyBracket(survey) {
   if (!survey.safetyEquipment || survey.safetyEquipment.length === 0) return;
-  const currentBracket = getLengthBracket(survey.loa);
+  const safetyLoa = getSurveyLOAForSafety(survey);
+  const currentBracket = getLengthBracketForSurvey(survey);
   const currentType = survey.vesselType || 'power';
   const storedBracket = survey.safetyBracket || '';
   const storedType = survey.safetyVesselType || '';
   // No change needed
   if (currentBracket === storedBracket && currentType === storedType) return;
-  // LOA is still empty — don't regenerate (would just produce under6 again)
-  if (!survey.loa || !survey.loa.trim()) return;
+  // LOA is still unknown — don't regenerate (would just produce under6 again)
+  if (!safetyLoa) return;
   // Regenerate with state preservation
   const result = generateSafetyChecklist(survey);
   const previousMap = {};
@@ -23406,6 +23427,7 @@ async function generateReport() {
 
   // Migrate old item labels before generating report
   if (migrateSurveyLabels(survey)) await saveSurvey(survey);
+  autoUpdateSafetyBracket(survey);
 
   // ── v2463: refresh the condition sentence in the stored vessel description
   // so it always matches the current BUC rating ─────────────────────────
@@ -24593,7 +24615,7 @@ ${(() => {
   // ── SAFETY EQUIPMENT (TC TP 511) ──────────────────────────────────
   // v2251: moved to immediately after Detailed Survey Findings
   if (survey.safetyEquipment && survey.safetyEquipment.length > 0) {
-    const safeBracket = TC_SAFETY_EQUIPMENT.brackets.find(b => b.id === (survey.safetyBracket || getLengthBracket(survey.loa)));
+    const safeBracket = TC_SAFETY_EQUIPMENT.brackets.find(b => b.id === (survey.safetyBracket || getLengthBracketForSurvey(survey)));
     const safeTypeLabel = (survey.safetyVesselType || survey.vesselType || 'power').replace('-', ' ');
     const _safeSkipCats = survey.safetySubcategoriesSkipped || {};
     const activeSafetyEq = survey.safetyEquipment.filter(e => !e.skipped && !_safeSkipCats[e.category]);
