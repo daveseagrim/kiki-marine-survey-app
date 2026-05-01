@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2493';
+const APP_VERSION = 'v2494';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -12667,8 +12667,8 @@ async function dedupeSurveyPhotosInPlace(survey) {
 }
 
 // v2252: Shared condition-sentence builder used by all three vessel-
-// description generators. Reads the surveyor's BUC grade first; falls
-// back to a rating-distribution heuristic when no grade is set.
+// description generators. Reads only the surveyor's chosen BUC grade.
+// It must not infer "fair", "good", etc. from the finding counts.
 function _buildConditionSentence(survey) {
   const _oc = (survey.overallCondition || document.getElementById('overallCondition')?.value || '').trim().toLowerCase();
   if (_oc) {
@@ -12688,27 +12688,8 @@ function _buildConditionSentence(survey) {
       // Custom text entered — use it verbatim
       return ` At the time of the survey the vessel's overall condition was assessed as "${survey.overallCondition || document.getElementById('overallCondition')?.value || ''}".`;
     }
-  } else if (survey.items) {
-    // Fallback: derive from ratings distribution when no grade is set
-    const _ratings = Object.values(survey.items).map(d => (d.rating || '').charAt(0)).filter(Boolean);
-    const _aCount = _ratings.filter(r => r === 'A').length;
-    const _bCount = _ratings.filter(r => r === 'B').length;
-    const _cCount = _ratings.filter(r => r === 'C').length;
-    const _total = _aCount + _bCount + _cCount;
-    if (_total > 0) {
-      const _cPct = Math.round((_cCount / _total) * 100);
-      if (_aCount === 0 && _bCount <= 2 && _cPct >= 85) {
-        return ` At the time of the survey the vessel was in good overall condition, consistent with its age and use, and appeared to have been well maintained.`;
-      } else if (_aCount === 0 && _cPct >= 65) {
-        return ` At the time of the survey the vessel was in fair to good overall condition with a number of items requiring attention, as detailed in the body of this report.`;
-      } else if (_aCount <= 2 && _cPct >= 50) {
-        return ` At the time of the survey the vessel was in fair overall condition with deficiencies noted. Corrective action is recommended before the vessel is placed into regular service.`;
-      } else {
-        return ` At the time of the survey the vessel exhibited significant deficiencies. The reader is directed to the Findings and Recommendations section of this report for details.`;
-      }
-    }
   }
-  return `\n\nThe vessel was in [GOOD/FAIR/POOR] overall cosmetic condition and appeared to have been [WELL/REASONABLY/POORLY] maintained.`;
+  return '';
 }
 
 function _formatEnginePowerText(engineHP) {

@@ -1,3 +1,9 @@
+## v2494
+- Stop the vessel description from automatically guessing an overall condition such as "fair" from the finding counts.
+- The condition sentence now comes only from the Overall Vessel Condition Rating dropdown: Excellent (Bristol), Above Average, Average, Fair, Poor, or Restorable.
+- If no final condition is selected, the vessel description leaves that condition sentence out instead of inserting placeholder or guessed wording.
+- Verified: `node tests/run_tests.js` — 106 tests passed.
+
 ## v2493
 - Fix the Transport Canada safety-equipment length class. The app now parses common LOA formats such as `35'4"` and `35 ft 4 in` instead of falling back to "Not over 6 m".
 - If the saved LOA field is blank, the safety checklist can use the matched boat-spec database LOA from the vessel model.
