@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2488';
+const APP_VERSION = 'v2489';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -24247,8 +24247,8 @@ ${(() => {
     <tr><td style="width:40%;"><strong><span style="color:#dc2626;">&#9632;</span> Critical (A)</strong></td><td>${findings.A.length} finding${findings.A.length !== 1 ? 's' : ''}</td></tr>
     <tr><td><strong><span style="color:#d97706;">&#9632;</span> Needs Attention (B)</strong></td><td>${findings.B.length} finding${findings.B.length !== 1 ? 's' : ''}</td></tr>
     <tr><td><strong><span style="color:#16a34a;">&#9632;</span> Serviceable (C)</strong></td><td>${findings.C.length} finding${findings.C.length !== 1 ? 's' : ''}</td></tr>
-    <tr><td><strong><span style="color:#6b7280;">&#9632;</span> Not Tested</strong></td><td>${findings.NT.length} item${findings.NT.length !== 1 ? 's' : ''}</td></tr>
-    ${findings.PO.length > 0 ? '<tr><td><strong><span style="color:#6b7280;">&#9632;</span> Powered Up Only</strong></td><td>' + findings.PO.length + ' item' + (findings.PO.length !== 1 ? 's' : '') + '</td></tr>' : ''}
+    <tr><td><strong><span style="color:#6b7280;">&#9632;</span> Not Tested</strong></td><td>${findings.NT.length} finding${findings.NT.length !== 1 ? 's' : ''}</td></tr>
+    ${findings.PO.length > 0 ? '<tr><td><strong><span style="color:#6b7280;">&#9632;</span> Powered Up Only</strong></td><td>' + findings.PO.length + ' finding' + (findings.PO.length !== 1 ? 's' : '') + '</td></tr>' : ''}
     ${_foSafe.length > 0 ? '<tr><td><strong>Safety Equipment (TC TP 511)</strong></td><td>' + _foChecked + ' of ' + _foSafe.length + ' verified' + (_foMissing > 0 ? ' — <strong style="color:#dc2626;">' + _foMissing + ' missing</strong>' : ' — <strong style="color:#16a34a;">all present</strong>') + '</td></tr>' : ''}
   </table>
 

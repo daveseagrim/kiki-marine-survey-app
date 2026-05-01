@@ -1,3 +1,7 @@
+## v2489
+- Make the Findings Overview wording consistent: Not Tested and Powered Up Only counts now say "finding/findings" instead of "item/items".
+- Verified: `node tests/run_tests.js` — 106 tests passed.
+
 ## v2488
 - Remove the generic boilerplate B-finding recommendation fallback that said "Schedule repairs in the near future to maintain compliance..." when no specific action could be extracted.
 - B findings without a specific extracted action now use a neutral fallback: "Address this finding as described in the observation..." so the report does not invent vague standards/compliance language.
