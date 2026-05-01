@@ -1,3 +1,9 @@
+## v2506
+- Manual edits to the Vessel Description now immediately stop auto-regeneration during that same save.
+- Manual edits to the Propulsion Narrative are saved from the inspection view and stop auto-regeneration until Regenerate is tapped.
+- Engine location/access wording now normalizes "companion way" to "companionway" and strips trailing punctuation before building the propulsion sentence.
+- Verified: `node tests/run_tests.js` — 108 tests passed.
+
 ## v2505
 - Disable the hard stale-save refusal path so legitimate report edits can save tonight.
 - The app no longer blocks saves with "Save refused — stale data detected"; use export/backup after major edits.
