@@ -1,3 +1,7 @@
+## v2490
+- Hide the "Licence number on hull:" photo/caption block for Small Vessel Register (SVR) vessels, because SVR vessels use an Official Number rather than a visible hull licence number.
+- Verified: `node tests/run_tests.js` — 106 tests passed.
+
 ## v2489
 - Make the Findings Overview wording consistent: Not Tested and Powered Up Only counts now say "finding/findings" instead of "item/items".
 - Verified: `node tests/run_tests.js` — 106 tests passed.
