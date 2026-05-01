@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2495';
+const APP_VERSION = 'v2496';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -5390,7 +5390,7 @@ function showNotesSheet(itemLabel, categoryName) {
         ${winchOptionsHtml}
         ${componentBuilderHtml}
         <div style="padding:12px 20px;">
-          <textarea id="sheet-text-${sanitizedLabel}" placeholder="Add inspection notes..." style="min-height:80px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;overflow:hidden;" spellcheck="true" autocorrect="on" autocapitalize="sentences" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';window._mainSheetToneCheck && window._mainSheetToneCheck(this);window._clearSheetCardHighlight && window._clearSheetCardHighlight(this);">${initialTextareaText}</textarea>
+          <textarea id="sheet-text-${sanitizedLabel}" placeholder="Add inspection notes..." style="min-height:80px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;overflow:hidden;" spellcheck="true" autocorrect="off" autocapitalize="sentences" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';window._mainSheetToneCheck && window._mainSheetToneCheck(this);window._clearSheetCardHighlight && window._clearSheetCardHighlight(this);">${initialTextareaText}</textarea>
           <div id="sheet-text-${sanitizedLabel}-tone" data-main-tone-warning="1" style="display:none;margin-top:6px;padding:8px 12px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;line-height:1.4;"></div>
           <div id="sheet-text-${sanitizedLabel}-chipstrip" style="display:none;flex-wrap:wrap;gap:6px;margin-top:6px;padding:8px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;"></div>
         </div>
@@ -8149,7 +8149,7 @@ function refreshChipStrip(textarea) {
 
     html += `
       <input type="text" data-custom-idx="${ti}" placeholder="Add another item${isMulti ? ' (comma-separated, no punctuation)' : ''}"
-             spellcheck="true" autocorrect="on" autocapitalize="sentences"
+             spellcheck="true" autocorrect="off" autocapitalize="sentences"
              style="width:100%;margin-top:4px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;box-sizing:border-box;" />
       <div data-tone-warning-for="${ti}" style="display:none;margin-top:6px;padding:7px 10px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;line-height:1.4;"></div>
     `;
@@ -8166,7 +8166,7 @@ function refreshChipStrip(textarea) {
       <div style="font-size:11px;font-weight:700;color:#066aab;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Additional observations (optional)</div>
       <textarea data-freeform-notes="1" rows="2"
                 placeholder="Type any extra details in your own words — appended as a separate sentence."
-                spellcheck="true" autocorrect="on" autocapitalize="sentences"
+                spellcheck="true" autocorrect="off" autocapitalize="sentences"
                 style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;box-sizing:border-box;resize:vertical;font-family:inherit;"></textarea>
       <div data-tone-warning-freeform="1" style="display:none;margin-top:6px;padding:7px 10px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;line-height:1.4;"></div>
       <div style="margin-top:6px;font-size:11px;color:#6b7280;font-style:italic;">Keep notes focused on this specific item only. Observations about other components belong in their own checklist items.</div>
@@ -8405,7 +8405,8 @@ const TONE_FLAGS = [
   { pat: /\bcrap(?:py)?\b/i, hint: 'Informal — use "substandard" or "poor quality".' },
   { pat: /\bsketchy\b/i, hint: '"sketchy" is informal — use "questionable" or "unreliable".' },
   { pat: /\bbeat[- ]up\b/i, hint: '"beat-up" is informal — use "worn" or "deteriorated".' },
-  { pat: /\btrashed\b/i, hint: '"trashed" is informal — use "unserviceable" or "extensively damaged".' }
+  { pat: /\btrashed\b/i, hint: '"trashed" is informal — use "unserviceable" or "extensively damaged".' },
+  { pat: /\b(?:mast|rig|rigging|sail|boom|shroud|forestay|halyard|keel-stepped|deck-stepped)\b[\s\S]{0,80}\bmask\b|\bmask\b[\s\S]{0,80}\b(?:mast|rig|rigging|sail|boom|shroud|forestay|halyard|keel-stepped|deck-stepped)\b/i, hint: 'Possible iOS autocorrect: "mask" may need to be "mast".' }
 ];
 
 // Curated misspellings list. Native browser spellcheck underlines typos
@@ -25511,31 +25512,30 @@ async function initApp() {
       if (typeof console !== 'undefined') console.warn('[v2425] persist unavailable:', e);
     }
 
-    // Suppress iOS autofill bar (keys, credit card, location, checkmark)
-    // by setting autocomplete="off" on all inputs as they're created.
+    // Suppress iOS autofill/autocorrect pain on survey prose fields.
     //
-    // v2469 fix: ONLY touch autocomplete. Previously this also set
-    // autocorrect="off" and autocapitalize="off", which clobbered the
-    // per-element attributes set in HTML (autocapitalize="sentences"
-    // on notes textareas, autocapitalize="words" on vessel/client-name
-    // inputs, autocorrect="on" everywhere). Result: iOS never capitalized
-    // the first letter of a sentence and surfaced no autocorrect
-    // suggestions in the keyboard bar. Surveyors had to hit the Shift
-    // key manually for every sentence. The autofill bar is suppressed
-    // by autocomplete alone; autocorrect and autocapitalize are
-    // orthogonal to autofill and should flow through from the HTML.
-    const disableAutofill = (el) => {
+    // v2496: keep autocapitalize="sentences" and spellcheck, but disable
+    // autocorrect. Marine terms such as mast, forepeak, berth, and aft berth
+    // were being changed into ordinary words on iOS before the surveyor could
+    // save the sentence.
+    const hardenTextEntry = (el) => {
       // Don't suppress autocomplete on inputs linked to a datalist — they need it for suggestions
-      if (el.getAttribute('list')) return;
-      el.setAttribute('autocomplete', 'off');
+      if (!el.getAttribute('list')) el.setAttribute('autocomplete', 'off');
+      if (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && (el.type || 'text') === 'text')) {
+        el.setAttribute('autocorrect', 'off');
+        el.setAttribute('spellcheck', 'true');
+        if (!el.getAttribute('autocapitalize')) el.setAttribute('autocapitalize', 'sentences');
+        if (!el.getAttribute('lang')) el.setAttribute('lang', 'en-CA');
+      }
     };
+    document.querySelectorAll('input, textarea').forEach(hardenTextEntry);
     new MutationObserver((mutations) => {
       for (const m of mutations) {
         for (const node of m.addedNodes) {
           if (node.nodeType !== 1) continue;
-          if (node.tagName === 'INPUT' || node.tagName === 'TEXTAREA') disableAutofill(node);
+          if (node.tagName === 'INPUT' || node.tagName === 'TEXTAREA') hardenTextEntry(node);
           if (node.querySelectorAll) {
-            node.querySelectorAll('input, textarea').forEach(disableAutofill);
+            node.querySelectorAll('input, textarea').forEach(hardenTextEntry);
           }
         }
       }

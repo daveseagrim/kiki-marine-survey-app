@@ -1,3 +1,8 @@
+## v2496
+- Turn off browser/iOS autocorrect on survey prose fields while keeping sentence capitalization and spellcheck. This prevents marine terms like "mast", "forepeak", "berth", and "aft berth" from being changed while typing.
+- Add a local warning for the common iOS autocorrect trap where "mast" becomes "mask" in nearby rigging/sail context.
+- Verified: `node tests/run_tests.js` — 106 tests passed.
+
 ## v2495
 - Rename the deck section wording from "Deck and coachroof/pilot house" to "Deck and coachroof" in the v1 templates and chip-library references.
 - Existing saved surveys migrate their old deck/coachroof item keys to the new labels so ratings, notes, and photos are preserved.
