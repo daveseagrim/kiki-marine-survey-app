@@ -1,3 +1,8 @@
+## v2500
+- Ensure v1 report generation auto-populates the Overall Description of Vessel if the stored description is blank.
+- This covers direct survey patches/imports that update valuation or metadata without passing through the normal save path.
+- Verified: `node tests/run_tests.js` — 106 tests passed.
+
 ## v2499
 - Update the Abbott 36 specs entry with sourced 1985 Abbott 36 particulars.
 - Add the original-equipment engine as Volvo Penta 2002, 18 HP diesel.
