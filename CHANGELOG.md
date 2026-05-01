@@ -1,3 +1,8 @@
+## v2498
+- Tighten the stale-save protection so empty template/catalog rows do not trigger a false "Save refused — stale data detected" warning.
+- The guard still blocks saves that would drop rated items, notes, recommendations, chips, or photos.
+- Verified: `node tests/run_tests.js` — 106 tests passed.
+
 ## v2497
 - Add Abbott 36 to the boat specifications database for lookup/autofill.
 - Covers model years 1979-1986, including 1985 Abbott 36.

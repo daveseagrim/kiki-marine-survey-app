@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2497';
+const APP_VERSION = 'v2498';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -1864,8 +1864,29 @@ function _v2424DetectStaleRegression(existing, incoming) {
     if (!existing.items || typeof existing.items !== 'object') return null;
     if (!incoming.items || typeof incoming.items !== 'object') return null;
 
+    const hasMeaningfulItemContent = (item) => {
+      if (!item || typeof item !== 'object') return false;
+      const textFields = ['text', 'note', 'notes', 'recommendation', 'ntPoReason', 'findingText'];
+      for (const field of textFields) {
+        if (typeof item[field] === 'string' && item[field].trim()) return true;
+      }
+      const scalarFields = ['rating', 'status', 'findingClass', 'condition', 'value'];
+      for (const field of scalarFields) {
+        if (item[field] !== undefined && item[field] !== null && String(item[field]).trim()) return true;
+      }
+      const arrayFields = ['photos', 'photoIds', 'images', 'selectedChips', 'chips'];
+      for (const field of arrayFields) {
+        if (Array.isArray(item[field]) && item[field].length > 0) return true;
+      }
+      return false;
+    };
+
     const existingKeys = Object.keys(existing.items);
-    const droppedKeys = existingKeys.filter(k => !(k in incoming.items));
+    // v2498: only count dropped items that contain actual survey content.
+    // Template/catalog changes can legitimately remove empty placeholder
+    // rows. Counting those as data loss caused false "stale data" refusals
+    // when the surveyor changed an intro field after the template changed.
+    const droppedKeys = existingKeys.filter(k => !(k in incoming.items) && hasMeaningfulItemContent(existing.items[k]));
     const droppedItems = droppedKeys.length;
     if (droppedItems < 2) return null;
 
