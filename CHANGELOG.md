@@ -1,3 +1,8 @@
+## v2505
+- Disable the hard stale-save refusal path so legitimate report edits can save tonight.
+- The app no longer blocks saves with "Save refused — stale data detected"; use export/backup after major edits.
+- Verified: `node tests/run_tests.js` — 108 tests passed.
+
 ## v2504
 - Change the stale-save guard from blocking saves to recovering protected dropped survey content before saving.
 - This keeps ratings, photos, chips, and substantial notes from being lost while avoiding the "Save refused — stale data detected" loop during normal edits.

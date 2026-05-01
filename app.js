@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2504';
+const APP_VERSION = 'v2505';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -1900,6 +1900,12 @@ function _v2425HandleQuotaError(err, context) {
 // ═══════════════════════════════════════════════════════════════════════════
 function _v2424DetectStaleRegression(existing, incoming) {
   try {
+    // v2505: Disable hard stale-save detection. The guard did its job after
+    // the 2026-04-19 regression, but tonight it is blocking legitimate
+    // report-completion edits. We now rely on backup/export discipline and
+    // the v2504 recovery path instead of refusing saves.
+    return null;
+
     if (!existing || !incoming) return null;
     if (!existing.items || typeof existing.items !== 'object') return null;
     if (!incoming.items || typeof incoming.items !== 'object') return null;
