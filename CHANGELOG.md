@@ -1,3 +1,8 @@
+## v2497
+- Add Abbott 36 to the boat specifications database for lookup/autofill.
+- Covers model years 1979-1986, including 1985 Abbott 36.
+- Verified: JSON parse clean; `node tests/run_tests.js` — 106 tests passed.
+
 ## v2496
 - Turn off browser/iOS autocorrect on survey prose fields while keeping sentence capitalization and spellcheck. This prevents marine terms like "mast", "forepeak", "berth", and "aft berth" from being changed while typing.
 - Add a local warning for the common iOS autocorrect trap where "mast" becomes "mask" in nearby rigging/sail context.
