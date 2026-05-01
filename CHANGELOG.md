@@ -1,3 +1,10 @@
+## v2492
+- Fix sailboat mast wording in the vessel description. The generated report now uses past tense ("was ... rigged") and no longer prints `[deck-stepped/keel-stepped] [aluminium/carbon fibre]`.
+- Mast material now defaults to aluminium. Carbon fibre is no longer offered in the automatic vessel-description wording.
+- Mast stepping is pulled from the saved Main mast item first, then from the boat-spec database if that source includes it. If neither source knows the stepping, the description omits the stepping term rather than guessing.
+- Existing saved descriptions with the old mast placeholder are cleaned during report generation, so current reports such as Big Surprise can render cleanly after the app updates.
+- Verified: `node tests/run_tests.js` — 106 tests passed.
+
 ## v2491
 - Confirm active survey templates and report wording use 120V, not 110V.
 - Update the Riverdance photo-import helper so old "110v panel" photo filenames attach to the current "Distribution panel 120V" item label.

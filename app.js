@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2491';
+const APP_VERSION = 'v2492';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -12707,6 +12707,66 @@ function _formatTwinEngineRatedPhrase(engineHP, engine2HP) {
   return `rated at ${primary || secondary || '[XX] horsepower'} each`;
 }
 
+function _articleFor(text) {
+  return /^[aeiou]/i.test(String(text || '').trim()) ? 'an' : 'a';
+}
+
+function _lookupBoatSpecsForSurvey(survey) {
+  const ymm = (survey && survey.yearMakeModel) || '';
+  if (!ymm || typeof findBoatSpecs !== 'function') return null;
+  try {
+    return findBoatSpecs(ymm);
+  } catch (_) {
+    return null;
+  }
+}
+
+function _normaliseMastStepping(value) {
+  const raw = String(value || '').toLowerCase();
+  if (/deck/.test(raw)) return 'deck-stepped';
+  if (/keel/.test(raw)) return 'keel-stepped';
+  return '';
+}
+
+function _resolveMastStepping(survey, mastData) {
+  const spec = _lookupBoatSpecsForSurvey(survey);
+  return _normaliseMastStepping(mastData?.mastStepping)
+    || _normaliseMastStepping(survey?.mastStepping)
+    || _normaliseMastStepping(spec?.mastStepping)
+    || _normaliseMastStepping(spec?.mastStep)
+    || '';
+}
+
+function _buildMastRigSentence(survey, vesselName) {
+  if (!survey || survey.vesselType !== 'sail') return '';
+  const rigType = survey.boatStyle ? String(survey.boatStyle).toLowerCase() : '[SLOOP/CUTTER/KETCH]';
+  const mastData = survey.items?.['Main mast'] || {};
+  const stepping = _resolveMastStepping(survey, mastData);
+  const material = 'aluminium';
+  const mastPhrase = [stepping, material, 'mast'].filter(Boolean).join(' ');
+  const trackStr = mastData.mastTrackType ? ` with ${String(mastData.mastTrackType).toLowerCase()}` : '';
+  let sentence = ` "${vesselName}" was ${rigType}-rigged with ${_articleFor(mastPhrase)} ${mastPhrase}${trackStr}.`;
+  if (survey.totalSailArea) sentence += ` Total sail area was ${survey.totalSailArea}.`;
+  return sentence;
+}
+
+function _refreshMastRigSentenceInDescription(survey, text) {
+  if (!survey || survey.vesselType !== 'sail' || !text) return text || '';
+  const vesselName = survey.vesselName || '[VESSEL NAME]';
+  const replacement = _buildMastRigSentence(survey, vesselName).trim();
+  if (!replacement) return text;
+  const escapedName = String(vesselName).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const rigSentenceRe = new RegExp(`\\s*"?${escapedName}"?\\s+(?:is|was)\\s+[^.]*-rigged\\s+with\\s+[^.]*mast[^.]*\\.(?:\\s*Total sail area (?:is|was) [^.]*\\.)?`, 'i');
+  if (rigSentenceRe.test(text)) {
+    return text.replace(rigSentenceRe, ` ${replacement}`);
+  }
+  const placeholderRe = /\s*"[^"]+"\s+(?:is|was)\s+[^.]*\[deck-stepped\/keel-stepped\]\s+\[aluminium\/carbon fibre\]\s+mast[^.]*\.(?:\s*Total sail area (?:is|was) [^.]*\.)?/i;
+  if (placeholderRe.test(text)) {
+    return text.replace(placeholderRe, ` ${replacement}`);
+  }
+  return text;
+}
+
 function _descriptionAlreadyStatesCondition(text) {
   return /\b(overall condition|above[- ]average|average overall|excellent overall|fair overall|poor overall|restorable condition)\b/i.test(text || '');
 }
@@ -12772,11 +12832,8 @@ async function generateVesselDescription() {
     const rigType = boatStyle ? boatStyle.toLowerCase() : '[SLOOP/CUTTER/KETCH]';
     // Pull mast stepping and track type from saved survey data
     const survey = await getSurvey(currentSurveyId);
-    const mastData = survey?.items?.['Main mast'] || {};
-    const steppingStr = mastData.mastStepping ? mastData.mastStepping.toLowerCase() : '[deck-stepped/keel-stepped]';
-    const trackStr = mastData.mastTrackType ? ` with ${mastData.mastTrackType.toLowerCase()}` : '';
-    rigDesc = ` "${vesselName}" is ${rigType}-rigged with a ${steppingStr} [aluminium/carbon fibre] mast${trackStr}.`;
-    if (sailArea) rigDesc += ` Total sail area is ${sailArea}.`;
+    const surveyForRig = survey || { vesselType, boatStyle, vesselName, totalSailArea: sailArea };
+    rigDesc = _buildMastRigSentence({ ...surveyForRig, vesselType, boatStyle, totalSailArea: sailArea }, vesselName);
   }
 
   // Build engine description using actual data where available
@@ -13016,11 +13073,7 @@ async function regenerateDescriptionFromInspection() {
   let rigDesc = '';
   if (vesselType === 'sail') {
     const rigType = boatStyle ? boatStyle.toLowerCase() : '[SLOOP/CUTTER/KETCH]';
-    const mastData = survey.items?.['Main mast'] || {};
-    const steppingStr = mastData.mastStepping ? mastData.mastStepping.toLowerCase() : '[deck-stepped/keel-stepped]';
-    const trackStr = mastData.mastTrackType ? ` with ${mastData.mastTrackType.toLowerCase()}` : '';
-    rigDesc = ` "${vesselName}" is ${rigType}-rigged with a ${steppingStr} [aluminium/carbon fibre] mast${trackStr}.`;
-    if (sailArea) rigDesc += ` Total sail area is ${sailArea}.`;
+    rigDesc = _buildMastRigSentence({ ...survey, vesselType, boatStyle, totalSailArea: sailArea }, vesselName);
   }
 
   const engMakeModel = (engineMake && engineModel) ? `${engineMake} ${engineModel}` :
@@ -13224,11 +13277,7 @@ function buildDescriptionFromSurvey(survey) {
   let rigDesc = '';
   if (vesselType === 'sail') {
     const rigType = boatStyle ? boatStyle.toLowerCase() : '[SLOOP/CUTTER/KETCH]';
-    const mastData = survey.items?.['Main mast'] || {};
-    const steppingStr = mastData.mastStepping ? mastData.mastStepping.toLowerCase() : '[deck-stepped/keel-stepped]';
-    const trackStr = mastData.mastTrackType ? ` with ${mastData.mastTrackType.toLowerCase()}` : '';
-    rigDesc = ` "${vesselName}" is ${rigType}-rigged with a ${steppingStr} [aluminium/carbon fibre] mast${trackStr}.`;
-    if (sailArea) rigDesc += ` Total sail area is ${sailArea}.`;
+    rigDesc = _buildMastRigSentence({ ...survey, vesselType, boatStyle, totalSailArea: sailArea }, vesselName);
   }
 
   const engMakeModel = (engineMake && engineModel) ? `${engineMake} ${engineModel}` :
@@ -23370,6 +23419,7 @@ async function generateReport() {
   // is not re-saved, so Dave's stored text stays as he last regenerated it,
   // but the rendered report is always in sync with the formal rating.
   let _refreshedDesc = survey.vesselDescription || '';
+  _refreshedDesc = _refreshMastRigSentenceInDescription(survey, _refreshedDesc);
   if (_refreshedDesc && (survey.overallCondition || (survey.items && Object.keys(survey.items).length))) {
     let _fresh = _buildConditionSentence(survey);
     // Strip any existing " At the time of the survey…" tail (spans 1–2 sentences).
