@@ -1,3 +1,7 @@
+## v2508
+- Add the 1989 Tollycraft 34 Sport Sedan to the boat-specs database, including "Tolleycraft" spelling aliases for lookup.
+- Verified: `node tests/run_tests.js` — 108 tests passed.
+
 ## v2507
 - Move "Pilot house gauges and instrumentation" so it appears immediately after "Pilot house" in the insurance survey template.
 - Verified: `node tests/run_tests.js` — 108 tests passed.

@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-01 (v2499 — Abbott 36 engine)",
+  "lastUpdated": "2026-05-01",
   "note": "Specifications sourced from manufacturer data sheets, sailboatdata.com, recognized technical references, and powerboat manufacturers. Values are approximate and may vary by model year, options, and keel variant.",
   "boats": [
     {
@@ -5100,6 +5100,47 @@
       "hullType": "Displacement",
       "keelType": "Full, bolted",
       "construction": "Fibreglass"
+    },
+    {
+      "id": "tollycraft-34-sport-sedan",
+      "make": "Tollycraft",
+      "model": "34 Sport Sedan",
+      "aliases": [
+        "tollycraft34",
+        "tollycraft 34",
+        "tollycraft 34 sedan",
+        "tollycraft 34 sport sedan",
+        "tollycraft 34 sports sedan",
+        "tolleycraft 34",
+        "tolleycraft 34 sedan",
+        "tolleycraft 34 sport sedan",
+        "tolleycraft 34 sports sedan",
+        "34 sedan",
+        "34 sport sedan",
+        "34 sports sedan"
+      ],
+      "yearStart": 1987,
+      "yearEnd": 1993,
+      "type": "powerboat",
+      "loa": "34'0\"",
+      "beam": "12'6\"",
+      "displacement": "17,000 lbs",
+      "maxDraft": "2'10\"",
+      "hullType": "Modified-vee",
+      "construction": "Solid fibreglass",
+      "builder": "Tollycraft Yachts",
+      "fuelCapacity": "296 USG",
+      "waterCapacity": "150 USG",
+      "wasteCapacity": "30 USG",
+      "cabins": "2",
+      "heads": "1",
+      "engine": "Crusader 454",
+      "engineMake": "Crusader",
+      "engineModel": "454",
+      "engineHP": "300-350 HP each",
+      "fuelType": "Gasoline",
+      "propulsion": "Twin gasoline inboards, direct drive",
+      "notes": "Tollycraft 34 Sport Sedan, built 1987-1993. Lower helm was standard; flybridge, two staterooms, bow pulpit, swim platform, and radar arch were typical. Some listings identify rebuilt/re-powered 7.4L/454 gasoline inboards, so confirm engine make, model, and horsepower from data plates."
     },
     {
       "id": "trojan-10-meter-express",
