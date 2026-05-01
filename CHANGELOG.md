@@ -1,3 +1,15 @@
+## v2488
+- Remove the generic boilerplate B-finding recommendation fallback that said "Schedule repairs in the near future to maintain compliance..." when no specific action could be extracted.
+- B findings without a specific extracted action now use a neutral fallback: "Address this finding as described in the observation..." so the report does not invent vague standards/compliance language.
+- Grace O'Malley keel wording can now be patched with the matching Desktop helper script so B-1 uses the specific keel repair recommendation instead of boilerplate.
+- Verified: `node tests/run_tests.js` — 106 tests passed.
+
+## v2487
+- **Pull-blocked-if-local guard on `pullSurvey`.** Per Dave 2026-04-30 — the iPhone-field → laptop-edit workflow makes the cloud a one-shot handoff channel, not a synced replica. Once a survey is on the laptop the cloud copy is by definition ≤ local, so a pull would always overwrite laptop work with a stale copy. The guard now refuses the pull and shows a clear alert when a local copy of that surveyId exists. To genuinely replace local with cloud, delete the local copy first via Diagnostics, then run pull.
+- **Type-to-confirm guard on `importSurvey`.** Imports while other surveys exist on the device now require Dave to type the imported vessel name exactly to confirm. Catches fat-finger imports and any future bug where a malformed export wraps a destructive payload. Cancellation does not modify state.
+- Both guards are deliberate UX friction — added because the 2026-04-30 IDB wipe of 5 surveys remains unexplained at root cause and Dave's workflow analysis showed the destructive paths (pull, import) are the high-risk surface area. The non-destructive paths (single-survey Save, single-survey ☁️ Force push, 💾 Save All Surveys batch push) are unchanged and operate normally.
+- Verified: `node --check app.js` clean.
+
 ## v2486
 - Replace the Page 3 water-leak limitation with clearer professional wording: leaks are assessed visually only, and evidence of past/intermittent leaks may be cleaned, concealed, or absent.
 - Shorten safety-equipment photo captions in the PDF generator. Fire extinguisher photos now caption as "Fire extinguisher — photo X of Y" instead of repeating the full TC requirement under every image.

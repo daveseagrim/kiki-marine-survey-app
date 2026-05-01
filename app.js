@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2486';
+const APP_VERSION = 'v2488';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4281,15 +4281,41 @@ async function importSurvey() {
       const survey = data.survey;
       const photos = data.photos || [];
 
-      // Check if survey already exists
-      const existing = await getSurvey(survey.id);
-      if (existing) {
-        const replace = await showConfirm(
-          `A survey for "${existing.vesselName || 'Unnamed'}" already exists on this device. Replace it with the imported version?`,
-          'Replace', 'Cancel'
-        );
-        if (!replace) return;
-        // Delete existing photos first
+      // v2487 GUARD: imports are now opt-in two-step. Importing while there
+      // are existing surveys on the device has been the suspect path for the
+      // 2026-04-30 IDB wipe (5 surveys vanished after an import session).
+      // Even though importSurvey only touches the matching surveyId, the
+      // user-visible blast radius of "import goes wrong" is the whole device.
+      // Until we have positive proof of the wipe's root cause, every import
+      // requires Dave to type-confirm the vessel name. Catches both fat-finger
+      // imports and any future bug where a malformed export wraps a delete-all
+      // payload.
+      const _kkAllSurveys = await getAllSurveys();
+      const _kkExisting = _kkAllSurveys.find(s => String(s.id) === String(survey.id));
+      const _kkImportName = (survey.vesselName || 'Unnamed').trim();
+      const _kkLocalCount = _kkAllSurveys.length;
+      const _kkPrompt =
+        'Import "' + _kkImportName + '"?\n\n' +
+        (_kkExisting
+          ? 'A local copy of "' + (_kkExisting.vesselName || 'Unnamed') + '" exists and will be REPLACED.\n'
+          : 'No conflict — this will be added as a new local survey.\n') +
+        '\nThere are currently ' + _kkLocalCount + ' surveys on this device. ' +
+        'Per the v2487 import-guard rule, type the vessel name exactly to confirm:\n\n' +
+        _kkImportName;
+      // window.prompt is always defined in browsers; using it directly avoids
+      // a ReferenceError if a custom showPrompt helper is ever added/removed.
+      const _kkTyped = window.prompt(_kkPrompt, '');
+      if (_kkTyped === null) {
+        // User pressed Cancel on the prompt
+        showToast('Import cancelled');
+        return;
+      }
+      if (_kkTyped.trim() !== _kkImportName) {
+        showToast('Import cancelled — name did not match');
+        return;
+      }
+      if (_kkExisting) {
+        // Delete existing photos first (only the matching surveyId)
         await deleteSurvey(survey.id);
       }
 
@@ -24737,7 +24763,7 @@ ${(() => {
     } else if (severity === 'B') {
       const body = action
         ? actionWithCite(action)
-        : `Schedule repairs in the near future to maintain compliance with applicable codes, regulations, standards, or recommended practices${stdCite}.`;
+        : `Address this finding as described in the observation${stdCite}.`;
       return `<p style="font-style:italic;color:#555;margin-top:4px;"><em><strong>Recommendation:</strong> ${body}</em></p>`;
     } else {
       // v2240: C-rated items don't get a generic recommendation line —
@@ -27089,6 +27115,37 @@ const FirebaseSync = (() => {
   async function pullSurvey(surveyId) {
     if (!window.fsDb) return { error: 'firebase-unavailable' };
     try {
+      // v2487 GUARD: per Dave's "iPhone field → laptop edit" workflow rule,
+      // the cloud is a one-shot handoff channel, not a synced replica. Once
+      // a survey lives on the laptop, the cloud copy is by definition older
+      // (or at best equal) — pulling would overwrite local edits with a
+      // stale copy. So: if a local copy exists, refuse the pull. If Dave
+      // genuinely wants to replace local with cloud, he must explicitly
+      // delete local first, then pull. This prevents the silent overwrite
+      // class of data loss the manual-sync model was always susceptible to.
+      // Added 2026-04-30 in the wake of the 5-survey IDB wipe — that wipe
+      // wasn't caused by pullSurvey, but the writeJournal flagged pullSurvey
+      // as the most recent destructive caller, and Dave's workflow analysis
+      // makes clear that a non-destructive pull is the correct contract.
+      try {
+        const _kkLocalExisting = await getSurvey(String(surveyId));
+        if (_kkLocalExisting) {
+          updateSyncStatusUI('error', 'Pull blocked — local copy exists');
+          await showAlert(
+            'Pull blocked.\n\nA local copy of "' + (_kkLocalExisting.vesselName || 'this survey') +
+            '" already exists on this device. To prevent silent overwrites of your laptop edits, ' +
+            'pulls that would replace a local copy are blocked.\n\nIf you really want to replace ' +
+            'the local copy with the cloud version, delete the local copy first (Diagnostics → ' +
+            'Delete local), then run the pull again.'
+          );
+          return { error: 'local-exists' };
+        }
+      } catch (_kkGuardErr) {
+        console.warn('[Sync] v2487 pullSurvey guard local-exists check failed (allowing pull):', _kkGuardErr);
+        // If the guard itself errors, fall through to the existing pull —
+        // we don't want a guard bug to block recovery work.
+      }
+
       updateSyncStatusUI('syncing', 'Pulling single survey...');
       const remoteDoc = await window.fsDb.collection('surveys').doc(String(surveyId)).get();
       if (!remoteDoc.exists) {
