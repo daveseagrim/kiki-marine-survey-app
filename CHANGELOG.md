@@ -1,3 +1,8 @@
+## v2503
+- Tighten the stale-save guard again to reduce false "Save refused — stale data detected" warnings during normal editing.
+- The guard now focuses on dropped protected item content such as ratings, photos, selected chips, or substantial notes rather than treating ordinary shortened shared text as stale data.
+- Verified: `node tests/run_tests.js` — 108 tests passed.
+
 ## v2502
 - Remove the remaining generic B-finding recommendation fallback: "Address this finding as described in the observation."
 - B findings now print a Recommendation line only when a specific action sentence is available.

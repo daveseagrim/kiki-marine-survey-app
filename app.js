@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2502';
+const APP_VERSION = 'v2503';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -81,6 +81,46 @@ function pluralizeRudder(text, rudderCount) {
   });
 
   return text;
+}
+
+// Built-in fallback so report generation never depends on a helper script
+// loading first. src/core/attendees.js exposes the same function for tests,
+// but app.js must be self-sufficient when a cached page has mixed assets.
+function formatPersonsInAttendance(raw) {
+  const normalize = (text) => String(text || '').replace(/\s+/g, ' ').trim();
+  const cleanPart = (part) => {
+    let value = normalize(part);
+    value = value.replace(/\s*\(([^)]*)\)\s*/g, ' ($1) ');
+    value = normalize(value);
+    value = value.replace(
+      /^(.+?)\s*\((Owner|Broker|Client|Purchaser|Mechanic|Representative)\)\s*\1$/i,
+      '$1 ($2)'
+    );
+    return normalize(value);
+  };
+  const identity = (part) => cleanPart(part)
+    .replace(/\s*\([^)]*\)\s*/g, ' ')
+    .replace(/[^a-z0-9]+/gi, ' ')
+    .replace(/\b(sams|surveyor|associate|abyc|master|advisor|owner|broker|client|purchaser|mechanic|representative)\b/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+
+  const text = normalize(raw);
+  if (!text) return '';
+  const parts = text
+    .split(/\s*,\s*(?=[A-Z][A-Za-z.'-]+(?:\s+[A-Z][A-Za-z.'-]+)*(?:\s*\(|\s*$))/)
+    .map(cleanPart)
+    .filter(Boolean);
+  const out = [];
+  const seen = new Set();
+  for (const part of parts) {
+    const id = identity(part) || part.toLowerCase();
+    if (id && seen.has(id)) continue;
+    if (id) seen.add(id);
+    out.push(part);
+  }
+  return out.join(', ');
 }
 
 // v2405: Display-only transform for category names that carry "(s)" markers
@@ -1881,6 +1921,17 @@ function _v2424DetectStaleRegression(existing, incoming) {
       return false;
     };
 
+    const hasProtectedItemContent = (item) => {
+      if (!item || typeof item !== 'object') return false;
+      if (typeof item.rating === 'string' && item.rating.trim()) return true;
+      const arrayFields = ['photos', 'photoIds', 'images', 'selectedChips', 'chips'];
+      for (const field of arrayFields) {
+        if (Array.isArray(item[field]) && item[field].length > 0) return true;
+      }
+      const textFields = ['text', 'note', 'notes', 'recommendation', 'ntPoReason', 'findingText'];
+      return textFields.some(field => typeof item[field] === 'string' && item[field].trim().length >= 40);
+    };
+
     const existingKeys = Object.keys(existing.items);
     // v2498: only count dropped items that contain actual survey content.
     // Template/catalog changes can legitimately remove empty placeholder
@@ -1889,31 +1940,26 @@ function _v2424DetectStaleRegression(existing, incoming) {
     const droppedKeys = existingKeys.filter(k => !(k in incoming.items) && hasMeaningfulItemContent(existing.items[k]));
     const droppedItems = droppedKeys.length;
     if (droppedItems < 2) return null;
+    const protectedDroppedKeys = droppedKeys.filter(k => hasProtectedItemContent(existing.items[k]));
+    if (protectedDroppedKeys.length < 2) return null;
 
     const existingName = typeof existing.vesselName === 'string' ? existing.vesselName.trim() : '';
     const incomingName = typeof incoming.vesselName === 'string' ? incoming.vesselName.trim() : '';
     const nameChanged = existingName.length > 0 && existingName !== incomingName;
 
-    // Compute text shrinkage: chars lost on dropped keys + per-item shrinkage on shared keys.
+    // Compute text shrinkage only for missing protected items. Normal edits
+    // can legitimately shorten shared notes by 200+ chars; that should not
+    // be treated as stale data unless real items are being dropped too.
     let textShrunk = 0;
-    for (const k of droppedKeys) {
+    for (const k of protectedDroppedKeys) {
       const it = existing.items[k];
       const t = it && typeof it.text === 'string' ? it.text : '';
       textShrunk += t.length;
     }
-    for (const k of Object.keys(incoming.items)) {
-      if (k in existing.items) {
-        const e = existing.items[k];
-        const i = incoming.items[k];
-        const et = e && typeof e.text === 'string' ? e.text : '';
-        const it = i && typeof i.text === 'string' ? i.text : '';
-        if (et.length > it.length) textShrunk += (et.length - it.length);
-      }
-    }
     const textShrunkEnough = textShrunk >= 200;
 
     if (nameChanged || textShrunkEnough) {
-      return { droppedItems, droppedKeys, nameChanged, existingName, incomingName, textShrunk };
+      return { droppedItems, droppedKeys: protectedDroppedKeys, nameChanged, existingName, incomingName, textShrunk };
     }
     return null;
   } catch (e) {
