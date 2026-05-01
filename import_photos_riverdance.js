@@ -117,7 +117,7 @@
   }
 
   function mapElectricalFile(fn) {
-    if (fnMatch(fn, '120v panel') || fnMatch(fn, '120V panel') || fnMatch(fn, '110v panel')) return 'Distribution panel 110V';
+    if (fnMatch(fn, '120v panel') || fnMatch(fn, '120V panel')) return 'Distribution panel 120V';
     if (fnMatch(fn, '12v panel') || fnMatch(fn, '12V panel')) return 'Distribution panel 12V';
     if (fnMatch(fn, 'battery switch')) return 'Battery selector switch, combiner, VSR';
     if (fnMatch(fn, 'charger')) return 'Battery charger';

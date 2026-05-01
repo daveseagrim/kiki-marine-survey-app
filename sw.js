@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kiki-marine-v2490';
+const CACHE_NAME = 'kiki-marine-v2491';
 
 // v2392: Split cache targets into CRITICAL vs OPTIONAL to prevent "cache
 // drift" — the bug class that crashed iPhone Safari in v2387.  Previously

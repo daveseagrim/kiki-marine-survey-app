@@ -1,3 +1,8 @@
+## v2491
+- Confirm active survey templates and report wording use 120V, not 110V.
+- Update the Riverdance photo-import helper so old "110v panel" photo filenames attach to the current "Distribution panel 120V" item label.
+- Verified: `node tests/run_tests.js` — 106 tests passed.
+
 ## v2490
 - Hide the "Licence number on hull:" photo/caption block for Small Vessel Register (SVR) vessels, because SVR vessels use an Official Number rather than a visible hull licence number.
 - Verified: `node tests/run_tests.js` — 106 tests passed.
