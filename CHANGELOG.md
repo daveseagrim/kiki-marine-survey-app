@@ -1,3 +1,8 @@
+## v2501
+- Clean up Persons in Attendance before saving and rendering the report.
+- Fixes broken output such as `Ian Koster (Owner)Ian Koster` and avoids duplicate attendee names in the printed table.
+- Verified: `node tests/run_tests.js` — 108 tests passed.
+
 ## v2500
 - Ensure v1 report generation auto-populates the Overall Description of Vessel if the stored description is blank.
 - This covers direct survey patches/imports that update valuation or metadata without passing through the normal save path.

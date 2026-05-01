@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2500';
+const APP_VERSION = 'v2501';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -13978,7 +13978,10 @@ function updateAttendeesList() {
     if (val) attendees.push(val);
   });
 
-  field.value = attendees.join(', ');
+  const raw = attendees.join(', ');
+  field.value = (typeof formatPersonsInAttendance === 'function')
+    ? formatPersonsInAttendance(raw)
+    : raw;
 }
 
 function startNewSurvey() {
@@ -24231,7 +24234,7 @@ async function generateReport() {
     ${esc(survey.yearMakeModel) ? `<tr><td><strong>Year / Make / Model</strong></td><td>${esc(survey.yearMakeModel)}</td></tr>` : ''}
     ${_row('location', 'Location of Survey Inspection', esc(formatReportLocation(survey.location)) || 'N/A')}
     ${_row('clientName', 'Client / Purchaser', esc(survey.clientName) || 'N/A')}
-    ${_row('personsInAttendance', 'Persons in Attendance', esc(survey.personsInAttendance) || 'N/A')}
+    ${_row('personsInAttendance', 'Persons in Attendance', esc(formatPersonsInAttendance(survey.personsInAttendance)) || 'N/A')}
     ${_row('independentSurveys', 'Independent Surveys', esc(survey.independentSurveys) || 'No independent surveys (engine, electrical, ultrasonic gauging, etc.) were conducted in conjunction with this inspection.')}
     <tr><td><strong>Surveyor</strong></td><td>Dave Seagrim, SAMS Surveyor Associate, ABYC Master Advisor</td></tr>
   </table>
