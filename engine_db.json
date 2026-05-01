@@ -608,6 +608,16 @@
       "type": "Gasoline/Diesel",
       "models": [
         {
+          "model": "2002",
+          "hp": "18",
+          "kw": "13",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.83L",
+          "engineType": "Inboard",
+          "description": "Volvo Penta 2000-series two-cylinder naturally aspirated marine diesel; commonly fitted to mid-1980s sailboats; approximately 18 HP at 3200 rpm."
+        },
+        {
           "model": "V6-SX",
           "hp": "200",
           "kw": "147",

@@ -1,3 +1,9 @@
+## v2499
+- Update the Abbott 36 specs entry with sourced 1985 Abbott 36 particulars.
+- Add the original-equipment engine as Volvo Penta 2002, 18 HP diesel.
+- Add Volvo Penta 2002 to the engine database so v1 can recognize/autofill the model.
+- Verified: JSON parse clean; `node tests/run_tests.js` — 106 tests passed.
+
 ## v2498
 - Tighten the stale-save protection so empty template/catalog rows do not trigger a false "Save refused — stale data detected" warning.
 - The guard still blocks saves that would drop rated items, notes, recommendations, chips, or photos.
