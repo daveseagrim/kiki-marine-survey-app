@@ -1,3 +1,7 @@
+## v2510
+- Add the 2005 Beneteau First 47.7 to the boat-specs database, including standard and deep/race draft options.
+- Version bump forces browsers to fetch the updated boat database.
+
 ## v2509
 - Restore the NMMA Yacht Certification Plate field and photo slot directly after the HIN number.
 - Report documentation now prints the NMMA plate row immediately after HIN when text or a plate photo is present.

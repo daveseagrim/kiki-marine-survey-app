@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-01",
+  "lastUpdated": "2026-05-02",
   "note": "Specifications sourced from manufacturer data sheets, sailboatdata.com, recognized technical references, and powerboat manufacturers. Values are approximate and may vary by model year, options, and keel variant.",
   "boats": [
     {
@@ -636,6 +636,52 @@
       "hullType": "Displacement",
       "keelType": "Fin",
       "construction": "Fibreglass"
+    },
+    {
+      "id": "beneteau-first-47-7",
+      "make": "Beneteau",
+      "model": "First 47.7",
+      "aliases": [
+        "first 47.7",
+        "first47.7",
+        "first477",
+        "first 477",
+        "beneteau 47.7",
+        "beneteau first 477"
+      ],
+      "yearStart": 2000,
+      "yearEnd": 2005,
+      "type": "sailboat",
+      "loa": "47'0\"",
+      "lwl": "41'4\"",
+      "beam": "14'9\"",
+      "displacement": "25,353 lbs",
+      "ballast": "8,444 lbs",
+      "maxDraft": "7'7\"",
+      "draftVariants": [
+        {
+          "label": "Standard draft",
+          "draft": "7'7\""
+        },
+        {
+          "label": "Deep draft / race",
+          "draft": "9'2\""
+        }
+      ],
+      "totalSailArea": "1,033 sq ft",
+      "hullType": "Fin w/bulb & spade rudder",
+      "keelType": "Fin bulb",
+      "construction": "Fibreglass",
+      "builder": "Beneteau",
+      "designer": "Bruce Farr",
+      "rig": "Fractional sloop",
+      "fuelCapacity": "66 USG",
+      "waterCapacity": "164 USG",
+      "engine": "Yanmar 4JH3TE diesel",
+      "engineMake": "Yanmar",
+      "engineModel": "4JH3TE",
+      "engineHP": "75 HP",
+      "notes": "Beneteau First 47.7 performance cruiser-racer by Bruce Farr. Standard draft is approximately 7'7\"; deep/race draft is approximately 9'2\". Verify keel option, engine data plate, and tankage on the vessel."
     },
     {
       "id": "beneteau-first-45",
