@@ -1,3 +1,7 @@
+## v2511
+- Add Port Whitby Marina as a built-in survey-location suggestion.
+- Version bump forces browsers to fetch the updated location search code.
+
 ## v2510
 - Add the 2005 Beneteau First 47.7 to the boat-specs database, including standard and deep/race draft options.
 - Version bump forces browsers to fetch the updated boat database.

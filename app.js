@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2510';
+const APP_VERSION = 'v2511';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -11712,6 +11712,22 @@ function returnToInspection(surveyId) {
 
 let _locationSearchTimeout = null;
 
+const BUILT_IN_SURVEY_LOCATIONS = [
+  {
+    display_name: 'Port Whitby Marina, 301 Watson Street West, Whitby, ON L1N 1A2',
+    lat: '43.86019',
+    lon: '-78.92953'
+  }
+];
+
+function builtInLocationMatches(query) {
+  const q = String(query || '').trim().toLowerCase();
+  if (q.length < 3) return [];
+  return BUILT_IN_SURVEY_LOCATIONS.filter((loc) =>
+    loc.display_name.toLowerCase().includes(q)
+  );
+}
+
 function searchLocation(query) {
   clearTimeout(_locationSearchTimeout);
   const dropdown = document.getElementById('locationDropdown');
@@ -11723,15 +11739,17 @@ function searchLocation(query) {
 
   _locationSearchTimeout = setTimeout(async () => {
     try {
+      const builtIns = builtInLocationMatches(query);
       // Bias results toward Canada
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1&countrycodes=ca,us`,
         { headers: { 'Accept': 'application/json' } }
       );
       const results = await res.json();
-      showLocationDropdown(results);
+      showLocationDropdown([...builtIns, ...results]);
     } catch (e) {
       console.error('Location search error:', e);
+      showLocationDropdown(builtInLocationMatches(query));
     }
   }, 600);
 }
