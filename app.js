@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2512';
+const APP_VERSION = 'v2513';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -3955,9 +3955,24 @@ function _showBackupWarning(service, photoLabel) {
 
   const bar = document.createElement('div');
   bar.id = 'backup-warning-bar';
-  bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#dc2626;color:white;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
-  bar.innerHTML = `⚠️ ${service} backup failed for "${photoLabel}" — photos may not be backed up. Check your connection.
-    <button onclick="this.parentElement.remove()" style="margin-left:12px;background:white;color:#dc2626;border:none;border-radius:4px;padding:4px 10px;font-weight:700;cursor:pointer;">Dismiss</button>`;
+  bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#dc2626;color:white;min-height:34px;padding:5px 12px;font-size:12px;font-weight:600;line-height:1.2;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 1px 5px rgba(0,0,0,0.25);';
+
+  const message = document.createElement('span');
+  message.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+  if (/not connected/i.test(String(service || ''))) {
+    message.textContent = `⚠️ ${service} — ${photoLabel}.`;
+  } else {
+    message.textContent = `⚠️ ${service} backup failed for "${photoLabel}". Check connection.`;
+  }
+
+  const dismiss = document.createElement('button');
+  dismiss.type = 'button';
+  dismiss.textContent = 'Dismiss';
+  dismiss.style.cssText = 'background:white;color:#dc2626;border:none;border-radius:4px;padding:2px 8px;font-weight:700;font-size:12px;line-height:1.2;cursor:pointer;flex:0 0 auto;';
+  dismiss.onclick = () => bar.remove();
+
+  bar.appendChild(message);
+  bar.appendChild(dismiss);
   document.body.appendChild(bar);
 
   // Auto-dismiss after 10 seconds

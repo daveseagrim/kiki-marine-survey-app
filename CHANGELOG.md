@@ -1,3 +1,8 @@
+## v2513
+- Made the red Drive backup warning banner shorter so it takes up much less screen space.
+- Left the Google Drive folder destination unchanged while the Drive folders are being reorganized.
+- Verified: `node tests/run_tests.js` — 108 tests passed.
+
 ## v2512
 - Report cover photos now preserve portrait orientation instead of being forced into a landscape crop.
 - Vessel-description condition wording is rebuilt from the final BUC condition dropdown at report time, so stale manual text cannot keep saying "fair" after a different rating is assigned.
