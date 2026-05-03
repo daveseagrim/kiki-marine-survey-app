@@ -1,3 +1,7 @@
+## v2520
+- Fixed conductivity-report wording at the source: one recorded value now prints as a representative reading instead of a false range like `215 to 215`.
+- Updated the Dash desktop export copies so the current client-ready import file uses the same single-reading wording.
+
 ## v2519
 - Cleaned identical conductivity ranges in reports, so values like `215 to 215` read as approximately/uniform readings.
 - Corrected the Beneteau Oceanis 323 beam in generated vessel-description prose.

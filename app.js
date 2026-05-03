@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2519';
+const APP_VERSION = 'v2520';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -13325,7 +13325,9 @@ function _ensureConductivityRangeInText(label, text) {
   }
   const range = _extractConductivityReadingRange(raw);
   if (!range) return raw;
-  const sentence = `The recorded conductivity range was ${range.low} to ${range.high}.`;
+  const sentence = range.low === range.high
+    ? `The representative conductivity reading was approximately ${range.low}.`
+    : `The recorded conductivity range was ${range.low} to ${range.high}.`;
   let next = raw.replace(/\s*Representative readings were approximately\s+\d{1,3}\s*\.?/gi, ' ');
   const scaleSentence = /(\b[^.]*relative scale of 0 to 999\.)/i;
   if (scaleSentence.test(next)) {
