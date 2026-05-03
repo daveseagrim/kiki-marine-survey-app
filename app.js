@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2518';
+const APP_VERSION = 'v2519';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -13315,6 +13315,9 @@ function _extractConductivityReadingRange(text) {
 function _ensureConductivityRangeInText(label, text) {
   const raw = String(text || '').trim();
   if (!raw || !/conductivity/i.test(`${label || ''} ${raw}`)) return raw;
+  const sameBetween = raw.replace(/\breadings?\s+(?:were\s+found\s+to\s+be\s+)?between\s+(\d{1,3})\s+and\s+\1\b/gi, 'readings were approximately $1');
+  const sameRange = sameBetween.replace(/\b(?:recorded\s+)?conductivity range\s+was\s+(\d{1,3})\s+to\s+\1\b/gi, 'conductivity was uniform at $1');
+  if (sameRange !== raw) return sameRange.replace(/\s{2,}/g, ' ').trim();
   if (/\b(?:recorded\s+)?conductivity range\b/i.test(raw)
       || /\breadings?\s+(?:were\s+found\s+to\s+be\s+)?between\s+\d{1,3}\s+and\s+\d{1,3}\b/i.test(raw)
       || /\breadings?\s+(?:range|ranged)\s+(?:from\s+)?\d{1,3}\s+to\s+\d{1,3}\b/i.test(raw)) {
@@ -24288,6 +24291,7 @@ async function generateReport() {
     if (isOceanis323Survey) {
       out = out
         .replace(/overall length of 33'1"/gi, 'overall length of 32\'10"')
+        .replace(/beam of 10'10"/gi, 'beam of 10\'9"')
         .replace(/\bLOA\s+33'1"/gi, 'LOA 32\'10"')
         .replace(/\bLWL\s+29'6"/gi, 'LWL 29\'2"')
         .replace(/displacement of 10,582 lbs \(ballast:\s*3,086 lbs\)/gi, 'displacement of 9,568 lbs (ballast: 2,414 lbs)')
@@ -25462,7 +25466,11 @@ ${(() => {
   function extractActionFromObservation(text) {
     if (!text) return { body: '', action: '' };
     const cleaned = text.trim().replace(/\s+/g, ' ');
-    const sentences = cleaned.match(/[^.!?]+[.!?]+/g);
+    let sentences = cleaned.match(/[^.!?]+[.!?]+/g);
+    if (!sentences || sentences.length < 2) {
+      const softerSplit = cleaned.match(/.+?[.!?](?=\s+[A-Z])|\s*[A-Z][^.!?]+$/g);
+      if (softerSplit && softerSplit.length >= 2) sentences = softerSplit.map(s => s.trim());
+    }
     if (!sentences || sentences.length < 2) return { body: cleaned, action: '' };
     const last = sentences[sentences.length - 1].trim();
     const isDisclaimer = /\b(visual observation only|does not constitute|confirmation of serviceability)\b/i.test(last);

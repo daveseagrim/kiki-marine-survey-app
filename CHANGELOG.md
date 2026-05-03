@@ -1,3 +1,8 @@
+## v2519
+- Cleaned identical conductivity ranges in reports, so values like `215 to 215` read as approximately/uniform readings.
+- Corrected the Beneteau Oceanis 323 beam in generated vessel-description prose.
+- Made B-finding action extraction more tolerant so recommendation sentences are pulled into a separate `Recommendation:` line.
+
 ## v2518
 - Shortened the survey overflow menu and grouped cloud/recovery tools under Advanced so the menu fits on small screens.
 - Tightened the cover-page photo height so title, vessel photo, and vessel summary table fit together.
