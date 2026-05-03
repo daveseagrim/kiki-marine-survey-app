@@ -1,3 +1,8 @@
+## v2524
+- Fixed HIN, licence, and NMMA documentation photos so they print uncropped instead of using the cropped finding-photo thumbnail style.
+- Added safer wrapping for long HIN values in the cover details box.
+- Kept ordinary finding photos unchanged.
+
 ## v2523
 - Enlarged and rebalanced the report title page so it fills page 1 instead of clustering at the top.
 - Kept the running Kiki Marine footer on page 1 and every page.

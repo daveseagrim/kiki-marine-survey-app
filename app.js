@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2523';
+const APP_VERSION = 'v2524';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -24625,6 +24625,8 @@ async function generateReport() {
        in the body: item photos, finding photos, nameplates, HIN/compliance
        plates, four-corner overview, safety equipment, instruments. */
     .report-photo { width: 234px; height: 176px; object-fit: cover; border: 1px solid #d1d5db; border-radius: 4px; display: block; }
+    .report-doc-photo { max-width: 100%; width: auto; height: auto; max-height: 1.95in; object-fit: contain; border: 1px solid #d1d5db; border-radius: 4px; display: block; margin-top: 6px; background: #fff; }
+    .report-hin-photo { max-height: 1.35in; }
     .report-photo-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; margin-top: 6px; }
     .report-photo-card { display: inline-block; vertical-align: top; width: 234px; }
     .report-photo-card .caption { font-size: 8pt; color: #4b5563; margin-top: 2px; font-style: italic; text-align: center; }
@@ -24678,6 +24680,10 @@ async function generateReport() {
         padding: 5px 7px !important;
         font-size: 9.7pt !important;
         line-height: 1.2 !important;
+      }
+      .cover-summary-table td:last-child {
+        overflow-wrap: anywhere !important;
+        word-break: normal !important;
       }
       .cover-company-footer {
         display: none !important;
@@ -24976,17 +24982,17 @@ async function generateReport() {
   <!-- ═══ VESSEL DOCUMENTATION ═══ -->
   <h2>VESSEL DOCUMENTATION DATA</h2>
   <table>
-    ${!_excl('hinNumber') && (esc(survey.hinNumber) || hinPhotoDataUrl) ? `<tr><td style="width:40%;"><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) || ''}${hinPhotoDataUrl ? '<br><img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>` : ''}
-    ${!_excl('compliancePlate') && (esc(survey.compliancePlate) || compliancePhotoDataUrl) ? `<tr><td><strong>NMMA Yacht Certification Plate</strong></td><td>${esc(survey.compliancePlate) || ''}${compliancePhotoDataUrl ? '<br><img src="' + compliancePhotoDataUrl + '" alt="NMMA Yacht Certification Plate Photo" class="report-photo" style="margin-top:6px;" />' : ''}</td></tr>` : ''}
+    ${!_excl('hinNumber') && (esc(survey.hinNumber) || hinPhotoDataUrl) ? `<tr><td style="width:40%;"><strong>HIN (Hull Identification Number)</strong></td><td>${esc(survey.hinNumber) ? '<div style="font-family:monospace;letter-spacing:0.02em;margin-bottom:4px;">' + esc(survey.hinNumber) + '</div>' : ''}${hinPhotoDataUrl ? '<img src="' + hinPhotoDataUrl + '" alt="HIN Plate Photo" class="report-doc-photo report-hin-photo" />' : ''}</td></tr>` : ''}
+    ${!_excl('compliancePlate') && (esc(survey.compliancePlate) || compliancePhotoDataUrl) ? `<tr><td><strong>NMMA Yacht Certification Plate</strong></td><td>${esc(survey.compliancePlate) ? '<div style="margin-bottom:4px;">' + esc(survey.compliancePlate) + '</div>' : ''}${compliancePhotoDataUrl ? '<img src="' + compliancePhotoDataUrl + '" alt="NMMA Yacht Certification Plate Photo" class="report-doc-photo" />' : ''}</td></tr>` : ''}
     ${(() => {
       if (_excl('tcLicense')) return '';
       const licenceType = String(survey.tcLicenseType || '');
       const isSvrRegistered = /small vessel register|\bsvr\b/i.test(licenceType);
-	      const hullLicenceBlock = (!isSvrRegistered && licencePhotoDataUrl)
-	        ? '<br><em style="font-size:10px;color:#6b7280;">Licence number on hull: ' + (esc(survey.tcLicense) || 'not recorded') + '</em><br><img src="' + licencePhotoDataUrl + '" alt="Licence Number on Hull" class="report-photo" style="margin-top:4px;" />'
-        : '';
-      if (!(survey.tcLicense || survey.tcLicenseType || hullLicenceBlock || tcPaperLicencePhotoDataUrl)) return '';
-      return `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${survey.tcLicenseExpiry ? ' (expires ' + esc(survey.tcLicenseExpiry) + ')' : ''}${hullLicenceBlock}${tcPaperLicencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Transport Canada paper licence:</em><br><img src="' + tcPaperLicencePhotoDataUrl + '" alt="TC Paper Licence" class="report-photo" style="margin-top:4px;" />' : ''}</td></tr>`;
+		      const hullLicenceBlock = (!isSvrRegistered && licencePhotoDataUrl)
+		        ? '<br><em style="font-size:10px;color:#6b7280;">Licence number on hull: ' + (esc(survey.tcLicense) || 'not recorded') + '</em><img src="' + licencePhotoDataUrl + '" alt="Licence Number on Hull" class="report-doc-photo" />'
+	        : '';
+	      if (!(survey.tcLicense || survey.tcLicenseType || hullLicenceBlock || tcPaperLicencePhotoDataUrl)) return '';
+	      return `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${survey.tcLicenseExpiry ? ' (expires ' + esc(survey.tcLicenseExpiry) + ')' : ''}${hullLicenceBlock}${tcPaperLicencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Transport Canada paper licence:</em><img src="' + tcPaperLicencePhotoDataUrl + '" alt="TC Paper Licence" class="report-doc-photo" />' : ''}</td></tr>`;
     })()}
     <!-- v2453/v2509: Tax Status row remains removed; NMMA Yacht Certification Plate restored after HIN. -->
   </table>
