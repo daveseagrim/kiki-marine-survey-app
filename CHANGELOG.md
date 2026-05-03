@@ -1,3 +1,7 @@
+## v2521
+- Made the report cover print as a true first page: title, full vessel photo, details box, and Kiki Marine company footer stay together.
+- Forced page 2 to begin with `Vessel overview photographs` at the top when overview photos are present.
+
 ## v2520
 - Fixed conductivity-report wording at the source: one recorded value now prints as a representative reading instead of a false range like `215 to 215`.
 - Updated the Dash desktop export copies so the current client-ready import file uses the same single-reading wording.

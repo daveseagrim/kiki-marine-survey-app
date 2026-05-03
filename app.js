@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2520';
+const APP_VERSION = 'v2521';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -24627,6 +24627,63 @@ async function generateReport() {
     .report-photo-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; margin-top: 6px; }
     .report-photo-card { display: inline-block; vertical-align: top; width: 234px; }
     .report-photo-card .caption { font-size: 8pt; color: #4b5563; margin-top: 2px; font-style: italic; text-align: center; }
+    .report-cover-page { page-break-after: always; break-after: page; }
+    .overview-page-title { margin-top: 0; }
+    @media print {
+      body { padding: 0; max-width: none; }
+      .report-cover-page {
+        min-height: calc(11in - 50mm);
+        display: flex;
+        flex-direction: column;
+        page-break-after: always;
+        break-after: page;
+      }
+      .report-cover-title { padding-top: 0 !important; }
+      .report-cover-title img { max-width: 2.45in !important; }
+      .report-cover-title h1 {
+        font-size: 14pt !important;
+        margin: 6px 0 2px 0 !important;
+        padding-bottom: 0 !important;
+      }
+      .report-cover-title p {
+        font-size: 9.2pt !important;
+        margin: 0 !important;
+      }
+      .report-cover-photo-wrap {
+        margin: 8px auto 8px auto !important;
+        max-width: 6.9in !important;
+      }
+      .report-cover-photo {
+        max-height: 2.85in !important;
+        max-width: 100% !important;
+        width: auto !important;
+        height: auto !important;
+        object-fit: contain !important;
+      }
+      .cover-summary-table {
+        margin-top: 6px !important;
+        margin-bottom: 6px !important;
+      }
+      .cover-summary-table td {
+        padding: 3px 6px !important;
+        font-size: 9pt !important;
+        line-height: 1.22 !important;
+      }
+      .cover-company-footer {
+        margin-top: auto !important;
+        padding-top: 6px !important;
+      }
+      .cover-company-footer span { font-size: 8.8pt !important; }
+      .cover-company-footer p {
+        font-size: 7.8pt !important;
+        margin: 2px 0 0 0 !important;
+      }
+      .overview-page-title {
+        margin-top: 0 !important;
+        page-break-before: auto !important;
+        break-before: auto !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -24643,7 +24700,8 @@ async function generateReport() {
   </div>
 
   <!-- ═══ COVER PAGE ═══ -->
-  <div style="text-align:center; padding-top: 20px;">
+  <div class="report-cover-page">
+  <div class="report-cover-title" style="text-align:center; padding-top: 20px;">
     <img src="new_logo.png"
          alt="Kiki Marine Logo" style="max-width: 300px; width: 80%; height: auto;"
          onerror="this.style.display='none'">
@@ -24652,12 +24710,13 @@ async function generateReport() {
   </div>
 
   ${coverPhotoDataUrl ? `
-  <div style="text-align:center; margin: 24px auto; max-width: 700px;">
+  <div class="report-cover-photo-wrap" style="text-align:center; margin: 24px auto; max-width: 700px;">
 	    <img src="${coverPhotoDataUrl}" alt="Vessel Photo"
-	         style="max-width:100%; max-height:4.4in; width:auto; height:auto; object-fit:contain; border:2px solid #066aab; border-radius:4px;" />
+	         class="report-cover-photo"
+           style="max-width:100%; max-height:4.4in; width:auto; height:auto; object-fit:contain; border:2px solid #066aab; border-radius:4px;" />
   </div>` : ''}
 
-  <table style="margin-top: 20px; border: 2px solid #066aab;">
+  <table class="cover-summary-table" style="margin-top: 20px; border: 2px solid #066aab;">
     ${(esc(survey.vesselName) || esc(survey.yearMakeModel)) ? `<tr><td style="width:40%; background:#e8edf2;"><strong>Vessel</strong></td><td>${esc(survey.vesselName) ? '"' + esc(survey.vesselName) + '"' : ''}${esc(survey.vesselName) && esc(survey.yearMakeModel) ? ' — ' : ''}${esc(survey.yearMakeModel) || ''}</td></tr>` : ''}
     ${esc(survey.hinNumber) ? `<tr><td style="background:#e8edf2;"><strong>HIN</strong></td><td>${esc(survey.hinNumber)}</td></tr>` : ''}
     ${esc(survey.clientName) ? `<tr><td style="background:#e8edf2;"><strong>Survey Conducted For</strong></td><td>${esc(survey.clientName)}</td></tr>` : ''}
@@ -24666,14 +24725,15 @@ async function generateReport() {
     <tr><td style="background:#e8edf2;"><strong>Surveyor</strong></td><td>Dave Seagrim, SAMS SA, ABYC Master Advisor</td></tr>
   </table>
 
-  <div style="text-align:center;margin-top:28px;padding-top:14px;border-top:2px solid #066aab;">
+  <div class="cover-company-footer" style="text-align:center;margin-top:28px;padding-top:14px;border-top:2px solid #066aab;">
     <span style="font-size:10pt;color:#066aab;letter-spacing:0.5px;">KIKI MARINE &nbsp;&bull;&nbsp; (647) 289-7876 &nbsp;&bull;&nbsp; dave@kikimarine.ca &nbsp;&bull;&nbsp; kikimarine.ca</span>
     <p style="font-size:9pt;color:#6b7280;margin:6px 0 0 0;font-style:italic;">Based in Toronto serving marinas and boatyards from Niagara to Pickering, Muskokas, Simcoe and the Kawarthas.</p>
+  </div>
   </div>
 
   ${Object.keys(fourCornerPhotos).length > 0 ? `
   <!-- ═══ VESSEL OVERVIEW PHOTOGRAPHS (v2227 — moved from end to top) ═══ -->
-  <h2>VESSEL OVERVIEW PHOTOGRAPHS</h2>
+  <h2 class="overview-page-title">Vessel overview photographs</h2>
   <div class="report-photo-row" style="justify-content:center;">
     ${cornerKeys.map(k => fourCornerPhotos[k] ? `<div class="report-photo-card">
         <img src="${fourCornerPhotos[k]}" alt="${cornerLabels[k]}" class="report-photo" />
