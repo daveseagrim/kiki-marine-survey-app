@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2513';
+const APP_VERSION = 'v2514';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -2106,10 +2106,23 @@ async function saveSurvey(survey) {
       // through to a plain put() to keep the save path alive.
       _performPut(null);
     };
-    getReq.onsuccess = () => {
-      const beforeRecord = getReq.result || null;
-      // v2424 freshness guard — refuse writes that drop ≥2 items AND
-      // either rename the vessel or shrink item text by ≥200 chars.
+	    getReq.onsuccess = () => {
+	      const beforeRecord = getReq.result || null;
+	      const workflowBypass = !!survey._allowWorkflowSave;
+	      if (Object.prototype.hasOwnProperty.call(survey, '_allowWorkflowSave')) {
+	        try { delete survey._allowWorkflowSave; } catch (_) { survey._allowWorkflowSave = undefined; }
+	      }
+	      if (beforeRecord && _isSurveyWorkflowLocked(beforeRecord) && !workflowBypass) {
+	        _kkSaveInProgress = false;
+	        _checkDeferredUpdate();
+	        if (typeof showToast === 'function') {
+	          showToast(`Save blocked — ${beforeRecord.vesselName || 'survey'} is ${_workflowStatusLabel(beforeRecord).toLowerCase()}.`);
+	        }
+	        resolve(null);
+	        return;
+	      }
+	      // v2424 freshness guard — refuse writes that drop ≥2 items AND
+	      // either rename the vessel or shrink item text by ≥200 chars.
       // This catches the class of regression seen on 2026-04-19 where
       // a stale _flushOnHide closure clobbered fresh IDB state.
       if (beforeRecord) {
@@ -4086,6 +4099,43 @@ async function deletePhoto(photoId) {
 
 // ─── Export / Import Surveys ────────────────────────────────────────────────
 
+function _surveyWorkflowStatus(survey) {
+  if (!survey) return '';
+  return survey.workflowStatus || (survey.completedAt ? 'completed' : '') || (survey.transferredAt ? 'transferred_to_laptop' : '');
+}
+
+function _isSurveyWorkflowLocked(survey) {
+  const status = _surveyWorkflowStatus(survey);
+  return status === 'transferred_to_laptop' || status === 'completed';
+}
+
+function _workflowStatusLabel(survey) {
+  const status = _surveyWorkflowStatus(survey);
+  if (status === 'completed') return 'Completed / locked';
+  if (status === 'transferred_to_laptop') return 'Transferred / locked';
+  return '';
+}
+
+function _allowWorkflowSave(survey) {
+  if (!survey || typeof survey !== 'object') return survey;
+  Object.defineProperty(survey, '_allowWorkflowSave', {
+    value: true,
+    enumerable: false,
+    configurable: true
+  });
+  return survey;
+}
+
+function _deviceWorkflowLabel() {
+  const ua = (typeof navigator !== 'undefined' && navigator.userAgent) || '';
+  if (/iPhone/i.test(ua)) return 'iPhone';
+  if (/iPad/i.test(ua)) return 'iPad';
+  if (/Macintosh/i.test(ua)) return 'Mac';
+  if (/Windows/i.test(ua)) return 'Windows';
+  if (/Android/i.test(ua)) return 'Android';
+  return 'this device';
+}
+
 async function exportSurvey(surveyId) {
   try {
     // v2318: flush any unsaved DOM edits before exporting
@@ -4186,9 +4236,9 @@ async function exportSurvey(surveyId) {
             files: [file]
           });
           showToast(`Shared: ${filename} (${photos.length} photos)`);
-          return;
+          return { ok: true, filename, photoCount: photos.length };
         } catch (shareErr) {
-          if (shareErr.name === 'AbortError') return; // User cancelled
+          if (shareErr.name === 'AbortError') return { ok: false, cancelled: true }; // User cancelled
           // Fall through to download approach
         }
       }
@@ -4205,10 +4255,84 @@ async function exportSurvey(surveyId) {
     URL.revokeObjectURL(url);
 
     showToast(`Exported: ${filename} (${photos.length} photos)`);
+    return { ok: true, filename, photoCount: photos.length };
   } catch (err) {
     console.error('Export error:', err);
     showAlert('Export failed: ' + err.message);
+    return { ok: false, error: err && err.message ? err.message : String(err) };
   }
+}
+
+async function transferSurveyToLaptop(surveyId) {
+  const survey = await getSurvey(surveyId);
+  if (!survey) { showAlert('Survey not found.'); return; }
+  const name = survey.vesselName || 'this survey';
+  if (_surveyWorkflowStatus(survey) === 'completed') {
+    showAlert(`"${name}" is already completed and locked.`);
+    return;
+  }
+  if (_surveyWorkflowStatus(survey) === 'transferred_to_laptop') {
+    showAlert(`"${name}" has already been transferred and locked on this device.`);
+    return;
+  }
+
+  const ok = await showConfirm(
+    `<strong>Transfer "${name}" to laptop?</strong><br><br>` +
+    `This will export the full survey package with photos, then lock the copy on this device so field edits cannot overwrite the laptop version later.<br><br>` +
+    `<span style="color:#92400e;">Keep the exported file until you confirm it imported correctly on the laptop.</span>`,
+    'Transfer',
+    'Cancel'
+  );
+  if (!ok) return;
+
+  const exported = await exportSurvey(surveyId);
+  if (!exported || !exported.ok) {
+    if (!exported || !exported.cancelled) showAlert('Transfer stopped because the export did not complete.');
+    return;
+  }
+
+  survey.workflowStatus = 'transferred_to_laptop';
+  survey.transferredAt = new Date().toISOString();
+  survey.transferredFromDevice = _deviceWorkflowLabel();
+  survey.lockedReason = 'Transferred to laptop for editing/finalizing';
+  await saveSurvey(_allowWorkflowSave(survey));
+  showAlert(`"${name}" was exported and locked on this device.\n\nNext step: import the file on the laptop. This phone copy will not overwrite laptop edits.`);
+  if (currentView === 'surveys') renderHome();
+}
+
+async function markSurveyCompleted(surveyId) {
+  const survey = await getSurvey(surveyId);
+  if (!survey) { showAlert('Survey not found.'); return; }
+  const name = survey.vesselName || 'this survey';
+  if (_surveyWorkflowStatus(survey) === 'completed') {
+    showAlert(`"${name}" is already completed and locked.`);
+    return;
+  }
+
+  const ok = await showConfirm(
+    `<strong>Mark "${name}" completed?</strong><br><br>` +
+    `This will export a final JSON package with all photos and then lock the survey so it cannot be accidentally changed or overwritten by a field device.<br><br>` +
+    `For now, save the final PDF from the report screen as usual. The Drive completed-survey folder upload will be wired after the Drive folder structure is finalized.`,
+    'Complete',
+    'Cancel'
+  );
+  if (!ok) return;
+
+  const exported = await exportSurvey(surveyId);
+  if (!exported || !exported.ok) {
+    if (!exported || !exported.cancelled) showAlert('Completion stopped because the final JSON export did not complete.');
+    return;
+  }
+
+  survey.workflowStatus = 'completed';
+  survey.completedAt = new Date().toISOString();
+  survey.completedOnDevice = _deviceWorkflowLabel();
+  survey.delivered = true;
+  survey.deliveredAt = survey.completedAt;
+  survey.lockedReason = 'Completed survey archive created';
+  await saveSurvey(_allowWorkflowSave(survey));
+  showAlert(`"${name}" is now completed and locked.\n\nThe final JSON/photo package was exported. Generate the report PDF from the Report screen and save it with the survey archive.`);
+  if (currentView === 'surveys') renderHome();
 }
 
 // Export ALL surveys (one at a time) with photos included
@@ -4387,15 +4511,30 @@ async function importSurvey() {
       // requires Dave to type-confirm the vessel name. Catches both fat-finger
       // imports and any future bug where a malformed export wraps a delete-all
       // payload.
-      const _kkAllSurveys = await getAllSurveys();
-      const _kkExisting = _kkAllSurveys.find(s => String(s.id) === String(survey.id));
-      const _kkImportName = (survey.vesselName || 'Unnamed').trim();
-      const _kkLocalCount = _kkAllSurveys.length;
-      const _kkPrompt =
-        'Import "' + _kkImportName + '"?\n\n' +
-        (_kkExisting
-          ? 'A local copy of "' + (_kkExisting.vesselName || 'Unnamed') + '" exists and will be REPLACED.\n'
-          : 'No conflict — this will be added as a new local survey.\n') +
+	      const _kkAllSurveys = await getAllSurveys();
+	      const _kkExisting = _kkAllSurveys.find(s => String(s.id) === String(survey.id));
+	      const _kkImportName = (survey.vesselName || 'Unnamed').trim();
+	      const _kkLocalCount = _kkAllSurveys.length;
+	      let _kkImportAsCopy = false;
+	      if (_kkExisting && _isSurveyWorkflowLocked(_kkExisting)) {
+	        _kkImportAsCopy = true;
+	        survey.id = String(survey.id) + '-import-' + Date.now();
+	        survey.vesselName = (survey.vesselName || 'Survey') + ' - imported copy';
+	        survey.workflowStatus = 'field';
+	        delete survey.completedAt;
+	        delete survey.transferredAt;
+	        delete survey.lockedReason;
+	        for (const photo of photos) {
+	          if (photo && typeof photo === 'object') photo.surveyId = survey.id;
+	        }
+	      }
+	      const _kkPrompt =
+	        'Import "' + _kkImportName + '"?\n\n' +
+	        (_kkImportAsCopy
+	          ? 'A completed/transferred local copy already exists. To protect it, this import will be added as a NEW copy instead of replacing it.\n'
+	          : _kkExisting
+	          ? 'A local copy of "' + (_kkExisting.vesselName || 'Unnamed') + '" exists and will be REPLACED.\n'
+	          : 'No conflict — this will be added as a new local survey.\n') +
         '\nThere are currently ' + _kkLocalCount + ' surveys on this device. ' +
         'Per the v2487 import-guard rule, type the vessel name exactly to confirm:\n\n' +
         _kkImportName;
@@ -9477,9 +9616,11 @@ function renderHome() {
             : survey.surveyType === 'Appraisal' ? '#7c3aed' : '#94a3b8';
 
           const vesselName = survey.vesselName ? esc(survey.vesselName) : 'Unnamed';
-          const clientName = survey.clientName ? esc(survey.clientName) : '';
-          const location = survey.location ? esc(shortLocation(survey.location)) : '';
-          const ymm = survey.yearMakeModel ? esc(survey.yearMakeModel) : '';
+	          const clientName = survey.clientName ? esc(survey.clientName) : '';
+	          const location = survey.location ? esc(shortLocation(survey.location)) : '';
+	          const ymm = survey.yearMakeModel ? esc(survey.yearMakeModel) : '';
+	          const workflowLabel = _workflowStatusLabel(survey);
+	          const workflowHtml = workflowLabel ? ` · <span style="color:#b45309;font-weight:700;">${esc(workflowLabel)}</span>` : '';
 
           const progressColour = completion === 100 ? '#16a34a' : completion >= 50 ? '#066aab' : '#94a3b8';
           const rowId = `sr-${survey.id}`;
@@ -9501,7 +9642,7 @@ function renderHome() {
                 <!-- Main info -->
                 <div style="flex:1;min-width:0;padding:0 6px;">
                   <div style="font-size:14px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${vesselName}</div>
-                  <div style="font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${[clientName, ymm, location].filter(Boolean).join(' · ')}</div>
+	                  <div style="font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${[clientName, ymm, location].filter(Boolean).join(' · ')}${workflowHtml}</div>
                 </div>
                 <!-- Progress ring + chevron -->
                 <div style="flex:0 0 auto;display:flex;align-items:center;gap:4px;">
@@ -9522,10 +9663,12 @@ function renderHome() {
               <!-- Expandable actions panel -->
               <div id="${rowId}" style="display:none;padding:0 10px 10px 52px;">
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                  <button onclick="event.stopPropagation();(async()=>{currentSurveyId='${survey.id}';checkSurvey();})()" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#ffcc00;color:#066aab;border:none;border-radius:14px;cursor:pointer;">✅ Check</button>
-                  <button onclick="event.stopPropagation();(async()=>{const s=await getSurvey('${survey.id}');if(s)generateReport(s);})()" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#066aab;color:white;border:none;border-radius:14px;cursor:pointer;">📄 Report</button>
-                  <button onclick="event.stopPropagation();exportSurvey('${survey.id}')" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:14px;cursor:pointer;">📤 Export</button>
-                  <button onclick="event.stopPropagation();deleteSurveyConfirm('${survey.id}')" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#fef2f2;color:#dc2626;border:none;border-radius:14px;cursor:pointer;">🗑 Delete</button>
+	                  <button onclick="event.stopPropagation();(async()=>{currentSurveyId='${survey.id}';checkSurvey();})()" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#ffcc00;color:#066aab;border:none;border-radius:14px;cursor:pointer;">✅ Check</button>
+	                  <button onclick="event.stopPropagation();(async()=>{const s=await getSurvey('${survey.id}');if(s)generateReport(s);})()" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#066aab;color:white;border:none;border-radius:14px;cursor:pointer;">📄 Report</button>
+	                  <button onclick="event.stopPropagation();exportSurvey('${survey.id}')" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:14px;cursor:pointer;">📤 Export</button>
+	                  <button onclick="event.stopPropagation();transferSurveyToLaptop('${survey.id}')" style="flex:1;min-width:90px;padding:8px 10px;font-size:12px;font-weight:600;background:#ecfeff;color:#0e7490;border:none;border-radius:14px;cursor:pointer;">➡️ Laptop</button>
+	                  <button onclick="event.stopPropagation();markSurveyCompleted('${survey.id}')" style="flex:1;min-width:90px;padding:8px 10px;font-size:12px;font-weight:600;background:#dcfce7;color:#166534;border:none;border-radius:14px;cursor:pointer;">✅ Complete</button>
+	                  <button onclick="event.stopPropagation();deleteSurveyConfirm('${survey.id}')" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#fef2f2;color:#dc2626;border:none;border-radius:14px;cursor:pointer;">🗑 Delete</button>
                 </div>
                 <!-- v2473+ — Mark as delivered (moves to bottom Delivered section). -->
                 <label style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 10px;background:#f1f5f9;border-radius:14px;cursor:pointer;font-size:13px;font-weight:600;color:#334155;" onclick="event.stopPropagation();">
@@ -15808,13 +15951,27 @@ function ensureReportButton() {
   checkOpt.onclick = () => { overflowMenu.style.display = 'none'; checkSurvey(); };
   overflowMenu.appendChild(checkOpt);
 
-  const introOpt = document.createElement('button');
-  introOpt.style.cssText = menuItemStyle + 'color:#066aab;';
-  introOpt.innerHTML = '✏️ Edit Vessel Info';
-  introOpt.onclick = () => { overflowMenu.style.display = 'none'; editSurveyDetails(currentSurveyId); };
-  overflowMenu.appendChild(introOpt);
+	  const introOpt = document.createElement('button');
+	  introOpt.style.cssText = menuItemStyle + 'color:#066aab;';
+	  introOpt.innerHTML = '✏️ Edit Vessel Info';
+	  introOpt.onclick = () => { overflowMenu.style.display = 'none'; editSurveyDetails(currentSurveyId); };
+	  overflowMenu.appendChild(introOpt);
 
-  // ── v2428: Manual sync divider + Force Push / Force Pull buttons ───────
+	  const transferOpt = document.createElement('button');
+	  transferOpt.style.cssText = menuItemStyle + 'color:#0e7490;';
+	  transferOpt.innerHTML = '➡️ Transfer to laptop';
+	  transferOpt.title = 'Export the full survey with photos, then lock this device copy';
+	  transferOpt.onclick = () => { overflowMenu.style.display = 'none'; transferSurveyToLaptop(currentSurveyId); };
+	  overflowMenu.appendChild(transferOpt);
+
+	  const completeOpt = document.createElement('button');
+	  completeOpt.style.cssText = menuItemStyle + 'color:#166534;';
+	  completeOpt.innerHTML = '✅ Mark completed';
+	  completeOpt.title = 'Export final JSON/photos and lock this survey';
+	  completeOpt.onclick = () => { overflowMenu.style.display = 'none'; markSurveyCompleted(currentSurveyId); };
+	  overflowMenu.appendChild(completeOpt);
+
+	  // ── v2428: Manual sync divider + Force Push / Force Pull buttons ───────
   // Replaces the v2426/v2427 auto-push behaviour. Save no longer touches
   // Firebase by itself; Dave taps these buttons explicitly when he wants
   // the device to talk to the cloud. Push = unconditional overwrite of

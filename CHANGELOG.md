@@ -1,3 +1,10 @@
+## v2514
+- Added a **Transfer to laptop** workflow: exports the survey with photos, then locks the phone/device copy so it cannot overwrite laptop edits later.
+- Added a **Mark completed** workflow: exports the final JSON/photo package, marks the survey completed, and locks it against later accidental edits.
+- Imports now protect completed/transferred same-ID surveys by importing as a new copy instead of replacing the locked local record.
+- The completed-survey Google Drive folder upload is intentionally not pointed at a folder yet while the Drive folder structure is being reorganized.
+- Verified: `node tests/run_tests.js` — 108 tests passed.
+
 ## v2513
 - Made the red Drive backup warning banner shorter so it takes up much less screen space.
 - Left the Google Drive folder destination unchanged while the Drive folders are being reorganized.
