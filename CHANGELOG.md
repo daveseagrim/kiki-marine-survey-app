@@ -1,3 +1,8 @@
+## v2517
+- Added a photo-only repair tool inside the Photos sheet.
+- "Repair missing photos from export" restores missing image data from a full JSON/photo export without replacing survey wording, ratings, findings, or report edits.
+- Updated the linked-photo warning to point to the new repair workflow.
+
 ## v2516
 - Made linked photo counts open the photo sheet directly.
 - Collapsed item thumbnails now open the photo viewer/editor directly.

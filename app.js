@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2516';
+const APP_VERSION = 'v2517';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4091,9 +4091,116 @@ function showMissingPhotoDataMessage(photoId) {
   const shortId = String(photoId || '').slice(0, 24);
   showAlert(
     'This photo is linked to the survey, but the image data is not available on this device.\n\n' +
-    'If this is Dash, import the full JSON/photo export again or pull/recover photos from the device that still has them.\n\n' +
+    'Use Repair missing photos and choose a full JSON/photo export from a device that still has the photos.\n\n' +
     (shortId ? `Photo ID: ${shortId}` : '')
   );
+}
+
+function collectSurveyLinkedPhotoIds(survey) {
+  const ids = new Set();
+  const add = (value) => {
+    if (!value) return;
+    if (Array.isArray(value)) {
+      value.forEach(add);
+      return;
+    }
+    if (typeof value === 'object') {
+      Object.values(value).forEach(add);
+      return;
+    }
+    ids.add(String(value));
+  };
+
+  [
+    'hinPhoto', 'compliancePhoto', 'licencePhoto', 'tcPaperLicencePhoto',
+    'coverPhoto', 'enginePhoto', 'enginePlatePhoto', 'transmissionPhoto',
+    'transmissionPlatePhoto', 'engine2Photo', 'engine2PlatePhoto',
+    'transmission2Photo', 'transmission2PlatePhoto', 'fourCornerPhotos',
+    'fourCornerPortBow', 'fourCornerStbdBow', 'fourCornerPortStern',
+    'fourCornerStbdStern'
+  ].forEach(key => add(survey && survey[key]));
+
+  Object.values((survey && survey.items) || {}).forEach(item => add(item && item.photos));
+  ((survey && survey.safetyEquipment) || []).forEach(eq => add(eq && eq.photos));
+  ((survey && survey.instrumentsElectronics) || []).forEach(item => add(item && item.photos));
+
+  return ids;
+}
+
+function repairMissingPhotosFromExport(itemLabel, categoryName) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,.kikisurvey,.kiki20.json,application/json,*/*';
+
+  input.onchange = async (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    try {
+      const data = JSON.parse(await file.text());
+      const sourcePhotos = Array.isArray(data.photos) ? data.photos : [];
+      if (sourcePhotos.length === 0) {
+        showAlert('That file does not contain photo records.');
+        return;
+      }
+
+      const survey = await getSurvey(currentSurveyId);
+      if (!survey) {
+        showAlert('Open a survey before repairing photos.');
+        return;
+      }
+
+      const linkedIds = collectSurveyLinkedPhotoIds(survey);
+      const sourceById = new Map();
+      sourcePhotos.forEach(photo => {
+        const id = photo && (photo.id || photo.photoId);
+        if (id && photo.dataUrl) sourceById.set(String(id), photo);
+      });
+
+      let repaired = 0;
+      let alreadyPresent = 0;
+      let stillMissing = 0;
+
+      for (const id of linkedIds) {
+        const existing = await getPhotoById(id);
+        if (existing && existing.dataUrl) {
+          alreadyPresent++;
+          continue;
+        }
+
+        const source = sourceById.get(id);
+        if (!source || !source.dataUrl) {
+          stillMissing++;
+          continue;
+        }
+
+        await savePhoto({
+          ...source,
+          id: id,
+          surveyId: currentSurveyId,
+          itemLabel: source.itemLabel || source.label || source.sourceItemId || ''
+        });
+        repaired++;
+      }
+
+      const refreshedSurvey = await getSurvey(currentSurveyId);
+      if (itemLabel) {
+        updateItemInPlace(refreshedSurvey, itemLabel);
+        showMediaSheet(itemLabel, categoryName || '');
+      } else {
+        renderInspection(refreshedSurvey);
+      }
+
+      showAlert(
+        `Photo repair complete.\n\nRestored: ${repaired}\nAlready present: ${alreadyPresent}\nStill missing from that file: ${stillMissing}`
+      );
+    } catch (err) {
+      console.error('Photo repair failed:', err);
+      showAlert('Photo repair failed: ' + (err && err.message ? err.message : err));
+    }
+  };
+
+  input.click();
 }
 
 async function deletePhoto(photoId) {
@@ -6947,12 +7054,19 @@ function showMediaSheet(itemLabel, categoryName) {
                   style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#066aab;color:white;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;">
             \ud83d\udcf7 Take photos
           </button>
-          <button type="button"
-                  onclick="document.getElementById('bottomSheetOverlay').remove(); importPhotosForItem('${safeLabel}');"
-                  style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:white;color:#066aab;border:2px solid #066aab;border-radius:10px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;">
-            \ud83d\uddbc\ufe0f Import photos from library / files
-          </button>
-          <div style="font-size:11px;color:#9ca3af;text-align:center;margin-top:-2px;">Both buttons support selecting multiple photos at once. On desktop, you can also drag photo files directly onto this item's card.</div>
+	          <button type="button"
+	                  onclick="document.getElementById('bottomSheetOverlay').remove(); importPhotosForItem('${safeLabel}');"
+	                  style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:white;color:#066aab;border:2px solid #066aab;border-radius:10px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;">
+	            \ud83d\uddbc\ufe0f Import photos from library / files
+	          </button>
+	          ${photoCount > 0 ? `
+	            <button type="button"
+	                    onclick="repairMissingPhotosFromExport('${safeLabel}', '${safeCat}')"
+	                    style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#f8fafc;color:#475569;border:1px solid #cbd5e1;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
+	              Repair missing photos from export
+	            </button>
+	          ` : ''}
+	          <div style="font-size:11px;color:#9ca3af;text-align:center;margin-top:-2px;">Photo repair imports image data only. It does not replace survey text, ratings or findings.</div>
         </div>
         <div class="sheet-btn-row">
           <button onclick="document.getElementById('bottomSheetOverlay').remove();" style="background:#066aab;color:white;">Done</button>
