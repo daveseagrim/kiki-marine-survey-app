@@ -1,3 +1,11 @@
+## v2518
+- Shortened the survey overflow menu and grouped cloud/recovery tools under Advanced so the menu fits on small screens.
+- Tightened the cover-page photo height so title, vessel photo, and vessel summary table fit together.
+- Removed misapplied ABYC H-22 / TP 1332 citations from bilge/stringer access and keel-bolt access findings.
+- Made PFD/lifejacket safety wording explicit when not verified, added the NT action line, and clarified TC TP 511 length brackets as LOA-based.
+- Corrected the Beneteau Oceanis 323 lookup specs and cleaned recurring Dash wording issues in generated reports.
+- Added a condition caveat when Above Average is selected but Type A findings remain.
+
 ## v2517
 - Added a photo-only repair tool inside the Photos sheet.
 - "Repair missing photos from export" restores missing image data from a full JSON/photo export without replacing survey wording, ratings, findings, or report edits.

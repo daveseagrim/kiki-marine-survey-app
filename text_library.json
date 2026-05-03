@@ -4970,7 +4970,7 @@
     {
       "section": "Boom, gooseneck, boom vang, outhaul, and reefing lines",
       "rating": "C - mast furling",
-      "text": "Because the mainsail furled into the mast, there were neither reefing lines nor a cunningham.",
+      "text": "Because the mainsail was set on an in-mast furler, dedicated reefing lines and a cunningham were not fitted.",
       "phase": "observed",
       "severity": 3
     },
@@ -5068,7 +5068,7 @@
     {
       "section": "Halyards",
       "rating": "C",
-      "text": "All halyards were sufficiently pliable, without fraying, and ran smoothly through in satisfactory condition tackle.",
+      "text": "All halyards were sufficiently pliable, without fraying, and ran smoothly through serviceable tackle.",
       "phase": "observed",
       "severity": 1
     },

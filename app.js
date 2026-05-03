@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2517';
+const APP_VERSION = 'v2518';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -7548,8 +7548,6 @@ const ITEM_STANDARD_MAP = {
   'Oven': 'ABYC A-1 - Marine Liquefied Petroleum Gas (LPG) Systems',
   'Refrigerator': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
   'Sink': 'ABYC H-27 - Potable Water Systems',
-  'Bilge': 'ABYC H-22 - DC Electric Bilge Pumps',
-  'Keel bolt': 'TP1332 - Construction Standards for Small Vessels',
 
   // Head
   'Head': 'ABYC TH-27 - Seacocks/Through-Hull Fittings',
@@ -7635,11 +7633,11 @@ function getStandardForItem(itemLabel, categoryName) {
 // Small Vessel Regulations (SOR/2010-91)
 const TC_SAFETY_EQUIPMENT = {
   brackets: [
-    { id: 'under6', label: 'Not over 6 m (19\'8")', maxM: 6 },
-    { id: '6to9',   label: 'Over 6 m, not over 9 m (19\'8"–29\'6")', maxM: 9 },
-    { id: '9to12',  label: 'Over 9 m, not over 12 m (29\'6"–39\'4")', maxM: 12 },
-    { id: '12to24', label: 'Over 12 m, not over 24 m (39\'4"–78\'9")', maxM: 24 },
-    { id: 'over24', label: 'Over 24 m (78\'9")', maxM: Infinity }
+    { id: 'under6', label: 'Not over 6 m LOA (19\'8.2")', maxM: 6 },
+    { id: '6to9',   label: 'Over 6 m, not over 9 m LOA (19\'8.2"–29\'6.3")', maxM: 9 },
+    { id: '9to12',  label: 'Over 9 m, not over 12 m LOA (29\'6.3"–39\'4.4")', maxM: 12 },
+    { id: '12to24', label: 'Over 12 m, not over 24 m LOA (39\'4.4"–78\'8.8")', maxM: 24 },
+    { id: 'over24', label: 'Over 24 m LOA (78\'8.8")', maxM: Infinity }
   ],
   items: [
     // ══════════════════════════════════════════════════════════════════════
@@ -16165,10 +16163,27 @@ function ensureReportButton() {
 
   const overflowMenu = document.createElement('div');
   overflowMenu.id = 'inspOverflowMenu';
-  overflowMenu.style.cssText = 'display:none;position:absolute;bottom:100%;right:0;margin-bottom:8px;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.18);padding:6px;flex-direction:column;gap:4px;min-width:180px;z-index:200;';
+  overflowMenu.style.cssText = 'display:none;position:fixed;right:calc(8px + env(safe-area-inset-right, 0px));bottom:calc(82px + env(safe-area-inset-bottom, 0px));background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.18);padding:6px;flex-direction:column;gap:4px;min-width:220px;max-width:calc(100vw - 16px);max-height:calc(100vh - 150px);overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:10020;';
+  overflowMenu.onclick = (e) => e.stopPropagation();
 
   // v2256: Primary actions moved from bottom bar into overflow menu
   const menuItemStyle = 'border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;width:100%;';
+  const advancedDetails = document.createElement('details');
+  advancedDetails.style.cssText = 'border-top:1px solid #e5e7eb;margin-top:4px;padding-top:4px;';
+  const advancedSummary = document.createElement('summary');
+  advancedSummary.innerHTML = '⚙️ Advanced cloud / recovery';
+  advancedSummary.style.cssText = 'list-style:none;padding:10px 14px;font-size:13px;font-weight:700;color:#475569;cursor:pointer;border-radius:8px;';
+  const advancedMenu = document.createElement('div');
+  advancedMenu.style.cssText = 'display:flex;flex-direction:column;gap:4px;padding-top:2px;';
+  advancedDetails.appendChild(advancedSummary);
+  advancedDetails.appendChild(advancedMenu);
+
+  const introOpt = document.createElement('button');
+  introOpt.style.cssText = menuItemStyle + 'color:#066aab;';
+  introOpt.innerHTML = '✏️ Edit Intro';
+  introOpt.title = 'Edit vessel information, valuation, comparables, and report intro fields';
+  introOpt.onclick = () => { overflowMenu.style.display = 'none'; editSurveyDetails(currentSurveyId); };
+  overflowMenu.appendChild(introOpt);
 
   const reportOpt = document.createElement('button');
   reportOpt.style.cssText = menuItemStyle + 'color:#066aab;';
@@ -16181,12 +16196,6 @@ function ensureReportButton() {
   checkOpt.innerHTML = '✅ Pre-Flight Check';
   checkOpt.onclick = () => { overflowMenu.style.display = 'none'; checkSurvey(); };
   overflowMenu.appendChild(checkOpt);
-
-	  const introOpt = document.createElement('button');
-	  introOpt.style.cssText = menuItemStyle + 'color:#066aab;';
-	  introOpt.innerHTML = '✏️ Edit Vessel Info';
-	  introOpt.onclick = () => { overflowMenu.style.display = 'none'; editSurveyDetails(currentSurveyId); };
-	  overflowMenu.appendChild(introOpt);
 
 	  const transferOpt = document.createElement('button');
 	  transferOpt.style.cssText = menuItemStyle + 'color:#0e7490;';
@@ -16201,6 +16210,7 @@ function ensureReportButton() {
 	  completeOpt.title = 'Export final JSON/photos and lock this survey';
 	  completeOpt.onclick = () => { overflowMenu.style.display = 'none'; markSurveyCompleted(currentSurveyId); };
 	  overflowMenu.appendChild(completeOpt);
+	  overflowMenu.appendChild(advancedDetails);
 
 	  // ── v2428: Manual sync divider + Force Push / Force Pull buttons ───────
   // Replaces the v2426/v2427 auto-push behaviour. Save no longer touches
@@ -16218,7 +16228,7 @@ function ensureReportButton() {
   // scoreSurveyContent + peekCloudSurvey.
   const syncDivider = document.createElement('div');
   syncDivider.style.cssText = 'height:1px;background:#e5e7eb;margin:4px 0;';
-  overflowMenu.appendChild(syncDivider);
+  advancedMenu.appendChild(syncDivider);
 
   // Format a survey's last-modified time as "Apr 20, 6:12 PM" (short, fits
   // the 320 px confirm modal). Returns "—" if the survey has no timestamp.
@@ -16387,7 +16397,7 @@ function ensureReportButton() {
       SaveProgress.finish(false, '⚠ Push failed');
     }
   };
-  overflowMenu.appendChild(pushOpt);
+  advancedMenu.appendChild(pushOpt);
 
   const pullOpt = document.createElement('button');
   pullOpt.id = 'manualPullBtn';
@@ -16469,7 +16479,7 @@ function ensureReportButton() {
       pullOpt.disabled = false;
     }
   };
-  overflowMenu.appendChild(pullOpt);
+  advancedMenu.appendChild(pullOpt);
 
   // ── v2457 — 🗑️ Delete cloud copy ───────────────────────────────────────
   // The symmetric complement of "☁️ Force push to cloud": explicitly remove
@@ -16591,17 +16601,17 @@ function ensureReportButton() {
       delCloudOpt.disabled = false;
     }
   };
-  overflowMenu.appendChild(delCloudOpt);
+  advancedMenu.appendChild(delCloudOpt);
 
   // Divider
   const divider = document.createElement('div');
   divider.style.cssText = 'height:1px;background:#e5e7eb;margin:4px 0;';
-  overflowMenu.appendChild(divider);
+  advancedMenu.appendChild(divider);
 
   // Recover Photos option
   const recoverOpt = document.createElement('button');
   recoverOpt.id = 'recoverPhotosBtn';
-  recoverOpt.style.cssText = 'border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#dc2626;';
+  recoverOpt.style.cssText = menuItemStyle + 'color:#dc2626;';
   recoverOpt.innerHTML = '🔄 Recover Photos';
   recoverOpt.onclick = async () => {
     overflowMenu.style.display = 'none';
@@ -16722,24 +16732,24 @@ function ensureReportButton() {
       recoverOpt.disabled = false;
     }
   };
-  overflowMenu.appendChild(recoverOpt);
+  advancedMenu.appendChild(recoverOpt);
 
   // Remove Date Stamps option
   const dateStampOpt = document.createElement('button');
-  dateStampOpt.style.cssText = 'border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#b45309;';
+  dateStampOpt.style.cssText = menuItemStyle + 'color:#b45309;';
   dateStampOpt.innerHTML = '🗓 Remove Date Stamps';
   dateStampOpt.onclick = async () => {
     overflowMenu.style.display = 'none';
     await removeAllDateStamps();
   };
-  overflowMenu.appendChild(dateStampOpt);
+  advancedMenu.appendChild(dateStampOpt);
 
   // Force Update option
   const updateOpt = document.createElement('button');
-  updateOpt.style.cssText = 'border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#066aab;';
+  updateOpt.style.cssText = menuItemStyle + 'color:#066aab;';
   updateOpt.innerHTML = '↻ Force Update';
   updateOpt.onclick = () => { overflowMenu.style.display = 'none'; forceAppUpdate(); };
-  overflowMenu.appendChild(updateOpt);
+  advancedMenu.appendChild(updateOpt);
 
   // v2393: Reset App Cache option — mirrors the entry on homeOverflowMenu so
   // the self-heal button is reachable from inside a survey, not just the
@@ -16749,11 +16759,11 @@ function ensureReportButton() {
   // Surveys and photos survive — resetAppCache() only touches CacheStorage
   // and service worker registrations, never IndexedDB.
   const resetCacheOpt = document.createElement('button');
-  resetCacheOpt.style.cssText = 'border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#dc2626;';
+  resetCacheOpt.style.cssText = menuItemStyle + 'color:#dc2626;';
   resetCacheOpt.title = 'Clears app cache and reloads — surveys and photos are preserved';
   resetCacheOpt.innerHTML = '🧹 Reset App Cache';
   resetCacheOpt.onclick = () => { overflowMenu.style.display = 'none'; resetAppCache(); };
-  overflowMenu.appendChild(resetCacheOpt);
+  advancedMenu.appendChild(resetCacheOpt);
 
   moreWrap.appendChild(overflowMenu);
   bottomBar.appendChild(moreWrap);
@@ -24200,6 +24210,11 @@ async function generateReport() {
   const cleanupTypos = (s) => {
     if (!s) return s;
     return s
+      .replace(/\bBecause this roller furling mainsail\b/gi, 'Because the mainsail was set on an in-mast furler')
+      .replace(/\bBecause the mainsail furled into the mast, there were neither reefing lines nor a cunningham\./gi, 'Because the mainsail was set on an in-mast furler, dedicated reefing lines and a cunningham were not fitted.')
+      .replace(/\bran smoothly through in satisfactory condition tackle\b/gi, 'ran smoothly through serviceable tackle')
+      .replace(/\bBoth sides,\s*Incorporated,\s*a functional folding table\b/g, 'Both sides incorporated a functional folding table')
+      .replace(/\bHowever,\s*it is a note that\b/gi, 'However, note that')
       // "th operation" → "the operation"
       .replace(/\bth\s+operation\b/gi, 'the operation')
       // "located engine compartment" → "located in the engine compartment"
@@ -24235,6 +24250,51 @@ async function generateReport() {
       if (!alreadyCovered) checked.push(ref.replace(/\s+/g, ' ').trim());
     });
     return checked;
+  };
+  const reportStandardsForItem = (itemLabel, standards, text) => {
+    const label = String(itemLabel || '').toLowerCase();
+    const body = String(text || '').toLowerCase();
+    return (standards || []).filter(std => {
+      const s = String(std || '');
+      // ABYC H-22 is for electric bilge-pump systems, not the bilge/stringer/rib
+      // structure or access to it. Keep it only for actual bilge-pump findings.
+      if (/abyc\s*h-22/i.test(s) && /\bbilge\b/.test(label) && !/\bbilge pump\b/.test(label + ' ' + body)) {
+        return false;
+      }
+      // TP 1332 is a construction standard; for in-service inability to inspect
+      // keel bolts, the observation/recommendation carries the finding without
+      // forcing a category-mismatched citation.
+      if (/tp\s*1332/i.test(s) && /\bkeel bolt/.test(label)) {
+        return false;
+      }
+      return true;
+    });
+  };
+  const isOceanis323Survey = /beneteau\s+.*(?:oceanis|clipper)\s*323/i.test(String(survey.yearMakeModel || ''));
+  const oceanis323Specs = {
+    loa: '32\'10"',
+    lwl: '29\'2"',
+    beam: '10\'9"',
+    displacement: '9,568 lbs',
+    ballast: '2,414 lbs'
+  };
+  const reportSpecValue = (field, fallback) => {
+    if (isOceanis323Survey && oceanis323Specs[field]) return oceanis323Specs[field];
+    return fallback;
+  };
+  const normalizeKnownModelText = (s) => {
+    if (!s) return s;
+    let out = String(s);
+    if (isOceanis323Survey) {
+      out = out
+        .replace(/overall length of 33'1"/gi, 'overall length of 32\'10"')
+        .replace(/\bLOA\s+33'1"/gi, 'LOA 32\'10"')
+        .replace(/\bLWL\s+29'6"/gi, 'LWL 29\'2"')
+        .replace(/displacement of 10,582 lbs \(ballast:\s*3,086 lbs\)/gi, 'displacement of 9,568 lbs (ballast: 2,414 lbs)')
+        .replace(/\bDisplacement\s+10,582 lbs\b/gi, 'Displacement 9,568 lbs')
+        .replace(/\bBallast\s+3,086 lbs\b/gi, 'Ballast 2,414 lbs');
+    }
+    return out;
   };
 
   const reportDate = survey.reportDate || new Date().toISOString().split('T')[0];
@@ -24587,8 +24647,8 @@ async function generateReport() {
 
   ${coverPhotoDataUrl ? `
   <div style="text-align:center; margin: 24px auto; max-width: 700px;">
-    <img src="${coverPhotoDataUrl}" alt="Vessel Photo"
-         style="max-width:100%; max-height:650px; width:auto; height:auto; object-fit:contain; border:2px solid #066aab; border-radius:4px;" />
+	    <img src="${coverPhotoDataUrl}" alt="Vessel Photo"
+	         style="max-width:100%; max-height:4.4in; width:auto; height:auto; object-fit:contain; border:2px solid #066aab; border-radius:4px;" />
   </div>` : ''}
 
   <table style="margin-top: 20px; border: 2px solid #066aab;">
@@ -24819,11 +24879,11 @@ async function generateReport() {
     ${_row('construction', 'Construction', esc(survey.construction) || 'N/A')}
     ${_row('hullType', 'Hull Type', esc(survey.hullType) || 'N/A')}
     ${isSail && !_excl('keelType') && esc(survey.keelType) ? `<tr><td><strong>Keel Type</strong></td><td>${esc(survey.keelType)}</td></tr>` : ''}
-    ${_row('loa', 'LOA', esc(survey.loa) || 'N/A')}
-    ${_row('lwl', 'LWL', esc(survey.lwl) || 'N/A')}
-    ${_row('beam', 'Beam', esc(survey.beam) || 'N/A')}
-    ${_row('displacement', 'Displacement', esc(survey.displacement) || 'N/A')}
-    ${isSail && !_excl('ballast') && esc(survey.ballast) ? `<tr><td><strong>Ballast</strong></td><td>${esc(survey.ballast)}</td></tr>` : ''}
+	    ${_row('loa', 'LOA', esc(reportSpecValue('loa', survey.loa)) || 'N/A')}
+	    ${_row('lwl', 'LWL', esc(reportSpecValue('lwl', survey.lwl)) || 'N/A')}
+	    ${_row('beam', 'Beam', esc(reportSpecValue('beam', survey.beam)) || 'N/A')}
+	    ${_row('displacement', 'Displacement', esc(reportSpecValue('displacement', survey.displacement)) || 'N/A')}
+	    ${isSail && !_excl('ballast') && esc(reportSpecValue('ballast', survey.ballast)) ? `<tr><td><strong>Ballast</strong></td><td>${esc(reportSpecValue('ballast', survey.ballast))}</td></tr>` : ''}
     ${isSail && !_excl('maxDraft') && esc(survey.maxDraft) ? `<tr><td><strong>Max Draft</strong></td><td>${esc(survey.maxDraft)}</td></tr>` : ''}
     ${isSail && !_excl('totalSailArea') && esc(survey.totalSailArea) ? `<tr><td><strong>Total Sail Area</strong></td><td>${esc(survey.totalSailArea)}</td></tr>` : ''}
     ${_row('numberCabins', 'Number of Cabins', esc(survey.numberCabins) || 'N/A')}
@@ -24852,8 +24912,8 @@ async function generateReport() {
       if (_excl('tcLicense')) return '';
       const licenceType = String(survey.tcLicenseType || '');
       const isSvrRegistered = /small vessel register|\bsvr\b/i.test(licenceType);
-      const hullLicenceBlock = (!isSvrRegistered && licencePhotoDataUrl)
-        ? '<br><em style="font-size:10px;color:#6b7280;">Licence number on hull:</em><br><img src="' + licencePhotoDataUrl + '" alt="Licence Number on Hull" class="report-photo" style="margin-top:4px;" />'
+	      const hullLicenceBlock = (!isSvrRegistered && licencePhotoDataUrl)
+	        ? '<br><em style="font-size:10px;color:#6b7280;">Licence number on hull: ' + (esc(survey.tcLicense) || 'not recorded') + '</em><br><img src="' + licencePhotoDataUrl + '" alt="Licence Number on Hull" class="report-photo" style="margin-top:4px;" />'
         : '';
       if (!(survey.tcLicense || survey.tcLicenseType || hullLicenceBlock || tcPaperLicencePhotoDataUrl)) return '';
       return `<tr><td><strong>TC Licence Type and Number</strong></td><td>${survey.tcLicenseType ? esc(survey.tcLicenseType) + ' — ' : ''}${esc(survey.tcLicense) || 'N/A'}${survey.tcLicenseExpiry ? ' (expires ' + esc(survey.tcLicenseExpiry) + ')' : ''}${hullLicenceBlock}${tcPaperLicencePhotoDataUrl ? '<br><em style="font-size:10px;color:#6b7280;">Transport Canada paper licence:</em><br><img src="' + tcPaperLicencePhotoDataUrl + '" alt="TC Paper Licence" class="report-photo" style="margin-top:4px;" />' : ''}</td></tr>`;
@@ -24872,7 +24932,7 @@ ${(() => {
   <!-- ═══ VESSEL DESCRIPTION ═══ -->
   <h2>VESSEL DESCRIPTION</h2>
   <div class="scope-text">
-    <p>${esc(cleanupPlaceholders(_desc)).replace(/\.([A-Z])/g, '. $1').replace(/\n/g, '</p><p>')}</p>
+	    <p>${esc(cleanupTypos(normalizeKnownModelText(cleanupPlaceholders(_desc)))).replace(/\.([A-Z])/g, '. $1').replace(/\n/g, '</p><p>')}</p>
   </div>
 `;
 })()}
@@ -24891,7 +24951,8 @@ ${(() => {
         <em>Definition:</em> The item appeared to be in generally serviceable condition based on a visual, non-destructive inspection, with no material deficiency noted at the time of survey.<br/>
         <em>Action:</em> No corrective action was recommended.</li>
       <li><span style="background:#6b7280;color:white;padding:2px 8px;font-weight:bold;">Not Tested / Not Verified</span><br/>
-        <em>Definition:</em> A comprehensive inspection was attempted, but was not possible due to constraints imposed upon the surveyor (e.g., no power available, inability to remove panels, requirements not to conduct destructive tests, or limitations on the inspection time).</li>
+	        <em>Definition:</em> A comprehensive inspection was attempted, but was not possible due to constraints imposed upon the surveyor (e.g., no power available, inability to remove panels, requirements not to conduct destructive tests, or limitations on the inspection time).<br/>
+	        <em>Action:</em> Further inspection is recommended where conditions permit.</li>
       <li><span style="background:#6b7280;color:white;padding:2px 8px;font-weight:bold;">Powered Up Only (PO)</span><br/>
         <em>Definition:</em> The equipment was powered on and confirmed operational, but could not be fully tested under normal operating conditions (e.g., the vessel was out of the water or essential inputs were unavailable).</li>
       <li><span style="background:#2563eb;color:white;padding:2px 8px;font-weight:bold;">Safety Equipment (TC TP 511)</span><br/>
@@ -25182,7 +25243,7 @@ ${(() => {
               mastOptionsHtml = `<p><em>Mast type: ${esc(parts.join(', '))}</em></p>`;
             }
           }
-          const detailedItemText = _ensureConductivityRangeInText(item.label, itemData.text || '');
+	          const detailedItemText = normalizeKnownModelText(_ensureConductivityRangeInText(item.label, itemData.text || ''));
 
           html += `
   <div class="item" style="border-left-color: ${RATING_COLORS[ratingLabel] || '#066aab'};">
@@ -25193,8 +25254,8 @@ ${(() => {
     ${detailedItemText ? `<p>${esc(pluralizeRudder(cleanupTypos(depersonalise(dedup(detailedItemText))), survey.rudderCount))}</p>` : ''}
     ${(() => {
       if (!(ratingLabel.startsWith('A') || ratingLabel.startsWith('B'))) return '';
-      const _merged = mergeTextStandards(itemData.standards, itemData.text);
-      return _merged.length > 0 ? `<p class="standards"><strong>Applicable Standards:</strong> ${_merged.join(', ')}</p>` : '';
+	      const _merged = reportStandardsForItem(item.label, mergeTextStandards(itemData.standards, itemData.text), itemData.text);
+	      return _merged.length > 0 ? `<p class="standards"><strong>Applicable Standards:</strong> ${_merged.join(', ')}</p>` : '';
     })()}
     ${itemPhotosHtml}
   </div>`;
@@ -25245,9 +25306,16 @@ ${(() => {
       html += `<h3 style="color:#2563eb;">${esc(catName)}</h3>`;
 
       _safeCats[catName].forEach(eq => {
-        const statusColor = eq.checked ? '#16a34a' : '#dc2626';
-        const statusText = eq.checked ? '✓ On Board' : '✗ MISSING';
-        const statusBg = eq.checked ? '#dcfce7' : '#fee2e2';
+	        const statusColor = eq.checked ? '#16a34a' : '#dc2626';
+	        const statusText = eq.checked ? '✓ On Board' : '✗ MISSING';
+	        const statusBg = eq.checked ? '#dcfce7' : '#fee2e2';
+	        const safetyNote = (() => {
+	          const note = String(eq.notes || '').trim();
+	          if (!eq.checked && /pfd|lifejacket/i.test(eq.name || '') && (!note || /^not verified\b/i.test(note))) {
+	            return 'No approved PFDs or lifejackets were located or verified in the accessible storage areas at the time of survey; the client should confirm the required number is on board before the vessel is next used.';
+	          }
+	          return note;
+	        })();
 
         let safetyPhotosHtml = '';
         if (eq.photos && eq.photos.length > 0) {
@@ -25269,7 +25337,7 @@ ${(() => {
   <div class="item" style="border-left-color: ${statusColor};">
     <p><strong>${esc(eq.name)}</strong> — <span style="display:inline-block;padding:1px 8px;border-radius:3px;color:${statusColor};background:${statusBg};font-weight:bold;font-size:9pt;">${statusText}</span></p>
     ${eq.requirement ? `<p style="font-size:9pt;color:#555;"><em>Requirement: ${esc(eq.requirement)}</em></p>` : ''}
-    ${eq.notes ? `<p>${esc(eq.notes)}</p>` : ''}
+	    ${safetyNote ? `<p>${esc(safetyNote)}</p>` : ''}
     ${safetyPhotosHtml}
   </div>`;
       });
@@ -25398,7 +25466,7 @@ ${(() => {
     if (!sentences || sentences.length < 2) return { body: cleaned, action: '' };
     const last = sentences[sentences.length - 1].trim();
     const isDisclaimer = /\b(visual observation only|does not constitute|confirmation of serviceability)\b/i.test(last);
-    const isAction = /\b(replace|repair|service|inspect|reapply|address|correct|install|secure|test|recommend)\b/i.test(last);
+	    const isAction = /\b(replace|repair|service|inspect|reapply|address|correct|install|secure|test|recommend|seal|monitor|clean|verify|rebed|re-bed|refit)\b/i.test(last);
     if (isDisclaimer || !isAction) return { body: cleaned, action: '' };
     // Join everything except the last sentence as the body. Each subsequent
     // sentence already carries its leading space from the regex match, so
@@ -25416,7 +25484,7 @@ ${(() => {
   // The action arrives here already stripped from the observation body so
   // the reader never sees it twice.
   function buildRecommendation(f, severity, action) {
-    const _frMerged = (severity === 'A' || severity === 'B') ? mergeTextStandards(f.standards, f.text) : [];
+	    const _frMerged = (severity === 'A' || severity === 'B') ? reportStandardsForItem(f.label, mergeTextStandards(f.standards, f.text), f.text) : [];
     const stdCite = _frMerged.length > 0 ? ` (${_frMerged.join('; ')})` : '';
     // Helper: rebuild "<action text> (standards)." with the original
     // terminator preserved (period for most actions, but respect ! or ?).
@@ -25617,15 +25685,18 @@ ${(() => {
     // Dave has actually chosen a BUC grade. Previously it fell back to
     // "Not yet assessed" and rendered anyway — which counts as blank
     // space under the new rule.
-    const _ratingCallout = _overallCondRaw
-      ? '<p style="font-size:14pt;font-weight:bold;text-align:center;padding:12px;border:2px solid #066aab;color:#066aab;">Overall Vessel Rating is: \u201c' + _overallCondRaw + '\u201d</p>'
-      : '';
+	    const _ratingCallout = _overallCondRaw
+	      ? '<p style="font-size:14pt;font-weight:bold;text-align:center;padding:12px;border:2px solid #066aab;color:#066aab;">Overall Vessel Rating is: \u201c' + _overallCondRaw + '\u201d</p>'
+	      : '';
+	    const _conditionCaveat = (/^above average$/i.test(_overallCondRaw) && findings.A.length > 0)
+	      ? '<p><strong>Condition caveat:</strong> The Above Average condition rating is subject to correction or further verification of the Type A findings noted in this report.</p>'
+	      : '';
 
     let _out = '<h2 style="background:#066aab;font-size:14pt;">RATING &amp; VALUATION</h2>'
       + '<div class="scope-text">'
       + '<p>It is the Surveyor\u2019s experience that develops an opinion of the OVERALL VESSEL RATING OF CONDITION after the Survey has been completed and the findings have been organised in a logical manner.</p>'
       + '<p>The grading of condition developed by BUC RESEARCH and accepted in the marine industry for a vessel at the time of Survey determines the adjustment to the range of base values in the BUC USED BOAT PRICE GUIDE for a similar vessel sold within a given time period, as a consideration to determine the Market Value.</p>'
-      + '<p><strong>The following is the accepted Marine Grading System of Condition:</strong></p>'
+	      + '<p><strong>The following is the accepted Marine Grading System of Condition:</strong></p>'
       + '<div class="buc-grades">'
       + '<p><strong>\u201cEXCELLENT (BRISTOL) CONDITION\u201d</strong> \u2014 A vessel that is maintained in mint or Bristol fashion (usually better than factory new, loaded with extras, a rarity).</p>'
       + '<p><strong>\u201cABOVE AVERAGE CONDITION\u201d</strong> \u2014 Has had above average care and is equipped with extra electrical and electronic gear.</p>'
@@ -25634,9 +25705,10 @@ ${(() => {
       + '<p><strong>\u201cPOOR CONDITION\u201d</strong> \u2014 Substantial yard work required and devoid of extras.</p>'
       + '<p><strong>\u201cRESTORABLE CONDITION\u201d</strong> \u2014 Enough of the hull and engine exists to restore the boat to usable condition.</p>'
       + '</div>'
-      + (_overallCondRaw ? '<p>As a result of the Survey, as shown in the REPORT OF MARINE SURVEY &amp; FINDINGS AND RECOMMENDATIONS sections of this report and by virtue of my experience, my opinion is:</p>' : '')
-      + _ratingCallout
-      + '</div>';
+	      + (_overallCondRaw ? '<p>As a result of the Survey, as shown in the REPORT OF MARINE SURVEY &amp; FINDINGS AND RECOMMENDATIONS sections of this report and by virtue of my experience, my opinion is:</p>' : '')
+	      + _ratingCallout
+	      + _conditionCaveat
+	      + '</div>';
 
     // v2477: Statement of Valuation now ALWAYS renders for every
     // survey type — insurance, pre-purchase, and appraisal all need
@@ -25700,19 +25772,28 @@ ${(() => {
       // the cell. Surveyor picks currency per comparable via the new
       // Cur selector in Edit Intro.
       if (!survey.skipComparables && survey.comparables && survey.comparables.length > 0 && survey.comparables.some(c => c.vessel)) {
-        const _compRows = survey.comparables.map(function(c) {
-          const _priceCell = (c.price || '')
-            ? (c.currency ? esc(c.currency) + ' ' : '') + esc(c.price)
-            : '';
-          return '<tr>'
+	        const _compRows = survey.comparables.map(function(c) {
+	          const _priceCell = (c.price || '')
+	            ? (c.currency ? esc(c.currency) + ' ' : '') + esc(c.price)
+	            : '';
+	          const _notes = (() => {
+	            const base = String(c.notes || '').trim();
+	            const priceNum = parseFloat(String(c.price || '').replace(/[^0-9.]/g, '')) || 0;
+	            const isLikelyOutlier = priceNum >= 100000 || /\boutlier\b|higher-side/i.test(base);
+	            if (isLikelyOutlier && !/\boutlier\b/i.test(base)) {
+	              return (base ? base + ' ' : '') + 'Higher asking-price outlier; not relied on as the headline value indicator.';
+	            }
+	            return base;
+	          })();
+	          return '<tr>'
             + '<td>' + esc(c.source) + '</td>'
             + '<td>' + esc(c.vessel) + '</td>'
             + '<td>' + _priceCell + '</td>'
             + '<td>' + esc(c.location || '') + '</td>'
             + '<td>' + esc(c.date || '') + '</td>'
-            + '<td>' + esc(c.notes) + (c.water ? ' (' + esc(c.water) + ')' : '') + '</td>'
-            + '</tr>';
-        }).join('');
+	            + '<td>' + esc(_notes) + (c.water ? ' (' + esc(c.water) + ')' : '') + '</td>'
+	            + '</tr>';
+	        }).join('');
         _out += '<table style="margin-top:12px;">'
           + '<tr><td colspan="6" style="background:#e8edf2;font-weight:bold;">Comparable Vessels / Market Research</td></tr>'
           + '<tr><th>Source</th><th>Vessel</th><th>Price</th><th>Location</th><th>Date</th><th>Notes</th></tr>'
