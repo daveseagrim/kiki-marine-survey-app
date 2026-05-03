@@ -1,3 +1,9 @@
+## v2512
+- Report cover photos now preserve portrait orientation instead of being forced into a landscape crop.
+- Vessel-description condition wording is rebuilt from the final BUC condition dropdown at report time, so stale manual text cannot keep saying "fair" after a different rating is assigned.
+- Conductivity findings now show a recorded low-to-high range in the report whenever readings are present but the generated text omitted the range.
+- Verified: `node tests/run_tests.js` — 108 tests passed.
+
 ## v2511
 - Add Port Whitby Marina as a built-in survey-location suggestion.
 - Version bump forces browsers to fetch the updated location search code.

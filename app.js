@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2511';
+const APP_VERSION = 'v2512';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -12800,17 +12800,17 @@ function _buildConditionSentence(survey) {
   const _oc = (survey.overallCondition || document.getElementById('overallCondition')?.value || '').trim().toLowerCase();
   if (_oc) {
     if (_oc.includes('excellent') || _oc.includes('bristol')) {
-      return ` At the time of the survey the vessel was in excellent overall condition, consistent with a vessel that has been meticulously maintained and well equipped.`;
+      return ` At the time of the survey the vessel was in excellent overall condition, consistent with a vessel that had been meticulously maintained and well equipped.`;
     } else if (_oc.includes('above average')) {
       return ` At the time of the survey the vessel was in above-average overall condition, having received above-average care.`;
     } else if (_oc.includes('average')) {
-      return ` At the time of the survey the vessel was in average overall condition, ready for use and normally equipped for its size. The reader is directed to the Findings and Recommendations section for items requiring attention.`;
+      return ` At the time of the survey the vessel was in average overall condition, ready for use and normally equipped for its size. The reader was directed to the Findings and Recommendations section for items requiring attention.`;
     } else if (_oc.includes('fair')) {
-      return ` At the time of the survey the vessel was in fair overall condition with deficiencies noted. Corrective action is recommended before the vessel is placed into regular service.`;
+      return ` At the time of the survey the vessel was in fair overall condition with deficiencies noted. Corrective action was recommended before the vessel was placed into regular service.`;
     } else if (_oc.includes('poor')) {
-      return ` At the time of the survey the vessel was in poor overall condition with substantial work required. The reader is directed to the Findings and Recommendations section of this report for details.`;
+      return ` At the time of the survey the vessel was in poor overall condition with substantial work required. The reader was directed to the Findings and Recommendations section of this report for details.`;
     } else if (_oc.includes('restorable')) {
-      return ` At the time of the survey the vessel was in restorable condition, requiring significant restoration work before it can be returned to service.`;
+      return ` At the time of the survey the vessel was in restorable condition, requiring significant restoration work before it could be returned to service.`;
     } else {
       // Custom text entered — use it verbatim
       return ` At the time of the survey the vessel's overall condition was assessed as "${survey.overallCondition || document.getElementById('overallCondition')?.value || ''}".`;
@@ -12896,6 +12896,54 @@ function _refreshMastRigSentenceInDescription(survey, text) {
 
 function _descriptionAlreadyStatesCondition(text) {
   return /\b(overall condition|above[- ]average|average overall|excellent overall|fair overall|poor overall|restorable condition)\b/i.test(text || '');
+}
+
+function _syncConditionSentenceWithAssignedRating(survey, text) {
+  let next = String(text || '');
+  const fresh = _buildConditionSentence(survey).trim();
+  const followUp = '(?:The reader (?:is|was) directed|Corrective action (?:is|was) recommended)';
+  const conditionTerms = '(?:excellent|bristol|above[- ]average|average|fair|poor)';
+  const patterns = [
+    new RegExp(`\\s*At the time of(?: the)? survey,?\\s+[^.]*\\b${conditionTerms}\\b[^.]*overall condition[^.]*\\.(?:\\s+${followUp}[^.]*\\.)*`, 'gi'),
+    new RegExp(`\\s*At the time of(?: the)? survey,?\\s+[^.]*\\brestorable condition[^.]*\\.(?:\\s+${followUp}[^.]*\\.)*`, 'gi'),
+    /\s*The vessel was found to be in (?:excellent|above[- ]average|average|fair|poor) overall condition[^.]*\./gi
+  ];
+  for (const pattern of patterns) {
+    next = next.replace(pattern, ' ');
+  }
+  next = next.replace(/\s{2,}/g, ' ').trim();
+  return fresh ? `${next}${next ? ' ' : ''}${fresh}` : next;
+}
+
+function _extractConductivityReadingRange(text) {
+  let working = String(text || '');
+  working = working.replace(/\b(?:relative\s+)?(?:scale\s+of\s+)?0\s*(?:to|-)\s*999\b/gi, ' ');
+  const nums = (working.match(/\b\d{1,3}\b/g) || [])
+    .map(n => parseInt(n, 10))
+    .filter(n => Number.isFinite(n) && n >= 0 && n <= 999);
+  if (nums.length === 0) return null;
+  return { low: Math.min(...nums), high: Math.max(...nums) };
+}
+
+function _ensureConductivityRangeInText(label, text) {
+  const raw = String(text || '').trim();
+  if (!raw || !/conductivity/i.test(`${label || ''} ${raw}`)) return raw;
+  if (/\b(?:recorded\s+)?conductivity range\b/i.test(raw)
+      || /\breadings?\s+(?:were\s+found\s+to\s+be\s+)?between\s+\d{1,3}\s+and\s+\d{1,3}\b/i.test(raw)
+      || /\breadings?\s+(?:range|ranged)\s+(?:from\s+)?\d{1,3}\s+to\s+\d{1,3}\b/i.test(raw)) {
+    return raw;
+  }
+  const range = _extractConductivityReadingRange(raw);
+  if (!range) return raw;
+  const sentence = `The recorded conductivity range was ${range.low} to ${range.high}.`;
+  let next = raw.replace(/\s*Representative readings were approximately\s+\d{1,3}\s*\.?/gi, ' ');
+  const scaleSentence = /(\b[^.]*relative scale of 0 to 999\.)/i;
+  if (scaleSentence.test(next)) {
+    next = next.replace(scaleSentence, `$1 ${sentence}`);
+  } else {
+    next = `${sentence} ${next}`;
+  }
+  return next.replace(/\s{2,}/g, ' ').trim();
 }
 
 function _shortSafetyPhotoCaption(name, idx, total) {
@@ -23585,16 +23633,8 @@ async function generateReport() {
   if (survey.descriptionAutoGenerated !== false) {
     _refreshedDesc = _refreshMastRigSentenceInDescription(survey, _refreshedDesc);
   }
-  if (survey.descriptionAutoGenerated !== false && _refreshedDesc && (survey.overallCondition || (survey.items && Object.keys(survey.items).length))) {
-    let _fresh = _buildConditionSentence(survey);
-    // Strip any existing " At the time of the survey…" tail (spans 1–2 sentences).
-    const _tailRE = /\s*At the time of the survey[\s\S]*$/;
-    if (_tailRE.test(_refreshedDesc)) {
-      _refreshedDesc = _refreshedDesc.replace(_tailRE, '').trimEnd();
-    } else if (_descriptionAlreadyStatesCondition(_refreshedDesc)) {
-      _fresh = '';
-    }
-    _refreshedDesc = _refreshedDesc + _fresh;
+  if (_refreshedDesc && (survey.overallCondition || _descriptionAlreadyStatesCondition(_refreshedDesc))) {
+    _refreshedDesc = _syncConditionSentenceWithAssignedRating(survey, _refreshedDesc);
   }
   survey.vesselDescription = _refreshedDesc;
 
@@ -24142,7 +24182,7 @@ async function generateReport() {
   ${coverPhotoDataUrl ? `
   <div style="text-align:center; margin: 24px auto; max-width: 700px;">
     <img src="${coverPhotoDataUrl}" alt="Vessel Photo"
-         style="width:100%; max-height:400px; object-fit:cover; border:2px solid #066aab; border-radius:4px;" />
+         style="max-width:100%; max-height:650px; width:auto; height:auto; object-fit:contain; border:2px solid #066aab; border-radius:4px;" />
   </div>` : ''}
 
   <table style="margin-top: 20px; border: 2px solid #066aab;">
@@ -24736,6 +24776,7 @@ ${(() => {
               mastOptionsHtml = `<p><em>Mast type: ${esc(parts.join(', '))}</em></p>`;
             }
           }
+          const detailedItemText = _ensureConductivityRangeInText(item.label, itemData.text || '');
 
           html += `
   <div class="item" style="border-left-color: ${RATING_COLORS[ratingLabel] || '#066aab'};">
@@ -24743,7 +24784,7 @@ ${(() => {
     ${outdriveInfoHtml}
     ${winchInfoHtml}
     ${mastOptionsHtml}
-    ${itemData.text ? `<p>${esc(pluralizeRudder(cleanupTypos(depersonalise(dedup(itemData.text))), survey.rudderCount))}</p>` : ''}
+    ${detailedItemText ? `<p>${esc(pluralizeRudder(cleanupTypos(depersonalise(dedup(detailedItemText))), survey.rudderCount))}</p>` : ''}
     ${(() => {
       if (!(ratingLabel.startsWith('A') || ratingLabel.startsWith('B'))) return '';
       const _merged = mergeTextStandards(itemData.standards, itemData.text);
@@ -25004,7 +25045,8 @@ ${(() => {
   // once, not twice). v2240 note preserved: no "See full observation…"
   // cross-reference — the reader can locate the item by code.
   function renderFinding(f, color, severity) {
-    const cleaned = pluralizeRudder(cleanupTypos(depersonalise(dedup(f.text || ''))), survey.rudderCount);
+    const findingText = _ensureConductivityRangeInText(f.label, f.text || '');
+    const cleaned = pluralizeRudder(cleanupTypos(depersonalise(dedup(findingText))), survey.rudderCount);
     const { body, action } = extractActionFromObservation(cleaned);
     return `<div class="finding-section" style="margin-bottom:10px;padding-left:8px;border-left:3px solid ${color};">
       <strong style="color:${color};">Finding ${f.code}</strong> — ${esc(displayItemLabel(f.label, survey))}
