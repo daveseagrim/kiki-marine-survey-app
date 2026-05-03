@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2515';
+const APP_VERSION = 'v2516';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4087,6 +4087,15 @@ async function getPhotoById(photoId) {
   });
 }
 
+function showMissingPhotoDataMessage(photoId) {
+  const shortId = String(photoId || '').slice(0, 24);
+  showAlert(
+    'This photo is linked to the survey, but the image data is not available on this device.\n\n' +
+    'If this is Dash, import the full JSON/photo export again or pull/recover photos from the device that still has them.\n\n' +
+    (shortId ? `Photo ID: ${shortId}` : '')
+  );
+}
+
 async function deletePhoto(photoId) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(['photos'], 'readwrite');
@@ -6898,11 +6907,16 @@ function showMediaSheet(itemLabel, categoryName) {
       (itemData.photos || []).forEach((photoId, idx) => {
         // v2306: each thumbnail wrapped in a container with rotate/delete buttons
         photosHtml += `
-          <div style="position:relative;display:none;" data-photo-idx="${idx}">
+          <div style="position:relative;display:block;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:8px;min-height:72px;overflow:hidden;cursor:pointer;" data-photo-idx="${idx}"
+               onclick="showPhotoActionOverlay('${photoId}', '${safeLabel}', '${safeCat}')">
             <img id="sheet-thumb-${photoId}" src=""
                  title="Drag to reorder \u2022 Tap to edit"
-                 style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;"
-                 onclick="showPhotoActionOverlay('${photoId}', '${safeLabel}', '${safeCat}')" />
+                 style="display:none;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;"
+                 onclick="event.stopPropagation();showPhotoActionOverlay('${photoId}', '${safeLabel}', '${safeCat}')" />
+            <div id="sheet-missing-${photoId}"
+                 style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#64748b;font-size:10px;font-weight:700;line-height:1.25;padding:6px;">
+              <span style="font-size:20px;">📷</span><span>Loading</span>
+            </div>
             <span onclick="event.stopPropagation();_sheetRotatePhoto('${photoId}','${safeLabel}','${safeCat}')"
                   style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,0.55);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;min-height:20px;max-width:20px;max-height:20px;font-size:11px;line-height:20px;text-align:center;cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box;backdrop-filter:blur(2px);-webkit-text-size-adjust:none;-webkit-tap-highlight-color:transparent;">↻</span>
             <span onclick="event.stopPropagation();_sheetDeletePhoto('${photoId}','${safeLabel}','${safeCat}')"
@@ -6955,11 +6969,22 @@ function showMediaSheet(itemLabel, categoryName) {
           const img = document.getElementById(`sheet-thumb-${photoId}`);
           if (photo && photo.dataUrl && img) {
             img.src = photo.dataUrl;
-            // v2316: wrapper starts hidden — show only when data loads
+            img.style.display = 'block';
+            const missing = document.getElementById(`sheet-missing-${photoId}`);
+            if (missing) missing.style.display = 'none';
+            // v2516: wrapper stays visible so linked-but-missing images are
+            // obvious instead of silently disappearing from the edit UI.
             const wrapper = img.closest('[data-photo-idx]');
-            if (wrapper) wrapper.style.display = '';
+            if (wrapper) {
+              wrapper.style.background = 'transparent';
+              wrapper.style.border = 'none';
+            }
+          } else {
+            const missing = document.getElementById(`sheet-missing-${photoId}`);
+            if (missing) {
+              missing.innerHTML = '<span style="font-size:20px;">⚠️</span><span>Linked<br>image missing</span>';
+            }
           }
-          // Otherwise wrapper stays hidden (default since v2316)
         });
       });
       // Wire drag-to-reorder on the thumbnail grid (v2162)
@@ -6974,7 +6999,10 @@ function showMediaSheet(itemLabel, categoryName) {
 // old inline red × and Move ↗ buttons with a clean lightbox-style overlay.
 async function showPhotoActionOverlay(photoId, itemLabel, categoryName) {
   const photo = await getPhotoById(photoId);
-  if (!photo) return;
+  if (!photo || !photo.dataUrl) {
+    showMissingPhotoDataMessage(photoId);
+    return;
+  }
 
   // Get all photos for this item so we can add prev/next navigation
   const survey = await getSurvey(currentSurveyId);
@@ -7023,6 +7051,10 @@ async function showPhotoActionOverlay(photoId, itemLabel, categoryName) {
     _paoCurrentIdx = idx;
     _paoCurrentPhotoId = allPhotoIds[idx];
     const p = await getPhotoById(_paoCurrentPhotoId);
+    if (!p || !p.dataUrl) {
+      showMissingPhotoDataMessage(_paoCurrentPhotoId);
+      return;
+    }
     const img = document.getElementById('pao-img');
     if (img && p) {
       img.style.opacity = '0.3';
@@ -20262,7 +20294,10 @@ function moveAreaPhoto(photoId, sourceMediaLabel, sourceCategoryName) {
 // Open edit modal for an already-saved photo (tap thumbnail to edit)
 async function editSavedPhoto(photoId, itemLabel) {
   const photo = await getPhotoById(photoId);
-  if (!photo) return;
+  if (!photo || !photo.dataUrl) {
+    showMissingPhotoDataMessage(photoId);
+    return;
+  }
 
   // Close any open bottom sheet first so it doesn't interfere with the preview modal
   const bottomSheet = document.getElementById('bottomSheetOverlay');
@@ -21704,7 +21739,7 @@ function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
   const notePreview = hasNotes ? escapeHtml(itemData.text.trim()) : '';
 
   // Compact card row: label + photo count badge + rating badge
-  const photoBadge = photoCount > 0 ? `<span style="display:inline-flex;align-items:center;gap:2px;background:#e0f2fe;color:#0369a1;font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;white-space:nowrap;vertical-align:middle;margin-left:4px;">📷${photoCount}</span>` : '';
+  const photoBadge = photoCount > 0 ? `<button type="button" onclick="event.stopPropagation();showMediaSheet('${safeLabel}', '${safeCat}')" title="Open photos" style="-webkit-appearance:none;appearance:none;border:0;display:inline-flex;align-items:center;gap:2px;background:#e0f2fe;color:#0369a1;font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;white-space:nowrap;vertical-align:middle;margin-left:4px;cursor:pointer;">📷${photoCount}</button>` : '';
   let html = `
     <div class="compact-item ${isExcluded ? 'excluded' : ''} ${isFlagged ? 'flagged' : ''}">
       <div class="compact-item-label ${isExcluded ? 'struck' : ''}">
@@ -21742,7 +21777,7 @@ function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
   if (photoCount > 0) {
     html += `<div class="compact-photo-thumbs" style="display:flex;gap:4px;padding:2px 12px 4px 12px;flex-wrap:wrap;">`;
     itemData.photos.forEach(pid => {
-      html += `<img id="thumb-${pid}" src="" style="width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid #ddd;cursor:pointer;display:none;" onclick="showMediaSheet('${safeLabel}', '${safeCat}')" />`;
+      html += `<img id="thumb-${pid}" src="" style="width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid #ddd;cursor:pointer;display:none;" onclick="showPhotoActionOverlay('${pid}', '${safeLabel}', '${safeCat}')" />`;
     });
     html += `</div>`;
   }

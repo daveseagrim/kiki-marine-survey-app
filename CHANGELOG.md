@@ -1,3 +1,9 @@
+## v2516
+- Made linked photo counts open the photo sheet directly.
+- Collapsed item thumbnails now open the photo viewer/editor directly.
+- Photo sheets now show a clear missing-image placeholder instead of silently hiding linked photos when the image data is not on the device.
+- Added a plain warning when a linked photo cannot be opened because the image data is missing locally.
+
 ## v2515
 - Google Drive backups now route to Dave's 2026 survey archive: `Boating / kiki marine / surveys 2026 / surveys / 2026 / in progress` or `completed`.
 - Folder matching tolerates leading order numbers, so `01 completed` still matches `completed`.
