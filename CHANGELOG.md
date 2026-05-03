@@ -1,3 +1,8 @@
+## v2523
+- Enlarged and rebalanced the report title page so it fills page 1 instead of clustering at the top.
+- Kept the running Kiki Marine footer on page 1 and every page.
+- Preserved the page 2 start at Vessel overview photographs.
+
 ## v2522
 - Tightened the report cover again so the details table no longer spills the Surveyor row onto page 2.
 - Kept the standard Kiki Marine running footer on page 1 and every page.

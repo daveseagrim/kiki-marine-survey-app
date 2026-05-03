@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2522';
+const APP_VERSION = 'v2523';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -24636,41 +24636,48 @@ async function generateReport() {
         min-height: calc(11in - 20mm);
         display: flex;
         flex-direction: column;
+        justify-content: flex-start;
         page-break-after: always;
         break-after: page;
       }
       .report-cover-title { padding-top: 0 !important; }
-      .report-cover-title img { max-width: 2.05in !important; }
+      .report-cover-title img { max-width: 3.6in !important; }
       .report-cover-title h1 {
-        font-size: 13pt !important;
-        margin: 4px 0 1px 0 !important;
+        font-size: 17pt !important;
+        margin: 5px 0 2px 0 !important;
         padding-bottom: 0 !important;
       }
       .report-cover-title p {
-        font-size: 8.4pt !important;
+        font-size: 10pt !important;
         margin: 0 !important;
       }
       .report-cover-photo-wrap {
-        margin: 5px auto 5px auto !important;
-        max-width: 6.45in !important;
+        flex: 1 1 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 0.12in auto 0.12in auto !important;
+        max-width: 7.0in !important;
+        min-height: 3.25in !important;
       }
       .report-cover-photo {
-        max-height: 2.45in !important;
+        max-height: 5.15in !important;
         max-width: 100% !important;
         width: auto !important;
         height: auto !important;
         object-fit: contain !important;
       }
       .cover-summary-table {
-        margin-top: 4px !important;
-        margin-bottom: 4px !important;
+        flex: 0 0 auto !important;
+        margin-top: 0 !important;
+        margin-bottom: 0.1in !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
       }
       .cover-summary-table td {
-        padding: 2px 5px !important;
-        font-size: 8.4pt !important;
-        line-height: 1.12 !important;
+        padding: 5px 7px !important;
+        font-size: 9.7pt !important;
+        line-height: 1.2 !important;
       }
       .cover-company-footer {
         display: none !important;
