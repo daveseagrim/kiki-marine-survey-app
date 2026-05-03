@@ -67,7 +67,28 @@
     return { toUpload, toSkip, missingData };
   }
 
-  const API = { photoFilename, classifyPhotosForBackup };
+  function folderMatchKeys(name) {
+    const base = String(name || '')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim();
+    const stripped = base
+      .replace(/^\d+\s*[-_.:)]?\s*/, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return stripped && stripped !== base ? [base, stripped] : [base];
+  }
+
+  function driveFolderNameMatches(actualName, targetName) {
+    const target = String(targetName || '')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!target) return false;
+    return folderMatchKeys(actualName).includes(target);
+  }
+
+  const API = { photoFilename, classifyPhotosForBackup, folderMatchKeys, driveFolderNameMatches };
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = API;

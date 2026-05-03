@@ -1,3 +1,10 @@
+## v2515
+- Google Drive backups now route to Dave's 2026 survey archive: `Boating / kiki marine / surveys 2026 / surveys / 2026 / in progress` or `completed`.
+- Folder matching tolerates leading order numbers, so `01 completed` still matches `completed`.
+- Mark Completed now uploads the survey JSON and photos to the completed Drive folder, with photos in a separate `photos` subfolder.
+- PDF upload is still manual from the Report screen because the browser print dialog does not give the app a PDF file to upload.
+- Verified: `node tests/run_tests.js` — 111 tests passed; `node --check app.js` — passed.
+
 ## v2514
 - Added a **Transfer to laptop** workflow: exports the survey with photos, then locks the phone/device copy so it cannot overwrite laptop edits later.
 - Added a **Mark completed** workflow: exports the final JSON/photo package, marks the survey completed, and locks it against later accidental edits.

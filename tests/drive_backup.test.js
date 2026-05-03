@@ -37,6 +37,25 @@ describe('photoFilename', () => {
   });
 });
 
+describe('driveFolderNameMatches', () => {
+  const { driveFolderNameMatches } = require('../src/core/drive_backup');
+
+  it('matches exact folder names', () => {
+    assert.truthy(driveFolderNameMatches('completed', 'completed'));
+  });
+
+  it('matches folders with leading ordering numbers', () => {
+    assert.truthy(driveFolderNameMatches('01 completed', 'completed'));
+    assert.truthy(driveFolderNameMatches('2 - in progress', 'in progress'));
+    assert.truthy(driveFolderNameMatches('03_surveys', 'surveys'));
+  });
+
+  it('does not strip meaningful year-only folder names', () => {
+    assert.truthy(driveFolderNameMatches('2026', '2026'));
+    assert.truthy(driveFolderNameMatches('04 2026', '2026'));
+  });
+});
+
 describe('classifyPhotosForBackup', () => {
   it('puts all photos in toUpload when Drive folder is empty', () => {
     const photos = [

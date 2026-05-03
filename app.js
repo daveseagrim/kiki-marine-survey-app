@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2514';
+const APP_VERSION = 'v2515';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4263,6 +4263,76 @@ async function exportSurvey(surveyId) {
   }
 }
 
+async function _backupCompletedSurveyToDrive(surveyId) {
+  if (typeof DriveBackup === 'undefined') {
+    return { ok: false, message: 'Google Drive backup is not available in this build.' };
+  }
+
+  const survey = await getSurvey(surveyId);
+  const vesselName = (survey && survey.vesselName) || 'this survey';
+
+  if (!DriveBackup.isSignedIn()) {
+    try {
+      sessionStorage.setItem('_pendingCompletedDriveBackup', String(surveyId));
+    } catch (_) {}
+    await DriveBackup.signIn();
+    if (!DriveBackup.isSignedIn()) {
+      return {
+        ok: false,
+        pending: true,
+        message: 'Google Drive sign-in is pending. The completed backup will continue after sign-in returns to the app.'
+      };
+    }
+  }
+
+  try {
+    sessionStorage.removeItem('_pendingCompletedDriveBackup');
+  } catch (_) {}
+
+  BackupProgress.show();
+  BackupProgress.update({
+    surveyLabel: `Completed archive: ${vesselName}`,
+    stepLabel: 'Preparing Google Drive completed folder…',
+    percent: 0
+  });
+
+  try {
+    const result = await DriveBackup.backupSurvey(
+      surveyId,
+      (update) => BackupProgress.update(update),
+      () => BackupProgress.isCancelled()
+    );
+    const totalPhotos = (result && result.totalPhotos) || 0;
+    BackupProgress.finish({
+      title: '✓ Completed archive uploaded',
+      subtitle: `JSON and ${totalPhotos} photo${totalPhotos === 1 ? '' : 's'} saved to the completed folder. PDF still needs to be saved from the report screen.`,
+      success: true
+    });
+    return { ok: true, result };
+  } catch (err) {
+    if (err && err.driveApiDisabled) {
+      BackupProgress.hide();
+      showDriveApiDisabledDialog(err.activationUrl, 0, 1);
+    } else {
+      BackupProgress.finish({
+        title: '⚠ Completed Drive backup failed',
+        subtitle: err && err.message ? err.message : String(err),
+        success: false
+      });
+    }
+    return { ok: false, message: err && err.message ? err.message : String(err) };
+  }
+}
+
+async function _resumePendingCompletedDriveBackup() {
+  let surveyId = '';
+  try {
+    surveyId = sessionStorage.getItem('_pendingCompletedDriveBackup') || '';
+  } catch (_) {}
+  if (!surveyId || typeof DriveBackup === 'undefined' || !DriveBackup.isSignedIn()) return;
+  await _backupCompletedSurveyToDrive(surveyId);
+}
+
 async function transferSurveyToLaptop(surveyId) {
   const survey = await getSurvey(surveyId);
   if (!survey) { showAlert('Survey not found.'); return; }
@@ -4301,6 +4371,7 @@ async function transferSurveyToLaptop(surveyId) {
 }
 
 async function markSurveyCompleted(surveyId) {
+  if (currentSurveyId === surveyId) await saveAllInspectionData();
   const survey = await getSurvey(surveyId);
   if (!survey) { showAlert('Survey not found.'); return; }
   const name = survey.vesselName || 'this survey';
@@ -4311,18 +4382,12 @@ async function markSurveyCompleted(surveyId) {
 
   const ok = await showConfirm(
     `<strong>Mark "${name}" completed?</strong><br><br>` +
-    `This will export a final JSON package with all photos and then lock the survey so it cannot be accidentally changed or overwritten by a field device.<br><br>` +
-    `For now, save the final PDF from the report screen as usual. The Drive completed-survey folder upload will be wired after the Drive folder structure is finalized.`,
+    `This will lock the survey, export a final JSON package with all photos, and upload the JSON/photos to the Google Drive completed folder when Drive is connected.<br><br>` +
+    `The final PDF still has to be saved from the report screen because the browser print dialog does not give the app a PDF file to upload.`,
     'Complete',
     'Cancel'
   );
   if (!ok) return;
-
-  const exported = await exportSurvey(surveyId);
-  if (!exported || !exported.ok) {
-    if (!exported || !exported.cancelled) showAlert('Completion stopped because the final JSON export did not complete.');
-    return;
-  }
 
   survey.workflowStatus = 'completed';
   survey.completedAt = new Date().toISOString();
@@ -4331,7 +4396,27 @@ async function markSurveyCompleted(surveyId) {
   survey.deliveredAt = survey.completedAt;
   survey.lockedReason = 'Completed survey archive created';
   await saveSurvey(_allowWorkflowSave(survey));
-  showAlert(`"${name}" is now completed and locked.\n\nThe final JSON/photo package was exported. Generate the report PDF from the Report screen and save it with the survey archive.`);
+
+  let exportLine = 'Local JSON/photo export was not completed.';
+  try {
+    const exported = await exportSurvey(surveyId);
+    if (exported && exported.ok) exportLine = `Local JSON/photo export created: ${exported.filename || 'download/share file'}.`;
+    else if (exported && exported.cancelled) exportLine = 'Local JSON/photo export was cancelled.';
+  } catch (err) {
+    exportLine = `Local JSON/photo export failed: ${err && err.message ? err.message : err}`;
+  }
+
+  const driveResult = await _backupCompletedSurveyToDrive(surveyId);
+  let driveLine = 'Google Drive completed backup was not run.';
+  if (driveResult && driveResult.ok) {
+    driveLine = 'Google Drive completed backup uploaded the JSON and photos.';
+  } else if (driveResult && driveResult.pending) {
+    driveLine = 'Google Drive sign-in started; the completed backup will resume after sign-in returns to the app.';
+  } else if (driveResult && driveResult.message) {
+    driveLine = `Google Drive completed backup failed: ${driveResult.message}`;
+  }
+
+  showAlert(`"${name}" is now completed and locked.\n\n${exportLine}\n${driveLine}\n\nSave the final PDF from the Report screen.`);
   if (currentView === 'surveys') renderHome();
 }
 
@@ -26795,9 +26880,16 @@ function showDriveApiDisabledDialog(activationUrl, done, total) {
 
 const DriveBackup = (() => {
   let _accessToken = null;
-  let _backupFolderId = null;  // "Kiki Marine Survey Backups" folder on Drive
-  const FOLDER_NAME = 'Kiki Marine Survey Backups';
-  const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+  const DRIVE_FOLDER_MIME = 'application/vnd.google-apps.folder';
+  const DRIVE_ROOT_PATH = ['Boating', 'kiki marine'];
+  const DRIVE_BASE_FOLDER = 'surveys 2026';
+  const DRIVE_YEAR_PATH = ['surveys', '2026'];
+  const DRIVE_WORKFLOW_FOLDERS = {
+    inProgress: 'in progress',
+    completed: 'completed'
+  };
+  const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
+  const _workflowFolderCache = {};
 
   function isSignedIn() {
     return !!_accessToken;
@@ -26812,6 +26904,7 @@ const DriveBackup = (() => {
       try {
         localStorage.setItem('_driveToken', _accessToken);
         localStorage.setItem('_driveTokenTime', String(window._driveTokenTime || Date.now()));
+        localStorage.setItem('_driveScope', DRIVE_SCOPE);
       } catch (e) { /* swallow — localStorage full or private browsing */ }
     }
   }
@@ -26819,6 +26912,13 @@ const DriveBackup = (() => {
     try {
       const saved = localStorage.getItem('_driveToken');
       const savedTime = parseInt(localStorage.getItem('_driveTokenTime') || '0', 10);
+      const savedScope = localStorage.getItem('_driveScope') || '';
+      if (saved && savedScope !== DRIVE_SCOPE) {
+        localStorage.removeItem('_driveToken');
+        localStorage.removeItem('_driveTokenTime');
+        localStorage.removeItem('_driveScope');
+        return false;
+      }
       // Token is still valid if less than 55 minutes old (tokens last 1 hour)
       if (saved && savedTime && (Date.now() - savedTime) < 3300000) {
         _accessToken = saved;
@@ -26829,6 +26929,7 @@ const DriveBackup = (() => {
       // Expired — clear stale token
       localStorage.removeItem('_driveToken');
       localStorage.removeItem('_driveTokenTime');
+      localStorage.removeItem('_driveScope');
     } catch (e) { /* swallow */ }
     return false;
   }
@@ -26836,6 +26937,7 @@ const DriveBackup = (() => {
     try {
       localStorage.removeItem('_driveToken');
       localStorage.removeItem('_driveTokenTime');
+      localStorage.removeItem('_driveScope');
     } catch (e) { /* swallow */ }
   }
   // Attempt to restore on module load
@@ -26892,6 +26994,9 @@ const DriveBackup = (() => {
         _showDriveConnectedBanner();
         // Re-render home to show the updated Drive button state
         if (!currentSurveyId) renderHome();
+        if (typeof _resumePendingCompletedDriveBackup === 'function') {
+          setTimeout(() => _resumePendingCompletedDriveBackup(), 500);
+        }
       } else if (sessionStorage.getItem('_driveRedirectPending')) {
         // Redirect was initiated but no credential came back — clear the flag
         sessionStorage.removeItem('_driveRedirectPending');
@@ -27006,55 +27111,118 @@ const DriveBackup = (() => {
     setInterval(_proactiveRefreshIfNeeded, _PROACTIVE_HEARTBEAT);
   }
 
-  // Find or create the root backup folder on Drive
-  async function getOrCreateBackupFolder() {
-    if (_backupFolderId) return _backupFolderId;
-    const token = await ensureToken();
-
-    // Search for existing folder
-    const q = encodeURIComponent(`name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
-    const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const searchData = await searchRes.json();
-    if (searchData.files && searchData.files.length > 0) {
-      _backupFolderId = searchData.files[0].id;
-      return _backupFolderId;
-    }
-
-    // Create the folder
-    const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: FOLDER_NAME, mimeType: 'application/vnd.google-apps.folder' })
-    });
-    const createData = await createRes.json();
-    _backupFolderId = createData.id;
-    return _backupFolderId;
+  function _driveQueryValue(value) {
+    return String(value || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
   }
 
-  // Find or create a subfolder for a specific vessel inside the backup folder
-  async function getOrCreateVesselFolder(vesselName) {
+  function _folderNameMatches(actualName, targetName) {
+    const helper = window.KikiDriveBackup && window.KikiDriveBackup.driveFolderNameMatches;
+    if (typeof helper === 'function') return helper(actualName, targetName);
+    const target = String(targetName || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const base = String(actualName || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const stripped = base.replace(/^\d+\s*[-_.:)]?\s*/, '').replace(/\s+/g, ' ').trim();
+    return base === target || stripped === target;
+  }
+
+  async function _listChildFolders(parentId) {
     const token = await ensureToken();
-    const parentId = await getOrCreateBackupFolder();
-    const safeName = (vesselName || 'Unnamed').trim();
+    const parentClause = parentId ? `'${_driveQueryValue(parentId)}' in parents` : `'root' in parents`;
+    const q = encodeURIComponent(`${parentClause} and mimeType='${DRIVE_FOLDER_MIME}' and trashed=false`);
+    const folders = [];
+    let pageToken = null;
+    do {
+      const pageParam = pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : '';
+      const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=nextPageToken,files(id,name)&pageSize=1000${pageParam}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Drive folder search failed (${res.status}): ${errText}`);
+      }
+      const data = await res.json();
+      if (Array.isArray(data.files)) folders.push(...data.files);
+      pageToken = data.nextPageToken || null;
+    } while (pageToken);
+    return folders;
+  }
 
-    const q = encodeURIComponent(`name='${safeName.replace(/'/g, "\\'")}' and '${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`);
-    const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const searchData = await searchRes.json();
-    if (searchData.files && searchData.files.length > 0) {
-      return searchData.files[0].id;
-    }
+  async function _findDriveFolder(name, parentId) {
+    const folders = await _listChildFolders(parentId);
+    return folders.find(f => _folderNameMatches(f.name, name)) || null;
+  }
 
+  async function _createDriveFolder(name, parentId) {
+    const token = await ensureToken();
+    const metadata = { name, mimeType: DRIVE_FOLDER_MIME };
+    if (parentId) metadata.parents = [parentId];
     const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: safeName, mimeType: 'application/vnd.google-apps.folder', parents: [parentId] })
+      body: JSON.stringify(metadata)
     });
+    if (!createRes.ok) {
+      const errText = await createRes.text();
+      throw new Error(`Drive folder create failed (${createRes.status}): ${errText}`);
+    }
     const createData = await createRes.json();
+    if (!createData || !createData.id) throw new Error(`Drive folder create failed: missing id for ${name}`);
     return createData.id;
+  }
+
+  async function _getOrCreateFolderNamed(name, parentId) {
+    const existing = await _findDriveFolder(name, parentId);
+    if (existing && existing.id) return existing.id;
+    return _createDriveFolder(name, parentId);
+  }
+
+  async function _getOrCreateFolderPath(parts, parentId) {
+    let currentParent = parentId || null;
+    for (const part of parts) {
+      currentParent = await _getOrCreateFolderNamed(part, currentParent);
+    }
+    return currentParent;
+  }
+
+  async function _getOrCreateSurveyYearFolder() {
+    const rootId = await _getOrCreateFolderPath(DRIVE_ROOT_PATH, null);
+    const compactBaseFolder = await _findDriveFolder(DRIVE_BASE_FOLDER, rootId);
+    if (compactBaseFolder && compactBaseFolder.id) {
+      return _getOrCreateFolderPath(DRIVE_YEAR_PATH, compactBaseFolder.id);
+    }
+
+    const splitSurveyFolder = await _findDriveFolder(DRIVE_YEAR_PATH[0], rootId);
+    if (splitSurveyFolder && splitSurveyFolder.id) {
+      return _getOrCreateFolderPath([DRIVE_YEAR_PATH[1]], splitSurveyFolder.id);
+    }
+
+    const createdBaseFolderId = await _getOrCreateFolderNamed(DRIVE_BASE_FOLDER, rootId);
+    return _getOrCreateFolderPath(DRIVE_YEAR_PATH, createdBaseFolderId);
+    return _getOrCreateFolderPath(DRIVE_YEAR_PATH, rootId);
+  }
+
+  function _workflowFolderKeyForSurvey(survey) {
+    return _surveyWorkflowStatus(survey) === 'completed' ? 'completed' : 'inProgress';
+  }
+
+  // Find or create the workflow backup folder on Drive.
+  // Preferred path: Boating / kiki marine / surveys 2026 / surveys / 2026
+  // / completed|in progress. If Dave has already removed the compact
+  // "surveys 2026" folder and uses Boating / kiki marine / surveys / 2026,
+  // use that existing split path instead.
+  async function getOrCreateBackupFolder(survey) {
+    const key = _workflowFolderKeyForSurvey(survey || {});
+    if (_workflowFolderCache[key]) return _workflowFolderCache[key];
+    const yearFolderId = await _getOrCreateSurveyYearFolder();
+    const workflowFolderId = await _getOrCreateFolderNamed(DRIVE_WORKFLOW_FOLDERS[key], yearFolderId);
+    _workflowFolderCache[key] = workflowFolderId;
+    return workflowFolderId;
+  }
+
+  // Find or create a subfolder for a specific vessel inside the workflow folder
+  async function getOrCreateVesselFolder(vesselName, survey) {
+    const parentId = await getOrCreateBackupFolder(survey || {});
+    const safeName = (vesselName || 'Unnamed').trim();
+    return _getOrCreateFolderNamed(safeName, parentId);
   }
 
   // List all filenames already present in a Drive folder, as a Set.
@@ -27064,7 +27232,7 @@ const DriveBackup = (() => {
     const token = await ensureToken();
     const names = new Set();
     let pageToken = null;
-    const q = encodeURIComponent(`'${folderId}' in parents and trashed=false`);
+    const q = encodeURIComponent(`'${_driveQueryValue(folderId)}' in parents and trashed=false`);
     do {
       const pageParam = pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : '';
       const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=nextPageToken,files(name)&pageSize=1000${pageParam}`;
@@ -27144,13 +27312,17 @@ const DriveBackup = (() => {
     const report = (update) => { if (typeof onProgress === 'function') onProgress(update); };
 
     report({ surveyLabel: vesselName, stepLabel: 'Preparing vessel folder…', percent: 0 });
-    const folderId = await getOrCreateVesselFolder(vesselName);
+    const folderId = await getOrCreateVesselFolder(vesselName, survey);
+    const workflowKey = _workflowFolderKeyForSurvey(survey);
+    const photoFolderId = workflowKey === 'completed'
+      ? await _getOrCreateFolderNamed('photos', folderId)
+      : folderId;
 
     // B-01: scan Drive folder to see which photos are already uploaded
     report({ stepLabel: 'Checking Drive for existing photos…', percent: 1 });
     let existingFilenames = new Set();
     try {
-      existingFilenames = await listExistingFilenamesInFolder(folderId);
+      existingFilenames = await listExistingFilenamesInFolder(photoFolderId);
     } catch (listErr) {
       // If the list fails (e.g. Drive API disabled), propagate — this is the
       // same call type as upload, so failure here means upload will also fail.
@@ -27174,11 +27346,13 @@ const DriveBackup = (() => {
     const dateStr = new Date().toISOString().slice(0, 10);
     const surveyJsonName = `${vesselName.replace(/[^a-zA-Z0-9_-]/g, '_')}_${dateStr}.json`;
     const surveyJson = JSON.stringify(surveyClone, null, 2);
-    if (!existingFilenames.has(surveyJsonName)) {
+    const existingJsonId = await findFileInFolder(folderId, surveyJsonName);
+    if (existingJsonId) {
+      await updateFile(existingJsonId, 'application/json', surveyJson);
+      report({ detail: `✓ ${surveyJsonName} (updated)` });
+    } else {
       await uploadFile(folderId, surveyJsonName, 'application/json', surveyJson);
       report({ detail: `✓ ${surveyJsonName}` });
-    } else {
-      report({ detail: `⏭ ${surveyJsonName} (already on Drive today)` });
     }
 
     // 2. Collect photo IDs only (no image data in memory)
@@ -27250,7 +27424,7 @@ const DriveBackup = (() => {
         percent: Math.round(((processed - 0.5) / totalPhotos) * 100)
       });
 
-      await uploadFile(folderId, photoName, mimeType, photoBlob);
+      await uploadFile(photoFolderId, photoName, mimeType, photoBlob);
       photoBlob = null;
       uploaded++;
 
@@ -27276,12 +27450,15 @@ const DriveBackup = (() => {
     try {
       const survey = await getSurvey(photo.surveyId);
       const vesselName = (survey && survey.vesselName) || 'Unnamed';
-      const folderId = await getOrCreateVesselFolder(vesselName);
+      const folderId = await getOrCreateVesselFolder(vesselName, survey);
+      const photoFolderId = survey && _workflowFolderKeyForSurvey(survey) === 'completed'
+        ? await _getOrCreateFolderNamed('photos', folderId)
+        : folderId;
 
       const photoBlob = dataUrlToBlob(photo.dataUrl);
       const ext = photo.dataUrl.startsWith('data:image/png') ? '.png' : '.jpg';
       const photoName = (photo.label || photo.id || 'photo').replace(/[^a-zA-Z0-9_-]/g, '_') + ext;
-      await uploadFile(folderId, photoName, photoBlob.type, photoBlob);
+      await uploadFile(photoFolderId, photoName, photoBlob.type, photoBlob);
     } catch (err) {
       console.warn('[Drive] Single photo backup failed:', err.message);
     }
@@ -27383,7 +27560,7 @@ const DriveBackup = (() => {
   // ── v2253: Find a file by exact name in a Drive folder ──────────────
   async function findFileInFolder(folderId, fileName) {
     const token = await ensureToken();
-    const q = encodeURIComponent(`name='${fileName.replace(/'/g, "\\'")}' and '${folderId}' in parents and trashed=false`);
+    const q = encodeURIComponent(`name='${_driveQueryValue(fileName)}' and '${_driveQueryValue(folderId)}' in parents and trashed=false`);
     const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -27431,12 +27608,13 @@ const DriveBackup = (() => {
     const vesselName = survey.vesselName || 'Unnamed';
     const safeName = vesselName.replace(/[^a-zA-Z0-9_-]/g, '_');
     const fileName = `${safeName}_autosync.json`;
+    const folderCacheKey = `${_workflowFolderKeyForSurvey(survey)}::${vesselName}`;
 
     // 1. Get or create the vessel folder (cached after first call)
-    let folderId = _folderCache[vesselName];
+    let folderId = _folderCache[folderCacheKey];
     if (!folderId) {
-      folderId = await getOrCreateVesselFolder(vesselName);
-      _folderCache[vesselName] = folderId;
+      folderId = await getOrCreateVesselFolder(vesselName, survey);
+      _folderCache[folderCacheKey] = folderId;
     }
 
     // 2. Strip photo blobs from the clone (too large for JSON)
@@ -27453,10 +27631,10 @@ const DriveBackup = (() => {
     const json = JSON.stringify(clone, null, 2);
 
     // 3. Find existing autosync file (cached) or create new
-    let fileId = _autosyncFileCache[vesselName];
+    let fileId = _autosyncFileCache[folderCacheKey];
     if (!fileId) {
       fileId = await findFileInFolder(folderId, fileName);
-      if (fileId) _autosyncFileCache[vesselName] = fileId;
+      if (fileId) _autosyncFileCache[folderCacheKey] = fileId;
     }
 
     if (fileId) {
@@ -27465,7 +27643,7 @@ const DriveBackup = (() => {
     } else {
       // Create new file
       const created = await uploadFile(folderId, fileName, 'application/json', json);
-      if (created && created.id) _autosyncFileCache[vesselName] = created.id;
+      if (created && created.id) _autosyncFileCache[folderCacheKey] = created.id;
     }
   }
 
