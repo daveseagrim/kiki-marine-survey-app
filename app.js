@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2521';
+const APP_VERSION = 'v2522';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -24555,6 +24555,7 @@ async function generateReport() {
        — only the top-center running title is suppressed (cover already has
        its own title banner). */
     @page :first {
+      margin: 10mm 15mm 10mm 15mm;
       @top-center { content: none; }
     }
     @media print {
@@ -24632,51 +24633,47 @@ async function generateReport() {
     @media print {
       body { padding: 0; max-width: none; }
       .report-cover-page {
-        min-height: calc(11in - 50mm);
+        min-height: calc(11in - 20mm);
         display: flex;
         flex-direction: column;
         page-break-after: always;
         break-after: page;
       }
       .report-cover-title { padding-top: 0 !important; }
-      .report-cover-title img { max-width: 2.45in !important; }
+      .report-cover-title img { max-width: 2.05in !important; }
       .report-cover-title h1 {
-        font-size: 14pt !important;
-        margin: 6px 0 2px 0 !important;
+        font-size: 13pt !important;
+        margin: 4px 0 1px 0 !important;
         padding-bottom: 0 !important;
       }
       .report-cover-title p {
-        font-size: 9.2pt !important;
+        font-size: 8.4pt !important;
         margin: 0 !important;
       }
       .report-cover-photo-wrap {
-        margin: 8px auto 8px auto !important;
-        max-width: 6.9in !important;
+        margin: 5px auto 5px auto !important;
+        max-width: 6.45in !important;
       }
       .report-cover-photo {
-        max-height: 2.85in !important;
+        max-height: 2.45in !important;
         max-width: 100% !important;
         width: auto !important;
         height: auto !important;
         object-fit: contain !important;
       }
       .cover-summary-table {
-        margin-top: 6px !important;
-        margin-bottom: 6px !important;
+        margin-top: 4px !important;
+        margin-bottom: 4px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
       .cover-summary-table td {
-        padding: 3px 6px !important;
-        font-size: 9pt !important;
-        line-height: 1.22 !important;
+        padding: 2px 5px !important;
+        font-size: 8.4pt !important;
+        line-height: 1.12 !important;
       }
       .cover-company-footer {
-        margin-top: auto !important;
-        padding-top: 6px !important;
-      }
-      .cover-company-footer span { font-size: 8.8pt !important; }
-      .cover-company-footer p {
-        font-size: 7.8pt !important;
-        margin: 2px 0 0 0 !important;
+        display: none !important;
       }
       .overview-page-title {
         margin-top: 0 !important;

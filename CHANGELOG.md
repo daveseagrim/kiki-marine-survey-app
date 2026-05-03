@@ -1,3 +1,8 @@
+## v2522
+- Tightened the report cover again so the details table no longer spills the Surveyor row onto page 2.
+- Kept the standard Kiki Marine running footer on page 1 and every page.
+- Hid the duplicate in-body cover footer during printing and compacted the cover photo/details box for Chrome print-to-PDF.
+
 ## v2521
 - Made the report cover print as a true first page: title, full vessel photo, details box, and Kiki Marine company footer stay together.
 - Forced page 2 to begin with `Vessel overview photographs` at the top when overview photos are present.
