@@ -1,3 +1,8 @@
+## v2525
+- Fixed inspection-note saving so the phone notes sheet and the older inline notes field both flush into the local survey before Save, Home, report generation, or backup/export.
+- Notes now create the item record when text is entered before a rating is selected, preventing Windlass-style text from disappearing.
+- When both the inline row and the open phone notes sheet exist, the open notes sheet is treated as the live version.
+
 ## v2524
 - Fixed HIN, licence, and NMMA documentation photos so they print uncropped instead of using the cropped finding-photo thumbnail style.
 - Added safer wrapping for long HIN values in the cover details box.

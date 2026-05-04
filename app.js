@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2524';
+const APP_VERSION = 'v2525';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -5820,7 +5820,7 @@ function showNotesSheet(itemLabel, categoryName) {
         ${winchOptionsHtml}
         ${componentBuilderHtml}
         <div style="padding:12px 20px;">
-          <textarea id="sheet-text-${sanitizedLabel}" placeholder="Add inspection notes..." style="min-height:80px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;overflow:hidden;" spellcheck="true" autocorrect="off" autocapitalize="sentences" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';window._mainSheetToneCheck && window._mainSheetToneCheck(this);window._clearSheetCardHighlight && window._clearSheetCardHighlight(this);">${initialTextareaText}</textarea>
+          <textarea id="sheet-text-${sanitizedLabel}" data-item-label="${escapeHtml(itemLabel)}" placeholder="Add inspection notes..." style="min-height:80px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;overflow:hidden;" spellcheck="true" autocorrect="off" autocapitalize="sentences" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';window._mainSheetToneCheck && window._mainSheetToneCheck(this);window._clearSheetCardHighlight && window._clearSheetCardHighlight(this);">${initialTextareaText}</textarea>
           <div id="sheet-text-${sanitizedLabel}-tone" data-main-tone-warning="1" style="display:none;margin-top:6px;padding:8px 12px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;line-height:1.4;"></div>
           <div id="sheet-text-${sanitizedLabel}-chipstrip" style="display:none;flex-wrap:wrap;gap:6px;margin-top:6px;padding:8px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;"></div>
         </div>
@@ -22156,7 +22156,7 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options, su
   html += `
     <div class="form-group">
       <label class="form-label">Notes / Description</label>
-      <textarea id="text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Add inspection notes..." style="min-height: 80px;" autocapitalize="sentences" onblur="autoSaveItemText('${safeLabel}', '${safeCat}')" oninput="checkFirstPerson(this)">${itemData.text || ''}</textarea>
+      <textarea id="text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}" data-item-label="${escapeHtml(itemLabel)}" placeholder="Add inspection notes..." style="min-height: 80px;" autocapitalize="sentences" onblur="autoSaveItemText('${safeLabel}', '${safeCat}')" oninput="checkFirstPerson(this)">${itemData.text || ''}</textarea>
       <div id="text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}-fp-warn" style="display:none;padding:6px 10px;margin-top:4px;background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;">⚠️ First-person language detected — the report will auto-convert to third person (e.g. "I was" → "the surveyor was").</div>
       <div id="text-${itemLabel.replace(/[^a-zA-Z0-9]/g, '_')}-chipstrip" style="display:none;flex-wrap:wrap;gap:6px;margin-top:6px;padding:8px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;"></div>
     </div>
@@ -23938,6 +23938,61 @@ async function deleteSurveyConfirm(surveyId) {
   renderHome();
 }
 
+function _kkTemplateLabelsForSurvey(survey) {
+  const labels = [];
+  const seen = new Set();
+  const addLabel = (label) => {
+    if (!label || seen.has(label)) return;
+    seen.add(label);
+    labels.push(label);
+  };
+
+  try {
+    const template = getTemplateForSurvey(survey) || [];
+    template.forEach(section => {
+      (section.categories || []).forEach(category => {
+        (category.items || []).forEach(item => {
+          if (item && item.label) addLabel(item.label);
+        });
+      });
+    });
+  } catch (_) {}
+
+  Object.keys((survey && survey.items) || {}).forEach(addLabel);
+  return labels;
+}
+
+function _kkItemLabelForNotesTextarea(textarea, survey) {
+  if (!textarea) return '';
+  const directLabel = textarea.getAttribute('data-item-label');
+  if (directLabel) return directLabel;
+
+  const wrapper = textarea.closest && textarea.closest('[data-item-label]');
+  const wrapperLabel = wrapper && wrapper.getAttribute('data-item-label');
+  if (wrapperLabel) return wrapperLabel;
+
+  const id = textarea.id || '';
+  const safeId = id.startsWith('sheet-text-')
+    ? id.slice('sheet-text-'.length)
+    : id.startsWith('text-')
+      ? id.slice('text-'.length)
+      : '';
+  if (!safeId) return '';
+
+  return _kkTemplateLabelsForSurvey(survey).find(label =>
+    String(label).replace(/[^a-zA-Z0-9]/g, '_') === safeId
+  ) || '';
+}
+
+function _kkTextFromNotesTextarea(textarea) {
+  const raw = (typeof finalizeSnippetText === 'function')
+    ? finalizeSnippetText(textarea)
+    : (textarea ? textarea.value : '');
+  return (typeof applyWritingFixups === 'function')
+    ? applyWritingFixups(String(raw || '').trim())
+    : String(raw || '').trim();
+}
+
 // Save all unsaved inspection data (text areas, bilge pumps, comparables, safety items)
 async function saveAllInspectionData() {
   if (!currentSurveyId) return false;
@@ -23946,18 +24001,31 @@ async function saveAllInspectionData() {
 
   let changed = false;
 
-  // Save all item text areas that have content
-  document.querySelectorAll('textarea[id^="text-"]').forEach(textarea => {
-    const safeId = textarea.id.replace('text-', '');
-    // Find the matching item label by checking all items
-    for (const [label, data] of Object.entries(survey.items || {})) {
-      if (label.replace(/[^a-zA-Z0-9]/g, '_') === safeId) {
-        if (data.text !== textarea.value) {
-          data.text = textarea.value;
-          changed = true;
-        }
-        break;
-      }
+  // Save all visible item note fields. The older inline fields use text-*;
+  // the phone bottom sheet uses sheet-text-*. When both are present for the
+  // same item, the open bottom sheet wins because it is the live edit.
+  const notesByLabel = new Map();
+  document.querySelectorAll('textarea[id^="text-"], textarea[id^="sheet-text-"]').forEach(textarea => {
+    const label = _kkItemLabelForNotesTextarea(textarea, survey);
+    if (!label) return;
+    const existing = notesByLabel.get(label);
+    const isSheet = (textarea.id || '').startsWith('sheet-text-');
+    const existingIsSheet = existing && (existing.id || '').startsWith('sheet-text-');
+    if (!existing || isSheet || !existingIsSheet) {
+      notesByLabel.set(label, textarea);
+    }
+  });
+
+  notesByLabel.forEach((textarea, label) => {
+    const text = _kkTextFromNotesTextarea(textarea);
+    if (!survey.items[label]) {
+      if (!text) return;
+      survey.items[label] = { rating: '', text: '', standards: [], photos: [] };
+    }
+    if (survey.items[label].text !== text) {
+      survey.items[label].text = text;
+      _syncEngineFieldsFromBody(survey, label, text);
+      changed = true;
     }
   });
 

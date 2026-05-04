@@ -10,43 +10,22 @@ currently pulling on.
 
 ---
 
-## Current thread — 2026-04-19 (post v2403)
+## Current thread — 2026-05-04 (post v2525)
 
 ### Last shipped
-**v2403 — Photo-capture hang hardening.** Added `try/catch` in async
-`FileReader.onload` bodies and `reader.onerror` handlers at six capture
-sites: `capturePhoto`, `handleAreaPhotoCapture`, `rapidCaptureInstruments`,
-`addInstrumentByPhoto`, `captureDocPhoto`, safety-equipment handler. A
-corrupt HEIC or transient iOS memory error no longer wedges the "Saving
-X photos…" loop — a warning toast fires and the loop moves on.
+**v2525 — Notes save-path hardening.** `saveAllInspectionData()` now flushes
+both inline `text-*` and phone bottom-sheet `sheet-text-*` note fields, creates
+an item record when notes are entered before a rating is selected, and lets the
+open phone notes sheet win over any stale inline row for the same item.
 
 ### What's next
-**v2404 — Save-path completion flush.** Companion to v2403. Close the
-stale-save gap in the two save entry points plus the iOS tab-suspend
-gap.
-
-Plan for v2404:
-1. In `saveEverywhere()` at `app.js:3022` — if `currentView === 'inspection'`,
-   `await saveAllInspectionData()` before `await getSurvey(currentSurveyId)`.
-   The current code (lines 3030–3033) fetches the survey from IDB without
-   first flushing DOM textareas/inputs → stale write.
-2. Same fix in `saveSurveyWithProgress()` at `app.js:3270` — flush before
-   the `await getSurvey(...)` at line 3276 (or at least before the else
-   branch's `saveSurvey(survey)` at line 3301).
-3. Add a `pagehide` / `visibilitychange` listener at app init that calls
-   `saveAllInspectionData()` synchronously-enough to land before iOS
-   suspends the tab. (Use `keepalive` fetch or just fire-and-forget IDB
-   writes — they survive tab suspension reliably.)
-4. Triple-check: verify `saveAllInspectionData()` is safe to call when
-   not in inspection view (it should early-return on no `currentSurveyId`
-   — confirm before shipping).
+Watch v1 field-save behaviour around Windlass and other notes-only items.
+If Dave still sees loss, inspect the exact tap path: Save Notes vs Save to
+phone vs Home vs Cancel.
 
 ### Open questions / things to watch
-- `saveAllInspectionData()` runs `guardedAssignComparables` and a few
-  other flush paths. Confirm it is idempotent and cheap — worst case
-  is it's called twice on a Save tap.
-- `pagehide` semantics differ between iOS Safari standalone vs in-tab.
-  Test both paths before declaring the iOS suspend gap closed.
+- The visible Cancel button on the notes sheet still means discard un-saved
+  edits in that sheet unless another save path is tapped first.
 
 ### Deferred (pre-field-survey priority shift)
 - **#48** — Duplicate photo warning not clearing. Root cause identified,
