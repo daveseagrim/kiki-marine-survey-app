@@ -1,3 +1,8 @@
+## v2526
+- Renamed the pre-purchase Aft deck item from `Lighting (cabin)` to `Aft deck lighting`.
+- Added a migration so existing non-insurance surveys keep any saved aft-deck lighting rating, notes, standards, and photos.
+- Kept the insurance-survey `Lighting (cabin)` item unchanged.
+
 ## v2525
 - Fixed inspection-note saving so the phone notes sheet and the older inline notes field both flush into the local survey before Save, Home, report generation, or backup/export.
 - Notes now create the item record when text is entered before a rating is selected, preventing Windlass-style text from disappearing.

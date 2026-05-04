@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2525';
+const APP_VERSION = 'v2526';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -1644,6 +1644,7 @@ const ITEM_SNIPPET_MAP = {
   'Condition (spider cracks, etc.)': 'Aft deck condition (spider cracks, etc.)',
   'Conductivity testing': 'Aft deck conductivity testing',
   'Percussion testing': 'Aft deck percussion testing',
+  'Aft deck lighting': 'Lighting',
   'Mechanical steering': 'Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)',
   'Trim tab mechanism (interior)': 'Trim tab hydraulic pump and system',
   // ── Insurance template mappings ──────────────────────────────────────
@@ -2472,7 +2473,7 @@ const BLANK_ITEM_TEXT_PATCHES = {
 
 function migrateSurveyLabels(survey) {
   if (!survey || !survey.items) return false;
-  const currentVersion = 2495;
+  const currentVersion = 2526;
   if (survey._labelVersion >= currentVersion) return false;
 
   let changed = false;
@@ -2483,6 +2484,35 @@ function migrateSurveyLabels(survey) {
       changed = true;
       console.log(`Migrated item: "${oldLabel}" → "${newLabel}"`);
     }
+  }
+
+  // v2526: The pre-purchase Aft deck template accidentally used the cabin
+  // lighting label. Move that non-insurance data forward without touching
+  // the legitimate insurance-survey cabin-lighting item.
+  if (survey.surveyType !== 'Insurance survey' && survey.items['Lighting (cabin)']) {
+    const source = survey.items['Lighting (cabin)'];
+    const target = survey.items['Aft deck lighting'];
+    if (!target) {
+      survey.items['Aft deck lighting'] = source;
+    } else {
+      if (!target.rating && source.rating) target.rating = source.rating;
+      if (!target.text && source.text) {
+        target.text = source.text;
+      } else if (source.text && target.text && source.text !== target.text) {
+        target.text = `${target.text}\n\n${source.text}`;
+      }
+      if (Array.isArray(source.standards)) {
+        target.standards = Array.from(new Set([...(target.standards || []), ...source.standards]));
+      }
+      if (Array.isArray(source.photos)) {
+        target.photos = Array.from(new Set([...(target.photos || []), ...source.photos]));
+      }
+      if (source.flagged) target.flagged = true;
+      if (source.excluded) target.excluded = true;
+    }
+    delete survey.items['Lighting (cabin)'];
+    changed = true;
+    console.log('Migrated pre-purchase Lighting (cabin) → Aft deck lighting');
   }
 
   // Fill in blank text for rated items that have approved default observations

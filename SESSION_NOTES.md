@@ -10,18 +10,18 @@ currently pulling on.
 
 ---
 
-## Current thread — 2026-05-04 (post v2525)
+## Current thread — 2026-05-04 (post v2526)
 
 ### Last shipped
-**v2525 — Notes save-path hardening.** `saveAllInspectionData()` now flushes
-both inline `text-*` and phone bottom-sheet `sheet-text-*` note fields, creates
-an item record when notes are entered before a rating is selected, and lets the
-open phone notes sheet win over any stale inline row for the same item.
+**v2526 — Aft deck lighting label fix.** Pre-purchase Aft deck now shows
+`Aft deck lighting` instead of `Lighting (cabin)`, with a migration preserving
+old non-insurance aft-deck lighting data. Insurance `Lighting (cabin)` is left
+alone.
 
 ### What's next
 Watch v1 field-save behaviour around Windlass and other notes-only items.
-If Dave still sees loss, inspect the exact tap path: Save Notes vs Save to
-phone vs Home vs Cancel.
+Also watch the Aft deck lighting migration on any older pre-purchase survey
+that already has notes/photos under the old label.
 
 ### Open questions / things to watch
 - The visible Cancel button on the notes sheet still means discard un-saved

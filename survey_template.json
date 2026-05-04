@@ -799,7 +799,7 @@
           },
           {
             "type": "list",
-            "label": "Lighting (cabin)",
+            "label": "Aft deck lighting",
             "options": [
               "A - Critical",
               "B - Needs Attention",
