@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2526';
+const APP_VERSION = 'v2527';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -985,7 +985,8 @@ const STANDARDS_BY_CATEGORY = {
     'Canada Shipping Act, 2001 (S.C. 2001, c. 26)',
     'Small Vessel Regulations (SOR/2010-91)',
     'ABYC A-31 - Cockpit Design',
-    'ABYC TH-27 - Seacocks/Through-Hull Fittings'
+    'ABYC TH-27 - Seacocks/Through-Hull Fittings',
+    'ABYC E-11 - AC and DC Electrical Systems on Boats'
   ],
   'Outboard': [
     'ABYC P-6 - Outboard Engines',
@@ -1644,6 +1645,7 @@ const ITEM_SNIPPET_MAP = {
   'Condition (spider cracks, etc.)': 'Aft deck condition (spider cracks, etc.)',
   'Conductivity testing': 'Aft deck conductivity testing',
   'Percussion testing': 'Aft deck percussion testing',
+  'Aft deck fridge': 'Aft deck fridge',
   'Aft deck lighting': 'Lighting',
   'Mechanical steering': 'Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)',
   'Trim tab mechanism (interior)': 'Trim tab hydraulic pump and system',
@@ -7576,6 +7578,7 @@ const ITEM_STANDARD_MAP = {
   'Interior lighting': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
   'Stove': 'ABYC A-1 - Marine Liquefied Petroleum Gas (LPG) Systems',
   'Oven': 'ABYC A-1 - Marine Liquefied Petroleum Gas (LPG) Systems',
+  'Aft deck fridge': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
   'Refrigerator': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
   'Sink': 'ABYC H-27 - Potable Water Systems',
 

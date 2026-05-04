@@ -823,6 +823,18 @@
           },
           {
             "type": "list",
+            "label": "Aft deck fridge",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
             "label": "Drainage",
             "options": [
               "A - Critical",

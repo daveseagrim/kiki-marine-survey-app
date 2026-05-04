@@ -6636,6 +6636,69 @@
       "severity": 3
     },
     {
+      "section": "Aft deck fridge",
+      "rating": "C",
+      "text": "The aft deck fridge/cooler powered up and operated normally at the time of survey.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Aft deck fridge",
+      "rating": "B",
+      "text": "The aft deck fridge/cooler powered up but did not appear to cool properly.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Aft deck fridge",
+      "rating": "B",
+      "text": "Service the aft deck fridge/cooler and verify cooling performance.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Aft deck fridge",
+      "rating": "A",
+      "text": "The aft deck fridge/cooler was non-functional at the time of survey.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Aft deck fridge",
+      "rating": "A",
+      "text": "Repair or replace the aft deck fridge/cooler.",
+      "phase": "action",
+      "severity": 5
+    },
+    {
+      "section": "Aft deck fridge",
+      "rating": "Powered up only",
+      "text": "The aft deck fridge/cooler powered up, but cooling performance was not verified.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Aft deck fridge",
+      "rating": "Powered up only",
+      "text": "Verify cooling performance under normal operating conditions.",
+      "phase": "action",
+      "severity": 1
+    },
+    {
+      "section": "Aft deck fridge",
+      "rating": "Not tested",
+      "text": "The aft deck fridge/cooler was not tested because DC power was not available at the time of survey.",
+      "phase": "observed",
+      "severity": 1
+    },
+    {
+      "section": "Aft deck fridge",
+      "rating": "Not tested",
+      "text": "Test the aft deck fridge/cooler when power is available.",
+      "phase": "action",
+      "severity": 1
+    },
+    {
       "section": "Condition (spider cracks, etc.)",
       "rating": "A",
       "text": "The aft deck exhibited significant structural damage, severe delamination, or extensive cracking.",

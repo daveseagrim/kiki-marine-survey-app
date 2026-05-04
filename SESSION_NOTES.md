@@ -10,13 +10,12 @@ currently pulling on.
 
 ---
 
-## Current thread — 2026-05-04 (post v2526)
+## Current thread — 2026-05-04 (post v2527)
 
 ### Last shipped
-**v2526 — Aft deck lighting label fix.** Pre-purchase Aft deck now shows
-`Aft deck lighting` instead of `Lighting (cabin)`, with a migration preserving
-old non-insurance aft-deck lighting data. Insurance `Lighting (cabin)` is left
-alone.
+**v2527 — Aft deck fridge option.** Pre-purchase and insurance Aft deck now
+include `Aft deck fridge`, with matching fridge/cooler snippets for serviceable,
+finding, powered-up-only, and not-tested wording.
 
 ### What's next
 Watch v1 field-save behaviour around Windlass and other notes-only items.

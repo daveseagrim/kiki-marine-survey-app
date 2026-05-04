@@ -1,3 +1,8 @@
+## v2527
+- Added an `Aft deck fridge` checklist item to pre-purchase and insurance Aft deck sections.
+- Added aft-deck fridge/cooler note snippets for serviceable, finding, powered-up-only, and not-tested paths.
+- Bumped the offline cache so phones load the new checklist item.
+
 ## v2526
 - Renamed the pre-purchase Aft deck item from `Lighting (cabin)` to `Aft deck lighting`.
 - Added a migration so existing non-insurance surveys keep any saved aft-deck lighting rating, notes, standards, and photos.
