@@ -10,12 +10,13 @@ currently pulling on.
 
 ---
 
-## Current thread — 2026-05-04 (post v2527)
+## Current thread — 2026-05-04 (post v2528)
 
 ### Last shipped
-**v2527 — Aft deck fridge option.** Pre-purchase and insurance Aft deck now
-include `Aft deck fridge`, with matching fridge/cooler snippets for serviceable,
-finding, powered-up-only, and not-tested wording.
+**v2528 — Speaker and companionway section cleanup.** Outdoor/flybridge speaker
+data now rolls into `Stereo and speakers` under gauges/instrumentation.
+Companionway moved into Cabin and conveniences, with cabin-side companionway
+snippets available.
 
 ### What's next
 Watch v1 field-save behaviour around Windlass and other notes-only items.

@@ -15275,6 +15275,90 @@
   ],
   "Cabin and conveniences": [
     {
+      "section": "Companionway",
+      "rating": "B",
+      "text": "The companionway top slid open and closed smoothly and appeared in good working condition.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Companionway",
+      "rating": "B",
+      "text": "The washboards and framing required refinishing.",
+      "phase": "means",
+      "severity": 3
+    },
+    {
+      "section": "Companionway",
+      "rating": "C",
+      "text": "The companionway opened and closed smoothly and appeared in good working condition.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Companionway",
+      "rating": "C",
+      "text": "The grab rails were solidly attached.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Companionway",
+      "rating": "C - doors",
+      "text": "The companionway top slid open and closed smoothly and the doors were solidly attached to their hinges and operated properly.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Companionway",
+      "rating": "C - washboards",
+      "text": "The companionway top slid open and closed smoothly, and the washboards appeared sound and well-maintained.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
+      "section": "Companionway",
+      "rating": "A",
+      "text": "The companionway is cracked or non-functional, affecting structural integrity.",
+      "phase": "observed",
+      "severity": 5
+    },
+    {
+      "section": "Companionway",
+      "rating": "A",
+      "text": "Repair is required.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Companionway",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "This condition represents a significant concern for the vessel's safe or structural operation."
+    },
+    {
+      "section": "Companionway",
+      "rating": "B",
+      "phase": "action",
+      "severity": 3,
+      "text": "Address this at the next scheduled service."
+    },
+    {
+      "section": "Companionway",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "No immediate concern was identified."
+    },
+    {
+      "section": "Companionway",
+      "rating": "C",
+      "phase": "action",
+      "severity": 1,
+      "text": "No corrective action is recommended at this time."
+    },
+    {
       "section": "Signs of water ingress",
       "rating": "B",
       "text": "One localized area showed signs of water ingress.",

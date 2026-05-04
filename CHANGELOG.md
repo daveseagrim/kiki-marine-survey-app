@@ -1,3 +1,9 @@
+## v2528
+- Moved `Companionway and washboards` into Cabin and conveniences for pre-purchase surveys.
+- Moved insurance `Companionway` into Cabin and conveniences.
+- Replaced the separate cockpit `Outdoor speakers` row with `Stereo and speakers` in gauges/instrumentation.
+- Added migration protection so old `Outdoor speakers`, `Entertainment/stereo`, and flybridge speaker data merge into `Stereo and speakers`.
+
 ## v2527
 - Added an `Aft deck fridge` checklist item to pre-purchase and insurance Aft deck sections.
 - Added aft-deck fridge/cooler note snippets for serviceable, finding, powered-up-only, and not-tested paths.

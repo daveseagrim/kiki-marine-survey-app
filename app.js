@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2527';
+const APP_VERSION = 'v2528';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -1618,13 +1618,16 @@ const ITEM_SNIPPET_MAP = {
   'Cabin sole': 'Floor and carpet',
   'Berths and upholstery': 'Upholstery',
   'Interior lighting': 'Cabin lights',
+  'Companionway and washboards': 'Companionway',
   'Refrigerator/freezer': 'Refrigerator / icebox',
   'Sink, faucet and drain (galley)': 'Galley faucet, sink and drain',
   'Shower, sump and drain': 'Head, shower, drain, sump and pump',
   'Horn/sound signal': 'Horn or sound signalling device',
   'Horn/sound signal (powered)': 'Horn or sound signalling device',
   'Spotlight/searchlight': 'Search light',
+  'Outdoor speakers': 'Stereo and speakers',
   'Entertainment/stereo': 'Stereo and speakers',
+  'Stereo and speakers': 'Stereo and speakers',
   'Windshield wipers': 'Wiper blade operation',
   'Trim tab controls': 'Trim tabs',
   'VHF radio and antenna': 'VHF',
@@ -2475,10 +2478,38 @@ const BLANK_ITEM_TEXT_PATCHES = {
 
 function migrateSurveyLabels(survey) {
   if (!survey || !survey.items) return false;
-  const currentVersion = 2526;
+  const currentVersion = 2528;
   if (survey._labelVersion >= currentVersion) return false;
 
   let changed = false;
+  const mergeLegacyItem = (oldLabel, newLabel) => {
+    const source = survey.items[oldLabel];
+    if (!source) return false;
+    const target = survey.items[newLabel];
+    if (!target) {
+      survey.items[newLabel] = source;
+    } else {
+      if (!target.rating && source.rating) target.rating = source.rating;
+      if (!target.text && source.text) {
+        target.text = source.text;
+      } else if (source.text && target.text && source.text !== target.text) {
+        target.text = `${target.text}\n\n${source.text}`;
+      }
+      if (Array.isArray(source.standards)) {
+        target.standards = Array.from(new Set([...(target.standards || []), ...source.standards]));
+      }
+      if (Array.isArray(source.photos)) {
+        target.photos = Array.from(new Set([...(target.photos || []), ...source.photos]));
+      }
+      if (!target.variantText && source.variantText) target.variantText = source.variantText;
+      if (!target.componentSelections && source.componentSelections) target.componentSelections = source.componentSelections;
+      if (source.flagged) target.flagged = true;
+      if (source.excluded) target.excluded = true;
+    }
+    delete survey.items[oldLabel];
+    console.log(`Merged item: "${oldLabel}" → "${newLabel}"`);
+    return true;
+  };
   for (const [oldLabel, newLabel] of Object.entries(ITEM_LABEL_MIGRATIONS)) {
     if (survey.items[oldLabel] && !survey.items[newLabel]) {
       survey.items[newLabel] = survey.items[oldLabel];
@@ -2487,6 +2518,12 @@ function migrateSurveyLabels(survey) {
       console.log(`Migrated item: "${oldLabel}" → "${newLabel}"`);
     }
   }
+
+  // v2528: speakers now live with the stereo/gauges workflow instead of as
+  // separate cockpit/flybridge equipment rows.
+  ['Outdoor speakers', 'Entertainment/stereo', 'Flybridge Stereo and speakers'].forEach((oldLabel) => {
+    if (mergeLegacyItem(oldLabel, 'Stereo and speakers')) changed = true;
+  });
 
   // v2526: The pre-purchase Aft deck template accidentally used the cabin
   // lighting label. Move that non-insurance data forward without touching
@@ -7580,6 +7617,7 @@ const ITEM_STANDARD_MAP = {
   'Oven': 'ABYC A-1 - Marine Liquefied Petroleum Gas (LPG) Systems',
   'Aft deck fridge': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
   'Refrigerator': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Stereo and speakers': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
   'Sink': 'ABYC H-27 - Potable Water Systems',
 
   // Head

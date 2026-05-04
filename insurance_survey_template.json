@@ -1097,18 +1097,6 @@
           },
           {
             "type": "list",
-            "label": "Companionway",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
             "label": "Cockpit - other features",
             "options": [
               "A - Critical",
@@ -2026,6 +2014,18 @@
           },
           {
             "type": "list",
+            "label": "Stereo and speakers",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
+          },
+          {
+            "type": "list",
             "label": "Windshield wiper(s) operation",
             "options": [
               "A - Critical",
@@ -2080,6 +2080,18 @@
           {
             "type": "media",
             "label": "Cabin and conveniences photos"
+          },
+          {
+            "type": "list",
+            "label": "Companionway",
+            "options": [
+              "A - Critical",
+              "B - Needs Attention",
+              "C - Serviceable",
+              "Powered up only",
+              "Not applicable",
+              "Not tested/not verified"
+            ]
           },
           {
             "type": "list",
