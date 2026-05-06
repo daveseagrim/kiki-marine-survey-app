@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2534';
+const APP_VERSION = 'v2535';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -6929,6 +6929,9 @@ async function attachPhotosToItem(itemLabel, fileList) {
       if (document.getElementById(`area-photo-wrap-${sanitized}`)) {
         refreshAreaPhotoGrid(survey, itemLabel);
       }
+    }
+    if (/engine name plate|gearbox nameplate|transmission nameplate/i.test(itemLabel)) {
+      scheduleAutoSurveyNameplateRead(currentSurveyId);
     }
   } catch (_) {}
 
@@ -16267,6 +16270,10 @@ function renderInspection(survey) {
 
   // v2340: wire up desktop drag-and-drop (drop photo files onto item cards)
   setupChecklistDragDrop();
+
+  // Treat engine and gearbox nameplate photos as data sources on every
+  // survey open: readable plate photos fill blank detail fields automatically.
+  scheduleAutoSurveyNameplateRead(survey.id);
 }
 
 function ensureReportButton() {
@@ -20099,8 +20106,10 @@ function _surveyItemPhotoIds(survey, label) {
 
 function _firstSurveyNameplatePhotoId(survey, fieldKey, itemLabels, slot) {
   if (!survey) return '';
-  const direct = survey[fieldKey];
-  if (direct) return direct;
+  const directIds = _photoIdArray(survey[fieldKey]);
+  const directIndex = Number(slot) === 2 ? 1 : 0;
+  if (directIds[directIndex]) return directIds[directIndex];
+  if (directIds[0]) return directIds[0];
   const index = Number(slot) === 2 ? 1 : 0;
   for (const label of itemLabels) {
     const ids = _surveyItemPhotoIds(survey, label);
@@ -20108,6 +20117,85 @@ function _firstSurveyNameplatePhotoId(survey, fieldKey, itemLabels, slot) {
     if (ids[0]) return ids[0];
   }
   return '';
+}
+
+function _surveyNameplatePhotoIds(survey, kind) {
+  const ids = [];
+  const add = value => {
+    _photoIdArray(value).forEach(id => {
+      if (id && !ids.includes(id)) ids.push(id);
+    });
+  };
+  if (!survey) return ids;
+  if (kind === 'gearbox') {
+    add(survey.transmissionPlatePhoto);
+    add(survey.transmission2PlatePhoto);
+    ['Gearbox nameplate(s)', 'Transmission nameplate(s)'].forEach(label => {
+      _surveyItemPhotoIds(survey, label).forEach(add);
+    });
+  } else {
+    add(survey.enginePlatePhoto);
+    add(survey.engine2PlatePhoto);
+    _surveyItemPhotoIds(survey, 'Engine name plate(s)').forEach(add);
+  }
+  return ids;
+}
+
+function _nameplateHasUsefulData(kind, details) {
+  if (!details || typeof details !== 'object') return false;
+  if (kind === 'gearbox') {
+    return !!(details.make || details.model || details.serial);
+  }
+  return !!(details.serial || (details.make && details.model) || (details.model && details.hp));
+}
+
+function _engineNameplateSlotNeedsRead(survey, slot) {
+  const p = Number(slot) === 2 ? '2' : '';
+  return !(
+    survey[`engine${p}Make`] &&
+    survey[`engine${p}Model`] &&
+    survey[`engine${p}Serial`] &&
+    survey[`engine${p}HP`] &&
+    survey[p ? 'fuelType2' : 'fuelType']
+  );
+}
+
+function _gearboxNameplateSlotNeedsRead(survey, slot) {
+  const p = Number(slot) === 2 ? '2' : '';
+  return !(
+    survey[`transmission${p}Make`] &&
+    survey[`transmission${p}Model`] &&
+    survey[`transmission${p}Serial`]
+  );
+}
+
+function _setNameplateFieldIfBlank(survey, field, value) {
+  const next = String(value || '').replace(/\s+/g, ' ').trim();
+  if (!next || survey[field]) return false;
+  survey[field] = next;
+  return true;
+}
+
+function _applyEngineNameplateDetailsToSlot(survey, slot, details) {
+  let changed = false;
+  const p = Number(slot) === 2 ? '2' : '';
+  changed = _setNameplateFieldIfBlank(survey, `engine${p}Make`, details.make) || changed;
+  changed = _setNameplateFieldIfBlank(survey, `engine${p}Model`, details.model) || changed;
+  changed = _setNameplateFieldIfBlank(survey, `engine${p}Serial`, details.serial) || changed;
+  changed = _setNameplateFieldIfBlank(survey, `engine${p}HP`, details.hp) || changed;
+  changed = _setNameplateFieldIfBlank(survey, p ? 'fuelType2' : 'fuelType', details.fuelType) || changed;
+  if (_applyEngineDbDefaults(survey, slot)) changed = true;
+  return changed;
+}
+
+function _applyGearboxNameplateDetailsToSlot(survey, slot, details) {
+  let changed = false;
+  const p = Number(slot) === 2 ? '2' : '';
+  changed = _setNameplateFieldIfBlank(survey, `transmission${p}Make`, details.make) || changed;
+  changed = _setNameplateFieldIfBlank(survey, `transmission${p}Model`, details.model) || changed;
+  changed = _setNameplateFieldIfBlank(survey, `transmission${p}Serial`, details.serial) || changed;
+  if (_updateTransmissionMakeModel(survey, slot)) changed = true;
+  return changed;
 }
 
 async function _resizeDataUrlForNameplateRead(dataUrl) {
@@ -20151,9 +20239,11 @@ function _parseAiJsonObject(text) {
   return JSON.parse(jsonText);
 }
 
-async function _readNameplateDetailsFromPhoto(photo, kind) {
+async function _readNameplateDetailsFromPhoto(photo, kind, options = {}) {
+  const promptForKey = options.promptForKey !== false;
   let apiKey = localStorage.getItem('geminiApiKey');
   if (!apiKey) {
+    if (!promptForKey) throw new Error('Gemini API key not set');
     const key = prompt('Nameplate reading requires a free Google Gemini API key.\n\nGet one at aistudio.google.com, then paste it here:');
     if (key && key.trim()) {
       apiKey = key.trim();
@@ -20176,7 +20266,7 @@ Return ONLY valid JSON with these fields, using empty strings if unreadable:
   "serial": ""
 }
 
-Do not guess. Read only visible plate text.`
+Do not guess. Read only visible plate text. If this is only a decorative decal, casting mark, or non-data label and not a gearbox/transmission data plate, return empty strings.`
     : `You are a marine surveyor's assistant. Read the engine nameplate/data plate in this photo.
 
 Return ONLY valid JSON with these fields, using empty strings if unreadable:
@@ -20188,7 +20278,7 @@ Return ONLY valid JSON with these fields, using empty strings if unreadable:
   "fuelType": ""
 }
 
-Do not guess. Read only visible plate text.`;
+Do not guess. Read only visible plate text. If this is only a decorative engine cover decal or marketing label and not a data/nameplate, return empty strings.`;
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -20222,6 +20312,108 @@ function _setNameplateFieldIfReadable(survey, field, value) {
   if (survey[field] === next) return false;
   survey[field] = next;
   return true;
+}
+
+const _autoNameplateReadInFlight = new Set();
+const _autoNameplateAttempted = new Set();
+let _autoNameplateNoKeyToastShown = false;
+
+async function _autoReadNameplateCandidates(surveyId, kind, photoIds) {
+  const found = [];
+  for (const photoId of photoIds) {
+    const attemptKey = `${surveyId}:${kind}:${photoId}`;
+    if (_autoNameplateAttempted.has(attemptKey)) continue;
+    _autoNameplateAttempted.add(attemptKey);
+    try {
+      const photo = await getPhotoById(photoId);
+      if (!photo || !photo.dataUrl) continue;
+      const details = await _readNameplateDetailsFromPhoto(photo, kind, { promptForKey: false });
+      if (_nameplateHasUsefulData(kind, details)) {
+        found.push({ photoId, details });
+      }
+    } catch (error) {
+      if (String(error && error.message || error).includes('API key')) {
+        throw error;
+      }
+      console.warn('Automatic nameplate read skipped photo', { kind, photoId, error });
+    }
+  }
+  return found;
+}
+
+async function _autoReadSurveyNameplates(surveyId) {
+  const id = surveyId || currentSurveyId;
+  if (!id || _autoNameplateReadInFlight.has(id)) return;
+  if (!localStorage.getItem('geminiApiKey')) {
+    if (!_autoNameplateNoKeyToastShown) {
+      _autoNameplateNoKeyToastShown = true;
+      showToast('Nameplate auto-fill is ready; add a Gemini key once to enable automatic reads.');
+    }
+    return;
+  }
+  _autoNameplateReadInFlight.add(id);
+  try {
+    const survey = await getSurvey(id);
+    if (!survey) return;
+    let changed = false;
+    if (_syncSecondEngineFromSurveyCount(survey)) changed = true;
+    if (_syncEnginePhotosFromBody(survey)) changed = true;
+    const engineCount = Math.max(0, _surveyEngineCountFromSetup(survey));
+    const engineSlots = [];
+    for (let slot = 1; slot <= Math.min(2, engineCount || 1); slot++) {
+      if (_engineNameplateSlotNeedsRead(survey, slot)) engineSlots.push(slot);
+    }
+    if (engineSlots.length > 0) {
+      const reads = await _autoReadNameplateCandidates(id, 'engine', _surveyNameplatePhotoIds(survey, 'engine'));
+      let idx = 0;
+      for (const slot of engineSlots) {
+        const read = reads[idx++];
+        if (!read) break;
+        if (_applyEngineNameplateDetailsToSlot(survey, slot, read.details)) changed = true;
+      }
+    }
+
+    const gearboxSlots = [];
+    for (let slot = 1; slot <= Math.min(2, engineCount || 1); slot++) {
+      if (_gearboxNameplateSlotNeedsRead(survey, slot)) gearboxSlots.push(slot);
+    }
+    if (gearboxSlots.length > 0) {
+      const reads = await _autoReadNameplateCandidates(id, 'gearbox', _surveyNameplatePhotoIds(survey, 'gearbox'));
+      let idx = 0;
+      for (const slot of gearboxSlots) {
+        const read = reads[idx++];
+        if (!read) break;
+        if (_applyGearboxNameplateDetailsToSlot(survey, slot, read.details)) changed = true;
+      }
+    }
+
+    if (changed) {
+      await saveSurvey(survey);
+      if (id === currentSurveyId) {
+        renderInspection(survey);
+        showToast('Engine and gearbox plate details auto-filled — please review them.');
+      }
+    }
+  } catch (error) {
+    if (String(error && error.message || error).includes('API key') && !_autoNameplateNoKeyToastShown) {
+      _autoNameplateNoKeyToastShown = true;
+      showToast('Nameplate auto-fill needs a Gemini key before it can read photos.');
+    } else {
+      console.warn('Automatic nameplate read failed', error);
+    }
+  } finally {
+    _autoNameplateReadInFlight.delete(id);
+  }
+}
+
+function scheduleAutoSurveyNameplateRead(surveyId) {
+  const id = surveyId || currentSurveyId;
+  if (!id) return;
+  setTimeout(() => {
+    _autoReadSurveyNameplates(id).catch(error => {
+      console.warn('Automatic nameplate read scheduling failed', error);
+    });
+  }, 300);
 }
 
 async function readSurveyEngineNameplate(slot) {
@@ -20708,6 +20900,9 @@ async function capturePhoto(itemLabel, event) {
   _syncEnginePhotosFromBody(survey);
   await saveSurvey(survey);
   updateItemInPlace(survey, itemLabel);
+  if (/engine name plate|gearbox nameplate|transmission nameplate/i.test(itemLabel)) {
+    scheduleAutoSurveyNameplateRead(currentSurveyId);
+  }
   showToast(`${files.length} photo${files.length > 1 ? 's' : ''} saved`);
 }
 
@@ -20783,6 +20978,9 @@ async function handleAreaPhotoCapture(mediaLabel, inputEl) {
   _syncEnginePhotosFromBody(survey);
   await saveSurvey(survey);
   refreshAreaPhotoGrid(survey, mediaLabel);
+  if (/engine name plate|gearbox nameplate|transmission nameplate/i.test(mediaLabel)) {
+    scheduleAutoSurveyNameplateRead(currentSurveyId);
+  }
   showToast(`${files.length} photo${files.length > 1 ? 's' : ''} saved`);
 }
 

@@ -1,3 +1,8 @@
+## v2535
+- Made engine and gearbox nameplate photos auto-fill blank detail fields whenever a survey is opened or nameplate photos are added.
+- Kept the manual read buttons as fallback/retry controls, but made the normal workflow automatic for every survey with readable plate photos.
+- Hardened the nameplate reader so decorative engine decals and non-data labels are ignored instead of being treated as serial plates.
+
 ## v2534
 - Removed the manual second-engine add/remove workflow from Version 1; the Engine & Gearbox Details panel now follows the survey's drive-line/engine count automatically.
 - Synced the second engine slot whenever drive-line count or matched boat specs indicate twin engines, while preserving existing entered data.
