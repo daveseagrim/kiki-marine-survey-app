@@ -1,3 +1,7 @@
+## v2539
+- Prevented the Edit Vessel Information page from running legacy intro engine dropdown code when those intro engine fields are no longer present.
+- Kept the documentation-photo preview restore path running after surveys with saved engine and gearbox values are opened.
+
 ## v2538
 - Added a Version 1 documentation-photo recovery path for imported surveys whose cover, four-corner, HIN, licence, engine, or gearbox intro photos are linked but not rendering.
 - Made documentation photo previews reload defensively when Edit Vessel Information opens.

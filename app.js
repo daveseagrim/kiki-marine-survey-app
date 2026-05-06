@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2538';
+const APP_VERSION = 'v2539';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -11022,6 +11022,7 @@ function populateEngineMakes() {
 function onEngineMakeChange() {
   if (!engineDb) return;
   const select = document.getElementById('engineMake');
+  if (!select) return;
   const makeVal = select.value;
 
   // "Other" — swap select for a text input
@@ -11064,8 +11065,10 @@ function onEngineMakeChange() {
     modelSelect.appendChild(otherOpt);
   }
   // Clear dependent fields
-  document.getElementById('engineHP').value = '';
-  document.getElementById('fuelType').value = '';
+  const hpField = document.getElementById('engineHP');
+  const fuelField = document.getElementById('fuelType');
+  if (hpField) hpField.value = '';
+  if (fuelField) fuelField.value = '';
 
   // Sync to Engine 2 if visible and empty
   syncEngine1ToEngine2();
@@ -11292,6 +11295,7 @@ function populateEngine2Makes() {
 function onEngine2MakeChange() {
   if (!engineDb) return;
   const select = document.getElementById('engine2Make');
+  if (!select) return;
   const makeVal = select.value;
   if (makeVal === '__other__') {
     const input = document.createElement('input');
@@ -11319,8 +11323,10 @@ function onEngine2MakeChange() {
     otherOpt.value = '__other__'; otherOpt.textContent = '— Other (type manually) —';
     modelSelect.appendChild(otherOpt);
   }
-  document.getElementById('engine2HP').value = '';
-  document.getElementById('fuelType2').value = '';
+  const hpField = document.getElementById('engine2HP');
+  const fuelField = document.getElementById('fuelType2');
+  if (hpField) hpField.value = '';
+  if (fuelField) fuelField.value = '';
 }
 
 function onEngine2ModelChange() {
@@ -11555,7 +11561,7 @@ function editSurveyDetails(surveyId) {
 
       // Trigger cascading engine/transmission dropdowns
       // Setting .value programmatically doesn't fire onchange, so we call manually
-      if (survey.engineMake) {
+      if (survey.engineMake && document.getElementById('engineMake')) {
         onEngineMakeChange();  // Populates model dropdown from make
         // Re-set model after options are populated
         if (survey.engineModel) {
@@ -11577,7 +11583,7 @@ function editSurveyDetails(surveyId) {
           if (fEl) fEl.value = survey.fuelType;
         }
       }
-      if (survey.transmissionMake) {
+      if (survey.transmissionMake && document.getElementById('transmissionMake')) {
         onTransmissionMakeChange();  // Populates transmission model dropdown
         if (survey.transmissionModel) {
           const tModelEl = document.getElementById('transmissionModel');
@@ -11586,7 +11592,7 @@ function editSurveyDetails(surveyId) {
       }
 
       // Show Engine 2 section if survey has twin engine data
-      if (survey.engine2Make) {
+      if (survey.engine2Make && document.getElementById('engine2Section')) {
         showEngine2();
         // Re-set Engine 2 fields after showEngine2 (which may auto-populate from Engine 1)
         setTimeout(() => {
@@ -11601,7 +11607,7 @@ function editSurveyDetails(surveyId) {
             if (val) { const el = document.getElementById(id); if (el) el.value = val; }
           }
           // Trigger cascading dropdowns for Engine 2
-          if (survey.engine2Make && typeof onEngine2MakeChange === 'function') {
+          if (survey.engine2Make && document.getElementById('engine2Make') && typeof onEngine2MakeChange === 'function') {
             onEngine2MakeChange();
             if (survey.engine2Model) {
               const m2 = document.getElementById('engine2Model');
@@ -11618,7 +11624,7 @@ function editSurveyDetails(surveyId) {
               if (f2) f2.value = survey.fuelType2;
             }
           }
-          if (survey.transmission2Make && typeof onTransmission2MakeChange === 'function') {
+          if (survey.transmission2Make && document.getElementById('transmission2Make') && typeof onTransmission2MakeChange === 'function') {
             onTransmission2MakeChange();
             if (survey.transmission2Model) {
               const t2 = document.getElementById('transmission2Model');
