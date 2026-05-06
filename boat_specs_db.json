@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-02",
+  "lastUpdated": "2026-05-06",
   "note": "Specifications sourced from manufacturer data sheets, sailboatdata.com, recognized technical references, and powerboat manufacturers. Values are approximate and may vary by model year, options, and keel variant.",
   "boats": [
     {
@@ -4941,6 +4941,33 @@
       "displacement": "17,441 lbs",
       "ballast": "",
       "maxDraft": "3'3\"",
+      "totalSailArea": "",
+      "hullType": "Modified V",
+      "keelType": "",
+      "construction": "Fibreglass"
+    },
+    {
+      "id": "silverton-350-2001",
+      "make": "Silverton",
+      "model": "350",
+      "aliases": [
+        "silverton 350",
+        "silverton350",
+        "silverton 351",
+        "silverton 351 sedan",
+        "silverton 351 sedan cruiser",
+        "silverton 35 convertible",
+        "silverton 35 sedan"
+      ],
+      "yearStart": 1997,
+      "yearEnd": 2002,
+      "type": "powerboat",
+      "loa": "38'10\"",
+      "lwl": "",
+      "beam": "13'0\"",
+      "displacement": "16,094 lbs",
+      "ballast": "",
+      "maxDraft": "2'6\"",
       "totalSailArea": "",
       "hullType": "Modified V",
       "keelType": "",

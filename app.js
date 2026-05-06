@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2529';
+const APP_VERSION = 'v2530';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -10616,8 +10616,11 @@ function renderNewSurveyForm() {
           <option value="">Select</option>
           <option value="Vessel was in water at the dock">Vessel was in water at the dock</option>
           <option value="Vessel was in the travel lift slings for the inspection">Vessel was in the travel lift slings for the inspection</option>
+          <option value="Vessel was in travel-lift slings for bottom inspection and was launched for the remainder of the survey">Vessel was in travel-lift slings for bottom inspection and was launched for the remainder of the survey</option>
           <option value="Vessel was laid up for winter storage on a cradle">Vessel was laid up for winter storage on a cradle</option>
+          <option value="Vessel was on a cradle for bottom inspection and was launched for the remainder of the survey">Vessel was on a cradle for bottom inspection and was launched for the remainder of the survey</option>
           <option value="Vessel was laid up for winter storage on blocks">Vessel was laid up for winter storage on blocks</option>
+          <option value="Vessel was on blocks for bottom inspection and was launched for the remainder of the survey">Vessel was on blocks for bottom inspection and was launched for the remainder of the survey</option>
           <option value="Vessel was on the cradle on shore, winterized">Vessel was on the cradle on shore, winterized</option>
           <option value="Vessel was on the hard, in a cradle, not winterized">Vessel was on the hard, in a cradle, not winterized</option>
           <option value="Vessel was on blocks, winterized">Vessel was on blocks, winterized</option>
@@ -10659,6 +10662,7 @@ function renderNewSurveyForm() {
           <option value="No water either in tanks or direct hookup">No water either in tanks or direct hookup</option>
           <option value="Water was in the freshwater tanks">Water was in the freshwater tanks</option>
           <option value="Water supplied from a direct shore hookup">Water supplied from a direct shore hookup</option>
+          <option value="Water was available in the freshwater tanks and from a shore water hookup">Water was available in the freshwater tanks and from a shore water hookup</option>
         </select>
       </div>
 
@@ -10666,7 +10670,7 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Overall Description of Vessel</label>
-        <textarea id="vesselDescription" rows="8" placeholder="Auto-generates as you complete the survey. You can also type or edit here — placeholders in [BRACKETS] show what still needs attention." autocapitalize="sentences" oninput="markDescriptionManuallyEdited()"></textarea>
+        <textarea id="vesselDescription" rows="8" placeholder="Auto-generates in past tense as you complete the survey. You can also type or edit here." autocapitalize="sentences" oninput="markDescriptionManuallyEdited()"></textarea>
         <div id="placeholderCount" style="font-size:12px;color:#d97706;margin-top:4px;display:none;"></div>
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Builds automatically from your survey data each time you save. Edit freely to override — auto-updates resume if you clear the field.</div>
       </div>
@@ -13113,7 +13117,7 @@ function _stripLegacySafetyFromDescription(text) {
     ''
   );
   // 2. Fallback variant (including the placeholder template form):
-  //    "Safety equipment included [NUMBER] fire extinguisher(s), [NUMBER] PFD(s), flares, and a throwable flotation device."
+  //    "Safety equipment included an unrecorded number of fire extinguisher(s), an unrecorded number of PFD(s), flares, and a throwable flotation device."
   //    and any plain "Safety equipment included ...." sentence.
   out = out.replace(/Safety equipment included[^.]*\.\s*/g, '');
   // 3. Tidy the paragraph break that used to precede the safety sentence so
@@ -13289,7 +13293,24 @@ function _formatTwinEngineRatedPhrase(engineHP, engine2HP) {
   if (primary && secondary && primary !== secondary) {
     return `rated at ${primary} (port) and ${secondary} (starboard)`;
   }
-  return `rated at ${primary || secondary || '[XX] horsepower'} each`;
+  return primary || secondary ? `rated at ${primary || secondary} each` : 'with horsepower not recorded';
+}
+
+function _descValue(value, fallback) {
+  const text = String(value || '').trim();
+  return text || fallback;
+}
+
+function _descLower(value, fallback) {
+  const text = String(value || '').trim();
+  return text ? text.toLowerCase() : fallback;
+}
+
+function _descMakeModel(make, model) {
+  if (make && model) return `${make} ${model}`;
+  if (make) return `${make} model not recorded`;
+  if (model) return `make not recorded ${model}`;
+  return 'make and model not recorded';
 }
 
 function _articleFor(text) {
@@ -13324,7 +13345,7 @@ function _resolveMastStepping(survey, mastData) {
 
 function _buildMastRigSentence(survey, vesselName) {
   if (!survey || survey.vesselType !== 'sail') return '';
-  const rigType = survey.boatStyle ? String(survey.boatStyle).toLowerCase() : '[SLOOP/CUTTER/KETCH]';
+  const rigType = survey.boatStyle ? String(survey.boatStyle).toLowerCase() : 'sail';
   const mastData = survey.items?.['Main mast'] || {};
   const stepping = _resolveMastStepping(survey, mastData);
   const material = 'aluminium';
@@ -13337,7 +13358,7 @@ function _buildMastRigSentence(survey, vesselName) {
 
 function _refreshMastRigSentenceInDescription(survey, text) {
   if (!survey || survey.vesselType !== 'sail' || !text) return text || '';
-  const vesselName = survey.vesselName || '[VESSEL NAME]';
+  const vesselName = survey.vesselName || 'The vessel';
   const replacement = _buildMastRigSentence(survey, vesselName).trim();
   if (!replacement) return text;
   const escapedName = String(vesselName).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -13441,15 +13462,15 @@ async function generateVesselDescription() {
   const cabins = document.getElementById('numberCabins')?.value || '';
   const electrical = document.getElementById('electricalSystem')?.value || '';
 
-  const vesselName = document.getElementById('vesselName')?.value || '[VESSEL NAME]';
+  const vesselName = document.getElementById('vesselName')?.value || 'The vessel';
 
   // Build the vessel type phrase
-  const yearStr = year || '[YEAR]';
-  const makeStr = make || '[MAKE]';
-  const modelStr = model || '[MODEL]';
+  const yearStr = year || 'year not recorded';
+  const makeStr = make || 'make not recorded';
+  const modelStr = model || 'model not recorded';
   // v2463: lowercase boatStyle ("Sloop" → "sloop") mid-sentence. The sail/power
   // fallbacks are already lowercase; the placeholder stays uppercase intentionally.
-  const typeStr = boatStyle ? boatStyle.toLowerCase() : (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : '[VESSEL TYPE]');
+  const typeStr = boatStyle ? boatStyle.toLowerCase() : (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : 'vessel type not recorded');
 
   // Gather engine and transmission data from form
   const engineMake = document.getElementById('engineMake')?.value || '';
@@ -13467,7 +13488,7 @@ async function generateVesselDescription() {
   // Determine rig description for sailboats
   let rigDesc = '';
   if (vesselType === 'sail') {
-    const rigType = boatStyle ? boatStyle.toLowerCase() : '[SLOOP/CUTTER/KETCH]';
+    const rigType = boatStyle ? boatStyle.toLowerCase() : 'sail';
     // Pull mast stepping and track type from saved survey data
     const survey = await getSurvey(currentSurveyId);
     const surveyForRig = survey || { vesselType, boatStyle, vesselName, totalSailArea: sailArea };
@@ -13476,15 +13497,15 @@ async function generateVesselDescription() {
 
   // Build engine description using actual data where available
   const engMakeModel = (engineMake && engineModel) ? `${engineMake} ${engineModel}` :
-                       engineMake ? `${engineMake} [MODEL]` : '[MAKE/MODEL]';
-  const engFuel = fuelType || '[DIESEL/GASOLINE]';
+                       engineMake ? `${engineMake} model not recorded` : 'make and model not recorded';
+  const engFuel = fuelType || 'fuel type not recorded';
   // v2463: don't double-emit the unit. If the user typed a power string that already
   // contains HP/kW/horsepower (e.g., "29HP / 21.3kW" from the auto-fill), use it verbatim.
   // Only append "horsepower" when the value is a bare number.
-  const engHPStr = _formatEnginePowerText(engineHP) || '[XX] horsepower';
+  const engHPStr = _formatEnginePowerText(engineHP) || 'horsepower not recorded';
   const twinRatedPhrase = _formatTwinEngineRatedPhrase(engineHP, engine2HP);
   const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
-                         transmissionMake ? `${transmissionMake} [MODEL]` : '[MAKE/MODEL]';
+                         transmissionMake ? `${transmissionMake} model not recorded` : 'make and model not recorded';
 
   // Check for Engine 2
   const eng2Section = document.getElementById('engine2Section');
@@ -13503,19 +13524,19 @@ async function generateVesselDescription() {
 
   let engineDesc = '';
   if (vesselType === 'human') {
-    engineDesc = `This is a human-powered vessel with no auxiliary engine.`;
+    engineDesc = `This was a human-powered vessel with no auxiliary engine.`;
   } else if (vesselType === 'sail') {
-    const engType = engineTypeStr || _engTypeFromDrive1 || '[inboard/outboard]';
-    const drivePhrase = _driveSingular1 || (engineTypeStr === 'inboard' ? '[shaft drive/saildrive]' : '[SHAFT DRIVE/SAILDRIVE]');
-    engineDesc = `Auxiliary power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a ${drivePhrase}.`;
+    const engType = engineTypeStr || _engTypeFromDrive1 || 'engine type not recorded';
+    const drivePhrase = _driveSingular1 || (engineTypeStr === 'inboard' ? 'drive type not recorded' : 'drive type not recorded');
+    engineDesc = `Auxiliary power was provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a propeller through a ${drivePhrase}.`;
   } else if (hasEngine2) {
-    const engType = engineTypeStr || _engTypeFromDrive1 || '[inboard/outboard/sterndrive]';
-    const drivePhrase = _drivePlural1 || '[SHAFT DRIVES/STERNDRIVES]';
-    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines ${twinRatedPhrase}, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through ${drivePhrase}.`;
+    const engType = engineTypeStr || _engTypeFromDrive1 || 'engine type not recorded';
+    const drivePhrase = _drivePlural1 || 'drive type not recorded';
+    engineDesc = `Power was provided by twin ${engMakeModel} ${engFuel} ${engType} engines ${twinRatedPhrase}, coupled to ${transMakeModel} transmissions, driving propellers through ${drivePhrase}.`;
   } else {
-    const engType = engineTypeStr || _engTypeFromDrive1 || '[inboard/outboard/sterndrive]';
-    const drivePhrase = _driveSingular1 || '[SHAFT DRIVE/STERNDRIVE]';
-    engineDesc = `Power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING] [3/4]-blade propeller through a ${drivePhrase}.`;
+    const engType = engineTypeStr || _engTypeFromDrive1 || 'engine type not recorded';
+    const drivePhrase = _driveSingular1 || 'drive type not recorded';
+    engineDesc = `Power was provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a propeller through a ${drivePhrase}.`;
   }
 
   // Pull survey data for propellers, shafts, electronics, and safety
@@ -13583,20 +13604,20 @@ async function generateVesselDescription() {
   // v2463: lowercase the real value so it reads as prose ("a fibreglass displacement
   // sloop" not "a Fibreglass Displacement Sloop"). Placeholders stay uppercase — they
   // signal a missing value to the surveyor reviewing the draft.
-  const constructionStr = construction ? construction.toLowerCase() : '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
-  const hullTypeStr = hullType ? hullType.toLowerCase() : '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
+  const constructionStr = construction ? construction.toLowerCase() : 'construction not recorded';
+  const hullTypeStr = hullType ? hullType.toLowerCase() : 'hull type not recorded';
   const keelStr = vesselType === 'sail'
-    ? (keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : ' with a [FIN/FULL/SHOAL/WING] keel')
+    ? (keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : '')
     : '';
-  const draftStr = draft ? ` with a maximum draft of ${draft}` : (vesselType === 'sail' ? ' with a maximum draft of [X\'X"]' : '');
-  const ballastStr = survey.ballast || '';
+  const draftStr = draft ? ` with a maximum draft of ${draft}` : '';
+  const ballastStr = survey?.ballast || '';
 
   // v2244: richer vessel description — four distinct paragraphs:
   // 1. Identification & hull  2. Propulsion  3. Accommodation & systems  4. Safety & condition
 
   // ── Para 1: Identification, hull geometry, and exterior ──
-  let desc = `"${vesselName}" is a ${yearStr} ${makeStr} ${modelStr}, a ${constructionStr} ${hullTypeStr} ${typeStr}. `;
-  desc += `"${vesselName}" has an overall length of ${loa || '[XX\'XX"]'}, a beam of ${beam || '[XX\'XX"]'}${keelStr}${draftStr}`;
+  let desc = `"${vesselName}" was a ${yearStr} ${makeStr} ${modelStr}, a ${constructionStr} ${hullTypeStr} ${typeStr}. `;
+  desc += `"${vesselName}" had an overall length of ${loa || 'not recorded'}, a beam of ${beam || 'not recorded'}${keelStr}${draftStr}`;
   if (displacement) desc += `, and a displacement of ${displacement}`;
   if (ballastStr && vesselType === 'sail') desc += ` (ballast: ${ballastStr})`;
   desc += `.`;
@@ -13605,11 +13626,11 @@ async function generateVesselDescription() {
   // v2463: colour names come from the dropdown capitalised (e.g. "White", "Navy blue").
   // Lowercase them mid-sentence so the narrative reads as prose, not a list of proper nouns.
   if (hullColour && bootStripeColour && deckColour) {
-    desc += ` The hull is finished in ${hullColour.toLowerCase()} with a ${bootStripeColour.toLowerCase()} boot stripe, and the deck is ${deckColour.toLowerCase()}.`;
+    desc += ` The hull was finished in ${hullColour.toLowerCase()} with a ${bootStripeColour.toLowerCase()} boot stripe, and the deck was ${deckColour.toLowerCase()}.`;
   } else if (hullColour && deckColour) {
-    desc += ` The hull is finished in ${hullColour.toLowerCase()} and the deck is ${deckColour.toLowerCase()}.`;
+    desc += ` The hull was finished in ${hullColour.toLowerCase()} and the deck was ${deckColour.toLowerCase()}.`;
   } else if (hullColour) {
-    desc += ` The hull is finished in ${hullColour.toLowerCase()}.`;
+    desc += ` The hull was finished in ${hullColour.toLowerCase()}.`;
   }
 
   // ── Para 2: Propulsion ──
@@ -13618,19 +13639,19 @@ async function generateVesselDescription() {
 
   // ── Para 3: Accommodation, electrical, and electronics ──
   desc += `\n\n`;
-  const cabinStr = cabins || '[NUMBER]';
-  const headStr = survey.headCount ? String(survey.headCount) : '[NUMBER]';
-  desc += `Below decks the vessel features ${cabinStr} cabin(s) and ${headStr} head(s). `;
+  const cabinStr = cabins || 'an unrecorded number of';
+  const headStr = survey?.headCount ? String(survey.headCount) : 'an unrecorded number of';
+  desc += `Below decks the vessel featured ${cabinStr} cabin(s) and ${headStr} head(s). `;
   if (electrical) {
-    desc += `The electrical system is ${electrical}. `;
+    desc += `The electrical system was ${electrical}. `;
   } else {
-    desc += `The electrical system is [12V DC / 120V AC] with [XX] amp shore power service. `;
+    desc += `The electrical system was not recorded. `;
   }
   if (electronicsDesc) {
     desc += `Navigation and communication equipment aboard included ${electronicsDesc.replace(/^Navigation and communication equipment included /i, '')}`;
     if (!desc.endsWith('. ')) desc += ' ';
   } else {
-    desc += `Navigation and communication equipment included [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
+    desc += `Navigation and communication equipment was not recorded. `;
   }
 
   // ── Para 4: Overall condition (v2375: safety equipment summary removed) ──
@@ -13689,14 +13710,14 @@ async function regenerateDescriptionFromInspection() {
   const sailArea = survey.totalSailArea || '';
   const cabins = survey.numberCabins || '';
   const electrical = survey.electricalSystem || '';
-  const vesselName = survey.vesselName || '[VESSEL NAME]';
+  const vesselName = survey.vesselName || 'The vessel';
 
-  const yearStr = year || '[YEAR]';
-  const makeStr = make || '[MAKE]';
-  const modelStr = model || '[MODEL]';
+  const yearStr = year || 'year not recorded';
+  const makeStr = make || 'make not recorded';
+  const modelStr = model || 'model not recorded';
   // v2463: lowercase boatStyle ("Sloop" → "sloop") mid-sentence. The sail/power
   // fallbacks are already lowercase; the placeholder stays uppercase intentionally.
-  const typeStr = boatStyle ? boatStyle.toLowerCase() : (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : '[VESSEL TYPE]');
+  const typeStr = boatStyle ? boatStyle.toLowerCase() : (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : 'vessel type not recorded');
 
   const engineMake = survey.engineMake || '';
   const engineModel = survey.engineModel || '';
@@ -13710,20 +13731,20 @@ async function regenerateDescriptionFromInspection() {
 
   let rigDesc = '';
   if (vesselType === 'sail') {
-    const rigType = boatStyle ? boatStyle.toLowerCase() : '[SLOOP/CUTTER/KETCH]';
+    const rigType = boatStyle ? boatStyle.toLowerCase() : 'sail';
     rigDesc = _buildMastRigSentence({ ...survey, vesselType, boatStyle, totalSailArea: sailArea }, vesselName);
   }
 
   const engMakeModel = (engineMake && engineModel) ? `${engineMake} ${engineModel}` :
-                       engineMake ? `${engineMake} [MODEL]` : '[MAKE/MODEL]';
-  const engFuel = fuelType || '[DIESEL/GASOLINE]';
+                       engineMake ? `${engineMake} model not recorded` : 'make and model not recorded';
+  const engFuel = fuelType || 'fuel type not recorded';
   // v2463: don't double-emit the unit. If the user typed a power string that already
   // contains HP/kW/horsepower (e.g., "29HP / 21.3kW" from the auto-fill), use it verbatim.
   // Only append "horsepower" when the value is a bare number.
-  const engHPStr = _formatEnginePowerText(engineHP) || '[XX] horsepower';
+  const engHPStr = _formatEnginePowerText(engineHP) || 'horsepower not recorded';
   const twinRatedPhrase = _formatTwinEngineRatedPhrase(engineHP, engine2HP);
   const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
-                         transmissionMake ? `${transmissionMake} [MODEL]` : '[MAKE/MODEL]';
+                         transmissionMake ? `${transmissionMake} model not recorded` : 'make and model not recorded';
 
   const hasEngine2 = !!survey.engine2Make;
 
@@ -13738,19 +13759,19 @@ async function regenerateDescriptionFromInspection() {
 
   let engineDesc = '';
   if (vesselType === 'human') {
-    engineDesc = `This is a human-powered vessel with no auxiliary engine.`;
+    engineDesc = `This was a human-powered vessel with no auxiliary engine.`;
   } else if (vesselType === 'sail') {
-    const engType = engineTypeStr || _engTypeFromDrive2 || '[inboard/outboard]';
-    const drivePhrase = _driveSingular2 || (engineTypeStr === 'inboard' ? '[shaft drive/saildrive]' : '[SHAFT DRIVE/SAILDRIVE]');
-    engineDesc = `Auxiliary power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a ${drivePhrase}.`;
+    const engType = engineTypeStr || _engTypeFromDrive2 || 'engine type not recorded';
+    const drivePhrase = _driveSingular2 || (engineTypeStr === 'inboard' ? 'drive type not recorded' : 'drive type not recorded');
+    engineDesc = `Auxiliary power was provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a propeller through a ${drivePhrase}.`;
   } else if (hasEngine2) {
-    const engType = engineTypeStr || _engTypeFromDrive2 || '[inboard/outboard/sterndrive]';
-    const drivePhrase = _drivePlural2 || '[SHAFT DRIVES/STERNDRIVES]';
-    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines ${twinRatedPhrase}, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through ${drivePhrase}.`;
+    const engType = engineTypeStr || _engTypeFromDrive2 || 'engine type not recorded';
+    const drivePhrase = _drivePlural2 || 'drive type not recorded';
+    engineDesc = `Power was provided by twin ${engMakeModel} ${engFuel} ${engType} engines ${twinRatedPhrase}, coupled to ${transMakeModel} transmissions, driving propellers through ${drivePhrase}.`;
   } else {
-    const engType = engineTypeStr || _engTypeFromDrive2 || '[inboard/outboard/sterndrive]';
-    const drivePhrase = _driveSingular2 || '[SHAFT DRIVE/STERNDRIVE]';
-    engineDesc = `Power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING] [3/4]-blade propeller through a ${drivePhrase}.`;
+    const engType = engineTypeStr || _engTypeFromDrive2 || 'engine type not recorded';
+    const drivePhrase = _driveSingular2 || 'drive type not recorded';
+    engineDesc = `Power was provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a propeller through a ${drivePhrase}.`;
   }
 
   // v2230: Propeller/shaft/cutlass/outdrive observations removed — those
@@ -13811,17 +13832,17 @@ async function regenerateDescriptionFromInspection() {
   // v2463: lowercase the real value so it reads as prose ("a fibreglass displacement
   // sloop" not "a Fibreglass Displacement Sloop"). Placeholders stay uppercase — they
   // signal a missing value to the surveyor reviewing the draft.
-  const constructionStr = construction ? construction.toLowerCase() : '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
-  const hullTypeStr = hullType ? hullType.toLowerCase() : '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
+  const constructionStr = construction ? construction.toLowerCase() : 'construction not recorded';
+  const hullTypeStr = hullType ? hullType.toLowerCase() : 'hull type not recorded';
   const keelStr = vesselType === 'sail'
-    ? (keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : ' with a [FIN/FULL/SHOAL/WING] keel')
+    ? (keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : '')
     : '';
-  const draftStr = draft ? ` with a maximum draft of ${draft}` : (vesselType === 'sail' ? ' with a maximum draft of [X\'X"]' : '');
+  const draftStr = draft ? ` with a maximum draft of ${draft}` : '';
   const ballastStr = survey.ballast || '';
 
   // v2244: richer vessel description (copy 2 — regenerateDescriptionFromInspection)
-  let desc = `"${vesselName}" is a ${yearStr} ${makeStr} ${modelStr}, a ${constructionStr} ${hullTypeStr} ${typeStr}. `;
-  desc += `"${vesselName}" has an overall length of ${loa || '[XX\'XX"]'}, a beam of ${beam || '[XX\'XX"]'}${keelStr}${draftStr}`;
+  let desc = `"${vesselName}" was a ${yearStr} ${makeStr} ${modelStr}, a ${constructionStr} ${hullTypeStr} ${typeStr}. `;
+  desc += `"${vesselName}" had an overall length of ${loa || 'not recorded'}, a beam of ${beam || 'not recorded'}${keelStr}${draftStr}`;
   if (displacement) desc += `, and a displacement of ${displacement}`;
   if (ballastStr && vesselType === 'sail') desc += ` (ballast: ${ballastStr})`;
   desc += `.`;
@@ -13829,28 +13850,28 @@ async function regenerateDescriptionFromInspection() {
   // v2463: colour names come from the dropdown capitalised (e.g. "White", "Navy blue").
   // Lowercase them mid-sentence so the narrative reads as prose, not a list of proper nouns.
   if (hullColour && bootStripeColour && deckColour) {
-    desc += ` The hull is finished in ${hullColour.toLowerCase()} with a ${bootStripeColour.toLowerCase()} boot stripe, and the deck is ${deckColour.toLowerCase()}.`;
+    desc += ` The hull was finished in ${hullColour.toLowerCase()} with a ${bootStripeColour.toLowerCase()} boot stripe, and the deck was ${deckColour.toLowerCase()}.`;
   } else if (hullColour && deckColour) {
-    desc += ` The hull is finished in ${hullColour.toLowerCase()} and the deck is ${deckColour.toLowerCase()}.`;
+    desc += ` The hull was finished in ${hullColour.toLowerCase()} and the deck was ${deckColour.toLowerCase()}.`;
   } else if (hullColour) {
-    desc += ` The hull is finished in ${hullColour.toLowerCase()}.`;
+    desc += ` The hull was finished in ${hullColour.toLowerCase()}.`;
   }
   desc += `\n\n`;
   desc += engineDesc;
   desc += `\n\n`;
-  const cabinStr = cabins || '[NUMBER]';
-  const headStr = survey.headCount ? String(survey.headCount) : '[NUMBER]';
-  desc += `Below decks the vessel features ${cabinStr} cabin(s) and ${headStr} head(s). `;
+  const cabinStr = cabins || 'an unrecorded number of';
+  const headStr = survey.headCount ? String(survey.headCount) : 'an unrecorded number of';
+  desc += `Below decks the vessel featured ${cabinStr} cabin(s) and ${headStr} head(s). `;
   if (electrical) {
-    desc += `The electrical system is ${electrical}. `;
+    desc += `The electrical system was ${electrical}. `;
   } else {
-    desc += `The electrical system is [12V DC / 120V AC] with [XX] amp shore power service. `;
+    desc += `The electrical system was not recorded. `;
   }
   if (electronicsDesc) {
     desc += `Navigation and communication equipment aboard included ${electronicsDesc.replace(/^Navigation and communication equipment included /i, '')}`;
     if (!desc.endsWith('. ')) desc += ' ';
   } else {
-    desc += `Navigation and communication equipment included [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
+    desc += `Navigation and communication equipment was not recorded. `;
   }
   desc += '\n\n';
   // v2251: condition sentence driven by overallCondition (same logic as generateVesselDescription)
@@ -13893,14 +13914,14 @@ function buildDescriptionFromSurvey(survey) {
   const sailArea = survey.totalSailArea || '';
   const cabins = survey.numberCabins || '';
   const electrical = survey.electricalSystem || '';
-  const vesselName = survey.vesselName || '[VESSEL NAME]';
+  const vesselName = survey.vesselName || 'The vessel';
 
-  const yearStr = year || '[YEAR]';
-  const makeStr = make || '[MAKE]';
-  const modelStr = model || '[MODEL]';
+  const yearStr = year || 'year not recorded';
+  const makeStr = make || 'make not recorded';
+  const modelStr = model || 'model not recorded';
   // v2463: lowercase boatStyle ("Sloop" → "sloop") mid-sentence. The sail/power
   // fallbacks are already lowercase; the placeholder stays uppercase intentionally.
-  const typeStr = boatStyle ? boatStyle.toLowerCase() : (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : '[VESSEL TYPE]');
+  const typeStr = boatStyle ? boatStyle.toLowerCase() : (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : 'vessel type not recorded');
 
   const engineMake = survey.engineMake || '';
   const engineModel = survey.engineModel || '';
@@ -13914,25 +13935,25 @@ function buildDescriptionFromSurvey(survey) {
 
   let rigDesc = '';
   if (vesselType === 'sail') {
-    const rigType = boatStyle ? boatStyle.toLowerCase() : '[SLOOP/CUTTER/KETCH]';
+    const rigType = boatStyle ? boatStyle.toLowerCase() : 'sail';
     rigDesc = _buildMastRigSentence({ ...survey, vesselType, boatStyle, totalSailArea: sailArea }, vesselName);
   }
 
   const engMakeModel = (engineMake && engineModel) ? `${engineMake} ${engineModel}` :
-                       engineMake ? `${engineMake} [MODEL]` : '[MAKE/MODEL]';
-  const engFuel = fuelType || '[DIESEL/GASOLINE]';
+                       engineMake ? `${engineMake} model not recorded` : 'make and model not recorded';
+  const engFuel = fuelType || 'fuel type not recorded';
   // v2463: don't double-emit the unit. If the user typed a power string that already
   // contains HP/kW/horsepower (e.g., "29HP / 21.3kW" from the auto-fill), use it verbatim.
   // Only append "horsepower" when the value is a bare number.
-  const engHPStr = _formatEnginePowerText(engineHP) || '[XX] horsepower';
+  const engHPStr = _formatEnginePowerText(engineHP) || 'horsepower not recorded';
   const twinRatedPhrase = _formatTwinEngineRatedPhrase(engineHP, engine2HP);
   const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
-                         transmissionMake ? `${transmissionMake} [MODEL]` : '[MAKE/MODEL]';
+                         transmissionMake ? `${transmissionMake} model not recorded` : 'make and model not recorded';
 
   const hasEngine2 = !!survey.engine2Make;
 
   // v2228: resolve drive type from survey.driveType so the description
-  // auto-fills instead of emitting "[SHAFT DRIVE/STERNDRIVE]" placeholder.
+  // auto-fills instead of emitting "drive type not recorded" placeholder.
   // Also back-fill engType (inboard/outboard/sterndrive) from driveType
   // when the engine DB lookup came up empty.
   const driveTypeLower = (survey.driveType || '').toLowerCase();
@@ -13945,19 +13966,19 @@ function buildDescriptionFromSurvey(survey) {
 
   let engineDesc = '';
   if (vesselType === 'human') {
-    engineDesc = `This is a human-powered vessel with no auxiliary engine.`;
+    engineDesc = `This was a human-powered vessel with no auxiliary engine.`;
   } else if (vesselType === 'sail') {
-    const engType = engineTypeStr || engTypeFromDrive || '[inboard/outboard]';
-    const drivePhrase = driveLabelSingular || (engineTypeStr === 'inboard' ? '[shaft drive/saildrive]' : '[SHAFT DRIVE/SAILDRIVE]');
-    engineDesc = `Auxiliary power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING/FEATHERING] [2/3]-blade propeller through a ${drivePhrase}.`;
+    const engType = engineTypeStr || engTypeFromDrive || 'engine type not recorded';
+    const drivePhrase = driveLabelSingular || (engineTypeStr === 'inboard' ? 'drive type not recorded' : 'drive type not recorded');
+    engineDesc = `Auxiliary power was provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a propeller through a ${drivePhrase}.`;
   } else if (hasEngine2) {
-    const engType = engineTypeStr || engTypeFromDrive || '[inboard/outboard/sterndrive]';
-    const drivePhrase = driveLabelPlural || '[SHAFT DRIVES/STERNDRIVES]';
-    engineDesc = `Power is provided by twin ${engMakeModel} ${engFuel} ${engType} engines ${twinRatedPhrase}, coupled to ${transMakeModel} transmissions, driving [FIXED/FOLDING] [3/4]-blade propellers through ${drivePhrase}.`;
+    const engType = engineTypeStr || engTypeFromDrive || 'engine type not recorded';
+    const drivePhrase = driveLabelPlural || 'drive type not recorded';
+    engineDesc = `Power was provided by twin ${engMakeModel} ${engFuel} ${engType} engines ${twinRatedPhrase}, coupled to ${transMakeModel} transmissions, driving propellers through ${drivePhrase}.`;
   } else {
-    const engType = engineTypeStr || engTypeFromDrive || '[inboard/outboard/sterndrive]';
-    const drivePhrase = driveLabelSingular || '[SHAFT DRIVE/STERNDRIVE]';
-    engineDesc = `Power is provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a [FIXED/FOLDING] [3/4]-blade propeller through a ${drivePhrase}.`;
+    const engType = engineTypeStr || engTypeFromDrive || 'engine type not recorded';
+    const drivePhrase = driveLabelSingular || 'drive type not recorded';
+    engineDesc = `Power was provided by a ${engMakeModel} ${engFuel} ${engType} engine rated at ${engHPStr}, coupled to a ${transMakeModel} transmission, driving a propeller through a ${drivePhrase}.`;
   }
 
   // v2230: Propeller/shaft/cutlass/outdrive observations removed from the
@@ -14019,17 +14040,17 @@ function buildDescriptionFromSurvey(survey) {
   // v2463: lowercase the real value so it reads as prose ("a fibreglass displacement
   // sloop" not "a Fibreglass Displacement Sloop"). Placeholders stay uppercase — they
   // signal a missing value to the surveyor reviewing the draft.
-  const constructionStr = construction ? construction.toLowerCase() : '[FIBREGLASS/WOOD/ALUMINUM/STEEL]';
-  const hullTypeStr = hullType ? hullType.toLowerCase() : '[DISPLACEMENT/SEMI-DISPLACEMENT/PLANING]';
+  const constructionStr = construction ? construction.toLowerCase() : 'construction not recorded';
+  const hullTypeStr = hullType ? hullType.toLowerCase() : 'hull type not recorded';
   const keelStr = vesselType === 'sail'
-    ? (keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : ' with a [FIN/FULL/SHOAL/WING] keel')
+    ? (keelType ? `, equipped with a ${keelType.toLowerCase()} keel` : '')
     : '';
-  const draftStr = draft ? ` with a maximum draft of ${draft}` : (vesselType === 'sail' ? ' with a maximum draft of [X\'X"]' : '');
+  const draftStr = draft ? ` with a maximum draft of ${draft}` : '';
   const ballastStr = survey.ballast || '';
 
   // v2244: richer vessel description (copy 3 — buildVesselDescription pure function)
-  let desc = `"${vesselName}" is a ${yearStr} ${makeStr} ${modelStr}, a ${constructionStr} ${hullTypeStr} ${typeStr}. `;
-  desc += `"${vesselName}" has an overall length of ${loa || '[XX\'XX"]'}, a beam of ${beam || '[XX\'XX"]'}${keelStr}${draftStr}`;
+  let desc = `"${vesselName}" was a ${yearStr} ${makeStr} ${modelStr}, a ${constructionStr} ${hullTypeStr} ${typeStr}. `;
+  desc += `"${vesselName}" had an overall length of ${loa || 'not recorded'}, a beam of ${beam || 'not recorded'}${keelStr}${draftStr}`;
   if (displacement) desc += `, and a displacement of ${displacement}`;
   if (ballastStr && vesselType === 'sail') desc += ` (ballast: ${ballastStr})`;
   desc += `.`;
@@ -14037,28 +14058,28 @@ function buildDescriptionFromSurvey(survey) {
   // v2463: colour names come from the dropdown capitalised (e.g. "White", "Navy blue").
   // Lowercase them mid-sentence so the narrative reads as prose, not a list of proper nouns.
   if (hullColour && bootStripeColour && deckColour) {
-    desc += ` The hull is finished in ${hullColour.toLowerCase()} with a ${bootStripeColour.toLowerCase()} boot stripe, and the deck is ${deckColour.toLowerCase()}.`;
+    desc += ` The hull was finished in ${hullColour.toLowerCase()} with a ${bootStripeColour.toLowerCase()} boot stripe, and the deck was ${deckColour.toLowerCase()}.`;
   } else if (hullColour && deckColour) {
-    desc += ` The hull is finished in ${hullColour.toLowerCase()} and the deck is ${deckColour.toLowerCase()}.`;
+    desc += ` The hull was finished in ${hullColour.toLowerCase()} and the deck was ${deckColour.toLowerCase()}.`;
   } else if (hullColour) {
-    desc += ` The hull is finished in ${hullColour.toLowerCase()}.`;
+    desc += ` The hull was finished in ${hullColour.toLowerCase()}.`;
   }
   desc += `\n\n`;
   desc += engineDesc;
   desc += `\n\n`;
-  const cabinStr = cabins || '[NUMBER]';
-  const headStr = survey.headCount ? String(survey.headCount) : '[NUMBER]';
-  desc += `Below decks the vessel features ${cabinStr} cabin(s) and ${headStr} head(s). `;
+  const cabinStr = cabins || 'an unrecorded number of';
+  const headStr = survey.headCount ? String(survey.headCount) : 'an unrecorded number of';
+  desc += `Below decks the vessel featured ${cabinStr} cabin(s) and ${headStr} head(s). `;
   if (electrical) {
-    desc += `The electrical system is ${electrical}. `;
+    desc += `The electrical system was ${electrical}. `;
   } else {
-    desc += `The electrical system is [12V DC / 120V AC] with [XX] amp shore power service. `;
+    desc += `The electrical system was not recorded. `;
   }
   if (electronicsDesc) {
     desc += `Navigation and communication equipment aboard included ${electronicsDesc.replace(/^Navigation and communication equipment included /i, '')}`;
     if (!desc.endsWith('. ')) desc += ' ';
   } else {
-    desc += `Navigation and communication equipment included [GPS/CHARTPLOTTER], [VHF RADIO], [DEPTH SOUNDER], [RADAR], and [AUTOPILOT]. `;
+    desc += `Navigation and communication equipment was not recorded. `;
   }
   desc += '\n\n';
   // v2251: condition sentence driven by overallCondition (same logic as generateVesselDescription)
@@ -14080,7 +14101,7 @@ function buildPropulsionNarrative(survey) {
   if (!survey) return '';
   const vt = (survey.vesselType || '').toLowerCase();
   if (vt === 'human') {
-    return 'This is a human-powered vessel with no auxiliary engine.';
+    return 'This was a human-powered vessel with no auxiliary engine.';
   }
 
   // ── Engine identity ───────────────────────────────────────────────
@@ -24486,7 +24507,7 @@ async function generateReport() {
   };
   // v2239: Strip sentences that still contain unfilled [BRACKETED]
   // placeholders from the vessel description so the report never shows
-  // "[XX] horsepower" or "[COLOUR]" template artefacts to the reader.
+  // "horsepower not recorded" or "[COLOUR]" template artefacts to the reader.
   const cleanupPlaceholders = (s) => {
     if (!s) return s;
     // Split into sentences, drop any containing a [BRACKET] placeholder
@@ -26783,8 +26804,8 @@ async function initApp() {
           // Fix "She has" / "She is" in vessel description
           if (s.vesselDescription && s.vesselName) {
             const _quoted = '"' + s.vesselName + '"';
-            if (s.vesselDescription.includes('She has an overall length')) {
-              s.vesselDescription = s.vesselDescription.replace(/She has an overall length/g, _quoted + ' has an overall length');
+            if (s.vesselDescription.includes('She had an overall length')) {
+              s.vesselDescription = s.vesselDescription.replace(/She had an overall length/g, _quoted + ' had an overall length');
               changed = true;
             }
             if (s.vesselDescription.includes('She is ')) {

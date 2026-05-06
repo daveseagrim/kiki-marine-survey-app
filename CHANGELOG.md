@@ -1,3 +1,9 @@
+## v2530
+- Added `2001 Silverton 350` to `boat_specs_db.json` so the Year / Make / Model field can auto-fill the current Tethys V specs.
+- Added survey-condition choices for vessels inspected in slings, on a cradle, or on blocks before launch.
+- Added a water-at-survey choice for freshwater tanks plus shore-water hookup.
+- Updated the Overall Description of Vessel generator to keep survey variables populated without bracket placeholders and to use past-tense wording.
+
 ## v2529
 - Fixed the home-screen Check workflow so survey quality results open over the selected survey, allowing Go buttons to jump to the correct checklist item instead of returning to the home screen.
 - Expanded the Version 1 checker with professional narrative, model-survey reference, valuation, placeholder, spelling/style, and photo-support checks.
