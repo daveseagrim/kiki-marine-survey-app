@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2531';
+const APP_VERSION = 'v2532';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -10401,219 +10401,6 @@ function renderNewSurveyForm() {
         <textarea id="changesToPlan" placeholder="Any modifications or changes" autocapitalize="sentences"></textarea>
       </div>
 
-      <h3 style="margin-top:16px;color:#066aab;">Engine & Gearbox</h3>
-
-      <!-- Engine 1 -->
-      <div style="border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin-bottom:10px;background:#f8fafc;">
-        <div id="engine1Label" style="font-weight:700;font-size:13px;color:#066aab;margin-bottom:8px;">Engine</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Engine Make</label>
-            <select id="engineMake" onchange="onEngineMakeChange()">
-              <option value="">Select make</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Engine Model</label>
-            <select id="engineModel" onchange="onEngineModelChange()">
-              <option value="">Select make first</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Engine Serial No.</label>
-            <input type="text" id="engineSerial" placeholder="">
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Engine Hours</label>
-            <input type="text" id="engineHours" placeholder="">
-            <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#6b7280;margin-top:2px;cursor:pointer;">
-              <input type="checkbox" id="engineHoursNA" onchange="if(this.checked){document.getElementById('engineHours').value='Hours not available';document.getElementById('engineHours').disabled=true;}else{document.getElementById('engineHours').value='';document.getElementById('engineHours').disabled=false;}"> Hours not available
-            </label>
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">HP / kW Rating</label>
-            <input type="text" id="engineHP" placeholder="e.g., 54HP / 39.7kW">
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Fuel Type</label>
-            <select id="fuelType">
-              <option value="">Select</option>
-              <option value="Diesel">Diesel</option>
-              <option value="Gasoline">Gasoline</option>
-              <option value="Electric">Electric</option>
-              <option value="Hybrid">Hybrid</option>
-            </select>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
-          <div class="form-group" style="margin:0;">
-            <label class="form-label" style="font-size:11px;">Engine Photo</label>
-            <div data-photo-field="enginePhoto">
-              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-                📷 Engine
-                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('enginePhoto', 'Engine', event)" />
-              </label>
-            </div>
-          </div>
-          <div class="form-group" style="margin:0;">
-            <label class="form-label" style="font-size:11px;">Data Plate Photo</label>
-            <div data-photo-field="enginePlatePhoto">
-              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-                📷 Data Plate
-                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('enginePlatePhoto', 'Data Plate', event)" />
-              </label>
-            </div>
-          </div>
-        </div>
-        <div style="font-weight:700;font-size:13px;color:#066aab;margin:12px 0 8px;">Gearbox 1</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Gearbox Make</label>
-            <select id="transmissionMake" onchange="onTransmissionMakeChange()">
-              <option value="">Select make</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Gearbox Model</label>
-            <select id="transmissionModel" onchange="onTransmissionModelChange()">
-              <option value="">Select make first</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Gearbox Serial No.</label>
-            <input type="text" id="transmissionSerial" placeholder="">
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
-          <div class="form-group" style="margin:0;">
-            <label class="form-label" style="font-size:11px;">Gearbox Photo</label>
-            <div data-photo-field="transmissionPhoto">
-              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-                📷 Gearbox
-                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmissionPhoto', 'Gearbox', event)" />
-              </label>
-            </div>
-          </div>
-          <div class="form-group" style="margin:0;">
-            <label class="form-label" style="font-size:11px;">Serial Plate Photo</label>
-            <div data-photo-field="transmissionPlatePhoto">
-              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-                📷 Serial Plate
-                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmissionPlatePhoto', 'Serial Plate', event)" />
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Engine 2 (hidden by default) -->
-      <div id="engine2Section" style="display:none;border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin-bottom:10px;background:#f8fafc;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <div style="font-weight:700;font-size:13px;color:#066aab;">Engine 2 (Starboard)</div>
-          <button class="btn-secondary" style="font-size:11px;padding:2px 8px;color:#dc2626;" onclick="removeEngine2()">Remove</button>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Engine Make</label>
-            <select id="engine2Make" onchange="onEngine2MakeChange()">
-              <option value="">Select make</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Engine Model</label>
-            <select id="engine2Model" onchange="onEngine2ModelChange()">
-              <option value="">Select make first</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Engine Serial No.</label>
-            <input type="text" id="engine2Serial" placeholder="">
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Engine Hours</label>
-            <input type="text" id="engine2Hours" placeholder="">
-            <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#6b7280;margin-top:2px;cursor:pointer;">
-              <input type="checkbox" id="engine2HoursNA" onchange="if(this.checked){document.getElementById('engine2Hours').value='Hours not available';document.getElementById('engine2Hours').disabled=true;}else{document.getElementById('engine2Hours').value='';document.getElementById('engine2Hours').disabled=false;}"> Hours not available
-            </label>
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">HP / kW Rating</label>
-            <input type="text" id="engine2HP" placeholder="e.g., 54HP / 39.7kW">
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Fuel Type</label>
-            <select id="fuelType2">
-              <option value="">Select</option>
-              <option value="Diesel">Diesel</option>
-              <option value="Gasoline">Gasoline</option>
-              <option value="Electric">Electric</option>
-              <option value="Hybrid">Hybrid</option>
-            </select>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
-          <div class="form-group" style="margin:0;">
-            <label class="form-label" style="font-size:11px;">Engine Photo</label>
-            <div data-photo-field="engine2Photo">
-              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-                📷 Engine 2
-                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('engine2Photo', 'Engine 2', event)" />
-              </label>
-            </div>
-          </div>
-          <div class="form-group" style="margin:0;">
-            <label class="form-label" style="font-size:11px;">Data Plate Photo</label>
-            <div data-photo-field="engine2PlatePhoto">
-              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-                📷 Data Plate 2
-                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('engine2PlatePhoto', 'Data Plate 2', event)" />
-              </label>
-            </div>
-          </div>
-        </div>
-        <div style="font-weight:700;font-size:13px;color:#066aab;margin:12px 0 8px;">Gearbox 2</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Gearbox Make</label>
-            <select id="transmission2Make" onchange="onTransmission2MakeChange()">
-              <option value="">Select make</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Gearbox Model</label>
-            <select id="transmission2Model" onchange="onTransmission2ModelChange()">
-              <option value="">Select make first</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Gearbox Serial No.</label>
-            <input type="text" id="transmission2Serial" placeholder="">
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
-          <div class="form-group" style="margin:0;">
-            <label class="form-label" style="font-size:11px;">Gearbox Photo</label>
-            <div data-photo-field="transmission2Photo">
-              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-                📷 Gearbox 2
-                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmission2Photo', 'Gearbox 2', event)" />
-              </label>
-            </div>
-          </div>
-          <div class="form-group" style="margin:0;">
-            <label class="form-label" style="font-size:11px;">Serial Plate Photo</label>
-            <div data-photo-field="transmission2PlatePhoto">
-              <label class="btn-secondary" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;padding:5px 8px;">
-                📷 Serial Plate 2
-                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="captureDocPhoto('transmission2PlatePhoto', 'Serial Plate 2', event)" />
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <button id="addEngine2Btn" class="btn-secondary" style="font-size:12px;padding:8px 14px;margin-bottom:12px;" onclick="showEngine2()">+ Add Second Engine</button>
-
       <h2 class="form-heading">Survey Conditions</h2>
 
       <div class="form-group">
@@ -12670,6 +12457,42 @@ function findBoatValues(input) {
   return { entry: bestEntry, range };
 }
 
+function _applyEngineSpecsToSurveyObject(survey, specs) {
+  if (!survey || !specs) return false;
+  const rawEngine = String(specs.engine || '').trim();
+  const rawParts = rawEngine ? rawEngine.split(/\s+/) : [];
+  const engineMake = specs.engineMake || (rawParts.length ? rawParts[0] : '');
+  const engineModel = specs.engineModel || (rawParts.length > 1 ? rawParts.slice(1).join(' ') : '');
+  const engineHP = specs.engineHP || specs.engineHp || specs.hp || '';
+  const fuelType = specs.fuelType || specs.fuel || '';
+  let changed = false;
+  const setIfEmpty = (field, value) => {
+    const next = String(value || '').trim();
+    if (!next || survey[field]) return;
+    survey[field] = next;
+    changed = true;
+  };
+  setIfEmpty('engineMake', engineMake);
+  setIfEmpty('engineModel', engineModel);
+  setIfEmpty('engineHP', engineHP);
+  setIfEmpty('fuelType', fuelType);
+  setIfEmpty('transmissionMake', specs.transmissionMake);
+  setIfEmpty('transmissionModel', specs.transmissionModel);
+  setIfEmpty('transmissionSerial', specs.transmissionSerial);
+  if (_updateTransmissionMakeModel(survey, 1)) changed = true;
+  if (_applyEngineDbDefaults(survey, 1)) changed = true;
+  return changed;
+}
+
+async function applyEngineSpecsToCurrentSurvey(specs) {
+  if (!currentSurveyId) return false;
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return false;
+  const changed = _applyEngineSpecsToSurveyObject(survey, specs);
+  if (changed) await saveSurvey(survey);
+  return changed;
+}
+
 // Apply found specs to the form fields
 function applyBoatSpecs(specs) {
   // Update the Year/Make/Model field with the correct name
@@ -12795,14 +12618,15 @@ function applyBoatSpecs(specs) {
   const banner = document.getElementById('specsBanner');
   if (banner) banner.remove();
 
-  // Auto-save: programmatic .value changes don't fire input/change events,
-  // so the debounced auto-save never triggers. Force a save now.
-  if (typeof saveEditFormSilently === 'function') {
-    saveEditFormSilently().then(() => {
-      const sub = document.querySelector('.header-subtitle');
-      if (sub) { const orig = sub.textContent; sub.textContent = 'Specs saved ✓'; setTimeout(() => { sub.textContent = orig; }, 800); }
-    });
-  }
+	  // Auto-save: programmatic .value changes don't fire input/change events,
+	  // so the debounced auto-save never triggers. Force a save now.
+	  if (typeof saveEditFormSilently === 'function') {
+	    saveEditFormSilently().then(async () => {
+	      await applyEngineSpecsToCurrentSurvey(specs);
+	      const sub = document.querySelector('.header-subtitle');
+	      if (sub) { const orig = sub.textContent; sub.textContent = 'Specs saved ✓'; setTimeout(() => { sub.textContent = orig; }, 800); }
+	    });
+	  }
 }
 
 // Check for specs on model field blur and show banner if found
@@ -13498,7 +13322,8 @@ async function generateVesselDescription() {
   const cabins = document.getElementById('numberCabins')?.value || '';
   const electrical = document.getElementById('electricalSystem')?.value || '';
 
-  const vesselName = document.getElementById('vesselName')?.value || 'The vessel';
+	  const vesselName = document.getElementById('vesselName')?.value || 'The vessel';
+	  const _survey1 = currentSurveyId ? await getSurvey(currentSurveyId) : null;
 
   // Build the vessel type phrase
   const yearStr = year || 'year not recorded';
@@ -13508,14 +13333,15 @@ async function generateVesselDescription() {
   // fallbacks are already lowercase; the placeholder stays uppercase intentionally.
   const typeStr = boatStyle ? boatStyle.toLowerCase() : (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : 'vessel type not recorded');
 
-  // Gather engine and transmission data from form
-  const engineMake = document.getElementById('engineMake')?.value || '';
-  const engineModel = document.getElementById('engineModel')?.value || '';
-  const engineHP = document.getElementById('engineHP')?.value || '';
-  const engine2HP = document.getElementById('engine2HP')?.value || '';
-  const fuelType = document.getElementById('fuelType')?.value || '';
-  const transmissionMake = document.getElementById('transmissionMake')?.value || '';
-  const transmissionModel = document.getElementById('transmissionModel')?.value || '';
+  // Gather engine and transmission data from the survey section. Older DOM
+  // fallbacks are kept for imported surveys opened on older cached builds.
+  const engineMake = document.getElementById('engineMake')?.value || _survey1?.engineMake || '';
+  const engineModel = document.getElementById('engineModel')?.value || _survey1?.engineModel || '';
+  const engineHP = document.getElementById('engineHP')?.value || _survey1?.engineHP || '';
+  const engine2HP = document.getElementById('engine2HP')?.value || _survey1?.engine2HP || '';
+  const fuelType = document.getElementById('fuelType')?.value || _survey1?.fuelType || '';
+  const transmissionMake = document.getElementById('transmissionMake')?.value || _survey1?.transmissionMake || '';
+  const transmissionModel = document.getElementById('transmissionModel')?.value || _survey1?.transmissionModel || '';
 
   // Look up engine type from database
   const engineTypeFromDb = lookupEngineType(engineMake, engineModel);
@@ -13526,8 +13352,7 @@ async function generateVesselDescription() {
   if (vesselType === 'sail') {
     const rigType = boatStyle ? boatStyle.toLowerCase() : 'sail';
     // Pull mast stepping and track type from saved survey data
-    const survey = await getSurvey(currentSurveyId);
-    const surveyForRig = survey || { vesselType, boatStyle, vesselName, totalSailArea: sailArea };
+    const surveyForRig = _survey1 || { vesselType, boatStyle, vesselName, totalSailArea: sailArea };
     rigDesc = _buildMastRigSentence({ ...surveyForRig, vesselType, boatStyle, totalSailArea: sailArea }, vesselName);
   }
 
@@ -13545,11 +13370,10 @@ async function generateVesselDescription() {
 
   // Check for Engine 2
   const eng2Section = document.getElementById('engine2Section');
-  const hasEngine2 = eng2Section && eng2Section.style.display !== 'none';
+  const hasEngine2 = (eng2Section && eng2Section.style.display !== 'none') || !!(_survey1 && (_survey1.hasSecondEngine || _survey1.engine2Make));
 
   // v2247: resolve drive type from saved survey so the description auto-fills
   // instead of emitting placeholder text. Ported from Copy 3 for parity.
-  const _survey1 = currentSurveyId ? await getSurvey(currentSurveyId) : null;
   const driveTypeLower1 = (_survey1?.driveType || '').toLowerCase();
   const _driveLabelMap1 = { 'shaft': 'shaft drive', 'outdrive': 'sterndrive', 'ips': 'IPS pod drive', 'saildrive': 'saildrive' };
   const _driveSingular1 = _driveLabelMap1[driveTypeLower1] || '';
@@ -14746,10 +14570,12 @@ function startNewSurvey() {
     concludedValue: document.getElementById('concludedValue')?.value || '',
     replacementCost: document.getElementById('replacementCost')?.value || '',
     overallCondition: document.getElementById('overallCondition')?.value || ''
-  };
+	  };
 
-  const survey = createNewSurvey(formData);
-  saveSurvey(survey).then(async (id) => {
+	  const survey = createNewSurvey(formData);
+	  const matchedSpecs = formData.yearMakeModel ? findBoatSpecs(formData.yearMakeModel) : null;
+	  if (matchedSpecs) _applyEngineSpecsToSurveyObject(survey, matchedSpecs);
+	  saveSurvey(survey).then(async (id) => {
     currentSurveyId = id;
 
     // Transfer any doc photos captured on the new survey form
@@ -15105,6 +14931,10 @@ function guardedAssignComparables(survey, newValue, caller) {
 //     by reference, matching the prior Object.assign semantics exactly.
 const EMPTY_OVER_NONEMPTY_PROTECTED_FIELDS = new Set([
   'hullColour', 'bootStripeColour', 'deckColour', 'personsInAttendance',
+  'engineMake', 'engineModel', 'engineSerial', 'engineHours', 'engineHP', 'fuelType',
+  'transmissionMake', 'transmissionModel', 'transmissionMakeModel', 'transmissionSerial',
+  'engine2Make', 'engine2Model', 'engine2Serial', 'engine2Hours', 'engine2HP', 'fuelType2',
+  'transmission2Make', 'transmission2Model', 'transmission2MakeModel', 'transmission2Serial',
   'hinPhoto', 'compliancePhoto', 'licencePhoto', 'tcPaperLicencePhoto',
   'coverPhoto', 'fourCornerPortBow', 'fourCornerStbdBow', 'fourCornerPortStern', 'fourCornerStbdStern',
   'enginePhoto', 'enginePlatePhoto', 'transmissionPhoto', 'transmissionPlatePhoto',
@@ -15182,6 +15012,149 @@ function guardedSurveyUpdate(survey, updates, caller) {
   }
 
   return { applied, skipped };
+}
+
+const SURVEY_ENGINE_DETAIL_FIELDS = [
+  'engineMake', 'engineModel', 'engineSerial', 'engineHours', 'engineHP', 'fuelType',
+  'transmissionMake', 'transmissionModel', 'transmissionSerial',
+  'engine2Make', 'engine2Model', 'engine2Serial', 'engine2Hours', 'engine2HP', 'fuelType2',
+  'transmission2Make', 'transmission2Model', 'transmission2Serial'
+];
+
+function _fuelTypeOptionsHtml() {
+  return ['Diesel', 'Gasoline', 'Electric', 'Hybrid']
+    .map(v => `<option value="${escapeHtml(v)}"></option>`)
+    .join('');
+}
+
+function _engineMakesOptionsHtml() {
+  if (!engineDb || !Array.isArray(engineDb.engines)) return '';
+  return [...engineDb.engines]
+    .map(e => e && e.make)
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b))
+    .map(make => `<option value="${escapeHtml(make)}"></option>`)
+    .join('');
+}
+
+function _engineModelsOptionsHtml(make) {
+  if (!engineDb || !Array.isArray(engineDb.engines) || !make) return '';
+  const maker = engineDb.engines.find(e => e.make && e.make.toLowerCase() === String(make).toLowerCase());
+  if (!maker || !Array.isArray(maker.models)) return '';
+  return [...maker.models]
+    .sort((a, b) => String(a.model || '').localeCompare(String(b.model || '')))
+    .map(m => `<option value="${escapeHtml(m.model || '')}">${escapeHtml(m.hp ? `${m.hp} HP` : '')}</option>`)
+    .join('');
+}
+
+function _transmissionMakesOptionsHtml() {
+  if (!engineDb || !Array.isArray(engineDb.transmissions)) return '';
+  return [...engineDb.transmissions]
+    .map(t => t && t.make)
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b))
+    .map(make => `<option value="${escapeHtml(make)}"></option>`)
+    .join('');
+}
+
+function _transmissionModelsOptionsHtml(make) {
+  if (!engineDb || !Array.isArray(engineDb.transmissions) || !make) return '';
+  const maker = engineDb.transmissions.find(t => t.make && t.make.toLowerCase() === String(make).toLowerCase());
+  if (!maker || !Array.isArray(maker.models)) return '';
+  return [...maker.models]
+    .sort((a, b) => String(a.model || '').localeCompare(String(b.model || '')))
+    .map(m => `<option value="${escapeHtml(m.model || '')}"></option>`)
+    .join('');
+}
+
+function renderSurveyEngineDetailsPanel(survey) {
+  if (!survey || (survey.vesselType || '').toLowerCase() === 'human') return '';
+  const v = field => escapeHtml(survey[field] || '');
+  const showSecond = !!(
+    survey.hasSecondEngine || survey.engine2Make || survey.engine2Model || survey.engine2Serial ||
+    survey.engine2Hours || survey.engine2HP || survey.fuelType2 ||
+    survey.transmission2Make || survey.transmission2Model || survey.transmission2Serial ||
+    survey.engine2Photo || survey.engine2PlatePhoto || survey.transmission2Photo || survey.transmission2PlatePhoto
+  );
+  const inputCss = 'width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;background:white;';
+  const labelCss = 'font-size:12px;font-weight:600;color:#374151;display:flex;flex-direction:column;gap:3px;';
+  const gridCss = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 10px;';
+  const engineMakeOptions = _engineMakesOptionsHtml();
+  const transMakeOptions = _transmissionMakesOptionsHtml();
+
+  const engineBlock = (slot, title, canRemove) => {
+    const p = slot === 2 ? '2' : '';
+    const engineMake = `engine${p}Make`;
+    const engineModel = `engine${p}Model`;
+    const engineSerial = `engine${p}Serial`;
+    const engineHours = `engine${p}Hours`;
+    const engineHP = `engine${p}HP`;
+    const fuelType = `fuelType${p}`;
+    const transMake = `transmission${p}Make`;
+    const transModel = `transmission${p}Model`;
+    const transSerial = `transmission${p}Serial`;
+    const engineMakeList = `engineMakeOptions${p || '1'}`;
+    const engineModelList = `engineModelOptions${p || '1'}`;
+    const fuelList = `fuelTypeOptions${p || '1'}`;
+    const transMakeList = `transmissionMakeOptions${p || '1'}`;
+    const transModelList = `transmissionModelOptions${p || '1'}`;
+    const removeHtml = canRemove
+      ? `<button type="button" onclick="toggleSurveyEngine2(false)" style="background:white;color:#dc2626;border:1px solid #fecaca;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">Remove</button>`
+      : '';
+    return `
+      <div style="border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:#f8fafc;margin-top:${slot === 2 ? '10px' : '0'};">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
+          <div id="${slot === 1 ? 'engine1Label' : 'engine2Label'}" style="font-weight:700;font-size:13px;color:#066aab;">${escapeHtml(title)}</div>
+          ${removeHtml}
+        </div>
+        <datalist id="${engineMakeList}">${engineMakeOptions}</datalist>
+        <datalist id="${engineModelList}">${_engineModelsOptionsHtml(survey[engineMake])}</datalist>
+        <datalist id="${fuelList}">${_fuelTypeOptionsHtml()}</datalist>
+        <datalist id="${transMakeList}">${transMakeOptions}</datalist>
+        <datalist id="${transModelList}">${_transmissionModelsOptionsHtml(survey[transMake])}</datalist>
+        <div style="${gridCss}">
+          <label style="${labelCss}">Engine Make
+            <input data-engine-field="${engineMake}" type="text" list="${engineMakeList}" value="${v(engineMake)}" onchange="handleSurveyEngineMakeChange(${slot}, this.value)" style="${inputCss}">
+          </label>
+          <label style="${labelCss}">Engine Model
+            <input data-engine-field="${engineModel}" type="text" list="${engineModelList}" value="${v(engineModel)}" onchange="handleSurveyEngineModelChange(${slot}, this.value)" style="${inputCss}">
+          </label>
+          <label style="${labelCss}">Engine Serial No.
+            <input data-engine-field="${engineSerial}" type="text" value="${v(engineSerial)}" onchange="saveSurveyEngineField('${engineSerial}', this.value)" style="${inputCss}">
+          </label>
+          <label style="${labelCss}">Engine Hours
+            <input data-engine-field="${engineHours}" type="text" value="${v(engineHours)}" onchange="saveSurveyEngineField('${engineHours}', this.value)" style="${inputCss}">
+          </label>
+          <label style="${labelCss}">HP / kW Rating
+            <input data-engine-field="${engineHP}" type="text" value="${v(engineHP)}" onchange="saveSurveyEngineField('${engineHP}', this.value)" style="${inputCss}">
+          </label>
+          <label style="${labelCss}">Fuel Type
+            <input data-engine-field="${fuelType}" type="text" list="${fuelList}" value="${v(fuelType)}" onchange="saveSurveyEngineField('${fuelType}', this.value)" style="${inputCss}">
+          </label>
+        </div>
+        <div style="font-weight:700;font-size:13px;color:#066aab;margin:12px 0 8px;">${slot === 2 ? 'Gearbox 2' : 'Gearbox'}</div>
+        <div style="${gridCss}">
+          <label style="${labelCss}">Gearbox Make
+            <input data-engine-field="${transMake}" type="text" list="${transMakeList}" value="${v(transMake)}" onchange="handleSurveyTransmissionMakeChange(${slot}, this.value)" style="${inputCss}">
+          </label>
+          <label style="${labelCss}">Gearbox Model
+            <input data-engine-field="${transModel}" type="text" list="${transModelList}" value="${v(transModel)}" onchange="handleSurveyTransmissionModelChange(${slot}, this.value)" style="${inputCss}">
+          </label>
+          <label style="${labelCss}">Gearbox Serial No.
+            <input data-engine-field="${transSerial}" type="text" value="${v(transSerial)}" onchange="saveSurveyEngineField('${transSerial}', this.value)" style="${inputCss}">
+          </label>
+        </div>
+      </div>`;
+  };
+
+  return `
+    <div id="surveyEngineDetailsPanel" style="margin-bottom:14px;padding:12px;background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;">
+      <div style="font-size:13px;font-weight:700;color:#066aab;margin-bottom:8px;">Engine & Gearbox Details</div>
+      ${engineBlock(1, showSecond ? 'Engine 1 (Port)' : 'Engine', false)}
+      ${showSecond ? engineBlock(2, 'Engine 2 (Starboard)', true) : `
+        <button type="button" onclick="toggleSurveyEngine2(true)" style="margin-top:10px;background:white;color:#066aab;border:1px solid #066aab;border-radius:6px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;">+ Add Second Engine</button>
+      `}
+    </div>`;
 }
 
 // v2231: toggle comparables section visibility and persist the flag
@@ -15269,11 +15242,16 @@ function renderInspection(survey) {
     saveSurvey(survey);
   }
 
-  // Retroactive engine sync — populate intro from body if body has data and intro is empty
-  if (_retroSyncEngineFromBody(survey)) {
-    saveSurvey(survey);
-    showToast('Engine info synced to intro');
-  }
+	  // Engine data now lives in the survey Engine(s) section. Preserve older
+	  // intro photo fields by copying them into the matching body photo slots,
+	  // while still backfilling report fields from existing body text/photos.
+	  let engineSyncChanged = false;
+	  if (_migrateLegacyIntroEnginePhotosToBody(survey)) engineSyncChanged = true;
+	  if (_retroSyncEngineFromBody(survey)) engineSyncChanged = true;
+	  if (engineSyncChanged) {
+	    saveSurvey(survey);
+	    showToast('Engine details synced');
+	  }
 
   const esc = (s) => (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
 
@@ -15795,11 +15773,14 @@ function renderInspection(survey) {
           <textarea id="propulsionNarrative" rows="6"
                     oninput="markPropulsionNarrativeManuallyEdited()"
                     style="width:100%;padding:8px 10px;border:1px solid #93c5fd;border-radius:6px;font-size:13px;line-height:1.45;font-family:inherit;resize:vertical;background:white;box-sizing:border-box;">${_narr}</textarea>
-        </div>
-      `;
-    }
+	        </div>
+	      `;
+	    }
+	    if (categoryName === 'Engine(s) and drive(s)') {
+	      html += renderSurveyEngineDetailsPanel(survey);
+	    }
 
-    // Render area photos at top of category (inline file input for reliable iOS behaviour)
+	    // Render area photos at top of category (inline file input for reliable iOS behaviour)
     // v2219: area photos are now skippable per section. Skipped media items
     // render as a collapsed row with an Unskip button; the photos remain in
     // IndexedDB so unskipping restores them.
@@ -16941,7 +16922,7 @@ function ensureReportButton() {
 
 // ─── Engine Data Migration ────────────────────────────────────────────────
 // Migrates engine info from the insurance template's "Engine(s) and drive(s)"
-// checklist items into the header fields used by report generation.
+// checklist items into the Engine & Gearbox Details fields used by report generation.
 // Preserves all original checklist item data (photos, ratings, text).
 async function migrateEngineData() {
   const survey = await getSurvey(currentSurveyId);
@@ -16982,7 +16963,7 @@ async function migrateEngineData() {
   }
 
   // Hours → engineHours
-  const hoursData = items['Hours'];
+  const hoursData = items['Hours'] || items['Engine hours'];
   if (hoursData && hoursData.text && hoursData.text.trim()) {
     if (!survey.engineHours) { survey.engineHours = hoursData.text.trim(); migrated.push('Engine hours'); }
   }
@@ -17017,7 +16998,7 @@ async function migrateEngineData() {
   }
 
   await saveSurvey(survey);
-  showAlert(`Migrated ${migrated.length} engine fields:\n\n${migrated.join('\n')}\n\nOriginal checklist items preserved. Review the header fields to verify.`);
+  showAlert(`Migrated ${migrated.length} engine fields:\n\n${migrated.join('\n')}\n\nOriginal checklist items preserved. Review Engine & Gearbox Details to verify.`);
 
   // Re-render to show updated fields
   renderInspection(survey);
@@ -17172,7 +17153,7 @@ async function checkSurvey() {
     if (missingEngineCount > 0) {
       const si = survey.items || {};
       const hasMfg = si['Engine(s) manufacturer, model # and serial number (if available)']?.text?.trim();
-      const hasHrs = si['Hours']?.text?.trim();
+      const hasHrs = si['Hours']?.text?.trim() || si['Engine hours']?.text?.trim();
       const hasHP = si['Horsepower']?.text?.trim();
       const hasFuel = si['Fuel type']?.text?.trim();
       if (hasMfg || hasHrs || hasHP || hasFuel) {
@@ -17196,14 +17177,18 @@ async function checkSurvey() {
 
   // Engine / transmission photos
   const enginePhotoFields = [
-    ['enginePhoto',         'Engine photo'],
-    ['enginePlatePhoto',    'Engine plate photo'],
-    ['transmissionPhoto',   'Gearbox photo'],
-    ['transmissionPlatePhoto','Gearbox plate photo'],
+    ['enginePhoto', 'Engine photo', ['Engine(s) and drive(s) photos']],
+    ['enginePlatePhoto', 'Engine plate photo', ['Engine name plate(s)']],
+    ['transmissionPhoto', 'Gearbox photo', ['Gearbox general condition/impressions', 'Gearbox oil']],
+    ['transmissionPlatePhoto', 'Gearbox plate photo', ['Gearbox nameplate(s)', 'Transmission nameplate(s)']],
   ];
   if (survey.vesselType !== 'human-powered') {
-    for (const [field, label] of enginePhotoFields) {
-      if (!survey[field]) add('warning', 'Documentation Photos', `Missing: ${label}`, null, field);
+    for (const [field, label, itemLabels] of enginePhotoFields) {
+      const hasFieldPhoto = !_isEmptySurveyValue(survey[field]);
+      const hasBodyPhoto = itemLabels.some(itemLabel =>
+        survey.items && survey.items[itemLabel] && (survey.items[itemLabel].photos || []).length > 0
+      );
+      if (!hasFieldPhoto && !hasBodyPhoto) add('warning', 'Documentation Photos', `Missing: ${label}`, itemLabels[0]);
     }
   }
   const docPhotoCount = ['hinPhoto','coverPhoto','licencePhoto',
@@ -18125,10 +18110,10 @@ async function checkSurvey() {
   if (hasEngineMigrationData) {
     html += `
       <div style="background:#eff6ff;border:2px solid #3b82f6;border-radius:10px;padding:12px;margin-bottom:16px;text-align:center;">
-        <div style="font-size:13px;color:#1e40af;margin-bottom:8px;">Engine data found in checklist items but missing from header fields.</div>
+        <div style="font-size:13px;color:#1e40af;margin-bottom:8px;">Engine data found in checklist items but missing from Engine & Gearbox Details.</div>
         <button onclick="migrateEngineData().then(()=>{checkSurvey();})"
                 style="background:#3b82f6;color:white;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;">
-          ⚙️ Migrate Engine Data to Header
+          ⚙️ Use Checklist Engine Data
         </button>
       </div>`;
   }
@@ -18700,8 +18685,20 @@ async function checkSurvey() {
           _csExpandAccordionAndScroll(el);
         }
       }, 250);
+    } else if (navId && SURVEY_ENGINE_DETAIL_FIELDS.includes(navId)) {
+      _csRemoveOverlay();
+      _csShowBackButton();
+      setTimeout(() => {
+        const el = document.querySelector(`[data-engine-field="${navId}"]`);
+        if (el) {
+          _csExpandAccordionAndScroll(el);
+          if (['INPUT','SELECT','TEXTAREA'].includes(el.tagName)) {
+            setTimeout(() => el.focus(), 250);
+          }
+        }
+      }, 250);
     } else if (navId) {
-      // Header/engine/valuation/photo field — lives in the Edit Intro view
+      // Header/valuation/photo field — lives in the Edit Intro view
       // KEEP the overlay visible while editSurveyDetails loads (prevents iOS ghost-clicks
       // on the inspection view's back button during the async transition)
       editSurveyDetails(currentSurveyId);
@@ -18997,12 +18994,14 @@ async function _csEvaluateAndReturn(scrollPos) {
   const working = window._csWorkingOn;
 
   // If we navigated to the Edit Intro view, save form to DB and return to inspection
-  if (currentView === 'edit-survey' || currentView === 'new-survey') {
-    await saveEditFormSilently();
-    const survey = await getSurvey(currentSurveyId);
-    if (survey) renderInspection(survey);
-    await new Promise(r => setTimeout(r, 100));
-  }
+	  if (currentView === 'edit-survey' || currentView === 'new-survey') {
+	    await saveEditFormSilently();
+	    const survey = await getSurvey(currentSurveyId);
+	    if (survey) renderInspection(survey);
+	    await new Promise(r => setTimeout(r, 100));
+	  } else {
+	    await saveAllInspectionData();
+	  }
 
   if (!working || (!working.itemLabel && !working.navId)) {
     // No specific issue tracked — just reopen Check Survey
@@ -19147,6 +19146,10 @@ function _csCheckSingleIssue(issue, data, survey) {
 
   // Documentation Photos
   if (cat === 'Documentation Photos') {
+    if (issue.itemLabel) {
+      if (data && Array.isArray(data.photos) && data.photos.length > 0) return { fixed: true };
+      return { fixed: false, reason: 'Photo not yet captured. Tap the camera button to add it.' };
+    }
     const photoFieldMap = { hinPhotoStatus: 'hinPhoto', compliancePhotoStatus: 'compliancePhoto', coverPhotoStatus: 'coverPhoto', tcLicense: 'licencePhoto' };
     const navId = issue.navId;
     if (navId && photoFieldMap[navId]) {
@@ -23057,6 +23060,174 @@ function toggleHasRudder(hasRudder) {
 // Propulsion section of the report. The narrative is auto-regenerated
 // inside saveSurvey() whenever any contributing field changes, mirroring
 // the Overall Description of Vessel behaviour.
+function _surveyEngineSlotKeys(slot) {
+  const p = Number(slot) === 2 ? '2' : '';
+  return {
+    engineMake: `engine${p}Make`,
+    engineModel: `engine${p}Model`,
+    engineHP: `engine${p}HP`,
+    fuelType: `fuelType${p}`,
+    transmissionMake: `transmission${p}Make`,
+    transmissionModel: `transmission${p}Model`,
+    transmissionMakeModel: `transmission${p}MakeModel`
+  };
+}
+
+function _setDatalistOptions(id, html) {
+  const list = document.getElementById(id);
+  if (list) list.innerHTML = html || '';
+}
+
+function _applyEngineDbDefaults(survey, slot) {
+  if (!survey || !engineDb || !Array.isArray(engineDb.engines)) return false;
+  const keys = _surveyEngineSlotKeys(slot);
+  const make = (survey[keys.engineMake] || '').trim();
+  const model = (survey[keys.engineModel] || '').trim();
+  if (!make || !model) return false;
+  const maker = engineDb.engines.find(e => e.make && e.make.toLowerCase() === make.toLowerCase());
+  const modelRow = maker && Array.isArray(maker.models)
+    ? maker.models.find(m => m.model && m.model.toLowerCase() === model.toLowerCase())
+    : null;
+  if (!modelRow) return false;
+  let changed = false;
+  if (modelRow.hp && !survey[keys.engineHP]) {
+    survey[keys.engineHP] = `${modelRow.hp}HP${modelRow.kw ? ` / ${modelRow.kw}kW` : ''}`;
+    changed = true;
+  }
+  if (modelRow.fuel && !survey[keys.fuelType]) {
+    survey[keys.fuelType] = modelRow.fuel;
+    changed = true;
+  }
+  return changed;
+}
+
+function _updateTransmissionMakeModel(survey, slot) {
+  if (!survey) return false;
+  const keys = _surveyEngineSlotKeys(slot);
+  const combined = [survey[keys.transmissionMake], survey[keys.transmissionModel]].filter(Boolean).join(' ').trim();
+  if ((survey[keys.transmissionMakeModel] || '') === combined) return false;
+  survey[keys.transmissionMakeModel] = combined;
+  return true;
+}
+
+async function saveSurveyEngineField(field, value) {
+  if (!SURVEY_ENGINE_DETAIL_FIELDS.includes(field) || !currentSurveyId) return;
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  const next = String(value || '').trim();
+  if (survey[field] === next) return;
+  survey[field] = next;
+  const slot = field.includes('2') || field === 'fuelType2' ? 2 : 1;
+  if (field.startsWith('transmission')) _updateTransmissionMakeModel(survey, slot);
+  await saveSurvey(survey);
+  if (typeof SaveStatus !== 'undefined') SaveStatus.markSaved();
+}
+
+async function handleSurveyEngineMakeChange(slot, value) {
+  const keys = _surveyEngineSlotKeys(slot);
+  _setDatalistOptions(`engineModelOptions${Number(slot) === 2 ? '2' : '1'}`, _engineModelsOptionsHtml(value));
+  await saveSurveyEngineField(keys.engineMake, value);
+}
+
+async function handleSurveyEngineModelChange(slot, value) {
+  if (!currentSurveyId) return;
+  const keys = _surveyEngineSlotKeys(slot);
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  const next = String(value || '').trim();
+  let changed = false;
+  if (survey[keys.engineModel] !== next) {
+    survey[keys.engineModel] = next;
+    changed = true;
+  }
+  if (_applyEngineDbDefaults(survey, slot)) changed = true;
+  if (changed) {
+    await saveSurvey(survey);
+    const hpEl = document.querySelector(`[data-engine-field="${keys.engineHP}"]`);
+    const fuelEl = document.querySelector(`[data-engine-field="${keys.fuelType}"]`);
+    if (hpEl) hpEl.value = survey[keys.engineHP] || '';
+    if (fuelEl) fuelEl.value = survey[keys.fuelType] || '';
+    if (typeof SaveStatus !== 'undefined') SaveStatus.markSaved();
+  }
+}
+
+async function handleSurveyTransmissionMakeChange(slot, value) {
+  const keys = _surveyEngineSlotKeys(slot);
+  _setDatalistOptions(`transmissionModelOptions${Number(slot) === 2 ? '2' : '1'}`, _transmissionModelsOptionsHtml(value));
+  if (!currentSurveyId) return;
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  const next = String(value || '').trim();
+  let changed = false;
+  if (survey[keys.transmissionMake] !== next) {
+    survey[keys.transmissionMake] = next;
+    changed = true;
+  }
+  if (_updateTransmissionMakeModel(survey, slot)) changed = true;
+  if (changed) {
+    await saveSurvey(survey);
+    if (typeof SaveStatus !== 'undefined') SaveStatus.markSaved();
+  }
+}
+
+async function handleSurveyTransmissionModelChange(slot, value) {
+  if (!currentSurveyId) return;
+  const keys = _surveyEngineSlotKeys(slot);
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  const next = String(value || '').trim();
+  let changed = false;
+  if (survey[keys.transmissionModel] !== next) {
+    survey[keys.transmissionModel] = next;
+    changed = true;
+  }
+  if (_updateTransmissionMakeModel(survey, slot)) changed = true;
+  if (changed) {
+    await saveSurvey(survey);
+    if (typeof SaveStatus !== 'undefined') SaveStatus.markSaved();
+  }
+}
+
+async function toggleSurveyEngine2(show) {
+  if (!currentSurveyId) return;
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  survey.hasSecondEngine = !!show;
+  if (!show) {
+    ['engine2Make', 'engine2Model', 'engine2Serial', 'engine2Hours', 'engine2HP', 'fuelType2',
+     'transmission2Make', 'transmission2Model', 'transmission2MakeModel', 'transmission2Serial'].forEach(field => {
+      survey[field] = '';
+    });
+  } else {
+    if (!survey.engine2Make && survey.engineMake) survey.engine2Make = survey.engineMake;
+    if (!survey.engine2Model && survey.engineModel) survey.engine2Model = survey.engineModel;
+    if (!survey.engine2HP && survey.engineHP) survey.engine2HP = survey.engineHP;
+    if (!survey.fuelType2 && survey.fuelType) survey.fuelType2 = survey.fuelType;
+    _updateTransmissionMakeModel(survey, 2);
+  }
+  await saveSurvey(survey);
+  renderInspection(survey);
+}
+
+function collectSurveyEngineDetailsFromDom(survey) {
+  if (!survey || typeof document === 'undefined') return false;
+  let changed = false;
+  document.querySelectorAll('[data-engine-field]').forEach(el => {
+    const field = el.getAttribute('data-engine-field');
+    if (!SURVEY_ENGINE_DETAIL_FIELDS.includes(field)) return;
+    const value = String(el.value || '').trim();
+    if (survey[field] !== value) {
+      survey[field] = value;
+      changed = true;
+    }
+  });
+  if (_updateTransmissionMakeModel(survey, 1)) changed = true;
+  if (_updateTransmissionMakeModel(survey, 2)) changed = true;
+  if (_applyEngineDbDefaults(survey, 1)) changed = true;
+  if (_applyEngineDbDefaults(survey, 2)) changed = true;
+  return changed;
+}
+
 function updateEngineNarrativeField(field, value) {
   const allowed = new Set(['engineLocation', 'engineAccess', 'engineGaugesLocation', 'engineControlsLocation']);
   if (!allowed.has(field)) return;
@@ -23195,6 +23366,7 @@ function _retroSyncEngineFromBody(survey) {
 
   // Sync engine hours
   if (syncText('Engine hours', 'engineHours')) changed = true;
+  if (syncText('Hours', 'engineHours')) changed = true;
 
   // Sync engine make/model/serial (uses parser)
   const emItem = items['Engine(s) manufacturer, model # and serial number (if available)'];
@@ -23233,7 +23405,7 @@ function _syncEngineFieldsFromBody(survey, itemLabel, text) {
   const raw = text.trim();
 
   // Engine hours
-  if (itemLabel === 'Engine hours') {
+  if (itemLabel === 'Engine hours' || itemLabel === 'Hours') {
     survey.engineHours = raw;
     return;
   }
@@ -23303,6 +23475,43 @@ function _mergeIntroPhotosFromBodyItem(survey, itemLabel, surveyField) {
   if (_samePhotoIds(existingIds, merged)) return false;
   survey[surveyField] = merged;
   return true;
+}
+
+function _mergeBodyPhotosFromIntroField(survey, itemLabel, surveyField) {
+  if (!survey) return false;
+  const legacyIds = _photoIdArray(survey[surveyField]);
+  if (legacyIds.length === 0) return false;
+  if (!survey.items) survey.items = {};
+  if (!survey.items[itemLabel]) {
+    survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+  }
+  if (!Array.isArray(survey.items[itemLabel].photos)) survey.items[itemLabel].photos = [];
+  const existingIds = _photoIdArray(survey.items[itemLabel].photos);
+  const merged = [...existingIds];
+  for (const id of legacyIds) {
+    if (!merged.includes(id)) merged.push(id);
+  }
+  if (_samePhotoIds(existingIds, merged)) return false;
+  survey.items[itemLabel].photos = merged;
+  return true;
+}
+
+function _migrateLegacyIntroEnginePhotosToBody(survey) {
+  let changed = false;
+  const mappings = [
+    ['enginePhoto', 'Engine(s) and drive(s) photos'],
+    ['engine2Photo', 'Engine(s) and drive(s) photos'],
+    ['enginePlatePhoto', 'Engine name plate(s)'],
+    ['engine2PlatePhoto', 'Engine name plate(s)'],
+    ['transmissionPhoto', 'Gearbox general condition/impressions'],
+    ['transmission2Photo', 'Gearbox general condition/impressions'],
+    ['transmissionPlatePhoto', 'Gearbox nameplate(s)'],
+    ['transmission2PlatePhoto', 'Gearbox nameplate(s)']
+  ];
+  mappings.forEach(([surveyField, itemLabel]) => {
+    if (_mergeBodyPhotosFromIntroField(survey, itemLabel, surveyField)) changed = true;
+  });
+  return changed;
 }
 
 // Auto-sync engine/gearbox PHOTOS from checklist body media items to intro header fields.
@@ -24339,6 +24548,10 @@ async function saveAllInspectionData() {
     }
   });
 
+  if (collectSurveyEngineDetailsFromDom(survey)) {
+    changed = true;
+  }
+
   // Save bilge pumps
   const bilgePumps = collectBilgePumps();
   if (bilgePumps.length > 0 || (survey.bilgePumps && survey.bilgePumps.length > 0)) {
@@ -24401,9 +24614,13 @@ async function generateReport() {
   const survey = await getSurvey(currentSurveyId);
   if (!survey) return;
 
-  // Migrate old item labels before generating report
-  if (migrateSurveyLabels(survey)) await saveSurvey(survey);
-  autoUpdateSafetyBracket(survey);
+	  // Migrate old item labels before generating report
+	  if (migrateSurveyLabels(survey)) await saveSurvey(survey);
+	  let reportEngineSyncChanged = false;
+	  if (_migrateLegacyIntroEnginePhotosToBody(survey)) reportEngineSyncChanged = true;
+	  if (_retroSyncEngineFromBody(survey)) reportEngineSyncChanged = true;
+	  if (reportEngineSyncChanged) await saveSurvey(survey);
+	  autoUpdateSafetyBracket(survey);
 
   // ── v2463: refresh the condition sentence in the stored vessel description
   // so it always matches the current BUC rating ─────────────────────────
@@ -24710,25 +24927,49 @@ async function generateReport() {
   let coverPhotoDataUrl = await loadAndCompress(survey.coverPhoto);
 
   // Helper to load all photos from a multi-doc field (array or single ID)
-  async function loadDocPhotos(fieldValue) {
-    if (!fieldValue) return [];
-    const ids = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
-    const urls = [];
+	  async function loadDocPhotos(fieldValue) {
+	    if (!fieldValue) return [];
+	    const ids = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
+	    const urls = [];
     for (const id of ids) {
       const compressed = await loadAndCompress(id);
       if (compressed) urls.push(compressed);
-    }
-    return urls;
-  }
+	    }
+	    return urls;
+	  }
 
-  const enginePhotos = await loadDocPhotos(survey.enginePhoto);
-  const enginePlatePhotos = await loadDocPhotos(survey.enginePlatePhoto);
-  const transmissionPhotos = await loadDocPhotos(survey.transmissionPhoto);
-  const transmissionPlatePhotos = await loadDocPhotos(survey.transmissionPlatePhoto);
-  const engine2Photos = await loadDocPhotos(survey.engine2Photo);
-  const engine2PlatePhotos = await loadDocPhotos(survey.engine2PlatePhoto);
-  const transmission2Photos = await loadDocPhotos(survey.transmission2Photo);
-  const transmission2PlatePhotos = await loadDocPhotos(survey.transmission2PlatePhoto);
+	  const itemPhotoIds = (label) => _photoIdArray(survey.items && survey.items[label] && survey.items[label].photos);
+	  const mergedPhotoIds = (...values) => {
+	    const merged = [];
+	    values.forEach(value => {
+	      _photoIdArray(value).forEach(id => {
+	        if (id && !merged.includes(id)) merged.push(id);
+	      });
+	    });
+	    return merged;
+	  };
+	  const enginePhotos = await loadDocPhotos(mergedPhotoIds(
+	    itemPhotoIds('Engine(s) and drive(s) photos'),
+	    survey.enginePhoto
+	  ));
+	  const enginePlatePhotos = await loadDocPhotos(mergedPhotoIds(
+	    itemPhotoIds('Engine name plate(s)'),
+	    survey.enginePlatePhoto
+	  ));
+	  const transmissionPhotos = await loadDocPhotos(mergedPhotoIds(
+	    itemPhotoIds('Gearbox general condition/impressions'),
+	    itemPhotoIds('Gearbox oil'),
+	    survey.transmissionPhoto
+	  ));
+	  const transmissionPlatePhotos = await loadDocPhotos(mergedPhotoIds(
+	    itemPhotoIds('Gearbox nameplate(s)'),
+	    itemPhotoIds('Transmission nameplate(s)'),
+	    survey.transmissionPlatePhoto
+	  ));
+	  const engine2Photos = await loadDocPhotos(survey.engine2Photo);
+	  const engine2PlatePhotos = await loadDocPhotos(survey.engine2PlatePhoto);
+	  const transmission2Photos = await loadDocPhotos(survey.transmission2Photo);
+	  const transmission2PlatePhotos = await loadDocPhotos(survey.transmission2PlatePhoto);
 
   // Backward compat: single dataUrl variables for report template
   const enginePhotoDataUrl = enginePhotos[0] || '';
@@ -25499,11 +25740,13 @@ ${(() => {
         let propulsionHeaderHtml = '';
         const isEngineCategory = category.name === 'Engine(s) and drive(s)';
         const hasPropulsionContent = isEngineCategory && !!(
-          (survey.propulsionNarrative && survey.propulsionNarrative.trim())
-          || survey.engineMake || survey.engineModel || survey.engineHP
-          || survey.engineSerial || survey.engineHours || survey.fuelType
-          || survey.transmissionMakeModel || survey.engine2Make
-        );
+	          (survey.propulsionNarrative && survey.propulsionNarrative.trim())
+	          || survey.engineMake || survey.engineModel || survey.engineHP
+	          || survey.engineSerial || survey.engineHours || survey.fuelType
+	          || survey.transmissionMakeModel || survey.transmissionMake || survey.transmissionModel || survey.engine2Make
+	          || (enginePhotos && enginePhotos.length) || (enginePlatePhotos && enginePlatePhotos.length)
+	          || (transmissionPhotos && transmissionPhotos.length) || (transmissionPlatePhotos && transmissionPlatePhotos.length)
+	        );
         if (completedItems.length === 0 && !hasPropulsionContent) return;
         if (isEngineCategory) {
           // Narrative paragraph — generated from chips + intro fields
@@ -25518,9 +25761,11 @@ ${(() => {
           // rows below. Nameplate photos rendered full-width inside the
           // cell at larger dimensions (SAMS reviewer noted previous plate
           // photos were too small to read serial numbers).
-          const hasAnyEngine = survey.engineMake || survey.engineModel || survey.engineHP
-            || survey.engineSerial || survey.engineHours || survey.fuelType
-            || survey.transmissionMakeModel;
+	          const hasAnyEngine = survey.engineMake || survey.engineModel || survey.engineHP
+	            || survey.engineSerial || survey.engineHours || survey.fuelType
+	            || survey.transmissionMakeModel || survey.transmissionMake || survey.transmissionModel
+	            || (enginePhotos && enginePhotos.length) || (enginePlatePhotos && enginePlatePhotos.length)
+	            || (transmissionPhotos && transmissionPhotos.length) || (transmissionPlatePhotos && transmissionPlatePhotos.length);
           const hasTwin = !!survey.engine2Make;
           const nameplateImg = (url, label) =>
             `<div class="report-photo-card">
@@ -25602,25 +25847,28 @@ ${(() => {
               blocks.push(propulsionItem(title, specs, e2Photos + e2Plates));
             }
 
-            const hasT1 = survey.transmissionMakeModel || survey.transmissionSerial
-              || t1Photos || t1Plates;
-            if (hasT1) {
-              const title = survey.transmission2MakeModel ? 'Gearbox 1 (Port)' : 'Gearbox';
-              const specs = [
-                survey.transmissionMakeModel,
-                survey.transmissionSerial ? `Serial ${survey.transmissionSerial}` : '',
-              ];
-              blocks.push(propulsionItem(title, specs, t1Photos + t1Plates));
-            }
+	            const t1MakeModel = survey.transmissionMakeModel || [survey.transmissionMake, survey.transmissionModel].filter(Boolean).join(' ').trim();
+	            const hasT1 = t1MakeModel || survey.transmissionSerial
+	              || t1Photos || t1Plates;
+	            if (hasT1) {
+	              const t2MakeModelForTitle = survey.transmission2MakeModel || [survey.transmission2Make, survey.transmission2Model].filter(Boolean).join(' ').trim();
+	              const title = t2MakeModelForTitle ? 'Gearbox 1 (Port)' : 'Gearbox';
+	              const specs = [
+	                t1MakeModel,
+	                survey.transmissionSerial ? `Serial ${survey.transmissionSerial}` : '',
+	              ];
+	              blocks.push(propulsionItem(title, specs, t1Photos + t1Plates));
+	            }
 
-            const hasT2 = survey.transmission2MakeModel || survey.transmission2Serial
-              || t2Photos || t2Plates;
-            if (hasT2) {
-              const title = 'Gearbox 2 (Starboard)';
-              const specs = [
-                survey.transmission2MakeModel,
-                survey.transmission2Serial ? `Serial ${survey.transmission2Serial}` : '',
-              ];
+	            const t2MakeModel = survey.transmission2MakeModel || [survey.transmission2Make, survey.transmission2Model].filter(Boolean).join(' ').trim();
+	            const hasT2 = t2MakeModel || survey.transmission2Serial
+	              || t2Photos || t2Plates;
+	            if (hasT2) {
+	              const title = 'Gearbox 2 (Starboard)';
+	              const specs = [
+	                t2MakeModel,
+	                survey.transmission2Serial ? `Serial ${survey.transmission2Serial}` : '',
+	              ];
               blocks.push(propulsionItem(title, specs, t2Photos + t2Plates));
             }
 

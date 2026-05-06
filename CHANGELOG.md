@@ -1,3 +1,8 @@
+## v2532
+- Removed duplicate engine and gearbox entry controls from Edit Vessel Information so Version 1 has one engine-entry workflow in the survey body.
+- Added Engine & Gearbox Details to the Engine(s) and drive(s) survey section, including twin-engine fields, make/model datalists, and report save support.
+- Migrated legacy intro engine photos into the matching survey-section photo items and updated the checker/report to use those survey-section photos.
+
 ## v2531
 - Restored saved Persons in Attendance entries into the visible Edit Vessel Information attendee controls instead of leaving only the default surveyor row.
 - Added guards so blank auto-fill saves cannot wipe saved hull/deck colours, attendee text, or intro/documentation photo fields.
