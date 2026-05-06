@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2536';
+const APP_VERSION = 'v2537';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -26906,12 +26906,14 @@ ${(() => {
         + '</ul>'
         + '</div>'
 
-        // v2479: Valuation Sources / Fair Market Value range / Estimated
-        // Replacement Cost rows removed per Dave's request 2026-04-27.
+        // v2537: Estimated Replacement Cost is client-facing again when
+        // entered, while sources/range remain worksheet context.
+        // v2479: Valuation Sources / Fair Market Value range rows removed
+        // per Dave's request 2026-04-27.
         // Surveyor's preference: surface only the Final Concluded FMV
         // (rendered at the bottom of the valuation section, see _hasConc
         // block below) plus the Comparables table when present. The
-        // sources/range/replacement working data lives in the surveyor's
+        // sources/range working data lives in the surveyor's
         // worksheet, not the client-facing report. _srcRow / _fmvRow /
         // _replRow / _hasFMV / _hasRepl / _hasSources still computed
         // above because Condition Adjustment paragraph + Comparables
@@ -26984,13 +26986,16 @@ ${(() => {
       // display, strong close. Exchange Rate row rides along because
       // Dave groups the two visually and it's the only place the raw
       // rate is surfaced now that the worksheet table is gone.
-      if (_hasConc) {
+      if (_hasConc || _hasRepl) {
         _out += '<table style="margin-top:18px;">'
-          + '<tr style="border-top:2px solid #066aab;"><td style="width:40%;"><strong style="font-size:11pt;">Final Concluded Fair Market Value</strong></td><td>'
-          + (_xr ? '<div style="font-size:16pt;font-weight:800;color:#066aab;line-height:1.3;">CAD $' + _f(_concC) + '</div>' : '')
-          + '<div style="font-size:11pt;' + (_xr ? 'color:#4b5563;margin-top:2px;' : 'font-weight:800;color:#066aab;') + '">USD $' + _f(_concU) + ' ' + _xrNote + '</div>'
-          + '<div style="font-size:9pt;color:#6b7280;font-style:italic;">Tax not included.</div>'
-          + '</td></tr>'
+          + (_hasConc
+            ? '<tr style="border-top:2px solid #066aab;"><td style="width:40%;"><strong style="font-size:11pt;">Final Concluded Fair Market Value</strong></td><td>'
+              + (_xr ? '<div style="font-size:16pt;font-weight:800;color:#066aab;line-height:1.3;">CAD $' + _f(_concC) + '</div>' : '')
+              + '<div style="font-size:11pt;' + (_xr ? 'color:#4b5563;margin-top:2px;' : 'font-weight:800;color:#066aab;') + '">USD $' + _f(_concU) + ' ' + _xrNote + '</div>'
+              + '<div style="font-size:9pt;color:#6b7280;font-style:italic;">Tax not included.</div>'
+              + '</td></tr>'
+            : '')
+          + (_hasRepl ? _replRow : '')
           + _xrRow
           + '</table>';
       }

@@ -1,3 +1,8 @@
+## v2537
+- Restored client-facing Estimated Replacement Cost output in the report valuation close when a replacement value has been entered.
+- Kept valuation sources and FMV range as worksheet context; the report still closes on the final concluded FMV and now includes replacement cost alongside it.
+- Updated app version metadata and service-worker cache for the GitHub-hosted Version 1 app.
+
 ## v2536
 - Kept overall vessel condition strictly surveyor-entered; valuation methodology text no longer mentions a BUC condition adjustment until an overall condition rating has been selected.
 - Updated the app version metadata and service-worker cache to keep the GitHub-hosted app on the same version.
