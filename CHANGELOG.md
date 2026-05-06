@@ -1,3 +1,8 @@
+## v2538
+- Added a Version 1 documentation-photo recovery path for imported surveys whose cover, four-corner, HIN, licence, engine, or gearbox intro photos are linked but not rendering.
+- Made documentation photo previews reload defensively when Edit Vessel Information opens.
+- Changed Overall Vessel Condition Rating from a fixed dropdown to a typeable field with BUC-grade presets, and added a type-to-set path in the item rating sheet.
+
 ## v2537
 - Restored client-facing Estimated Replacement Cost output in the report valuation close when a replacement value has been entered.
 - Kept valuation sources and FMV range as worksheet context; the report still closes on the final concluded FMV and now includes replacement cost alongside it.

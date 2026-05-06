@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2537';
+const APP_VERSION = 'v2538';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -795,6 +795,11 @@ const RATING_SHORT_LABELS = {
 
 function getRatingShortLabel(rating) {
   return RATING_SHORT_LABELS[rating] || rating;
+}
+
+function getRatingColor(rating) {
+  if (RATING_COLORS[rating]) return RATING_COLORS[rating];
+  return classifyRatingForReport(rating).color;
 }
 
 // v2228: single source of truth for how the report labels, colours, and
@@ -4197,6 +4202,34 @@ function showMissingPhotoDataMessage(photoId) {
   );
 }
 
+const DOC_PHOTO_FIELDS = [
+  'hinPhoto', 'compliancePhoto', 'licencePhoto', 'tcPaperLicencePhoto',
+  'coverPhoto', 'enginePhoto', 'enginePlatePhoto', 'transmissionPhoto',
+  'transmissionPlatePhoto', 'engine2Photo', 'engine2PlatePhoto',
+  'transmission2Photo', 'transmission2PlatePhoto', 'fourCornerPhotos',
+  'fourCornerPortBow', 'fourCornerStbdBow', 'fourCornerPortStern',
+  'fourCornerStbdStern'
+];
+const DOC_PREVIEW_PHOTO_FIELDS = DOC_PHOTO_FIELDS.filter(fieldKey => fieldKey !== 'fourCornerPhotos');
+
+function collectPhotoIdsFromValue(value) {
+  const ids = [];
+  const add = (candidate) => {
+    if (!candidate) return;
+    if (Array.isArray(candidate)) {
+      candidate.forEach(add);
+      return;
+    }
+    if (typeof candidate === 'object') {
+      Object.values(candidate).forEach(add);
+      return;
+    }
+    ids.push(String(candidate));
+  };
+  add(value);
+  return ids;
+}
+
 function collectSurveyLinkedPhotoIds(survey) {
   const ids = new Set();
   const add = (value) => {
@@ -4212,20 +4245,145 @@ function collectSurveyLinkedPhotoIds(survey) {
     ids.add(String(value));
   };
 
-  [
-    'hinPhoto', 'compliancePhoto', 'licencePhoto', 'tcPaperLicencePhoto',
-    'coverPhoto', 'enginePhoto', 'enginePlatePhoto', 'transmissionPhoto',
-    'transmissionPlatePhoto', 'engine2Photo', 'engine2PlatePhoto',
-    'transmission2Photo', 'transmission2PlatePhoto', 'fourCornerPhotos',
-    'fourCornerPortBow', 'fourCornerStbdBow', 'fourCornerPortStern',
-    'fourCornerStbdStern'
-  ].forEach(key => add(survey && survey[key]));
+  DOC_PHOTO_FIELDS.forEach(key => add(survey && survey[key]));
 
   Object.values((survey && survey.items) || {}).forEach(item => add(item && item.photos));
   ((survey && survey.safetyEquipment) || []).forEach(eq => add(eq && eq.photos));
   ((survey && survey.instrumentsElectronics) || []).forEach(item => add(item && item.photos));
 
   return ids;
+}
+
+async function reloadDocPhotoPreviews() {
+  if (!currentSurveyId) return { linked: 0, present: 0, missing: 0 };
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return { linked: 0, present: 0, missing: 0 };
+
+  let linked = 0;
+  let present = 0;
+  let missing = 0;
+
+  for (const fieldKey of DOC_PREVIEW_PHOTO_FIELDS) {
+    const ids = collectPhotoIdsFromValue(survey[fieldKey]);
+    if (ids.length === 0) continue;
+    linked += ids.length;
+
+    let fieldHasLocalPhoto = false;
+    for (const id of ids) {
+      const photo = await getPhotoById(id);
+      if (photo && photo.dataUrl) {
+        present++;
+        fieldHasLocalPhoto = true;
+      } else {
+        missing++;
+      }
+    }
+
+    if (fieldHasLocalPhoto) {
+      await loadDocPhotoPreview(fieldKey);
+    } else {
+      markDocPhotoMissing(fieldKey);
+    }
+  }
+
+  return { linked, present, missing };
+}
+
+function markDocPhotoMissing(fieldKey) {
+  const wrapper = document.querySelector(`[data-photo-field="${fieldKey}"]`);
+  if (!wrapper) return;
+  const label = PHOTO_FIELD_LABELS[fieldKey] || fieldKey;
+  wrapper.innerHTML = `
+    <div style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;">
+      <span style="font-size:12px;color:#b45309;background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;padding:4px 8px;">Linked photo missing</span>
+      <button type="button" class="btn-secondary" style="font-size:11px;padding:4px 8px;" onclick="repairDocPhotosFromExport()">Repair</button>
+      ${getDocPhotoButtonHTML(fieldKey, label)}
+    </div>
+  `;
+}
+
+function repairDocPhotosFromExport() {
+  (async () => {
+    const localCheck = await reloadDocPhotoPreviews();
+    if (localCheck.linked > 0 && localCheck.missing === 0) {
+      showToast(`Restored ${localCheck.present} documentation photo preview${localCheck.present === 1 ? '' : 's'}.`);
+      return;
+    }
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,.kikisurvey,.kiki20.json,application/json,*/*';
+
+    input.onchange = async (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      try {
+        const data = JSON.parse(await file.text());
+        const sourcePhotos = Array.isArray(data.photos) ? data.photos : [];
+        if (sourcePhotos.length === 0) {
+          showAlert('That file does not contain photo records.');
+          return;
+        }
+
+        const survey = await getSurvey(currentSurveyId);
+        if (!survey) {
+          showAlert('Open a survey before repairing photos.');
+          return;
+        }
+
+        const sourceById = new Map();
+        sourcePhotos.forEach(photo => {
+          const id = photo && (photo.id || photo.photoId);
+          if (id && photo.dataUrl) sourceById.set(String(id), photo);
+        });
+
+        let repaired = 0;
+        let alreadyPresent = 0;
+        let stillMissing = 0;
+        const linkedDocIds = new Set();
+
+        DOC_PHOTO_FIELDS.forEach(fieldKey => {
+          collectPhotoIdsFromValue(survey[fieldKey]).forEach(id => linkedDocIds.add(id));
+        });
+
+        for (const id of linkedDocIds) {
+          const existing = await getPhotoById(id);
+          if (existing && existing.dataUrl) {
+            alreadyPresent++;
+            continue;
+          }
+
+          const source = sourceById.get(id);
+          if (!source || !source.dataUrl) {
+            stillMissing++;
+            continue;
+          }
+
+          await savePhoto({
+            ...source,
+            id: id,
+            surveyId: currentSurveyId,
+            itemLabel: source.itemLabel || source.label || source.sourceItemId || ''
+          });
+          repaired++;
+        }
+
+        await reloadDocPhotoPreviews();
+        showAlert(
+          `Documentation photo repair complete.\n\nRestored: ${repaired}\nAlready present: ${alreadyPresent}\nStill missing from that file: ${stillMissing}`
+        );
+      } catch (err) {
+        console.error('Documentation photo repair failed:', err);
+        showAlert('Documentation photo repair failed: ' + (err && err.message ? err.message : err));
+      }
+    };
+
+    input.click();
+  })().catch(err => {
+    console.error('Documentation photo repair failed:', err);
+    showAlert('Documentation photo repair failed: ' + (err && err.message ? err.message : err));
+  });
 }
 
 function repairMissingPhotosFromExport(itemLabel, categoryName) {
@@ -5109,10 +5267,11 @@ function showRatingSheet(itemLabel, categoryName, options) {
     const currentRating = itemData.rating || '';
     const safeLabel = itemLabel.replace(/'/g, "\\'");
     const safeCat = categoryName.replace(/'/g, "\\'");
+    window._activeRatingSheet = { itemLabel, categoryName, options: Array.isArray(options) ? options : [] };
 
     let optionsHtml = '';
     options.forEach(option => {
-      const color = RATING_COLORS[option] || '#6b7280';
+      const color = getRatingColor(option);
       const isSelected = currentRating === option;
       optionsHtml += `
         <div class="sheet-rating-option" onclick="selectRatingFromSheet('${safeLabel}', '${safeCat}', '${option}')">
@@ -5141,12 +5300,73 @@ function showRatingSheet(itemLabel, categoryName, options) {
       <div class="bottom-sheet" onclick="event.stopPropagation();">
         <div class="bottom-sheet-handle"></div>
         <div class="bottom-sheet-title">${itemLabel}</div>
+        <div style="display:flex;gap:8px;align-items:center;margin:8px 0 12px;">
+          <input id="typedRatingInput" list="ratingSheetChoices" type="text" value="${escapeHtml(currentRating)}"
+                 placeholder="A, B, C, NA, NT, PO, or custom"
+                 style="flex:1;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:15px;"
+                 onkeydown="if(event.key==='Enter'){event.preventDefault();applyTypedRatingFromSheet();}" />
+          <button class="btn-primary" style="padding:10px 14px;font-size:14px;" onclick="applyTypedRatingFromSheet()">Set</button>
+          <datalist id="ratingSheetChoices">
+            ${options.map(option => `<option value="${escapeHtml(option)}"></option>`).join('')}
+          </datalist>
+        </div>
         ${optionsHtml}
       </div>
     `;
     overlay.addEventListener('click', () => overlay.remove());
     document.body.appendChild(overlay);
+    setTimeout(() => {
+      const input = document.getElementById('typedRatingInput');
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 0);
   });
+}
+
+function normalizeTypedRating(raw, options) {
+  const value = String(raw || '').trim();
+  if (!value) return '';
+  const lowered = value.toLowerCase();
+  const canonical = {
+    'a': 'A - Critical',
+    'critical': 'A - Critical',
+    'a - critical': 'A - Critical',
+    'b': 'B - Needs Attention',
+    'needs attention': 'B - Needs Attention',
+    'b - needs attention': 'B - Needs Attention',
+    'c': 'C - Serviceable',
+    'serviceable': 'C - Serviceable',
+    'c - serviceable': 'C - Serviceable',
+    'na': 'Not applicable',
+    'n/a': 'Not applicable',
+    'not applicable': 'Not applicable',
+    'nt': 'Not tested/not verified',
+    'not tested': 'Not tested/not verified',
+    'not verified': 'Not tested/not verified',
+    'not tested/not verified': 'Not tested/not verified',
+    'po': 'Powered up only',
+    'powered': 'Powered up only',
+    'powered up': 'Powered up only',
+    'powered up only': 'Powered up only'
+  };
+  if (canonical[lowered]) return canonical[lowered];
+  const optionMatch = (options || []).find(option => String(option || '').toLowerCase() === lowered);
+  if (optionMatch) return optionMatch;
+  const shortMatch = (options || []).find(option => String(getRatingShortLabel(option) || '').toLowerCase() === lowered);
+  return shortMatch || value;
+}
+
+function applyTypedRatingFromSheet() {
+  const input = document.getElementById('typedRatingInput');
+  const ctx = window._activeRatingSheet || {};
+  if (!input || !ctx.itemLabel) return;
+  const rating = normalizeTypedRating(input.value, ctx.options || []);
+  if (!rating) return;
+  const overlay = document.getElementById('bottomSheetOverlay');
+  if (overlay) overlay.remove();
+  selectRating(ctx.itemLabel, ctx.categoryName || '', rating, { forceSet: true });
 }
 
 // Select rating from bottom sheet, then close it
@@ -10498,6 +10718,9 @@ function renderNewSurveyForm() {
       </div>
 
       <h2 class="form-heading">Vessel Documentation</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 14px;">
+        <button type="button" class="btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="repairDocPhotosFromExport()">↻ Restore photos from export</button>
+      </div>
 
       <div class="form-group">
         <label class="form-label">Cover Photo of Vessel</label>
@@ -10705,15 +10928,15 @@ function renderNewSurveyForm() {
 
       <div class="form-group">
         <label class="form-label">Overall Vessel Condition Rating (BUC Grading)</label>
-        <select id="overallCondition">
-          <option value="">Select condition</option>
-          <option value="Excellent (Bristol)">Excellent (Bristol) — Mint or Bristol fashion, loaded with extras</option>
-          <option value="Above Average">Above Average — Above average care, extra electrical and electronic gear</option>
-          <option value="Average">Average — Ready for sale, no additional work, normally equipped</option>
-          <option value="Fair">Fair — Requires usual maintenance to prepare for sale</option>
-          <option value="Poor">Poor — Substantial yard work required, devoid of extras</option>
-          <option value="Restorable">Restorable — Enough hull and engine to restore to usable condition</option>
-        </select>
+        <input type="text" id="overallCondition" list="overallConditionOptions" placeholder="Average" autocapitalize="words">
+        <datalist id="overallConditionOptions">
+          <option value="Excellent (Bristol)">Mint or Bristol fashion, loaded with extras</option>
+          <option value="Above Average">Above average care, extra electrical and electronic gear</option>
+          <option value="Average">Ready for sale, no additional work, normally equipped</option>
+          <option value="Fair">Requires usual maintenance to prepare for sale</option>
+          <option value="Poor">Substantial yard work required, devoid of extras</option>
+          <option value="Restorable">Enough hull and engine to restore to usable condition</option>
+        </datalist>
       </div>
 
       <div style="display:flex;align-items:center;gap:8px;margin-top:16px;">
@@ -11417,11 +11640,7 @@ function editSurveyDetails(surveyId) {
       }
 
       // Load doc photo previews
-      const docPhotoFields = ['hinPhoto', 'compliancePhoto', 'licencePhoto', 'tcPaperLicencePhoto',
-        'coverPhoto', 'fourCornerPortBow', 'fourCornerStbdBow', 'fourCornerPortStern', 'fourCornerStbdStern',
-        'enginePhoto', 'enginePlatePhoto', 'engine2Photo', 'engine2PlatePhoto',
-        'transmissionPhoto', 'transmissionPlatePhoto', 'transmission2Photo', 'transmission2PlatePhoto'];
-      docPhotoFields.forEach(fieldKey => loadDocPhotoPreview(fieldKey));
+      reloadDocPhotoPreviews().catch(err => console.warn('Doc photo preview reload failed:', err));
 
       // Populate comparables
       if (survey.comparables && survey.comparables.length > 0) {
@@ -21435,13 +21654,7 @@ async function removeAllDateStamps() {
   const photoIds = new Set();
 
   // Doc photos
-  const docPhotoFields = [
-    'coverPhoto', 'hinPhoto', 'compliancePhoto', 'licencePhoto', 'tcPaperLicencePhoto',
-    'enginePhoto', 'enginePlatePhoto', 'transmissionPhoto', 'transmissionPlatePhoto',
-    'engine2Photo', 'engine2PlatePhoto', 'transmission2Photo', 'transmission2PlatePhoto',
-    'fourCornerPortBow', 'fourCornerStbdBow', 'fourCornerPortStern', 'fourCornerStbdStern'
-  ];
-  docPhotoFields.forEach(f => { if (survey[f]) photoIds.add(survey[f]); });
+  DOC_PHOTO_FIELDS.forEach(f => collectPhotoIdsFromValue(survey[f]).forEach(id => photoIds.add(id)));
 
   // Item photos
   if (survey.items) {
@@ -22488,6 +22701,8 @@ async function loadDocPhotoPreview(fieldKey) {
     const photo = await getPhotoById(survey[fieldKey]);
     if (photo && photo.dataUrl) {
       updateDocPhotoPreview(fieldKey, photo.dataUrl);
+    } else {
+      markDocPhotoMissing(fieldKey);
     }
   }
 }
@@ -22505,10 +22720,12 @@ async function loadMultiDocPhotoPreview(fieldKey) {
 
   const label = PHOTO_FIELD_LABELS[fieldKey] || fieldKey;
   let galleryHtml = '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;">';
+  let renderedCount = 0;
 
   for (let i = 0; i < ids.length; i++) {
     const photo = await getPhotoById(ids[i]);
     if (!photo || !photo.dataUrl) continue;
+    renderedCount++;
     galleryHtml += `
       <div style="position:relative;display:inline-block;text-align:center;">
         <img src="${photo.dataUrl}" style="max-width:120px;max-height:90px;border:2px solid #16a34a;border-radius:6px;cursor:pointer;"
@@ -22517,6 +22734,12 @@ async function loadMultiDocPhotoPreview(fieldKey) {
           <button class="btn-secondary" style="font-size:10px;padding:2px 6px;color:#dc2626;border-color:#fca5a5;" onclick="deleteMultiDocPhoto('${fieldKey}', ${i})">✕</button>
         </div>
       </div>`;
+  }
+
+  const missingCount = ids.length - renderedCount;
+  if (ids.length > 0 && missingCount === ids.length) {
+    markDocPhotoMissing(fieldKey);
+    return;
   }
 
   // Always show an add-more button
@@ -22530,7 +22753,7 @@ async function loadMultiDocPhotoPreview(fieldKey) {
 
   galleryHtml += '</div>';
   if (ids.length > 0) {
-    galleryHtml += `<div style="font-size:10px;color:#16a34a;font-weight:600;margin-top:2px;">✓ ${ids.length} photo${ids.length > 1 ? 's' : ''}</div>`;
+    galleryHtml += `<div style="font-size:10px;color:#16a34a;font-weight:600;margin-top:2px;">✓ ${renderedCount} photo${renderedCount === 1 ? '' : 's'}</div>`;
   }
 
   const wrapper = document.querySelector(`[data-photo-field="${fieldKey}"]`);
@@ -22575,7 +22798,7 @@ function buildCompactItemHTML(itemLabel, categoryName, itemData, options) {
   const safeCat = categoryName.replace(/'/g, "\\'");
   const isExcluded = itemData.excluded;
   const isFlagged = itemData.flagged;
-  const ratingColor = RATING_COLORS[itemData.rating] || '#6b7280';
+  const ratingColor = getRatingColor(itemData.rating);
   const hasNotes = !!(itemData.text && itemData.text.trim());
   const photoCount = (itemData.photos || []).length;
   const optionsAttr = options.map(o => o.replace(/"/g, '&quot;')).join('|||');
@@ -22673,7 +22896,7 @@ function buildSingleItemInnerHTML(itemLabel, categoryName, itemData, options, su
   // Rating buttons
   options.forEach(option => {
     const isActive = itemData.rating === option;
-    const color = RATING_COLORS[option] || '#066aab';
+    const color = getRatingColor(option) || '#066aab';
     html += `
       <button class="rating-btn ${isActive ? 'active' : ''}"
               style="${isActive ? `background-color: ${color}; border-color: ${color};` : ''}"
@@ -23070,14 +23293,14 @@ function updateCategoryHeader(survey, categoryName) {
   }
 }
 
-function selectRating(itemLabel, categoryName, rating) {
+function selectRating(itemLabel, categoryName, rating, options = {}) {
   getSurvey(currentSurveyId).then(survey => {
     if (!survey.items[itemLabel]) {
       survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
     }
 
     // Deselect: if tapping the same rating, clear it
-    if (survey.items[itemLabel].rating === rating) {
+    if (survey.items[itemLabel].rating === rating && !options.forceSet) {
       survey.items[itemLabel].rating = '';
       survey.items[itemLabel].text = '';
       survey.items[itemLabel].standards = [];
