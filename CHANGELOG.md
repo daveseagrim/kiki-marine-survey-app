@@ -1,3 +1,7 @@
+## v2529
+- Fixed the home-screen Check workflow so survey quality results open over the selected survey, allowing Go buttons to jump to the correct checklist item instead of returning to the home screen.
+- Expanded the Version 1 checker with professional narrative, model-survey reference, valuation, placeholder, spelling/style, and photo-support checks.
+
 ## v2528
 - Moved `Companionway and washboards` into Cabin and conveniences for pre-purchase surveys.
 - Moved insurance `Companionway` into Cabin and conveniences.

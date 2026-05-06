@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2528';
+const APP_VERSION = 'v2529';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -16968,11 +16968,41 @@ async function checkSurvey() {
   const survey = await getSurvey(currentSurveyId);
   if (!survey) { showAlert('No survey loaded.'); return; }
 
+  // v2529: The home-screen row has its own Check button. Before this guard,
+  // that path opened the QC overlay directly over the home list; pressing a
+  // result's Go button removed the overlay and revealed home, because the
+  // checklist item did not exist in the DOM underneath. Always make the
+  // selected survey the underlying view before rendering check results.
+  if (currentView !== 'inspection') {
+    renderInspection(survey);
+    await new Promise(r => setTimeout(r, 100));
+    document.getElementById('csBackToCheckBtn')?.remove();
+  }
+
   const issues = [];   // { severity, category, message, itemLabel?, navId? }
 
   // Helper: add issue — navId is optional DOM element ID for non-checklist items
   const add = (severity, category, message, itemLabel, navId) => {
     issues.push({ severity, category, message, itemLabel: itemLabel || null, navId: navId || null });
+  };
+  const cleanText = (value) => String(value || '').trim();
+  const hasUnresolvedPlaceholder = (value) => {
+    const raw = cleanText(value);
+    return /\[[A-Z][A-Z0-9 /,'"().&-]{2,}\]/.test(raw) ||
+      /\{(?:specify|any|describe|insert):?[^}]*\}/i.test(raw) ||
+      /\[(?:describe|specify|insert)[^\]]*\]/i.test(raw);
+  };
+  const hasCaseDrift = (value) => {
+    const raw = cleanText(value);
+    const letters = raw.replace(/[^A-Za-z]/g, '');
+    return letters.length >= 6 && (raw === raw.toLowerCase() || raw === raw.toUpperCase());
+  };
+  const hasGenericBoilerplate = (value) => /Schedule repairs in the near future to maintain compliance|Address this finding as described in the observation|applicable codes,\s*regulations,\s*standards,\s*or recommended practices/i.test(cleanText(value));
+  const hasAmericanSpelling = (value) => /\b(?:fiberglass|color|center|mold|gray|license)\b/i.test(cleanText(value));
+  const sentenceCount = (value) => cleanText(value).split(/[.!?]+/).filter(part => part.trim().length > 0).length;
+  const parseMoney = (value) => {
+    const n = parseFloat(String(value || '').replace(/[^0-9.]/g, ''));
+    return Number.isFinite(n) ? n : null;
   };
 
   // ── 1. HEADER FIELDS ────────────────────────────────────────────────────
@@ -17012,6 +17042,18 @@ async function checkSurvey() {
     if (!survey[field] || survey[field].trim() === '') {
       add('warning', 'Header Fields', `Missing: ${label}`, null, field);
     }
+  }
+  if (hasCaseDrift(survey.vesselName)) {
+    add('warning', 'Appearance & Branding', 'Vessel name casing looks unfinished; use the exact branded vessel name style.', null, 'vesselName');
+  }
+  if (hasCaseDrift(survey.yearMakeModel)) {
+    add('warning', 'Appearance & Branding', 'Year / make / model casing should be cleaned up for a professional title line.', null, 'yearMakeModel');
+  }
+  if (survey.reportDate && survey.surveyDate && survey.reportDate < survey.surveyDate) {
+    add('critical', 'Report Metadata', 'Report date is earlier than the survey date', null, 'reportDate');
+  }
+  if (survey.location && survey.location.length < 12) {
+    add('info', 'Report Metadata', 'Survey location looks very short; confirm marina/city/province are included.', null, 'location');
   }
 
   // ── 2. ENGINE & TRANSMISSION ────────────────────────────────────────────
@@ -17079,6 +17121,13 @@ async function checkSurvey() {
     for (const [field, label] of enginePhotoFields) {
       if (!survey[field]) add('warning', 'Documentation Photos', `Missing: ${label}`, null, field);
     }
+  }
+  const docPhotoCount = ['hinPhoto','coverPhoto','licencePhoto',
+    'fourCornerPortBow','fourCornerStbdBow','fourCornerPortStern','fourCornerStbdStern',
+    'enginePhoto','enginePlatePhoto','transmissionPhoto','transmissionPlatePhoto']
+    .filter(key => !!survey[key]).length;
+  if (docPhotoCount > 0 && docPhotoCount < 5) {
+    add('info', 'Appearance & Branding', `Only ${docPhotoCount} documentation/cover photo(s) attached; model reports use a fuller visual package.`, null, 'coverPhotoStatus');
   }
 
   // ── 3b. PHOTO ORIENTATION CHECK ──────────────────────────────────────────
@@ -17359,6 +17408,21 @@ async function checkSurvey() {
         }
       }
     }
+    if (data.text && cleanText(data.text).length < 30 && (baseRating === 'A' || baseRating === 'B' || baseRating === 'C')) {
+      add('info', 'Professional Narrative', `Report body text is very short: ${item.label}`, item.label);
+    }
+    if ((baseRating === 'A' || baseRating === 'B') && data.text && sentenceCount(data.text) < 2) {
+      add('warning', 'Professional Narrative', `A/B finding should include observation plus implication or recommendation: ${item.label}`, item.label);
+    }
+    if (data.text && hasGenericBoilerplate(data.text)) {
+      add('warning', 'Professional Narrative', `Replace generic boilerplate with vessel-specific wording: ${item.label}`, item.label);
+    }
+    if (data.text && hasAmericanSpelling(data.text)) {
+      add('info', 'Appearance & Branding', `Canadian spelling / Kiki style check: ${item.label}`, item.label);
+    }
+    if ((data.rating === 'Not tested/not verified' || data.rating === 'Powered up only') && /appeared to (?:work|function) properly|functioned properly|operated normally/i.test(data.text || '')) {
+      add('warning', 'Professional Narrative', `Limited-test wording overclaims operation: ${item.label}`, item.label);
+    }
 
     // B-rated items should ideally have a recommendation
     if (baseRating === 'B' && data.text && !(/recommend|should|advise|suggest|replace|repair|service|address|correct|attention/i.test(data.text))) {
@@ -17391,6 +17455,64 @@ async function checkSurvey() {
       // A few — list them
       skippedLabels.forEach(lbl => add('info', 'Skipped Items', `Skipped: ${lbl}`, lbl));
     }
+  }
+
+  // ── 4b. MODEL SURVEY REFERENCE CHECKS ──────────────────────────────────
+  // Refuge, Footloose and Liquid Wisdom are insurance reference surveys;
+  // Kathy Weylie is the pre-purchase reference. These checks are deliberately
+  // advisory except for missing report-critical fields, because the reference
+  // examples may not include every possible inspection item.
+  const surveyTypeText = String(survey.surveyType || '').toLowerCase();
+  const isInsuranceReference = surveyTypeText.includes('insurance');
+  const isPrepurchaseReference = surveyTypeText.includes('pre-purchase') || surveyTypeText.includes('prepurchase') || surveyTypeText.includes('purchase');
+
+  if (isInsuranceReference) {
+    if (!survey.valuationRationale || survey.valuationRationale.trim().length < 40) {
+      add('warning', 'Model Survey Reference', 'Insurance model conclusion needs a clear valuation rationale', null, 'valuationRationale');
+    }
+    if (!survey.concludedValue) {
+      add('warning', 'Model Survey Reference', 'Insurance model conclusion includes a final concluded value', null, 'concludedValue');
+    }
+    if (!survey.overallCondition) {
+      add('critical', 'Model Survey Reference', 'Insurance model conclusion needs an overall condition', null, 'overallCondition');
+    }
+  }
+
+  if (isPrepurchaseReference) {
+    if (!survey.seaTrial) {
+      add('warning', 'Model Survey Reference', 'Pre-purchase model intro states whether a sea trial / limited trial run was performed', null, 'seaTrial');
+    }
+    if (!survey.vesselDescription || survey.vesselDescription.trim().length < 40) {
+      add('warning', 'Model Survey Reference', 'Pre-purchase model body needs a complete vessel description', null, 'vesselDescription');
+    }
+    if (!survey.overallCondition) {
+      add('critical', 'Model Survey Reference', 'Pre-purchase model conclusion needs an overall condition', null, 'overallCondition');
+    }
+  }
+
+  let modelMissingPhotoCount = 0;
+  expandedItems.forEach(item => {
+    const data = survey.items[item.label];
+    if (!data || data.excluded || !data.rating) return;
+    const baseRating = data.rating.charAt(0);
+    const hasPhoto = Array.isArray(data.photos) && data.photos.length > 0;
+    const hasText = !!(data.text && data.text.trim());
+
+    if ((baseRating === 'A' || baseRating === 'B') && !hasPhoto) {
+      modelMissingPhotoCount++;
+      if (modelMissingPhotoCount <= 20) {
+        add('warning', 'Model Survey Reference', `A/B finding should have supporting photo(s): ${item.label}`, item.label);
+      }
+    }
+    if ((baseRating === 'A' || baseRating === 'B') && !hasText) {
+      add('critical', 'Model Survey Reference', `A/B finding needs body text: ${item.label}`, item.label);
+    }
+    if ((data.rating === 'Not tested/not verified' || data.rating === 'Powered up only') && !hasText) {
+      add('warning', 'Model Survey Reference', `Limited-test item needs explanatory body text: ${item.label}`, item.label);
+    }
+  });
+  if (modelMissingPhotoCount > 20) {
+    add('warning', 'Model Survey Reference', `...and ${modelMissingPhotoCount - 20} more A/B findings without supporting photos`, null);
   }
 
   // ── 5. VALUATION ────────────────────────────────────────────────────────
@@ -17427,8 +17549,29 @@ async function checkSurvey() {
   if (!survey.valuationRationale && !survey.valuationSource) {
     add('warning', 'Valuation', 'Missing: Valuation rationale or source', null, 'valuationRationale');
   }
+  const valuationLowNumber = parseMoney(survey.valuationLow);
+  const valuationHighNumber = parseMoney(survey.valuationHigh);
+  const concludedValueNumber = parseMoney(survey.concludedValue);
+  if (valuationLowNumber !== null && valuationHighNumber !== null && valuationLowNumber > valuationHighNumber) {
+    add('critical', 'Valuation', 'Low fair market value is higher than high fair market value', null, 'valuationLow');
+  }
+  if (concludedValueNumber !== null && valuationLowNumber !== null && concludedValueNumber < valuationLowNumber) {
+    add('warning', 'Valuation', 'Concluded FMV is below the stated fair market value range', null, 'concludedValue');
+  }
+  if (concludedValueNumber !== null && valuationHighNumber !== null && concludedValueNumber > valuationHighNumber) {
+    add('warning', 'Valuation', 'Concluded FMV is above the stated fair market value range', null, 'concludedValue');
+  }
+  if ((survey.valuationLow || survey.valuationHigh || survey.concludedValue) && !survey.valuationCurrency) {
+    add('warning', 'Valuation', 'Valuation amount entered but currency is missing', null, 'valuationLow');
+  }
   if (!survey.skipComparables && ((!survey.comparables || survey.comparables.length === 0) || survey.comparables.every(c => !c.vessel))) {
     add('warning', 'Valuation', 'No comparable vessels entered (or skip comparables on the Vessel Info form)', null, 'valuationLow');
+  }
+  if (Array.isArray(survey.comparables) && survey.comparables.length > 0) {
+    const incompleteComparables = survey.comparables.filter(c => c && (c.vessel || c.price || c.source) && (!c.vessel || !c.price || !c.source));
+    if (incompleteComparables.length > 0) {
+      add('warning', 'Valuation', `${incompleteComparables.length} comparable(s) are missing vessel, price, or source details`, null, 'valuationLow');
+    }
   }
   if (!survey.replacementCost) add('info', 'Valuation', 'Missing: Replacement cost estimate', null, 'replacementCost');
 
@@ -17492,6 +17635,12 @@ async function checkSurvey() {
       } else {
         add('warning', 'Vessel Description', `Contains ${unique.length} unfilled placeholders: ${unique.slice(0, 3).join(', ')} (+${unique.length - 3} more)`, null, 'vesselDescription');
       }
+    }
+    if (hasUnresolvedPlaceholder(descText)) {
+      add('warning', 'Appearance & Branding', 'Vessel description contains unresolved report-template text', null, 'vesselDescription');
+    }
+    if (hasAmericanSpelling(descText)) {
+      add('info', 'Appearance & Branding', 'Vessel description may contain non-Canadian spelling', null, 'vesselDescription');
     }
   }
 
