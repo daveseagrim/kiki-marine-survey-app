@@ -4971,7 +4971,11 @@
       "totalSailArea": "",
       "hullType": "Modified V",
       "keelType": "",
-      "construction": "Fibreglass"
+      "construction": "Fibreglass",
+      "driveType": "shaft",
+      "driveCount": 2,
+      "engineCount": 2,
+      "propulsion": "Twin gasoline inboards with shaft drives"
     },
     {
       "id": "silverton-37-convertible",

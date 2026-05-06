@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2532';
+const APP_VERSION = 'v2533';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -12465,6 +12465,9 @@ function _applyEngineSpecsToSurveyObject(survey, specs) {
   const engineModel = specs.engineModel || (rawParts.length > 1 ? rawParts.slice(1).join(' ') : '');
   const engineHP = specs.engineHP || specs.engineHp || specs.hp || '';
   const fuelType = specs.fuelType || specs.fuel || '';
+  const specEngineCount = Number(specs.engineCount || specs.driveCount || 0);
+  const specPropulsionText = String([specs.propulsion, specs.engine, specs.notes].filter(Boolean).join(' '));
+  const isTwinSpec = specEngineCount >= 2 || /\btwin\b|\btwo\s+engines\b|\bdual\b/i.test(specPropulsionText);
   let changed = false;
   const setIfEmpty = (field, value) => {
     const next = String(value || '').trim();
@@ -12479,8 +12482,21 @@ function _applyEngineSpecsToSurveyObject(survey, specs) {
   setIfEmpty('transmissionMake', specs.transmissionMake);
   setIfEmpty('transmissionModel', specs.transmissionModel);
   setIfEmpty('transmissionSerial', specs.transmissionSerial);
+  setIfEmpty('driveType', specs.driveType);
+  if (isTwinSpec) {
+    if (!survey.hasSecondEngine) {
+      survey.hasSecondEngine = true;
+      changed = true;
+    }
+    setIfEmpty('engine2Make', engineMake);
+    setIfEmpty('engine2Model', engineModel);
+    setIfEmpty('engine2HP', engineHP);
+    setIfEmpty('fuelType2', fuelType);
+  }
   if (_updateTransmissionMakeModel(survey, 1)) changed = true;
+  if (isTwinSpec && _updateTransmissionMakeModel(survey, 2)) changed = true;
   if (_applyEngineDbDefaults(survey, 1)) changed = true;
+  if (isTwinSpec && _applyEngineDbDefaults(survey, 2)) changed = true;
   return changed;
 }
 
@@ -24217,6 +24233,9 @@ function openSurvey(surveyId) {
           survey.vesselType = correctType;
           saveSurvey(survey);
         }
+      }
+      if (specs && _applyEngineSpecsToSurveyObject(survey, specs)) {
+        saveSurvey(survey);
       }
     }
     // v2470: one-time per-survey migration. The ambiguous "Voltmeter/ammeter"

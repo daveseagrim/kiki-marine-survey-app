@@ -1,3 +1,8 @@
+## v2533
+- Marked the 2001 Silverton 350 boat-spec entry as a twin shaft-drive vessel so Version 1 opens the second engine slot automatically.
+- Applied twin-engine defaults when matched boat specs are selected or when an existing matched survey is opened, without overwriting entered engine details.
+- Copied shared make/model/HP/fuel defaults into Engine 2 only when those fields are still blank.
+
 ## v2532
 - Removed duplicate engine and gearbox entry controls from Edit Vessel Information so Version 1 has one engine-entry workflow in the survey body.
 - Added Engine & Gearbox Details to the Engine(s) and drive(s) survey section, including twin-engine fields, make/model datalists, and report save support.
