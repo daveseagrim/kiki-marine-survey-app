@@ -1,3 +1,7 @@
+## v2536
+- Kept overall vessel condition strictly surveyor-entered; valuation methodology text no longer mentions a BUC condition adjustment until an overall condition rating has been selected.
+- Updated the app version metadata and service-worker cache to keep the GitHub-hosted app on the same version.
+
 ## v2535
 - Made engine and gearbox nameplate photos auto-fill blank detail fields whenever a survey is opened or nameplate photos are added.
 - Kept the manual read buttons as fallback/retry controls, but made the normal workflow automatic for every survey with readable plate photos.

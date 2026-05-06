@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2535';
+const APP_VERSION = 'v2536';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -26850,9 +26850,11 @@ ${(() => {
     // _srcRow (covers Source list), and the trailing Final Concluded
     // block at the end of the valuation section.
 
-    const _methodology = esc(survey.valuationRationale) || 'The following method of valuation was used to obtain the Fair Market Value: similarly equipped, same or similar model vessels as shown as sold on soldboats.com, buc.com, and listings on yachtworld.com (and/or other websites) in the last two years were identified, adjusted for model year, condition, equipment, and date of sale, and averaged together. The vessel\'s overall condition rating using the BUC Marine Grading System has been factored into the final valuation range.';
-
     const _overallCondRaw = esc(survey.overallCondition) || '';
+    const _methodology = esc(survey.valuationRationale) || (
+      'The following method of valuation was used to obtain the Fair Market Value: similarly equipped, same or similar model vessels as shown as sold on soldboats.com, buc.com, and listings on yachtworld.com (and/or other websites) in the last two years were identified, adjusted for model year, equipment, location, date of sale, and observed findings.'
+      + (_overallCondRaw ? " The vessel's overall condition rating using the BUC Marine Grading System has been factored into the final valuation range." : '')
+    );
     // v2374: the boxed Overall Vessel Rating callout only renders when
     // Dave has actually chosen a BUC grade. Previously it fell back to
     // "Not yet assessed" and rendered anyway — which counts as blank
