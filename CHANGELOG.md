@@ -1,3 +1,8 @@
+## v2534
+- Removed the manual second-engine add/remove workflow from Version 1; the Engine & Gearbox Details panel now follows the survey's drive-line/engine count automatically.
+- Synced the second engine slot whenever drive-line count or matched boat specs indicate twin engines, while preserving existing entered data.
+- Added engine and gearbox nameplate readers that can populate make, model, serial, HP, and fuel type from saved plate photos for surveyor review.
+
 ## v2533
 - Marked the 2001 Silverton 350 boat-spec entry as a twin shaft-drive vessel so Version 1 opens the second engine slot automatically.
 - Applied twin-engine defaults when matched boat specs are selected or when an existing matched survey is opened, without overwriting entered engine details.

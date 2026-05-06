@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2533';
+const APP_VERSION = 'v2534';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -12483,11 +12483,11 @@ function _applyEngineSpecsToSurveyObject(survey, specs) {
   setIfEmpty('transmissionModel', specs.transmissionModel);
   setIfEmpty('transmissionSerial', specs.transmissionSerial);
   setIfEmpty('driveType', specs.driveType);
+  if (specEngineCount > 0 && !survey.driveLineCount) {
+    survey.driveLineCount = Math.min(2, specEngineCount);
+    changed = true;
+  }
   if (isTwinSpec) {
-    if (!survey.hasSecondEngine) {
-      survey.hasSecondEngine = true;
-      changed = true;
-    }
     setIfEmpty('engine2Make', engineMake);
     setIfEmpty('engine2Model', engineModel);
     setIfEmpty('engine2HP', engineHP);
@@ -12497,6 +12497,7 @@ function _applyEngineSpecsToSurveyObject(survey, specs) {
   if (isTwinSpec && _updateTransmissionMakeModel(survey, 2)) changed = true;
   if (_applyEngineDbDefaults(survey, 1)) changed = true;
   if (isTwinSpec && _applyEngineDbDefaults(survey, 2)) changed = true;
+  if (_syncSecondEngineFromSurveyCount(survey)) changed = true;
   return changed;
 }
 
@@ -13386,7 +13387,7 @@ async function generateVesselDescription() {
 
   // Check for Engine 2
   const eng2Section = document.getElementById('engine2Section');
-  const hasEngine2 = (eng2Section && eng2Section.style.display !== 'none') || !!(_survey1 && (_survey1.hasSecondEngine || _survey1.engine2Make));
+  const hasEngine2 = _survey1 ? _surveyHasSecondEngine(_survey1) : (eng2Section && eng2Section.style.display !== 'none');
 
   // v2247: resolve drive type from saved survey so the description auto-fills
   // instead of emitting placeholder text. Ported from Copy 3 for parity.
@@ -13622,7 +13623,7 @@ async function regenerateDescriptionFromInspection() {
   const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
                          transmissionMake ? `${transmissionMake} model not recorded` : 'make and model not recorded';
 
-  const hasEngine2 = !!survey.engine2Make;
+  const hasEngine2 = _surveyHasSecondEngine(survey);
 
   // v2247: resolve drive type from survey.driveType (ported from Copy 3)
   const driveTypeLower2 = (survey.driveType || '').toLowerCase();
@@ -13826,7 +13827,7 @@ function buildDescriptionFromSurvey(survey) {
   const transMakeModel = (transmissionMake && transmissionModel) ? `${transmissionMake} ${transmissionModel}` :
                          transmissionMake ? `${transmissionMake} model not recorded` : 'make and model not recorded';
 
-  const hasEngine2 = !!survey.engine2Make;
+  const hasEngine2 = _surveyHasSecondEngine(survey);
 
   // v2228: resolve drive type from survey.driveType so the description
   // auto-fills instead of emitting "drive type not recorded" placeholder.
@@ -15086,19 +15087,15 @@ function _transmissionModelsOptionsHtml(make) {
 function renderSurveyEngineDetailsPanel(survey) {
   if (!survey || (survey.vesselType || '').toLowerCase() === 'human') return '';
   const v = field => escapeHtml(survey[field] || '');
-  const showSecond = !!(
-    survey.hasSecondEngine || survey.engine2Make || survey.engine2Model || survey.engine2Serial ||
-    survey.engine2Hours || survey.engine2HP || survey.fuelType2 ||
-    survey.transmission2Make || survey.transmission2Model || survey.transmission2Serial ||
-    survey.engine2Photo || survey.engine2PlatePhoto || survey.transmission2Photo || survey.transmission2PlatePhoto
-  );
+  const engineCount = _surveyEngineCountFromSetup(survey);
+  const showSecond = engineCount >= 2;
   const inputCss = 'width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;background:white;';
   const labelCss = 'font-size:12px;font-weight:600;color:#374151;display:flex;flex-direction:column;gap:3px;';
   const gridCss = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 10px;';
   const engineMakeOptions = _engineMakesOptionsHtml();
   const transMakeOptions = _transmissionMakesOptionsHtml();
 
-  const engineBlock = (slot, title, canRemove) => {
+  const engineBlock = (slot, title) => {
     const p = slot === 2 ? '2' : '';
     const engineMake = `engine${p}Make`;
     const engineModel = `engine${p}Model`;
@@ -15114,14 +15111,10 @@ function renderSurveyEngineDetailsPanel(survey) {
     const fuelList = `fuelTypeOptions${p || '1'}`;
     const transMakeList = `transmissionMakeOptions${p || '1'}`;
     const transModelList = `transmissionModelOptions${p || '1'}`;
-    const removeHtml = canRemove
-      ? `<button type="button" onclick="toggleSurveyEngine2(false)" style="background:white;color:#dc2626;border:1px solid #fecaca;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">Remove</button>`
-      : '';
     return `
       <div style="border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:#f8fafc;margin-top:${slot === 2 ? '10px' : '0'};">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
           <div id="${slot === 1 ? 'engine1Label' : 'engine2Label'}" style="font-weight:700;font-size:13px;color:#066aab;">${escapeHtml(title)}</div>
-          ${removeHtml}
         </div>
         <datalist id="${engineMakeList}">${engineMakeOptions}</datalist>
         <datalist id="${engineModelList}">${_engineModelsOptionsHtml(survey[engineMake])}</datalist>
@@ -15148,6 +15141,7 @@ function renderSurveyEngineDetailsPanel(survey) {
             <input data-engine-field="${fuelType}" type="text" list="${fuelList}" value="${v(fuelType)}" onchange="saveSurveyEngineField('${fuelType}', this.value)" style="${inputCss}">
           </label>
         </div>
+        <button type="button" onclick="readSurveyEngineNameplate(${slot})" style="margin-top:8px;background:white;color:#066aab;border:1px solid #93c5fd;border-radius:6px;padding:7px 10px;font-size:12px;font-weight:700;cursor:pointer;">Read engine plate</button>
         <div style="font-weight:700;font-size:13px;color:#066aab;margin:12px 0 8px;">${slot === 2 ? 'Gearbox 2' : 'Gearbox'}</div>
         <div style="${gridCss}">
           <label style="${labelCss}">Gearbox Make
@@ -15160,16 +15154,15 @@ function renderSurveyEngineDetailsPanel(survey) {
             <input data-engine-field="${transSerial}" type="text" value="${v(transSerial)}" onchange="saveSurveyEngineField('${transSerial}', this.value)" style="${inputCss}">
           </label>
         </div>
+        <button type="button" onclick="readSurveyGearboxNameplate(${slot})" style="margin-top:8px;background:white;color:#066aab;border:1px solid #93c5fd;border-radius:6px;padding:7px 10px;font-size:12px;font-weight:700;cursor:pointer;">Read gearbox plate</button>
       </div>`;
   };
 
   return `
     <div id="surveyEngineDetailsPanel" style="margin-bottom:14px;padding:12px;background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;">
       <div style="font-size:13px;font-weight:700;color:#066aab;margin-bottom:8px;">Engine & Gearbox Details</div>
-      ${engineBlock(1, showSecond ? 'Engine 1 (Port)' : 'Engine', false)}
-      ${showSecond ? engineBlock(2, 'Engine 2 (Starboard)', true) : `
-        <button type="button" onclick="toggleSurveyEngine2(true)" style="margin-top:10px;background:white;color:#066aab;border:1px solid #066aab;border-radius:6px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;">+ Add Second Engine</button>
-      `}
+      ${engineBlock(1, showSecond ? 'Engine 1 (Port)' : 'Engine')}
+      ${showSecond ? engineBlock(2, 'Engine 2 (Starboard)') : ''}
     </div>`;
 }
 
@@ -20099,6 +20092,213 @@ If you cannot identify the device, still provide your best guess for the name fi
   }
 }
 
+function _surveyItemPhotoIds(survey, label) {
+  const item = survey && survey.items && survey.items[label];
+  return item && Array.isArray(item.photos) ? item.photos.filter(Boolean) : [];
+}
+
+function _firstSurveyNameplatePhotoId(survey, fieldKey, itemLabels, slot) {
+  if (!survey) return '';
+  const direct = survey[fieldKey];
+  if (direct) return direct;
+  const index = Number(slot) === 2 ? 1 : 0;
+  for (const label of itemLabels) {
+    const ids = _surveyItemPhotoIds(survey, label);
+    if (ids[index]) return ids[index];
+    if (ids[0]) return ids[0];
+  }
+  return '';
+}
+
+async function _resizeDataUrlForNameplateRead(dataUrl) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const maxDim = 1400;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      } catch (error) {
+        reject(error);
+      }
+    };
+    img.onerror = () => reject(new Error('Could not load image for nameplate read'));
+    img.src = dataUrl;
+  });
+}
+
+function _parseAiJsonObject(text) {
+  let jsonText = String(text || '').trim();
+  const block = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (block) jsonText = block[1].trim();
+  const start = jsonText.indexOf('{');
+  const end = jsonText.lastIndexOf('}');
+  if (start >= 0 && end > start) jsonText = jsonText.slice(start, end + 1);
+  return JSON.parse(jsonText);
+}
+
+async function _readNameplateDetailsFromPhoto(photo, kind) {
+  let apiKey = localStorage.getItem('geminiApiKey');
+  if (!apiKey) {
+    const key = prompt('Nameplate reading requires a free Google Gemini API key.\n\nGet one at aistudio.google.com, then paste it here:');
+    if (key && key.trim()) {
+      apiKey = key.trim();
+      localStorage.setItem('geminiApiKey', apiKey);
+    } else {
+      throw new Error('No API key entered');
+    }
+  }
+  if (!photo || !photo.dataUrl) throw new Error('Could not load nameplate photo');
+  const resized = await _resizeDataUrlForNameplateRead(photo.dataUrl);
+  const base64Match = resized.match(/^data:image\/(.*?);base64,(.*)$/);
+  if (!base64Match) throw new Error('Could not prepare photo for nameplate read');
+  const promptText = kind === 'gearbox'
+    ? `You are a marine surveyor's assistant. Read the marine gearbox/transmission nameplate in this photo.
+
+Return ONLY valid JSON with these fields, using empty strings if unreadable:
+{
+  "make": "",
+  "model": "",
+  "serial": ""
+}
+
+Do not guess. Read only visible plate text.`
+    : `You are a marine surveyor's assistant. Read the engine nameplate/data plate in this photo.
+
+Return ONLY valid JSON with these fields, using empty strings if unreadable:
+{
+  "make": "",
+  "model": "",
+  "serial": "",
+  "hp": "",
+  "fuelType": ""
+}
+
+Do not guess. Read only visible plate text.`;
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{
+        parts: [
+          {
+            inlineData: {
+              mimeType: `image/${base64Match[1]}`,
+              data: base64Match[2]
+            }
+          },
+          { text: promptText }
+        ]
+      }],
+      generationConfig: { temperature: 0, maxOutputTokens: 350 }
+    })
+  });
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`API ${response.status}: ${errText.substring(0, 300)}`);
+  }
+  const result = await response.json();
+  const text = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  return _parseAiJsonObject(text);
+}
+
+function _setNameplateFieldIfReadable(survey, field, value) {
+  const next = String(value || '').replace(/\s+/g, ' ').trim();
+  if (!next) return false;
+  if (survey[field] === next) return false;
+  survey[field] = next;
+  return true;
+}
+
+async function readSurveyEngineNameplate(slot) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  const isSecond = Number(slot) === 2;
+  const photoId = _firstSurveyNameplatePhotoId(
+    survey,
+    isSecond ? 'engine2PlatePhoto' : 'enginePlatePhoto',
+    ['Engine name plate(s)'],
+    slot
+  );
+  if (!photoId) {
+    showToast('Add an engine nameplate photo first');
+    return;
+  }
+  const photo = await getPhotoById(photoId);
+  try {
+    showToast('Reading engine nameplate...');
+    const details = await _readNameplateDetailsFromPhoto(photo, 'engine');
+    let changed = false;
+    const p = isSecond ? '2' : '';
+    changed = _setNameplateFieldIfReadable(survey, `engine${p}Make`, details.make) || changed;
+    changed = _setNameplateFieldIfReadable(survey, `engine${p}Model`, details.model) || changed;
+    changed = _setNameplateFieldIfReadable(survey, `engine${p}Serial`, details.serial) || changed;
+    changed = _setNameplateFieldIfReadable(survey, `engine${p}HP`, details.hp) || changed;
+    changed = _setNameplateFieldIfReadable(survey, isSecond ? 'fuelType2' : 'fuelType', details.fuelType) || changed;
+    if (changed) {
+      await saveSurvey(survey);
+      renderInspection(survey);
+      showToast('Engine plate read — check the fields');
+    } else {
+      showToast('No readable new engine details found');
+    }
+  } catch (error) {
+    console.error('Engine nameplate read failed', error);
+    showToast('Engine plate read failed: ' + (error.message || 'unknown').substring(0, 80));
+  }
+}
+
+async function readSurveyGearboxNameplate(slot) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  const isSecond = Number(slot) === 2;
+  const photoId = _firstSurveyNameplatePhotoId(
+    survey,
+    isSecond ? 'transmission2PlatePhoto' : 'transmissionPlatePhoto',
+    ['Gearbox nameplate(s)', 'Transmission nameplate(s)'],
+    slot
+  );
+  if (!photoId) {
+    showToast('Add a gearbox nameplate photo first');
+    return;
+  }
+  const photo = await getPhotoById(photoId);
+  try {
+    showToast('Reading gearbox nameplate...');
+    const details = await _readNameplateDetailsFromPhoto(photo, 'gearbox');
+    let changed = false;
+    const p = isSecond ? '2' : '';
+    changed = _setNameplateFieldIfReadable(survey, `transmission${p}Make`, details.make) || changed;
+    changed = _setNameplateFieldIfReadable(survey, `transmission${p}Model`, details.model) || changed;
+    changed = _setNameplateFieldIfReadable(survey, `transmission${p}Serial`, details.serial) || changed;
+    if (_updateTransmissionMakeModel(survey, slot)) changed = true;
+    if (changed) {
+      await saveSurvey(survey);
+      renderInspection(survey);
+      showToast('Gearbox plate read — check the fields');
+    } else {
+      showToast('No readable new gearbox details found');
+    }
+  } catch (error) {
+    console.error('Gearbox nameplate read failed', error);
+    showToast('Gearbox plate read failed: ' + (error.message || 'unknown').substring(0, 80));
+  }
+}
+
 // Update Gemini API key (called from settings or prompt)
 // Identify all unidentified instruments sequentially
 async function identifyAllInstruments() {
@@ -23030,6 +23230,7 @@ function setVesselTypeFromInspection(vesselType) {
 function updateDriveLineCount(count) {
   getSurvey(currentSurveyId).then(survey => {
     survey.driveLineCount = count;
+    _syncSecondEngineFromSurveyCount(survey);
     saveSurvey(survey).then(() => {
       renderInspection(survey);
     });
@@ -23055,6 +23256,7 @@ function updateDriveType(driveType) {
         survey.hasRudder = true;
       }
     }
+    _syncSecondEngineFromSurveyCount(survey);
     saveSurvey(survey).then(() => {
       renderInspection(survey);
     });
@@ -23124,6 +23326,53 @@ function _updateTransmissionMakeModel(survey, slot) {
   if ((survey[keys.transmissionMakeModel] || '') === combined) return false;
   survey[keys.transmissionMakeModel] = combined;
   return true;
+}
+
+function _hasSecondEngineData(survey) {
+  return !!(survey && (
+    survey.engine2Make || survey.engine2Model || survey.engine2Serial ||
+    survey.engine2Hours || survey.engine2HP || survey.fuelType2 ||
+    survey.transmission2Make || survey.transmission2Model || survey.transmission2Serial ||
+    survey.engine2Photo || survey.engine2PlatePhoto || survey.transmission2Photo || survey.transmission2PlatePhoto
+  ));
+}
+
+function _surveyEngineCountFromSetup(survey) {
+  if (!survey || (survey.vesselType || '').toLowerCase() === 'human') return 0;
+  const explicit = Number.parseInt(survey.engineCount, 10);
+  if (Number.isFinite(explicit) && explicit >= 0) return Math.min(2, explicit);
+  const driveLines = Number.parseInt(survey.driveLineCount, 10);
+  if (Number.isFinite(driveLines) && driveLines >= 0) return Math.min(2, driveLines);
+  return _hasSecondEngineData(survey) || survey.hasSecondEngine ? 2 : 1;
+}
+
+function _surveyHasSecondEngine(survey) {
+  return _surveyEngineCountFromSetup(survey) >= 2;
+}
+
+function _syncSecondEngineFromSurveyCount(survey) {
+  if (!survey) return false;
+  const shouldShowSecond = _surveyHasSecondEngine(survey);
+  let changed = false;
+  if (survey.hasSecondEngine !== shouldShowSecond) {
+    survey.hasSecondEngine = shouldShowSecond;
+    changed = true;
+  }
+  if (shouldShowSecond) {
+    const copyIfEmpty = (target, source) => {
+      if (!survey[target] && survey[source]) {
+        survey[target] = survey[source];
+        changed = true;
+      }
+    };
+    copyIfEmpty('engine2Make', 'engineMake');
+    copyIfEmpty('engine2Model', 'engineModel');
+    copyIfEmpty('engine2HP', 'engineHP');
+    copyIfEmpty('fuelType2', 'fuelType');
+    if (_updateTransmissionMakeModel(survey, 2)) changed = true;
+    if (_applyEngineDbDefaults(survey, 2)) changed = true;
+  }
+  return changed;
 }
 
 async function saveSurveyEngineField(field, value) {
