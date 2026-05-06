@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2530';
+const APP_VERSION = 'v2531';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -121,6 +121,38 @@ function formatPersonsInAttendance(raw) {
     out.push(part);
   }
   return out.join(', ');
+}
+
+const PRIMARY_SURVEYOR_ATTENDEE = 'Dave Seagrim, SAMS Surveyor Associate, ABYC Master Advisor';
+
+function _splitAttendanceExtras(raw) {
+  let text = String(raw || '').trim();
+  if (!text) return [];
+  text = text
+    .replace(/Dave\s+Seagrim\s*,?\s*SAMS\s+Surveyor\s+Associate\s*,?\s*ABYC\s+Master\s+Advisor/ig, '')
+    .replace(/^\s*[,;]\s*/, '')
+    .replace(/\s*[,;]\s*$/, '')
+    .trim();
+  if (!text) return [];
+  return text
+    .split(/\s*(?:;|\n|,\s*(?=[A-Z][A-Za-z.'-]+(?:\s+[A-Z][A-Za-z.'-]+)*(?:\s*\(|\s*$)))\s*/)
+    .map(part => part.trim())
+    .filter(Boolean)
+    .filter(part => !/^(?:SAMS\s+Surveyor\s+Associate|ABYC\s+Master\s+Advisor)$/i.test(part))
+    .filter(part => !/^Dave\s+Seagrim\b/i.test(part));
+}
+
+function restoreAttendeesList(raw) {
+  const list = document.getElementById('attendeesList');
+  const field = document.getElementById('personsInAttendance');
+  if (!list || !field) return;
+  list.querySelectorAll('[data-attendee-extra]').forEach(node => node.remove());
+  const formatted = (typeof formatPersonsInAttendance === 'function')
+    ? formatPersonsInAttendance(raw || PRIMARY_SURVEYOR_ATTENDEE)
+    : (raw || PRIMARY_SURVEYOR_ATTENDEE);
+  field.value = formatted || PRIMARY_SURVEYOR_ATTENDEE;
+  const extras = _splitAttendanceExtras(raw);
+  extras.forEach(extra => addAttendeeField(extra, { focus: false, skipUpdate: true }));
 }
 
 // v2405: Display-only transform for category names that carry "(s)" markers
@@ -11492,6 +11524,10 @@ function editSurveyDetails(surveyId) {
       restoreColourSelect('hullColour', survey.hullColour);
       restoreColourSelect('bootStripeColour', survey.bootStripeColour);
       restoreColourSelect('deckColour', survey.deckColour);
+      restoreAttendeesList(survey.personsInAttendance);
+      if (_syncEnginePhotosFromBody(survey)) {
+        saveSurvey(survey).catch(err => console.warn('Engine photo intro sync failed:', err));
+      }
 
       // Trigger boat style options update after setting vessel type
       if (survey.vesselType) {
@@ -12090,7 +12126,7 @@ async function saveEditFormSilently() {
   ];
   for (const f of fields) {
     const el = document.getElementById(f);
-    if (el) survey[f] = el.value;
+    if (el && !_shouldSkipEmptyOverNonempty(survey, f, el.value)) survey[f] = el.value;
   }
   // Special fields
   survey.locationLat = window._surveyLat || survey.locationLat;
@@ -12107,11 +12143,11 @@ async function saveEditFormSilently() {
   // undefined when the select isn't in the DOM, in which case we skip the
   // write so the saved value isn't wiped.
   const _hullColour = getColourValue('hullColour');
-  if (_hullColour !== undefined) survey.hullColour = _hullColour;
+  if (_hullColour !== undefined && !_shouldSkipEmptyOverNonempty(survey, 'hullColour', _hullColour)) survey.hullColour = _hullColour;
   const _bootStripeColour = getColourValue('bootStripeColour');
-  if (_bootStripeColour !== undefined) survey.bootStripeColour = _bootStripeColour;
+  if (_bootStripeColour !== undefined && !_shouldSkipEmptyOverNonempty(survey, 'bootStripeColour', _bootStripeColour)) survey.bootStripeColour = _bootStripeColour;
   const _deckColour = getColourValue('deckColour');
-  if (_deckColour !== undefined) survey.deckColour = _deckColour;
+  if (_deckColour !== undefined && !_shouldSkipEmptyOverNonempty(survey, 'deckColour', _deckColour)) survey.deckColour = _deckColour;
   survey.exchangeRate = parseFloat(document.getElementById('exchangeRate')?.value) || survey.exchangeRate || 1.35;
   // v2377 data-loss guard: only write valuation sources when the DOM
   // checkboxes are rendered. The old path unconditionally assigned the
@@ -14568,7 +14604,7 @@ function addOwnerAttendee() {
   }
 }
 
-function addAttendeeField() {
+function addAttendeeField(initialValue = '', options = {}) {
   const list = document.getElementById('attendeesList');
   if (!list) return;
 
@@ -14584,6 +14620,7 @@ function addAttendeeField() {
   input.style.cssText = 'flex:1;padding:6px 8px;border:1px solid #cbd5e1;border-radius:4px;font-size:13px;';
   input.setAttribute('data-attendee-index', idx);
   input.autocapitalize = 'words';
+  input.value = initialValue || '';
 
   const removeBtn = document.createElement('button');
   removeBtn.className = 'btn-secondary';
@@ -14598,9 +14635,10 @@ function addAttendeeField() {
   div.appendChild(input);
   div.appendChild(removeBtn);
   list.appendChild(div);
-  input.focus();
+  if (options.focus !== false) input.focus();
   input.addEventListener('change', updateAttendeesList);
   input.addEventListener('input', updateAttendeesList);
+  if (initialValue && !options.skipUpdate) updateAttendeesList();
 }
 
 function updateAttendeesList() {
@@ -15065,6 +15103,27 @@ function guardedAssignComparables(survey, newValue, caller) {
 //     when they were going to persist.  This is a merge primitive only.
 //   • This function does NOT deep-clone updates.  Array values are assigned
 //     by reference, matching the prior Object.assign semantics exactly.
+const EMPTY_OVER_NONEMPTY_PROTECTED_FIELDS = new Set([
+  'hullColour', 'bootStripeColour', 'deckColour', 'personsInAttendance',
+  'hinPhoto', 'compliancePhoto', 'licencePhoto', 'tcPaperLicencePhoto',
+  'coverPhoto', 'fourCornerPortBow', 'fourCornerStbdBow', 'fourCornerPortStern', 'fourCornerStbdStern',
+  'enginePhoto', 'enginePlatePhoto', 'transmissionPhoto', 'transmissionPlatePhoto',
+  'engine2Photo', 'engine2PlatePhoto', 'transmission2Photo', 'transmission2PlatePhoto'
+]);
+
+function _isEmptySurveyValue(value) {
+  if (value === undefined || value === null) return true;
+  if (Array.isArray(value)) return value.filter(Boolean).length === 0;
+  if (typeof value === 'object') return Object.keys(value).length === 0;
+  return String(value).trim() === '';
+}
+
+function _shouldSkipEmptyOverNonempty(survey, field, incoming) {
+  return EMPTY_OVER_NONEMPTY_PROTECTED_FIELDS.has(field)
+    && _isEmptySurveyValue(incoming)
+    && !_isEmptySurveyValue(survey && survey[field]);
+}
+
 function guardedSurveyUpdate(survey, updates, caller) {
   if (!survey || !updates || typeof updates !== 'object') {
     return { applied: 0, skipped: [] };
@@ -15111,6 +15170,10 @@ function guardedSurveyUpdate(survey, updates, caller) {
   // by-reference for arrays/objects, overwrites existing keys.
   for (const k of Object.keys(updates)) {
     if (updates[k] === undefined) {
+      skipped.push(k);
+      continue;
+    }
+    if (_shouldSkipEmptyOverNonempty(survey, k, updates[k])) {
       skipped.push(k);
       continue;
     }
@@ -23127,12 +23190,7 @@ function _retroSyncEngineFromBody(survey) {
 
   // Helper: sync first photo from body item to intro field
   const syncPhoto = (itemLabel, surveyField) => {
-    const item = items[itemLabel];
-    if (item && item.photos && item.photos.length > 0 && !survey[surveyField]) {
-      survey[surveyField] = item.photos[0];
-      return true;
-    }
-    return false;
+    return _mergeIntroPhotosFromBodyItem(survey, itemLabel, surveyField);
   };
 
   // Sync engine hours
@@ -23221,34 +23279,45 @@ function _parseAndSyncMakeModelSerial(survey, raw, prefix) {
   }
 }
 
+function _photoIdArray(value) {
+  if (!value) return [];
+  const raw = Array.isArray(value) ? value : [value];
+  return raw.filter(Boolean);
+}
+
+function _samePhotoIds(a, b) {
+  if (a.length !== b.length) return false;
+  return a.every((id, idx) => id === b[idx]);
+}
+
+function _mergeIntroPhotosFromBodyItem(survey, itemLabel, surveyField) {
+  if (!survey || !survey.items) return false;
+  const item = survey.items[itemLabel];
+  const bodyIds = _photoIdArray(item && item.photos);
+  if (bodyIds.length === 0) return false;
+  const existingIds = _photoIdArray(survey[surveyField]);
+  const merged = [...bodyIds];
+  for (const id of existingIds) {
+    if (!merged.includes(id)) merged.push(id);
+  }
+  if (_samePhotoIds(existingIds, merged)) return false;
+  survey[surveyField] = merged;
+  return true;
+}
+
 // Auto-sync engine/gearbox PHOTOS from checklist body media items to intro header fields.
 // Called after area photos are captured, deleted, or after regular item photos are saved.
-// Always updates the intro to match the body — if body has no photos, clears the intro.
+// Additive by design: body photos are copied into the intro photo galleries, but an
+// empty body item never clears existing intro photos.
 function _syncEnginePhotosFromBody(survey) {
-  const _firstPhoto = (label) => {
-    const item = survey.items[label];
-    return (item && item.photos && item.photos.length > 0) ? item.photos[0] : null;
-  };
-
-  // Engine photos → enginePhoto (first photo from body, or null)
-  const ep = _firstPhoto('Engine(s) and drive(s) photos');
-  if (ep !== null) survey.enginePhoto = ep;
-  else if (survey.items['Engine(s) and drive(s) photos']) survey.enginePhoto = null;
-
-  // Engine nameplate photos → enginePlatePhoto
-  const enp = _firstPhoto('Engine name plate(s)');
-  if (enp !== null) survey.enginePlatePhoto = enp;
-  else if (survey.items['Engine name plate(s)']) survey.enginePlatePhoto = null;
-
-  // Gearbox/transmission nameplate photos → transmissionPlatePhoto
-  const gp = _firstPhoto('Gearbox nameplate(s)');
-  if (gp !== null) survey.transmissionPlatePhoto = gp;
-  else if (survey.items['Gearbox nameplate(s)']) survey.transmissionPlatePhoto = null;
-
-  // Gearbox general condition photos → transmissionPhoto
-  const gc = _firstPhoto('Gearbox general condition/impressions');
-  if (gc !== null) survey.transmissionPhoto = gc;
-  else if (survey.items['Gearbox general condition/impressions']) survey.transmissionPhoto = null;
+  let changed = false;
+  if (_mergeIntroPhotosFromBodyItem(survey, 'Engine(s) and drive(s) photos', 'enginePhoto')) changed = true;
+  if (_mergeIntroPhotosFromBodyItem(survey, 'Engine name plate(s)', 'enginePlatePhoto')) changed = true;
+  if (_mergeIntroPhotosFromBodyItem(survey, 'Gearbox nameplate(s)', 'transmissionPlatePhoto')) changed = true;
+  if (_mergeIntroPhotosFromBodyItem(survey, 'Transmission nameplate(s)', 'transmissionPlatePhoto')) changed = true;
+  if (_mergeIntroPhotosFromBodyItem(survey, 'Gearbox general condition/impressions', 'transmissionPhoto')) changed = true;
+  if (_mergeIntroPhotosFromBodyItem(survey, 'Gearbox oil', 'transmissionPhoto')) changed = true;
+  return changed;
 }
 
 // Live first-person detection warning on item textareas

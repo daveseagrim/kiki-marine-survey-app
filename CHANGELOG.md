@@ -1,3 +1,8 @@
+## v2531
+- Restored saved Persons in Attendance entries into the visible Edit Vessel Information attendee controls instead of leaving only the default surveyor row.
+- Added guards so blank auto-fill saves cannot wipe saved hull/deck colours, attendee text, or intro/documentation photo fields.
+- Changed engine and gearbox photo syncing so checklist body photos are copied into the intro photo galleries without clearing existing intro photos.
+
 ## v2530
 - Added `2001 Silverton 350` to `boat_specs_db.json` so the Year / Make / Model field can auto-fill the current Tethys V specs.
 - Added survey-condition choices for vessels inspected in slings, on a cradle, or on blocks before launch.
