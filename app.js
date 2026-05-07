@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2541';
+const APP_VERSION = 'v2542';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -20462,7 +20462,7 @@ function _firstSurveyNameplatePhotoId(survey, fieldKey, itemLabels, slot) {
   return '';
 }
 
-function _surveyNameplatePhotoIds(survey, kind) {
+function _surveyNameplatePhotoIds(survey, kind, options = {}) {
   const ids = [];
   const add = value => {
     _photoIdArray(value).forEach(id => {
@@ -20476,12 +20476,43 @@ function _surveyNameplatePhotoIds(survey, kind) {
     ['Gearbox nameplate(s)', 'Transmission nameplate(s)'].forEach(label => {
       _surveyItemPhotoIds(survey, label).forEach(add);
     });
+    if (options.includeFallback) {
+      add(survey.transmissionPhoto);
+      add(survey.transmission2Photo);
+      [
+        'Gearbox general condition/impressions',
+        'Gearbox oil',
+        'Drive coupling(s), interior propeller shaft(s), stuffing box(es)/packing gland(s)/dripless seal(s), interior stern tube(s)'
+      ].forEach(label => {
+        _surveyItemPhotoIds(survey, label).forEach(add);
+      });
+    }
   } else {
     add(survey.enginePlatePhoto);
     add(survey.engine2PlatePhoto);
     _surveyItemPhotoIds(survey, 'Engine name plate(s)').forEach(add);
+    if (options.includeFallback) {
+      add(survey.enginePhoto);
+      add(survey.engine2Photo);
+      [
+        'Engine(s) and drive(s) photos',
+        'Engine, general condition/impression',
+        'Engine general condition/impressions'
+      ].forEach(label => {
+        _surveyItemPhotoIds(survey, label).forEach(add);
+      });
+    }
   }
   return ids;
+}
+
+function _slotOrderedPhotoIds(ids, slot) {
+  const unique = [];
+  (ids || []).forEach(id => {
+    if (id && !unique.includes(id)) unique.push(id);
+  });
+  if (Number(slot) !== 2 || unique.length < 2) return unique;
+  return [unique[1], unique[0], ...unique.slice(2)];
 }
 
 function _nameplateHasUsefulData(kind, details) {
@@ -20763,20 +20794,40 @@ async function readSurveyEngineNameplate(slot) {
   const survey = await getSurvey(currentSurveyId);
   if (!survey) return;
   const isSecond = Number(slot) === 2;
-  const photoId = _firstSurveyNameplatePhotoId(
-    survey,
-    isSecond ? 'engine2PlatePhoto' : 'enginePlatePhoto',
-    ['Engine name plate(s)'],
-    slot
-  );
-  if (!photoId) {
-    showToast('Add an engine nameplate photo first');
+  const candidateIds = _slotOrderedPhotoIds(_surveyNameplatePhotoIds(survey, 'engine', { includeFallback: true }), slot);
+  if (candidateIds.length === 0) {
+    showToast('Add or import an engine plate photo first');
     return;
   }
-  const photo = await getPhotoById(photoId);
   try {
     showToast('Reading engine nameplate...');
-    const details = await _readNameplateDetailsFromPhoto(photo, 'engine');
+    let details = null;
+    let triedWithImage = 0;
+    let lastError = null;
+    for (const photoId of candidateIds) {
+      const photo = await getPhotoById(photoId);
+      if (!photo || !photo.dataUrl) continue;
+      triedWithImage++;
+      try {
+        const read = await _readNameplateDetailsFromPhoto(photo, 'engine');
+        if (_nameplateHasUsefulData('engine', read)) {
+          details = read;
+          break;
+        }
+      } catch (error) {
+        lastError = error;
+        break;
+      }
+    }
+    if (!details) {
+      if (lastError) throw lastError;
+      if (triedWithImage === 0) {
+        showToast('Photo marker found, but image data is missing on this device. Repair from export first.');
+      } else {
+        showToast('No readable engine plate details found in the available photos');
+      }
+      return;
+    }
     let changed = false;
     const p = isSecond ? '2' : '';
     changed = _setNameplateFieldIfReadable(survey, `engine${p}Make`, details.make) || changed;
@@ -20793,7 +20844,12 @@ async function readSurveyEngineNameplate(slot) {
     }
   } catch (error) {
     console.error('Engine nameplate read failed', error);
-    showToast('Engine plate read failed: ' + (error.message || 'unknown').substring(0, 80));
+    const msg = error && error.message ? error.message : 'unknown';
+    if (/API 429/.test(msg)) {
+      showToast('Engine plate read failed: Gemini quota/rate limit. Try again later or enter manually.');
+    } else {
+      showToast('Engine plate read failed: ' + msg.substring(0, 80));
+    }
   }
 }
 
@@ -20801,20 +20857,40 @@ async function readSurveyGearboxNameplate(slot) {
   const survey = await getSurvey(currentSurveyId);
   if (!survey) return;
   const isSecond = Number(slot) === 2;
-  const photoId = _firstSurveyNameplatePhotoId(
-    survey,
-    isSecond ? 'transmission2PlatePhoto' : 'transmissionPlatePhoto',
-    ['Gearbox nameplate(s)', 'Transmission nameplate(s)'],
-    slot
-  );
-  if (!photoId) {
-    showToast('Add a gearbox nameplate photo first');
+  const candidateIds = _slotOrderedPhotoIds(_surveyNameplatePhotoIds(survey, 'gearbox', { includeFallback: true }), slot);
+  if (candidateIds.length === 0) {
+    showToast('Add or import a gearbox plate photo first');
     return;
   }
-  const photo = await getPhotoById(photoId);
   try {
     showToast('Reading gearbox nameplate...');
-    const details = await _readNameplateDetailsFromPhoto(photo, 'gearbox');
+    let details = null;
+    let triedWithImage = 0;
+    let lastError = null;
+    for (const photoId of candidateIds) {
+      const photo = await getPhotoById(photoId);
+      if (!photo || !photo.dataUrl) continue;
+      triedWithImage++;
+      try {
+        const read = await _readNameplateDetailsFromPhoto(photo, 'gearbox');
+        if (_nameplateHasUsefulData('gearbox', read)) {
+          details = read;
+          break;
+        }
+      } catch (error) {
+        lastError = error;
+        break;
+      }
+    }
+    if (!details) {
+      if (lastError) throw lastError;
+      if (triedWithImage === 0) {
+        showToast('Photo marker found, but image data is missing on this device. Repair from export first.');
+      } else {
+        showToast('No readable gearbox plate details found in the available photos');
+      }
+      return;
+    }
     let changed = false;
     const p = isSecond ? '2' : '';
     changed = _setNameplateFieldIfReadable(survey, `transmission${p}Make`, details.make) || changed;
@@ -20830,7 +20906,12 @@ async function readSurveyGearboxNameplate(slot) {
     }
   } catch (error) {
     console.error('Gearbox nameplate read failed', error);
-    showToast('Gearbox plate read failed: ' + (error.message || 'unknown').substring(0, 80));
+    const msg = error && error.message ? error.message : 'unknown';
+    if (/API 429/.test(msg)) {
+      showToast('Gearbox plate read failed: Gemini quota/rate limit. Try again later or enter manually.');
+    } else {
+      showToast('Gearbox plate read failed: ' + msg.substring(0, 80));
+    }
   }
 }
 

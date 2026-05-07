@@ -1,3 +1,8 @@
+## v2542
+- Made manual engine and gearbox plate reads try all relevant candidate photos instead of only the first nameplate marker.
+- Added fallbacks to general engine/gearbox photo sections when plate photos were imported into the broader photo bucket.
+- Improved the message when the laptop only has photo markers and not the image data.
+
 ## v2541
 - Added small section-level photo repair bundle exports so a phone can send only the photos from one photo section to the laptop.
 - Kept the bundle compatible with the existing "Repair missing photos from export" importer.
