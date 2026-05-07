@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-26T03:24:27.014315Z",
+  "lastUpdated": "2026-05-07T00:00:00.000000Z",
   "engines": [
     {
       "make": "Yanmar",
@@ -3512,6 +3512,31 @@
       ]
     },
     {
+      "make": "Kubota",
+      "country": "Japan",
+      "type": "Diesel",
+      "models": [
+        {
+          "model": "V1305-E2B",
+          "hp": "36.5",
+          "kw": "27.2",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "1.335L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "V1305-ES",
+          "hp": "36.5",
+          "kw": "27.2",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "1.335L",
+          "engineType": "Inboard"
+        }
+      ]
+    },
+    {
       "make": "Westerbeke",
       "country": "USA",
       "type": "Diesel",
@@ -3620,6 +3645,15 @@
           "fuel": "Diesel",
           "cylinders": "4",
           "displacement": "2.33L",
+          "engineType": "Inboard"
+        },
+        {
+          "model": "M-35B",
+          "hp": "35",
+          "kw": "26",
+          "fuel": "Diesel",
+          "cylinders": "4",
+          "displacement": "1.335L",
           "engineType": "Inboard"
         },
         {

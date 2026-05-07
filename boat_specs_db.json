@@ -2109,7 +2109,16 @@
           "label": "Wing keel",
           "draft": "4'10\""
         }
-      ]
+      ],
+      "engine": "Universal M-35B diesel",
+      "engineMake": "Universal",
+      "engineModel": "M-35B",
+      "engineHP": "35",
+      "fuelType": "Diesel",
+      "driveType": "shaft",
+      "driveCount": 1,
+      "engineCount": 1,
+      "auxiliaryEngine": "Universal M-35B diesel (Kubota V1305 block)"
     },
     {
       "id": "catalina-36-mk2",

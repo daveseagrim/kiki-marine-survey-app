@@ -1,3 +1,8 @@
+## v2545
+- Added the Catalina 350 auxiliary engine package so matched surveys prefill a single Universal M-35B diesel on shaft drive.
+- Added Universal M-35B plus Kubota V1305 plate-model options to the Version 1 engine database for nameplate and manual-entry workflows.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the new engine options.
+
 ## v2544
 - Preserved original JPEG detail for reasonably sized nameplate photos instead of downsampling them before AI reading.
 - Raised fallback nameplate image preparation quality so small plate text stays sharper.
