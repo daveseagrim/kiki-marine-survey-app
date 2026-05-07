@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2539';
+const APP_VERSION = 'v2540';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4460,6 +4460,10 @@ function repairMissingPhotosFromExport(itemLabel, categoryName) {
   };
 
   input.click();
+}
+
+function repairAllMissingPhotosFromExport() {
+  repairMissingPhotosFromExport('', '');
 }
 
 async function deletePhoto(photoId) {
@@ -15759,6 +15763,12 @@ function renderInspection(survey) {
       </div>
       ${!currentVesselType ? '<span style="font-size:12px;color:#dc2626;font-weight:600;">← Please select</span>' : ''}
     </div>
+    <div style="display:flex;justify-content:flex-end;margin:-2px 10px 10px;">
+      <button type="button" onclick="repairAllMissingPhotosFromExport()"
+              style="background:white;color:#066aab;border:1px solid #93c5fd;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer;">
+        Repair missing photos from export
+      </button>
+    </div>
   `;
 
   // v2227: fully-skipped categories accumulate here so we can append them
@@ -16070,6 +16080,13 @@ function renderInspection(survey) {
                   style="background:white;color:#066aab;border:2px solid #066aab;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
                   🖼️ Import photos from library / files
                 </button>
+                ${photos.length > 0 ? `
+                  <button type="button"
+                    onclick="repairMissingPhotosFromExport('${safeLabel}', '${safeCat}')"
+                    style="background:#f8fafc;color:#475569;border:1px solid #cbd5e1;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;min-height:44px;box-sizing:border-box;">
+                    Repair missing photos from export
+                  </button>
+                ` : ''}
               </div>
               <div style="font-size:11px;color:#6b7280;margin-top:6px;">Both buttons support selecting multiple photos at once. On desktop, you can also drag photo files onto any item card.</div>
             </div>
@@ -21326,6 +21343,13 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
           style="background:white;color:#066aab;border:2px solid #066aab;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-sizing:border-box;">
           🖼️ Import photos from library / files
         </button>
+        ${photos.length > 0 ? `
+          <button type="button"
+            onclick="repairMissingPhotosFromExport('${safeLabel}', '${safeCat}')"
+            style="background:#f8fafc;color:#475569;border:1px solid #cbd5e1;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;min-height:44px;box-sizing:border-box;">
+            Repair missing photos from export
+          </button>
+        ` : ''}
       </div>
       <div style="font-size:11px;color:#6b7280;margin-top:6px;">Both buttons support selecting multiple photos at once. On desktop, you can also drag photo files onto any item card.</div>
     </div>

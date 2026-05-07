@@ -1,3 +1,7 @@
+## v2540
+- Added a survey-level photo repair action so a laptop can restore missing image data from a full phone export without replacing survey text, ratings, or notes.
+- Added the same repair action to category photo sections when linked photos are present.
+
 ## v2539
 - Prevented the Edit Vessel Information page from running legacy intro engine dropdown code when those intro engine fields are no longer present.
 - Kept the documentation-photo preview restore path running after surveys with saved engine and gearbox values are opened.
