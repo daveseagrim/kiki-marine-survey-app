@@ -1,3 +1,8 @@
+## v2546
+- Replaced the full-width red Drive-backup warning with a compact amber notice.
+- Added a Sign in button directly on the Drive-backup warning.
+- Rate-limited the not-connected warning and made Not now suppress it for one hour.
+
 ## v2545
 - Added the Catalina 350 auxiliary engine package so matched surveys prefill a single Universal M-35B diesel on shaft drive.
 - Added Universal M-35B plus Kubota V1305 plate-model options to the Version 1 engine database for nameplate and manual-entry workflows.

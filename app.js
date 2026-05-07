@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2545';
+const APP_VERSION = 'v2546';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4067,35 +4067,113 @@ function _updateBackupStatusUI() {
   }
 }
 
-// Show a visible warning when Firebase backup fails — NOT just a console message
+const DRIVE_BACKUP_WARNING_DISMISSED_UNTIL_KEY = '_driveBackupWarningDismissedUntil';
+let _driveBackupWarningLastShownAt = 0;
+
+async function _signInToDriveFromWarning(button, bar) {
+  if (typeof DriveBackup === 'undefined' || !DriveBackup.signIn) {
+    showToast('Google Drive sign-in is not available in this build');
+    return;
+  }
+  const originalText = button ? button.textContent : 'Sign in';
+  if (button) {
+    button.textContent = 'Signing in...';
+    button.disabled = true;
+  }
+  try {
+    await DriveBackup.signIn();
+    if (DriveBackup.isSignedIn && DriveBackup.isSignedIn()) {
+      localStorage.removeItem(DRIVE_BACKUP_WARNING_DISMISSED_UNTIL_KEY);
+      if (bar && bar.parentElement) bar.remove();
+      _showDriveConnectedBanner();
+      _resetIdleTimer();
+    }
+  } catch (err) {
+    if (button) {
+      button.textContent = originalText;
+      button.disabled = false;
+    }
+    if (err && err.code !== 'auth/popup-closed-by-user') {
+      console.warn('[Drive] Sign-in from backup warning failed:', err.message || err);
+      showToast('Google Drive sign-in did not complete');
+    }
+  }
+}
+
+// Show a visible backup warning — compact, actionable, and rate-limited.
 function _showBackupWarning(service, photoLabel) {
+  const isDriveDisconnected = /drive backup not connected/i.test(String(service || ''));
+  const now = Date.now();
+  if (isDriveDisconnected) {
+    const dismissedUntil = Number(localStorage.getItem(DRIVE_BACKUP_WARNING_DISMISSED_UNTIL_KEY) || 0);
+    if (dismissedUntil && dismissedUntil > now) return;
+    if ((now - _driveBackupWarningLastShownAt) < 10 * 60 * 1000) return;
+    _driveBackupWarningLastShownAt = now;
+  }
+
   const existing = document.getElementById('backup-warning-bar');
   if (existing) existing.remove();
 
   const bar = document.createElement('div');
   bar.id = 'backup-warning-bar';
-  bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#dc2626;color:white;min-height:34px;padding:5px 12px;font-size:12px;font-weight:600;line-height:1.2;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 1px 5px rgba(0,0,0,0.25);';
+  const isSmallScreen = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+  bar.style.cssText = [
+    'position:fixed',
+    'top:calc(env(safe-area-inset-top, 0px) + 8px)',
+    isSmallScreen ? 'left:10px' : 'left:auto',
+    'right:10px',
+    isSmallScreen ? 'max-width:none' : 'max-width:620px',
+    'z-index:9999',
+    'background:#fffbeb',
+    'color:#78350f',
+    'border:1px solid #f59e0b',
+    'border-radius:10px',
+    'padding:8px 10px',
+    'font-size:12px',
+    'font-weight:600',
+    'line-height:1.25',
+    'display:flex',
+    'align-items:center',
+    'justify-content:flex-start',
+    'gap:8px',
+    'box-shadow:0 4px 14px rgba(15,23,42,0.16)'
+  ].join(';');
 
   const message = document.createElement('span');
-  message.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
-  if (/not connected/i.test(String(service || ''))) {
-    message.textContent = `⚠️ ${service} — ${photoLabel}.`;
+  message.style.cssText = 'min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+  if (isDriveDisconnected) {
+    message.textContent = 'Drive backup paused. Photos are saved here, but not backed up to Google Drive.';
   } else {
-    message.textContent = `⚠️ ${service} backup failed for "${photoLabel}". Check connection.`;
+    message.textContent = `Backup issue: ${service} failed for "${photoLabel}".`;
+  }
+
+  if (isDriveDisconnected && typeof DriveBackup !== 'undefined' && DriveBackup.signIn) {
+    const signIn = document.createElement('button');
+    signIn.type = 'button';
+    signIn.textContent = 'Sign in';
+    signIn.style.cssText = 'background:#066aab;color:white;border:none;border-radius:7px;padding:7px 10px;font-weight:800;font-size:12px;line-height:1;cursor:pointer;flex:0 0 auto;';
+    signIn.onclick = () => _signInToDriveFromWarning(signIn, bar);
+    bar.appendChild(message);
+    bar.appendChild(signIn);
+  } else {
+    bar.appendChild(message);
   }
 
   const dismiss = document.createElement('button');
   dismiss.type = 'button';
-  dismiss.textContent = 'Dismiss';
-  dismiss.style.cssText = 'background:white;color:#dc2626;border:none;border-radius:4px;padding:2px 8px;font-weight:700;font-size:12px;line-height:1.2;cursor:pointer;flex:0 0 auto;';
-  dismiss.onclick = () => bar.remove();
+  dismiss.textContent = isDriveDisconnected ? 'Not now' : 'Dismiss';
+  dismiss.style.cssText = 'background:transparent;color:#78350f;border:1px solid #f59e0b;border-radius:7px;padding:6px 9px;font-weight:700;font-size:12px;line-height:1;cursor:pointer;flex:0 0 auto;';
+  dismiss.onclick = () => {
+    if (isDriveDisconnected) {
+      localStorage.setItem(DRIVE_BACKUP_WARNING_DISMISSED_UNTIL_KEY, String(Date.now() + 60 * 60 * 1000));
+    }
+    bar.remove();
+  };
 
-  bar.appendChild(message);
   bar.appendChild(dismiss);
   document.body.appendChild(bar);
 
-  // Auto-dismiss after 10 seconds
-  setTimeout(() => { if (bar.parentElement) bar.remove(); }, 10000);
+  setTimeout(() => { if (bar.parentElement) bar.remove(); }, isDriveDisconnected ? 25000 : 10000);
 }
 
 // ── v2254: Persistent Drive token-expiry warning banner ──────────────
