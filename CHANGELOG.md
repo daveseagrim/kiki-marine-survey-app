@@ -1,3 +1,7 @@
+## v2541
+- Added small section-level photo repair bundle exports so a phone can send only the photos from one photo section to the laptop.
+- Kept the bundle compatible with the existing "Repair missing photos from export" importer.
+
 ## v2540
 - Added a survey-level photo repair action so a laptop can restore missing image data from a full phone export without replacing survey text, ratings, or notes.
 - Added the same repair action to category photo sections when linked photos are present.

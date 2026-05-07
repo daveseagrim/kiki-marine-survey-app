@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2540';
+const APP_VERSION = 'v2541';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -4466,6 +4466,97 @@ function repairAllMissingPhotosFromExport() {
   repairMissingPhotosFromExport('', '');
 }
 
+async function exportItemPhotoRepairBundle(itemLabel) {
+  try {
+    const survey = await getSurvey(currentSurveyId);
+    if (!survey || !survey.items || !survey.items[itemLabel]) {
+      showAlert('Open the photo section before exporting its photos.');
+      return { ok: false };
+    }
+
+    const linkedIds = _photoIdArray(survey.items[itemLabel].photos);
+    if (linkedIds.length === 0) {
+      showAlert('This photo section has no linked photos to export.');
+      return { ok: false };
+    }
+
+    const photos = [];
+    let missing = 0;
+    for (const id of linkedIds) {
+      const photo = await getPhotoById(id);
+      if (photo && photo.dataUrl) {
+        photos.push(photo);
+      } else {
+        missing++;
+      }
+    }
+
+    if (photos.length === 0) {
+      showAlert('No image data was found on this device for that photo section.');
+      return { ok: false };
+    }
+
+    const blobParts = [];
+    const header = {
+      version: 1,
+      type: 'kiki-photo-repair-bundle',
+      exportedAt: new Date().toISOString(),
+      appVersion: APP_VERSION,
+      survey: {
+        id: survey.id,
+        vesselName: survey.vesselName || '',
+        yearMakeModel: survey.yearMakeModel || ''
+      },
+      itemLabel: itemLabel
+    };
+    const headerJson = JSON.stringify(header);
+    blobParts.push(headerJson.slice(0, -1) + ',"photos":[');
+    for (let i = 0; i < photos.length; i++) {
+      if (i > 0) blobParts.push(',');
+      blobParts.push(JSON.stringify(photos[i]));
+    }
+    blobParts.push(']}');
+
+    const blob = new Blob(blobParts, { type: 'application/json' });
+    const vesselName = (survey.vesselName || 'survey').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const sectionName = String(itemLabel || 'photos').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 48);
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const filename = `${vesselName}_${sectionName}_photo_repair_${dateStr}.json`;
+
+    if (navigator.share && navigator.canShare) {
+      const file = new File([blob], filename, { type: 'application/json' });
+      if (navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: `Photos: ${survey.vesselName || itemLabel}`,
+            files: [file]
+          });
+          showToast(`Shared ${photos.length} photo${photos.length === 1 ? '' : 's'}${missing ? ` (${missing} missing)` : ''}`);
+          return { ok: true, filename, photoCount: photos.length, missing };
+        } catch (shareErr) {
+          if (shareErr && shareErr.name === 'AbortError') return { ok: false, cancelled: true };
+        }
+      }
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast(`Exported ${photos.length} photo${photos.length === 1 ? '' : 's'}${missing ? ` (${missing} missing)` : ''}`);
+    return { ok: true, filename, photoCount: photos.length, missing };
+  } catch (err) {
+    console.error('Photo repair bundle export failed:', err);
+    showAlert('Photo export failed: ' + (err && err.message ? err.message : err));
+    return { ok: false, error: err };
+  }
+}
+
 async function deletePhoto(photoId) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(['photos'], 'readwrite');
@@ -7388,6 +7479,11 @@ function showMediaSheet(itemLabel, categoryName) {
 	            \ud83d\uddbc\ufe0f Import photos from library / files
 	          </button>
 	          ${photoCount > 0 ? `
+	            <button type="button"
+	                    onclick="exportItemPhotoRepairBundle('${safeLabel}')"
+	                    style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#ecfeff;color:#0e7490;border:1px solid #67e8f9;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
+	              Export these photos for laptop
+	            </button>
 	            <button type="button"
 	                    onclick="repairMissingPhotosFromExport('${safeLabel}', '${safeCat}')"
 	                    style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#f8fafc;color:#475569;border:1px solid #cbd5e1;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
@@ -16082,6 +16178,11 @@ function renderInspection(survey) {
                 </button>
                 ${photos.length > 0 ? `
                   <button type="button"
+                    onclick="exportItemPhotoRepairBundle('${safeLabel}')"
+                    style="background:#ecfeff;color:#0e7490;border:1px solid #67e8f9;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;min-height:44px;box-sizing:border-box;">
+                    Export these photos for laptop
+                  </button>
+                  <button type="button"
                     onclick="repairMissingPhotosFromExport('${safeLabel}', '${safeCat}')"
                     style="background:#f8fafc;color:#475569;border:1px solid #cbd5e1;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;min-height:44px;box-sizing:border-box;">
                     Repair missing photos from export
@@ -21344,6 +21445,11 @@ function refreshAreaPhotoGrid(survey, mediaLabel) {
           🖼️ Import photos from library / files
         </button>
         ${photos.length > 0 ? `
+          <button type="button"
+            onclick="exportItemPhotoRepairBundle('${safeLabel}')"
+            style="background:#ecfeff;color:#0e7490;border:1px solid #67e8f9;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;min-height:44px;box-sizing:border-box;">
+            Export these photos for laptop
+          </button>
           <button type="button"
             onclick="repairMissingPhotosFromExport('${safeLabel}', '${safeCat}')"
             style="background:#f8fafc;color:#475569;border:1px solid #cbd5e1;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;min-height:44px;box-sizing:border-box;">
