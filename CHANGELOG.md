@@ -1,3 +1,7 @@
+## v2544
+- Preserved original JPEG detail for reasonably sized nameplate photos instead of downsampling them before AI reading.
+- Raised fallback nameplate image preparation quality so small plate text stays sharper.
+
 ## v2543
 - Kept manual engine and gearbox plate reads moving through later candidate photos when an earlier photo produces an unusable AI response.
 - Added raw visible plate text feedback when the reader can see wording but cannot safely fill structured make/model/serial fields.

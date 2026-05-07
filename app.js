@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2543';
+const APP_VERSION = 'v2544';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -20586,9 +20586,13 @@ async function _resizeDataUrlForNameplateRead(dataUrl) {
     const img = new Image();
     img.onload = () => {
       try {
-        const maxDim = 1400;
+        const maxDim = 2200;
         let w = img.width;
         let h = img.height;
+        if (w <= maxDim && h <= maxDim && /^data:image\/jpe?g/i.test(dataUrl) && dataUrl.length < 4500000) {
+          resolve(dataUrl);
+          return;
+        }
         if (w > maxDim || h > maxDim) {
           if (w > h) {
             h = Math.round((h * maxDim) / w);
@@ -20602,7 +20606,7 @@ async function _resizeDataUrlForNameplateRead(dataUrl) {
         canvas.width = w;
         canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', 0.82));
+        resolve(canvas.toDataURL('image/jpeg', 0.92));
       } catch (error) {
         reject(error);
       }
