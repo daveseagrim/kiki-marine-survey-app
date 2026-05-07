@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2542';
+const APP_VERSION = 'v2543';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -20523,6 +20523,15 @@ function _nameplateHasUsefulData(kind, details) {
   return !!(details.serial || (details.make && details.model) || (details.model && details.hp));
 }
 
+function _nameplateRawText(details) {
+  return String(details && details.rawText || '').replace(/\s+/g, ' ').trim();
+}
+
+function _isBlockingNameplateReadError(error) {
+  const msg = String(error && error.message || error || '');
+  return /No API key|Gemini API key|API key not set|API 401|API 403|API 429|quota|rate limit/i.test(msg);
+}
+
 function _engineNameplateSlotNeedsRead(survey, slot) {
   const p = Number(slot) === 2 ? '2' : '';
   return !(
@@ -20637,10 +20646,11 @@ Return ONLY valid JSON with these fields, using empty strings if unreadable:
 {
   "make": "",
   "model": "",
-  "serial": ""
+  "serial": "",
+  "rawText": ""
 }
 
-Do not guess. Read only visible plate text. If this is only a decorative decal, casting mark, or non-data label and not a gearbox/transmission data plate, return empty strings.`
+Do not guess. Read only visible plate text. If a plate is visible but the structured fields cannot be assigned, put the visible wording in rawText. If this is only a decorative decal, casting mark, or non-data label and not a gearbox/transmission data plate, return empty strings.`
     : `You are a marine surveyor's assistant. Read the engine nameplate/data plate in this photo.
 
 Return ONLY valid JSON with these fields, using empty strings if unreadable:
@@ -20649,10 +20659,11 @@ Return ONLY valid JSON with these fields, using empty strings if unreadable:
   "model": "",
   "serial": "",
   "hp": "",
-  "fuelType": ""
+  "fuelType": "",
+  "rawText": ""
 }
 
-Do not guess. Read only visible plate text. If this is only a decorative engine cover decal or marketing label and not a data/nameplate, return empty strings.`;
+Do not guess. Read only visible plate text. If a plate is visible but the structured fields cannot be assigned, put the visible wording in rawText. If this is only a decorative engine cover decal or marketing label and not a data/nameplate, return empty strings.`;
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -20668,7 +20679,7 @@ Do not guess. Read only visible plate text. If this is only a decorative engine 
           { text: promptText }
         ]
       }],
-      generationConfig: { temperature: 0, maxOutputTokens: 350 }
+      generationConfig: { temperature: 0, maxOutputTokens: 450 }
     })
   });
   if (!response.ok) {
@@ -20677,7 +20688,11 @@ Do not guess. Read only visible plate text. If this is only a decorative engine 
   }
   const result = await response.json();
   const text = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  return _parseAiJsonObject(text);
+  try {
+    return _parseAiJsonObject(text);
+  } catch (error) {
+    throw new Error('AI response was not usable JSON');
+  }
 }
 
 function _setNameplateFieldIfReadable(survey, field, value) {
@@ -20804,6 +20819,7 @@ async function readSurveyEngineNameplate(slot) {
     let details = null;
     let triedWithImage = 0;
     let lastError = null;
+    const rawHints = [];
     for (const photoId of candidateIds) {
       const photo = await getPhotoById(photoId);
       if (!photo || !photo.dataUrl) continue;
@@ -20814,15 +20830,20 @@ async function readSurveyEngineNameplate(slot) {
           details = read;
           break;
         }
+        const rawText = _nameplateRawText(read);
+        if (rawText) rawHints.push(rawText);
       } catch (error) {
         lastError = error;
-        break;
+        if (_isBlockingNameplateReadError(error)) break;
+        console.warn('Engine nameplate read skipped one photo and will try the next', { photoId, error });
       }
     }
     if (!details) {
-      if (lastError) throw lastError;
+      if (lastError && _isBlockingNameplateReadError(lastError)) throw lastError;
       if (triedWithImage === 0) {
         showToast('Photo marker found, but image data is missing on this device. Repair from export first.');
+      } else if (rawHints.length > 0) {
+        showAlert(`Plate text was visible, but there was not enough reliable structured detail to fill the fields.\n\nVisible text: ${escapeHtml(rawHints[0]).substring(0, 220)}`);
       } else {
         showToast('No readable engine plate details found in the available photos');
       }
@@ -20867,6 +20888,7 @@ async function readSurveyGearboxNameplate(slot) {
     let details = null;
     let triedWithImage = 0;
     let lastError = null;
+    const rawHints = [];
     for (const photoId of candidateIds) {
       const photo = await getPhotoById(photoId);
       if (!photo || !photo.dataUrl) continue;
@@ -20877,15 +20899,20 @@ async function readSurveyGearboxNameplate(slot) {
           details = read;
           break;
         }
+        const rawText = _nameplateRawText(read);
+        if (rawText) rawHints.push(rawText);
       } catch (error) {
         lastError = error;
-        break;
+        if (_isBlockingNameplateReadError(error)) break;
+        console.warn('Gearbox nameplate read skipped one photo and will try the next', { photoId, error });
       }
     }
     if (!details) {
-      if (lastError) throw lastError;
+      if (lastError && _isBlockingNameplateReadError(lastError)) throw lastError;
       if (triedWithImage === 0) {
         showToast('Photo marker found, but image data is missing on this device. Repair from export first.');
+      } else if (rawHints.length > 0) {
+        showAlert(`Plate text was visible, but there was not enough reliable structured detail to fill the fields.\n\nVisible text: ${escapeHtml(rawHints[0]).substring(0, 220)}`);
       } else {
         showToast('No readable gearbox plate details found in the available photos');
       }

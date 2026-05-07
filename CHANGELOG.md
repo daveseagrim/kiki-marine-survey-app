@@ -1,3 +1,8 @@
+## v2543
+- Kept manual engine and gearbox plate reads moving through later candidate photos when an earlier photo produces an unusable AI response.
+- Added raw visible plate text feedback when the reader can see wording but cannot safely fill structured make/model/serial fields.
+- Bumped the app cache metadata so the GitHub-hosted app loads the corrected reader.
+
 ## v2542
 - Made manual engine and gearbox plate reads try all relevant candidate photos instead of only the first nameplate marker.
 - Added fallbacks to general engine/gearbox photo sections when plate photos were imported into the broader photo bucket.
