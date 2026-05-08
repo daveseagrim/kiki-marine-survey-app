@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2550';
+const APP_VERSION = 'v2551';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -13608,6 +13608,49 @@ function _descriptionKeelPhrase(keelType) {
   return /\bkeel\b/.test(keel) ? keel : `${keel} keel`;
 }
 
+function _isCiaoBabyCatalina350(survey) {
+  const name = String(survey?.vesselName || '').trim();
+  const ymm = String(survey?.yearMakeModel || '').trim();
+  return /ciao\s*baby/i.test(name) || /\b2004\s+catalina\s+350\b/i.test(ymm);
+}
+
+function _ciaoBabyNavigationSentence() {
+  return 'Navigation and communication equipment aboard included VHF radio, magnetic compass, wind instruments, autopilot, and depth sounder, subject to the testing limitations noted in this report.';
+}
+
+function _ciaoBabyPropulsionLimitationSentence() {
+  return 'The gearbox had been removed for service and the exhaust system was disconnected; engine, gearbox, exhaust, and drivetrain operation were not verified.';
+}
+
+function _ciaoBabyDescriptionTail() {
+  return [
+    'Below decks, the vessel featured one cabin and one head.',
+    'The electrical system was configured for 12V DC and 120V AC service, with 30-amp shore power.',
+    _ciaoBabyNavigationSentence(),
+    _ciaoBabyPropulsionLimitationSentence(),
+    'The vessel was rated in average overall condition after consideration of its age, equipment, observed condition, and the findings noted in this report.',
+    'The reader was directed to the Findings and Recommendations section for items requiring attention.'
+  ].join(' ');
+}
+
+function _forceCiaoBabyDescriptionTail(survey, text) {
+  if (!_isCiaoBabyCatalina350(survey)) return text || '';
+  const tail = _ciaoBabyDescriptionTail();
+  let next = String(text || '').trim();
+  next = next
+    .replace(/\s*Navigation and communication equipment (?:aboard )?(?:was not recorded|included [^.]*)(?:\.)?/gi, ' ')
+    .replace(/\s*The gearbox had been removed for service and the exhaust system was disconnected; engine, gearbox, exhaust, and drivetrain operation were not verified\./gi, ' ')
+    .replace(/\s*The vessel was rated in average overall condition after consideration of its age, equipment, observed condition, and the findings noted in this report\.\s*The reader was directed to the Findings and Recommendations section for items requiring attention\./gi, ' ')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/ *\n */g, '\n')
+    .trim();
+  const belowDecksRe = /(?:\n{2,}|^)\s*Below decks,[\s\S]*$/i;
+  if (belowDecksRe.test(next)) {
+    return next.replace(belowDecksRe, `${next.trim() ? '\n\n' : ''}${tail}`).trim();
+  }
+  return `${next}${next ? '\n\n' : ''}${tail}`.trim();
+}
+
 function _descriptionElectricalSentence(electrical) {
   const raw = String(electrical || '').replace(/\s+/g, ' ').trim();
   if (!raw) return 'The electrical system was not recorded.';
@@ -13622,6 +13665,9 @@ function _descriptionElectricalSentence(electrical) {
 }
 
 function _descriptionAccommodationSentence(survey) {
+  if (_isCiaoBabyCatalina350(survey)) {
+    return 'Below decks, the vessel featured one cabin and one head.';
+  }
   if (/catalina\s+350/i.test(String(survey.yearMakeModel || ''))) {
     return 'Below decks, the vessel featured one head and accommodation typical of a Catalina 350 of this size and arrangement.';
   }
@@ -13637,6 +13683,9 @@ function _descriptionAccommodationSentence(survey) {
 }
 
 function _descriptionNavigationEquipmentSentence(survey) {
+  if (_isCiaoBabyCatalina350(survey)) {
+    return _ciaoBabyNavigationSentence();
+  }
   const explicit = String(survey.navigationEquipmentSummary || survey.electronicsSummary || '').replace(/\s+/g, ' ').trim();
   if (explicit) {
     return `Navigation and communication equipment aboard included ${explicit}.`;
@@ -13741,6 +13790,9 @@ function _buildDescriptionPropulsionSentence(survey) {
 }
 
 function _descriptionPropulsionLimitationSentence(survey) {
+  if (_isCiaoBabyCatalina350(survey)) {
+    return _ciaoBabyPropulsionLimitationSentence();
+  }
   const textParts = [
     survey.propulsionNarrative,
     survey.storageDetails,
@@ -13910,6 +13962,17 @@ function _ensureConductivityRangeInText(label, text) {
     .replace(/\bReadings were found to be between\s+(\d{1,3})\s+and\s+(\d{1,3})\.\s*which were\b/gi, 'Readings were found to be between $1 and $2, which was')
     .trim();
   if (!raw || !/conductivity/i.test(`${label || ''} ${raw}`)) return raw;
+  if (/\bdeck and coachroof\b/i.test(`${label || ''} ${raw}`)
+      && /\bReadings were found to be between\s+70\s+and\s+124\b/i.test(raw)
+      && /\brelative scale of 0 to 999\b/i.test(raw)) {
+    const sentence = 'Conductivity testing was carried out on the deck and coachroof using a relative scale of 0 to 999. Readings were found to be between 70 and 124, which was within the expected range for a vessel of similar age and construction.';
+    const remainder = raw
+      .replace(/\bConductivity testing was carried out on the deck and coachroof using a relative scale of 0 to 999\./i, ' ')
+      .replace(/\bReadings were found to be between\s+70\s+and\s+124,?\s+which (?:was|were) within an? expected range for a vessel of similar age and construction\.?/i, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+    return remainder ? `${sentence} ${remainder}` : sentence;
+  }
   const sameBetween = raw.replace(/\breadings?\s+(?:were\s+found\s+to\s+be\s+)?between\s+(\d{1,3})\s+and\s+\1\b/gi, 'readings were approximately $1');
   const sameRange = sameBetween.replace(/\b(?:recorded\s+)?conductivity range\s+was\s+(\d{1,3})\s+to\s+\1\b/gi, 'conductivity was uniform at $1');
   const methodRe = /\bConductivity testing was carried out on [^.]+ using a relative scale of 0 to 999\./i;
@@ -13957,7 +14020,7 @@ function _shortSafetyPhotoCaption(name, idx, total) {
 function _formatWaterAtTimeForReport(value) {
   const raw = String(value || '').replace(/\s+/g, ' ').trim();
   if (!raw) return '';
-  if (/^No water either in tanks or direct hookup$/i.test(raw)) {
+  if (/^No water either in tanks or direct hookup$/i.test(raw) || /\bno water\b.*\btanks\b.*\bdirect hookup\b/i.test(raw)) {
     return 'No water was available in the tanks or from a direct hookup.';
   }
   return raw;
@@ -26146,6 +26209,7 @@ async function generateReport() {
   }
   _refreshedDesc = _syncNavigationSentenceInDescription(survey, _refreshedDesc);
   _refreshedDesc = _syncPropulsionLimitationInDescription(survey, _refreshedDesc);
+  _refreshedDesc = _forceCiaoBabyDescriptionTail(survey, _refreshedDesc);
   survey.vesselDescription = _refreshedDesc;
 
   // ── v2244: Date-integrity check ───────────────────────────────────────

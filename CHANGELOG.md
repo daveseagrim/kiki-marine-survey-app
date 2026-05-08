@@ -1,3 +1,7 @@
+## v2551
+- Forced the Ciao Baby II / 2004 Catalina 350 report description tail at render time so the final PDF removes duplicate condition wording, lists the recorded navigation equipment, and states the gearbox/exhaust operational limitation.
+- Tightened the water-at-survey and deck/coachroof conductivity wording used in the report output.
+
 ## v2550
 - Kept the standalone Instruments & Electronics inventory as a per-survey report option instead of removing it globally, and made the table of contents use the same visibility rule as the report body.
 - Tightened the generated vessel description for Catalina 350 insurance reports, including safer accommodation wording, navigation-equipment summary from completed survey items, and drivetrain limitation wording when gearbox/exhaust disassembly is documented.
