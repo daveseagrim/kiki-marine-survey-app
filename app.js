@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2552';
+const APP_VERSION = 'v2553';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -2025,6 +2025,12 @@ async function saveSurvey(survey) {
   // rather than throwing DataError: Provided data is inadequate.
   if (!survey || survey.id === undefined || survey.id === null || survey.id === '') {
     return null;
+  }
+
+  try {
+    if (typeof _syncIntroEngineDataToBody === 'function') _syncIntroEngineDataToBody(survey);
+  } catch (e) {
+    if (typeof console !== 'undefined') console.warn('intro engine/body sync failed', e);
   }
 
   // ── Auto-regenerate the Overall Description of Vessel ─────────────────
@@ -16089,6 +16095,7 @@ function renderInspection(survey) {
 	  // intro photo fields by copying them into the matching body photo slots,
 	  // while still backfilling report fields from existing body text/photos.
 	  let engineSyncChanged = false;
+	  if (_syncIntroEngineDataToBody(survey)) engineSyncChanged = true;
 	  if (_migrateLegacyIntroEnginePhotosToBody(survey)) engineSyncChanged = true;
 	  if (_retroSyncEngineFromBody(survey)) engineSyncChanged = true;
 	  if (engineSyncChanged) {
@@ -25052,6 +25059,83 @@ function _mergeBodyPhotosFromIntroField(survey, itemLabel, surveyField) {
   return true;
 }
 
+function _ensureBodyItemForIntroSync(survey, itemLabel) {
+  if (!survey.items) survey.items = {};
+  if (!survey.items[itemLabel]) {
+    survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+  }
+  return survey.items[itemLabel];
+}
+
+function _setBodyTextFromIntroIfBlank(survey, itemLabel, text, options = {}) {
+  const value = String(text || '').replace(/\s+/g, ' ').trim();
+  if (!value) return false;
+  const existing = survey.items && survey.items[itemLabel];
+  if (!existing && options.create === false) return false;
+  const item = existing || _ensureBodyItemForIntroSync(survey, itemLabel);
+  if (item.text && item.text.trim()) return false;
+  item.text = value;
+  return true;
+}
+
+function _engineIntroIdentityText(survey, slot) {
+  const p = Number(slot) === 2 ? '2' : '';
+  const makeModel = [survey[`engine${p}Make`], survey[`engine${p}Model`]]
+    .map(v => String(v || '').trim())
+    .filter(Boolean)
+    .join(' ');
+  const parts = [
+    makeModel,
+    survey[`engine${p}Serial`] ? `Serial ${String(survey[`engine${p}Serial`]).trim()}` : '',
+    survey[`engine${p}HP`] ? `Rated ${String(survey[`engine${p}HP`]).trim()}` : '',
+    survey[p ? 'fuelType2' : 'fuelType'] ? `Fuel type ${String(survey[p ? 'fuelType2' : 'fuelType']).trim()}` : ''
+  ].filter(Boolean);
+  const text = parts.join(', ');
+  return text && !/[.!?:;]$/.test(text) ? `${text}.` : text;
+}
+
+function _gearboxIntroIdentityText(survey, slot) {
+  const p = Number(slot) === 2 ? '2' : '';
+  const combined = survey[`transmission${p}MakeModel`] || [survey[`transmission${p}Make`], survey[`transmission${p}Model`]]
+    .map(v => String(v || '').trim())
+    .filter(Boolean)
+    .join(' ');
+  const makeModel = String(combined || '').trim();
+  const parts = [
+    makeModel,
+    survey[`transmission${p}Serial`] ? `Serial ${String(survey[`transmission${p}Serial`]).trim()}` : ''
+  ].filter(Boolean);
+  const text = parts.join(', ');
+  return text && !/[.!?:;]$/.test(text) ? `${text}.` : text;
+}
+
+function _syncIntroEngineDataToBody(survey) {
+  if (!survey) return false;
+  let changed = false;
+  if (!survey.items) survey.items = {};
+
+  const primaryEngine = _engineIntroIdentityText(survey, 1);
+  const secondaryEngine = _surveyHasSecondEngine(survey) ? _engineIntroIdentityText(survey, 2) : '';
+  const engineIdentity = [primaryEngine, secondaryEngine].filter(Boolean).join('; ');
+  const primaryGearbox = _gearboxIntroIdentityText(survey, 1);
+  const secondaryGearbox = _surveyHasSecondEngine(survey) ? _gearboxIntroIdentityText(survey, 2) : '';
+  const gearboxIdentity = [primaryGearbox, secondaryGearbox].filter(Boolean).join('; ');
+
+  // Older templates had explicit text rows for identity; newer templates show
+  // the same data in the Engine & Gearbox Details panel. Backfill both paths
+  // only when the body field is still blank so Dave's inspection notes stay put.
+  if (_setBodyTextFromIntroIfBlank(survey, 'Engine(s) manufacturer, model # and serial number (if available)', engineIdentity, { create: false })) changed = true;
+  if ((survey.driveType || '').toLowerCase() === 'outboard'
+      && _setBodyTextFromIntroIfBlank(survey, 'Outboard manufacturer, model # and serial number (if available)', engineIdentity)) changed = true;
+  if (_setBodyTextFromIntroIfBlank(survey, 'Gearbox manufacturer, model # and serial # (if available)', gearboxIdentity, { create: false })) changed = true;
+  if (_setBodyTextFromIntroIfBlank(survey, 'Engine hours', survey.engineHours)) changed = true;
+  if (_setBodyTextFromIntroIfBlank(survey, 'Hours', survey.engineHours)) changed = true;
+  if (_setBodyTextFromIntroIfBlank(survey, 'Horsepower', survey.engineHP, { create: false })) changed = true;
+  if (_setBodyTextFromIntroIfBlank(survey, 'Fuel type', survey.fuelType, { create: false })) changed = true;
+
+  return changed;
+}
+
 function _migrateLegacyIntroEnginePhotosToBody(survey) {
   let changed = false;
   const mappings = [
@@ -26176,6 +26260,7 @@ async function generateReport() {
 	  // Migrate old item labels before generating report
 	  if (migrateSurveyLabels(survey)) await saveSurvey(survey);
 	  let reportEngineSyncChanged = false;
+	  if (_syncIntroEngineDataToBody(survey)) reportEngineSyncChanged = true;
 	  if (_migrateLegacyIntroEnginePhotosToBody(survey)) reportEngineSyncChanged = true;
 	  if (_retroSyncEngineFromBody(survey)) reportEngineSyncChanged = true;
 	  if (reportEngineSyncChanged) await saveSurvey(survey);

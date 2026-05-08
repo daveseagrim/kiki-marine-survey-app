@@ -1,3 +1,7 @@
+## v2553
+- Backfilled engine and gearbox details from intro/header fields into the Engine(s) and drive(s) body data when the body fields are blank.
+- Ran the intro-to-body engine sync on survey open, save, and report generation so existing surveys such as Brian Buckle pick up the populated engine information without re-entry.
+
 ## v2552
 - Added Rinker 272 Captiva to the boat specifications database with single outdrive setup defaults for survey autofill.
 - Added "No water tanks" to Water at Time of Survey.
