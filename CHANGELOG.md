@@ -1,3 +1,7 @@
+## v2548
+- Changed the idle photo-backup progress strip into a compact floating status pill at the upper right so it no longer blocks the Kiki Marine logo/home click.
+- Kept the compact backup status non-interactive so it cannot steal taps while photos are uploading.
+
 ## v2547
 - Promoted missing Transport Canada safety equipment into Type A Findings & Recommendations so safety gaps are visible in the main findings section.
 - Removed the unsupported "ready for use" wording from the generated vessel-description condition paragraph.

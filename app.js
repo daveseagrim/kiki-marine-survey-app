@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2547';
+const APP_VERSION = 'v2548';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -2778,17 +2778,20 @@ function _showBackupNowBanner() {
   if (!banner) {
     banner = document.createElement('div');
     banner.id = 'backup-progress-bar';
-    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9998;transition:opacity 0.3s;';
     document.body.appendChild(banner);
   }
+  banner.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top, 0px) + 10px);right:12px;left:auto;width:min(320px, calc(100vw - 24px));z-index:9998;transition:opacity 0.3s, transform 0.3s;pointer-events:none;';
   banner.style.opacity = '1';
   banner.innerHTML = `
-    <div style="background:#066aab;color:white;padding:10px 16px 6px;font-size:13px;font-weight:600;text-align:center;">
+    <div style="background:rgba(6,106,171,0.96);color:white;border-radius:999px;overflow:hidden;box-shadow:0 6px 18px rgba(15,23,42,0.24);border:1px solid rgba(255,255,255,0.35);">
+      <div id="backup-progress-text" style="padding:7px 12px 5px;font-size:12px;font-weight:700;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
       ☁️ Backing up ${count} photo${count > 1 ? 's' : ''}...
+      </div>
+      <div style="height:3px;background:rgba(255,255,255,0.24);">
+        <div id="backup-fill-bar" style="height:100%;width:0%;background:#7dd3fc;transition:width 0.3s ease;"></div>
+      </div>
     </div>
-    <div style="height:4px;background:#004466;">
-      <div id="backup-fill-bar" style="height:100%;width:0%;background:#00ccff;transition:width 0.3s ease;"></div>
-    </div>`;
+  `;
 }
 
 // Update the banner during upload progress
@@ -2796,8 +2799,8 @@ function _updateBackupBanner(uploaded, total) {
   const banner = document.getElementById('backup-progress-bar');
   if (!banner) return;
   const pct = Math.round((uploaded / total) * 100);
-  const textEl = banner.querySelector('div');
-  if (textEl) textEl.innerHTML = `☁️ Backing up... ${uploaded} of ${total} (${pct}%)`;
+  const textEl = document.getElementById('backup-progress-text');
+  if (textEl) textEl.textContent = `☁️ Backing up ${uploaded} of ${total} (${pct}%)`;
   const fill = document.getElementById('backup-fill-bar');
   if (fill) fill.style.width = pct + '%';
 }
@@ -2809,8 +2812,9 @@ function _hideBackupBanner(message) {
   const isSuccess = message && (message.includes('✓') || message.includes('All'));
   const isPause = message && message.includes('⏸');
   const bg = isSuccess ? '#16a34a' : isPause ? '#d97706' : '#dc2626';
+  banner.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top, 0px) + 10px);right:12px;left:auto;width:min(320px, calc(100vw - 24px));z-index:9998;transition:opacity 0.3s, transform 0.3s;pointer-events:none;';
   banner.innerHTML = `
-    <div style="background:${bg};color:white;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;">
+    <div style="background:${bg};color:white;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 6px 18px rgba(15,23,42,0.24);border:1px solid rgba(255,255,255,0.35);">
       ${message || '✓ Backup complete'}
     </div>`;
   setTimeout(() => {
@@ -2989,20 +2993,22 @@ async function syncAllPhotosToFirebase() {
   if (!banner) {
     banner = document.createElement('div');
     banner.id = 'backup-progress-bar';
-    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9998;transition:opacity 0.3s;';
     document.body.appendChild(banner);
   }
+  banner.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top, 0px) + 10px);right:12px;left:auto;width:min(320px, calc(100vw - 24px));z-index:9998;transition:opacity 0.3s, transform 0.3s;pointer-events:none;';
   banner.style.opacity = '1';
 
   function _updateSyncBar(done, total) {
     const remaining = total - done;
     const pct = Math.round((done / total) * 100);
     banner.innerHTML = `
-      <div style="background:#066aab;color:white;padding:10px 16px 6px;font-size:13px;font-weight:600;text-align:center;">
-        ☁️ Uploading photo ${done} of ${total} — ${remaining} to go
-      </div>
-      <div style="height:4px;background:#004466;">
-        <div style="height:100%;width:${pct}%;background:#00ccff;transition:width 0.3s ease;"></div>
+      <div style="background:rgba(6,106,171,0.96);color:white;border-radius:999px;overflow:hidden;box-shadow:0 6px 18px rgba(15,23,42,0.24);border:1px solid rgba(255,255,255,0.35);">
+        <div style="padding:7px 12px 5px;font-size:12px;font-weight:700;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          ☁️ Uploading ${done} of ${total} · ${remaining} left
+        </div>
+        <div style="height:3px;background:rgba(255,255,255,0.24);">
+          <div style="height:100%;width:${pct}%;background:#7dd3fc;transition:width 0.3s ease;"></div>
+        </div>
       </div>`;
   }
 
