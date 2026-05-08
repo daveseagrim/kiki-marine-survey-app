@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2551';
+const APP_VERSION = 'v2552';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -10886,6 +10886,7 @@ function renderNewSurveyForm() {
         <select id="waterAtTime">
           <option value="">Select</option>
           <option value="No water was available in the tanks or from a direct hookup.">No water was available in the tanks or from a direct hookup</option>
+          <option value="No water tanks were fitted.">No water tanks</option>
           <option value="Water was in the freshwater tanks">Water was in the freshwater tanks</option>
           <option value="Water supplied from a direct shore hookup">Water supplied from a direct shore hookup</option>
           <option value="Water was available in the freshwater tanks and from a shore water hookup">Water was available in the freshwater tanks and from a shore water hookup</option>
@@ -14022,6 +14023,9 @@ function _formatWaterAtTimeForReport(value) {
   if (!raw) return '';
   if (/^No water either in tanks or direct hookup$/i.test(raw) || /\bno water\b.*\btanks\b.*\bdirect hookup\b/i.test(raw)) {
     return 'No water was available in the tanks or from a direct hookup.';
+  }
+  if (/^No water tanks(?: were fitted)?\.?$/i.test(raw)) {
+    return 'No water tanks were fitted.';
   }
   return raw;
 }

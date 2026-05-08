@@ -1,3 +1,8 @@
+## v2552
+- Added Rinker 272 Captiva to the boat specifications database with single outdrive setup defaults for survey autofill.
+- Added "No water tanks" to Water at Time of Survey.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the new options.
+
 ## v2551
 - Forced the Ciao Baby II / 2004 Catalina 350 report description tail at render time so the final PDF removes duplicate condition wording, lists the recorded navigation equipment, and states the gearbox/exhaust operational limitation.
 - Tightened the water-at-survey and deck/coachroof conductivity wording used in the report output.

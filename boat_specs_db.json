@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-06",
+  "lastUpdated": "2026-05-08",
   "note": "Specifications sourced from manufacturer data sheets, sailboatdata.com, recognized technical references, and powerboat manufacturers. Values are approximate and may vary by model year, options, and keel variant.",
   "boats": [
     {
@@ -4451,6 +4451,39 @@
       "displacement": "7,900 lbs",
       "hullType": "Modified V",
       "construction": "Fibreglass"
+    },
+    {
+      "id": "rinker-272-captiva",
+      "make": "Rinker",
+      "model": "272 Captiva",
+      "aliases": [
+        "rinker 272 captiva",
+        "rinker captiva 272",
+        "rinker272captiva",
+        "rinkercaptiva272",
+        "rinker 272 captiva bowrider",
+        "rinker 272 captiva cuddy",
+        "272 captiva",
+        "captiva 272",
+        "272captiva",
+        "captiva272"
+      ],
+      "yearStart": 1999,
+      "yearEnd": 2002,
+      "type": "powerboat",
+      "loa": "27'0\"",
+      "beam": "9'0\"",
+      "maxDraft": "3'0\"",
+      "displacement": "5,400 lbs",
+      "hullType": "Deep-V",
+      "construction": "Fibreglass",
+      "fuelCapacity": "100 US gal",
+      "waterCapacity": "10 US gal",
+      "fuelType": "Gasoline",
+      "driveType": "outdrive",
+      "driveCount": 1,
+      "engineCount": 1,
+      "propulsion": "Single gasoline sterndrive"
     },
     {
       "id": "rinker-280-express-cruiser",
