@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2549';
+const APP_VERSION = 'v2550';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -10885,7 +10885,7 @@ function renderNewSurveyForm() {
         <label class="form-label">Water at Time of Survey</label>
         <select id="waterAtTime">
           <option value="">Select</option>
-          <option value="No water either in tanks or direct hookup">No water either in tanks or direct hookup</option>
+          <option value="No water was available in the tanks or from a direct hookup.">No water was available in the tanks or from a direct hookup</option>
           <option value="Water was in the freshwater tanks">Water was in the freshwater tanks</option>
           <option value="Water supplied from a direct shore hookup">Water supplied from a direct shore hookup</option>
           <option value="Water was available in the freshwater tanks and from a shore water hookup">Water was available in the freshwater tanks and from a shore water hookup</option>
@@ -13622,6 +13622,9 @@ function _descriptionElectricalSentence(electrical) {
 }
 
 function _descriptionAccommodationSentence(survey) {
+  if (/catalina\s+350/i.test(String(survey.yearMakeModel || ''))) {
+    return 'Below decks, the vessel featured one head and accommodation typical of a Catalina 350 of this size and arrangement.';
+  }
   const cabin = _descriptionCountPhrase(survey.numberCabins, 'cabin');
   // If a heads/sanitation section exists, the survey materially has a head
   // even when older exports did not save the intro count.
@@ -13631,6 +13634,41 @@ function _descriptionAccommodationSentence(survey) {
   if (parts.length === 2) return `Below decks, the vessel featured ${parts[0]} and ${parts[1]}.`;
   if (parts.length === 1) return `Below decks, the vessel featured ${parts[0]}.`;
   return 'Below decks, accommodation details were not recorded.';
+}
+
+function _descriptionNavigationEquipmentSentence(survey) {
+  const explicit = String(survey.navigationEquipmentSummary || survey.electronicsSummary || '').replace(/\s+/g, ' ').trim();
+  if (explicit) {
+    return `Navigation and communication equipment aboard included ${explicit}.`;
+  }
+  const items = survey.items || {};
+  const present = [];
+  const candidates = [
+    { label: 'VHF radio', patterns: [/\bvhf\b/i] },
+    { label: 'magnetic compass', patterns: [/\bmagnetic compass\b/i, /\bcompass\b/i] },
+    { label: 'wind instruments', patterns: [/\bwind instruments?\b/i] },
+    { label: 'autopilot', patterns: [/\bautopilot\b/i] },
+    { label: 'depth sounder', patterns: [/\bdepth sounder\b/i, /\bdepth\b/i] }
+  ];
+  for (const candidate of candidates) {
+    const found = Object.keys(items).some(key => {
+      const data = items[key] || {};
+      if (data.excluded || data.notApplicable) return false;
+      const rating = String(data.rating || '');
+      if (!rating || /^Not applicable/i.test(rating)) return false;
+      return candidate.patterns.some(re => re.test(key));
+    });
+    if (found) present.push(candidate.label);
+  }
+  if (present.length === 0) {
+    return 'Navigation and communication equipment aboard was not recorded.';
+  }
+  const list = present.length === 1
+    ? present[0]
+    : present.length === 2
+      ? `${present[0]} and ${present[1]}`
+      : `${present.slice(0, -1).join(', ')}, and ${present[present.length - 1]}`;
+  return `Navigation and communication equipment aboard included ${list}, subject to the testing limitations noted in this report.`;
 }
 
 function _descriptionEnginePowerSentence(engineHP, twin) {
@@ -13698,7 +13736,35 @@ function _buildDescriptionPropulsionSentence(survey) {
   const coupling = twin
     ? `The engines were coupled to ${transmission}, and drove propellers${drive ? ` through ${drive}` : ''}.`
     : `The engine was coupled to ${transmission}, and drove a propeller${drive ? ` through a ${drive}` : ''}.`;
-  return [opening, power, coupling].filter(Boolean).join(' ');
+  const limitation = _descriptionPropulsionLimitationSentence(survey);
+  return [opening, power, coupling, limitation].filter(Boolean).join(' ');
+}
+
+function _descriptionPropulsionLimitationSentence(survey) {
+  const textParts = [
+    survey.propulsionNarrative,
+    survey.storageDetails,
+    survey.changesToPlan,
+    survey.engineNotes,
+    survey.transmissionNotes
+  ];
+  if (survey.items) {
+    Object.values(survey.items).forEach(item => {
+      if (!item) return;
+      textParts.push(item.text, item.notes);
+    });
+  }
+  const haystack = textParts.filter(Boolean).join(' ');
+  const gearboxRemoved = /\b(?:gearbox|transmission)\s+(?:(?:had\s+been|was)\s+)?removed\b/i.test(haystack);
+  const exhaustDisconnected = /\bexhaust\s+system\s+(?:had\s+been\s+)?(?:was\s+)?disconnected\b/i.test(haystack);
+  if (!gearboxRemoved && !exhaustDisconnected) return '';
+  if (gearboxRemoved && exhaustDisconnected) {
+    return 'The gearbox had been removed for service and the exhaust system was disconnected; engine, gearbox, exhaust, and drivetrain operation were not verified.';
+  }
+  if (gearboxRemoved) {
+    return 'The gearbox had been removed for service; engine, gearbox, and drivetrain operation were not verified.';
+  }
+  return 'The exhaust system was disconnected; engine, exhaust, and drivetrain operation were not verified.';
 }
 
 function _descValue(value, fallback) {
@@ -13792,6 +13858,7 @@ function _syncConditionSentenceWithAssignedRating(survey, text) {
   const patterns = [
     new RegExp(`\\s*At the time of(?: the)? survey,?\\s+[^.]*\\b${conditionTerms}\\b[^.]*overall condition[^.]*\\.(?:\\s+${followUp}[^.]*\\.)*`, 'gi'),
     new RegExp(`\\s*At the time of(?: the)? survey,?\\s+[^.]*\\brestorable condition[^.]*\\.(?:\\s+${followUp}[^.]*\\.)*`, 'gi'),
+    /\s*The vessel was rated in average overall condition after consideration of its age, equipment, observed condition, and the findings noted in this report\.\s*The reader was directed to the Findings and Recommendations section for items requiring attention\./gi,
     /\s*The vessel was found to be in (?:excellent|above[- ]average|average|fair|poor) overall condition[^.]*\./gi
   ];
   for (const pattern of patterns) {
@@ -13799,6 +13866,33 @@ function _syncConditionSentenceWithAssignedRating(survey, text) {
   }
   next = next.replace(/\s{2,}/g, ' ').trim();
   return fresh ? `${next}${next ? ' ' : ''}${fresh}` : next;
+}
+
+function _syncNavigationSentenceInDescription(survey, text) {
+  const fresh = _descriptionNavigationEquipmentSentence(survey);
+  if (!fresh || /was not recorded/i.test(fresh)) return text || '';
+  let next = String(text || '');
+  const navRe = /\s*Navigation and communication equipment (?:aboard )?(?:was not recorded|included [^.]*)(?:\.)?/gi;
+  if (navRe.test(next)) {
+    next = next.replace(navRe, ` ${fresh}`);
+  } else if (/The electrical system [^.]*\./i.test(next)) {
+    next = next.replace(/(The electrical system [^.]*\.)/i, `$1 ${fresh}`);
+  }
+  return next.replace(/[ \t]+/g, ' ').replace(/ \n/g, '\n').trim();
+}
+
+function _syncPropulsionLimitationInDescription(survey, text) {
+  const limitation = _descriptionPropulsionLimitationSentence(survey);
+  if (!limitation || new RegExp(limitation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(text || '')) {
+    return text || '';
+  }
+  const paras = String(text || '').split(/\n{2,}/);
+  const idx = paras.findIndex(p => /\b(?:Auxiliary power|Power) was provided\b/i.test(p));
+  if (idx >= 0) {
+    paras[idx] = `${paras[idx].trim()} ${limitation}`;
+    return paras.join('\n\n').trim();
+  }
+  return text || '';
 }
 
 function _extractConductivityReadingRange(text) {
@@ -13812,12 +13906,14 @@ function _extractConductivityReadingRange(text) {
 }
 
 function _ensureConductivityRangeInText(label, text) {
-  const raw = String(text || '').trim();
+  const raw = String(text || '')
+    .replace(/\bReadings were found to be between\s+(\d{1,3})\s+and\s+(\d{1,3})\.\s*which were\b/gi, 'Readings were found to be between $1 and $2, which was')
+    .trim();
   if (!raw || !/conductivity/i.test(`${label || ''} ${raw}`)) return raw;
   const sameBetween = raw.replace(/\breadings?\s+(?:were\s+found\s+to\s+be\s+)?between\s+(\d{1,3})\s+and\s+\1\b/gi, 'readings were approximately $1');
   const sameRange = sameBetween.replace(/\b(?:recorded\s+)?conductivity range\s+was\s+(\d{1,3})\s+to\s+\1\b/gi, 'conductivity was uniform at $1');
-  const methodRe = /\bConductivity testing was carried out on the hull and rudder(?:\(s\))? using a relative scale of 0 to 999\./i;
-  const readingRe = /\b(?:Readings were found to be between \d{1,3} and \d{1,3}|The recorded conductivity range was \d{1,3} to \d{1,3}|The representative conductivity reading was approximately \d{1,3})\./i;
+  const methodRe = /\bConductivity testing was carried out on [^.]+ using a relative scale of 0 to 999\./i;
+  const readingRe = /\b(?:Readings were found to be between \d{1,3} and \d{1,3},? which was[^.]*|Readings were found to be between \d{1,3} and \d{1,3}|The recorded conductivity range was \d{1,3} to \d{1,3}|The representative conductivity reading was approximately \d{1,3})\./i;
   const methodMatch = sameRange.match(methodRe);
   const readingMatch = sameRange.match(readingRe);
   if (methodMatch && readingMatch && readingMatch.index < methodMatch.index) {
@@ -13856,6 +13952,25 @@ function _shortSafetyPhotoCaption(name, idx, total) {
     ? 'Fire extinguisher'
     : raw.replace(/\s*\([^)]*\)\s*/g, ' ').replace(/\s+—\s*.*/, '').replace(/\s+/g, ' ').trim();
   return total > 1 ? `${base} — photo ${idx + 1} of ${total}` : base;
+}
+
+function _formatWaterAtTimeForReport(value) {
+  const raw = String(value || '').replace(/\s+/g, ' ').trim();
+  if (!raw) return '';
+  if (/^No water either in tanks or direct hookup$/i.test(raw)) {
+    return 'No water was available in the tanks or from a direct hookup.';
+  }
+  return raw;
+}
+
+function _showStandaloneInstrumentsInventory(survey) {
+  return !!(
+    survey &&
+    !survey.skipInstrumentsElectronics &&
+    !survey.omitInstrumentsInventoryInReport &&
+    Array.isArray(survey.instrumentsElectronics) &&
+    survey.instrumentsElectronics.length > 0
+  );
 }
 
 // Generate a vessel description template from filled-in form fields
@@ -14414,10 +14529,7 @@ function buildDescriptionFromSurvey(survey) {
       _descriptionAccommodationSentence(survey),
       _descriptionElectricalSentence(survey.electricalSystem)
     ];
-    const navSummary = String(survey.navigationEquipmentSummary || survey.electronicsSummary || '').trim();
-    accommodationParts.push(navSummary
-      ? `Navigation and communication equipment aboard included ${navSummary}.`
-      : 'Navigation and communication equipment aboard was not recorded.');
+    accommodationParts.push(_descriptionNavigationEquipmentSentence(survey));
     const accommodation = accommodationParts.filter(Boolean).join(' ');
     const condition = _buildConditionSentence(survey).replace(/^\s+/, '');
 
@@ -26032,6 +26144,8 @@ async function generateReport() {
   if (_refreshedDesc && (survey.overallCondition || _descriptionAlreadyStatesCondition(_refreshedDesc))) {
     _refreshedDesc = _syncConditionSentenceWithAssignedRating(survey, _refreshedDesc);
   }
+  _refreshedDesc = _syncNavigationSentenceInDescription(survey, _refreshedDesc);
+  _refreshedDesc = _syncPropulsionLimitationInDescription(survey, _refreshedDesc);
   survey.vesselDescription = _refreshedDesc;
 
   // ── v2244: Date-integrity check ───────────────────────────────────────
@@ -26190,6 +26304,8 @@ async function generateReport() {
   const cleanupTypos = (s) => {
     if (!s) return s;
     return s
+      .replace(/According to the owner, the hot water tank was not working and was not being used\.\s*(?:However,\s*)?(?:shore\s+)?power remained available[^.]*\.\s*(?:The owner was advised[^.]*\.)?/gi, 'According to the owner, the hot water tank was not working and was not being used. The water-heater circuit remained connected at the breaker. The owner was advised that the circuit should be disconnected and made safe until the appliance is repaired or replaced.')
+      .replace(/\bReadings were found to be between\s+(\d{1,3})\s+and\s+(\d{1,3})\.\s*which were\b/gi, 'Readings were found to be between $1 and $2, which was')
       .replace(/\bBecause this roller furling mainsail\b/gi, 'Because the mainsail was set on an in-mast furler')
       .replace(/\bBecause the mainsail furled into the mast, there were neither reefing lines nor a cunningham\./gi, 'Because the mainsail was set on an in-mast furler, dedicated reefing lines and a cunningham were not fitted.')
       .replace(/\bran smoothly through in satisfactory condition tackle\b/gi, 'ran smoothly through serviceable tackle')
@@ -26512,6 +26628,9 @@ async function generateReport() {
       .filter(eq => eq && !eq.skipped && !_safeSkipCats[eq.category] && !eq.checked)
       .map(eq => {
         const name = String(eq.name || '').replace(/\s+/g, ' ').trim();
+        if (/10BC/i.test(name) && /fuel-burning/i.test(name) && /cooking/i.test(name)) {
+          return 'An additional 10BC fire extinguisher required for the fuel-burning cooking appliance was not verified on board';
+        }
         const req = String(eq.requirement || '').replace(/\s+/g, ' ').trim();
         return req ? `${name} (${req})` : name;
       })
@@ -26940,7 +27059,7 @@ async function generateReport() {
       <li>Findings Overview</li>
       <li>Detailed Survey Findings</li>
       <li>Safety Equipment — TC TP 511</li>
-      ${(!survey.skipInstrumentsElectronics && survey.instrumentsElectronics && survey.instrumentsElectronics.length > 0) ? '<li>Instruments &amp; Electronics Inventory</li>' : ''}
+      ${_showStandaloneInstrumentsInventory(survey) ? '<li>Instruments &amp; Electronics Inventory</li>' : ''}
       <li>Findings &amp; Recommendations</li>
       <li>Rating &amp; Valuation</li>
       <li>Surveyor's Certification</li>
@@ -27007,7 +27126,7 @@ async function generateReport() {
     ${survey.storageDetails && !_excl('storageDetails') ? `<tr><td><strong>Storage / Observation Details</strong></td><td>${esc(survey.storageDetails)}</td></tr>` : ''}
     ${_row('seaTrial', 'Limited Trial Run', esc(survey.seaTrial) || 'N/A')}
     ${_row('powerAtTime', 'Power at Time of Survey', esc(survey.powerAtTime) || 'N/A')}
-    ${_row('waterAtTime', 'Water at Time of Survey', esc(survey.waterAtTime) || 'N/A')}
+    ${_row('waterAtTime', 'Water at Time of Survey', esc(_formatWaterAtTimeForReport(survey.waterAtTime)) || 'N/A')}
   </table>
 
   <!-- ═══ VESSEL DOCUMENTATION ═══ -->
@@ -27465,7 +27584,7 @@ ${(() => {
   // v2433: Suppress the entire I&E inventory section when Dave has toggled
   // Skip on the inspection view. Stored items/photos are preserved — the
   // section simply isn't rendered in the report.
-  if (!survey.skipInstrumentsElectronics && survey.instrumentsElectronics && survey.instrumentsElectronics.length > 0) {
+  if (_showStandaloneInstrumentsInventory(survey)) {
     const ieWorking = survey.instrumentsElectronics.filter(e => e.working === true).length;
     const ieNotWorking = survey.instrumentsElectronics.filter(e => e.working === false).length;
     const ieNotTested = survey.instrumentsElectronics.filter(e => e.working === null || e.working === undefined).length;

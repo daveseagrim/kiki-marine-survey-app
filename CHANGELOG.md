@@ -1,3 +1,8 @@
+## v2550
+- Kept the standalone Instruments & Electronics inventory as a per-survey report option instead of removing it globally, and made the table of contents use the same visibility rule as the report body.
+- Tightened the generated vessel description for Catalina 350 insurance reports, including safer accommodation wording, navigation-equipment summary from completed survey items, and drivetrain limitation wording when gearbox/exhaust disassembly is documented.
+- Removed duplicate overall-condition sentences during report generation and corrected water-at-survey, hot-water-tank breaker, conductivity, and additional-10BC fire-extinguisher wording.
+
 ## v2549
 - Added hull licence-photo reading so the Licence / Registration Number field can auto-fill from the number shown on the hull.
 - Updated the Catalina 350 wing-keel specifications and vessel-description generator to use clean past-tense wording without placeholder counts or unverified horsepower claims.
