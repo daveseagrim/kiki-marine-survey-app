@@ -1,3 +1,8 @@
+## v2554
+- Added the 2000 Sea Ray 260 Bow Rider as its own boat-spec and valuation database entry without changing the existing 260 Sundancer entry.
+- Added Mercury MerCruiser MCM 7.4 Litre MPI to the engine database and strengthened engine-photo reading for MerCruiser nameplates so the engine serial is not confused with transom or drive serials.
+- Added HIN photo auto-reading to match the existing hull licence-photo reader when a Gemini API key is available.
+
 ## v2553
 - Backfilled engine and gearbox details from intro/header fields into the Engine(s) and drive(s) body data when the body fields are blank.
 - Ran the intro-to-body engine sync on survey open, save, and report generation so existing surveys such as Brian Buckle pick up the populated engine information without re-entry.

@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2553';
+const APP_VERSION = 'v2554';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -17131,6 +17131,7 @@ function renderInspection(survey) {
   // survey open: readable plate photos fill blank detail fields automatically.
   scheduleAutoSurveyNameplateRead(survey.id);
   scheduleAutoSurveyLicenceRead(survey.id);
+  scheduleAutoSurveyHinRead(survey.id);
 }
 
 function ensureReportButton() {
@@ -21181,6 +21182,9 @@ Return ONLY valid JSON with these fields, using empty strings if unreadable:
   "rawText": ""
 }
 
+If the visible plate says MERCRUISER or Mercury Marine, return make "Mercury MerCruiser".
+If the visible model line says MCM 7.4 LITRE MPI, return model "MCM 7.4 Litre MPI", hp "310 HP", and fuelType "Gasoline".
+When multiple serial numbers are visible, put only the engine serial number in serial; do not use transom serial numbers or drive serial numbers as the engine serial.
 Do not guess. Read only visible plate text. If a plate is visible but the structured fields cannot be assigned, put the visible wording in rawText. If this is only a decorative engine cover decal or marketing label and not a data/nameplate, return empty strings.`;
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
     method: 'POST',
@@ -21270,6 +21274,62 @@ Use only visible hull lettering or numbering. Do not guess. Accept Canadian plea
     .slice(0, 20);
 }
 
+async function _readHinNumberFromPhotoDataUrl(dataUrl, options = {}) {
+  const promptForKey = options.promptForKey !== false;
+  let apiKey = localStorage.getItem('geminiApiKey');
+  if (!apiKey) {
+    if (!promptForKey) throw new Error('Gemini API key not set');
+    const key = prompt('HIN reading requires a free Google Gemini API key.\n\nGet one at aistudio.google.com, then paste it here:');
+    if (key && key.trim()) {
+      apiKey = key.trim();
+      localStorage.setItem('geminiApiKey', apiKey);
+    } else {
+      throw new Error('No API key entered');
+    }
+  }
+  if (!dataUrl) throw new Error('Could not load HIN photo');
+  const resized = await _resizeDataUrlForNameplateRead(dataUrl);
+  const base64Match = resized.match(/^data:image\/(.*?);base64,(.*)$/);
+  if (!base64Match) throw new Error('Could not prepare HIN photo');
+  const promptText = `You are a marine surveyor's assistant. Read the Hull Identification Number (HIN) stamped or printed on this boat.
+
+Return ONLY valid JSON with these fields:
+{
+  "value": "",
+  "rawText": ""
+}
+
+Use only visible lettering or stamping. Do not guess. The HIN is usually 12 characters. If the photo shows a country prefix such as US-, put only the 12-character HIN in value and put the full visible marking in rawText. Remove spaces, dashes, and punctuation from value. If no HIN can be read with confidence, return an empty value and put any visible uncertain text in rawText.`;
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{
+        parts: [
+          {
+            inlineData: {
+              mimeType: `image/${base64Match[1]}`,
+              data: base64Match[2]
+            }
+          },
+          { text: promptText }
+        ]
+      }],
+      generationConfig: { temperature: 0, maxOutputTokens: 220 }
+    })
+  });
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`API ${response.status}: ${errText.substring(0, 300)}`);
+  }
+  const result = await response.json();
+  const text = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const parsed = _parseAiJsonObject(text);
+  let compact = String(parsed.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (compact.length > 12 && compact.startsWith('US')) compact = compact.slice(2);
+  return compact.slice(0, 12);
+}
+
 function _setNameplateFieldIfReadable(survey, field, value) {
   const next = String(value || '').replace(/\s+/g, ' ').trim();
   if (!next) return false;
@@ -21282,6 +21342,7 @@ const _autoNameplateReadInFlight = new Set();
 const _autoNameplateAttempted = new Set();
 let _autoNameplateNoKeyToastShown = false;
 const _autoLicenceReadAttempted = new Set();
+const _autoHinReadAttempted = new Set();
 
 async function _autoReadNameplateCandidates(surveyId, kind, photoIds) {
   const found = [];
@@ -21408,12 +21469,49 @@ async function _autoReadSurveyLicenceNumber(surveyId) {
   }
 }
 
+async function _autoReadSurveyHinNumber(surveyId) {
+  const id = surveyId || currentSurveyId;
+  if (!id || !localStorage.getItem('geminiApiKey')) return;
+  const survey = await getSurvey(id);
+  if (!survey || survey.hinNumber || !survey.hinPhoto) return;
+  const attemptKey = `${id}:${survey.hinPhoto}`;
+  if (_autoHinReadAttempted.has(attemptKey)) return;
+  _autoHinReadAttempted.add(attemptKey);
+  try {
+    const photo = await getPhotoById(survey.hinPhoto);
+    if (!photo || !photo.dataUrl) return;
+    const hinNumber = await _readHinNumberFromPhotoDataUrl(photo.dataUrl, { promptForKey: false });
+    if (!hinNumber) return;
+    const fresh = await getSurvey(id);
+    if (!fresh || fresh.hinNumber) return;
+    fresh.hinNumber = hinNumber;
+    await saveSurvey(fresh);
+    if (id === currentSurveyId) {
+      const input = document.getElementById('hinNumber');
+      if (input && !input.value) input.value = hinNumber;
+      showToast(`HIN auto-filled: ${hinNumber}`);
+    }
+  } catch (error) {
+    console.warn('Automatic HIN read failed', error);
+  }
+}
+
 function scheduleAutoSurveyLicenceRead(surveyId) {
   const id = surveyId || currentSurveyId;
   if (!id) return;
   setTimeout(() => {
     _autoReadSurveyLicenceNumber(id).catch(error => {
       console.warn('Automatic licence read scheduling failed', error);
+    });
+  }, 600);
+}
+
+function scheduleAutoSurveyHinRead(surveyId) {
+  const id = surveyId || currentSurveyId;
+  if (!id) return;
+  setTimeout(() => {
+    _autoReadSurveyHinNumber(id).catch(error => {
+      console.warn('Automatic HIN read scheduling failed', error);
     });
   }, 600);
 }
@@ -23387,6 +23485,26 @@ async function confirmPhotoPreview(fieldKey, label) {
             showToast('Licence photo saved. Gemini rate limit prevented the auto-read.');
           } else {
             console.warn('Licence number auto-read failed', error);
+          }
+        }
+      }
+      if (fieldKey === 'hinPhoto') {
+        try {
+          const hinNumber = await _readHinNumberFromPhotoDataUrl(data.stampedDataUrl, { promptForKey: false });
+          if (hinNumber) {
+            survey.hinNumber = hinNumber;
+            const input = document.getElementById('hinNumber');
+            if (input) input.value = hinNumber;
+            showToast(`HIN read: ${hinNumber}`);
+          }
+        } catch (error) {
+          const msg = String(error && error.message || error || '');
+          if (/API key/i.test(msg)) {
+            showToast('HIN photo saved. Add a Gemini key to auto-read HINs.');
+          } else if (/API 429|quota|rate limit/i.test(msg)) {
+            showToast('HIN photo saved. Gemini rate limit prevented the auto-read.');
+          } else {
+            console.warn('HIN auto-read failed', error);
           }
         }
       }

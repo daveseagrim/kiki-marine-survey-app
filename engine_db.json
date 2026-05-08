@@ -1545,6 +1545,16 @@
           "description": "MPI; 1998-2007; Standard 7.4L MPI (non-Magnum variant)"
         },
         {
+          "model": "MCM 7.4 Litre MPI",
+          "hp": "310",
+          "kw": "228",
+          "fuel": "Gasoline",
+          "cylinders": "8",
+          "displacement": "7.4L / 454 CID",
+          "engineType": "Sterndrive",
+          "description": "MPI; MerCruiser MCM 7.4 Litre MPI, 454 CID, 4,200-4,600 rpm WOT"
+        },
+        {
           "model": "7.4L EFI",
           "hp": "290",
           "kw": "213",
