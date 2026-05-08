@@ -1,3 +1,8 @@
+## v2547
+- Promoted missing Transport Canada safety equipment into Type A Findings & Recommendations so safety gaps are visible in the main findings section.
+- Removed the unsupported "ready for use" wording from the generated vessel-description condition paragraph.
+- Updated report valuation/certification wording for "organized" spelling and narrower client/underwriter reliance language.
+
 ## v2546
 - Replaced the full-width red Drive-backup warning with a compact amber notice.
 - Added a Sign in button directly on the Drive-backup warning.

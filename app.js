@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2546';
+const APP_VERSION = 'v2547';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -13549,7 +13549,7 @@ function _buildConditionSentence(survey) {
     } else if (_oc.includes('above average')) {
       return ` At the time of the survey the vessel was in above-average overall condition, having received above-average care.`;
     } else if (_oc.includes('average')) {
-      return ` At the time of the survey the vessel was in average overall condition, ready for use and normally equipped for its size. The reader was directed to the Findings and Recommendations section for items requiring attention.`;
+      return ` The vessel was rated in average overall condition after consideration of its age, equipment, observed condition, and the findings noted in this report. The reader was directed to the Findings and Recommendations section for items requiring attention.`;
     } else if (_oc.includes('fair')) {
       return ` At the time of the survey the vessel was in fair overall condition with deficiencies noted. Corrective action was recommended before the vessel was placed into regular service.`;
     } else if (_oc.includes('poor')) {
@@ -26137,6 +26137,34 @@ async function generateReport() {
     }
   });
 
+  // v2547: Missing Transport Canada safety equipment must be visible in
+  // Findings & Recommendations, not only in the checklist table. A reader or
+  // insurer reviewing the F&R section should see the regulatory gap without
+  // having to reconcile the later TP 511 checklist manually.
+  if (survey.safetyEquipment && survey.safetyEquipment.length > 0) {
+    const _safeSkipCats = survey.safetySubcategoriesSkipped || {};
+    const missingSafety = survey.safetyEquipment
+      .filter(eq => eq && !eq.skipped && !_safeSkipCats[eq.category] && !eq.checked)
+      .map(eq => {
+        const name = String(eq.name || '').replace(/\s+/g, ' ').trim();
+        const req = String(eq.requirement || '').replace(/\s+/g, ' ').trim();
+        return req ? `${name} (${req})` : name;
+      })
+      .filter(Boolean);
+    if (missingSafety.length > 0) {
+      findingCount.A++;
+      findings.A.push({
+        label: 'Required Transport Canada safety equipment not verified',
+        rating: 'A - Critical',
+        text: `Required Transport Canada safety equipment was missing or not verified at the time of survey: ${missingSafety.join('; ')}. The required equipment should be confirmed on board and serviceable before the vessel is next used.`,
+        standards: ['Transport Canada TP 511E Safe Boating Guide / Small Vessel Regulations (SOR/2010-91)'],
+        photos: [],
+        code: `A-${findingCount.A}`,
+        category: 'Safety Equipment'
+      });
+    }
+  }
+
   // Build finding code lookup map (used by both summary table and body)
   const findingCodeMap = {};
   [...findings.A, ...findings.B, ...findings.C, ...findings.NT, ...findings.PO].forEach(f => {
@@ -27417,7 +27445,7 @@ ${(() => {
 
     let _out = '<h2 style="background:#066aab;font-size:14pt;">RATING &amp; VALUATION</h2>'
       + '<div class="scope-text">'
-      + '<p>It is the Surveyor\u2019s experience that develops an opinion of the OVERALL VESSEL RATING OF CONDITION after the Survey has been completed and the findings have been organised in a logical manner.</p>'
+      + '<p>It is the Surveyor\u2019s experience that develops an opinion of the OVERALL VESSEL RATING OF CONDITION after the Survey has been completed and the findings have been organized in a logical manner.</p>'
       + '<p>The grading of condition developed by BUC RESEARCH and accepted in the marine industry for a vessel at the time of Survey determines the adjustment to the range of base values in the BUC USED BOAT PRICE GUIDE for a similar vessel sold within a given time period, as a consideration to determine the Market Value.</p>'
 	      + '<p><strong>The following is the accepted Marine Grading System of Condition:</strong></p>'
       + '<div class="buc-grades">'
@@ -27571,7 +27599,7 @@ ${(() => {
       <p>I have no present or prospective interest in the vessel that is the subject of this report and I have no personal interest or bias with respect to the parties involved.</p>
       <p>My compensation is not contingent upon the reporting of a predetermined value or direction in value that favours the cause of the client, the amount of the value estimate, the attainment of a stipulated result or the occurrence of a subsequent event.</p>
       <p>I have made a personal inspection of the vessel that is the subject of this report.</p>
-      <p>This report is submitted without prejudice and for the benefit of all concerned parties.</p>
+      <p>This report is submitted for the exclusive use of the client and associated lenders or underwriters identified in this report, subject to the limitations stated herein.</p>
     </div>
     <div style="margin-top:20px;display:flex;align-items:center;gap:24px;">
       <img src="new_logo.png"
