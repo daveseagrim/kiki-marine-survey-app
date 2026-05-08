@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2548';
+const APP_VERSION = 'v2549';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -13002,10 +13002,11 @@ function applyBoatSpecs(specs) {
       note.style.cssText = 'margin-top:6px;padding:8px 12px;background:#fff3cd;border:1px solid #ffc107;border-radius:6px;font-size:13px;';
       let optionsHtml = '<strong>⚠️ Multiple keel options available:</strong><br>';
       specs.draftVariants.forEach((v, i) => {
+        const variantKeel = v.keel || v.label || 'Draft option';
         optionsHtml += `<label style="display:block;margin:4px 0;cursor:pointer;">
-          <input type="radio" name="draftVariant" value="${v.draft}" data-keel="${v.keel}" ${i === 0 ? 'checked' : ''}
-            onchange="document.getElementById('maxDraft').value=this.value; if(document.getElementById('keelType')){const opts=document.getElementById('keelType').options; for(let o of opts){if(o.value.toLowerCase().includes(this.dataset.keel.split(' ')[0].toLowerCase())){document.getElementById('keelType').value=o.value;break;}}}"
-          > ${v.keel} — Draft: ${v.draft}
+          <input type="radio" name="draftVariant" value="${v.draft}" data-keel="${variantKeel}" ${i === 0 ? 'checked' : ''}
+            onchange="document.getElementById('maxDraft').value=this.value; if(document.getElementById('keelType')){const opts=document.getElementById('keelType').options; const keel=(this.dataset.keel||'').split(' ')[0].toLowerCase(); for(let o of opts){if(keel&&o.value.toLowerCase().includes(keel)){document.getElementById('keelType').value=o.value;break;}}}"
+          > ${variantKeel} — Draft: ${v.draft}
         </label>`;
       });
       note.innerHTML = optionsHtml;
@@ -13585,6 +13586,121 @@ function _formatTwinEngineRatedPhrase(engineHP, engine2HP) {
   return primary || secondary ? `rated at ${primary || secondary} each` : 'with horsepower not recorded';
 }
 
+function _descriptionCountWord(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  const n = Number(raw);
+  if (!Number.isFinite(n) || String(n) !== raw.replace(/\.0$/, '')) return raw;
+  const words = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+  return words[n] || raw;
+}
+
+function _descriptionCountPhrase(value, noun) {
+  const word = _descriptionCountWord(value);
+  if (!word) return '';
+  const one = /^one$/i.test(word) || String(value).trim() === '1';
+  return `${word} ${noun}${one ? '' : 's'}`;
+}
+
+function _descriptionKeelPhrase(keelType) {
+  const keel = String(keelType || '').trim().toLowerCase();
+  if (!keel) return '';
+  return /\bkeel\b/.test(keel) ? keel : `${keel} keel`;
+}
+
+function _descriptionElectricalSentence(electrical) {
+  const raw = String(electrical || '').replace(/\s+/g, ' ').trim();
+  if (!raw) return 'The electrical system was not recorded.';
+  const shoreMatch = raw.match(/\(([^)]*shore\s*power[^)]*)\)/i);
+  let service = raw.replace(/\s*\([^)]*shore\s*power[^)]*\)\s*/i, ' ').replace(/\s+/g, ' ').trim();
+  service = service.replace(/\s*\/\s*/g, ' and ');
+  if (/configured\s+for/i.test(service)) return service.endsWith('.') ? service : `${service}.`;
+  const shore = shoreMatch
+    ? shoreMatch[1].replace(/\b(\d+)\s*amp\b/gi, '$1-amp').replace(/\s+/g, ' ').trim()
+    : '';
+  return `The electrical system was configured for ${service} service${shore ? `, with ${shore}` : ''}.`;
+}
+
+function _descriptionAccommodationSentence(survey) {
+  const cabin = _descriptionCountPhrase(survey.numberCabins, 'cabin');
+  // If a heads/sanitation section exists, the survey materially has a head
+  // even when older exports did not save the intro count.
+  const inferredHead = survey.headCount || (survey.items && Object.keys(survey.items).some(k => /\bhead\b/i.test(k)) ? '1' : '');
+  const head = _descriptionCountPhrase(inferredHead, 'head');
+  const parts = [cabin, head].filter(Boolean);
+  if (parts.length === 2) return `Below decks, the vessel featured ${parts[0]} and ${parts[1]}.`;
+  if (parts.length === 1) return `Below decks, the vessel featured ${parts[0]}.`;
+  return 'Below decks, accommodation details were not recorded.';
+}
+
+function _descriptionEnginePowerSentence(engineHP, twin) {
+  const raw = String(engineHP || '').replace(/\s+/g, ' ').trim();
+  if (!raw) return '';
+  const kwMatch = raw.match(/\b\d+(?:\.\d+)?\s*kW\b/i);
+  if (kwMatch) {
+    return twin
+      ? `The engine data plates indicated outputs of ${kwMatch[0]}; however, the marine propulsion ratings were not independently verified.`
+      : `The engine data plate indicated an output of ${kwMatch[0]}; however, the marine propulsion rating was not independently verified.`;
+  }
+  const formatted = _formatEnginePowerText(raw);
+  if (!formatted) return '';
+  return twin
+    ? `The engines were rated at ${formatted} each.`
+    : `The engine was rated at ${formatted}.`;
+}
+
+function _descriptionTransmissionPhrase(make, model, twin) {
+  const makeModel = [make, model].map(v => String(v || '').trim()).filter(Boolean).join(' ');
+  if (makeModel) return twin ? `${makeModel} transmissions` : `a ${makeModel} transmission`;
+  return twin
+    ? 'marine transmissions, make and model not recorded'
+    : 'a marine transmission, make and model not recorded';
+}
+
+function _descriptionDriveLabel(driveType, twin) {
+  const lower = String(driveType || '').toLowerCase();
+  const singular = {
+    shaft: 'shaft drive',
+    outdrive: 'sterndrive',
+    ips: 'IPS pod drive',
+    saildrive: 'saildrive',
+    outboard: 'outboard drive'
+  }[lower] || '';
+  if (!singular) return '';
+  if (!twin) return singular;
+  if (singular === 'IPS pod drive') return 'IPS pod drives';
+  if (singular === 'sterndrive') return 'sterndrives';
+  if (singular.endsWith('drive')) return `${singular}s`;
+  return `${singular}s`;
+}
+
+function _buildDescriptionPropulsionSentence(survey) {
+  const vesselType = survey.vesselType || '';
+  if (vesselType === 'human') return 'This was a human-powered vessel with no auxiliary engine.';
+
+  const twin = _surveyHasSecondEngine(survey);
+  const makeModel = [survey.engineMake, survey.engineModel].map(v => String(v || '').trim()).filter(Boolean).join(' ');
+  const fuel = String(survey.fuelType || '').trim().toLowerCase();
+  const driveTypeLower = String(survey.driveType || '').toLowerCase();
+  const engineTypeFromDb = lookupEngineType(survey.engineMake || '', survey.engineModel || '');
+  const engineType = (engineTypeFromDb || ({ shaft: 'inboard', ips: 'inboard', saildrive: 'inboard', outdrive: 'sterndrive' })[driveTypeLower] || '').toLowerCase();
+  const identity = [makeModel, fuel, engineType].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+  if (!identity) return vesselType === 'sail'
+    ? 'Auxiliary engine details were not recorded.'
+    : 'Engine details were not recorded.';
+
+  const opening = twin
+    ? `Power was provided by twin ${identity} engines.`
+    : `${vesselType === 'sail' ? 'Auxiliary power' : 'Power'} was provided by ${_articleFor(identity)} ${identity} engine.`;
+  const power = _descriptionEnginePowerSentence(survey.engineHP || '', twin);
+  const transmission = _descriptionTransmissionPhrase(survey.transmissionMake, survey.transmissionModel, twin);
+  const drive = _descriptionDriveLabel(survey.driveType, twin);
+  const coupling = twin
+    ? `The engines were coupled to ${transmission}, and drove propellers${drive ? ` through ${drive}` : ''}.`
+    : `The engine was coupled to ${transmission}, and drove a propeller${drive ? ` through a ${drive}` : ''}.`;
+  return [opening, power, coupling].filter(Boolean).join(' ');
+}
+
 function _descValue(value, fallback) {
   const text = String(value || '').trim();
   return text || fallback;
@@ -13636,10 +13752,12 @@ function _buildMastRigSentence(survey, vesselName) {
   if (!survey || survey.vesselType !== 'sail') return '';
   const rigType = survey.boatStyle ? String(survey.boatStyle).toLowerCase() : 'sail';
   const mastData = survey.items?.['Main mast'] || {};
+  const spec = _lookupBoatSpecsForSurvey(survey) || {};
   const stepping = _resolveMastStepping(survey, mastData);
   const material = 'aluminium';
   const mastPhrase = [stepping, material, 'mast'].filter(Boolean).join(' ');
-  const trackStr = mastData.mastTrackType ? ` with ${String(mastData.mastTrackType).toLowerCase()}` : '';
+  const track = mastData.mastTrackType || survey.mastTrackType || spec.mastTrackType || spec.mastFurling || '';
+  const trackStr = track ? ` and ${String(track).toLowerCase()}` : '';
   let sentence = ` "${vesselName}" was ${rigType}-rigged with ${_articleFor(mastPhrase)} ${mastPhrase}${trackStr}.`;
   if (survey.totalSailArea) sentence += ` Total sail area was ${survey.totalSailArea}.`;
   return sentence;
@@ -13698,6 +13816,19 @@ function _ensureConductivityRangeInText(label, text) {
   if (!raw || !/conductivity/i.test(`${label || ''} ${raw}`)) return raw;
   const sameBetween = raw.replace(/\breadings?\s+(?:were\s+found\s+to\s+be\s+)?between\s+(\d{1,3})\s+and\s+\1\b/gi, 'readings were approximately $1');
   const sameRange = sameBetween.replace(/\b(?:recorded\s+)?conductivity range\s+was\s+(\d{1,3})\s+to\s+\1\b/gi, 'conductivity was uniform at $1');
+  const methodRe = /\bConductivity testing was carried out on the hull and rudder(?:\(s\))? using a relative scale of 0 to 999\./i;
+  const readingRe = /\b(?:Readings were found to be between \d{1,3} and \d{1,3}|The recorded conductivity range was \d{1,3} to \d{1,3}|The representative conductivity reading was approximately \d{1,3})\./i;
+  const methodMatch = sameRange.match(methodRe);
+  const readingMatch = sameRange.match(readingRe);
+  if (methodMatch && readingMatch && readingMatch.index < methodMatch.index) {
+    const readingSentence = readingMatch[0];
+    const next = sameRange
+      .replace(readingRe, '')
+      .replace(methodRe, `${methodMatch[0]} ${readingSentence}`)
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+    return next;
+  }
   if (sameRange !== raw) return sameRange.replace(/\s{2,}/g, ' ').trim();
   if (/\b(?:recorded\s+)?conductivity range\b/i.test(raw)
       || /\breadings?\s+(?:were\s+found\s+to\s+be\s+)?between\s+\d{1,3}\s+and\s+\d{1,3}\b/i.test(raw)
@@ -13952,6 +14083,34 @@ async function generateVesselDescription() {
   // _buildConditionSentence returns a string starting with a leading space.
   // Strip that leading space so the paragraph starts cleanly at its first word.
   desc += _buildConditionSentence(_surveyForCond).replace(/^\s+/, '');
+  desc = buildDescriptionFromSurvey({
+    ...(_survey1 || {}),
+    vesselName,
+    yearMakeModel: ymm,
+    vesselType,
+    boatStyle,
+    hullType,
+    construction,
+    hullColour,
+    bootStripeColour,
+    deckColour,
+    loa,
+    beam,
+    maxDraft: draft,
+    displacement,
+    keelType,
+    totalSailArea: sailArea,
+    numberCabins: cabins,
+    electricalSystem: electrical,
+    engineMake,
+    engineModel,
+    engineHP,
+    engine2HP,
+    fuelType,
+    transmissionMake,
+    transmissionModel,
+    overallCondition: _surveyForCond.overallCondition || _survey1?.overallCondition || ''
+  });
 
   const textarea = document.getElementById('vesselDescription');
   if (textarea) {
@@ -14167,6 +14326,7 @@ async function regenerateDescriptionFromInspection() {
   // v2375: safety summary removed; condition sentence leads this paragraph,
   // so strip its leading space.
   desc += _buildConditionSentence(survey).replace(/^\s+/, '');
+  desc = buildDescriptionFromSurvey(survey);
 
   // Confirm before overwriting
   if (survey.vesselDescription && survey.vesselDescription.trim()) {
@@ -14185,6 +14345,89 @@ async function regenerateDescriptionFromInspection() {
 
 // Pure function: build vessel description from a survey object (no DOM access)
 function buildDescriptionFromSurvey(survey) {
+  {
+    survey = survey || {};
+    const ymm = survey.yearMakeModel || '';
+    const { year, make, model } = parseYearMakeModel(ymm);
+    const vesselType = survey.vesselType || '';
+    const boatStyle = survey.boatStyle || '';
+    const construction = String(survey.construction || '').trim().toLowerCase();
+    const hullType = String(survey.hullType || '').trim().toLowerCase();
+    const typeStr = boatStyle
+      ? boatStyle.toLowerCase()
+      : (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : 'vessel');
+    const vesselName = survey.vesselName || 'The vessel';
+    const yearStr = year || 'year not recorded';
+    const makeStr = make || 'make not recorded';
+    const modelStr = model || 'model not recorded';
+    const descriptor = [construction, hullType, typeStr]
+      .filter(Boolean)
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    let para1 = `"${vesselName}" was a ${yearStr} ${makeStr} ${modelStr}`;
+    para1 += descriptor ? `, a ${descriptor}.` : `.`;
+
+    const loa = survey.loa || 'not recorded';
+    const beam = survey.beam || 'not recorded';
+    const draft = survey.maxDraft || '';
+    const displacement = survey.displacement || '';
+    const keel = vesselType === 'sail' ? _descriptionKeelPhrase(survey.keelType) : '';
+    const ballast = survey.ballast || '';
+    let specsSentence = `The vessel had an overall length of ${loa}, a beam of ${beam}`;
+    if (keel && draft) {
+      specsSentence += `, a ${keel} with a maximum draft of ${draft}`;
+    } else if (draft) {
+      specsSentence += `, a maximum draft of ${draft}`;
+    } else if (keel) {
+      specsSentence += `, a ${keel}`;
+    }
+    if (displacement) {
+      specsSentence += `, and a displacement of ${displacement}`;
+      if (ballast && vesselType === 'sail') specsSentence += `, with reported ballast of ${ballast}`;
+    } else if (ballast && vesselType === 'sail') {
+      specsSentence += `, with reported ballast of ${ballast}`;
+    }
+    specsSentence += '.';
+    para1 += ` ${specsSentence}`;
+
+    const rigDesc = vesselType === 'sail'
+      ? _buildMastRigSentence(survey, vesselName).replace(/^\s+/, '')
+      : '';
+    if (rigDesc) para1 += ` ${rigDesc}`;
+
+    const hullColour = String(survey.hullColour || '').trim();
+    const bootStripeColourRaw = String(survey.bootStripeColour || '').trim();
+    const bootStripeColour = bootStripeColourRaw.toLowerCase() === 'none' ? '' : bootStripeColourRaw;
+    const deckColour = String(survey.deckColour || '').trim();
+    if (hullColour && bootStripeColour && deckColour) {
+      para1 += ` The hull was finished in ${hullColour.toLowerCase()} with a ${bootStripeColour.toLowerCase()} boot stripe, and the deck was ${deckColour.toLowerCase()}.`;
+    } else if (hullColour && deckColour) {
+      para1 += ` The hull was finished in ${hullColour.toLowerCase()} and the deck was ${deckColour.toLowerCase()}.`;
+    } else if (hullColour) {
+      para1 += ` The hull was finished in ${hullColour.toLowerCase()}.`;
+    }
+
+    const propulsion = _buildDescriptionPropulsionSentence(survey);
+    const accommodationParts = [
+      _descriptionAccommodationSentence(survey),
+      _descriptionElectricalSentence(survey.electricalSystem)
+    ];
+    const navSummary = String(survey.navigationEquipmentSummary || survey.electronicsSummary || '').trim();
+    accommodationParts.push(navSummary
+      ? `Navigation and communication equipment aboard included ${navSummary}.`
+      : 'Navigation and communication equipment aboard was not recorded.');
+    const accommodation = accommodationParts.filter(Boolean).join(' ');
+    const condition = _buildConditionSentence(survey).replace(/^\s+/, '');
+
+    return [para1, propulsion, accommodation, condition]
+      .filter(Boolean)
+      .join('\n\n')
+      .replace(/[ \t]+/g, ' ')
+      .replace(/ \n/g, '\n')
+      .trim();
+  }
   const ymm = survey.yearMakeModel || '';
   const { year, make, model } = parseYearMakeModel(ymm);
   const vesselType = survey.vesselType || '';
@@ -16701,6 +16944,7 @@ function renderInspection(survey) {
   // Treat engine and gearbox nameplate photos as data sources on every
   // survey open: readable plate photos fill blank detail fields automatically.
   scheduleAutoSurveyNameplateRead(survey.id);
+  scheduleAutoSurveyLicenceRead(survey.id);
 }
 
 function ensureReportButton() {
@@ -20783,6 +21027,63 @@ Do not guess. Read only visible plate text. If a plate is visible but the struct
   }
 }
 
+async function _readLicenceNumberFromPhotoDataUrl(dataUrl, options = {}) {
+  const promptForKey = options.promptForKey !== false;
+  let apiKey = localStorage.getItem('geminiApiKey');
+  if (!apiKey) {
+    if (!promptForKey) throw new Error('Gemini API key not set');
+    const key = prompt('Licence-number reading requires a free Google Gemini API key.\n\nGet one at aistudio.google.com, then paste it here:');
+    if (key && key.trim()) {
+      apiKey = key.trim();
+      localStorage.setItem('geminiApiKey', apiKey);
+    } else {
+      throw new Error('No API key entered');
+    }
+  }
+  if (!dataUrl) throw new Error('Could not load licence photo');
+  const resized = await _resizeDataUrlForNameplateRead(dataUrl);
+  const base64Match = resized.match(/^data:image\/(.*?);base64,(.*)$/);
+  if (!base64Match) throw new Error('Could not prepare licence photo');
+  const promptText = `You are a marine surveyor's assistant. Read the vessel licence, registration, or official number visible on the hull in this photo.
+
+Return ONLY valid JSON with these fields:
+{
+  "value": "",
+  "rawText": ""
+}
+
+Use only visible hull lettering or numbering. Do not guess. Accept Canadian pleasure craft licence formats such as 18E39179, ON1234567, or other uppercase letter/number combinations. Remove spaces, punctuation, and decorative separators from value. If no hull licence or registration number can be read with confidence, return an empty value and put any visible uncertain text in rawText.`;
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{
+        parts: [
+          {
+            inlineData: {
+              mimeType: `image/${base64Match[1]}`,
+              data: base64Match[2]
+            }
+          },
+          { text: promptText }
+        ]
+      }],
+      generationConfig: { temperature: 0, maxOutputTokens: 180 }
+    })
+  });
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`API ${response.status}: ${errText.substring(0, 300)}`);
+  }
+  const result = await response.json();
+  const text = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const parsed = _parseAiJsonObject(text);
+  return String(parsed.value || '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, 20);
+}
+
 function _setNameplateFieldIfReadable(survey, field, value) {
   const next = String(value || '').replace(/\s+/g, ' ').trim();
   if (!next) return false;
@@ -20794,6 +21095,7 @@ function _setNameplateFieldIfReadable(survey, field, value) {
 const _autoNameplateReadInFlight = new Set();
 const _autoNameplateAttempted = new Set();
 let _autoNameplateNoKeyToastShown = false;
+const _autoLicenceReadAttempted = new Set();
 
 async function _autoReadNameplateCandidates(surveyId, kind, photoIds) {
   const found = [];
@@ -20891,6 +21193,43 @@ function scheduleAutoSurveyNameplateRead(surveyId) {
       console.warn('Automatic nameplate read scheduling failed', error);
     });
   }, 300);
+}
+
+async function _autoReadSurveyLicenceNumber(surveyId) {
+  const id = surveyId || currentSurveyId;
+  if (!id || !localStorage.getItem('geminiApiKey')) return;
+  const survey = await getSurvey(id);
+  if (!survey || survey.tcLicense || !survey.licencePhoto) return;
+  const attemptKey = `${id}:${survey.licencePhoto}`;
+  if (_autoLicenceReadAttempted.has(attemptKey)) return;
+  _autoLicenceReadAttempted.add(attemptKey);
+  try {
+    const photo = await getPhotoById(survey.licencePhoto);
+    if (!photo || !photo.dataUrl) return;
+    const licenceNumber = await _readLicenceNumberFromPhotoDataUrl(photo.dataUrl, { promptForKey: false });
+    if (!licenceNumber) return;
+    const fresh = await getSurvey(id);
+    if (!fresh || fresh.tcLicense) return;
+    fresh.tcLicense = licenceNumber;
+    await saveSurvey(fresh);
+    if (id === currentSurveyId) {
+      const input = document.getElementById('tcLicense');
+      if (input && !input.value) input.value = licenceNumber;
+      showToast(`Licence / registration number auto-filled: ${licenceNumber}`);
+    }
+  } catch (error) {
+    console.warn('Automatic licence number read failed', error);
+  }
+}
+
+function scheduleAutoSurveyLicenceRead(surveyId) {
+  const id = surveyId || currentSurveyId;
+  if (!id) return;
+  setTimeout(() => {
+    _autoReadSurveyLicenceNumber(id).catch(error => {
+      console.warn('Automatic licence read scheduling failed', error);
+    });
+  }, 600);
 }
 
 async function readSurveyEngineNameplate(slot) {
@@ -22844,6 +23183,26 @@ async function confirmPhotoPreview(fieldKey, label) {
           try { await deletePhoto(survey[fieldKey]); } catch(e) {}
         }
         survey[fieldKey] = photoId;
+      }
+      if (fieldKey === 'licencePhoto') {
+        try {
+          const licenceNumber = await _readLicenceNumberFromPhotoDataUrl(data.stampedDataUrl, { promptForKey: false });
+          if (licenceNumber) {
+            survey.tcLicense = licenceNumber;
+            const input = document.getElementById('tcLicense');
+            if (input) input.value = licenceNumber;
+            showToast(`Licence / registration number read: ${licenceNumber}`);
+          }
+        } catch (error) {
+          const msg = String(error && error.message || error || '');
+          if (/API key/i.test(msg)) {
+            showToast('Licence photo saved. Add a Gemini key to auto-read hull numbers.');
+          } else if (/API 429|quota|rate limit/i.test(msg)) {
+            showToast('Licence photo saved. Gemini rate limit prevented the auto-read.');
+          } else {
+            console.warn('Licence number auto-read failed', error);
+          }
+        }
       }
       await saveSurvey(survey);
     }
@@ -25935,25 +26294,25 @@ async function generateReport() {
 
   // ── Fetch documentation photos (HIN plate, compliance plate, licence) ──
   // All photos are compressed for the report to prevent Chrome "Aw Snap" crashes
-  async function loadAndCompress(photoId) {
+  async function loadAndCompress(photoId, maxDim = 900, quality = 0.6) {
     if (!photoId) return '';
     const p = await getPhotoById(photoId);
-    if (p && p.dataUrl) return compressPhotoForReport(p.dataUrl);
+    if (p && p.dataUrl) return compressPhotoForReport(p.dataUrl, maxDim, quality);
     return '';
   }
-  let hinPhotoDataUrl = await loadAndCompress(survey.hinPhoto);
-  let compliancePhotoDataUrl = await loadAndCompress(survey.compliancePhoto);
-  let licencePhotoDataUrl = await loadAndCompress(survey.licencePhoto);
-  let tcPaperLicencePhotoDataUrl = await loadAndCompress(survey.tcPaperLicencePhoto);
-  let coverPhotoDataUrl = await loadAndCompress(survey.coverPhoto);
+  let hinPhotoDataUrl = await loadAndCompress(survey.hinPhoto, 1200, 0.72);
+  let compliancePhotoDataUrl = await loadAndCompress(survey.compliancePhoto, 1200, 0.72);
+  let licencePhotoDataUrl = await loadAndCompress(survey.licencePhoto, 1200, 0.72);
+  let tcPaperLicencePhotoDataUrl = await loadAndCompress(survey.tcPaperLicencePhoto, 1200, 0.72);
+  let coverPhotoDataUrl = await loadAndCompress(survey.coverPhoto, 1200, 0.72);
 
   // Helper to load all photos from a multi-doc field (array or single ID)
-	  async function loadDocPhotos(fieldValue) {
+	  async function loadDocPhotos(fieldValue, maxDim = 1000, quality = 0.66) {
 	    if (!fieldValue) return [];
 	    const ids = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
 	    const urls = [];
     for (const id of ids) {
-      const compressed = await loadAndCompress(id);
+      const compressed = await loadAndCompress(id, maxDim, quality);
       if (compressed) urls.push(compressed);
 	    }
 	    return urls;
@@ -25972,25 +26331,25 @@ async function generateReport() {
 	  const enginePhotos = await loadDocPhotos(mergedPhotoIds(
 	    itemPhotoIds('Engine(s) and drive(s) photos'),
 	    survey.enginePhoto
-	  ));
+	  ), 900, 0.6);
 	  const enginePlatePhotos = await loadDocPhotos(mergedPhotoIds(
 	    itemPhotoIds('Engine name plate(s)'),
 	    survey.enginePlatePhoto
-	  ));
+	  ), 1200, 0.72);
 	  const transmissionPhotos = await loadDocPhotos(mergedPhotoIds(
 	    itemPhotoIds('Gearbox general condition/impressions'),
 	    itemPhotoIds('Gearbox oil'),
 	    survey.transmissionPhoto
-	  ));
+	  ), 900, 0.6);
 	  const transmissionPlatePhotos = await loadDocPhotos(mergedPhotoIds(
 	    itemPhotoIds('Gearbox nameplate(s)'),
 	    itemPhotoIds('Transmission nameplate(s)'),
 	    survey.transmissionPlatePhoto
-	  ));
-	  const engine2Photos = await loadDocPhotos(survey.engine2Photo);
-	  const engine2PlatePhotos = await loadDocPhotos(survey.engine2PlatePhoto);
-	  const transmission2Photos = await loadDocPhotos(survey.transmission2Photo);
-	  const transmission2PlatePhotos = await loadDocPhotos(survey.transmission2PlatePhoto);
+	  ), 1200, 0.72);
+	  const engine2Photos = await loadDocPhotos(survey.engine2Photo, 900, 0.6);
+	  const engine2PlatePhotos = await loadDocPhotos(survey.engine2PlatePhoto, 1200, 0.72);
+	  const transmission2Photos = await loadDocPhotos(survey.transmission2Photo, 900, 0.6);
+	  const transmission2PlatePhotos = await loadDocPhotos(survey.transmission2PlatePhoto, 1200, 0.72);
 
   // Backward compat: single dataUrl variables for report template
   const enginePhotoDataUrl = enginePhotos[0] || '';
@@ -26010,7 +26369,7 @@ async function generateReport() {
   const cornerKeys = ['fourCornerPortBow', 'fourCornerStbdBow', 'fourCornerPortStern', 'fourCornerStbdStern'];
   const cornerLabels = {'fourCornerPortBow': 'Port Bow', 'fourCornerStbdBow': 'Starboard Bow', 'fourCornerPortStern': 'Port Stern', 'fourCornerStbdStern': 'Starboard Stern'};
   for (const _key of cornerKeys) {
-    if (survey[_key]) fourCornerPhotos[_key] = await loadAndCompress(survey[_key]);
+    if (survey[_key]) fourCornerPhotos[_key] = await loadAndCompress(survey[_key], 1100, 0.68);
   }
 
   // ── Pre-load surveyor signature image (converted to base64 for embedding) ──
@@ -26033,7 +26392,7 @@ async function generateReport() {
     if (!photoId || itemPhotoCache[photoId]) return;
     const p = await getPhotoById(photoId);
     if (p && p.dataUrl) {
-      itemPhotoCache[photoId] = await compressPhotoForReport(p.dataUrl);
+      itemPhotoCache[photoId] = await compressPhotoForReport(p.dataUrl, 850, 0.58);
     }
   }
   for (const itemLabel of Object.keys(survey.items || {})) {
@@ -26245,6 +26604,8 @@ async function generateReport() {
     }
     /* v2225: report brand aligned to kikimarine.ca (primary #066aab) */
     body { font-family: Arial, Helvetica, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; color: #1f2937; line-height: 1.6; font-size: 11pt; }
+    .page-break { height: 0; overflow: hidden; }
+    .page-break + h2 { page-break-before: auto !important; break-before: auto !important; }
     h1 { text-align: center; padding-bottom: 10px; margin-bottom: 6px; color: #066aab; letter-spacing: 0.01em; }
     h2 { background: #066aab; color: white; padding: 8px 12px; margin-top: 24px; font-size: 13pt; letter-spacing: 0.01em; }
     h3 { color: #066aab; margin-top: 18px; font-size: 12pt; border-bottom: 1px solid #d1d5db; padding-bottom: 4px; }
@@ -26293,10 +26654,12 @@ async function generateReport() {
        in the body: item photos, finding photos, nameplates, HIN/compliance
        plates, four-corner overview, safety equipment, instruments. */
     .report-photo { width: 234px; height: 176px; object-fit: cover; border: 1px solid #d1d5db; border-radius: 4px; display: block; }
+    .report-overview-photo { width: 320px; height: 220px; object-fit: contain; border: 1px solid #d1d5db; border-radius: 4px; display: block; background: #fff; }
     .report-doc-photo { max-width: 100%; width: auto; height: auto; max-height: 1.95in; object-fit: contain; border: 1px solid #d1d5db; border-radius: 4px; display: block; margin-top: 6px; background: #fff; }
     .report-hin-photo { max-height: 1.35in; }
     .report-photo-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; margin-top: 6px; }
     .report-photo-card { display: inline-block; vertical-align: top; width: 234px; }
+    .report-overview-card { width: 320px; }
     .report-photo-card .caption { font-size: 8pt; color: #4b5563; margin-top: 2px; font-style: italic; text-align: center; }
     .report-cover-page { page-break-after: always; break-after: page; }
     .overview-page-title { margin-top: 0; }
@@ -26371,7 +26734,7 @@ async function generateReport() {
     <span style="color:white;font-size:11pt;font-weight:bold;">Kiki Marine — Survey Report</span>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button onclick="window.close(); if(!window.closed) history.back();" style="background:#4ade80;color:#066aab;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">← Back to Inspection</button>
-      <button onclick="(function(){try{if(window.parent&&window.parent.printReportIframe){window.parent.printReportIframe();return;}}catch(_){}try{window.print();}catch(_){}})()" style="background:#fff;color:#066aab;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">🖨️ Print / PDF</button>
+      <button onclick="printKikiReport()" style="background:#fff;color:#066aab;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">🖨️ Print / PDF</button>
       <button onclick="exportToWord()" style="background:#f0c040;color:#066aab;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">📥 Download as Word</button>
       <button onclick="toggleProseMode()" id="proseModeBtn" style="background:#e5e7eb;color:#333;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10pt;">📝 Prose Mode</button>
     </div>
@@ -26413,8 +26776,8 @@ async function generateReport() {
   <!-- ═══ VESSEL OVERVIEW PHOTOGRAPHS (v2227 — moved from end to top) ═══ -->
   <h2 class="overview-page-title">Vessel overview photographs</h2>
   <div class="report-photo-row" style="justify-content:center;">
-    ${cornerKeys.map(k => fourCornerPhotos[k] ? `<div class="report-photo-card">
-        <img src="${fourCornerPhotos[k]}" alt="${cornerLabels[k]}" class="report-photo" />
+    ${cornerKeys.map(k => fourCornerPhotos[k] ? `<div class="report-photo-card report-overview-card">
+        <img src="${fourCornerPhotos[k]}" alt="${cornerLabels[k]}" class="report-overview-photo" />
         <div class="caption">${cornerLabels[k]}</div>
       </div>` : '').join('')}
   </div>
@@ -27636,6 +27999,61 @@ ${(() => {
   // but reader context is better set up front.
 
   html += `<script>
+function waitForReportImages() {
+  var imgs = Array.prototype.slice.call(document.images || []);
+  if (imgs.length === 0) return Promise.resolve();
+  var waits = imgs.map(function(img) {
+    if (img.complete && img.naturalWidth !== 0) {
+      if (img.decode) {
+        return img.decode().catch(function(){});
+      }
+      return Promise.resolve();
+    }
+    return new Promise(function(resolve) {
+      var done = false;
+      function finish() {
+        if (done) return;
+        done = true;
+        resolve();
+      }
+      img.addEventListener('load', finish, { once: true });
+      img.addEventListener('error', finish, { once: true });
+      setTimeout(finish, 10000);
+    });
+  });
+  return Promise.all(waits).then(function() {
+    return new Promise(function(resolve) {
+      requestAnimationFrame(function() {
+        requestAnimationFrame(resolve);
+      });
+    });
+  });
+}
+
+async function printKikiReport() {
+  var btn = document.activeElement;
+  var oldText = btn && btn.tagName === 'BUTTON' ? btn.textContent : '';
+  if (btn && btn.tagName === 'BUTTON') {
+    btn.disabled = true;
+    btn.textContent = 'Preparing photos...';
+  }
+  try {
+    await waitForReportImages();
+    try {
+      if (window.parent && window.parent.printReportIframe) {
+        window.parent.printReportIframe();
+        return;
+      }
+    } catch (_) {}
+    window.print();
+  } finally {
+    if (btn && btn.tagName === 'BUTTON') {
+      btn.disabled = false;
+      btn.textContent = oldText || 'Print / PDF';
+    }
+  }
+}
+
 async function exportToWord() {
   var btn = document.querySelector('#exportToolbar button:last-child');
   var origText = btn.textContent;

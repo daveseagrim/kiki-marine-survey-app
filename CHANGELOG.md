@@ -1,3 +1,9 @@
+## v2549
+- Added hull licence-photo reading so the Licence / Registration Number field can auto-fill from the number shown on the hull.
+- Updated the Catalina 350 wing-keel specifications and vessel-description generator to use clean past-tense wording without placeholder counts or unverified horsepower claims.
+- Kept four-corner overview photos uncropped in the report and made image-heavy report printing wait for photos to finish loading while using smaller print-safe body photos.
+- Reordered conductivity-testing prose so the testing method appears before the reading range.
+
 ## v2548
 - Changed the idle photo-backup progress strip into a compact floating status pill at the upper right so it no longer blocks the Kiki Marine logo/home click.
 - Kept the compact backup status non-interactive so it cannot steal taps while photos are uploading.
