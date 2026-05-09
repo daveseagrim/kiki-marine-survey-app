@@ -1,3 +1,7 @@
+## v2557
+- Added Bukh marine diesel engines to the Version 1 engine database.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the new Bukh engine options.
+
 ## v2556
 - Built the Version 1 survey checker into the report path as a pre-send workflow: Report now opens the quality check first, separates Must Fix / Review / Advisory counts, and only enables final report generation after Critical items are fixed or intentionally skipped.
 - Renamed the report action to Pre-send Report so the issue check is the normal final workflow instead of an optional side step.
