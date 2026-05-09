@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-07T00:00:00.000000Z",
+  "lastUpdated": "2026-05-09T00:00:00.000000Z",
   "engines": [
     {
       "make": "Yanmar",
@@ -599,6 +599,83 @@
           "cylinders": "1",
           "displacement": "0.39L",
           "engineType": "Inboard"
+        }
+      ]
+    },
+    {
+      "make": "Bukh",
+      "country": "Denmark",
+      "type": "Diesel",
+      "models": [
+        {
+          "model": "DV10 ME",
+          "hp": "10",
+          "kw": "7.4",
+          "fuel": "Diesel",
+          "cylinders": "1",
+          "displacement": "0.482L",
+          "engineType": "Inboard",
+          "description": "BUKH DV10 ME single-cylinder marine diesel; 10 HP at 3000 rpm."
+        },
+        {
+          "model": "DV20 ME",
+          "hp": "20",
+          "kw": "14.7",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.964L",
+          "engineType": "Inboard",
+          "description": "BUKH DV20 ME two-cylinder marine diesel; commonly installed as an auxiliary sailboat engine."
+        },
+        {
+          "model": "DV24 RME",
+          "hp": "24",
+          "kw": "17.7",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.964L",
+          "engineType": "Inboard",
+          "description": "BUKH DV24 RME two-cylinder marine diesel; 24 HP at 3600 rpm."
+        },
+        {
+          "model": "DV29 RME",
+          "hp": "29",
+          "kw": "21.3",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.964L",
+          "engineType": "Inboard",
+          "description": "BUKH DV29 RME two-cylinder marine diesel; 29 HP at 3600 rpm."
+        },
+        {
+          "model": "DV32 RME",
+          "hp": "32",
+          "kw": "23.5",
+          "fuel": "Diesel",
+          "cylinders": "2",
+          "displacement": "0.964L",
+          "engineType": "Inboard",
+          "description": "BUKH DV32 RME two-cylinder marine diesel; 32 HP at 3600 rpm."
+        },
+        {
+          "model": "DV36 RME",
+          "hp": "36",
+          "kw": "26.5",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.447L",
+          "engineType": "Inboard",
+          "description": "BUKH DV36 RME three-cylinder marine diesel; 36 HP at 3600 rpm."
+        },
+        {
+          "model": "DV48 RME",
+          "hp": "48",
+          "kw": "35.3",
+          "fuel": "Diesel",
+          "cylinders": "3",
+          "displacement": "1.447L",
+          "engineType": "Inboard",
+          "description": "BUKH DV48 RME turbocharged three-cylinder marine diesel; 48 HP at 3600 rpm."
         }
       ]
     },
