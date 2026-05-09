@@ -1,3 +1,7 @@
+## v2556
+- Built the Version 1 survey checker into the report path as a pre-send workflow: Report now opens the quality check first, separates Must Fix / Review / Advisory counts, and only enables final report generation after Critical items are fixed or intentionally skipped.
+- Renamed the report action to Pre-send Report so the issue check is the normal final workflow instead of an optional side step.
+
 ## v2555
 - Strengthened the Version 1 survey checker with the lessons from the Tethys, Ciao Baby II, and Brian Buckle corrections: C-rated repair language, limited-test overclaims, questionable standards citations, vessel-type wording mismatches, duplicate condition wording, proofing errors, and valuation/comparable defects are now surfaced before issuing.
 - Kept Average overall condition tied to the surveyor's chosen BUC grade while requiring the report wording to be subject to correction of Type A and Type B findings when those findings exist.

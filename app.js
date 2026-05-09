@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2555';
+const APP_VERSION = 'v2556';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -10413,7 +10413,7 @@ function renderHome() {
               <div id="${rowId}" style="display:none;padding:0 10px 10px 52px;">
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
 	                  <button onclick="event.stopPropagation();(async()=>{currentSurveyId='${survey.id}';checkSurvey();})()" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#ffcc00;color:#066aab;border:none;border-radius:14px;cursor:pointer;">✅ Check</button>
-	                  <button onclick="event.stopPropagation();(async()=>{const s=await getSurvey('${survey.id}');if(s)generateReport(s);})()" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#066aab;color:white;border:none;border-radius:14px;cursor:pointer;">📄 Report</button>
+	                  <button onclick="event.stopPropagation();(async()=>{const s=await getSurvey('${survey.id}');if(s)generateReport(s);})()" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#066aab;color:white;border:none;border-radius:14px;cursor:pointer;">📄 Pre-send</button>
 	                  <button onclick="event.stopPropagation();exportSurvey('${survey.id}')" style="flex:1;min-width:70px;padding:8px 10px;font-size:12px;font-weight:600;background:#f1f5f9;color:#334155;border:none;border-radius:14px;cursor:pointer;">📤 Export</button>
 	                  <button onclick="event.stopPropagation();transferSurveyToLaptop('${survey.id}')" style="flex:1;min-width:90px;padding:8px 10px;font-size:12px;font-weight:600;background:#ecfeff;color:#0e7490;border:none;border-radius:14px;cursor:pointer;">➡️ Laptop</button>
 	                  <button onclick="event.stopPropagation();markSurveyCompleted('${survey.id}')" style="flex:1;min-width:90px;padding:8px 10px;font-size:12px;font-weight:600;background:#dcfce7;color:#166534;border:none;border-radius:14px;cursor:pointer;">✅ Complete</button>
@@ -11978,7 +11978,7 @@ function editSurveyDetails(surveyId) {
     // 📄 Report button
     const reportBtn2 = document.createElement('button');
     reportBtn2.style.cssText = ps + 'background:#066aab;color:white;';
-    reportBtn2.innerHTML = '📄 Report';
+    reportBtn2.innerHTML = '📄 Pre-send';
     reportBtn2.onclick = async () => {
       await saveEditFormSilently();
       const s = await getSurvey(survey.id);
@@ -17218,7 +17218,7 @@ function ensureReportButton() {
 
   const reportOpt = document.createElement('button');
   reportOpt.style.cssText = menuItemStyle + 'color:#066aab;';
-  reportOpt.innerHTML = '📄 Generate Report';
+  reportOpt.innerHTML = '📄 Pre-send Report';
   reportOpt.onclick = () => { overflowMenu.style.display = 'none'; generateReport(); };
   overflowMenu.appendChild(reportOpt);
 
@@ -17895,7 +17895,8 @@ async function migrateEngineData() {
 }
 
 // ─── Check Survey — Quality Audit ─────────────────────────────────────────
-async function checkSurvey() {
+async function checkSurvey(options = {}) {
+  const preSendMode = !!(options && options.preSendMode);
   // If we're in the Edit Intro view, save form to DB first, then switch to inspection
   if (currentView === 'edit-survey' || currentView === 'new-survey') {
     await saveEditFormSilently();
@@ -19022,6 +19023,23 @@ async function checkSurvey() {
     if (forceOKState[item.message]) return; // force-OK'd, already in resolvedItems
     activeItems.push(item);
   });
+  const preSendActionItems = activeItems.filter(item =>
+    !reviewedState[item._checkId] &&
+    item.severity !== 'proofread' &&
+    item.category !== 'Skipped Items' &&
+    item.category !== 'Skipped Sections'
+  );
+  const preSendCriticalItems = preSendActionItems.filter(item => item.severity === 'critical');
+  const preSendWarningItems = preSendActionItems.filter(item => item.severity === 'warning');
+  const preSendInfoItems = preSendActionItems.filter(item => item.severity === 'info');
+  const preSendSummary = {
+    ready: preSendCriticalItems.length === 0,
+    critical: preSendCriticalItems.length,
+    warning: preSendWarningItems.length,
+    advisory: preSendInfoItems.length,
+    total: preSendActionItems.length,
+  };
+  window._lastSurveyPreSendSummary = preSendSummary;
 
   // ── Group active items by severity for section headers ─────────────
   // Items that are reviewed (checked off) move to the Resolved section
@@ -19060,7 +19078,30 @@ async function checkSurvey() {
   resolvedItems.sort((a, b) => (a._surveyOrder ?? 9999) - (b._surveyOrder ?? 9999));
 
   // ── Build HTML ─────────────────────────────────────────────────────
-  let html = `
+  const preSendButtonHtml = preSendSummary.ready
+    ? `<button onclick="document.getElementById('checkSurveyOverlay')?.remove();generateReport(null,{skipPreSend:true})" style="background:#16a34a;color:white;border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;">Generate final report</button>`
+    : `<button disabled style="background:#cbd5e1;color:#475569;border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;cursor:not-allowed;">Fix critical items first</button>`;
+  let html = preSendMode ? `
+    <div style="background:#f8fafc;border:2px solid ${preSendSummary.ready ? '#16a34a' : '#dc2626'};border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:240px;">
+          <div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:4px;">Pre-send workflow</div>
+          <div style="font-size:13px;color:#475569;line-height:1.45;">
+            Resolve, review, or intentionally skip all Critical items before issuing. Warnings and advisory items remain visible for final review.
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:12px;font-weight:700;">
+            <span style="background:#fee2e2;color:#991b1b;border-radius:999px;padding:4px 9px;">Must Fix: ${preSendSummary.critical}</span>
+            <span style="background:#fef3c7;color:#92400e;border-radius:999px;padding:4px 9px;">Review: ${preSendSummary.warning}</span>
+            <span style="background:#dbeafe;color:#1e40af;border-radius:999px;padding:4px 9px;">Advisory: ${preSendSummary.advisory}</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+          ${preSendButtonHtml}
+        </div>
+      </div>
+    </div>
+  ` : '';
+  html += `
     <div style="text-align:center;margin-bottom:16px;">
       <div style="display:inline-block;background:${readinessBg};color:white;padding:8px 20px;border-radius:20px;font-weight:700;font-size:16px;margin-bottom:8px;">${readiness}</div>
       <div style="font-size:13px;color:#64748b;">
@@ -19307,7 +19348,7 @@ async function checkSurvey() {
   overlay.style.cssText = 'position:fixed;inset:0;background:white;z-index:9999;display:flex;flex-direction:column;';
   overlay.innerHTML = `
     <div style="flex-shrink:0;background:#066aab;color:white;padding:12px 16px calc(12px + env(safe-area-inset-top, 0px)) 16px;display:flex;align-items:center;justify-content:space-between;">
-      <h2 style="margin:0;font-size:17px;font-weight:700;">✔ Survey Quality Check</h2>
+      <h2 style="margin:0;font-size:17px;font-weight:700;">${preSendMode ? '✔ Pre-send Survey Check' : '✔ Survey Quality Check'}</h2>
       <button onclick="document.getElementById('checkSurveyOverlay')?.remove();" style="background:rgba(255,255,255,0.15);color:white;border:none;border-radius:8px;padding:6px 14px;font-size:14px;cursor:pointer;">✕ Close</button>
     </div>
     <div id="csScrollContainer" style="flex:1;overflow-y:auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom, 0px)) 16px;">
@@ -19750,6 +19791,7 @@ async function checkSurvey() {
       }, 5000);
     }
   };
+  return preSendSummary;
 }
 
 // ─── Helper: expand accordion and scroll to element ──────────────────────
@@ -26493,7 +26535,20 @@ async function backToHome() {
 }
 
 // Report generation
-async function generateReport() {
+async function generateReport(surveyArg = null, options = {}) {
+  let reportOptions = options || {};
+  if (surveyArg && typeof surveyArg === 'object' && !surveyArg.id && Object.prototype.hasOwnProperty.call(surveyArg, 'skipPreSend')) {
+    reportOptions = surveyArg;
+    surveyArg = null;
+  }
+  if (surveyArg && surveyArg.id) {
+    currentSurveyId = surveyArg.id;
+  }
+  if (!reportOptions.skipPreSend) {
+    _kkLastAction = 'preSendCheck:' + currentSurveyId;
+    await checkSurvey({ preSendMode: true });
+    return;
+  }
   _kkLastAction = 'generateReport:' + currentSurveyId;
   try {
   // v2318: flush any unsaved DOM edits (textareas, bilge pumps, comparables)
