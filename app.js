@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2554';
+const APP_VERSION = 'v2555';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -962,6 +962,10 @@ function displayItemLabel(rawLabel, survey) {
   if (!rawLabel) return '';
   const s = survey || window._currentSurveyCache || null;
   if (!s) return rawLabel;
+  if (rawLabel === 'Windshield, pilot house windows, frames and seals'
+      && String(s.boatStyle || '').toLowerCase().includes('bowrider')) {
+    return 'Windshield, frames and seals';
+  }
   // v2275: apply rudder pluralization to labels even without transformLabelForDisplay
   let label = rawLabel;
   if (typeof window.transformLabelForDisplay === 'function') {
@@ -13555,6 +13559,14 @@ async function dedupeSurveyPhotosInPlace(survey) {
 // v2252: Shared condition-sentence builder used by all three vessel-
 // description generators. Reads only the surveyor's chosen BUC grade.
 // It must not infer "fair", "good", etc. from the finding counts.
+function _surveyHasTypeAorBFindings(survey) {
+  const items = survey && survey.items ? Object.values(survey.items) : [];
+  return items.some(item => {
+    if (!item || item.excluded || item.notApplicable) return false;
+    return /^(A|B)\s*-/i.test(String(item.rating || '').trim());
+  });
+}
+
 function _buildConditionSentence(survey) {
   const _oc = (survey.overallCondition || document.getElementById('overallCondition')?.value || '').trim().toLowerCase();
   if (_oc) {
@@ -13563,6 +13575,9 @@ function _buildConditionSentence(survey) {
     } else if (_oc.includes('above average')) {
       return ` At the time of the survey the vessel was in above-average overall condition, having received above-average care.`;
     } else if (_oc.includes('average')) {
+      if (_surveyHasTypeAorBFindings(survey)) {
+        return ` The vessel was rated in average overall condition after consideration of its age, equipment, observed condition, and the findings noted in this report, subject to correction of the Type A and Type B findings. The reader was directed to the Findings and Recommendations section for items requiring attention.`;
+      }
       return ` The vessel was rated in average overall condition after consideration of its age, equipment, observed condition, and the findings noted in this report. The reader was directed to the Findings and Recommendations section for items requiring attention.`;
     } else if (_oc.includes('fair')) {
       return ` At the time of the survey the vessel was in fair overall condition with deficiencies noted. Corrective action was recommended before the vessel was placed into regular service.`;
@@ -13701,6 +13716,7 @@ function _descriptionNavigationEquipmentSentence(survey) {
   const present = [];
   const candidates = [
     { label: 'VHF radio', patterns: [/\bvhf\b/i] },
+    { label: 'GPS/chartplotter', patterns: [/\bgps\b/i, /\bchart\s*plotter\b/i, /\bchartplotter\b/i, /\bmfd\b/i] },
     { label: 'magnetic compass', patterns: [/\bmagnetic compass\b/i, /\bcompass\b/i] },
     { label: 'wind instruments', patterns: [/\bwind instruments?\b/i] },
     { label: 'autopilot', patterns: [/\bautopilot\b/i] },
@@ -13917,7 +13933,7 @@ function _syncConditionSentenceWithAssignedRating(survey, text) {
   const patterns = [
     new RegExp(`\\s*At the time of(?: the)? survey,?\\s+[^.]*\\b${conditionTerms}\\b[^.]*overall condition[^.]*\\.(?:\\s+${followUp}[^.]*\\.)*`, 'gi'),
     new RegExp(`\\s*At the time of(?: the)? survey,?\\s+[^.]*\\brestorable condition[^.]*\\.(?:\\s+${followUp}[^.]*\\.)*`, 'gi'),
-    /\s*The vessel was rated in average overall condition after consideration of its age, equipment, observed condition, and the findings noted in this report\.\s*The reader was directed to the Findings and Recommendations section for items requiring attention\./gi,
+    /\s*The vessel was rated in average overall condition after consideration of its age, equipment, observed condition, and the findings noted in this report(?:, subject to correction of the Type A and Type B findings)?\.\s*The reader was directed to the Findings and Recommendations section for items requiring attention\./gi,
     /\s*The vessel was found to be in (?:excellent|above[- ]average|average|fair|poor) overall condition[^.]*\./gi
   ];
   for (const pattern of patterns) {
@@ -17943,6 +17959,54 @@ async function checkSurvey() {
     const n = parseFloat(String(value || '').replace(/[^0-9.]/g, ''));
     return Number.isFinite(n) ? n : null;
   };
+  const hasRepairRecommendationLanguage = (value) => /\b(?:should|recommended|recommend|requires?|required|repair|replace|re-bed|rebedded|seal accordingly|service|correct|address|further inspection|qualified technician|qualified marine)\b/i.test(cleanText(value));
+  const hasOperationalClaim = (value) => /appeared to (?:work|function|operate) properly|\b(?:functioned|operated|worked|tested)\s+(?:properly|normally|correctly|as intended)\b/i.test(cleanText(value));
+  const hasKnownProofingProblem = (value) => {
+    const t = cleanText(value);
+    return /\bswing platform\b/i.test(t) ||
+      /\bwhich was in good(?:\s|$)/i.test(t) ||
+      /\bleak leaking\b/i.test(t) ||
+      /\bdifunctional\b/i.test(t) ||
+      /\bfunctionwl\b/i.test(t) ||
+      /\bhaull deck joint\b/i.test(t) ||
+      /\blocated in the under\b/i.test(t) ||
+      /\bmounted beneath\b/i.test(t) ||
+      /\bfly bridge\b/i.test(t);
+  };
+  const hasQuestionableStandardCitation = (label, text, standards) => {
+    const combined = `${label || ''} ${text || ''} ${(standards || []).join(' ')}`;
+    if (/\bH-33\b/i.test(combined) && !/\bdiesel\b/i.test(combined)) return true;
+    if (/\bH-27\b/i.test(combined) && /\b(?:potable|shore water|fresh ?water|water hookup|water system|pump[- ]?out|waste)\b/i.test(combined)) return true;
+    if (/\bP-4\b/i.test(combined) && /\b(?:water ingress|hull\/deck|hull deck|bilge|stringer|transom leak)\b/i.test(combined)) return true;
+    if (/\bP-7\b/i.test(combined) && /\b(?:outdrive|sterndrive|anode|cathodic|trim[- ]?tab)\b/i.test(combined)) return true;
+    if (/\bE-11\b/i.test(combined) && /\b(?:anode|cathodic|trim[- ]?tab anode|drive anode|propeller\/drive anode)\b/i.test(combined)) return true;
+    if (/\bE-11\b/i.test(combined) && /\bdepth sounder\b/i.test(combined) && !/\b(?:wire|wiring|electrical|breaker|fuse|connection|power)\b/i.test(combined)) return true;
+    return /no diesel-fuel-system standard was cited/i.test(combined);
+  };
+  const powerAtSurveyText = cleanText([survey.powerAtTime, survey.powerAtSurvey].filter(Boolean).join(' '));
+  const waterAtSurveyText = cleanText([survey.waterAtTime, survey.waterAtSurvey].filter(Boolean).join(' '));
+  const noAcPowerAvailable = (
+    /\b(?:dc only|only dc|battery|no ac|no shore|no power)\b/i.test(powerAtSurveyText) &&
+    !/\b(?:ac and dc|shore power available|ac power available)\b/i.test(powerAtSurveyText)
+  );
+  const noWaterAvailable = /\b(?:no water|winterized|empty|no water tanks|vessel out)\b/i.test(waterAtSurveyText);
+  const comparableModelMismatch = () => {
+    const ymm = cleanText(survey.yearMakeModel);
+    const modelNumbers = Array.from(ymm.matchAll(/\b\d{2,4}\b/g))
+      .map(match => match[0])
+      .filter(value => !/^(?:19|20)\d{2}$/.test(value));
+    if (!modelNumbers.length || !Array.isArray(survey.comparables) || survey.comparables.length === 0) return false;
+    const comparableText = survey.comparables.map(c => `${c?.vessel || ''} ${c?.notes || ''}`).join(' ');
+    return !modelNumbers.some(model => new RegExp(`\\b${model}\\b`, 'i').test(comparableText));
+  };
+  const hasNavigationEquipmentInSurvey = () => {
+    const navRe = /\b(?:vhf|gps|chartplotter|chart plotter|depth sounder|depthsounder|wind instruments?|autopilot|magnetic compass|radar)\b/i;
+    if (Array.isArray(survey.instrumentsElectronics) && survey.instrumentsElectronics.some(i => navRe.test(`${i?.name || ''} ${i?.description || ''} ${i?.notes || ''}`))) return true;
+    return Object.entries(survey.items || {}).some(([label, data]) => {
+      if (!data || data.excluded || !data.rating) return false;
+      return navRe.test(`${label} ${data.text || ''}`);
+    });
+  };
 
   // ── 1. HEADER FIELDS ────────────────────────────────────────────────────
   const requiredHeader = [
@@ -18289,6 +18353,7 @@ async function checkSurvey() {
   // Check each expanded item
   let unratedCount = 0;
   let missingTextAB = 0;
+  let typeABCount = 0;
 
   // Group skipped items by category so we can summarize them together
   const skippedByCategory = {};  // { categoryName: [itemLabel, ...] }
@@ -18317,6 +18382,7 @@ async function checkSurvey() {
     }
 
     const baseRating = data.rating.charAt(0);
+    if (baseRating === 'A' || baseRating === 'B') typeABCount++;
 
     // A or B rating without explanatory text
     if ((baseRating === 'A' || baseRating === 'B') && (!data.text || data.text.trim() === '')) {
@@ -18366,6 +18432,22 @@ async function checkSurvey() {
     if ((data.rating === 'Not tested/not verified' || data.rating === 'Powered up only') && /appeared to (?:work|function) properly|functioned properly|operated normally/i.test(data.text || '')) {
       add('warning', 'Professional Narrative', `Limited-test wording overclaims operation: ${item.label}`, item.label);
     }
+    if (baseRating === 'C' && data.text && hasRepairRecommendationLanguage(data.text)) {
+      add('warning', 'Rating Consistency', `C-rated item contains repair/recommendation language; re-rate B or soften the wording: ${item.label}`, item.label);
+    }
+    if (data.text && hasKnownProofingProblem(data.text)) {
+      add('warning', 'Proofing', `Known proofing issue detected: ${item.label}`, item.label);
+    }
+    if (hasQuestionableStandardCitation(item.label, data.text || '', data.standards || [])) {
+      add('warning', 'Applicable Standards', `Review standards citation and remove/correct any citation not directly applicable: ${item.label}`, item.label);
+    }
+    const itemAndText = `${item.label} ${data.text || ''}`;
+    if (noAcPowerAvailable && /\b(?:120v|ac\b|shore power|reverse polarity|battery charger|water heater|hot water)\b/i.test(itemAndText) && hasOperationalClaim(data.text || '')) {
+      add('warning', 'Testing Limitations', `AC operation may be overstated even though AC shore power was not available: ${item.label}`, item.label);
+    }
+    if (noWaterAvailable && /\b(?:fresh ?water|potable|shore water|water heater|hot water|shower|sink|head)\b/i.test(itemAndText) && hasOperationalClaim(data.text || '')) {
+      add('warning', 'Testing Limitations', `Water-system operation may be overstated even though water was not available: ${item.label}`, item.label);
+    }
 
     // B-rated items should ideally have a recommendation
     if (baseRating === 'B' && data.text && !(/recommend|should|advise|suggest|replace|repair|service|address|correct|attention/i.test(data.text))) {
@@ -18398,6 +18480,51 @@ async function checkSurvey() {
       // A few — list them
       skippedLabels.forEach(lbl => add('info', 'Skipped Items', `Skipped: ${lbl}`, lbl));
     }
+  }
+
+  // ── 4a. REPORT-LEVEL CONSISTENCY CHECKS ────────────────────────────────
+  const surveyFreeformText = [
+    survey.vesselDescription,
+    survey.valuationRationale,
+    survey.valuationSource,
+    ...(Array.isArray(survey.comparables) ? survey.comparables.flatMap(c => [
+      c?.vessel,
+      c?.source,
+      c?.location,
+      c?.notes,
+    ]) : []),
+    ...Object.values(survey.items || {}).flatMap(data => [data?.text || '']),
+  ].filter(Boolean).join('\n');
+
+  if (/\bready for use\b/i.test(surveyFreeformText)) {
+    add('critical', 'Report Consistency', 'Remove unsupported "ready for use" wording unless the findings and survey conditions fully support it.', null, 'vesselDescription');
+  }
+  const conditionSentenceCount = (surveyFreeformText.match(/The vessel was rated in average overall condition/gi) || []).length;
+  if (conditionSentenceCount > 1) {
+    add('warning', 'Report Consistency', 'Duplicate average-condition sentence appears in report text.', null, 'vesselDescription');
+  }
+  if (/Navigation and communication equipment aboard was not recorded/i.test(surveyFreeformText) && hasNavigationEquipmentInSurvey()) {
+    add('warning', 'Report Consistency', 'Vessel description says navigation/communication equipment was not recorded, but VHF/GPS/depth/wind/autopilot/compass items appear later.', null, 'vesselDescription');
+  }
+  if (/\bnot applicable\s*-\s*stern drive\b|\bnot recorded\s+not recorded\b/i.test(surveyFreeformText)) {
+    add('warning', 'Propulsion', 'Sterndrive/outdrive wording contains template text; use clean "Sterndrive/outdrive - model and serial number not recorded" wording.', null);
+  }
+  if (/\bbow\s*rider\b|\bbowrider\b|\brunabout\b/i.test(cleanText(survey.yearMakeModel)) && /\bmotor yacht\b|\bsemi[- ]displacement\b|\bpilot ?house\b|\bpilothouse\b/i.test(`${survey.boatStyle || ''}\n${survey.vesselDescription || ''}\n${surveyFreeformText}`)) {
+    add('warning', 'Vessel Description', 'Bowrider/runabout survey contains motor-yacht, semi-displacement, or pilothouse wording.', null, 'boatStyle');
+  }
+  if (cleanText(survey.overallCondition).toLowerCase().includes('average') && typeABCount > 0) {
+    const generatedCondition = (typeof _buildConditionSentence === 'function') ? _buildConditionSentence(survey) : '';
+    if (!/\bsubject to correction of the Type A and Type B findings\b/i.test(`${generatedCondition}\n${surveyFreeformText}`)) {
+      add('warning', 'Valuation', 'Average overall condition with Type A/B findings should be subject to correction of the Type A and Type B findings.', null, 'overallCondition');
+    }
+  }
+  if (Array.isArray(survey.comparables) && /\bsilverton\s+350\b/i.test(cleanText(survey.yearMakeModel)) && survey.comparables.some(c => /\bsilverton\s+352\s+motor\s+yacht\b/i.test(`${c?.vessel || ''} ${c?.notes || ''}`))) {
+    add('warning', 'Valuation', 'Silverton 350 valuation includes a Silverton 352 Motor Yacht comparable; confirm it is not the wrong model family.', null, 'valuationLow');
+  } else if (comparableModelMismatch()) {
+    add('info', 'Valuation', 'Comparable vessels may not match the specific model number in Year / Make / Model. Confirm the valuation family.', null, 'valuationLow');
+  }
+  if (survey.replacementCost && !/replacement|new vessel|similar size|similar construction|similar propulsion/i.test(cleanText(survey.valuationRationale))) {
+    add('info', 'Valuation', 'Replacement cost is entered but the valuation paragraph should state its basis: new vessel of similar size, construction, propulsion, and equipment.', null, 'replacementCost');
   }
 
   // ── 4b. MODEL SURVEY REFERENCE CHECKS ──────────────────────────────────
@@ -27649,15 +27776,23 @@ ${(() => {
               blocks.push(propulsionItem(title, specs, e2Photos + e2Plates));
             }
 
-	            const t1MakeModel = survey.transmissionMakeModel || [survey.transmissionMake, survey.transmissionModel].filter(Boolean).join(' ').trim();
-	            const hasT1 = t1MakeModel || survey.transmissionSerial
+	            const driveTypeLower = String(survey.driveType || '').toLowerCase();
+	            let t1MakeModel = survey.transmissionMakeModel || [survey.transmissionMake, survey.transmissionModel].filter(Boolean).join(' ').trim();
+	            const t1SerialRaw = String(survey.transmissionSerial || '').trim();
+	            const t1Serial = /^not\s+recorded$/i.test(t1SerialRaw) ? '' : t1SerialRaw;
+	            if (driveTypeLower === 'outdrive'
+	                && (!t1MakeModel || /^not\s+recorded(?:\s+not\s+recorded)?$/i.test(t1MakeModel)
+	                    || /^sterndrive\/outdrive\s*-\s*model\s+not\s+recorded$/i.test(t1MakeModel))) {
+	              t1MakeModel = 'Sterndrive/outdrive - model and serial number not recorded';
+	            }
+	            const hasT1 = t1MakeModel || t1Serial
 	              || t1Photos || t1Plates;
 	            if (hasT1) {
 	              const t2MakeModelForTitle = survey.transmission2MakeModel || [survey.transmission2Make, survey.transmission2Model].filter(Boolean).join(' ').trim();
-	              const title = t2MakeModelForTitle ? 'Gearbox 1 (Port)' : 'Gearbox';
+	              const title = driveTypeLower === 'outdrive' ? 'Gearbox / drive' : (t2MakeModelForTitle ? 'Gearbox 1 (Port)' : 'Gearbox');
 	              const specs = [
 	                t1MakeModel,
-	                survey.transmissionSerial ? `Serial ${survey.transmissionSerial}` : '',
+	                t1Serial ? `Serial ${t1Serial}` : '',
 	              ];
 	              blocks.push(propulsionItem(title, specs, t1Photos + t1Plates));
 	            }

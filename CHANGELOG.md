@@ -1,3 +1,8 @@
+## v2555
+- Strengthened the Version 1 survey checker with the lessons from the Tethys, Ciao Baby II, and Brian Buckle corrections: C-rated repair language, limited-test overclaims, questionable standards citations, vessel-type wording mismatches, duplicate condition wording, proofing errors, and valuation/comparable defects are now surfaced before issuing.
+- Kept Average overall condition tied to the surveyor's chosen BUC grade while requiring the report wording to be subject to correction of Type A and Type B findings when those findings exist.
+- Cleaned sterndrive/outdrive report wording so a missing drive model does not render as "Not recorded Not recorded" or "Not applicable - stern drive".
+
 ## v2554
 - Added the 2000 Sea Ray 260 Bow Rider as its own boat-spec and valuation database entry without changing the existing 260 Sundancer entry.
 - Added Mercury MerCruiser MCM 7.4 Litre MPI to the engine database and strengthened engine-photo reading for MerCruiser nameplates so the engine serial is not confused with transom or drive serials.
