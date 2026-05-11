@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-08",
+  "lastUpdated": "2026-05-11",
   "note": "Specifications sourced from manufacturer data sheets, sailboatdata.com, recognized technical references, and powerboat manufacturers. Values are approximate and may vary by model year, options, and keel variant.",
   "boats": [
     {
@@ -3611,6 +3611,25 @@
       "hullType": "Displacement",
       "keelType": "Fin",
       "construction": "Fibreglass"
+    },
+    {
+      "id": "jeanneau-sailboat-2011",
+      "make": "Jeanneau",
+      "model": "Sailboat",
+      "aliases": [
+        "2011 jeanneau sailboat",
+        "jeanneau sailboat",
+        "jeanneau yacht",
+        "jeanneau"
+      ],
+      "yearStart": 2011,
+      "yearEnd": 2011,
+      "type": "sailboat",
+      "driveType": "saildrive",
+      "driveCount": 1,
+      "engineCount": 1,
+      "rudderCount": 1,
+      "notes": "Generic Jeanneau sailboat lookup added for field use when the exact model has not been confirmed. Verify model-specific dimensions, tankage, engine package, and production year from vessel documents or data plates before relying on them in the final report."
     },
     {
       "id": "jeanneau-so-349",

@@ -1,3 +1,7 @@
+## v2558
+- Added a generic 2011 Jeanneau Sailboat lookup entry to the Version 1 boat specifications database for field use when the exact Jeanneau model has not been confirmed.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the new Jeanneau option.
+
 ## v2557
 - Added Bukh marine diesel engines to the Version 1 engine database.
 - Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the new Bukh engine options.
