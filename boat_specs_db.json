@@ -3632,6 +3632,61 @@
       "notes": "Generic Jeanneau sailboat lookup added for field use when the exact model has not been confirmed. Verify model-specific dimensions, tankage, engine package, and production year from vessel documents or data plates before relying on them in the final report."
     },
     {
+      "id": "jeanneau-sun-odyssey-42-ds",
+      "make": "Jeanneau",
+      "model": "Sun Odyssey 42 DS",
+      "aliases": [
+        "2011 jeanneau 42",
+        "2011 jenneau 42",
+        "2011 jeanneau sun odyssey 42 ds",
+        "2011 jenneau sun odyssey 42 ds",
+        "jeanneau 42",
+        "jenneau 42",
+        "jeanneau 42 ds",
+        "jenneau 42 ds",
+        "jeanneau sun odyssey 42 ds",
+        "jenneau sun odyssey 42 ds",
+        "jeanneausunodyssey42ds",
+        "jenneausunodyssey42ds",
+        "jeanneausun odyssey 42 ds",
+        "jeanneau-sun odyssey 42 ds",
+        "sun odyssey 42 ds",
+        "sun odyssey 42ds",
+        "sunodyssey42ds"
+      ],
+      "yearStart": 2009,
+      "yearEnd": 2011,
+      "type": "sailboat",
+      "loa": "42'5\"",
+      "lwl": "38'1\"",
+      "beam": "13'7\"",
+      "displacement": "19,700 lbs",
+      "ballast": "5,580 lbs",
+      "maxDraft": "7'0\"",
+      "draftVariants": [
+        {
+          "label": "Shoal keel",
+          "draft": "5'3\""
+        },
+        {
+          "label": "Deep keel",
+          "draft": "7'0\""
+        }
+      ],
+      "totalSailArea": "833 sq ft",
+      "hullType": "Displacement",
+      "keelType": "Fin",
+      "construction": "Fibreglass",
+      "designer": "Marc Lombard / Vittorio Garroni",
+      "rigType": "Fractional sloop",
+      "driveType": "saildrive",
+      "driveCount": 1,
+      "engineCount": 1,
+      "rudderCount": 1,
+      "fuelType": "Diesel",
+      "notes": "Specifications added for the 2009-2011 Sun Odyssey 42 DS / 42DS Mk 2. Verify exact draft, engine package, and tankage from vessel documents or data plates before final reporting."
+    },
+    {
       "id": "jeanneau-so-349",
       "make": "Jeanneau",
       "model": "Sun Odyssey 349",

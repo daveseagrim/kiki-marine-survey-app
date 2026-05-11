@@ -1,3 +1,7 @@
+## v2559
+- Added full Jeanneau Sun Odyssey 42 DS specifications and aliases for 2011 Jeanneau/Jenneau 42 lookups.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the new Jeanneau 42 DS specs.
+
 ## v2558
 - Added a generic 2011 Jeanneau Sailboat lookup entry to the Version 1 boat specifications database for field use when the exact Jeanneau model has not been confirmed.
 - Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the new Jeanneau option.
