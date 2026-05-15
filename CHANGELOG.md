@@ -1,3 +1,7 @@
+## v2562
+- Updated Version 1 Google Drive saves to use `Kiki Marine / Surveys, 2026 / in progress` or `completed`.
+- Removed the older Drive fallback path so saves do not drift back into the old personal-drive folder structure.
+
 ## v2561
 - Bumped Version 1 cache metadata so the Kiki Marine Drive account enforcement and Drive account switcher load cleanly in the installed app.
 - Updated the release helper so the app-version meta tag is bumped with the cache metadata.

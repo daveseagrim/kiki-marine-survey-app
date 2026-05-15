@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2561';
+const APP_VERSION = 'v2562';
 const KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL = 'dave@kikimarine.ca';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
@@ -29898,19 +29898,11 @@ const DriveBackup = (() => {
   const DRIVE_FOLDER_MIME = 'application/vnd.google-apps.folder';
   const DRIVE_PRIMARY_ROOT_FOLDER_ID = '1dHwlGFyQsyOOIRBLSsA2Mz4dHfYZUbBo';
   const DRIVE_ROOT_PATH = ['Kiki Marine'];
-  const DRIVE_SURVEY_YEAR_FOLDER = '02 Surveys, 2026';
-  const DRIVE_LEGACY_ROOT_PATH = ['Boating', 'kiki marine'];
-  const DRIVE_LEGACY_BASE_FOLDER = 'surveys 2026';
-  const DRIVE_LEGACY_YEAR_PATH = ['surveys', '2026'];
+  const DRIVE_SURVEY_YEAR_FOLDER = 'Surveys, 2026';
   const DRIVE_WORKFLOW_FOLDERS = {
-    inProgress: 'surveys, 2026, in progress',
-    completed: 'surveys, 2026, completed'
-  };
-  const DRIVE_LEGACY_WORKFLOW_FOLDERS = {
     inProgress: 'in progress',
     completed: 'completed'
   };
-  let _driveWorkflowFolderNames = DRIVE_WORKFLOW_FOLDERS;
   const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
   const DRIVE_TOKEN_EMAIL_KEY = '_driveTokenEmail';
   const REQUIRED_DRIVE_ACCOUNT_EMAIL = KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL;
@@ -30322,28 +30314,8 @@ const DriveBackup = (() => {
   }
 
   async function _getOrCreateSurveyYearFolder() {
-    try {
-      const rootId = await _getKikiMarineRootFolderId();
-      _driveWorkflowFolderNames = DRIVE_WORKFLOW_FOLDERS;
-      return _getOrCreateFolderNamed(DRIVE_SURVEY_YEAR_FOLDER, rootId);
-    } catch (err) {
-      console.warn('[Drive] Kiki Marine Drive path unavailable, falling back to legacy Boating/kiki marine path:', err.message || err);
-    }
-
-    _driveWorkflowFolderNames = DRIVE_LEGACY_WORKFLOW_FOLDERS;
-    const rootId = await _getOrCreateFolderPath(DRIVE_LEGACY_ROOT_PATH, null);
-    const compactBaseFolder = await _findDriveFolder(DRIVE_LEGACY_BASE_FOLDER, rootId);
-    if (compactBaseFolder && compactBaseFolder.id) {
-      return _getOrCreateFolderPath(DRIVE_LEGACY_YEAR_PATH, compactBaseFolder.id);
-    }
-
-    const splitSurveyFolder = await _findDriveFolder(DRIVE_LEGACY_YEAR_PATH[0], rootId);
-    if (splitSurveyFolder && splitSurveyFolder.id) {
-      return _getOrCreateFolderPath([DRIVE_LEGACY_YEAR_PATH[1]], splitSurveyFolder.id);
-    }
-
-    const createdBaseFolderId = await _getOrCreateFolderNamed(DRIVE_LEGACY_BASE_FOLDER, rootId);
-    return _getOrCreateFolderPath(DRIVE_LEGACY_YEAR_PATH, createdBaseFolderId);
+    const rootId = await _getKikiMarineRootFolderId();
+    return _getOrCreateFolderNamed(DRIVE_SURVEY_YEAR_FOLDER, rootId);
   }
 
   function _workflowFolderKeyForSurvey(survey) {
@@ -30351,14 +30323,12 @@ const DriveBackup = (() => {
   }
 
   // Find or create the workflow backup folder on Drive.
-  // Preferred path: Kiki Marine / 02 Surveys, 2026 /
-  // surveys, 2026, completed|surveys, 2026, in progress.
-  // The older Boating / kiki marine path remains a fallback only.
+  // Required path: Kiki Marine / Surveys, 2026 / completed|in progress.
   async function getOrCreateBackupFolder(survey) {
     const key = _workflowFolderKeyForSurvey(survey || {});
     if (_workflowFolderCache[key]) return _workflowFolderCache[key];
     const yearFolderId = await _getOrCreateSurveyYearFolder();
-    const workflowFolderId = await _getOrCreateFolderNamed(_driveWorkflowFolderNames[key] || DRIVE_WORKFLOW_FOLDERS[key], yearFolderId);
+    const workflowFolderId = await _getOrCreateFolderNamed(DRIVE_WORKFLOW_FOLDERS[key], yearFolderId);
     _workflowFolderCache[key] = workflowFolderId;
     return workflowFolderId;
   }
