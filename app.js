@@ -4087,6 +4087,27 @@ function _updateBackupStatusUI() {
 const DRIVE_BACKUP_WARNING_DISMISSED_UNTIL_KEY = '_driveBackupWarningDismissedUntil';
 let _driveBackupWarningLastShownAt = 0;
 
+async function switchDriveAccount() {
+  if (typeof DriveBackup === 'undefined' || !DriveBackup.switchAccount) {
+    showToast('Google Drive account switching is not available in this build');
+    return;
+  }
+  try {
+    showToast(`Choose ${KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL}`);
+    await DriveBackup.switchAccount();
+    if (DriveBackup.isSignedIn && DriveBackup.isSignedIn()) {
+      localStorage.removeItem(DRIVE_BACKUP_WARNING_DISMISSED_UNTIL_KEY);
+      const email = DriveBackup.getAccountEmail ? DriveBackup.getAccountEmail() : KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL;
+      showToast(`Google Drive connected: ${email}`);
+      if (!currentSurveyId) renderHome();
+    }
+  } catch (err) {
+    if (!err || err.code !== 'auth/popup-closed-by-user') {
+      showToast(err && err.message ? err.message : 'Google Drive sign-in failed');
+    }
+  }
+}
+
 async function _signInToDriveFromWarning(button, bar) {
   if (typeof DriveBackup === 'undefined' || !DriveBackup.signIn) {
     showToast('Google Drive sign-in is not available in this build');
@@ -4112,7 +4133,7 @@ async function _signInToDriveFromWarning(button, bar) {
     }
     if (err && err.code !== 'auth/popup-closed-by-user') {
       console.warn('[Drive] Sign-in from backup warning failed:', err.message || err);
-      showToast('Google Drive sign-in did not complete');
+      showToast(err.message || 'Google Drive sign-in did not complete');
     }
   }
 }
@@ -4236,6 +4257,7 @@ function _showDriveExpiryWarning() {
         signInBtn.disabled = false;
         if (err.code !== 'auth/popup-closed-by-user') {
           console.warn('[Drive] Re-sign-in failed:', err.message);
+          showToast(err.message || 'Google Drive sign-in failed');
         }
       }
     };
