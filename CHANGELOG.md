@@ -1,3 +1,7 @@
+## v2563
+- Fixed the standalone V1 photo-import page so it opens the current browser database instead of failing on older schema metadata.
+- Bumped the app cache metadata so the GitHub-hosted app loads the corrected recovery page.
+
 ## v2562
 - Updated Version 1 Google Drive saves to use `Kiki Marine / Surveys, 2026 / in progress` or `completed`.
 - Removed the older Drive fallback path so saves do not drift back into the old personal-drive folder structure.
