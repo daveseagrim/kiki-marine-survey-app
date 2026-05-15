@@ -9,6 +9,7 @@
 # Updates in a single operation:
 #   - APP_VERSION in app.js
 #   - CACHE_NAME in sw.js
+#   - Meta app-version in index.html
 #   - ?v= cache-busters on every script tag in index.html
 # Then runs:
 #   - node tests/run_tests.js
@@ -55,13 +56,19 @@ rm -f app.js.bak
 sed -i.bak "s|const CACHE_NAME = 'kiki-marine-$CURRENT';|const CACHE_NAME = 'kiki-marine-$NEW';|" sw.js
 rm -f sw.js.bak
 
-# 3. index.html cache-busters — replace every ?v=NNNN after a script src=
+# 3. index.html app version + cache-busters
+#    Meta version is used by the startup version handshake.
+sed -i.bak -E "s|(<meta name=\"app-version\" content=\")v[0-9]+(\".*)|\1$NEW\2|" index.html
+rm -f index.html.bak
+
+#    Cache-busters — replace every ?v=NNNN after a script src=
 #    (uses sed with portable syntax that works on macOS BSD sed)
 sed -i.bak -E "s|(\.js)\?v=v?[0-9]+|\1?v=$NEW_NUM|g" index.html
 rm -f index.html.bak
 
 echo "  ✓ app.js: APP_VERSION = '$NEW'"
 echo "  ✓ sw.js: CACHE_NAME = 'kiki-marine-$NEW'"
+echo "  ✓ index.html: meta app-version = '$NEW'"
 echo "  ✓ index.html: cache-busters → ?v=$NEW_NUM"
 
 # 4. Verify everything

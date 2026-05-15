@@ -1,3 +1,7 @@
+## v2561
+- Bumped Version 1 cache metadata so the Kiki Marine Drive account enforcement and Drive account switcher load cleanly in the installed app.
+- Updated the release helper so the app-version meta tag is bumped with the cache metadata.
+
 ## v2560
 - Moved Version 1 Google Drive survey backups to the Kiki Marine Drive structure under `Kiki Marine / 02 Surveys, 2026`, using the existing in-progress and completed workflow folders.
 - Added a fallback to the older `Boating / kiki marine` path only when the Kiki Marine Drive folder is not accessible.
