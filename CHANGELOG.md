@@ -1,3 +1,9 @@
+## v2560
+- Moved Version 1 Google Drive survey backups to the Kiki Marine Drive structure under `Kiki Marine / 02 Surveys, 2026`, using the existing in-progress and completed workflow folders.
+- Added a fallback to the older `Boating / kiki marine` path only when the Kiki Marine Drive folder is not accessible.
+- Updated Drive sign-in guidance and token checks so backups target `dave@kikimarine.ca` instead of the old personal Drive account.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the corrected Drive backup path.
+
 ## v2559
 - Added full Jeanneau Sun Odyssey 42 DS specifications and aliases for 2011 Jeanneau/Jenneau 42 lookups.
 - Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the new Jeanneau 42 DS specs.

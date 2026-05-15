@@ -5,7 +5,8 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2559';
+const APP_VERSION = 'v2560';
+const KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL = 'dave@kikimarine.ca';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
 // survey.rudderCount.  When count >= 2 every "rudder" becomes "rudders" and
@@ -29830,7 +29831,7 @@ function showDriveApiDisabledDialog(activationUrl, done, total) {
         ${status} Your Google Cloud project needs the Drive API switched on — this is a <strong>one-time setup</strong>, not a repeat login.
       </p>
       <ol style="margin:0 0 14px;padding-left:20px;font-size:13px;line-height:1.6;color:#374151;">
-        <li>Tap the blue link below and sign in with <strong>daveseagrim@gmail.com</strong></li>
+        <li>Tap the blue link below and sign in with <strong>${KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL}</strong></li>
         <li>Tap the blue <strong>Enable</strong> button on that page</li>
         <li>Wait 2–3 minutes for Google to propagate the change</li>
         <li>Come back and tap Backup again — the same sign-in still works</li>
@@ -29870,31 +29871,123 @@ function showDriveApiDisabledDialog(activationUrl, done, total) {
 
 const DriveBackup = (() => {
   let _accessToken = null;
+  let _tokenEmail = null;
   const DRIVE_FOLDER_MIME = 'application/vnd.google-apps.folder';
-  const DRIVE_ROOT_PATH = ['Boating', 'kiki marine'];
-  const DRIVE_BASE_FOLDER = 'surveys 2026';
-  const DRIVE_YEAR_PATH = ['surveys', '2026'];
+  const DRIVE_PRIMARY_ROOT_FOLDER_ID = '1dHwlGFyQsyOOIRBLSsA2Mz4dHfYZUbBo';
+  const DRIVE_ROOT_PATH = ['Kiki Marine'];
+  const DRIVE_SURVEY_YEAR_FOLDER = '02 Surveys, 2026';
+  const DRIVE_LEGACY_ROOT_PATH = ['Boating', 'kiki marine'];
+  const DRIVE_LEGACY_BASE_FOLDER = 'surveys 2026';
+  const DRIVE_LEGACY_YEAR_PATH = ['surveys', '2026'];
   const DRIVE_WORKFLOW_FOLDERS = {
+    inProgress: 'surveys, 2026, in progress',
+    completed: 'surveys, 2026, completed'
+  };
+  const DRIVE_LEGACY_WORKFLOW_FOLDERS = {
     inProgress: 'in progress',
     completed: 'completed'
   };
+  let _driveWorkflowFolderNames = DRIVE_WORKFLOW_FOLDERS;
   const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
+  const DRIVE_TOKEN_EMAIL_KEY = '_driveTokenEmail';
+  const REQUIRED_DRIVE_ACCOUNT_EMAIL = KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL;
   const _workflowFolderCache = {};
 
   function isSignedIn() {
-    return !!_accessToken;
+    return !!_accessToken && _isRequiredDriveAccount(_tokenEmail);
+  }
+
+  function _normaliseEmail(email) {
+    return String(email || '').trim().toLowerCase();
+  }
+
+  function _isRequiredDriveAccount(email) {
+    return _normaliseEmail(email) === REQUIRED_DRIVE_ACCOUNT_EMAIL;
+  }
+
+  function getRequiredAccountEmail() {
+    return REQUIRED_DRIVE_ACCOUNT_EMAIL;
+  }
+
+  function getAccountEmail() {
+    if (_tokenEmail) return _tokenEmail;
+    try {
+      return localStorage.getItem(DRIVE_TOKEN_EMAIL_KEY) || (firebase && firebase.auth && firebase.auth().currentUser && firebase.auth().currentUser.email) || '';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  function _driveAccountError(email) {
+    const normalised = _normaliseEmail(email);
+    return normalised
+      ? `Google Drive is signed into ${normalised}. Sign in with ${REQUIRED_DRIVE_ACCOUNT_EMAIL}.`
+      : `Google Drive account could not be verified. Sign in with ${REQUIRED_DRIVE_ACCOUNT_EMAIL}.`;
+  }
+
+  function _extractEmailFromAuthResult(result) {
+    return (
+      result?.user?.email ||
+      result?.additionalUserInfo?.profile?.email ||
+      result?.additionalUserInfo?.profile?.emailAddress ||
+      ''
+    );
+  }
+
+  async function _fetchDriveAccountEmail(token) {
+    if (!token) return '';
+    try {
+      const res = await fetch('https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) return '';
+      const data = await res.json();
+      return data && data.user && data.user.emailAddress ? data.user.emailAddress : '';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  async function _rejectWrongDriveAccount(email) {
+    _clearPersistedToken();
+    try {
+      if (firebase && firebase.auth) await firebase.auth().signOut();
+    } catch (_) { /* best effort */ }
+    throw new Error(_driveAccountError(email));
+  }
+
+  async function _acceptCredentialResult(result, source) {
+    const token = result && result.credential && result.credential.accessToken;
+    if (!token) throw new Error('Drive sign-in returned no access token');
+    let email = _extractEmailFromAuthResult(result);
+    if (!email) email = await _fetchDriveAccountEmail(token);
+    if (!_isRequiredDriveAccount(email)) {
+      await _rejectWrongDriveAccount(email);
+    }
+    _accessToken = token;
+    _tokenEmail = _normaliseEmail(email);
+    window._driveTokenTime = Date.now();
+    _persistToken(_tokenEmail);
+    console.log(`[Drive] ${source || 'Sign-in'} token accepted for ${_tokenEmail}`);
+    return _accessToken;
   }
 
   // v2253: Persist Drive token to localStorage so it survives page reloads
   // and app restarts. Tokens last ~1 hour; we store the token + timestamp
   // and check validity on restore. This means Dave stays "signed in" to
   // Drive across sessions without re-authenticating every time.
-  function _persistToken() {
+  function _persistToken(email) {
     if (_accessToken) {
       try {
+        const verifiedEmail = _normaliseEmail(email || _tokenEmail);
+        if (!_isRequiredDriveAccount(verifiedEmail)) {
+          _clearPersistedToken();
+          return;
+        }
         localStorage.setItem('_driveToken', _accessToken);
         localStorage.setItem('_driveTokenTime', String(window._driveTokenTime || Date.now()));
         localStorage.setItem('_driveScope', DRIVE_SCOPE);
+        localStorage.setItem(DRIVE_TOKEN_EMAIL_KEY, verifiedEmail);
       } catch (e) { /* swallow — localStorage full or private browsing */ }
     }
   }
@@ -29903,31 +29996,36 @@ const DriveBackup = (() => {
       const saved = localStorage.getItem('_driveToken');
       const savedTime = parseInt(localStorage.getItem('_driveTokenTime') || '0', 10);
       const savedScope = localStorage.getItem('_driveScope') || '';
+      const savedEmail = localStorage.getItem(DRIVE_TOKEN_EMAIL_KEY) || '';
       if (saved && savedScope !== DRIVE_SCOPE) {
-        localStorage.removeItem('_driveToken');
-        localStorage.removeItem('_driveTokenTime');
-        localStorage.removeItem('_driveScope');
+        _clearPersistedToken();
+        return false;
+      }
+      if (saved && !_isRequiredDriveAccount(savedEmail)) {
+        _clearPersistedToken();
         return false;
       }
       // Token is still valid if less than 55 minutes old (tokens last 1 hour)
       if (saved && savedTime && (Date.now() - savedTime) < 3300000) {
         _accessToken = saved;
+        _tokenEmail = _normaliseEmail(savedEmail);
         window._driveTokenTime = savedTime;
-        console.log('[Drive] Restored saved token, valid for', Math.round((3300000 - (Date.now() - savedTime)) / 60000), 'more minutes');
+        console.log('[Drive] Restored saved token for', _tokenEmail, 'valid for', Math.round((3300000 - (Date.now() - savedTime)) / 60000), 'more minutes');
         return true;
       }
       // Expired — clear stale token
-      localStorage.removeItem('_driveToken');
-      localStorage.removeItem('_driveTokenTime');
-      localStorage.removeItem('_driveScope');
+      _clearPersistedToken();
     } catch (e) { /* swallow */ }
     return false;
   }
   function _clearPersistedToken() {
+    _accessToken = null;
+    _tokenEmail = null;
     try {
       localStorage.removeItem('_driveToken');
       localStorage.removeItem('_driveTokenTime');
       localStorage.removeItem('_driveScope');
+      localStorage.removeItem(DRIVE_TOKEN_EMAIL_KEY);
     } catch (e) { /* swallow */ }
   }
   // Attempt to restore on module load
@@ -29949,7 +30047,7 @@ const DriveBackup = (() => {
     }
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.addScope(DRIVE_SCOPE);
-    provider.setCustomParameters({ prompt: 'consent', login_hint: 'daveseagrim@gmail.com' });
+    provider.setCustomParameters({ prompt: 'consent', login_hint: KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL });
 
     if (_useRedirect) {
       // Redirect flow — page navigates to Google, returns after auth.
@@ -29959,13 +30057,9 @@ const DriveBackup = (() => {
       // Execution stops here — page unloads for the redirect.
       return null;
     }
-    // Desktop popup flow (unchanged)
+    // Desktop popup flow
     const result = await firebase.auth().signInWithPopup(provider);
-    _accessToken = result.credential.accessToken;
-    window._driveTokenTime = Date.now();
-    _persistToken();
-    console.log('[Drive] Signed in, token obtained');
-    return _accessToken;
+    return _acceptCredentialResult(result, 'Signed in');
   }
 
   // Called once at app startup to pick up a redirect result (if any)
@@ -29974,11 +30068,8 @@ const DriveBackup = (() => {
     try {
       const result = await firebase.auth().getRedirectResult();
       if (result && result.credential && result.credential.accessToken) {
-        _accessToken = result.credential.accessToken;
-        window._driveTokenTime = Date.now();
-        _persistToken();
+        await _acceptCredentialResult(result, 'Redirect sign-in completed');
         sessionStorage.removeItem('_driveRedirectPending');
-        console.log('[Drive] Redirect sign-in completed, token obtained');
         if (typeof _hideDriveExpiryWarning === 'function') _hideDriveExpiryWarning();
         // v2260: show a clear banner so the user knows Drive is ready
         _showDriveConnectedBanner();
@@ -30004,6 +30095,12 @@ const DriveBackup = (() => {
   // Refresh token if expired (tokens last ~1 hour)
   async function ensureToken() {
     if (_accessToken && (Date.now() - (window._driveTokenTime || 0)) < 3300000) {
+      if (!_isRequiredDriveAccount(_tokenEmail)) {
+        const email = await _fetchDriveAccountEmail(_accessToken);
+        if (!_isRequiredDriveAccount(email)) await _rejectWrongDriveAccount(email);
+        _tokenEmail = _normaliseEmail(email);
+        _persistToken(_tokenEmail);
+      }
       return _accessToken; // Still valid
     }
     // v2253: try restoring from localStorage before triggering a sign-in flow
@@ -30016,7 +30113,7 @@ const DriveBackup = (() => {
     if (user) {
       const provider = new firebase.auth.GoogleAuthProvider();
       provider.addScope(DRIVE_SCOPE);
-      provider.setCustomParameters({ prompt: 'none', login_hint: user.email || 'daveseagrim@gmail.com' });
+      provider.setCustomParameters({ prompt: 'none', login_hint: user.email || KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL });
       try {
         if (_useRedirect) {
           // On iOS we can't silently refresh via popup — trigger redirect
@@ -30025,11 +30122,7 @@ const DriveBackup = (() => {
           return null;
         }
         const result = await firebase.auth().signInWithPopup(provider);
-        _accessToken = result.credential.accessToken;
-        window._driveTokenTime = Date.now();
-        _persistToken();
-        console.log('[Drive] Token refreshed');
-        return _accessToken;
+        return _acceptCredentialResult(result, 'Token refreshed');
       } catch (e) {
         console.warn('[Drive] Silent refresh failed:', e.message);
       }
@@ -30067,14 +30160,12 @@ const DriveBackup = (() => {
         if (!user) throw new Error('no signed-in Firebase user for silent refresh');
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.addScope(DRIVE_SCOPE);
-        provider.setCustomParameters({ prompt: 'none', login_hint: user.email || 'daveseagrim@gmail.com' });
+        provider.setCustomParameters({ prompt: 'none', login_hint: user.email || KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL });
         const result = await firebase.auth().signInWithPopup(provider);
         if (!result || !result.credential || !result.credential.accessToken) {
           throw new Error('silent refresh returned no credential');
         }
-        _accessToken = result.credential.accessToken;
-        window._driveTokenTime = Date.now();
-        _persistToken();
+        await _acceptCredentialResult(result, 'Proactive refresh');
       } finally {
         _refreshInFlight = null;
       }
@@ -30141,6 +30232,22 @@ const DriveBackup = (() => {
     return folders.find(f => _folderNameMatches(f.name, name)) || null;
   }
 
+  async function _getDriveFolderById(folderId) {
+    const token = await ensureToken();
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(folderId)}?fields=id,name,mimeType,trashed&supportsAllDrives=true`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Drive folder lookup failed (${res.status}): ${errText}`);
+    }
+    const data = await res.json();
+    if (!data || data.trashed || data.mimeType !== DRIVE_FOLDER_MIME) {
+      throw new Error('Drive folder lookup failed: target is not an active folder');
+    }
+    return data;
+  }
+
   async function _createDriveFolder(name, parentId) {
     const token = await ensureToken();
     const metadata = { name, mimeType: DRIVE_FOLDER_MIME };
@@ -30173,21 +30280,41 @@ const DriveBackup = (() => {
     return currentParent;
   }
 
+  async function _getKikiMarineRootFolderId() {
+    if (DRIVE_PRIMARY_ROOT_FOLDER_ID) {
+      try {
+        const folder = await _getDriveFolderById(DRIVE_PRIMARY_ROOT_FOLDER_ID);
+        return folder.id;
+      } catch (err) {
+        console.warn('[Drive] Kiki Marine root id unavailable, falling back to name lookup:', err.message || err);
+      }
+    }
+    return _getOrCreateFolderPath(DRIVE_ROOT_PATH, null);
+  }
+
   async function _getOrCreateSurveyYearFolder() {
-    const rootId = await _getOrCreateFolderPath(DRIVE_ROOT_PATH, null);
-    const compactBaseFolder = await _findDriveFolder(DRIVE_BASE_FOLDER, rootId);
+    try {
+      const rootId = await _getKikiMarineRootFolderId();
+      _driveWorkflowFolderNames = DRIVE_WORKFLOW_FOLDERS;
+      return _getOrCreateFolderNamed(DRIVE_SURVEY_YEAR_FOLDER, rootId);
+    } catch (err) {
+      console.warn('[Drive] Kiki Marine Drive path unavailable, falling back to legacy Boating/kiki marine path:', err.message || err);
+    }
+
+    _driveWorkflowFolderNames = DRIVE_LEGACY_WORKFLOW_FOLDERS;
+    const rootId = await _getOrCreateFolderPath(DRIVE_LEGACY_ROOT_PATH, null);
+    const compactBaseFolder = await _findDriveFolder(DRIVE_LEGACY_BASE_FOLDER, rootId);
     if (compactBaseFolder && compactBaseFolder.id) {
-      return _getOrCreateFolderPath(DRIVE_YEAR_PATH, compactBaseFolder.id);
+      return _getOrCreateFolderPath(DRIVE_LEGACY_YEAR_PATH, compactBaseFolder.id);
     }
 
-    const splitSurveyFolder = await _findDriveFolder(DRIVE_YEAR_PATH[0], rootId);
+    const splitSurveyFolder = await _findDriveFolder(DRIVE_LEGACY_YEAR_PATH[0], rootId);
     if (splitSurveyFolder && splitSurveyFolder.id) {
-      return _getOrCreateFolderPath([DRIVE_YEAR_PATH[1]], splitSurveyFolder.id);
+      return _getOrCreateFolderPath([DRIVE_LEGACY_YEAR_PATH[1]], splitSurveyFolder.id);
     }
 
-    const createdBaseFolderId = await _getOrCreateFolderNamed(DRIVE_BASE_FOLDER, rootId);
-    return _getOrCreateFolderPath(DRIVE_YEAR_PATH, createdBaseFolderId);
-    return _getOrCreateFolderPath(DRIVE_YEAR_PATH, rootId);
+    const createdBaseFolderId = await _getOrCreateFolderNamed(DRIVE_LEGACY_BASE_FOLDER, rootId);
+    return _getOrCreateFolderPath(DRIVE_LEGACY_YEAR_PATH, createdBaseFolderId);
   }
 
   function _workflowFolderKeyForSurvey(survey) {
@@ -30195,15 +30322,14 @@ const DriveBackup = (() => {
   }
 
   // Find or create the workflow backup folder on Drive.
-  // Preferred path: Boating / kiki marine / surveys 2026 / surveys / 2026
-  // / completed|in progress. If Dave has already removed the compact
-  // "surveys 2026" folder and uses Boating / kiki marine / surveys / 2026,
-  // use that existing split path instead.
+  // Preferred path: Kiki Marine / 02 Surveys, 2026 /
+  // surveys, 2026, completed|surveys, 2026, in progress.
+  // The older Boating / kiki marine path remains a fallback only.
   async function getOrCreateBackupFolder(survey) {
     const key = _workflowFolderKeyForSurvey(survey || {});
     if (_workflowFolderCache[key]) return _workflowFolderCache[key];
     const yearFolderId = await _getOrCreateSurveyYearFolder();
-    const workflowFolderId = await _getOrCreateFolderNamed(DRIVE_WORKFLOW_FOLDERS[key], yearFolderId);
+    const workflowFolderId = await _getOrCreateFolderNamed(_driveWorkflowFolderNames[key] || DRIVE_WORKFLOW_FOLDERS[key], yearFolderId);
     _workflowFolderCache[key] = workflowFolderId;
     return workflowFolderId;
   }
@@ -30637,7 +30763,7 @@ const DriveBackup = (() => {
     }
   }
 
-  return { isSignedIn, signIn, checkRedirectResult, backupSurvey, backupOnePhoto, backupAll, ensureToken, autoSyncJSON };
+  return { isSignedIn, signIn, checkRedirectResult, backupSurvey, backupOnePhoto, backupAll, ensureToken, autoSyncJSON, getRequiredAccountEmail, getAccountEmail };
 })();
 
 const FirebaseSync = (() => {
