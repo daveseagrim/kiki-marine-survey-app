@@ -1,3 +1,6 @@
+## v2564
+- Made the V1 photo-import diagnostic count stored photos without loading full image data, preventing large photo stores from freezing the recovery page.
+
 ## v2563
 - Fixed the standalone V1 photo-import page so it opens the current browser database instead of failing on older schema metadata.
 - Bumped the app cache metadata so the GitHub-hosted app loads the corrected recovery page.
