@@ -10291,6 +10291,7 @@ function renderHome() {
           <div id="homeOverflowMenu" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.18);padding:6px;flex-direction:column;gap:4px;min-width:170px;z-index:200;">
             <button onclick="document.getElementById('homeOverflowMenu').style.display='none';exportAllSurveys()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#066aab;">📦 Export All Surveys</button>
             <button onclick="document.getElementById('homeOverflowMenu').style.display='none';importSurvey()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#066aab;">📥 Import Survey</button>
+            <button onclick="document.getElementById('homeOverflowMenu').style.display='none';switchDriveAccount()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#066aab;">☁️ Switch Drive Account</button>
             <button onclick="document.getElementById('homeOverflowMenu').style.display='none';forceAppUpdate()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#64748b;">↻ Force Update</button>
             <button onclick="document.getElementById('homeOverflowMenu').style.display='none';resetAppCache()" style="border:none;background:none;padding:10px 14px;font-size:13px;font-weight:600;text-align:left;cursor:pointer;border-radius:8px;color:#dc2626;" title="Clears app cache and reloads — surveys and photos are preserved">🧹 Reset App Cache</button>
           </div>
@@ -30047,7 +30048,7 @@ const DriveBackup = (() => {
     }
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.addScope(DRIVE_SCOPE);
-    provider.setCustomParameters({ prompt: 'consent', login_hint: KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL });
+    provider.setCustomParameters({ prompt: 'select_account consent', login_hint: REQUIRED_DRIVE_ACCOUNT_EMAIL });
 
     if (_useRedirect) {
       // Redirect flow — page navigates to Google, returns after auth.
@@ -30111,9 +30112,12 @@ const DriveBackup = (() => {
     // fresh Google credential without a full sign-in flow.
     const user = firebase.auth().currentUser;
     if (user) {
+      if (!_isRequiredDriveAccount(user.email)) {
+        await _rejectWrongDriveAccount(user.email);
+      }
       const provider = new firebase.auth.GoogleAuthProvider();
       provider.addScope(DRIVE_SCOPE);
-      provider.setCustomParameters({ prompt: 'none', login_hint: user.email || KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL });
+      provider.setCustomParameters({ prompt: 'none', login_hint: REQUIRED_DRIVE_ACCOUNT_EMAIL });
       try {
         if (_useRedirect) {
           // On iOS we can't silently refresh via popup — trigger redirect
@@ -30158,9 +30162,12 @@ const DriveBackup = (() => {
         if (!firebase || !firebase.auth) throw new Error('Firebase Auth not loaded');
         const user = firebase.auth().currentUser;
         if (!user) throw new Error('no signed-in Firebase user for silent refresh');
+        if (!_isRequiredDriveAccount(user.email)) {
+          await _rejectWrongDriveAccount(user.email);
+        }
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.addScope(DRIVE_SCOPE);
-        provider.setCustomParameters({ prompt: 'none', login_hint: user.email || KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL });
+        provider.setCustomParameters({ prompt: 'none', login_hint: REQUIRED_DRIVE_ACCOUNT_EMAIL });
         const result = await firebase.auth().signInWithPopup(provider);
         if (!result || !result.credential || !result.credential.accessToken) {
           throw new Error('silent refresh returned no credential');
@@ -30763,7 +30770,15 @@ const DriveBackup = (() => {
     }
   }
 
-  return { isSignedIn, signIn, checkRedirectResult, backupSurvey, backupOnePhoto, backupAll, ensureToken, autoSyncJSON, getRequiredAccountEmail, getAccountEmail };
+  async function switchAccount() {
+    _clearPersistedToken();
+    try {
+      if (firebase && firebase.auth) await firebase.auth().signOut();
+    } catch (_) { /* best effort */ }
+    return await signIn();
+  }
+
+  return { isSignedIn, signIn, checkRedirectResult, backupSurvey, backupOnePhoto, backupAll, ensureToken, autoSyncJSON, getRequiredAccountEmail, getAccountEmail, switchAccount };
 })();
 
 const FirebaseSync = (() => {
