@@ -1,3 +1,8 @@
+## v2565
+- Added 1980 Bristol 40 / Bristol 40 sailboat specifications to the Version 1 boat specifications database for Year / Make / Model autofill.
+- Included standard modified-full-keel and keel/centerboard draft variants while leaving engine fields blank so propulsion is not guessed from original-equipment references.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the new Bristol 40 specs.
+
 ## v2564
 - Made the V1 photo-import diagnostic count stored photos without loading full image data, preventing large photo stores from freezing the recovery page.
 

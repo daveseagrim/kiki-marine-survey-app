@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-11",
+  "lastUpdated": "2026-05-19",
   "note": "Specifications sourced from manufacturer data sheets, sailboatdata.com, recognized technical references, and powerboat manufacturers. Values are approximate and may vary by model year, options, and keel variant.",
   "boats": [
     {
@@ -1614,6 +1614,54 @@
       "displacement": "14,200 lbs",
       "hullType": "Deep V",
       "construction": "Fibreglass"
+    },
+    {
+      "id": "bristol-40",
+      "make": "Bristol",
+      "model": "40",
+      "aliases": [
+        "bristol 40",
+        "bristol40",
+        "bristol-40",
+        "1980 bristol 40"
+      ],
+      "yearStart": 1970,
+      "yearEnd": 1986,
+      "type": "sailboat",
+      "loa": "40'2\"",
+      "lwl": "27'6\"",
+      "beam": "10'9\"",
+      "displacement": "17,580 lbs",
+      "ballast": "6,500 lbs",
+      "maxDraft": "5'4\"",
+      "totalSailArea": "694 sq ft",
+      "hullType": "Modified full keel",
+      "keelType": "Modified full keel",
+      "draftVariants": [
+        {
+          "label": "Modified full keel",
+          "keel": "Modified full keel",
+          "draft": "5'4\""
+        },
+        {
+          "label": "Keel/centerboard, board up",
+          "keel": "Keel/centerboard",
+          "draft": "4'0\""
+        },
+        {
+          "label": "Keel/centerboard, board down",
+          "keel": "Keel/centerboard",
+          "draft": "7'10\""
+        }
+      ],
+      "construction": "Fibreglass",
+      "builder": "Bristol Yachts Inc., Bristol, Rhode Island, USA",
+      "designer": "Ted Hood",
+      "rig": "Masthead sloop",
+      "rigType": "Masthead sloop",
+      "fuelCapacity": "31 USG",
+      "waterCapacity": "130 USG",
+      "notes": "Original equipment references list a Universal Atomic 4 gasoline inboard, 30 HP, with Westerbeke diesel optional. Do not auto-fill propulsion from this database entry; verify the installed engine from vessel records or the engine data plate."
     },
     {
       "id": "cc-30-mk1",
