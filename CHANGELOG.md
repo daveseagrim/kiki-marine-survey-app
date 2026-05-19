@@ -1,3 +1,8 @@
+## v2566
+- Doubled photo annotation text size in both Version 1 annotation paths.
+- Doubled circle annotation stroke thickness so circled defects remain visible on report photos.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the updated annotation sizing.
+
 ## v2565
 - Added 1980 Bristol 40 / Bristol 40 sailboat specifications to the Version 1 boat specifications database for Year / Make / Model autofill.
 - Included standard modified-full-keel and keel/centerboard draft variants while leaving engine fields blank so propulsion is not guessed from original-equipment references.

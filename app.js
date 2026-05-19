@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2565';
+const APP_VERSION = 'v2566';
 const KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL = 'dave@kikimarine.ca';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
@@ -23439,6 +23439,7 @@ function drawAnnotation(ctx, d) {
   ctx.lineWidth = d.lineWidth || 3;
 
   if (d.tool === 'circle') {
+    ctx.lineWidth = (d.lineWidth || 3) * 2;
     const cx = (d.x1 + d.x2) / 2;
     const cy = (d.y1 + d.y2) / 2;
     const rx = Math.abs(d.x2 - d.x1) / 2;
@@ -23462,13 +23463,13 @@ function drawAnnotation(ctx, d) {
     ctx.closePath();
     ctx.fill();
   } else if (d.tool === 'text') {
-    const fontSize = Math.max(16, Math.round(ctx.canvas.width / 25));
+    const fontSize = Math.max(32, Math.round(ctx.canvas.width / 12.5));
     ctx.font = `bold ${fontSize}px Arial, sans-serif`;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
     // Background
     const metrics = ctx.measureText(d.text);
-    const pad = 4;
+    const pad = 8;
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
     ctx.fillRect(d.x1 - pad, d.y1 - pad, metrics.width + pad * 2, fontSize + pad * 2);
     // Text
@@ -25980,16 +25981,16 @@ function viewPhotoAnnotation(photoId) {
             ctx.beginPath();
             ctx.arc(ann.x, ann.y, radius, 0, Math.PI * 2);
             ctx.strokeStyle = '#dc2626';
-            ctx.lineWidth = Math.max(3, Math.round(canvas.width / 400));
+            ctx.lineWidth = Math.max(6, Math.round(canvas.width / 200));
             ctx.stroke();
           } else if (ann.type === 'arrow') {
             drawArrow(ann.x1, ann.y1, ann.x2, ann.y2);
           } else if (ann.type === 'text') {
-            const fontSize = Math.max(24, Math.round(canvas.width / 40));
+            const fontSize = Math.max(48, Math.round(canvas.width / 20));
             ctx.font = 'bold ' + fontSize + 'px Arial, sans-serif';
             // Draw background pill for readability
             const metrics = ctx.measureText(ann.text);
-            const pad = 6;
+            const pad = 12;
             ctx.fillStyle = 'rgba(0,0,0,0.7)';
             ctx.beginPath();
             ctx.roundRect(ann.x - pad, ann.y - fontSize - pad, metrics.width + pad * 2, fontSize + pad * 2, 4);
