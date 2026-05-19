@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2566';
+const APP_VERSION = 'v2567';
 const KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL = 'dave@kikimarine.ca';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
@@ -25866,10 +25866,8 @@ function toggleAccordion(button) {
   // Show/hide the floating collapse button
   updateCollapseButton(!isOpen);
 
-  // Scroll the opened category to the top of the screen
-  if (!isOpen) {
-    button.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  // Do not force-scroll when a category opens. Field editing should
+  // stay under the surveyor's finger instead of dragging the page.
 }
 
 // Floating "Collapse" button — always visible when a section is expanded
@@ -25928,8 +25926,6 @@ function restoreAccordionState() {
           updateCollapseButton(true);
           // v2305: lazy-load thumbnails for the restored category
           loadCategoryThumbnails(content);
-          // Scroll back to it
-          setTimeout(() => header.scrollIntoView({ behavior: 'auto', block: 'start' }), 50);
         }
         break;
       }

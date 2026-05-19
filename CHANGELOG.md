@@ -1,3 +1,8 @@
+## v2567
+- Removed forced scrolling when opening or restoring survey question sections during field editing.
+- Prevented the app from dragging the screen back to the top of the question list while notes, ratings, or item controls are being edited.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the scroll fix.
+
 ## v2566
 - Doubled photo annotation text size in both Version 1 annotation paths.
 - Doubled circle annotation stroke thickness so circled defects remain visible on report photos.
