@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2569';
+const APP_VERSION = 'v2570';
 const KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL = 'dave@kikimarine.ca';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
@@ -17895,9 +17895,9 @@ async function migrateEngineData() {
   }
 
   // Engine name plate photos → enginePlatePhoto (first photo)
-  const plateData = items['Engine name plate(s)'];
-  if (plateData && plateData.photos && plateData.photos.length > 0) {
-    if (!survey.enginePlatePhoto) { survey.enginePlatePhoto = plateData.photos[0]; migrated.push('Engine plate photo'); }
+  const enginePlateIds = _surveyItemPhotoIdsAny(survey, ENGINE_NAMEPLATE_ITEM_LABELS);
+  if (enginePlateIds.length > 0) {
+    if (!survey.enginePlatePhoto) { survey.enginePlatePhoto = enginePlateIds[0]; migrated.push('Engine plate photo'); }
   }
 
   // Engine photos → enginePhoto (first photo from "Engine(s) and drive(s) photos")
@@ -18141,9 +18141,9 @@ async function checkSurvey(options = {}) {
   // Engine / transmission photos
   const enginePhotoFields = [
     ['enginePhoto', 'Engine photo', ['Engine(s) and drive(s) photos']],
-    ['enginePlatePhoto', 'Engine plate photo', ['Engine name plate(s)']],
+    ['enginePlatePhoto', 'Engine plate photo', ENGINE_NAMEPLATE_ITEM_LABELS],
     ['transmissionPhoto', 'Gearbox photo', ['Gearbox general condition/impressions', 'Gearbox oil']],
-    ['transmissionPlatePhoto', 'Gearbox plate photo', ['Gearbox nameplate(s)', 'Transmission nameplate(s)']],
+    ['transmissionPlatePhoto', 'Gearbox plate photo', GEARBOX_NAMEPLATE_ITEM_LABELS],
   ];
   if (survey.vesselType !== 'human-powered') {
     for (const [field, label, itemLabels] of enginePhotoFields) {
@@ -18814,14 +18814,12 @@ async function checkSurvey(options = {}) {
     }
     // Nameplate photo — SAMS review flagged plate photos as unreadable
     const hasEnginePlatePhoto = !!(survey.enginePlatePhoto)
-      || !!(survey.items && survey.items['Engine name plate(s)']
-            && (survey.items['Engine name plate(s)'].photos || []).length > 0);
+      || _surveyItemPhotoIdsAny(survey, ENGINE_NAMEPLATE_ITEM_LABELS).length > 0;
     if (survey.engineMake && !hasEnginePlatePhoto) {
       add('warning', 'Propulsion', 'Missing: Engine nameplate photo (SAMS reviewer flagged plate photos as unreadable)', 'Engine name plate(s)');
     }
     const hasGearboxPlatePhoto = !!(survey.transmissionPlatePhoto)
-      || !!(survey.items && survey.items['Gearbox nameplate(s)']
-            && (survey.items['Gearbox nameplate(s)'].photos || []).length > 0);
+      || _surveyItemPhotoIdsAny(survey, GEARBOX_NAMEPLATE_ITEM_LABELS).length > 0;
     if (survey.transmissionMakeModel && !hasGearboxPlatePhoto) {
       add('info', 'Propulsion', 'Missing: Gearbox/transmission nameplate photo', 'Gearbox nameplate(s)');
     }
@@ -21155,6 +21153,34 @@ function _surveyItemPhotoIds(survey, label) {
   return item && Array.isArray(item.photos) ? item.photos.filter(Boolean) : [];
 }
 
+const ENGINE_NAMEPLATE_ITEM_LABELS = [
+  'Engine name plate(s)',
+  'Engine nameplate',
+  'Engine nameplate(s)',
+  'Engine data plate',
+  'Engine data plate(s)'
+];
+
+const GEARBOX_NAMEPLATE_ITEM_LABELS = [
+  'Gearbox nameplate(s)',
+  'Gearbox name plate(s)',
+  'Transmission nameplate(s)',
+  'Transmission name plate(s)',
+  'Gearbox serial plate',
+  'Transmission serial plate',
+  'Sail drive name plate(s)'
+];
+
+function _surveyItemPhotoIdsAny(survey, labels) {
+  const ids = [];
+  (labels || []).forEach(label => {
+    _surveyItemPhotoIds(survey, label).forEach(id => {
+      if (id && !ids.includes(id)) ids.push(id);
+    });
+  });
+  return ids;
+}
+
 function _firstSurveyNameplatePhotoId(survey, fieldKey, itemLabels, slot) {
   if (!survey) return '';
   const directIds = _photoIdArray(survey[fieldKey]);
@@ -21181,7 +21207,7 @@ function _surveyNameplatePhotoIds(survey, kind, options = {}) {
   if (kind === 'gearbox') {
     add(survey.transmissionPlatePhoto);
     add(survey.transmission2PlatePhoto);
-    ['Gearbox nameplate(s)', 'Transmission nameplate(s)'].forEach(label => {
+    GEARBOX_NAMEPLATE_ITEM_LABELS.forEach(label => {
       _surveyItemPhotoIds(survey, label).forEach(add);
     });
     if (options.includeFallback) {
@@ -21198,7 +21224,7 @@ function _surveyNameplatePhotoIds(survey, kind, options = {}) {
   } else {
     add(survey.enginePlatePhoto);
     add(survey.engine2PlatePhoto);
-    _surveyItemPhotoIds(survey, 'Engine name plate(s)').forEach(add);
+    _surveyItemPhotoIdsAny(survey, ENGINE_NAMEPLATE_ITEM_LABELS).forEach(add);
     if (options.includeFallback) {
       add(survey.enginePhoto);
       add(survey.engine2Photo);
@@ -21229,6 +21255,103 @@ function _nameplateHasUsefulData(kind, details) {
     return !!(details.make || details.model || details.serial);
   }
   return !!(details.serial || (details.make && details.model) || (details.model && details.hp));
+}
+
+function _nameplateHasReadableSerial(details) {
+  return !!(details && String(details.serial || '').trim());
+}
+
+function _cleanNameplateField(value) {
+  if (value === null || value === undefined) return '';
+  if (Array.isArray(value)) value = value.filter(Boolean).join(' ');
+  if (typeof value === 'object') return '';
+  return String(value).replace(/\s+/g, ' ').trim();
+}
+
+function _cleanNameplateSerial(value) {
+  const serial = _cleanNameplateField(value)
+    .replace(/^(?:engine|motor|gearbox|transmission|marine gear)?\s*(?:(?:serial|ser\.?)\s*(?:no|number|num|#)?|s\/n|s\.n\.?|sn|no\.?)\s*[:#=.-]*/i, '')
+    .replace(/[;,|].*$/, '')
+    .replace(/\s+/g, '')
+    .replace(/[^A-Z0-9/-]/gi, '')
+    .toUpperCase();
+  return serial.length >= 3 ? serial : '';
+}
+
+function _nameplateDetailObjects(raw) {
+  const objects = [];
+  if (!raw || typeof raw !== 'object') return objects;
+  objects.push(raw);
+  ['engine', 'motor', 'gearbox', 'transmission', 'marineGear', 'plate', 'nameplate', 'data'].forEach(key => {
+    if (raw[key] && typeof raw[key] === 'object') objects.push(raw[key]);
+  });
+  return objects;
+}
+
+function _firstNameplateField(raw, keys) {
+  for (const obj of _nameplateDetailObjects(raw)) {
+    for (const key of keys) {
+      const value = _cleanNameplateField(obj[key]);
+      if (value) return value;
+    }
+  }
+  return '';
+}
+
+function _firstNameplateSerial(raw, keys) {
+  for (const obj of _nameplateDetailObjects(raw)) {
+    for (const key of keys) {
+      const value = _cleanNameplateSerial(obj[key]);
+      if (value) return value;
+    }
+  }
+  return '';
+}
+
+function _extractNameplateSerialFromText(text) {
+  const raw = _cleanNameplateField(text);
+  if (!raw) return '';
+  const patterns = [
+    /\b(?:engine|motor|gearbox|transmission|marine gear)?\s*(?:(?:serial|ser\.?)\s*(?:no|number|num|#)?|s\/n|s\.n\.?|sn|no\.?)\s*[:#=.-]*\s*([A-Z0-9][A-Z0-9 ./-]{2,30})/i,
+    /\b(?:S\/N|SN)\s*[:#=.-]*\s*([A-Z0-9][A-Z0-9 ./-]{2,30})/i
+  ];
+  for (const pattern of patterns) {
+    const match = raw.match(pattern);
+    if (match) {
+      const serial = _cleanNameplateSerial(match[1]);
+      if (serial) return serial;
+    }
+  }
+  return '';
+}
+
+function _mergeNameplateDetails(base, extra) {
+  const merged = { ...(base || {}) };
+  ['make', 'model', 'serial', 'hp', 'fuelType', 'rawText'].forEach(key => {
+    if (!merged[key] && extra && extra[key]) merged[key] = extra[key];
+  });
+  return merged;
+}
+
+function _normalizeNameplateDetails(raw, kind) {
+  if (!raw || typeof raw !== 'object') return raw;
+  const rawText = _firstNameplateField(raw, ['rawText', 'visibleText', 'text', 'details', 'notes', 'otherDetails']);
+  const serialKeys = kind === 'gearbox'
+    ? ['serial', 'serialNumber', 'serialNo', 'serialNum', 'sn', 'sNo', 'gearboxSerial', 'gearboxSerialNumber', 'gearboxSerialNo', 'transmissionSerial', 'transmissionSerialNumber', 'transmissionSerialNo']
+    : ['serial', 'serialNumber', 'serialNo', 'serialNum', 'sn', 'sNo', 'engineSerial', 'engineSerialNumber', 'engineSerialNo', 'motorSerial', 'motorSerialNumber'];
+  const normalized = {
+    make: _firstNameplateField(raw, kind === 'gearbox'
+      ? ['make', 'manufacturer', 'gearboxMake', 'transmissionMake', 'marineGearMake']
+      : ['make', 'manufacturer', 'engineMake', 'motorMake']),
+    model: _firstNameplateField(raw, kind === 'gearbox'
+      ? ['model', 'modelNumber', 'modelNo', 'gearboxModel', 'transmissionModel', 'marineGearModel']
+      : ['model', 'modelNumber', 'modelNo', 'engineModel', 'engineModelNumber', 'motorModel']),
+    serial: _firstNameplateSerial(raw, serialKeys) || _extractNameplateSerialFromText(rawText),
+    hp: _firstNameplateField(raw, ['hp', 'horsepower', 'power', 'powerRating', 'ratedPower', 'kw', 'kW']),
+    fuelType: _firstNameplateField(raw, ['fuelType', 'fuel', 'fuel_type']),
+    rawText
+  };
+  return normalized;
 }
 
 function _nameplateRawText(details) {
@@ -21362,6 +21485,7 @@ Return ONLY valid JSON with these fields, using empty strings if unreadable:
   "rawText": ""
 }
 
+Serial number labels may appear as SERIAL, SERIAL NO, SER NO, S/N, SN, or NO. Read the gearbox/transmission serial number even if make or model are already known elsewhere in the survey.
 Do not guess. Read only visible plate text. If a plate is visible but the structured fields cannot be assigned, put the visible wording in rawText. If this is only a decorative decal, casting mark, or non-data label and not a gearbox/transmission data plate, return empty strings.`
     : `You are a marine surveyor's assistant. Read the engine nameplate/data plate in this photo.
 
@@ -21378,6 +21502,7 @@ Return ONLY valid JSON with these fields, using empty strings if unreadable:
 If the visible plate says MERCRUISER or Mercury Marine, return make "Mercury MerCruiser".
 If the visible model line says MCM 7.4 LITRE MPI, return model "MCM 7.4 Litre MPI", hp "310 HP", and fuelType "Gasoline".
 When multiple serial numbers are visible, put only the engine serial number in serial; do not use transom serial numbers or drive serial numbers as the engine serial.
+Serial number labels may appear as SERIAL, SERIAL NO, SER NO, S/N, SN, or NO. Read the engine serial number even if make or model are already known elsewhere in the survey.
 Do not guess. Read only visible plate text. If a plate is visible but the structured fields cannot be assigned, put the visible wording in rawText. If this is only a decorative engine cover decal or marketing label and not a data/nameplate, return empty strings.`;
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
     method: 'POST',
@@ -21404,7 +21529,7 @@ Do not guess. Read only visible plate text. If a plate is visible but the struct
   const result = await response.json();
   const text = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
   try {
-    return _parseAiJsonObject(text);
+    return _normalizeNameplateDetails(_parseAiJsonObject(text), kind);
   } catch (error) {
     throw new Error('AI response was not usable JSON');
   }
@@ -21713,6 +21838,8 @@ async function readSurveyEngineNameplate(slot) {
   const survey = await getSurvey(currentSurveyId);
   if (!survey) return;
   const isSecond = Number(slot) === 2;
+  const p = isSecond ? '2' : '';
+  const needsSerial = !String(survey[`engine${p}Serial`] || '').trim();
   const candidateIds = _slotOrderedPhotoIds(_surveyNameplatePhotoIds(survey, 'engine', { includeFallback: true }), slot);
   if (candidateIds.length === 0) {
     showToast('Add or import an engine plate photo first');
@@ -21731,8 +21858,9 @@ async function readSurveyEngineNameplate(slot) {
       try {
         const read = await _readNameplateDetailsFromPhoto(photo, 'engine');
         if (_nameplateHasUsefulData('engine', read)) {
-          details = read;
-          break;
+          details = _mergeNameplateDetails(details, read);
+          if (!needsSerial || _nameplateHasReadableSerial(details)) break;
+          continue;
         }
         const rawText = _nameplateRawText(read);
         if (rawText) rawHints.push(rawText);
@@ -21754,7 +21882,6 @@ async function readSurveyEngineNameplate(slot) {
       return;
     }
     let changed = false;
-    const p = isSecond ? '2' : '';
     changed = _setNameplateFieldIfReadable(survey, `engine${p}Make`, details.make) || changed;
     changed = _setNameplateFieldIfReadable(survey, `engine${p}Model`, details.model) || changed;
     changed = _setNameplateFieldIfReadable(survey, `engine${p}Serial`, details.serial) || changed;
@@ -21782,6 +21909,8 @@ async function readSurveyGearboxNameplate(slot) {
   const survey = await getSurvey(currentSurveyId);
   if (!survey) return;
   const isSecond = Number(slot) === 2;
+  const p = isSecond ? '2' : '';
+  const needsSerial = !String(survey[`transmission${p}Serial`] || '').trim();
   const candidateIds = _slotOrderedPhotoIds(_surveyNameplatePhotoIds(survey, 'gearbox', { includeFallback: true }), slot);
   if (candidateIds.length === 0) {
     showToast('Add or import a gearbox plate photo first');
@@ -21800,8 +21929,9 @@ async function readSurveyGearboxNameplate(slot) {
       try {
         const read = await _readNameplateDetailsFromPhoto(photo, 'gearbox');
         if (_nameplateHasUsefulData('gearbox', read)) {
-          details = read;
-          break;
+          details = _mergeNameplateDetails(details, read);
+          if (!needsSerial || _nameplateHasReadableSerial(details)) break;
+          continue;
         }
         const rawText = _nameplateRawText(read);
         if (rawText) rawHints.push(rawText);
@@ -21823,7 +21953,6 @@ async function readSurveyGearboxNameplate(slot) {
       return;
     }
     let changed = false;
-    const p = isSecond ? '2' : '';
     changed = _setNameplateFieldIfReadable(survey, `transmission${p}Make`, details.make) || changed;
     changed = _setNameplateFieldIfReadable(survey, `transmission${p}Model`, details.model) || changed;
     changed = _setNameplateFieldIfReadable(survey, `transmission${p}Serial`, details.serial) || changed;
@@ -25262,9 +25391,12 @@ function _retroSyncEngineFromBody(survey) {
 
   // Sync photos — engine, engine nameplate, gearbox/transmission
   if (syncPhoto('Engine(s) and drive(s) photos', 'enginePhoto')) changed = true;
-  if (syncPhoto('Engine name plate(s)', 'enginePlatePhoto')) changed = true;
-  if (syncPhoto('Gearbox nameplate(s)', 'transmissionPlatePhoto')) changed = true;
-  if (syncPhoto('Transmission nameplate(s)', 'transmissionPlatePhoto')) changed = true;
+  ENGINE_NAMEPLATE_ITEM_LABELS.forEach(label => {
+    if (syncPhoto(label, 'enginePlatePhoto')) changed = true;
+  });
+  GEARBOX_NAMEPLATE_ITEM_LABELS.forEach(label => {
+    if (syncPhoto(label, 'transmissionPlatePhoto')) changed = true;
+  });
   // Gearbox general condition photos → transmissionPhoto (main gearbox photo)
   if (syncPhoto('Gearbox general condition/impressions', 'transmissionPhoto')) changed = true;
   if (syncPhoto('Gearbox oil', 'transmissionPhoto')) changed = true;
@@ -25473,9 +25605,12 @@ function _migrateLegacyIntroEnginePhotosToBody(survey) {
 function _syncEnginePhotosFromBody(survey) {
   let changed = false;
   if (_mergeIntroPhotosFromBodyItem(survey, 'Engine(s) and drive(s) photos', 'enginePhoto')) changed = true;
-  if (_mergeIntroPhotosFromBodyItem(survey, 'Engine name plate(s)', 'enginePlatePhoto')) changed = true;
-  if (_mergeIntroPhotosFromBodyItem(survey, 'Gearbox nameplate(s)', 'transmissionPlatePhoto')) changed = true;
-  if (_mergeIntroPhotosFromBodyItem(survey, 'Transmission nameplate(s)', 'transmissionPlatePhoto')) changed = true;
+  ENGINE_NAMEPLATE_ITEM_LABELS.forEach(label => {
+    if (_mergeIntroPhotosFromBodyItem(survey, label, 'enginePlatePhoto')) changed = true;
+  });
+  GEARBOX_NAMEPLATE_ITEM_LABELS.forEach(label => {
+    if (_mergeIntroPhotosFromBodyItem(survey, label, 'transmissionPlatePhoto')) changed = true;
+  });
   if (_mergeIntroPhotosFromBodyItem(survey, 'Gearbox general condition/impressions', 'transmissionPhoto')) changed = true;
   if (_mergeIntroPhotosFromBodyItem(survey, 'Gearbox oil', 'transmissionPhoto')) changed = true;
   return changed;
@@ -26909,6 +27044,15 @@ async function generateReport(surveyArg = null, options = {}) {
 	  }
 
 	  const itemPhotoIds = (label) => _photoIdArray(survey.items && survey.items[label] && survey.items[label].photos);
+	  const itemPhotoIdsAny = (labels) => {
+	    const merged = [];
+	    (labels || []).forEach(label => {
+	      itemPhotoIds(label).forEach(id => {
+	        if (id && !merged.includes(id)) merged.push(id);
+	      });
+	    });
+	    return merged;
+	  };
 	  const mergedPhotoIds = (...values) => {
 	    const merged = [];
 	    values.forEach(value => {
@@ -26923,7 +27067,7 @@ async function generateReport(surveyArg = null, options = {}) {
 	    survey.enginePhoto
 	  ), 900, 0.6);
 	  const enginePlatePhotos = await loadDocPhotos(mergedPhotoIds(
-	    itemPhotoIds('Engine name plate(s)'),
+	    itemPhotoIdsAny(ENGINE_NAMEPLATE_ITEM_LABELS),
 	    survey.enginePlatePhoto
 	  ), 1200, 0.72);
 	  const transmissionPhotos = await loadDocPhotos(mergedPhotoIds(
@@ -26932,8 +27076,7 @@ async function generateReport(surveyArg = null, options = {}) {
 	    survey.transmissionPhoto
 	  ), 900, 0.6);
 	  const transmissionPlatePhotos = await loadDocPhotos(mergedPhotoIds(
-	    itemPhotoIds('Gearbox nameplate(s)'),
-	    itemPhotoIds('Transmission nameplate(s)'),
+	    itemPhotoIdsAny(GEARBOX_NAMEPLATE_ITEM_LABELS),
 	    survey.transmissionPlatePhoto
 	  ), 1200, 0.72);
 	  const engine2Photos = await loadDocPhotos(survey.engine2Photo, 900, 0.6);

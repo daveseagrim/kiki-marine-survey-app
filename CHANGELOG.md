@@ -1,3 +1,10 @@
+## v2570
+- Made Version 1 engine and gearbox plate reading more robust for Gimme Shelter and future surveys.
+- Added support for alternate nameplate question labels, including `Engine nameplate`, `Engine name plate(s)`, transmission nameplate variants, and saildrive nameplate photos.
+- Normalized common serial-number outputs from AI reads, including `serialNumber`, `serialNo`, `S/N`, `SN`, `SER NO`, and visible raw-text serial labels.
+- Kept scanning additional engine or gearbox plate photos when the first readable plate gives make/model/details but does not provide the serial number.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the plate-reader fix.
+
 ## v2569
 - Added an exact 1989 Tolleycraft 34 Sedan boat-spec entry for Version 1 Year / Make / Model autofill.
 - Kept Tollycraft spelling aliases and marked the vessel as twin gasoline shaft drive so the two-engine/two-drive workflow opens automatically.
