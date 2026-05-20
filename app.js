@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2574';
+const APP_VERSION = 'v2575';
 const KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL = 'dave@kikimarine.ca';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
@@ -25361,8 +25361,12 @@ function _retroSyncEngineFromBody(survey) {
   // Helper: sync a text field from body to intro if body has data and intro is empty/missing
   const syncText = (itemLabel, surveyField) => {
     const item = items[itemLabel];
-    if (item && item.text && item.text.trim() && !survey[surveyField]) {
-      survey[surveyField] = item.text.trim();
+    const raw = item && item.text ? item.text.trim() : '';
+    if ((itemLabel === 'Engine hours' || itemLabel === 'Hours') && /^not\s+verified$/i.test(raw)) {
+      return false;
+    }
+    if (raw && !survey[surveyField]) {
+      survey[surveyField] = raw;
       return true;
     }
     return false;
@@ -25418,6 +25422,7 @@ function _syncEngineFieldsFromBody(survey, itemLabel, text) {
 
   // Engine hours
   if (itemLabel === 'Engine hours' || itemLabel === 'Hours') {
+    if (/^not\s+verified$/i.test(raw)) return;
     survey.engineHours = raw;
     return;
   }

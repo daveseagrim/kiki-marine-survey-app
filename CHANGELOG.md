@@ -1,3 +1,6 @@
+## v2575
+- Prevented legacy checklist placeholders such as `Not verified` from repopulating blank engine-hour fields during report generation.
+
 ## v2574
 - Cleaned the Version 1 printed report output for issuing Gimme Shelter: corrected the cover/footer company name, common text typos, photo caption accessibility duplication, and the Vessel Specifications propulsion note layout.
 - Restored the propulsion narrative fallback helper so report generation does not fail when the engine/controls narrative is rebuilt.
