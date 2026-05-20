@@ -1,3 +1,8 @@
+## v2568
+- Updated Version 1 Google Drive backups so in-progress and completed surveys both save directly under `Kiki Marine / Surveys, 2026`.
+- Removed the active `in progress` and `completed` folder split from the Version 1 backup destination so all 2026 survey folders live in one archive folder.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the single-folder Drive behavior.
+
 ## v2567
 - Removed forced scrolling when opening or restoring survey question sections during field editing.
 - Prevented the app from dragging the screen back to the top of the question list while notes, ratings, or item controls are being edited.

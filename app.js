@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2567';
+const APP_VERSION = 'v2568';
 const KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL = 'dave@kikimarine.ca';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
@@ -4879,7 +4879,7 @@ async function _backupCompletedSurveyToDrive(surveyId) {
   BackupProgress.show();
   BackupProgress.update({
     surveyLabel: `Completed archive: ${vesselName}`,
-    stepLabel: 'Preparing Google Drive completed folder…',
+    stepLabel: 'Preparing Google Drive 2026 survey folder…',
     percent: 0
   });
 
@@ -4892,7 +4892,7 @@ async function _backupCompletedSurveyToDrive(surveyId) {
     const totalPhotos = (result && result.totalPhotos) || 0;
     BackupProgress.finish({
       title: '✓ Completed archive uploaded',
-      subtitle: `JSON and ${totalPhotos} photo${totalPhotos === 1 ? '' : 's'} saved to the completed folder. PDF still needs to be saved from the report screen.`,
+      subtitle: `JSON and ${totalPhotos} photo${totalPhotos === 1 ? '' : 's'} saved to the 2026 survey folder. PDF still needs to be saved from the report screen.`,
       success: true
     });
     return { ok: true, result };
@@ -4969,7 +4969,7 @@ async function markSurveyCompleted(surveyId) {
 
   const ok = await showConfirm(
     `<strong>Mark "${name}" completed?</strong><br><br>` +
-    `This will lock the survey, export a final JSON package with all photos, and upload the JSON/photos to the Google Drive completed folder when Drive is connected.<br><br>` +
+    `This will lock the survey, export a final JSON package with all photos, and upload the JSON/photos to the Google Drive 2026 survey folder when Drive is connected.<br><br>` +
     `The final PDF still has to be saved from the report screen because the browser print dialog does not give the app a PDF file to upload.`,
     'Complete',
     'Cancel'
@@ -29896,10 +29896,6 @@ const DriveBackup = (() => {
   const DRIVE_PRIMARY_ROOT_FOLDER_ID = '1dHwlGFyQsyOOIRBLSsA2Mz4dHfYZUbBo';
   const DRIVE_ROOT_PATH = ['Kiki Marine'];
   const DRIVE_SURVEY_YEAR_FOLDER = 'Surveys, 2026';
-  const DRIVE_WORKFLOW_FOLDERS = {
-    inProgress: 'in progress',
-    completed: 'completed'
-  };
   const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
   const DRIVE_TOKEN_EMAIL_KEY = '_driveTokenEmail';
   const REQUIRED_DRIVE_ACCOUNT_EMAIL = KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL;
@@ -30319,18 +30315,17 @@ const DriveBackup = (() => {
     return _surveyWorkflowStatus(survey) === 'completed' ? 'completed' : 'inProgress';
   }
 
-  // Find or create the workflow backup folder on Drive.
-  // Required path: Kiki Marine / Surveys, 2026 / completed|in progress.
+  // Find or create the single 2026 backup folder on Drive.
+  // Required path: Kiki Marine / Surveys, 2026.
   async function getOrCreateBackupFolder(survey) {
     const key = _workflowFolderKeyForSurvey(survey || {});
     if (_workflowFolderCache[key]) return _workflowFolderCache[key];
     const yearFolderId = await _getOrCreateSurveyYearFolder();
-    const workflowFolderId = await _getOrCreateFolderNamed(DRIVE_WORKFLOW_FOLDERS[key], yearFolderId);
-    _workflowFolderCache[key] = workflowFolderId;
-    return workflowFolderId;
+    _workflowFolderCache[key] = yearFolderId;
+    return yearFolderId;
   }
 
-  // Find or create a subfolder for a specific vessel inside the workflow folder
+  // Find or create a subfolder for a specific vessel inside the single 2026 survey folder.
   async function getOrCreateVesselFolder(vesselName, survey) {
     const parentId = await getOrCreateBackupFolder(survey || {});
     const safeName = (vesselName || 'Unnamed').trim();
