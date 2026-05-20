@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2572';
+const APP_VERSION = 'v2574';
 const KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL = 'dave@kikimarine.ca';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
@@ -14854,6 +14854,11 @@ function buildDescriptionFromSurvey(survey) {
 // specs from the intro form plus condition observations derived from
 // existing rated items. Returns a string ready to drop into a <p> or a
 // textarea. Surveyor can edit in place; auto-regen respects that.
+function _lcFirst(value) {
+  const s = String(value || '');
+  return s ? s.charAt(0).toLowerCase() + s.slice(1) : s;
+}
+
 function buildPropulsionNarrative(survey) {
   if (!survey) return '';
   const vt = (survey.vesselType || '').toLowerCase();
@@ -26932,6 +26937,13 @@ async function generateReport(surveyArg = null, options = {}) {
       .replace(/\bthe\s+the\b/gi, 'the')
       // "was was" → "was"
       .replace(/\bwas\s+was\b/gi, 'was')
+      // Gimme Shelter issuing cleanup.
+      .replace(/\bgenerllay\b/gi, 'generally')
+      .replace(/\bThe VHF and antenna was installed\b/g, 'The VHF and antenna were installed')
+      .replace(/\bThe pilot House, magnetic compass\b/g, 'The pilot house, magnetic compass')
+      .replace(/\bThe Flybridge, floor, seats\b/g, 'The flybridge, floor, seats')
+      .replace(/\bwas in serviceable condition without deficiencies with no cracks or crazing\b/gi, 'was in serviceable condition, free of deficiencies, cracks, or crazing')
+      .replace(/\bForward starboard engine room\.\./g, 'Forward starboard engine room.')
       // double spaces → single
       .replace(/  +/g, ' ');
   };
@@ -27503,7 +27515,7 @@ async function generateReport(surveyArg = null, options = {}) {
   </table>
 
   <div class="cover-company-footer" style="text-align:center;margin-top:28px;padding-top:14px;border-top:2px solid #066aab;">
-    <span style="font-size:10pt;color:#066aab;letter-spacing:0.5px;">KIKI MARINE &nbsp;&bull;&nbsp; (647) 289-7876 &nbsp;&bull;&nbsp; dave@kikimarine.ca &nbsp;&bull;&nbsp; kikimarine.ca</span>
+    <span style="font-size:10pt;color:#066aab;letter-spacing:0.5px;">Kiki Marine &nbsp;&bull;&nbsp; (647) 289-7876 &nbsp;&bull;&nbsp; dave@kikimarine.ca &nbsp;&bull;&nbsp; kikimarine.ca</span>
     <p style="font-size:9pt;color:#6b7280;margin:6px 0 0 0;font-style:italic;">Based in Toronto serving marinas and boatyards from Niagara to Pickering, Muskokas, Simcoe and the Kawarthas.</p>
   </div>
   </div>
@@ -27513,7 +27525,7 @@ async function generateReport(surveyArg = null, options = {}) {
   <h2 class="overview-page-title">Vessel overview photographs</h2>
   <div class="report-photo-row" style="justify-content:center;">
     ${cornerKeys.map(k => fourCornerPhotos[k] ? `<div class="report-photo-card report-overview-card">
-        <img src="${fourCornerPhotos[k]}" alt="${cornerLabels[k]}" class="report-overview-photo" />
+        <img src="${fourCornerPhotos[k]}" alt="" aria-hidden="true" class="report-overview-photo" />
         <div class="caption">${cornerLabels[k]}</div>
       </div>` : '').join('')}
   </div>
@@ -27732,8 +27744,8 @@ async function generateReport(surveyArg = null, options = {}) {
     ${_row('numberCabins', 'Number of Cabins', esc(survey.numberCabins) || 'N/A')}
     ${_row('electricalSystem', 'Electrical System', esc(survey.electricalSystem) || 'N/A')}
     ${_row('changesToPlan', 'Changes to Original Plan', esc(survey.changesToPlan) || 'None noted')}
+    <tr><td><strong>Propulsion Detail Note</strong></td><td>Engine, transmission, and drive details are presented together in the Propulsion section of the Detailed Survey Findings. This includes make, model, serial numbers, power rating, fuel type, data-plate photos, and condition observations.</td></tr>
   </table>
-  <p style="font-size:9pt;color:#555;margin:4px 0 0;"><em>Engine, transmission, and drive details — including make, model, serial numbers, power rating, engine hours, fuel type, data-plate photos, and condition — appear together in the Propulsion section of the Detailed Survey Findings.</em></p>
 
   <!-- ═══ SURVEY CONDITIONS ═══ -->
   <h2>SURVEY CONDITIONS</h2>
@@ -27917,7 +27929,7 @@ ${(() => {
           const hasTwin = !!survey.engine2Make;
           const nameplateImg = (url, label) =>
             `<div class="report-photo-card">
-              <img src="${url}" alt="${esc(label)}" class="report-photo" />
+              <img src="${url}" alt="" aria-hidden="true" class="report-photo" />
               <div class="caption">${esc(label)}</div>
             </div>`;
           // v2396: render engine + transmission info as .item blocks so this
@@ -28062,7 +28074,7 @@ ${(() => {
                   ? item.label
                   : (idx === 0 ? item.label : `${item.label} — photo ${idx + 1} of ${total}`);
                 return `<div class="report-photo-card">
-                <img src="${itemPhotoCache[pid]}" alt="${esc(cap)}" class="report-photo" />
+                <img src="${itemPhotoCache[pid]}" alt="" aria-hidden="true" class="report-photo" />
                 <div class="caption">${esc(cap)}</div>
               </div>`;
               })
@@ -28182,7 +28194,7 @@ ${(() => {
           const imgs = validPhotos.map((pid, idx) => {
             const cap = _shortSafetyPhotoCaption(eq.name, idx, total);
             return `<div class="report-photo-card">
-              <img src="${itemPhotoCache[pid]}" alt="${esc(cap)}" class="report-photo" />
+              <img src="${itemPhotoCache[pid]}" alt="" aria-hidden="true" class="report-photo" />
               <div class="caption">${esc(cap)}</div>
             </div>`;
           }).join('');
@@ -28247,7 +28259,7 @@ ${(() => {
             ? (item.name || 'Instrument')
             : (idx === 0 ? (item.name || 'Instrument') : `${item.name || 'Instrument'} — photo ${idx + 1} of ${total}`);
           return `<div class="report-photo-card">
-            <img src="${itemPhotoCache[pid]}" alt="${esc(cap)}" class="report-photo" />
+            <img src="${itemPhotoCache[pid]}" alt="" aria-hidden="true" class="report-photo" />
             <div class="caption">${esc(cap)}</div>
           </div>`;
         }).join('');
@@ -28731,7 +28743,7 @@ ${(() => {
       </div>
     </div>
     <div style="margin-top:16px;padding:10px 0;border-top:2px solid #066aab;text-align:center;">
-      <span style="font-size:8.5pt;color:#066aab;letter-spacing:0.5px;">KIKI MARINE &nbsp;&bull;&nbsp; (647) 289-7876 &nbsp;&bull;&nbsp; dave@kikimarine.ca &nbsp;&bull;&nbsp; kikimarine.ca</span>
+      <span style="font-size:8.5pt;color:#066aab;letter-spacing:0.5px;">Kiki Marine &nbsp;&bull;&nbsp; (647) 289-7876 &nbsp;&bull;&nbsp; dave@kikimarine.ca &nbsp;&bull;&nbsp; kikimarine.ca</span>
       <div style="font-size:8pt;color:#6b7280;margin-top:4px;font-style:italic;">Based in Toronto serving marinas and boatyards from Niagara to Pickering, Muskokas, Simcoe and the Kawarthas.</div>
     </div>
   </div>

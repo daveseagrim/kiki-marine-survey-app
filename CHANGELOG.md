@@ -1,5 +1,15 @@
+## v2574
+- Cleaned the Version 1 printed report output for issuing Gimme Shelter: corrected the cover/footer company name, common text typos, photo caption accessibility duplication, and the Vessel Specifications propulsion note layout.
+- Restored the propulsion narrative fallback helper so report generation does not fail when the engine/controls narrative is rebuilt.
+- Kept engine hours out of the front matter propulsion note so blank hours remain blank in the issued report.
+
+## v2573
+- Updated Google Drive backups to target the clean `Kiki Marine / Surveys 2026` folder name after the numbered Drive folder cleanup.
+- Kept folder matching tolerant of the old `02 Surveys, 2026` and comma-separated names so existing Drive structure is still recognized during transition.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the corrected Drive save destination.
+
 ## v2572
-- Updated Google Drive backups to use the active `Kiki Marine / Surveys 2026` folder name.
+- Updated Google Drive backups to use the active Kiki Marine survey-year folder name.
 - Kept compatibility with the older comma folder name during folder lookup so existing Drive folders are not duplicated.
 - Changed full survey JSON backups to update one stable file inside each vessel folder instead of creating a new dated JSON on every save.
 - Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the corrected Drive save behavior.
