@@ -1,3 +1,8 @@
+## v2569
+- Added an exact 1989 Tolleycraft 34 Sedan boat-spec entry for Version 1 Year / Make / Model autofill.
+- Kept Tollycraft spelling aliases and marked the vessel as twin gasoline shaft drive so the two-engine/two-drive workflow opens automatically.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the updated boat database.
+
 ## v2568
 - Updated Version 1 Google Drive backups so in-progress and completed surveys both save directly under `Kiki Marine / Surveys, 2026`.
 - Removed the active `in progress` and `completed` folder split from the Version 1 backup destination so all 2026 survey folders live in one archive folder.
