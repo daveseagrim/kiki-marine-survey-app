@@ -1,3 +1,8 @@
+## v2571
+- Expanded the gearbox/transmission database with common Hurth HBW and HSW gearboxes, including `HSW 630 A`.
+- Added ZF/Hurth aliases and additional ZF Marine shaft, down-angle, and V-drive gearbox models so the model dropdown is not limited to MerCruiser outdrives.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the updated gearbox list.
+
 ## v2570
 - Made Version 1 engine and gearbox plate reading more robust for Gimme Shelter and future surveys.
 - Added support for alternate nameplate question labels, including `Engine nameplate`, `Engine name plate(s)`, transmission nameplate variants, and saildrive nameplate photos.

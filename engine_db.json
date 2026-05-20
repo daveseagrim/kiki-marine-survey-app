@@ -1022,7 +1022,7 @@
           "cylinders": "",
           "displacement": "D8 series or custom",
           "engineType": "Inboard",
-          "description": "Diesel; 2023-Present; Latest IPS inboard pod, works with D8 series diesel engines, +/-40\u00b0 rotation, joystick steering"
+          "description": "Diesel; 2023-Present; Latest IPS inboard pod, works with D8 series diesel engines, +/-40° rotation, joystick steering"
         },
         {
           "model": "IPS 600",
@@ -1042,7 +1042,7 @@
           "cylinders": "13",
           "displacement": "Variable",
           "engineType": "Inboard",
-          "description": "Diesel/Hybrid electric; 2024-Present; Dual D13 diesel or D13+electric motor hybrid, +/-40\u00b0 rotation, joystick control, dual prop IPS"
+          "description": "Diesel/Hybrid electric; 2024-Present; Dual D13 diesel or D13+electric motor hybrid, +/-40° rotation, joystick control, dual prop IPS"
         }
       ]
     },
@@ -1866,7 +1866,7 @@
           "cylinders": "6",
           "displacement": "2.5L",
           "engineType": "Outboard",
-          "description": "DFI 2-Stroke; 2000-2010; DFI 2-stroke variant, loop-charged 60\u00b0 V6"
+          "description": "DFI 2-Stroke; 2000-2010; DFI 2-stroke variant, loop-charged 60° V6"
         },
         {
           "model": "Optimax 175",
@@ -3911,6 +3911,18 @@
           "ratios": "2.0:1, 2.5:1"
         },
         {
+          "model": "HBW 35",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 40",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
           "model": "HBW 50",
           "type": "Mechanical",
           "transmission_type": "Manual",
@@ -3923,23 +3935,204 @@
           "ratios": "2.5:1, 3.0:1"
         },
         {
+          "model": "HBW 100-2R",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 125",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
           "model": "HBW 150",
           "type": "Hydraulic",
           "transmission_type": "Hydraulic Shift",
           "ratios": "2.5:1, 3.0:1"
         },
         {
+          "model": "HBW 150A",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 150V",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 200",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 220",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
           "model": "HBW 250",
           "type": "Hydraulic",
           "transmission_type": "Hydraulic Shift",
           "ratios": "2.5:1, 3.0:1, 3.5:1"
+        },
+        {
+          "model": "HBW 250A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 250V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 360A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 360V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 450A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 450V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 630A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 630V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 45 A",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 63 A",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 100 A",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 125 A",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 150 A",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 250 A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 250 V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 360 A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 360 V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 450 A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 450 D",
+          "type": "Hydraulic",
+          "transmission_type": "Down-Angle",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 450 V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 630 A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 630 V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 800 A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 800 V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
         }
-      ]
+      ],
+      "note": "Legacy Hurth and ZF/Hurth marine gearboxes, including HBW and HSW series plates."
     },
     {
       "make": "Kanzaki",
       "country": "Japan",
-      "note": "Yanmar's transmission division \u2014 standard gearbox on most Yanmar marine diesels",
+      "note": "Yanmar's transmission division — standard gearbox on most Yanmar marine diesels",
       "models": [
         {
           "model": "KM2P",
@@ -4296,7 +4489,7 @@
     {
       "make": "Walter",
       "country": "USA",
-      "note": "V-drive specialist \u2014 common on ski boats, wake boats, and inboard runabouts",
+      "note": "V-drive specialist — common on ski boats, wake boats, and inboard runabouts",
       "models": [
         {
           "model": "V-Drive (Light Duty)",
@@ -4406,10 +4599,22 @@
           "ratios": "2.0:1, 2.5:1"
         },
         {
+          "model": "ZF 12M",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
           "model": "ZF 15M",
           "type": "Mechanical",
           "transmission_type": "Manual",
           "ratios": "2.0:1, 2.5:1, 3.0:1"
+        },
+        {
+          "model": "ZF 15MA",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
         },
         {
           "model": "ZF 25",
@@ -4424,6 +4629,30 @@
           "ratios": "2.5:1, 2.7:1, 3.0:1"
         },
         {
+          "model": "ZF 25M",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 25MA",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 30M",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 45-1",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
           "model": "ZF 45A",
           "type": "Hydraulic",
           "transmission_type": "Hydraulic Shift",
@@ -4436,18 +4665,169 @@
           "ratios": "2.5:1, 3.0:1"
         },
         {
+          "model": "ZF 63IV",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 63V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 68A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 68IV",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 68V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
           "model": "ZF 80A",
           "type": "Hydraulic",
           "transmission_type": "Hydraulic Shift",
           "ratios": "2.5:1, 3.0:1"
         },
         {
+          "model": "ZF 80IV",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
           "model": "ZF 85A",
           "type": "Hydraulic",
           "transmission_type": "Hydraulic Shift",
           "ratios": "2.5:1, 3.0:1, 3.5:1"
+        },
+        {
+          "model": "ZF 85IV",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 220A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 220IV",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 280A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 280IV",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 301A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 301IV",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 305A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 305IV",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 325A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 325IV",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 350A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 350IV",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 500A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 500IV",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 550A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 550IV",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 665A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "ZF 665IV",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
         }
-      ]
+      ],
+      "note": "ZF Marine shaft, down-angle, and V-drive gearboxes."
     },
     {
       "make": "Yanmar Saildrive",
@@ -4578,6 +4958,247 @@
           "type": "Saildrive",
           "transmission_type": "Saildrive",
           "ratios": "2.48:1"
+        }
+      ]
+    },
+    {
+      "make": "ZF/Hurth",
+      "country": "Germany",
+      "note": "ZF Marine gearboxes often marked ZF/Hurth or Hurth on older nameplates.",
+      "models": [
+        {
+          "model": "HBW 5",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 10",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 20",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 35",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 40",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 50",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 100",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 100-2R",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 125",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 150",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 150A",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 150V",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 200",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 220",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 250",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 250A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 250V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 360A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 360V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 450A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 450V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 630A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HBW 630V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 45 A",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 63 A",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 100 A",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 125 A",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 150 A",
+          "type": "Mechanical",
+          "transmission_type": "Manual",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 250 A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 250 V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 360 A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 360 V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 450 A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 450 D",
+          "type": "Hydraulic",
+          "transmission_type": "Down-Angle",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 450 V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 630 A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 630 V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 800 A",
+          "type": "Hydraulic",
+          "transmission_type": "Hydraulic Shift",
+          "ratios": "various"
+        },
+        {
+          "model": "HSW 800 V",
+          "type": "Hydraulic",
+          "transmission_type": "V-Drive",
+          "ratios": "various"
         }
       ]
     }
