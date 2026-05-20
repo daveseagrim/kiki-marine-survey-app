@@ -1,3 +1,9 @@
+## v2572
+- Updated Google Drive backups to use the active `Kiki Marine / Surveys 2026` folder name.
+- Kept compatibility with the older comma folder name during folder lookup so existing Drive folders are not duplicated.
+- Changed full survey JSON backups to update one stable file inside each vessel folder instead of creating a new dated JSON on every save.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the corrected Drive save behavior.
+
 ## v2571
 - Expanded the gearbox/transmission database with common Hurth HBW and HSW gearboxes, including `HSW 630 A`.
 - Added ZF/Hurth aliases and additional ZF Marine shaft, down-angle, and V-drive gearbox models so the model dropdown is not limited to MerCruiser outdrives.

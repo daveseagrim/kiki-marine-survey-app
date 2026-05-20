@@ -50,6 +50,11 @@ describe('driveFolderNameMatches', () => {
     assert.truthy(driveFolderNameMatches('03_surveys', 'surveys'));
   });
 
+  it('matches the 2026 survey folder with or without punctuation', () => {
+    assert.truthy(driveFolderNameMatches('Surveys, 2026', 'Surveys 2026'));
+    assert.truthy(driveFolderNameMatches('Surveys 2026', 'Surveys, 2026'));
+  });
+
   it('does not strip meaningful year-only folder names', () => {
     assert.truthy(driveFolderNameMatches('2026', '2026'));
     assert.truthy(driveFolderNameMatches('04 2026', '2026'));

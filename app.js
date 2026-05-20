@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2571';
+const APP_VERSION = 'v2572';
 const KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL = 'dave@kikimarine.ca';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
@@ -30038,7 +30038,7 @@ const DriveBackup = (() => {
   const DRIVE_FOLDER_MIME = 'application/vnd.google-apps.folder';
   const DRIVE_PRIMARY_ROOT_FOLDER_ID = '1dHwlGFyQsyOOIRBLSsA2Mz4dHfYZUbBo';
   const DRIVE_ROOT_PATH = ['Kiki Marine'];
-  const DRIVE_SURVEY_YEAR_FOLDER = 'Surveys, 2026';
+  const DRIVE_SURVEY_YEAR_FOLDER = 'Surveys 2026';
   const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
   const DRIVE_TOKEN_EMAIL_KEY = '_driveTokenEmail';
   const REQUIRED_DRIVE_ACCOUNT_EMAIL = KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL;
@@ -30356,8 +30356,8 @@ const DriveBackup = (() => {
   function _folderNameMatches(actualName, targetName) {
     const helper = window.KikiDriveBackup && window.KikiDriveBackup.driveFolderNameMatches;
     if (typeof helper === 'function') return helper(actualName, targetName);
-    const target = String(targetName || '').toLowerCase().replace(/\s+/g, ' ').trim();
-    const base = String(actualName || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const target = String(targetName || '').toLowerCase().replace(/[,\u2013\u2014-]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const base = String(actualName || '').toLowerCase().replace(/[,\u2013\u2014-]+/g, ' ').replace(/\s+/g, ' ').trim();
     const stripped = base.replace(/^\d+\s*[-_.:)]?\s*/, '').replace(/\s+/g, ' ').trim();
     return base === target || stripped === target;
   }
@@ -30459,7 +30459,7 @@ const DriveBackup = (() => {
   }
 
   // Find or create the single 2026 backup folder on Drive.
-  // Required path: Kiki Marine / Surveys, 2026.
+  // Required path: Kiki Marine / Surveys 2026.
   async function getOrCreateBackupFolder(survey) {
     const key = _workflowFolderKeyForSurvey(survey || {});
     if (_workflowFolderCache[key]) return _workflowFolderCache[key];
@@ -30581,8 +30581,8 @@ const DriveBackup = (() => {
 
     // 1. Upload survey data (without photo blobs) as JSON — always uploaded
     // fresh because it may have changed since the last backup. Filename
-    // includes the date so same-day re-runs overwrite, different days create
-    // a new snapshot.
+    // uses a stable current filename so repeated saves update the same Drive
+    // file inside the vessel folder instead of scattering dated snapshots.
     report({ stepLabel: 'Uploading survey data…', percent: 2 });
     const surveyClone = JSON.parse(JSON.stringify(survey));
     if (surveyClone.items) {
@@ -30593,8 +30593,9 @@ const DriveBackup = (() => {
         }
       }
     }
-    const dateStr = new Date().toISOString().slice(0, 10);
-    const surveyJsonName = `${vesselName.replace(/[^a-zA-Z0-9_-]/g, '_')}_${dateStr}.json`;
+    const safeVesselName = vesselName.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const safeSurveyId = String(survey.id || 'current').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const surveyJsonName = `${safeVesselName}_${safeSurveyId}.json`;
     const surveyJson = JSON.stringify(surveyClone, null, 2);
     const existingJsonId = await findFileInFolder(folderId, surveyJsonName);
     if (existingJsonId) {

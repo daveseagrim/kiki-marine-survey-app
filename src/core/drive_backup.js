@@ -70,6 +70,7 @@
   function folderMatchKeys(name) {
     const base = String(name || '')
       .toLowerCase()
+      .replace(/[,\u2013\u2014-]+/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
     const stripped = base
@@ -82,6 +83,7 @@
   function driveFolderNameMatches(actualName, targetName) {
     const target = String(targetName || '')
       .toLowerCase()
+      .replace(/[,\u2013\u2014-]+/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
     if (!target) return false;
