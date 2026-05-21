@@ -1,3 +1,9 @@
+## v2582
+- Added a dedicated AC outlet count field to the Version 1 AC outlets notes sheet and report output.
+- Added dedicated amperage and location fields to Shore power overcurrent protection so the breaker/device rating no longer has to be typed into prose.
+- Added the standard `could not be tested without AC power available` chip to AC-dependent Version 1 items that exist in the template.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the updated AC workflow.
+
 ## v2581
 - Kept the 12V/DC distribution panel and 120V/AC distribution panel as separate questions, but placed them consecutively in both Version 1 templates.
 - Renamed the combined wiring question to `Wire bundling and support` and mapped older wiring labels to the new question.

@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2581';
+const APP_VERSION = 'v2582';
 const KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL = 'dave@kikimarine.ca';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
@@ -6290,6 +6290,8 @@ function showNotesSheet(itemLabel, categoryName) {
       `;
     }
 
+    const overcurrentProtectionHtml = _overcurrentProtectionHtml(itemLabel, itemData, safeLabel, safeCat, sanitizedLabel);
+    const acOutletCountHtml = _acOutletCountHtml(itemLabel, itemData, safeLabel, safeCat, sanitizedLabel);
     const batteryBankHtml = _batteryBankHtml(itemLabel, itemData, safeLabel, safeCat);
 
     // Component builder — check if this item has a builder definition
@@ -6350,6 +6352,8 @@ function showNotesSheet(itemLabel, categoryName) {
       <div class="bottom-sheet" onclick="event.stopPropagation();">
         <div class="bottom-sheet-handle"></div>
         <div class="bottom-sheet-title">${itemData.rating ? `<span style="display:inline-block;background:${RATING_COLORS[itemData.rating] || '#6b7280'};color:#fff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:6px;margin-right:8px;vertical-align:middle;">${itemData.rating.charAt(0)}</span>` : ''}${displayItemLabel(itemLabel, survey)} — Notes <span style="font-size:10px;color:#9ca3af;font-weight:400;">${APP_VERSION}</span></div>
+        ${overcurrentProtectionHtml}
+        ${acOutletCountHtml}
         ${mastOptionsHtml}
         ${outdriveOptionsHtml}
         ${winchOptionsHtml}
@@ -7155,6 +7159,7 @@ function saveNotesFromSheet(itemLabel, categoryName, sanitizedLabel) {
       survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
     }
     survey.items[itemLabel].text = newText;
+    _syncElectricalDetailFieldsFromSheet(itemLabel, survey.items[itemLabel], sanitizedLabel);
     saveSurvey(survey).then(() => {
       updateCompactItem(survey, itemLabel, categoryName);
       // Dismiss overlay AFTER the compact item is re-rendered so scroll
@@ -21372,6 +21377,110 @@ function _nameplateRawText(details) {
   return String(details && details.rawText || '').replace(/\s+/g, ' ').trim();
 }
 
+function _isShorePowerOvercurrentLabel(label) {
+  return /^Shore power overcurrent protection$/i.test(String(label || '').trim());
+}
+
+function _isAcOutletsLabel(label) {
+  return /^AC outlets$/i.test(String(label || '').trim());
+}
+
+function _cleanSurveyDetailValue(value) {
+  if (value === null || value === undefined) return '';
+  return String(value).replace(/\s+/g, ' ').trim();
+}
+
+function _cleanNumericSurveyDetailValue(value) {
+  const text = _cleanSurveyDetailValue(value);
+  const match = text.match(/\d+(?:\.\d+)?/);
+  return match ? match[0] : '';
+}
+
+function _overcurrentProtectionHtml(itemLabel, itemData, safeLabel, safeCat, sanitizedLabel) {
+  if (!_isShorePowerOvercurrentLabel(itemLabel)) return '';
+  const amperage = _cleanNumericSurveyDetailValue(itemData.overcurrentAmperage);
+  const location = _cleanSurveyDetailValue(itemData.overcurrentLocation);
+  return `
+    <div style="margin:8px 20px 4px 20px;padding:12px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff;">
+      <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:8px;">Shore power overcurrent protection details</div>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+        <label style="display:block;font-size:11px;font-weight:600;color:#4b5563;">
+          Amperage
+          <input id="sheet-overcurrent-amperage-${sanitizedLabel}" inputmode="decimal" value="${escapeHtml(amperage)}"
+                 onchange="updateOvercurrentProtectionFieldFromSheet('${safeLabel}', '${safeCat}', 'overcurrentAmperage', this.value)"
+                 style="width:100%;box-sizing:border-box;margin-top:3px;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;" />
+        </label>
+        <label style="display:block;font-size:11px;font-weight:600;color:#4b5563;">
+          Location
+          <input id="sheet-overcurrent-location-${sanitizedLabel}" value="${escapeHtml(location)}"
+                 onchange="updateOvercurrentProtectionFieldFromSheet('${safeLabel}', '${safeCat}', 'overcurrentLocation', this.value)"
+                 style="width:100%;box-sizing:border-box;margin-top:3px;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;" />
+        </label>
+      </div>
+    </div>
+  `;
+}
+
+function _acOutletCountHtml(itemLabel, itemData, safeLabel, safeCat, sanitizedLabel) {
+  if (!_isAcOutletsLabel(itemLabel)) return '';
+  const count = _cleanNumericSurveyDetailValue(itemData.acOutletCount);
+  return `
+    <div style="margin:8px 20px 4px 20px;padding:12px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff;">
+      <label style="display:block;font-size:11px;font-weight:700;color:#4b5563;">
+        Number of AC outlets
+        <input id="sheet-ac-outlet-count-${sanitizedLabel}" inputmode="numeric" value="${escapeHtml(count)}"
+               onchange="updateAcOutletCountFromSheet('${safeLabel}', '${safeCat}', this.value)"
+               style="width:100%;box-sizing:border-box;margin-top:5px;padding:9px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;" />
+      </label>
+    </div>
+  `;
+}
+
+function _syncElectricalDetailFieldsFromSheet(itemLabel, itemData, sanitizedLabel) {
+  if (!itemData) return;
+  if (_isShorePowerOvercurrentLabel(itemLabel)) {
+    const amperageEl = document.getElementById(`sheet-overcurrent-amperage-${sanitizedLabel}`);
+    const locationEl = document.getElementById(`sheet-overcurrent-location-${sanitizedLabel}`);
+    if (amperageEl) itemData.overcurrentAmperage = _cleanNumericSurveyDetailValue(amperageEl.value);
+    if (locationEl) itemData.overcurrentLocation = _cleanSurveyDetailValue(locationEl.value);
+  }
+  if (_isAcOutletsLabel(itemLabel)) {
+    const countEl = document.getElementById(`sheet-ac-outlet-count-${sanitizedLabel}`);
+    if (countEl) itemData.acOutletCount = _cleanNumericSurveyDetailValue(countEl.value);
+  }
+}
+
+function _applyElectricalDetailPlaceholders(itemLabel, itemData, text) {
+  let output = String(text || '');
+  if (_isShorePowerOvercurrentLabel(itemLabel)) {
+    const amperage = _cleanNumericSurveyDetailValue(itemData && itemData.overcurrentAmperage);
+    if (amperage) {
+      output = output.replace(/\[insert amperage\]/gi, amperage);
+    } else {
+      output = output.replace(/\s*rated at\s*\[insert amperage\]\s*amps/gi, '');
+    }
+  }
+  return output;
+}
+
+function _overcurrentProtectionReportHtml(itemLabel, itemData) {
+  if (!_isShorePowerOvercurrentLabel(itemLabel)) return '';
+  const parts = [];
+  const amperage = _cleanNumericSurveyDetailValue(itemData && itemData.overcurrentAmperage);
+  const location = _cleanSurveyDetailValue(itemData && itemData.overcurrentLocation);
+  if (amperage) parts.push(`${amperage} amps`);
+  if (location) parts.push(`location: ${location}`);
+  return parts.length
+    ? `<p><em>Shore power overcurrent protection details: ${escapeHtml(parts.join('; '))}</em></p>`
+    : '';
+}
+
+function _acOutletCountReportHtml(itemLabel, itemData) {
+  if (!_isAcOutletsLabel(itemLabel)) return '';
+  const count = _cleanNumericSurveyDetailValue(itemData && itemData.acOutletCount);
+  return count ? `<p><em>AC outlets recorded: ${escapeHtml(count)}</em></p>` : '';
+}
+
 function _isBatteryItemLabel(label) {
   return /^Battery\(ies\),\s*(house|starter)$/i.test(String(label || '').trim());
 }
@@ -21560,6 +21669,30 @@ async function updateBatteryCountFromSheet(itemLabel, categoryName, value) {
   itemData.batterySummary = _batterySummary(itemData.batteryRows);
   await saveSurvey(survey);
   showNotesSheet(itemLabel, categoryName || '');
+  updateCompactItem(survey, itemLabel, categoryName || '');
+}
+
+async function updateOvercurrentProtectionFieldFromSheet(itemLabel, categoryName, key, value) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !_isShorePowerOvercurrentLabel(itemLabel)) return;
+  if (!survey.items[itemLabel]) survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+  if (key === 'overcurrentAmperage') {
+    survey.items[itemLabel].overcurrentAmperage = _cleanNumericSurveyDetailValue(value);
+  } else if (key === 'overcurrentLocation') {
+    survey.items[itemLabel].overcurrentLocation = _cleanSurveyDetailValue(value);
+  } else {
+    return;
+  }
+  await saveSurvey(survey);
+  updateCompactItem(survey, itemLabel, categoryName || '');
+}
+
+async function updateAcOutletCountFromSheet(itemLabel, categoryName, value) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !_isAcOutletsLabel(itemLabel)) return;
+  if (!survey.items[itemLabel]) survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+  survey.items[itemLabel].acOutletCount = _cleanNumericSurveyDetailValue(value);
+  await saveSurvey(survey);
   updateCompactItem(survey, itemLabel, categoryName || '');
 }
 
@@ -28517,7 +28650,9 @@ ${(() => {
 	          if (_isBatteryItemLabel(item.label) && itemData.batterySummary) {
 	            batteryInfoHtml = `<p><em>Battery details: ${esc(itemData.batterySummary)}</em></p>`;
 	          }
-		          const detailedItemText = normalizeKnownModelText(_ensureConductivityRangeInText(item.label, itemData.text || ''));
+	          const overcurrentInfoHtml = _overcurrentProtectionReportHtml(item.label, itemData);
+	          const acOutletCountInfoHtml = _acOutletCountReportHtml(item.label, itemData);
+		          const detailedItemText = normalizeKnownModelText(_ensureConductivityRangeInText(item.label, _applyElectricalDetailPlaceholders(item.label, itemData, itemData.text || '')));
 
           html += `
   <div class="item" style="border-left-color: ${RATING_COLORS[ratingLabel] || '#066aab'};">
@@ -28526,6 +28661,8 @@ ${(() => {
 	    ${winchInfoHtml}
 	    ${mastOptionsHtml}
 	    ${batteryInfoHtml}
+	    ${overcurrentInfoHtml}
+	    ${acOutletCountInfoHtml}
 	    ${detailedItemText ? `<p>${esc(pluralizeRudder(cleanupTypos(depersonalise(dedup(detailedItemText))), survey.rudderCount))}</p>` : ''}
     ${(() => {
       if (!(ratingLabel.startsWith('A') || ratingLabel.startsWith('B'))) return '';

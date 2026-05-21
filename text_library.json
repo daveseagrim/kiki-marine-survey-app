@@ -19157,6 +19157,13 @@
       "text": "Recommend testing the hot water tank, plumbing and electrical when the vessel is commissioned for the season."
     },
     {
+      "section": "Hot water tank, plumbing and electrical",
+      "rating": "Not tested/not verified",
+      "text": "could not be tested without AC power available",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
       "section": "Black water tank(s) and plumbing",
       "rating": "Not tested/not verified",
       "phase": "observed",
@@ -23914,6 +23921,13 @@
       "text": "No corrective action is recommended at this time."
     },
     {
+      "section": "Battery charger",
+      "rating": "Not tested/not verified",
+      "text": "could not be tested without AC power available",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
       "section": "Battery selector switch, combiner, VSR",
       "rating": "A",
       "phase": "means",
@@ -24103,6 +24117,13 @@
       "text": "No corrective action is recommended at this time."
     },
     {
+      "section": "Distribution panel 120V",
+      "rating": "Not tested/not verified",
+      "text": "could not be tested without AC power available",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
       "section": "Voltmeter/ammeter",
       "rating": "A",
       "phase": "means",
@@ -24185,6 +24206,13 @@
       "phase": "action",
       "severity": 1,
       "text": "No corrective action is recommended at this time."
+    },
+    {
+      "section": "AC outlets",
+      "rating": "Not tested/not verified",
+      "text": "could not be tested without AC power available",
+      "phase": "observed",
+      "severity": 3
     },
     {
       "section": "Shore power cable(s)",
