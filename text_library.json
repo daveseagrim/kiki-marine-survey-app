@@ -7931,6 +7931,216 @@
       "phase": "means",
       "severity": 3,
       "text": "As this was a visual observation only and did not constitute a mechanical assessment, serviceability could not be confirmed."
+    },
+    {
+      "section": "Outboard general condition and impression",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard general condition and impression",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard general condition and impression",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard general condition and impression",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard general condition and impression",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Engine mount",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Engine mount",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Engine mount",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Engine mount",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Engine mount",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Throttle, gearshift, choke",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Throttle, gearshift, choke",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Throttle, gearshift, choke",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Throttle, gearshift, choke",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Throttle, gearshift, choke",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard tilt",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard tilt",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard tilt",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard tilt",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard tilt",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard propeller",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard propeller",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard propeller",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard propeller",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard propeller",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard oil",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard oil",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard oil",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard oil",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Outboard oil",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
     }
   ],
   "Cockpit": [
@@ -21216,6 +21426,531 @@
       "rating": "Not tested - out of water",
       "phase": "action",
       "text": "Recommend testing the stuffing box or dripless seal when the vessel is commissioned for the season."
+    },
+    {
+      "section": "Engine condition",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Engine condition",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Engine condition",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Engine condition",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Engine condition",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Cooling water intake seacock(s) and strainer(s)",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Cooling water intake seacock(s) and strainer(s)",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Cooling water intake seacock(s) and strainer(s)",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Cooling water intake seacock(s) and strainer(s)",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Cooling water intake seacock(s) and strainer(s)",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Anti-vibration mounts",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Anti-vibration mounts",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Anti-vibration mounts",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Anti-vibration mounts",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Anti-vibration mounts",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Manifolds and risers",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Manifolds and risers",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Manifolds and risers",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Manifolds and risers",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Manifolds and risers",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Manual fuel pump(s)",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Manual fuel pump(s)",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Manual fuel pump(s)",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Manual fuel pump(s)",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Manual fuel pump(s)",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Oil level and condition",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Oil level and condition",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Oil level and condition",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Oil level and condition",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Oil level and condition",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Coolant level and quality",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Coolant level and quality",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Coolant level and quality",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Coolant level and quality",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Coolant level and quality",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Belts and pulleys",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Belts and pulleys",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Belts and pulleys",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Belts and pulleys",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Belts and pulleys",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Hoses",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Hoses",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Hoses",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Hoses",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Hoses",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Gearbox general condition and impressions",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Gearbox general condition and impressions",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Gearbox general condition and impressions",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Gearbox general condition and impressions",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Gearbox general condition and impressions",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Gearbox oil",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Gearbox oil",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Gearbox oil",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Gearbox oil",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Gearbox oil",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Drive coupling(s), interior propeller shaft(s), stuffing box(es) or dripless seal(s), interior stern tube(s)",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Drive coupling",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Drive coupling",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Drive coupling",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Drive coupling",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Drive coupling",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Stuffing box/packing gland/dripless seal",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "A",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "B",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "C",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "Not tested",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
+    },
+    {
+      "section": "Exhaust condition",
+      "rating": "Powered up only",
+      "phase": "action",
+      "text": "The surveyor is not a licensed marine mechanic; this mechanical assessment should be verified by a licensed marine mechanic.",
+      "severity": 3
     }
   ],
   "Steering & Hydraulics": [

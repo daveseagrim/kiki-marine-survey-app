@@ -1,3 +1,7 @@
+## v2577
+- Added an optional mechanic-verification action snippet to engine and outboard mechanical sections so the report can state that the surveyor is not a licensed marine mechanic and that the mechanical assessment should be verified by one.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the updated engine-section chip library.
+
 ## v2576
 - Corrected legacy Version 1 ABYC standards mapping so A/B findings no longer auto-cite questionable H-27 potable-water, P-7 shafting/outdrive, or H-33 non-diesel standards.
 - Added final-report filtering for stale or manually carried standard citations so irrelevant standards are removed before printing.
