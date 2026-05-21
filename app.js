@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2575';
+const APP_VERSION = 'v2576';
 const KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL = 'dave@kikimarine.ca';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
@@ -1003,7 +1003,7 @@ const STANDARDS_BY_CATEGORY = {
     'ABYC TH-27 - Seacocks/Through-Hull Fittings',
     'ABYC P-1 - Installation of Exhaust Systems',
     'ABYC P-4 - Inboard Engines',
-    'ABYC P-7 - Propeller Shafting Systems',
+    'ABYC P-6 - Propeller Shafting Systems',
     'ABYC E-2 - Cathodic Protection',
     'ABYC E-13 - Cathodic Protection'
   ],
@@ -1031,7 +1031,6 @@ const STANDARDS_BY_CATEGORY = {
     'ABYC E-11 - AC and DC Electrical Systems on Boats'
   ],
   'Outboard': [
-    'ABYC P-6 - Outboard Engines',
     'ABYC H-24 - Gasoline Fuel Systems',
     'ABYC H-25 - Portable Fuel Systems',
     'ABYC H-2 - Ventilation of Boats Using Gasoline',
@@ -1090,7 +1089,7 @@ const STANDARDS_BY_CATEGORY = {
     'TP1332 - Construction Standards for Small Vessels',
     'Canada Shipping Act, 2001 (S.C. 2001, c. 26)',
     'Small Vessel Regulations (SOR/2010-91)',
-    'ABYC H-27 - Potable Water Systems',
+    'ABYC H-23 - Water Systems on Boats',
     'ABYC A-1 - Marine Liquefied Petroleum Gas (LPG) Systems',
     'ABYC A-22 - Marine Compressed Natural Gas (CNG) Systems',
     'NFPA 302 - Fire Protection Standard for Pleasure and Commercial Motor Craft'
@@ -1099,14 +1098,14 @@ const STANDARDS_BY_CATEGORY = {
     'TP1332 - Construction Standards for Small Vessels',
     'Canada Shipping Act, 2001 (S.C. 2001, c. 26)',
     'Small Vessel Regulations (SOR/2010-91)',
-    'ABYC H-27 - Potable Water Systems',
+    'ABYC H-23 - Water Systems on Boats',
     'ABYC TH-27 - Seacocks/Through-Hull Fittings',
     'Vessel Pollution and Dangerous Chemicals Regulations (SOR/2012-69)'
   ],
   'Fuel': [
     'ABYC H-24 - Gasoline Fuel Systems',
     'ABYC H-33 - Diesel Fuel Systems',
-    'ABYC H-27 - Potable Water Systems',
+    'ABYC H-23 - Water Systems on Boats',
     'ABYC H-41 - Vapor Detection Systems',
     'ABYC H-2 - Ventilation of Boats Using Gasoline',
     'ABYC H-32 - Ventilation of Boats Using Diesel Fuel',
@@ -1118,7 +1117,7 @@ const STANDARDS_BY_CATEGORY = {
   'Engine': [
     'ABYC P-1 - Installation of Exhaust Systems',
     'ABYC P-4 - Inboard Engines',
-    'ABYC P-7 - Propeller Shafting Systems',
+    'ABYC P-6 - Propeller Shafting Systems',
     'ABYC H-24 - Gasoline Fuel Systems',
     'ABYC H-33 - Diesel Fuel Systems',
     'ABYC H-2 - Ventilation of Boats Using Gasoline',
@@ -8008,8 +8007,8 @@ const ITEM_STANDARD_MAP = {
   'Keel and keel-hull joint': 'TP1332 - Construction Standards for Small Vessels',
   'Hull anodes': 'ABYC E-2 - Cathodic Protection',
   'Propeller/drive anode': 'ABYC E-2 - Cathodic Protection',
-  'Cutlass bearing': 'ABYC P-7 - Propeller Shafting Systems',
-  'Propeller': 'ABYC P-7 - Propeller Shafting Systems',
+  'Cutlass bearing': 'ABYC P-6 - Propeller Shafting Systems',
+  'Propeller': null,
   'Outdrive': ['ABYC P-4 - Inboard Engines', 'ABYC E-2 - Cathodic Protection'],
   'Sail drive': ['ABYC P-4 - Inboard Engines', 'ABYC E-2 - Cathodic Protection'],
   'Bow thruster': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
@@ -8020,9 +8019,9 @@ const ITEM_STANDARD_MAP = {
   'Swim platform': 'ABYC E-2 - Cathodic Protection',
   'Transom': 'TP1332 - Construction Standards for Small Vessels',
   'Hull-deck joint': 'TP1332 - Construction Standards for Small Vessels',
-  'Stern tube': 'ABYC P-7 - Propeller Shafting Systems',
-  'Propeller shaft': 'ABYC P-7 - Propeller Shafting Systems',
-  'Trim tab': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Stern tube': 'ABYC P-6 - Propeller Shafting Systems',
+  'Propeller shaft': 'ABYC P-6 - Propeller Shafting Systems',
+  'Trim tab': 'ABYC E-2 - Cathodic Protection',
   'Rub rail': 'TP1332 - Construction Standards for Small Vessels',
 
   // Spars and rigging
@@ -8050,13 +8049,13 @@ const ITEM_STANDARD_MAP = {
   'Windlass': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
   'Stanchion': 'TP1332 - Construction Standards for Small Vessels',
   'Lifeline': 'TP1332 - Construction Standards for Small Vessels',
-  'Shore water': 'ABYC H-27 - Potable Water Systems',
+  'Shore water': 'ABYC H-23 - Water Systems on Boats',
   'Mooring cleat': 'TP1332 - Construction Standards for Small Vessels',
   'Deck hatch': 'TP1332 - Construction Standards for Small Vessels',
   'Windshield': 'TP1332 - Construction Standards for Small Vessels',
 
   // Outboard
-  'Outboard': 'ABYC P-6 - Outboard Engines',
+  'Outboard': null,
 
   // Cockpit
   'Cockpit drain': 'ABYC A-31 - Cockpit Design',
@@ -8090,18 +8089,18 @@ const ITEM_STANDARD_MAP = {
   'Aft deck fridge': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
   'Refrigerator': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
   'Stereo and speakers': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
-  'Sink': 'ABYC H-27 - Potable Water Systems',
+  'Sink': 'ABYC H-23 - Water Systems on Boats',
 
   // Head
   'Head': 'ABYC TH-27 - Seacocks/Through-Hull Fittings',
   'Toilet': 'ABYC TH-27 - Seacocks/Through-Hull Fittings',
-  'Shower': 'ABYC H-27 - Potable Water Systems',
+  'Shower': 'ABYC H-23 - Water Systems on Boats',
 
   // Fuel, water and waste
-  'Fuel tank': 'ABYC H-33 - Diesel Fuel Systems',
-  'Hot water tank': 'ABYC E-11 - AC and DC Electrical Systems on Boats',
+  'Fuel tank': null,
+  'Hot water tank': ['ABYC H-23 - Water Systems on Boats', 'ABYC E-11 - AC and DC Electrical Systems on Boats'],
   'Black water': 'Vessel Pollution and Dangerous Chemicals Regulations (SOR/2012-69)',
-  'Fresh water': 'ABYC H-27 - Potable Water Systems',
+  'Fresh water': 'ABYC H-23 - Water Systems on Boats',
 
   // Engine
   'Engine': 'ABYC P-4 - Inboard Engines',
@@ -8113,10 +8112,10 @@ const ITEM_STANDARD_MAP = {
   'Anti-vibration': 'ABYC P-4 - Inboard Engines',
   'Hose': 'ABYC P-4 - Inboard Engines',
   'Gearbox': 'ABYC P-4 - Inboard Engines',
-  'Drive coupling': 'ABYC P-7 - Propeller Shafting Systems',
-  'Stuffing box': 'ABYC P-7 - Propeller Shafting Systems',
-  'Packing gland': 'ABYC P-7 - Propeller Shafting Systems',
-  'Dripless seal': 'ABYC P-7 - Propeller Shafting Systems',
+  'Drive coupling': 'ABYC P-6 - Propeller Shafting Systems',
+  'Stuffing box': 'ABYC P-6 - Propeller Shafting Systems',
+  'Packing gland': 'ABYC P-6 - Propeller Shafting Systems',
+  'Dripless seal': 'ABYC P-6 - Propeller Shafting Systems',
 
   // Steering and trim
   'Mechanical steering': 'ABYC P-11 - Steering Systems',
@@ -18007,8 +18006,9 @@ async function checkSurvey(options = {}) {
     const combined = `${label || ''} ${text || ''} ${(standards || []).join(' ')}`;
     if (/\bH-33\b/i.test(combined) && !/\bdiesel\b/i.test(combined)) return true;
     if (/\bH-27\b/i.test(combined) && /\b(?:potable|shore water|fresh ?water|water hookup|water system|pump[- ]?out|waste)\b/i.test(combined)) return true;
+    if (/\bH-28\b/i.test(combined) && /\b(?:waste|holding tank|sanitation|pump[- ]?out)\b/i.test(combined)) return true;
     if (/\bP-4\b/i.test(combined) && /\b(?:water ingress|hull\/deck|hull deck|bilge|stringer|transom leak)\b/i.test(combined)) return true;
-    if (/\bP-7\b/i.test(combined) && /\b(?:outdrive|sterndrive|anode|cathodic|trim[- ]?tab)\b/i.test(combined)) return true;
+    if (/\bP-7\b/i.test(combined) && /\b(?:propeller shaft|shafting|cutlass|stern tube|outdrive|sterndrive|anode|cathodic|trim[- ]?tab)\b/i.test(combined)) return true;
     if (/\bE-11\b/i.test(combined) && /\b(?:anode|cathodic|trim[- ]?tab anode|drive anode|propeller\/drive anode)\b/i.test(combined)) return true;
     if (/\bE-11\b/i.test(combined) && /\bdepth sounder\b/i.test(combined) && !/\b(?:wire|wiring|electrical|breaker|fuse|connection|power)\b/i.test(combined)) return true;
     return /no diesel-fuel-system standard was cited/i.test(combined);
@@ -26976,8 +26976,44 @@ async function generateReport(surveyArg = null, options = {}) {
   const reportStandardsForItem = (itemLabel, standards, text) => {
     const label = String(itemLabel || '').toLowerCase();
     const body = String(text || '').toLowerCase();
+    const combined = `${label} ${body}`;
     return (standards || []).filter(std => {
       const s = String(std || '');
+      if (/abyc\s*h-33/i.test(s) && !/\bdiesel\b/i.test(combined)) {
+        return false;
+      }
+      if (/abyc\s*h-2\b/i.test(s) && !/\b(?:gasoline|petrol|gas)\b/i.test(combined)) {
+        return false;
+      }
+      if (/abyc\s*h-24/i.test(s) && !/\b(?:gasoline|petrol|gas|fuel)\b/i.test(combined)) {
+        return false;
+      }
+      if (/abyc\s*h-25/i.test(s) && !/\b(?:portable|semi[- ]portable|outboard|fuel)\b/i.test(combined)) {
+        return false;
+      }
+      if (/abyc\s*h-23/i.test(s) && !/\b(?:fresh ?water|potable|shore water|water hookup|water system|water tank|water pump|hot water|water heater|sink|shower)\b/i.test(combined)) {
+        return false;
+      }
+      if (/abyc\s*h-27|abyc\s*th-27/i.test(s)) {
+        if (/\b(?:potable|shore water|fresh ?water|water hookup|water system|pump[- ]?out|waste|black water|grey water|holding tank)\b/i.test(combined)) {
+          return false;
+        }
+        if (!/\b(?:seacock|thru[- ]?hull|through[- ]?hull|drain plug|cooling water intake)\b/i.test(combined)) {
+          return false;
+        }
+      }
+      if (/abyc\s*p-7/i.test(s)) {
+        return false;
+      }
+      if (/abyc\s*e-11/i.test(s) && /\b(?:anodes?|cathodic|galvanic corrosion|trim[- ]?tab anode|drive anode|propeller\/drive anode)\b/i.test(combined)) {
+        return false;
+      }
+      if (/abyc\s*e-11/i.test(s) && /\bdepth sounder\b/i.test(combined) && !/\b(?:wire|wiring|electrical|breaker|fuse|connection|terminal|power|voltage|display did not power)\b/i.test(combined)) {
+        return false;
+      }
+      if (/abyc\s*p-4/i.test(s) && /\b(?:water ingress|hull\/deck|hull deck|bilge|stringer|transom leak)\b/i.test(combined)) {
+        return false;
+      }
       // ABYC H-22 is for electric bilge-pump systems, not the bilge/stringer/rib
       // structure or access to it. Keep it only for actual bilge-pump findings.
       if (/abyc\s*h-22/i.test(s) && /\bbilge\b/.test(label) && !/\bbilge pump\b/.test(label + ' ' + body)) {

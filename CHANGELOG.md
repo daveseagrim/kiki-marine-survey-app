@@ -1,3 +1,8 @@
+## v2576
+- Corrected legacy Version 1 ABYC standards mapping so A/B findings no longer auto-cite questionable H-27 potable-water, P-7 shafting/outdrive, or H-33 non-diesel standards.
+- Added final-report filtering for stale or manually carried standard citations so irrelevant standards are removed before printing.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the standards cleanup.
+
 ## v2575
 - Prevented legacy checklist placeholders such as `Not verified` from repopulating blank engine-hour fields during report generation.
 
