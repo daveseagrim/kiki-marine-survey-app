@@ -1151,19 +1151,6 @@
           },
           {
             "type": "list",
-            "label": "Emergency tiller",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ],
-            "sailOnly": true
-          },
-          {
-            "type": "list",
             "label": "Pushpit",
             "options": [
               "A - Critical",
@@ -1879,18 +1866,6 @@
               "Not tested/not verified"
             ],
             "sailOnly": true
-          },
-          {
-            "type": "list",
-            "label": "Heating and/or air conditioning system",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
           }
         ]
       },
@@ -2435,7 +2410,7 @@
           },
           {
             "type": "list",
-            "label": "Voltmeter/ammeter (12V DC)",
+            "label": "Distribution panel 120V",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2447,7 +2422,7 @@
           },
           {
             "type": "list",
-            "label": "Distribution panel 120V",
+            "label": "Voltmeter/ammeter (12V DC)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2483,7 +2458,7 @@
           },
           {
             "type": "list",
-            "label": "Bundling support and wiring",
+            "label": "Wire bundling and support",
             "options": [
               "A - Critical",
               "B - Needs Attention",

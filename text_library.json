@@ -16234,34 +16234,6 @@
       "severity": 3
     },
     {
-      "section": "Heating and/or air conditioning system",
-      "rating": "A",
-      "text": "The system is non-functional and requires repair or replacement.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Heating and/or air conditioning system",
-      "rating": "B",
-      "text": "The system operated but at reduced capacity.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Heating and/or air conditioning system",
-      "rating": "B",
-      "text": "Service is recommended to restore full capability.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Heating and/or air conditioning system",
-      "rating": "C",
-      "text": "The system is functional and effective.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
       "section": "Signs of water ingress",
       "rating": "A",
       "text": "Significant water damage is visible, indicating active leaks.",
@@ -17558,34 +17530,6 @@
     },
     {
       "section": "Oven",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No corrective action is recommended at this time."
-    },
-    {
-      "section": "Heating and/or air conditioning system",
-      "rating": "A",
-      "phase": "observed",
-      "severity": 5,
-      "text": "A significant deficiency was observed."
-    },
-    {
-      "section": "Heating and/or air conditioning system",
-      "rating": "A",
-      "phase": "action",
-      "severity": 5,
-      "text": "Professional assessment and repair are recommended before the vessel is returned to service."
-    },
-    {
-      "section": "Heating and/or air conditioning system",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No immediate concern was identified."
-    },
-    {
-      "section": "Heating and/or air conditioning system",
       "rating": "C",
       "phase": "action",
       "severity": 1,
@@ -22910,6 +22854,13 @@
       "severity": 3
     },
     {
+      "section": "Distribution panel 120V",
+      "rating": "C",
+      "text": "The 120V distribution panel appeared clearly labeled, and all switches and indicator lights appeared to function properly.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
       "section": "Distribution panel 12V",
       "rating": "Not tested",
       "text": "The item was not tested.",
@@ -22918,61 +22869,8 @@
     },
     {
       "section": "Distribution panel 120V",
-      "rating": "A",
-      "text": "A protective guard was not present on the reverse side of the panel.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Distribution panel 120V",
-      "rating": "A",
-      "text": "Install a guard to prevent accidental contact with live parts.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Distribution panel 120V",
-      "rating": "A",
-      "phase": "observed",
-      "text": "A reverse-polarity indicator was not present on the AC shore-power panel."
-    },
-    {
-      "section": "Distribution panel 120V",
-      "rating": "A",
-      "phase": "means",
-      "text": "The indicator warns the crew of a reversed polarity in the shore-power connection. Without one, the reversed-polarity condition — which presents shock and fire hazards — can go undetected during normal use."
-    },
-    {
-      "section": "Distribution panel 120V",
-      "rating": "A",
-      "phase": "action",
-      "text": "Install a reverse-polarity indicator in accordance with ABYC E-11."
-    },
-    {
-      "section": "Distribution panel 120V",
-      "rating": "C",
-      "text": "The 120V distribution panel appeared clearly labeled, and all appeared to function properly.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Distribution panel 120V",
-      "rating": "C",
-      "text": "The panel was screwed down, so reverse side protection could not be confirmed.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Distribution panel 120V",
       "rating": "Not tested",
-      "text": "The 120V distribution panel appeared clearly labeled, and all switches appeared to function properly.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Distribution panel 120V",
-      "rating": "Not tested",
-      "text": "The system was not tested because the vessel was not connected to AC power.",
+      "text": "The item was not tested.",
       "phase": "observed",
       "severity": 3
     },
@@ -23019,110 +22917,96 @@
       "severity": 3
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "A",
       "text": "Wiring in the engine compartment was not properly bundled or supported.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "A",
       "text": "Conductors should be supported to prevent chafe, strain, and vibration and secured at intervals not exceeding 18 inches.",
       "phase": "action",
       "severity": 3
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "A",
       "text": "Re route and fasten wiring with marine grade clamps or cable ties to improve reliability.",
       "phase": "action",
       "severity": 3
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "A",
       "text": "Wiring at [insert location] was unsecured, improperly bundled, and lacked appropriate marine grade connections.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "A",
       "text": "Correct routing, support, and corrosion resistant terminations are recommended to reduce risk of chafe, short circuits, or failure.",
       "phase": "action",
       "severity": 3
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "A",
       "text": "Several sections of wiring were improperly supported, connected, or terminated.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "A",
       "text": "Connections should be mechanically secure and electrically conductive with terminals designed for marine use and proper strain relief.",
       "phase": "action",
       "severity": 1
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "A",
       "text": "Non compliance increases the risk of faults, overheating, and failure.",
       "phase": "means",
       "severity": 3
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "A",
       "phase": "observed",
       "text": "Non-marine-grade (household-type, solid-core untinned) wiring was observed at [insert location(s)]."
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "A",
       "phase": "observed",
       "text": "Romex-type solid-core household wiring was used in place of marine-grade stranded tinned copper at [insert location(s)]."
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "A",
       "phase": "means",
       "text": "Marine environments demand stranded, tinned copper conductors to resist vibration fatigue and galvanic corrosion. Solid-core untinned wiring is not permitted by ABYC E-11 and presents elevated fire and electrical-shock hazards as it ages in service."
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "A",
       "phase": "action",
       "text": "Replace the non-marine-grade conductors with tinned stranded copper wiring and marine-rated terminations in accordance with ABYC E-11."
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "C",
       "text": "Wiring appeared properly bundled and supported in the accessible areas examined.",
       "phase": "observed",
       "severity": 3
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "Not tested",
       "text": "The item was not tested.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Heating and air conditioning",
-      "rating": "Not tested",
-      "text": "The air conditioning unit could not be tested with the vessel ashore.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Heating and air conditioning",
-      "rating": "Not tested",
-      "text": "The unit appeared solidly installed, the associated seacock operated smoothly, and the raw water strainer appeared clean with no sign of leakage.",
       "phase": "observed",
       "severity": 3
     },
@@ -23596,7 +23480,21 @@
       "severity": 3
     },
     {
+      "section": "Distribution panel 120V",
+      "rating": "A",
+      "text": "The panel is damaged or non-functional.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
       "section": "Distribution panel 12V",
+      "rating": "A",
+      "text": "Repair or replacement is required.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Distribution panel 120V",
       "rating": "A",
       "text": "Repair or replacement is required.",
       "phase": "action",
@@ -23610,7 +23508,21 @@
       "severity": 3
     },
     {
+      "section": "Distribution panel 120V",
+      "rating": "B",
+      "text": "The panel showed signs of corrosion or loose connections.",
+      "phase": "observed",
+      "severity": 3
+    },
+    {
       "section": "Distribution panel 12V",
+      "rating": "B",
+      "text": "Service is recommended.",
+      "phase": "action",
+      "severity": 3
+    },
+    {
+      "section": "Distribution panel 120V",
       "rating": "B",
       "text": "Service is recommended.",
       "phase": "action",
@@ -23648,41 +23560,6 @@
       "section": "Reverse polarity light",
       "rating": "C",
       "text": "The reverse polarity light is functional.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Heating and air conditioning",
-      "rating": "A",
-      "text": "The system is non-functional.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Heating and air conditioning",
-      "rating": "A",
-      "text": "Repair or replacement is required.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Heating and air conditioning",
-      "rating": "B",
-      "text": "The system operated but with reduced efficiency.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Heating and air conditioning",
-      "rating": "B",
-      "text": "Service is recommended.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Heating and air conditioning",
-      "rating": "C",
-      "text": "The system is operational and effective.",
       "phase": "observed",
       "severity": 3
     },
@@ -23869,20 +23746,6 @@
       "severity": 3
     },
     {
-      "section": "Distribution panel 120V",
-      "rating": "B",
-      "text": "The 120V distribution panel was functional but showed signs of age or minor corrosion.",
-      "phase": "observed",
-      "severity": 2
-    },
-    {
-      "section": "Distribution panel 120V",
-      "rating": "B",
-      "text": "Inspection and service are recommended to ensure all circuits are operating properly.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
       "section": "Voltmeter/ammeter",
       "rating": "A",
       "text": "The voltmeter or ammeter was non-functional or inaccurate.",
@@ -23897,14 +23760,14 @@
       "severity": 3
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "B",
       "text": "Electrical wiring was serviceable but some cable supports were loose or corroded.",
       "phase": "observed",
       "severity": 1
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "B",
       "text": "Tightening and inspection are recommended to prevent chafe and ensure proper routing.",
       "phase": "action",
@@ -24205,7 +24068,21 @@
       "text": "This condition represents a significant concern for the vessel's safe or structural operation."
     },
     {
+      "section": "Distribution panel 120V",
+      "rating": "A",
+      "phase": "means",
+      "severity": 5,
+      "text": "This condition represents a significant concern for the vessel's safe or structural operation."
+    },
+    {
       "section": "Distribution panel 12V",
+      "rating": "C",
+      "phase": "means",
+      "severity": 1,
+      "text": "No immediate concern was identified."
+    },
+    {
+      "section": "Distribution panel 120V",
       "rating": "C",
       "phase": "means",
       "severity": 1,
@@ -24217,27 +24094,6 @@
       "phase": "action",
       "severity": 1,
       "text": "No corrective action is recommended at this time."
-    },
-    {
-      "section": "Distribution panel 120V",
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Distribution panel 120V",
-      "rating": "B",
-      "phase": "action",
-      "severity": 3,
-      "text": "Address this at the next scheduled service."
-    },
-    {
-      "section": "Distribution panel 120V",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No immediate concern was identified."
     },
     {
       "section": "Distribution panel 120V",
@@ -24275,28 +24131,28 @@
       "text": "No corrective action is recommended at this time."
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "A",
       "phase": "action",
       "severity": 5,
       "text": "Professional assessment and repair are recommended before the vessel is returned to service."
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "B",
       "phase": "action",
       "severity": 3,
       "text": "Address this at the next scheduled service."
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "C",
       "phase": "means",
       "severity": 1,
       "text": "No immediate concern was identified."
     },
     {
-      "section": "Bundling support and wiring",
+      "section": "Wire bundling and support",
       "rating": "C",
       "phase": "action",
       "severity": 1,
@@ -24591,27 +24447,6 @@
     },
     {
       "section": "Reverse polarity light",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No corrective action is recommended at this time."
-    },
-    {
-      "section": "Heating and air conditioning",
-      "rating": "A",
-      "phase": "means",
-      "severity": 5,
-      "text": "This condition represents a significant concern for the vessel's safe or structural operation."
-    },
-    {
-      "section": "Heating and air conditioning",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No immediate concern was identified."
-    },
-    {
-      "section": "Heating and air conditioning",
       "rating": "C",
       "phase": "action",
       "severity": 1,
@@ -25029,62 +24864,6 @@
       "section": "Bilge pump, manual",
       "rating": "Not tested",
       "text": "The manual bilge pump located in the cockpit was not tested.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Bilge pump, automatic float",
-      "rating": "A",
-      "text": "The bilge pump was non-operational.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Bilge pump, automatic float",
-      "rating": "A",
-      "text": "ABYC H-22 requires functional bilge pumping capacity.",
-      "phase": "means",
-      "severity": 3
-    },
-    {
-      "section": "Bilge pump, automatic float",
-      "rating": "A",
-      "text": "Repair or replace the pump, confirm proper wiring, and verify automatic float switch operation.",
-      "phase": "action",
-      "severity": 3
-    },
-    {
-      "section": "Bilge pump, automatic float",
-      "rating": "C",
-      "text": "The bilge pump located beneath the cabin sole was tested and functioned properly.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Bilge pump, automatic float",
-      "rating": "Not tested",
-      "text": "Two bilge pumps were installed for low and high water with integral float switches.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Bilge pump, automatic float",
-      "rating": "Not tested",
-      "text": "The installations appeared proper but were not tested.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Bilge pump, automatic float",
-      "rating": "Not tested",
-      "text": "The pump operated well when manually switched on.",
-      "phase": "observed",
-      "severity": 3
-    },
-    {
-      "section": "Bilge pump, automatic float",
-      "rating": "Not tested",
-      "text": "The float switch was integrated into the pump and was not tested.",
       "phase": "observed",
       "severity": 3
     },
@@ -25692,20 +25471,6 @@
     },
     {
       "section": "Bilge pump, manual",
-      "rating": "C",
-      "phase": "action",
-      "severity": 1,
-      "text": "No corrective action is recommended at this time."
-    },
-    {
-      "section": "Bilge pump, automatic float",
-      "rating": "C",
-      "phase": "means",
-      "severity": 1,
-      "text": "No immediate concern was identified."
-    },
-    {
-      "section": "Bilge pump, automatic float",
       "rating": "C",
       "phase": "action",
       "severity": 1,

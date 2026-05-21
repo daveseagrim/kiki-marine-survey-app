@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2577';
+const APP_VERSION = 'v2581';
 const KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL = 'dave@kikimarine.ca';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
@@ -1759,7 +1759,8 @@ const ITEM_SNIPPET_MAP = {
   'Pilot house, floor and seat(s)': 'Cockpit, floor, seats and coaming',
   'Sail drive oil': 'Gearbox oil',
   'Solar panels controller': 'Generator',
-  'Solar panels wiring': 'Bundling support and wiring',
+  'Solar panels wiring': 'Wire bundling and support',
+  'Bundling support and wiring': 'Wire bundling and support',
   'Spars and rigging - other': 'Spars and rigging photos',
   'Steering and trim mechanics - other features': 'Mechanical steering (quadrant, linkages, cables, bearings, post, etc.)',
   'Wind generator manufacturer and model #': 'Generator',
@@ -6289,6 +6290,8 @@ function showNotesSheet(itemLabel, categoryName) {
       `;
     }
 
+    const batteryBankHtml = _batteryBankHtml(itemLabel, itemData, safeLabel, safeCat);
+
     // Component builder — check if this item has a builder definition
     let componentBuilderHtml = '';
     // Strip expansion prefixes (drive-line or hull) for builder lookup
@@ -6350,6 +6353,7 @@ function showNotesSheet(itemLabel, categoryName) {
         ${mastOptionsHtml}
         ${outdriveOptionsHtml}
         ${winchOptionsHtml}
+        ${batteryBankHtml}
         ${componentBuilderHtml}
         <div style="padding:12px 20px;">
           <textarea id="sheet-text-${sanitizedLabel}" data-item-label="${escapeHtml(itemLabel)}" placeholder="Add inspection notes..." style="min-height:80px;width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:15px;resize:vertical;overflow:hidden;" spellcheck="true" autocorrect="off" autocapitalize="sentences" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';window._mainSheetToneCheck && window._mainSheetToneCheck(this);window._clearSheetCardHighlight && window._clearSheetCardHighlight(this);">${initialTextareaText}</textarea>
@@ -7363,6 +7367,9 @@ async function attachPhotosToItem(itemLabel, fileList) {
     }
     if (/engine name plate|gearbox nameplate|transmission nameplate/i.test(itemLabel)) {
       scheduleAutoSurveyNameplateRead(currentSurveyId);
+    }
+    if (_isBatteryItemLabel(itemLabel)) {
+      scheduleAutoBatteryRead(currentSurveyId, itemLabel);
     }
   } catch (_) {}
 
@@ -20436,6 +20443,8 @@ async function toggleSafetyItemSkip(idx, skip) {
 
 // Predefined additional safety items not in TC TP 511 standard list
 const ADDITIONAL_SAFETY_ITEMS = [
+  'Engine compartment ventilation blower',
+  'Emergency tiller',
   'EPIRB (Emergency Position Indicating Radio Beacon)',
   'Life raft',
   'Axe / hatchet',
@@ -21363,6 +21372,299 @@ function _nameplateRawText(details) {
   return String(details && details.rawText || '').replace(/\s+/g, ' ').trim();
 }
 
+function _isBatteryItemLabel(label) {
+  return /^Battery\(ies\),\s*(house|starter)$/i.test(String(label || '').trim());
+}
+
+function _batteryBankTypeFromLabel(label) {
+  return /starter/i.test(String(label || '')) ? 'starter' : 'house';
+}
+
+function _batteryMaxForLabel(label) {
+  return _batteryBankTypeFromLabel(label) === 'starter' ? 4 : 6;
+}
+
+function _cleanBatteryValue(value) {
+  if (value === null || value === undefined) return '';
+  if (Array.isArray(value)) value = value.filter(Boolean).join(' ');
+  if (typeof value === 'object') return '';
+  return String(value).replace(/\s+/g, ' ').trim();
+}
+
+function _cleanBatteryRating(value) {
+  const text = _cleanBatteryValue(value);
+  const match = text.match(/\d+(?:\.\d+)?/);
+  return match ? match[0] : '';
+}
+
+function _normalizeBatteryCount(value, max, fallback = 1) {
+  const parsed = parseInt(value, 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(1, Math.min(max, parsed));
+}
+
+function _batteryRowsForItem(itemData, count) {
+  const rows = Array.isArray(itemData && itemData.batteryRows) ? itemData.batteryRows : [];
+  const normalized = rows.slice(0, count).map(row => ({
+    manufacturer: _cleanBatteryValue(row && row.manufacturer),
+    model: _cleanBatteryValue(row && row.model),
+    ampHours: _cleanBatteryValue(row && row.ampHours),
+    cca: _cleanBatteryValue(row && row.cca),
+    mca: _cleanBatteryValue(row && row.mca),
+    groupSize: _cleanBatteryValue(row && row.groupSize)
+  }));
+  while (normalized.length < count) normalized.push({});
+  return normalized;
+}
+
+function _batteryRowHasData(row) {
+  return !!(row && (row.manufacturer || row.model || row.ampHours || row.cca || row.mca || row.groupSize));
+}
+
+function _batterySummary(rows) {
+  return rows.map((row, idx) => {
+    const parts = [
+      row.manufacturer,
+      row.model,
+      row.ampHours ? `${row.ampHours} Ah` : '',
+      row.cca ? `${row.cca} CCA` : '',
+      row.mca ? `${row.mca} MCA` : '',
+      row.groupSize ? `Group ${row.groupSize}` : ''
+    ].filter(Boolean);
+    return parts.length ? `Battery ${idx + 1}: ${parts.join(', ')}` : '';
+  }).filter(Boolean).join('; ');
+}
+
+function _mergeBatteryDetailsIntoItem(itemData, details, max) {
+  const currentCount = _normalizeBatteryCount(itemData.batteryCount, max, 1);
+  let rows = _batteryRowsForItem(itemData, currentCount);
+  let targetIdx = rows.findIndex(row => !_batteryRowHasData(row));
+  if (targetIdx < 0 && rows.length < max) {
+    rows.push({});
+    targetIdx = rows.length - 1;
+  }
+  if (targetIdx < 0) targetIdx = 0;
+
+  const row = { ...rows[targetIdx] };
+  let changed = false;
+  ['manufacturer', 'model', 'ampHours', 'cca', 'mca', 'groupSize'].forEach(key => {
+    const value = _cleanBatteryValue(details && details[key]);
+    if (value && !row[key]) {
+      row[key] = value;
+      changed = true;
+    }
+  });
+  if (!changed) return false;
+  rows[targetIdx] = row;
+  itemData.batteryCount = Math.max(currentCount, rows.length);
+  itemData.batteryRows = rows.slice(0, itemData.batteryCount);
+  itemData.batterySummary = _batterySummary(itemData.batteryRows);
+  itemData.batteryPhotoReadAt = new Date().toISOString();
+  return true;
+}
+
+function _normalizeBatteryDetails(raw) {
+  if (!raw || typeof raw !== 'object') return {};
+  const confidence = _cleanBatteryValue(raw.confidence).toLowerCase();
+  if (confidence === 'low') return {};
+  const rawText = _firstNameplateField(raw, ['rawText', 'visibleText', 'text', 'details', 'notes']);
+  const ratingText = [
+    _firstNameplateField(raw, ['rating', 'ratings', 'capacity', 'crankingAmps']),
+    rawText
+  ].filter(Boolean).join('; ');
+  const ah = ratingText.match(/\b(\d+(?:\.\d+)?)\s*(?:A\.?H\.?|AMP[- ]?HOURS?)\b/i);
+  const cca = ratingText.match(/\b(\d{2,4})\s*CCA\b/i);
+  const mca = ratingText.match(/\b(\d{2,4})\s*MCA\b/i);
+  return {
+    manufacturer: _firstNameplateField(raw, ['manufacturer', 'make', 'brand', 'batteryMake']),
+    model: _firstNameplateField(raw, ['model', 'modelNumber', 'modelNo', 'partNumber', 'batteryModel']),
+    ampHours: _cleanBatteryRating(_firstNameplateField(raw, ['ampHours', 'ah', 'ampHour', 'capacityAh'])) || (ah ? ah[1] : ''),
+    cca: _cleanBatteryRating(_firstNameplateField(raw, ['cca', 'coldCrankingAmps'])) || (cca ? cca[1] : ''),
+    mca: _cleanBatteryRating(_firstNameplateField(raw, ['mca', 'marineCrankingAmps'])) || (mca ? mca[1] : ''),
+    groupSize: _firstNameplateField(raw, ['groupSize', 'group', 'size']),
+    rawText
+  };
+}
+
+function _batteryDetailsHasData(details) {
+  return !!(details && ['manufacturer', 'model', 'ampHours', 'cca', 'mca', 'groupSize'].some(key => _cleanBatteryValue(details[key])));
+}
+
+function _batteryBankHtml(itemLabel, itemData, safeLabel, safeCat) {
+  if (!_isBatteryItemLabel(itemLabel)) return '';
+  const type = _batteryBankTypeFromLabel(itemLabel);
+  const max = _batteryMaxForLabel(itemLabel);
+  const count = _normalizeBatteryCount(itemData.batteryCount, max, 1);
+  const rows = _batteryRowsForItem(itemData, count);
+  const countOptions = Array.from({ length: max }, (_, idx) => {
+    const value = idx + 1;
+    return `<option value="${value}" ${count === value ? 'selected' : ''}>${value}</option>`;
+  }).join('');
+  const rowHtml = rows.map((row, idx) => {
+    const n = idx + 1;
+    const fields = [
+      ['manufacturer', 'Make'],
+      ['model', 'Model'],
+      ['ampHours', 'Ah'],
+      ['cca', 'CCA'],
+      ['mca', 'MCA'],
+      ['groupSize', 'Group']
+    ].map(([key, label]) => `
+      <label style="display:block;font-size:11px;font-weight:600;color:#4b5563;">
+        ${label}
+        <input value="${escapeHtml(row[key] || '')}"
+               onchange="updateBatteryRowFromSheet('${safeLabel}', '${safeCat}', ${idx}, '${key}', this.value)"
+               style="width:100%;box-sizing:border-box;margin-top:3px;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;" />
+      </label>
+    `).join('');
+    return `
+      <div style="padding:10px;border:1px solid #dbeafe;border-radius:8px;background:#fff;margin-top:8px;">
+        <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:8px;">${type === 'starter' ? 'Starter' : 'House'} battery ${n}</div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">${fields}</div>
+      </div>
+    `;
+  }).join('');
+  return `
+    <div style="margin:8px 20px 4px 20px;padding:12px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff;">
+      <div style="display:flex;gap:10px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#1e40af;">Battery bank details</div>
+          <div style="font-size:11px;color:#4b5563;margin-top:2px;">Readable battery-label photos can fill these fields. Batteries are not added to Instruments.</div>
+        </div>
+        <label style="font-size:11px;font-weight:700;color:#4b5563;">
+          Number of batteries
+          <select onchange="updateBatteryCountFromSheet('${safeLabel}', '${safeCat}', this.value)"
+                  style="display:block;margin-top:3px;padding:8px;border:1px solid #93c5fd;border-radius:6px;background:#fff;font-size:13px;">
+            ${countOptions}
+          </select>
+        </label>
+      </div>
+      ${rowHtml}
+      <button type="button" onclick="readBatteryLabelsForItem('${safeLabel}', '${safeCat}', true)"
+              style="margin-top:10px;background:#066aab;color:white;border:none;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:700;">
+        Read battery labels from photos
+      </button>
+    </div>
+  `;
+}
+
+async function updateBatteryCountFromSheet(itemLabel, categoryName, value) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  if (!survey.items[itemLabel]) survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+  const itemData = survey.items[itemLabel];
+  const max = _batteryMaxForLabel(itemLabel);
+  const count = _normalizeBatteryCount(value, max, 1);
+  itemData.batteryCount = count;
+  itemData.batteryRows = _batteryRowsForItem(itemData, count);
+  itemData.batterySummary = _batterySummary(itemData.batteryRows);
+  await saveSurvey(survey);
+  showNotesSheet(itemLabel, categoryName || '');
+  updateCompactItem(survey, itemLabel, categoryName || '');
+}
+
+async function updateBatteryRowFromSheet(itemLabel, categoryName, rowIndex, key, value) {
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey) return;
+  if (!survey.items[itemLabel]) survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: [] };
+  const itemData = survey.items[itemLabel];
+  const max = _batteryMaxForLabel(itemLabel);
+  const count = _normalizeBatteryCount(itemData.batteryCount, max, 1);
+  const rows = _batteryRowsForItem(itemData, count);
+  const idx = Math.max(0, Math.min(rows.length - 1, parseInt(rowIndex, 10) || 0));
+  if (!['manufacturer', 'model', 'ampHours', 'cca', 'mca', 'groupSize'].includes(key)) return;
+  rows[idx] = { ...rows[idx], [key]: _cleanBatteryValue(value) };
+  itemData.batteryCount = count;
+  itemData.batteryRows = rows;
+  itemData.batterySummary = _batterySummary(rows);
+  await saveSurvey(survey);
+  updateCompactItem(survey, itemLabel, categoryName || '');
+}
+
+async function readBatteryLabelsForItem(itemLabel, categoryName = '', promptForKey = true, options = {}) {
+  const silent = !!options.silent;
+  const survey = await getSurvey(currentSurveyId);
+  if (!survey || !_isBatteryItemLabel(itemLabel)) return false;
+  const itemData = survey.items[itemLabel];
+  const photoIds = itemData && Array.isArray(itemData.photos) ? itemData.photos : [];
+  if (photoIds.length === 0) {
+    if (!silent) showToast('Add battery label photos first');
+    return false;
+  }
+  if (!silent) showToast('Reading battery labels...');
+  let changed = false;
+  let triedWithImage = 0;
+  let blockingError = null;
+  for (const photoId of photoIds) {
+    const photo = await getPhotoById(photoId);
+    if (!photo || !photo.dataUrl) continue;
+    triedWithImage++;
+    try {
+      const details = await _readBatteryDetailsFromPhoto(photo, { promptForKey });
+      if (_batteryDetailsHasData(details)) {
+        if (!survey.items[itemLabel]) survey.items[itemLabel] = { rating: '', text: '', standards: [], photos: photoIds };
+        if (_mergeBatteryDetailsIntoItem(survey.items[itemLabel], details, _batteryMaxForLabel(itemLabel))) {
+          changed = true;
+        }
+      }
+    } catch (error) {
+      if (_isBlockingNameplateReadError(error)) {
+        blockingError = error;
+        break;
+      }
+      console.warn('Battery label read skipped one photo and will try the next', { photoId, error });
+    }
+  }
+  if (blockingError) {
+    if (!silent) showToast('Battery label read failed: ' + String(blockingError.message || blockingError).substring(0, 80));
+    return false;
+  }
+  if (changed) {
+    await saveSurvey(survey);
+    if (!silent && document.getElementById('bottomSheetOverlay')?.getAttribute('data-item-label') === itemLabel) {
+      showNotesSheet(itemLabel, categoryName || '');
+    } else if (typeof updateItemInPlace === 'function') {
+      updateItemInPlace(survey, itemLabel);
+    } else {
+      updateCompactItem(survey, itemLabel, categoryName || '');
+    }
+    if (!silent) showToast('Battery label details filled — please review them.');
+    return true;
+  }
+  if (!silent) {
+    if (triedWithImage === 0) showToast('Photo marker found, but image data is missing on this device. Repair from export first.');
+    else showToast('No readable battery label details found');
+  }
+  return false;
+}
+
+const _autoBatteryReadInFlight = new Set();
+let _autoBatteryNoKeyToastShown = false;
+
+function scheduleAutoBatteryRead(surveyId, itemLabel) {
+  const id = surveyId || currentSurveyId;
+  if (!id || !_isBatteryItemLabel(itemLabel)) return;
+  const key = `${id}:${itemLabel}`;
+  if (_autoBatteryReadInFlight.has(key)) return;
+  setTimeout(async () => {
+    if (!localStorage.getItem('geminiApiKey')) {
+      if (!_autoBatteryNoKeyToastShown) {
+        _autoBatteryNoKeyToastShown = true;
+        showToast('Battery-label auto-fill is ready; add a Gemini key once to enable automatic reads.');
+      }
+      return;
+    }
+    _autoBatteryReadInFlight.add(key);
+    try {
+      await readBatteryLabelsForItem(itemLabel, '', false, { silent: true });
+    } catch (error) {
+      console.warn('Automatic battery label read failed', error);
+    } finally {
+      _autoBatteryReadInFlight.delete(key);
+    }
+  }, 500);
+}
+
 function _isBlockingNameplateReadError(error) {
   const msg = String(error && error.message || error || '');
   return /No API key|Gemini API key|API key not set|API 401|API 403|API 429|quota|rate limit/i.test(msg);
@@ -21535,6 +21837,70 @@ Do not guess. Read only visible plate text. If a plate is visible but the struct
   const text = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
   try {
     return _normalizeNameplateDetails(_parseAiJsonObject(text), kind);
+  } catch (error) {
+    throw new Error('AI response was not usable JSON');
+  }
+}
+
+async function _readBatteryDetailsFromPhoto(photo, options = {}) {
+  const promptForKey = options.promptForKey !== false;
+  let apiKey = localStorage.getItem('geminiApiKey');
+  if (!apiKey) {
+    if (!promptForKey) throw new Error('Gemini API key not set');
+    const key = prompt('Battery-label reading requires a free Google Gemini API key.\n\nGet one at aistudio.google.com, then paste it here:');
+    if (key && key.trim()) {
+      apiKey = key.trim();
+      localStorage.setItem('geminiApiKey', apiKey);
+    } else {
+      throw new Error('No API key entered');
+    }
+  }
+  if (!photo || !photo.dataUrl) throw new Error('Could not load battery photo');
+  const resized = await _resizeDataUrlForNameplateRead(photo.dataUrl);
+  const base64Match = resized.match(/^data:image\/(.*?);base64,(.*)$/);
+  if (!base64Match) throw new Error('Could not prepare battery photo');
+  const promptText = `You are a marine surveyor's assistant. Read the marine battery label in this photo.
+
+Return ONLY valid JSON with these fields, using empty strings if unreadable:
+{
+  "manufacturer": "",
+  "model": "",
+  "ampHours": "",
+  "cca": "",
+  "mca": "",
+  "groupSize": "",
+  "rawText": "",
+  "confidence": "high"
+}
+
+manufacturer is the battery brand or maker. model is the exact visible model or part number. ampHours is the visible amp-hour capacity only. cca is the visible cold cranking amps only. mca is the visible marine cranking amps only. groupSize is the visible group size such as 24, 27, 31, 4D, or 8D.
+Use confidence low if the label is blurred, angled, partly obscured, or uncertain. Do not guess. Read only visible label text.`;
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{
+        parts: [
+          {
+            inlineData: {
+              mimeType: `image/${base64Match[1]}`,
+              data: base64Match[2]
+            }
+          },
+          { text: promptText }
+        ]
+      }],
+      generationConfig: { temperature: 0, maxOutputTokens: 320 }
+    })
+  });
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`API ${response.status}: ${errText.substring(0, 300)}`);
+  }
+  const result = await response.json();
+  const text = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  try {
+    return _normalizeBatteryDetails(_parseAiJsonObject(text));
   } catch (error) {
     throw new Error('AI response was not usable JSON');
   }
@@ -22391,6 +22757,9 @@ async function capturePhoto(itemLabel, event) {
   updateItemInPlace(survey, itemLabel);
   if (/engine name plate|gearbox nameplate|transmission nameplate/i.test(itemLabel)) {
     scheduleAutoSurveyNameplateRead(currentSurveyId);
+  }
+  if (_isBatteryItemLabel(itemLabel)) {
+    scheduleAutoBatteryRead(currentSurveyId, itemLabel);
   }
   showToast(`${files.length} photo${files.length > 1 ? 's' : ''} saved`);
 }
@@ -27899,16 +28268,6 @@ ${(() => {
   // ── DETAILED SURVEY FINDINGS (body sections) ──────────────────────
   html += `<h2 style="background:#066aab;font-size:14pt;">DETAILED SURVEY FINDINGS</h2>`;
 
-  // Bilge pump detail table (if data exists)
-  if (survey.bilgePumps && survey.bilgePumps.length > 0) {
-    html += `<h3>Bilge Pump Detail</h3>`;
-    html += `<table><thead><tr><th>Location</th><th>Type</th><th>Make/Model</th><th>Capacity</th><th>Float Switch</th><th>Tested</th><th>Discharge</th></tr></thead><tbody>`;
-    survey.bilgePumps.forEach(bp => {
-      html += `<tr><td>${esc(bp.location)}</td><td>${esc(bp.type)}</td><td>${esc(bp.makeModel)}</td><td>${esc(bp.capacity)}</td><td>${esc(bp.floatSwitch)}</td><td>${esc(bp.tested)}</td><td>${esc(bp.discharge)}</td></tr>`;
-    });
-    html += `</tbody></table>`;
-  }
-
   activeTemplate.forEach(section => {
     if (section.name === 'Kiki Marine Survey' && section.categories) {
       section.categories.forEach(category => {
@@ -28146,23 +28505,28 @@ ${(() => {
 
           // Mast options info for Main mast item
           let mastOptionsHtml = '';
-          if (item.label === 'Main mast') {
-            const parts = [];
-            if (itemData.mastStepping) parts.push(itemData.mastStepping);
-            if (itemData.mastTrackType) parts.push(itemData.mastTrackType);
-            if (parts.length > 0) {
-              mastOptionsHtml = `<p><em>Mast type: ${esc(parts.join(', '))}</em></p>`;
-            }
-          }
-	          const detailedItemText = normalizeKnownModelText(_ensureConductivityRangeInText(item.label, itemData.text || ''));
+	          if (item.label === 'Main mast') {
+	            const parts = [];
+	            if (itemData.mastStepping) parts.push(itemData.mastStepping);
+	            if (itemData.mastTrackType) parts.push(itemData.mastTrackType);
+	            if (parts.length > 0) {
+	              mastOptionsHtml = `<p><em>Mast type: ${esc(parts.join(', '))}</em></p>`;
+	            }
+	          }
+	          let batteryInfoHtml = '';
+	          if (_isBatteryItemLabel(item.label) && itemData.batterySummary) {
+	            batteryInfoHtml = `<p><em>Battery details: ${esc(itemData.batterySummary)}</em></p>`;
+	          }
+		          const detailedItemText = normalizeKnownModelText(_ensureConductivityRangeInText(item.label, itemData.text || ''));
 
           html += `
   <div class="item" style="border-left-color: ${RATING_COLORS[ratingLabel] || '#066aab'};">
     <p><strong>${esc(displayItemLabel(item.label, survey))}</strong>${ratingLabel ? ` — <span class="${ratingClass}">${ratingLabel}</span>${codeTag}` : ''}</p>
-    ${outdriveInfoHtml}
-    ${winchInfoHtml}
-    ${mastOptionsHtml}
-    ${detailedItemText ? `<p>${esc(pluralizeRudder(cleanupTypos(depersonalise(dedup(detailedItemText))), survey.rudderCount))}</p>` : ''}
+	    ${outdriveInfoHtml}
+	    ${winchInfoHtml}
+	    ${mastOptionsHtml}
+	    ${batteryInfoHtml}
+	    ${detailedItemText ? `<p>${esc(pluralizeRudder(cleanupTypos(depersonalise(dedup(detailedItemText))), survey.rudderCount))}</p>` : ''}
     ${(() => {
       if (!(ratingLabel.startsWith('A') || ratingLabel.startsWith('B'))) return '';
 	      const _merged = reportStandardsForItem(item.label, mergeTextStandards(itemData.standards, itemData.text), itemData.text);
@@ -28198,6 +28562,15 @@ ${(() => {
     ${missing > 0 ? '<p style="color:#dc2626;font-weight:bold;font-size:10pt;">⚠ Vessel does not carry all required safety equipment per Transport Canada regulations.</p>' : '<p style="color:#16a34a;font-weight:bold;font-size:10pt;">✓ Vessel carries all required safety equipment per Transport Canada regulations.</p>'}
   </div>
   `;
+
+    if (survey.bilgePumps && survey.bilgePumps.length > 0) {
+      html += `<h3 style="color:#2563eb;">Bilge Pump Detail</h3>`;
+      html += `<table><thead><tr><th>Location</th><th>Type</th><th>Make/Model</th><th>Capacity</th><th>Float Switch</th><th>Tested</th><th>Discharge</th></tr></thead><tbody>`;
+      survey.bilgePumps.forEach(bp => {
+        html += `<tr><td>${esc(bp.location)}</td><td>${esc(bp.type)}</td><td>${esc(bp.makeModel)}</td><td>${esc(bp.capacity)}</td><td>${esc(bp.floatSwitch)}</td><td>${esc(bp.tested)}</td><td>${esc(bp.discharge)}</td></tr>`;
+      });
+      html += `</tbody></table>`;
+    }
 
     const _safeCats = {};
     activeSafetyEq.forEach(eq => {

@@ -2894,7 +2894,7 @@
           },
           {
             "type": "list",
-            "label": "Voltmeter/ammeter (12V DC)",
+            "label": "Distribution panel 120V",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2906,7 +2906,7 @@
           },
           {
             "type": "list",
-            "label": "Distribution panel 120V",
+            "label": "Voltmeter/ammeter (12V DC)",
             "options": [
               "A - Critical",
               "B - Needs Attention",
@@ -2942,19 +2942,7 @@
           },
           {
             "type": "list",
-            "label": "Bundling support and wiring",
-            "options": [
-              "A - Critical",
-              "B - Needs Attention",
-              "C - Serviceable",
-              "Powered up only",
-              "Not applicable",
-              "Not tested/not verified"
-            ]
-          },
-          {
-            "type": "list",
-            "label": "Heating and air conditioning",
+            "label": "Wire bundling and support",
             "options": [
               "A - Critical",
               "B - Needs Attention",

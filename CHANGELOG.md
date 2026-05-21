@@ -1,3 +1,26 @@
+## v2581
+- Kept the 12V/DC distribution panel and 120V/AC distribution panel as separate questions, but placed them consecutively in both Version 1 templates.
+- Renamed the combined wiring question to `Wire bundling and support` and mapped older wiring labels to the new question.
+- Added house/starter battery bank detail fields with count selectors, per-battery make/model/Ah/CCA/MCA/group rows, and confidence-gated battery-label photo reading.
+- Kept battery bank details out of the Instruments list while allowing the details to appear with the battery question in the report.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the updated electrical and battery workflow.
+
+## v2580
+- Moved Emergency tiller out of the body survey template and into Additional Safety Equipment.
+- Kept the v2579 diesel/heating-system removal, bilge-pump safety grouping, and blower safety option.
+- Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the updated safety template.
+
+## v2579
+- Removed the diesel/heating-system survey question from both Version 1 templates and removed its quick-insert snippets from the text library.
+- Added engine-compartment ventilation blower as an Additional Safety Equipment option so blower documentation can live in Safety Equipment.
+- Kept the bilge-pump report grouping in Safety Equipment and retained the automatic-float bilge-pump snippet removal from v2578.
+- Bumped the app cache metadata for the updated Version 1 template cleanup.
+
+## v2578
+- Moved the report's Bilge Pump Detail table into the Safety Equipment section so bilge-pump details are grouped with safety information rather than appearing at the start of Detailed Survey Findings.
+- Removed the Bilge pump, automatic float quick-insert section from the Version 1 text library.
+- Bumped the app cache metadata for the updated Version 1 safety/bilge-pump report behavior.
+
 ## v2577
 - Added an optional mechanic-verification action snippet to engine and outboard mechanical sections so the report can state that the surveyor is not a licensed marine mechanic and that the mechanical assessment should be verified by one.
 - Bumped the app cache metadata so the GitHub-hosted Version 1 app loads the updated engine-section chip library.
