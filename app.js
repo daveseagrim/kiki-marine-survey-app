@@ -5,7 +5,7 @@
  * Photo storage and annotation capabilities
  */
 
-const APP_VERSION = 'v2582';
+const APP_VERSION = 'v2583';
 const KIKI_REQUIRED_DRIVE_ACCOUNT_EMAIL = 'dave@kikimarine.ca';
 
 // v2275: Rudder pluralization — adapts labels and snippet text based on
@@ -5007,6 +5007,39 @@ async function markSurveyCompleted(surveyId) {
   if (currentView === 'surveys') renderHome();
 }
 
+async function reopenSurveyForEditing(surveyId) {
+  const survey = await getSurvey(surveyId);
+  if (!survey) { showAlert('Survey not found.'); return; }
+  const name = survey.vesselName || 'this survey';
+
+  if (!_isSurveyWorkflowLocked(survey)) {
+    showToast(`"${name}" is already open for editing.`);
+    return;
+  }
+
+  const ok = await showConfirm(
+    `<strong>Reopen "${name}" for editing?</strong><br><br>` +
+    `This unlocks the local survey so future changes can be saved. Survey answers, photos, and the Delivered status are preserved.<br><br>` +
+    `Existing Firebase and Google Drive copies are not changed unless you later use Force push or mark the survey completed again.<br><br>` +
+    `<span style="color:#92400e;">Changes attempted while the survey was locked were not saved and may need to be entered again.</span>`,
+    'Reopen',
+    'Cancel'
+  );
+  if (!ok) return;
+
+  if (typeof KikiWorkflow === 'undefined' || typeof KikiWorkflow.reopenForEditing !== 'function') {
+    showAlert('The reopen helper did not load. Force Update the app and try again.');
+    return;
+  }
+
+  const reopened = KikiWorkflow.reopenForEditing(survey, new Date().toISOString());
+  await saveSurvey(_allowWorkflowSave(reopened));
+  await showAlert(`"${name}" is now open for editing.\n\nUse Save after making changes. When the revised report is final, mark the survey completed again.`);
+
+  if (currentView === 'surveys') renderHome();
+  else renderInspection(reopened);
+}
+
 // Export ALL surveys (one at a time) with photos included
 async function exportAllSurveys() {
   try {
@@ -7283,6 +7316,19 @@ async function attachPhotosToItem(itemLabel, fileList) {
   });
   if (files.length === 0) {
     showToast('No image files selected');
+    return 0;
+  }
+
+  // A locked survey cannot persist the item reference. Refuse before reading
+  // or saving the image so the photos store cannot gain an orphan record.
+  const editableSurvey = await getSurvey(currentSurveyId);
+  const canEdit = typeof KikiWorkflow !== 'undefined' && typeof KikiWorkflow.canEditSurvey === 'function'
+    ? KikiWorkflow.canEditSurvey(editableSurvey)
+    : !_isSurveyWorkflowLocked(editableSurvey);
+  if (!editableSurvey || !canEdit) {
+    await showAlert(
+      `"${editableSurvey?.vesselName || 'This survey'}" is locked.\n\nUse More (⋯) → Reopen for editing before attaching photos or changing survey answers.`
+    );
     return 0;
   }
 
@@ -13611,9 +13657,9 @@ function _buildConditionSentence(survey) {
       return ` At the time of the survey the vessel was in above-average overall condition, having received above-average care.`;
     } else if (_oc.includes('average')) {
       if (_surveyHasTypeAorBFindings(survey)) {
-        return ` The vessel was rated in average overall condition after consideration of its age, equipment, observed condition, and the findings noted in this report, subject to correction of the Type A and Type B findings. The reader was directed to the Findings and Recommendations section for items requiring attention.`;
+        return ` The vessel was rated in average overall condition after consideration of its age, equipment, observed condition, and the findings noted in this report, subject to correction of the Type A and Type B findings. Refer to the Findings and Recommendations section for details.`;
       }
-      return ` The vessel was rated in average overall condition after consideration of its age, equipment, observed condition, and the findings noted in this report. The reader was directed to the Findings and Recommendations section for items requiring attention.`;
+      return ` The vessel was rated in average overall condition after consideration of its age, equipment, observed condition, and the findings noted in this report. Refer to the Findings and Recommendations section for details.`;
     } else if (_oc.includes('fair')) {
       return ` At the time of the survey the vessel was in fair overall condition with deficiencies noted. Corrective action was recommended before the vessel was placed into regular service.`;
     } else if (_oc.includes('poor')) {
@@ -13665,6 +13711,20 @@ function _descriptionKeelPhrase(keelType) {
   return /\bkeel\b/.test(keel) ? keel : `${keel} keel`;
 }
 
+function _normaliseDescriptionMeasurement(value) {
+  return String(value || '')
+    .replace(/\blbs?\.?\b/gi, 'lb')
+    .replace(/\bsq\.?\s*ft\.?\b/gi, 'sq. ft.')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function _normaliseDescriptionHullType(value) {
+  const hull = String(value || '').trim().toLowerCase();
+  if (hull === 'displacement') return 'displacement monohull';
+  return hull;
+}
+
 function _isCiaoBabyCatalina350(survey) {
   const name = String(survey?.vesselName || '').trim();
   const ymm = String(survey?.yearMakeModel || '').trim();
@@ -13672,11 +13732,11 @@ function _isCiaoBabyCatalina350(survey) {
 }
 
 function _ciaoBabyNavigationSentence() {
-  return 'Navigation and communication equipment aboard included VHF radio, magnetic compass, wind instruments, autopilot, and depth sounder, subject to the testing limitations noted in this report.';
+  return 'Recorded navigation and communication fit-out included VHF radio, magnetic compass, wind instruments, autopilot, and depth sounder. Testing status and limitations for each item are stated in the Detailed Survey Findings.';
 }
 
 function _ciaoBabyPropulsionLimitationSentence() {
-  return 'The gearbox had been removed for service and the exhaust system was disconnected; engine, gearbox, exhaust, and drivetrain operation were not verified.';
+  return 'The gearbox had been removed for service and the exhaust system was disconnected. Engine, gearbox, exhaust, and drivetrain operation were not verified.';
 }
 
 function _ciaoBabyDescriptionTail() {
@@ -13784,8 +13844,8 @@ function _descriptionEnginePowerSentence(engineHP, twin) {
   const kwMatch = raw.match(/\b\d+(?:\.\d+)?\s*kW\b/i);
   if (kwMatch) {
     return twin
-      ? `The engine data plates indicated outputs of ${kwMatch[0]}; however, the marine propulsion ratings were not independently verified.`
-      : `The engine data plate indicated an output of ${kwMatch[0]}; however, the marine propulsion rating was not independently verified.`;
+      ? `The engine data plates indicated outputs of ${kwMatch[0]}. However, the marine propulsion ratings were not independently verified.`
+      : `The engine data plate indicated an output of ${kwMatch[0]}. However, the marine propulsion rating was not independently verified.`;
   }
   const formatted = _formatEnginePowerText(raw);
   if (!formatted) return '';
@@ -13797,9 +13857,7 @@ function _descriptionEnginePowerSentence(engineHP, twin) {
 function _descriptionTransmissionPhrase(make, model, twin) {
   const makeModel = [make, model].map(v => String(v || '').trim()).filter(Boolean).join(' ');
   if (makeModel) return twin ? `${makeModel} transmissions` : `a ${makeModel} transmission`;
-  return twin
-    ? 'marine transmissions, make and model not recorded'
-    : 'a marine transmission, make and model not recorded';
+  return '';
 }
 
 function _descriptionDriveLabel(driveType, twin) {
@@ -13841,8 +13899,12 @@ function _buildDescriptionPropulsionSentence(survey) {
   const transmission = _descriptionTransmissionPhrase(survey.transmissionMake, survey.transmissionModel, twin);
   const drive = _descriptionDriveLabel(survey.driveType, twin);
   const coupling = twin
-    ? `The engines were coupled to ${transmission}, and drove propellers${drive ? ` through ${drive}` : ''}.`
-    : `The engine was coupled to ${transmission}, and drove a propeller${drive ? ` through a ${drive}` : ''}.`;
+    ? (transmission
+        ? `The engines were coupled to ${transmission}, and drove propellers${drive ? ` through ${drive}` : ''}.`
+        : `The engines drove propellers${drive ? ` through ${drive}` : ''}.`)
+    : (transmission
+        ? `The engine was coupled to ${transmission}, and drove a propeller${drive ? ` through a ${drive}` : ''}.`
+        : `The engine drove a propeller${drive ? ` through a ${drive}` : ''}.`);
   const limitation = _descriptionPropulsionLimitationSentence(survey);
   return [opening, power, coupling, limitation].filter(Boolean).join(' ');
 }
@@ -13869,12 +13931,12 @@ function _descriptionPropulsionLimitationSentence(survey) {
   const exhaustDisconnected = /\bexhaust\s+system\s+(?:had\s+been\s+)?(?:was\s+)?disconnected\b/i.test(haystack);
   if (!gearboxRemoved && !exhaustDisconnected) return '';
   if (gearboxRemoved && exhaustDisconnected) {
-    return 'The gearbox had been removed for service and the exhaust system was disconnected; engine, gearbox, exhaust, and drivetrain operation were not verified.';
+    return 'The gearbox had been removed for service and the exhaust system was disconnected. Engine, gearbox, exhaust, and drivetrain operation were not verified.';
   }
   if (gearboxRemoved) {
-    return 'The gearbox had been removed for service; engine, gearbox, and drivetrain operation were not verified.';
+    return 'The gearbox had been removed for service. Engine, gearbox, and drivetrain operation were not verified.';
   }
-  return 'The exhaust system was disconnected; engine, exhaust, and drivetrain operation were not verified.';
+  return 'The exhaust system was disconnected. Engine, exhaust, and drivetrain operation were not verified.';
 }
 
 function _descValue(value, fallback) {
@@ -13926,7 +13988,6 @@ function _resolveMastStepping(survey, mastData) {
 
 function _buildMastRigSentence(survey, vesselName) {
   if (!survey || survey.vesselType !== 'sail') return '';
-  const rigType = survey.boatStyle ? String(survey.boatStyle).toLowerCase() : 'sail';
   const mastData = survey.items?.['Main mast'] || {};
   const spec = _lookupBoatSpecsForSurvey(survey) || {};
   const stepping = _resolveMastStepping(survey, mastData);
@@ -13934,8 +13995,11 @@ function _buildMastRigSentence(survey, vesselName) {
   const mastPhrase = [stepping, material, 'mast'].filter(Boolean).join(' ');
   const track = mastData.mastTrackType || survey.mastTrackType || spec.mastTrackType || spec.mastFurling || '';
   const trackStr = track ? ` and ${String(track).toLowerCase()}` : '';
-  let sentence = ` "${vesselName}" was ${rigType}-rigged with ${_articleFor(mastPhrase)} ${mastPhrase}${trackStr}.`;
-  if (survey.totalSailArea) sentence += ` Total sail area was ${survey.totalSailArea}.`;
+  let sentence = ` ${vesselName} was fitted with ${_articleFor(mastPhrase)} ${mastPhrase}${trackStr}.`;
+  if (survey.totalSailArea) {
+    const sailArea = _normaliseDescriptionMeasurement(survey.totalSailArea);
+    sentence += ` Total sail area was reported as ${sailArea}${/[.!?]$/.test(sailArea) ? '' : '.'}`;
+  }
   return sentence;
 }
 
@@ -14591,7 +14655,7 @@ function buildDescriptionFromSurvey(survey) {
     const vesselType = survey.vesselType || '';
     const boatStyle = survey.boatStyle || '';
     const construction = String(survey.construction || '').trim().toLowerCase();
-    const hullType = String(survey.hullType || '').trim().toLowerCase();
+    const hullType = _normaliseDescriptionHullType(survey.hullType);
     const typeStr = boatStyle
       ? boatStyle.toLowerCase()
       : (vesselType === 'sail' ? 'sailing vessel' : vesselType === 'power' ? 'power vessel' : 'vessel');
@@ -14599,21 +14663,23 @@ function buildDescriptionFromSurvey(survey) {
     const yearStr = year || 'year not recorded';
     const makeStr = make || 'make not recorded';
     const modelStr = model || 'model not recorded';
-    const descriptor = [construction, hullType, typeStr]
-      .filter(Boolean)
-      .join(' ')
-      .replace(/\s+/g, ' ')
-      .trim();
+    const riggedType = vesselType === 'sail' && boatStyle
+      ? `${typeStr.replace(/-rigged$/i, '')}-rigged`
+      : typeStr;
+    const form = [riggedType, hullType].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+    const descriptor = construction && form
+      ? `${construction}, ${form}`
+      : (construction || form);
 
-    let para1 = `"${vesselName}" was a ${yearStr} ${makeStr} ${modelStr}`;
+    let para1 = `${vesselName} was a ${yearStr} ${makeStr} ${modelStr}`;
     para1 += descriptor ? `, a ${descriptor}.` : `.`;
 
-    const loa = survey.loa || 'not recorded';
-    const beam = survey.beam || 'not recorded';
-    const draft = survey.maxDraft || '';
-    const displacement = survey.displacement || '';
+    const loa = _normaliseDescriptionMeasurement(survey.loa) || 'not recorded';
+    const beam = _normaliseDescriptionMeasurement(survey.beam) || 'not recorded';
+    const draft = _normaliseDescriptionMeasurement(survey.maxDraft);
+    const displacement = _normaliseDescriptionMeasurement(survey.displacement);
     const keel = vesselType === 'sail' ? _descriptionKeelPhrase(survey.keelType) : '';
-    const ballast = survey.ballast || '';
+    const ballast = _normaliseDescriptionMeasurement(survey.ballast);
     let specsSentence = `The vessel had an overall length of ${loa}, a beam of ${beam}`;
     if (keel && draft) {
       specsSentence += `, a ${keel} with a maximum draft of ${draft}`;
@@ -14856,6 +14922,35 @@ function buildDescriptionFromSurvey(survey) {
   desc += _buildConditionSentence(survey).replace(/^\s+/, '');
 
   return desc;
+}
+
+// The report uses current structured survey data whenever the description is
+// still in automatic mode. Manual Freeform copy remains authoritative.
+function _descriptionForReport(survey) {
+  survey = survey || {};
+  const stored = String(survey.vesselDescription || '');
+  if (survey.descriptionAutoGenerated === false && stored.trim()) return stored;
+  const generated = buildDescriptionFromSurvey(survey);
+  return String(generated || stored).trim();
+}
+
+function _buildFindingOverviewSummary(items) {
+  const findings = Array.isArray(items) ? items : [];
+  const labels = [];
+  const seen = new Set();
+  findings.forEach((finding) => {
+    const code = String(finding?.code || '').replace(/\s+/g, ' ').trim();
+    const label = String(finding?.label || '').replace(/\s+/g, ' ').trim();
+    const line = [code, label].filter(Boolean).join(' ');
+    if (line && !seen.has(line)) {
+      seen.add(line);
+      labels.push(line);
+    }
+  });
+  return {
+    countText: `${findings.length} finding${findings.length === 1 ? '' : 's'}`,
+    items: labels
+  };
 }
 
 // ── Propulsion narrative builder (Norm Behring-style) ─────────────────
@@ -17276,6 +17371,13 @@ function ensureReportButton() {
 	  overflowMenu.appendChild(transferOpt);
 
 	  const completeOpt = document.createElement('button');
+	  const reopenOpt = document.createElement('button');
+	  reopenOpt.style.cssText = menuItemStyle + 'color:#b45309;';
+	  reopenOpt.innerHTML = '🔓 Reopen for editing';
+	  reopenOpt.title = 'Unlock a completed or transferred survey while preserving its data and delivered status';
+	  reopenOpt.onclick = () => { overflowMenu.style.display = 'none'; reopenSurveyForEditing(currentSurveyId); };
+	  overflowMenu.appendChild(reopenOpt);
+
 	  completeOpt.style.cssText = menuItemStyle + 'color:#166534;';
 	  completeOpt.innerHTML = '✅ Mark completed';
 	  completeOpt.title = 'Export final JSON/photos and lock this survey';
@@ -27234,40 +27336,11 @@ async function generateReport(surveyArg = null, options = {}) {
 	  if (reportEngineSyncChanged) await saveSurvey(survey);
 	  autoUpdateSafetyBracket(survey);
 
-  // ── v2463: refresh the condition sentence in the stored vessel description
-  // so it always matches the current BUC rating ─────────────────────────
-  // The condition sentence is appended to vesselDescription at the end of
-  // generateVesselDescription(). If Dave sets/changes overallCondition AFTER
-  // generating the description (which is the common workflow — write the
-  // description early, finalise the rating late), the stored description is
-  // stale and contradicts pp. 58-60 of the final report. We detect the tail
-  // sentence (always starts with " At the time of the survey…") and replace
-  // it with a freshly-built one in a local copy of the description — survey
-  // is not re-saved, so Dave's stored text stays as he last regenerated it,
-  // but the rendered report is always in sync with the formal rating.
-  let _refreshedDesc = survey.vesselDescription || '';
-  // v2500: Direct IndexedDB patches/imports can update valuation or
-  // metadata without passing through saveSurvey(), leaving a blank stored
-  // vessel description. The report must still populate it from the survey
-  // data, so build it here if it is missing before the report renders.
-  if (!_refreshedDesc.trim() && typeof buildDescriptionFromSurvey === 'function') {
-    _refreshedDesc = buildDescriptionFromSurvey(survey) || '';
-    if (_refreshedDesc.trim()) {
-      survey.vesselDescription = _refreshedDesc;
-      survey.descriptionAutoGenerated = true;
-      await saveSurvey(survey);
-    }
-  }
-  if (survey.descriptionAutoGenerated !== false) {
-    _refreshedDesc = _refreshMastRigSentenceInDescription(survey, _refreshedDesc);
-  }
-  if (_refreshedDesc && (survey.overallCondition || _descriptionAlreadyStatesCondition(_refreshedDesc))) {
-    _refreshedDesc = _syncConditionSentenceWithAssignedRating(survey, _refreshedDesc);
-  }
-  _refreshedDesc = _syncNavigationSentenceInDescription(survey, _refreshedDesc);
-  _refreshedDesc = _syncPropulsionLimitationInDescription(survey, _refreshedDesc);
-  _refreshedDesc = _forceCiaoBabyDescriptionTail(survey, _refreshedDesc);
-  survey.vesselDescription = _refreshedDesc;
+  // Build automatic descriptions once from the current structured survey.
+  // This matches Version 2's single-source report-time generator and avoids
+  // the former incremental Ciao Baby tail appends that duplicated sections.
+  // A manually edited Freeform description remains authoritative verbatim.
+  survey.vesselDescription = _descriptionForReport(survey);
 
   // ── v2244: Date-integrity check ───────────────────────────────────────
   // Extract capture timestamps from photo IDs (all formats embed Date.now())
@@ -28369,20 +28442,21 @@ ${(() => {
   const _foSafe = _foSafeRaw.filter(e => !e.skipped && !_foSkipCats[e.category]);
   const _foChecked = _foSafe.filter(e => e.checked).length;
   const _foMissing = _foSafe.length - _foChecked;
-
-  // v2250: _foAllA / _foAllB removed — bullet lists no longer in Findings Overview
+  const _foA = _buildFindingOverviewSummary(findings.A);
+  const _foB = _buildFindingOverviewSummary(findings.B);
+  const _foDetails = (summary) => summary.items.length > 0
+    ? `<div style="margin-top:4px;font-size:10.5pt;line-height:1.35;color:#475569;">${summary.items.map(item => esc(item)).join('<br>')}</div>`
+    : '';
 
   html += `
   <table>
-    <tr><td style="width:40%;"><strong><span style="color:#dc2626;">&#9632;</span> Critical (A)</strong></td><td>${findings.A.length} finding${findings.A.length !== 1 ? 's' : ''}</td></tr>
-    <tr><td><strong><span style="color:#d97706;">&#9632;</span> Needs Attention (B)</strong></td><td>${findings.B.length} finding${findings.B.length !== 1 ? 's' : ''}</td></tr>
+    <tr><td style="width:40%;"><strong><span style="color:#dc2626;">&#9632;</span> Critical (A)</strong></td><td>${_foA.countText}${_foDetails(_foA)}</td></tr>
+    <tr><td><strong><span style="color:#d97706;">&#9632;</span> Needs Attention (B)</strong></td><td>${_foB.countText}${_foDetails(_foB)}</td></tr>
     <tr><td><strong><span style="color:#16a34a;">&#9632;</span> Serviceable (C)</strong></td><td>${findings.C.length} finding${findings.C.length !== 1 ? 's' : ''}</td></tr>
     <tr><td><strong><span style="color:#6b7280;">&#9632;</span> Not Tested</strong></td><td>${findings.NT.length} finding${findings.NT.length !== 1 ? 's' : ''}</td></tr>
     ${findings.PO.length > 0 ? '<tr><td><strong><span style="color:#6b7280;">&#9632;</span> Powered Up Only</strong></td><td>' + findings.PO.length + ' finding' + (findings.PO.length !== 1 ? 's' : '') + '</td></tr>' : ''}
     ${_foSafe.length > 0 ? '<tr><td><strong>Safety Equipment (TC TP 511)</strong></td><td>' + _foChecked + ' of ' + _foSafe.length + ' verified' + (_foMissing > 0 ? ' — <strong style="color:#dc2626;">' + _foMissing + ' missing</strong>' : ' — <strong style="color:#16a34a;">all present</strong>') + '</td></tr>' : ''}
   </table>
-
-  <!-- v2250: A and B bullet lists removed from Findings Overview. -->
 
   <!-- v2251: Survey Checklist Summary section removed entirely.
        It showed every inspected item in a table (rating, finding code,

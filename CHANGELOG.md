@@ -1,3 +1,10 @@
+## v2583
+- Added a safe Reopen for editing action for completed or transferred surveys while preserving survey answers, photos, and delivered status.
+- Prevented locked-survey photo attachments from creating orphan photo records when the item reference cannot be saved.
+- Reworked automatic vessel descriptions to use the concise Version 2 structure at report time, removing duplicated Ciao Baby II narrative sections while preserving manually edited Freeform copy.
+- Added brief coded Critical (A) and Needs Attention (B) item names to the Findings Overview count table.
+- Added regression tests for the locked-edit workflow, Version 2-style Ciao Baby II narrative, manual description preservation, and A/B overview summaries.
+
 ## v2582
 - Added a dedicated AC outlet count field to the Version 1 AC outlets notes sheet and report output.
 - Added dedicated amperage and location fields to Shore power overcurrent protection so the breaker/device rating no longer has to be typed into prose.
